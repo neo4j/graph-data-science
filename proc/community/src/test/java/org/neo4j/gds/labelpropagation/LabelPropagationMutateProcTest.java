@@ -45,7 +45,7 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
-import org.neo4j.gds.algorithms.community.NodePropertyService;
+import org.neo4j.gds.algorithms.community.MutateNodePropertyService;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
@@ -318,7 +318,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                 TaskRegistryFactory.empty(),
                 EmptyUserLogRegistryFactory.INSTANCE,
                 memoryUsageValidator, logMock),
-            new NodePropertyService(logMock)
+            new MutateNodePropertyService(logMock)
         );
 
         TestProcedureRunner.applyOnProcedure(db, LabelPropagationMutateProc.class, procedure -> {
@@ -332,6 +332,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     new User(getUsername(), false),
                     null,
                     algorithmsMutateBusinessFacade,
+                    null,
                     null,
                     null
                 )
@@ -434,7 +435,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                 TaskRegistryFactory.empty(),
                 EmptyUserLogRegistryFactory.INSTANCE,
                 memoryUsageValidator, logMock),
-            new NodePropertyService(logMock)
+            new MutateNodePropertyService(logMock)
         );
 
         TestProcedureRunner.applyOnProcedure(db, LabelPropagationMutateProc.class, procedure -> {
@@ -448,6 +449,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     new User(getUsername(), false),
                     null,
                     algorithmsMutateBusinessFacade,
+                    null,
                     null,
                     null
                 )
@@ -505,7 +507,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                 TaskRegistryFactory.empty(),
                 EmptyUserLogRegistryFactory.INSTANCE,
                 memoryUsageValidator, logMock),
-            new NodePropertyService(logMock)
+            new MutateNodePropertyService(logMock)
         );
 
         TestProcedureRunner.applyOnProcedure(db, LabelPropagationMutateProc.class, (procedure) -> {
@@ -519,6 +521,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     new User(getUsername(), false),
                     null,
                     algorithmsMutateBusinessFacade,
+                    null,
                     null,
                     null
                 )
@@ -579,7 +582,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                 TaskRegistryFactory.empty(),
                 EmptyUserLogRegistryFactory.INSTANCE,
                 memoryUsageValidator, logMock),
-            new NodePropertyService(logMock)
+            new MutateNodePropertyService(logMock)
         );
 
         TestProcedureRunner.applyOnProcedure(db, LabelPropagationMutateProc.class, procedure -> {
@@ -593,6 +596,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     new User(getUsername(), false),
                     null,
                     algorithmsMutateBusinessFacade,
+                    null,
                     null,
                     null
                 )

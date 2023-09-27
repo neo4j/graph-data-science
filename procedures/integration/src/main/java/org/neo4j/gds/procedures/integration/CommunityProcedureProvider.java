@@ -26,7 +26,9 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStatsBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
-import org.neo4j.gds.algorithms.community.NodePropertyService;
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
+import org.neo4j.gds.algorithms.community.MutateNodePropertyService;
+import org.neo4j.gds.algorithms.community.WriteNodePropertyService;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
@@ -34,6 +36,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
@@ -42,8 +45,8 @@ import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.TerminationFlagService;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.services.DatabaseIdAccessor;
-import org.neo4j.gds.services.UserLogServices;
 import org.neo4j.gds.services.UserAccessor;
+import org.neo4j.gds.services.UserLogServices;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
@@ -60,6 +63,7 @@ public class CommunityProcedureProvider {
     // Request scoped state and services
     private final AlgorithmMetaDataSetterService algorithmMetaDataSetterService;
     private final DatabaseIdAccessor databaseIdAccessor;
+    private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final KernelTransactionAccessor kernelTransactionAccessor;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final TerminationFlagService terminationFlagService;
@@ -73,6 +77,7 @@ public class CommunityProcedureProvider {
         AlgorithmMetaDataSetterService algorithmMetaDataSetterService,
         DatabaseIdAccessor databaseIdAccessor,
         KernelTransactionAccessor kernelTransactionAccessor,
+        ExporterBuildersProviderService exporterBuildersProviderService,
         TaskRegistryFactoryService taskRegistryFactoryService,
         TerminationFlagService terminationFlagService,
         UserLogServices userLogServices,
@@ -85,6 +90,7 @@ public class CommunityProcedureProvider {
         this.algorithmMetaDataSetterService = algorithmMetaDataSetterService;
         this.databaseIdAccessor = databaseIdAccessor;
         this.kernelTransactionAccessor = kernelTransactionAccessor;
+        this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.terminationFlagService = terminationFlagService;
         this.userLogServices = userLogServices;
@@ -92,6 +98,10 @@ public class CommunityProcedureProvider {
     }
 
     public CommunityProcedureFacade createCommunityProcedureFacade(Context context) throws ProcedureException {
+
+        // Neo4j's services
+        var graphDatabaseService = context.graphDatabaseAPI();
+
         var kernelTransaction = kernelTransactionAccessor.getKernelTransaction(context);
 
         var algorithmMetaDataSetter = algorithmMetaDataSetterService.getAlgorithmMetaDataSetter(kernelTransaction);
@@ -105,6 +115,8 @@ public class CommunityProcedureProvider {
             user
         );
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
+
+        var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(graphDatabaseService);
 
         // algorithm facade
         var communityAlgorithmsFacade = new CommunityAlgorithmsFacade(
@@ -129,6 +141,9 @@ public class CommunityProcedureProvider {
             graphLoaderContext
         );
 
+        var exporterContext = new ExporterContext.ProcedureContextWrapper(context);
+
+
         // business facades
         var estimateBusinessFacade = new CommunityAlgorithmsEstimateBusinessFacade(
             graphStoreCatalogService,
@@ -139,8 +154,14 @@ public class CommunityProcedureProvider {
         );
         var statsBusinessFacade = new CommunityAlgorithmsStatsBusinessFacade(communityAlgorithmsFacade);
         var streamBusinessFacade = new CommunityAlgorithmsStreamBusinessFacade(communityAlgorithmsFacade);
-        var mutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(communityAlgorithmsFacade, new NodePropertyService(log));
-
+        var mutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
+            communityAlgorithmsFacade,
+            new MutateNodePropertyService(log)
+        );
+        CommunityAlgorithmsWriteBusinessFacade writeBusinessFacade = new CommunityAlgorithmsWriteBusinessFacade(
+            communityAlgorithmsFacade,
+            new WriteNodePropertyService(exportBuildersProvider.nodePropertyExporterBuilder(exporterContext), log)
+        );
 
         // procedure facade
         return new CommunityProcedureFacade(
@@ -151,7 +172,8 @@ public class CommunityProcedureProvider {
             estimateBusinessFacade,
             mutateBusinessFacade,
             statsBusinessFacade,
-            streamBusinessFacade
+            streamBusinessFacade,
+            writeBusinessFacade
         );
     }
 

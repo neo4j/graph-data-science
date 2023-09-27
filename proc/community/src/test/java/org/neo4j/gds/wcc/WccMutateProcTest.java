@@ -42,7 +42,7 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
-import org.neo4j.gds.algorithms.community.NodePropertyService;
+import org.neo4j.gds.algorithms.community.MutateNodePropertyService;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
@@ -347,7 +347,7 @@ class WccMutateProcTest extends BaseProcTest {
                 TaskRegistryFactory.empty(),
                 EmptyUserLogRegistryFactory.INSTANCE,
                 memoryUsageValidator, logMock),
-            new NodePropertyService(logMock)
+            new MutateNodePropertyService(logMock)
         );
 
         applyOnProcedure(procedure -> {
@@ -361,6 +361,7 @@ class WccMutateProcTest extends BaseProcTest {
                     new User(getUsername(), false),
                     null,
                     algorithmsMutateBusinessFacade,
+                    null,
                     null,
                     null
                 )
@@ -468,7 +469,7 @@ class WccMutateProcTest extends BaseProcTest {
                     TaskRegistryFactory.empty(),
                     EmptyUserLogRegistryFactory.INSTANCE,
                     memoryUsageValidator, logMock),
-                new NodePropertyService(logMock)
+                new MutateNodePropertyService(logMock)
             );
 
             procedure.facade = new GraphDataScience(
@@ -481,6 +482,7 @@ class WccMutateProcTest extends BaseProcTest {
                     new User(getUsername(), false),
                     null,
                     algorithmsBusinessFacade,
+                    null,
                     null,
                     null
                 )
@@ -538,7 +540,7 @@ class WccMutateProcTest extends BaseProcTest {
                     TaskRegistryFactory.empty(),
                     EmptyUserLogRegistryFactory.INSTANCE,
                     memoryUsageValidator, null),
-                new NodePropertyService(logMock)
+                new MutateNodePropertyService(logMock)
             );
             proc.facade = new GraphDataScience(
                 null,
@@ -550,6 +552,7 @@ class WccMutateProcTest extends BaseProcTest {
                     new User(getUsername(), false),
                     null,
                     algorithmsBusinessFacade,
+                    null,
                     null,
                     null
                 )
@@ -609,7 +612,7 @@ class WccMutateProcTest extends BaseProcTest {
                 TaskRegistryFactory.empty(),
                 EmptyUserLogRegistryFactory.INSTANCE,
                 memoryUsageValidator, logMock),
-            new NodePropertyService(logMock)
+            new MutateNodePropertyService(logMock)
         );
 
         applyOnProcedure(procedure ->
@@ -625,6 +628,7 @@ class WccMutateProcTest extends BaseProcTest {
                             new User(getUsername(), false),
                             null,
                             algorithmsBusinessFacade,
+                            null,
                             null,
                             null
                         )

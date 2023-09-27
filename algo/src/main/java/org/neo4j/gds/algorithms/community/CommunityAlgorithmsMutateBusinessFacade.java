@@ -69,13 +69,13 @@ import static org.neo4j.gds.algorithms.community.AlgorithmRunner.runWithTiming;
 public class CommunityAlgorithmsMutateBusinessFacade {
 
     private final CommunityAlgorithmsFacade communityAlgorithmsFacade;
-    private final NodePropertyService nodePropertyService;
+    private final MutateNodePropertyService mutateNodePropertyService;
 
     public CommunityAlgorithmsMutateBusinessFacade(
         CommunityAlgorithmsFacade communityAlgorithmsFacade,
-        NodePropertyService nodePropertyService
+        MutateNodePropertyService mutateNodePropertyService
     ) {
-        this.nodePropertyService = nodePropertyService;
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.communityAlgorithmsFacade = communityAlgorithmsFacade;
     }
 
@@ -378,7 +378,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             );
 
             // 3. Go and mutate the graph store
-            var addNodePropertyResult = nodePropertyService.mutate(
+            var addNodePropertyResult = mutateNodePropertyService.mutate(
                 configuration.mutateProperty(), nodePropertyValues,
                 configuration.nodeLabelIdentifiers(algorithmResult.graphStore()), algorithmResult.graph(),
                 algorithmResult.graphStore()
@@ -564,7 +564,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             );
 
             // 3. Go and mutate the graph store
-            var addNodePropertyResult = nodePropertyService.mutate(
+            var addNodePropertyResult = mutateNodePropertyService.mutate(
                 configuration.mutateProperty(),
                 nodePropertyValues,
                 configuration.nodeLabelIdentifiers(algorithmResult.graphStore()),

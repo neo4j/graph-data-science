@@ -19,37 +19,22 @@
  */
 package org.neo4j.gds.algorithms.community;
 
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.logging.Log;
 
-import java.util.Collection;
-
-public class NodePropertyService {
+public class WriteNodePropertyService {
 
     private final Log log;
+    private  final NodePropertyExporterBuilder nodePropertyExporterBuilder;
 
-    public NodePropertyService(Log log) {
+    public WriteNodePropertyService(NodePropertyExporterBuilder nodePropertyExporterBuilder, Log log) {
+        this.nodePropertyExporterBuilder=nodePropertyExporterBuilder;
         this.log = log;
     }
 
-    public AddNodePropertyResult mutate(
-        String nodePropertyToMutate,
-        NodePropertyValues nodePropertyValues,
-        Collection<NodeLabel> nodeLabelsToUpdate,
-        Graph graph,
-        GraphStore graphStore
+    public WriteNodePropertyResult write(
     ) {
-        return GraphStoreUpdater.addNodeProperty(
-            graph,
-            graphStore,
-            nodeLabelsToUpdate,
-            nodePropertyToMutate,
-            nodePropertyValues,
-            this.log
-        );
+        return  null;
     }
 
 

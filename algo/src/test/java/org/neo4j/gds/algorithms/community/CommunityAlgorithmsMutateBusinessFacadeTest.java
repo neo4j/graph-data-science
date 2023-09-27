@@ -62,7 +62,7 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
         var configurationMock = mock(MutateNodePropertyConfig.class);
         var algorithmResult = AlgorithmComputationResult.<Long>withoutAlgorithmResult(graph, graphStore);
 
-        var nodePropertyServiceMock = mock(NodePropertyService.class);
+        var nodePropertyServiceMock = mock(MutateNodePropertyService.class);
 
         var businessFacade = new CommunityAlgorithmsMutateBusinessFacade(null, nodePropertyServiceMock);
 
@@ -89,7 +89,7 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
     @Test
     void mutateWithCommunityStatistics() {
 
-        var nodePropertyService = new NodePropertyService(mock(Log.class));
+        var nodePropertyService = new MutateNodePropertyService(mock(Log.class));
 
         var businessFacade = new CommunityAlgorithmsMutateBusinessFacade(null, nodePropertyService);
 
@@ -141,7 +141,7 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
     @Test
     void mutateWithoutCommunityStatistics() {
 
-        var nodePropertyService = new NodePropertyService(mock(Log.class));
+        var nodePropertyService = new MutateNodePropertyService(mock(Log.class));
 
         var businessFacade = new CommunityAlgorithmsMutateBusinessFacade(null, nodePropertyService);
 

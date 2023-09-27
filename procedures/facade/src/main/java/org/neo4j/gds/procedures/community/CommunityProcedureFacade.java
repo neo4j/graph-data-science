@@ -23,6 +23,7 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsEstimateBusinessFac
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStatsBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ProcedureReturnColumns;
@@ -121,6 +122,8 @@ public class CommunityProcedureFacade {
     private final CommunityAlgorithmsMutateBusinessFacade mutateBusinessFacade;
     private final CommunityAlgorithmsStatsBusinessFacade statsBusinessFacade;
     private final CommunityAlgorithmsStreamBusinessFacade streamBusinessFacade;
+    private final CommunityAlgorithmsWriteBusinessFacade writeBusinessFacade;
+
 
     public CommunityProcedureFacade(
         AlgorithmMetaDataSetter algorithmMetaDataSetter,
@@ -130,7 +133,8 @@ public class CommunityProcedureFacade {
         CommunityAlgorithmsEstimateBusinessFacade estimateBusinessFacade,
         CommunityAlgorithmsMutateBusinessFacade mutateBusinessFacade,
         CommunityAlgorithmsStatsBusinessFacade statsBusinessFacade,
-        CommunityAlgorithmsStreamBusinessFacade streamBusinessFacade
+        CommunityAlgorithmsStreamBusinessFacade streamBusinessFacade,
+        CommunityAlgorithmsWriteBusinessFacade writeBusinessFacade
     ) {
         this.algorithmMetaDataSetter = algorithmMetaDataSetter;
         this.databaseId = databaseId;
@@ -140,6 +144,7 @@ public class CommunityProcedureFacade {
         this.mutateBusinessFacade = mutateBusinessFacade;
         this.statsBusinessFacade = statsBusinessFacade;
         this.streamBusinessFacade = streamBusinessFacade;
+        this.writeBusinessFacade = writeBusinessFacade;
     }
 
     // WCC

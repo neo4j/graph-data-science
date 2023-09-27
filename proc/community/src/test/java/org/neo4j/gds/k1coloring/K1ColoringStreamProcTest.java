@@ -210,7 +210,8 @@ class K1ColoringStreamProcTest extends BaseProcTest {
                     null,
                     null,
                     null,
-                    algorithmsStreamBusinessFacade
+                    algorithmsStreamBusinessFacade,
+                    null
                 )
             );
             var someJobId = new JobId();
