@@ -17,19 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.kcore;
+package org.neo4j.gds.procedures.community.kcore;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.StandardWriteResult;
 
 import java.util.Map;
 
-public class WriteResult extends StandardWriteResult {
+public class KCoreDecompositionWriteResult extends StandardWriteResult {
 
     public final long nodePropertiesWritten;
     public final long degeneracy;
 
-    public WriteResult(
+    public KCoreDecompositionWriteResult(
         long nodePropertiesWritten,
         long degeneracy,
         long preProcessingMillis,
@@ -43,17 +43,17 @@ public class WriteResult extends StandardWriteResult {
         this.degeneracy = degeneracy;
     }
 
-    static final class Builder extends AbstractResultBuilder<WriteResult> {
+    public static final class Builder extends AbstractResultBuilder<KCoreDecompositionWriteResult> {
 
         private long degeneracy;
 
-        Builder withDegeneracy(long degeneracy) {
+        public Builder withDegeneracy(long degeneracy) {
             this.degeneracy = degeneracy;
             return this;
         }
 
-        public WriteResult build() {
-            return new WriteResult(
+        public KCoreDecompositionWriteResult build() {
+            return new KCoreDecompositionWriteResult(
                 nodePropertiesWritten,
                 degeneracy,
                 preProcessingMillis,

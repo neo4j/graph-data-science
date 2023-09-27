@@ -27,6 +27,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionWriteResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -37,7 +38,7 @@ import static org.neo4j.gds.kcore.KCoreCompanion.nodePropertyValues;
 import static org.neo4j.gds.kcore.KCoreDecomposition.KCORE_DESCRIPTION;
 
 @GdsCallable(name = "gds.kcore.write", description = KCORE_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class KCoreDecompositionWriteSpec implements AlgorithmSpec<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionWriteConfig, Stream<WriteResult>, KCoreDecompositionAlgorithmFactory<KCoreDecompositionWriteConfig>> {
+public class KCoreDecompositionWriteSpec implements AlgorithmSpec<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionWriteConfig, Stream<KCoreDecompositionWriteResult>, KCoreDecompositionAlgorithmFactory<KCoreDecompositionWriteConfig>> {
     @Override
     public String name() {
         return "KCoreWrite";
@@ -54,7 +55,7 @@ public class KCoreDecompositionWriteSpec implements AlgorithmSpec<KCoreDecomposi
     }
 
     @Override
-    public ComputationResultConsumer<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionWriteConfig, Stream<KCoreDecompositionWriteResult>> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>(
             this::resultBuilder,
             computationResult -> List.of(ImmutableNodeProperty.of(
@@ -64,11 +65,11 @@ public class KCoreDecompositionWriteSpec implements AlgorithmSpec<KCoreDecomposi
         );
     }
 
-    private AbstractResultBuilder<WriteResult> resultBuilder(
+    private AbstractResultBuilder<KCoreDecompositionWriteResult> resultBuilder(
         ComputationResult<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionWriteConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new WriteResult.Builder();
+        var builder = new KCoreDecompositionWriteResult.Builder();
         computationResult.result().ifPresent(result -> builder.withDegeneracy(result.degeneracy()));
 
         return builder;

@@ -48,7 +48,8 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStatsBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
-import org.neo4j.gds.algorithms.community.NodePropertyService;
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
+import org.neo4j.gds.algorithms.community.MutateNodePropertyService;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -567,7 +568,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
                 TaskRegistryFactory.empty(),
                 EmptyUserLogRegistryFactory.INSTANCE,
                 memoryUsageValidator, logMock),
-            new NodePropertyService(logMock)
+            new MutateNodePropertyService(logMock)
         );
 
         return new GraphDataScience(
@@ -581,7 +582,8 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
                 mock(CommunityAlgorithmsEstimateBusinessFacade.class),
                 algorithmsMutateBusinessFacade,
                 mock(CommunityAlgorithmsStatsBusinessFacade.class),
-                mock(CommunityAlgorithmsStreamBusinessFacade.class)
+                mock(CommunityAlgorithmsStreamBusinessFacade.class),
+                mock(CommunityAlgorithmsWriteBusinessFacade.class)
             )
         );
     }

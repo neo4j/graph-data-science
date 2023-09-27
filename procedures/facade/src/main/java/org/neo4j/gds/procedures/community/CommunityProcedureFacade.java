@@ -39,6 +39,7 @@ import org.neo4j.gds.k1coloring.K1ColoringStreamConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
+import org.neo4j.gds.kcore.KCoreDecompositionWriteConfig;
 import org.neo4j.gds.kmeans.KmeansMutateConfig;
 import org.neo4j.gds.kmeans.KmeansStatsConfig;
 import org.neo4j.gds.kmeans.KmeansStreamConfig;
@@ -63,7 +64,8 @@ import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStatsResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStreamResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionMutateResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStatsResult;
-import org.neo4j.gds.procedures.community.kcore.KCoreStreamResult;
+import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStreamResult;
+import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionWriteResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansMutateResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansStatsResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansStreamResult;
@@ -245,7 +247,7 @@ public class CommunityProcedureFacade {
     // WCC end
 
     // K-Core Decomposition
-    public Stream<KCoreStreamResult> kCoreStream(
+    public Stream<KCoreDecompositionStreamResult> kCoreStream(
         String graphName,
         Map<String, Object> configuration
     ) {
@@ -294,6 +296,22 @@ public class CommunityProcedureFacade {
         );
 
         return Stream.of(KCoreComputationalResultTransformer.toStatsResult(computationResult, config));
+    }
+
+    public Stream<KCoreDecompositionWriteResult> kCoreWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, KCoreDecompositionWriteConfig::of);
+
+        var computationResult = writeBusinessFacade.kcore(
+            graphName,
+            config,
+            user,
+            databaseId
+        );
+
+        return Stream.of(KCoreComputationalResultTransformer.toWriteResult(computationResult));
     }
 
     public Stream<MemoryEstimateResult> kCoreEstimateStream(

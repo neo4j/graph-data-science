@@ -25,6 +25,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStreamResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -34,7 +35,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.kcore.KCoreDecomposition.KCORE_DESCRIPTION;
 
 @GdsCallable(name = "gds.kcore.stream", description = KCORE_DESCRIPTION, executionMode = STREAM)
-public class KCoreDecompositionStreamSpec implements AlgorithmSpec<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionStreamConfig, Stream<StreamResult>, KCoreDecompositionAlgorithmFactory<KCoreDecompositionStreamConfig>> {
+public class KCoreDecompositionStreamSpec implements AlgorithmSpec<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionStreamConfig, Stream<KCoreDecompositionStreamResult>, KCoreDecompositionAlgorithmFactory<KCoreDecompositionStreamConfig>> {
     @Override
     public String name() {
         return "KCoreStream";
@@ -51,7 +52,7 @@ public class KCoreDecompositionStreamSpec implements AlgorithmSpec<KCoreDecompos
     }
 
     @Override
-    public ComputationResultConsumer<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionStreamConfig, Stream<KCoreDecompositionStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),
@@ -62,7 +63,7 @@ public class KCoreDecompositionStreamSpec implements AlgorithmSpec<KCoreDecompos
                     return LongStream
                         .range(IdMap.START_NODE_ID, graph.nodeCount())
                         .mapToObj(nodeId ->
-                            new StreamResult(
+                            new KCoreDecompositionStreamResult(
                                 graph.toOriginalNodeId(nodeId),
                                 coreValues.get(nodeId)
                             ));
