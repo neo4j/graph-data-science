@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.kge;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
@@ -26,6 +27,12 @@ import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
 public interface KGEPredictWriteConfig extends KGEPredictBaseConfig, WritePropertyConfig, WriteRelationshipConfig {
+
+    @Value.Default
+    @Override
+    default String writeProperty() {
+        return "score";
+    }
 
     static KGEPredictWriteConfig of(CypherMapWrapper userInput) {
         return new KGEPredictWriteConfigImpl(userInput);
