@@ -5,11 +5,13 @@ description = 'Neo4j Graph Data Science :: OpenGDS Extension'
 group = 'org.neo4j.gds'
 
 dependencies {
-    compileOnly(group: 'org.neo4j', name: 'neo4j-common', version: ver.'neo4j') { transitive = false }
-    compileOnly(group: 'org.neo4j', name: 'neo4j-graphdb-api', version: ver.'neo4j') { transitive = false }
-    compileOnly(group: 'org.neo4j', name: 'neo4j-kernel', version: ver.'neo4j') { transitive = false }
-    compileOnly(group: 'org.neo4j', name: 'neo4j-kernel-api', version: ver.'neo4j') { transitive = false }
-    compileOnly(group: 'org.neo4j', name: 'neo4j-logging', version: ver.'neo4j') { transitive = false }
+    neodeps().each {
+        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
+            transitive = false
+        }
+
+        testImplementation(group: 'org.neo4j', name: it, version: ver.'neo4j')
+    }
 
     implementation project(':config-api')
     implementation project(':core')

@@ -51,7 +51,7 @@ import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.procedures.KernelTransactionService;
+import org.neo4j.gds.procedures.KernelTransactionAccessor;
 import org.neo4j.gds.procedures.ProcedureTransactionService;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.TerminationFlagService;
@@ -64,6 +64,7 @@ import org.neo4j.gds.services.UserServices;
 import org.neo4j.kernel.api.procedure.Context;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -80,6 +81,7 @@ public class CatalogFacadeFactory {
     // Request scoped things
     private final DatabaseIdService databaseIdService;
     private final ExporterBuildersProviderService exporterBuildersProviderService;
+    private final KernelTransactionAccessor kernelTransactionAccessor;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final TerminationFlagService terminationFlagService;
     private final UserLogServices userLogServices;
@@ -99,6 +101,7 @@ public class CatalogFacadeFactory {
         GraphStoreCatalogService graphStoreCatalogService,
         DatabaseIdService databaseIdService,
         ExporterBuildersProviderService exporterBuildersProviderService,
+        KernelTransactionAccessor kernelTransactionAccessor,
         TaskRegistryFactoryService taskRegistryFactoryService,
         TerminationFlagService terminationFlagService,
         UserLogServices userLogServices,
@@ -110,6 +113,7 @@ public class CatalogFacadeFactory {
 
         this.databaseIdService = databaseIdService;
         this.exporterBuildersProviderService = exporterBuildersProviderService;
+        this.kernelTransactionAccessor = kernelTransactionAccessor;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.terminationFlagService = terminationFlagService;
         this.userLogServices = userLogServices;
@@ -128,10 +132,18 @@ public class CatalogFacadeFactory {
 
         // Derived data and services
         var databaseId = databaseIdService.getDatabaseId(graphDatabaseService);
-        var kernelTransactionService = new KernelTransactionService(context);
         var procedureTransactionService = new ProcedureTransactionService(context);
         var procedureReturnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
-        var terminationFlag = terminationFlagService.terminationFlag(kernelTransactionService);
+        var kernelTransaction = kernelTransactionAccessor.getKernelTransaction(context);
+        var streamCloser = new Consumer<AutoCloseable>() {
+            @Override
+            public void accept(AutoCloseable autoCloseable) {
+                try (var statement = kernelTransaction.acquireStatement()) {
+                    statement.registerCloseableResource(autoCloseable);
+                }
+            }
+        };
+        var terminationFlag = terminationFlagService.createTerminationFlag(kernelTransaction);
         var transactionContextService = new TransactionContextService();
         var user = userServices.getUser(context.securityContext());
 
@@ -229,9 +241,9 @@ public class CatalogFacadeFactory {
         }
 
         return new CatalogFacade(
+            streamCloser,
             databaseId,
             graphDatabaseService,
-            kernelTransactionService,
             procedureReturnColumns,
             procedureTransactionService,
             taskRegistryFactoryService,

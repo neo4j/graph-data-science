@@ -32,6 +32,7 @@ import org.neo4j.gds.core.write.NativeExportBuildersProvider;
 import org.neo4j.gds.internal.MemoryEstimationSettings;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.KernelTransactionAccessor;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.TerminationFlagService;
 import org.neo4j.gds.procedures.integration.AlgorithmMetaDataSetterService;
@@ -86,6 +87,7 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
          */
         var algorithmMetaDataSetterService = new AlgorithmMetaDataSetterService();
         var databaseIdService = new DatabaseIdService();
+        var kernelTransactionAccessor = new KernelTransactionAccessor();
         var neo4jConfig = dependencies.config();
         var progressTrackingEnabled = neo4jConfig.get(ProgressFeatureSettings.progress_tracking_enabled);
         log.info("Progress tracking: " + (progressTrackingEnabled ? "enabled" : "disabled"));
@@ -106,6 +108,7 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
             graphStoreCatalogService,
             databaseIdService,
             __ -> new NativeExportBuildersProvider(), // we always just offer native writes in OpenGDS
+            kernelTransactionAccessor,
             taskRegistryFactoryService,
             terminationFlagService,
             userLogServices,
@@ -115,12 +118,14 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         var communityProcedureFactory = new CommunityProcedureFactory(
             log,
             graphStoreCatalogService,
+            useMaxMemoryEstimation,
             algorithmMetaDataSetterService,
             databaseIdService,
+            kernelTransactionAccessor,
             taskRegistryFactoryService,
+            terminationFlagService,
             userLogServices,
-            userServices,
-            useMaxMemoryEstimation
+            userServices
         );
 
         // We need a provider to slot into the Neo4j Procedure Framework mechanism

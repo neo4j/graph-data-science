@@ -30,16 +30,16 @@ import org.neo4j.gds.algorithms.community.NodePropertyService;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
-import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
-import org.neo4j.gds.procedures.KernelTransactionService;
+import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
+import org.neo4j.gds.procedures.KernelTransactionAccessor;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
+import org.neo4j.gds.procedures.TerminationFlagService;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.services.DatabaseIdService;
 import org.neo4j.gds.services.UserLogServices;
@@ -49,48 +49,59 @@ import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
 public class CommunityProcedureFactory {
+    // Global state and services
     private final Log log;
     private final GraphStoreCatalogService graphStoreCatalogService;
+    private final boolean useMaxMemoryEstimation;
+
+    // Request scoped state and services
     private final AlgorithmMetaDataSetterService algorithmMetaDataSetterService;
     private final DatabaseIdService databaseIdService;
+    private final KernelTransactionAccessor kernelTransactionAccessor;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
+    private final TerminationFlagService terminationFlagService;
     private final UserLogServices userLogServices;
     private final UserServices userServices;
-    private final boolean useMaxMemoryEstimation;
 
     public CommunityProcedureFactory(
         Log log,
         GraphStoreCatalogService graphStoreCatalogService,
+        boolean useMaxMemoryEstimation,
         AlgorithmMetaDataSetterService algorithmMetaDataSetterService,
         DatabaseIdService databaseIdService,
+        KernelTransactionAccessor kernelTransactionAccessor,
         TaskRegistryFactoryService taskRegistryFactoryService,
+        TerminationFlagService terminationFlagService,
         UserLogServices userLogServices,
-        UserServices userServices,
-        boolean useMaxMemoryEstimation
+        UserServices userServices
     ) {
         this.log = log;
         this.graphStoreCatalogService = graphStoreCatalogService;
+        this.useMaxMemoryEstimation = useMaxMemoryEstimation;
+
         this.algorithmMetaDataSetterService = algorithmMetaDataSetterService;
         this.databaseIdService = databaseIdService;
+        this.kernelTransactionAccessor = kernelTransactionAccessor;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
+        this.terminationFlagService = terminationFlagService;
         this.userLogServices = userLogServices;
         this.userServices = userServices;
-        this.useMaxMemoryEstimation = useMaxMemoryEstimation;
     }
 
     public CommunityProcedureFacade createCommunityProcedureFacade(Context context) throws ProcedureException {
+        var kernelTransaction = kernelTransactionAccessor.getKernelTransaction(context);
+
+        var algorithmMetaDataSetter = algorithmMetaDataSetterService.getAlgorithmMetaDataSetter(kernelTransaction);
         var algorithmMemoryValidationService = new AlgorithmMemoryValidationService(log, useMaxMemoryEstimation);
         var databaseId = databaseIdService.getDatabaseId(context.graphDatabaseAPI());
-        var kernelTransactionService = new KernelTransactionService(context);
         var returnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
-        var kernelTransaction = kernelTransactionService.getKernelTransaction();
+        var terminationFlag = terminationFlagService.createTerminationFlag(kernelTransaction);
         var user = userServices.getUser(context.securityContext());
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(
             databaseId,
             user
         );
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
-        var algorithmMetaDataSetter = algorithmMetaDataSetterService.getAlgorithmMetaDataSetter(kernelTransaction);
 
         // algorithm facade
         var communityAlgorithmsFacade = new CommunityAlgorithmsFacade(
@@ -107,6 +118,7 @@ public class CommunityProcedureFactory {
             context,
             databaseId,
             taskRegistryFactory,
+            terminationFlag,
             userLogRegistryFactory
         );
         var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(
@@ -144,6 +156,7 @@ public class CommunityProcedureFactory {
         Context context,
         DatabaseId databaseId,
         TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag,
         UserLogRegistryFactory userLogRegistryFactory
     ) throws ProcedureException {
         return ImmutableGraphLoaderContext
@@ -153,7 +166,7 @@ public class CommunityProcedureFactory {
             .log((org.neo4j.logging.Log) log.getNeo4jLog())
             .taskRegistryFactory(taskRegistryFactory)
             .userLogRegistryFactory(userLogRegistryFactory)
-            .terminationFlag(TerminationFlag.wrap(TerminationMonitor.EMPTY))
+            .terminationFlag(terminationFlag)
             .transactionContext(DatabaseTransactionContext.of(
                 context.graphDatabaseAPI(),
                 context.internalTransaction()

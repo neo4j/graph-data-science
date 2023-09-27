@@ -44,7 +44,6 @@ import org.neo4j.gds.core.loading.GraphFilterResult;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
-import org.neo4j.gds.procedures.KernelTransactionService;
 import org.neo4j.gds.procedures.ProcedureTransactionService;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.TransactionContextService;
@@ -55,6 +54,7 @@ import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -72,9 +72,9 @@ public class CatalogFacade {
      */
     public static final String NO_VALUE_PLACEHOLDER = "d9b6394a-9482-4929-adab-f97df578a6c6";
 
+    private final Consumer<AutoCloseable> streamCloser;
     private final DatabaseId databaseId;
     private final GraphDatabaseService graphDatabaseService;
-    private final KernelTransactionService kernelTransactionService;
     private final ProcedureReturnColumns procedureReturnColumns;
     private final ProcedureTransactionService procedureTransactionService;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
@@ -86,10 +86,13 @@ public class CatalogFacade {
     // business facade
     private final CatalogBusinessFacade businessFacade;
 
+    /**
+     * @param streamCloser A special thing needed for property streaming
+     */
     public CatalogFacade(
+        Consumer<AutoCloseable> streamCloser,
         DatabaseId databaseId,
         GraphDatabaseService graphDatabaseService,
-        KernelTransactionService kernelTransactionService,
         ProcedureReturnColumns procedureReturnColumns,
         ProcedureTransactionService procedureTransactionService,
         TaskRegistryFactoryService taskRegistryFactoryService,
@@ -99,9 +102,9 @@ public class CatalogFacade {
         UserLogServices userLogServices,
         CatalogBusinessFacade businessFacade
     ) {
+        this.streamCloser = streamCloser;
         this.databaseId = databaseId;
         this.graphDatabaseService = graphDatabaseService;
-        this.kernelTransactionService = kernelTransactionService;
         this.procedureReturnColumns = procedureReturnColumns;
         this.procedureTransactionService = procedureTransactionService;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
@@ -475,11 +478,9 @@ public class CatalogFacade {
             outputMarshaller
         );
 
-        // neat trick...
-        try (var statement = kernelTransactionService.getKernelTransaction().acquireStatement()) {
-            statement.registerCloseableResource(resultStream);
-            return resultStream;
-        }
+        streamCloser.accept(resultStream);
+
+        return resultStream;
     }
 
     public Stream<GraphStreamRelationshipPropertiesResult> streamRelationshipProperties(
@@ -686,7 +687,7 @@ public class CatalogFacade {
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
 
-        boolean usesPropertyNameColumn = procedureReturnColumns.contains("relationshipProperty");
+        var usesPropertyNameColumn = procedureReturnColumns.contains("relationshipProperty");
 
         var resultStream = businessFacade.streamRelationshipProperties(
             user,
@@ -701,10 +702,9 @@ public class CatalogFacade {
             outputMarshaller
         );
 
-        try (var statement = kernelTransactionService.getKernelTransaction().acquireStatement()) {
-            statement.registerCloseableResource(resultStream);
-            return resultStream;
-        }
+        streamCloser.accept(resultStream);
+
+        return resultStream;
     }
 
     /**

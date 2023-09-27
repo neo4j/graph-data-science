@@ -41,8 +41,8 @@ class CatalogFacadeTest {
     void shouldDetermineIfGraphExists() {
         var businessFacade = mock(CatalogBusinessFacade.class);
         var catalogFacade = new CatalogFacade(
-            DatabaseId.of("current database"),
             null,
+            DatabaseId.of("current database"),
             null,
             null,
             null,
@@ -77,8 +77,8 @@ class CatalogFacadeTest {
         var userLogServices = mock(UserLogServices.class);
         var businessFacade = mock(CatalogBusinessFacade.class);
         var catalogFacade = new CatalogFacade(
-            DatabaseId.of("current database"),
             null,
+            DatabaseId.of("current database"),
             null,
             null,
             null,

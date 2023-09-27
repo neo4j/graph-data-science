@@ -23,14 +23,12 @@ import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.Context;
 
-public class KernelTransactionService {
-    private final Context context;
-
-    public KernelTransactionService(Context context) {
-        this.context = context;
-    }
-
-    public KernelTransaction getKernelTransaction() {
+/**
+ * We encapsulate the code for getting the kernel transaction out of a procedure context.
+ * That in turn makes it easy to stub out should you want to do that.
+ */
+public class KernelTransactionAccessor {
+    public KernelTransaction getKernelTransaction(Context context) {
         try {
             // this is not opening something new that we should close
             // it only fetches the current transaction
