@@ -31,7 +31,7 @@ import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.graphdb.Label;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInFullAccessTransaction;
 
 class NodeLabelIndexBasedScannerTest extends BaseTest {
 
@@ -47,7 +47,7 @@ class NodeLabelIndexBasedScannerTest extends BaseTest {
         var labelA = Label.label("A");
         var labelB = Label.label("B");
 
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             for (int i = 0; i < nodeCount; i++) {
                 if (i % 3 == 0) {
                     labelABits.set(tx.createNode(labelA).getId());
@@ -130,7 +130,7 @@ class NodeLabelIndexBasedScannerTest extends BaseTest {
         var label = Label.label("Node");
         long labelCount = 2 * expectedBatchSize;
 
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             for (int i = 0; i < labelCount; i++) {
                 tx.createNode(label);
             }

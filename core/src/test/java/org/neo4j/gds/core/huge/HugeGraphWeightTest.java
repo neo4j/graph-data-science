@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.getNodeById;
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInFullAccessTransaction;
 
 final class HugeGraphWeightTest extends BaseTest {
 
@@ -74,7 +74,7 @@ final class HugeGraphWeightTest extends BaseTest {
     private void mkDb(int nodes, int relsPerNode) {
         long[] nodeIds = new long[nodes];
 
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             for (int i = 0; i < nodes; i++) {
                 nodeIds[i] = tx.createNode().getId();
             }

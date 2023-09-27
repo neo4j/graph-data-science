@@ -59,7 +59,7 @@ import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.crossArguments;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.TestSupport.toArguments;
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInFullAccessTransaction;
 import static org.neo4j.gds.core.Aggregation.COUNT;
 import static org.neo4j.gds.core.Aggregation.DEFAULT;
 import static org.neo4j.gds.core.Aggregation.MAX;
@@ -686,7 +686,7 @@ class GraphLoaderMultipleRelTypesAndPropertiesTest extends BaseTest {
         Graph unionGraph = graphStore.getUnion();
 
         long[] expectedCounts = new long[4];
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             expectedCounts[0] = tx.getAllNodes().stream().count();
             expectedCounts[1] = tx.getAllRelationships().stream().count();
             // The graphs share the node mapping, so we expect the node count for a subgraph

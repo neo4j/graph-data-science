@@ -34,7 +34,7 @@ import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.applyInTransaction;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.applyInFullAccessTransaction;
 
 final class CompositeIntersectionTest extends BaseTest {
 
@@ -50,7 +50,7 @@ final class CompositeIntersectionTest extends BaseTest {
     void setup() {
         Random random = new Random(0L);
         long[] neoStarts = new long[2];
-        long[] neoTargets = applyInTransaction(db, tx -> {
+        long[] neoTargets = applyInFullAccessTransaction(db, tx -> {
             Node start1 = tx.createNode();
             Node start2 = tx.createNode();
             Node start3 = tx.createNode();

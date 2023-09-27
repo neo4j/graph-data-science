@@ -47,7 +47,7 @@ public final class TestProcedureRunner {
         Log log,
         Consumer<P> func
     ) {
-        GraphDatabaseApiProxy.runInTransaction(graphDb, tx -> ProcedureRunner.applyOnProcedure(
+        GraphDatabaseApiProxy.runInFullAccessTransaction(graphDb, tx -> ProcedureRunner.applyOnProcedure(
             graphDb,
             procClass,
             ProcedureCallContext.EMPTY,

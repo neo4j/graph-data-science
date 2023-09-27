@@ -30,7 +30,7 @@ import java.util.Set;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsIterableContaining.hasItems;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInFullAccessTransaction;
 
 class NeighborsFinderTest extends BaseTest {
 
@@ -40,7 +40,7 @@ class NeighborsFinderTest extends BaseTest {
 
     @Test
     void excludeDirectRelationships() {
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             Node node1 = tx.createNode();
             Node node2 = tx.createNode();
             node1.createRelationshipTo(node2, FRIEND);
@@ -48,7 +48,7 @@ class NeighborsFinderTest extends BaseTest {
 
         NeighborsFinder neighborsFinder = new NeighborsFinder();
 
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             Node node1 = tx.getNodeById(0);
             Node node2 = tx.getNodeById(1);
             Set<Node> neighbors = neighborsFinder.findCommonNeighbors(node1, node2, null, Direction.BOTH);
@@ -59,7 +59,7 @@ class NeighborsFinderTest extends BaseTest {
 
     @Test
     void sameNodeHasNoCommonNeighbors() {
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             Node node1 = tx.createNode();
             Node node2 = tx.createNode();
             node1.createRelationshipTo(node2, FRIEND);
@@ -67,7 +67,7 @@ class NeighborsFinderTest extends BaseTest {
 
         NeighborsFinder neighborsFinder = new NeighborsFinder();
 
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             Node node1 = tx.getNodeById(0);
             Set<Node> neighbors = neighborsFinder.findCommonNeighbors(node1, node1, null, Direction.BOTH);
 
@@ -77,7 +77,7 @@ class NeighborsFinderTest extends BaseTest {
 
     @Test
     void findNeighborsExcludingDirection() {
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             Node node1 = tx.createNode();
             Node node2 = tx.createNode();
             Node node3 = tx.createNode();
@@ -91,7 +91,7 @@ class NeighborsFinderTest extends BaseTest {
 
         NeighborsFinder neighborsFinder = new NeighborsFinder();
 
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             Node node1 = tx.getNodeById(0);
             Node node2 = tx.getNodeById(1);
             Set<Node> neighbors = neighborsFinder.findCommonNeighbors(node1, node2, null, Direction.BOTH);
@@ -102,7 +102,7 @@ class NeighborsFinderTest extends BaseTest {
 
     @Test
     void findOutgoingNeighbors() {
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             Node node1 = tx.createNode();
             Node node2 = tx.createNode();
             Node node3 = tx.createNode();
@@ -113,7 +113,7 @@ class NeighborsFinderTest extends BaseTest {
 
         NeighborsFinder neighborsFinder = new NeighborsFinder();
 
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             Node node1 = tx.getNodeById(0);
             Node node2 = tx.getNodeById(1);
             Set<Node> neighbors = neighborsFinder.findCommonNeighbors(node1, node2, FOLLOWS, Direction.OUTGOING);
@@ -124,7 +124,7 @@ class NeighborsFinderTest extends BaseTest {
 
     @Test
     void findIncomingNeighbors() {
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             Node node1 = tx.createNode();
             Node node2 = tx.createNode();
             Node node3 = tx.createNode();
@@ -135,7 +135,7 @@ class NeighborsFinderTest extends BaseTest {
 
         NeighborsFinder neighborsFinder = new NeighborsFinder();
 
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             Node node1 = tx.getNodeById(0);
             Node node2 = tx.getNodeById(1);
             Set<Node> neighbors = neighborsFinder.findCommonNeighbors(node1, node2, FOLLOWS, Direction.INCOMING);
@@ -146,7 +146,7 @@ class NeighborsFinderTest extends BaseTest {
 
     @Test
     void findNeighborsOfSpecificRelationshipType() {
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             Node node1 = tx.createNode();
             Node node2 = tx.createNode();
             Node node3 = tx.createNode();
@@ -160,7 +160,7 @@ class NeighborsFinderTest extends BaseTest {
 
         NeighborsFinder neighborsFinder = new NeighborsFinder();
 
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             Node node1 = tx.getNodeById(0);
             Node node2 = tx.getNodeById(1);
             Set<Node> neighbors = neighborsFinder.findCommonNeighbors(node1, node2, COLLEAGUE, Direction.BOTH);
@@ -171,7 +171,7 @@ class NeighborsFinderTest extends BaseTest {
 
     @Test
     void dontCountDuplicates() {
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             Node[] nodes = new Node[4];
             nodes[0] = tx.createNode();
             nodes[1] = tx.createNode();
@@ -193,7 +193,7 @@ class NeighborsFinderTest extends BaseTest {
 
     @Test
     void otherNodeCountsAsNeighbor() {
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             Node[] nodes = new Node[2];
             nodes[0] = tx.createNode();
             nodes[1] = tx.createNode();
@@ -212,7 +212,7 @@ class NeighborsFinderTest extends BaseTest {
     @Test
     void otherNodeCountsAsOutgoingNeighbor() {
         Node[] nodes = new Node[2];
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             nodes[0] = tx.createNode();
             nodes[1] = tx.createNode();
             nodes[0].createRelationshipTo(nodes[1], FRIEND);

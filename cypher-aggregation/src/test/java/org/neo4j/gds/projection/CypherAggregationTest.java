@@ -362,7 +362,7 @@ class CypherAggregationTest extends BaseProcTest {
         assertThat(GraphStoreCatalog.exists("", db.databaseName(), "g")).isTrue();
         var graph = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore().getUnion();
 
-        GraphDatabaseApiProxy.runInTransaction(db, tx -> {
+        GraphDatabaseApiProxy.runInFullAccessTransaction(db, tx -> {
             for (char nodeVariable = 'a'; nodeVariable <= 'f'; nodeVariable++) {
                 var neoNodeId = this.idFunction.of(String.valueOf(nodeVariable));
                 var node = tx.getNodeById(neoNodeId);
@@ -485,7 +485,7 @@ class CypherAggregationTest extends BaseProcTest {
         assertThat(prop3.valueType()).isEqualTo(ValueType.DOUBLE_ARRAY);
         assertThat(prop4.valueType()).isEqualTo(ValueType.LONG_ARRAY);
 
-        GraphDatabaseApiProxy.runInTransaction(db, tx -> {
+        GraphDatabaseApiProxy.runInFullAccessTransaction(db, tx -> {
             for (char nodeVariable = 'a'; nodeVariable <= 'f'; nodeVariable++) {
                 var neoNodeId = this.idFunction.of(String.valueOf(nodeVariable));
                 var node = tx.getNodeById(neoNodeId);
@@ -563,7 +563,7 @@ class CypherAggregationTest extends BaseProcTest {
         assertThat(graph.hasRelationshipProperty()).isTrue();
         assertThat(graph.relationshipCount()).isEqualTo(4);
 
-        GraphDatabaseApiProxy.runInTransaction(db, tx -> {
+        GraphDatabaseApiProxy.runInFullAccessTransaction(db, tx -> {
             for (char nodeVariable = 'a'; nodeVariable <= 'f'; nodeVariable++) {
                 var neoNodeId = this.idFunction.of(String.valueOf(nodeVariable));
                 var node = tx.getNodeById(neoNodeId);
@@ -598,7 +598,7 @@ class CypherAggregationTest extends BaseProcTest {
         assertThat(GraphStoreCatalog.exists("", db.databaseName(), "g")).isTrue();
         var graphStore = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore();
 
-        GraphDatabaseApiProxy.runInTransaction(db, tx -> {
+        GraphDatabaseApiProxy.runInFullAccessTransaction(db, tx -> {
             for (var prop : List.of("prop", "prop_by_another_name")) {
                 var graph = graphStore.getGraph(
                     org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS,
@@ -649,7 +649,7 @@ class CypherAggregationTest extends BaseProcTest {
             .returns(2L, GraphStore::nodeCount)
             .returns(1L, GraphStore::relationshipCount);
 
-        GraphDatabaseApiProxy.runInTransaction(db, tx -> {
+        GraphDatabaseApiProxy.runInFullAccessTransaction(db, tx -> {
             var neoNodeId = this.idFunction.of("a");
             var node = tx.getNodeById(neoNodeId);
 

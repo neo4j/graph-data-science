@@ -29,7 +29,7 @@ import org.neo4j.graphdb.Label;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInFullAccessTransaction;
 
 /**
  *
@@ -57,7 +57,7 @@ class RelationshipPredicateTest extends BaseTest {
     @BeforeEach
     void setupGraph() {
         runQuery(DB_CYPHER);
-        runInTransaction(db,tx -> {
+        runInFullAccessTransaction(db, tx -> {
             nodeA = tx.findNode(LABEL, "name", "a").getId();
             nodeB = tx.findNode(LABEL, "name", "b").getId();
             nodeC = tx.findNode(LABEL, "name", "c").getId();
