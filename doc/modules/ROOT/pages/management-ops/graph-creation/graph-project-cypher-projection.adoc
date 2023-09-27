@@ -4,7 +4,9 @@
 :page-aliases: management-ops/projections/graph-project-cypher-aggregation.adoc, management-ops/projections/graph-project-cypher-projection.adoc
 
 
-Using Cypher projection is a more flexible and expressive approach with diminished focus on performance compared to the xref:management-ops/graph-creation/graph-project.adoc[native projections].
+A Cypher projection uses Cypher to create (_project_) an in-memory graph from the Neo4j database.
+
+Cypher projections are a more flexible and expressive approach with diminished focus on performance compared to the xref:management-ops/graph-creation/graph-project.adoc[native projections].
 
 
 == Considerations
