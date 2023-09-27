@@ -23,6 +23,9 @@ import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 
+/**
+ * This exists as a way of easy dependency injection.
+ */
 public class TransactionContextService {
     public TransactionContext transactionContext(
         GraphDatabaseService graphDatabaseService,

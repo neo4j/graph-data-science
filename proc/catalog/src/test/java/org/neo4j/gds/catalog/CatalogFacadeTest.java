@@ -27,7 +27,6 @@ import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.core.utils.warnings.UserLogStore;
 import org.neo4j.gds.procedures.catalog.CatalogFacade;
-import org.neo4j.gds.services.UserLogServices;
 
 import java.util.stream.Stream;
 
@@ -50,6 +49,7 @@ class CatalogFacadeTest {
             null,
             null,
             new User("current user", false),
+            null,
             null,
             businessFacade
         );
@@ -74,7 +74,7 @@ class CatalogFacadeTest {
      */
     @Test
     void shouldQueryUserLog() {
-        var userLogServices = mock(UserLogServices.class);
+        var userLogStore = mock(UserLogStore.class);
         var businessFacade = mock(CatalogBusinessFacade.class);
         var catalogFacade = new CatalogFacade(
             null,
@@ -86,12 +86,11 @@ class CatalogFacadeTest {
             null,
             null,
             new User("current user", false),
-            userLogServices,
+            null,
+            userLogStore,
             businessFacade
         );
 
-        var userLogStore = mock(UserLogStore.class);
-        when(userLogServices.getUserLogStore(DatabaseId.of("current database"))).thenReturn(userLogStore);
         var expectedWarnings = Stream.of(
             new UserLogEntry(new LeafTask("lt", 42), "going once"),
             new UserLogEntry(new LeafTask("lt", 87), "going twice..."),

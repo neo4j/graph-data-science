@@ -129,12 +129,12 @@ public class CatalogFacadeFactory {
     public CatalogFacade createCatalogFacade(Context context) {
         // Neo4j's services
         var graphDatabaseService = context.graphDatabaseAPI();
+        var kernelTransaction = kernelTransactionAccessor.getKernelTransaction(context);
 
         // Derived data and services
         var databaseId = databaseIdService.getDatabaseId(graphDatabaseService);
         var procedureTransactionService = new ProcedureTransactionService(context);
         var procedureReturnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
-        var kernelTransaction = kernelTransactionAccessor.getKernelTransaction(context);
         var streamCloser = new Consumer<AutoCloseable>() {
             @Override
             public void accept(AutoCloseable autoCloseable) {
@@ -146,6 +146,10 @@ public class CatalogFacadeFactory {
         var terminationFlag = terminationFlagService.createTerminationFlag(kernelTransaction);
         var transactionContextService = new TransactionContextService();
         var user = userServices.getUser(context.securityContext());
+
+        var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
+        var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
+        var userLogStore = userLogServices.getUserLogStore(databaseId);
 
         // GDS services
         var configurationService = new ConfigurationService();
@@ -246,11 +250,12 @@ public class CatalogFacadeFactory {
             graphDatabaseService,
             procedureReturnColumns,
             procedureTransactionService,
-            taskRegistryFactoryService,
+            taskRegistryFactory,
             terminationFlag,
             transactionContextService,
             user,
-            userLogServices,
+            userLogRegistryFactory,
+            userLogStore,
             businessFacade
         );
     }
