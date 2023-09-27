@@ -149,6 +149,7 @@ public class CatalogFacadeFactory {
 
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
+        var userLogStore = userLogServices.getUserLogStore(databaseId);
 
         // GDS services
         var configurationService = new ConfigurationService();
@@ -254,7 +255,7 @@ public class CatalogFacadeFactory {
             transactionContextService,
             user,
             userLogRegistryFactory,
-            userLogServices,
+            userLogStore,
             businessFacade
         );
     }

@@ -46,11 +46,11 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogStore;
 import org.neo4j.gds.procedures.ProcedureTransactionService;
 import org.neo4j.gds.procedures.TransactionContextService;
 import org.neo4j.gds.projection.GraphProjectNativeResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.services.UserLogServices;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.List;
@@ -87,7 +87,7 @@ public class CatalogFacade {
     private final TransactionContextService transactionContextService;
     private final User user;
     private final UserLogRegistryFactory userLogRegistryFactory;
-    private final UserLogServices userLogServices;
+    private final UserLogStore userLogStore;
 
     // business facade
     private final CatalogBusinessFacade businessFacade;
@@ -106,7 +106,7 @@ public class CatalogFacade {
         TransactionContextService transactionContextService,
         User user,
         UserLogRegistryFactory userLogRegistryFactory,
-        UserLogServices userLogServices,
+        UserLogStore userLogStore,
         CatalogBusinessFacade businessFacade
     ) {
         this.streamCloser = streamCloser;
@@ -119,7 +119,7 @@ public class CatalogFacade {
         this.transactionContextService = transactionContextService;
         this.user = user;
         this.userLogRegistryFactory = userLogRegistryFactory;
-        this.userLogServices = userLogServices;
+        this.userLogStore = userLogStore;
 
         this.businessFacade = businessFacade;
     }
@@ -150,8 +150,6 @@ public class CatalogFacade {
      * Huh, we never did jobId filtering...
      */
     public Stream<UserLogEntry> queryUserLog(String jobId) {
-        var userLogStore = userLogServices.getUserLogStore(databaseId);
-
         return userLogStore.query(user.getUsername());
     }
 
