@@ -377,7 +377,13 @@ public class CatalogFacade {
             configuration
         );
 
-        return Stream.of(new GraphDropGraphPropertiesResult(graphName, graphProperty, numberOfPropertiesRemoved));
+        var result = new GraphDropGraphPropertiesResult(
+            graphName,
+            graphProperty,
+            numberOfPropertiesRemoved
+        );
+
+        return Stream.of(result);
     }
 
     public Stream<MutateLabelResult> mutateNodeLabel(
@@ -448,7 +454,6 @@ public class CatalogFacade {
         Map<String, Object> configuration,
         GraphStreamNodePropertyOrPropertiesResultProducer<T> outputMarshaller
     ) {
-        // odd behaviour selection, how can we do better?
         var usesPropertyNameColumn = procedureReturnColumns.contains("nodeProperty");
 
         var resultStream = businessFacade.streamNodeProperties(
