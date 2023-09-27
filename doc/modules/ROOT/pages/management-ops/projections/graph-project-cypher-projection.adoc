@@ -4,8 +4,7 @@
 :page-aliases: management-ops/projections/graph-project-cypher-aggregation
 
 
-Using Cypher projection is a more flexible and expressive approach with diminished focus on performance compared to the xref:management-ops/projections/graph-project.adoc[native projections].
-Cypher projections are primarily recommended for the development phase (see xref:common-usage/index.adoc[Common usage]).
+Using Cypher projection is a more flexible and expressive approach with diminished focus on performance compared to the xref:management-ops/graph-creation/graph-project.adoc[native projections].
 
 
 == Considerations
