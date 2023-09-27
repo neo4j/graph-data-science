@@ -38,8 +38,6 @@ import java.util.stream.Stream;
 class KGEMutateResultConsumer extends MutateComputationResultConsumer<TopKMapComputer, KGEPredictResult, KGEPredictMutateConfig, KGEMutateResult> {
 
 
-    public static final String KGE_PREDICT_MUTATE_PROPERTY = "score";
-
     KGEMutateResultConsumer(ResultBuilderFunction<TopKMapComputer, KGEPredictResult, KGEPredictMutateConfig, KGEMutateResult> resultBuilderFunction) {
         super(resultBuilderFunction);
     }
@@ -62,7 +60,7 @@ class KGEMutateResultConsumer extends MutateComputationResultConsumer<TopKMapCom
             .nodes(graph)
             .relationshipType(mutateRelationshipType)
             .orientation(Orientation.NATURAL)
-            .addPropertyConfig(GraphFactory.PropertyConfig.of(KGE_PREDICT_MUTATE_PROPERTY))
+            .addPropertyConfig(GraphFactory.PropertyConfig.builder().propertyKey(config.mutateProperty()).build())
             .concurrency(concurrency)
             .executorService(DefaultPool.INSTANCE)
             .build();

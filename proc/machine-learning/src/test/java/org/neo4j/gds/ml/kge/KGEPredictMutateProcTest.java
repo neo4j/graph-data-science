@@ -103,6 +103,7 @@ class KGEPredictMutateProcTest extends BaseProcTest {
             .addParameter("relationshipTypeEmbedding", List.of(10.5, 12.43, 3.1, 10.0))
             .addParameter("scoringFunction", "TransE")
             .addParameter("topK", 2)
+            .addParameter("mutateProperty", "newScore")
             .yields();
 
         assertCypherResult(query, List.of(Map.of(
@@ -114,7 +115,7 @@ class KGEPredictMutateProcTest extends BaseProcTest {
             "configuration", isA(Map.class)
         )));
 
-        assertTrue(graphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED_T3"), "score"));
+        assertTrue(graphStore.hasRelationshipProperty(RelationshipType.of("PREDICTED_T3"), "newScore"));
     }
 
 
