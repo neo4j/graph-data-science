@@ -20,6 +20,7 @@
 package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -28,18 +29,38 @@ import org.neo4j.values.storable.LongValue;
 import org.neo4j.values.storable.Value;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public final class CommunityResultCompanion {
 
     private CommunityResultCompanion() {}
 
     public static NodePropertyValues nodePropertyValues(
-        boolean incremental,
         boolean consecutiveIds,
         LongNodePropertyValues nodeProperties
     ) {
 
-        if (consecutiveIds && !incremental) {
+        if (consecutiveIds) {
+            return new ConsecutiveLongNodePropertyValues(nodeProperties);
+        }
+
+        return nodeProperties;
+    }
+
+    public static NodePropertyValues nodePropertyValues(
+        boolean isIncremental,
+        String resultProperty,
+        String seedProperty,
+        boolean consecutiveIds,
+        LongNodePropertyValues nodeProperties,
+        Supplier<NodeProperty> seedPropertySupplier
+    ) {
+
+        if (isIncremental && resultProperty.equals(seedProperty)) {
+            nodeProperties = LongIfChangedNodePropertyValues.of(seedPropertySupplier.get(), nodeProperties);
+        }
+
+        if (consecutiveIds) {
             return new ConsecutiveLongNodePropertyValues(nodeProperties);
         }
 
@@ -48,6 +69,29 @@ public final class CommunityResultCompanion {
 
     public static NodePropertyValues nodePropertyValues(
         boolean incremental,
+        String resultProperty,
+        String seedProperty,
+        boolean consecutiveIds,
+        LongNodePropertyValues nodeProperties,
+        Optional<Long> minCommunitySize,
+        int concurrency,
+        Supplier<NodeProperty> seedPropertySupplier
+    ) {
+        var resultAfterMinFilter = minCommunitySize
+            .map(size -> applySizeFilter(nodeProperties, size, concurrency))
+            .orElse(nodeProperties);
+
+        return nodePropertyValues(
+            incremental,
+            resultProperty,
+            seedProperty,
+            consecutiveIds,
+            resultAfterMinFilter,
+            seedPropertySupplier
+        );
+    }
+
+    public static NodePropertyValues nodePropertyValues(
         boolean consecutiveIds,
         LongNodePropertyValues nodeProperties,
         Optional<Long> minCommunitySize,
@@ -57,8 +101,9 @@ public final class CommunityResultCompanion {
             .map(size -> applySizeFilter(nodeProperties, size, concurrency))
             .orElse(nodeProperties);
 
-        return nodePropertyValues(incremental, consecutiveIds, resultAfterMinFilter);
+        return nodePropertyValues(consecutiveIds, resultAfterMinFilter);
     }
+
 
     private static LongNodePropertyValues applySizeFilter(
         LongNodePropertyValues nodeProperties,

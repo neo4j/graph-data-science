@@ -70,10 +70,13 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             configuration,
             (result, config) -> CommunityResultCompanion.nodePropertyValues(
                 config.isIncremental(),
+                config.seedProperty(),
+                config.writeProperty(),
                 config.consecutiveIds(),
                 result.asNodeProperties(),
                 config.minCommunitySize(),
-                config.concurrency()
+                config.concurrency(),
+                () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
             ),
             (result -> result::setIdOf),
             (result, componentCount, communitySummary) -> {

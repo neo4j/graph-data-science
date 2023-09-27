@@ -46,7 +46,6 @@ final class ApproxMaxKCutComputationResultTransformer {
             var graph = computationResult.graph();
             var nodeProperties = CommunityResultCompanion.nodePropertyValues(
                 false,
-                false,
                 NodePropertyValuesAdapter.adapt(approxMaxKCutResult.candidateSolution()),
                 config.minCommunitySize(),
                 config.concurrency()

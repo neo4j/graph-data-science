@@ -96,8 +96,11 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             configuration,
             (result, config) -> CommunityResultCompanion.nodePropertyValues(
                 config.isIncremental(),
+                config.mutateProperty(),
+                config.seedProperty(),
                 config.consecutiveIds(),
-                result.asNodeProperties()
+                result.asNodeProperties(),
+                () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
             ),
             (result -> result::setIdOf),
             (result, componentCount, communitySummary) -> {
@@ -154,8 +157,11 @@ public class CommunityAlgorithmsMutateBusinessFacade {
                 ? createIntermediateCommunitiesNodePropertyValues(result::getIntermediateCommunities, result.size())
                 : CommunityResultCompanion.nodePropertyValues(
                     config.isIncremental(),
+                    config.mutateProperty(),
+                    config.seedProperty(),
                     config.consecutiveIds(),
-                    NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent())
+                    NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent()),
+                    () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
                 );
         });
 
@@ -200,8 +206,11 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             )
                 : CommunityResultCompanion.nodePropertyValues(
                     config.isIncremental(),
+                    config.mutateProperty(),
+                    config.seedProperty(),
                     config.consecutiveIds(),
-                    NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent())
+                    NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent()),
+                    () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
                 );
         });
 
@@ -277,8 +286,11 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             ((result1, config) -> {
                 return CommunityResultCompanion.nodePropertyValues(
                     config.isIncremental(),
+                    config.mutateProperty(),
+                    config.seedProperty(),
                     config.consecutiveIds(),
-                    NodePropertyValuesAdapter.adapt(result1.labels())
+                    NodePropertyValuesAdapter.adapt(result1.labels()),
+                    () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
                 );
             }),
             (result -> result.labels()::get),
@@ -493,7 +505,6 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             ((result, configuration1) -> {
                 return CommunityResultCompanion.nodePropertyValues(
                     false,
-                    false,
                     NodePropertyValuesAdapter.adapt(result.candidateSolution())
                 );
             }),
@@ -525,8 +536,11 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             ((modularityOptimizationResult, config) -> {
                 return CommunityResultCompanion.nodePropertyValues(
                     config.isIncremental(),
+                    config.mutateProperty(),
+                    config.seedProperty(),
                     config.consecutiveIds(),
-                    modularityOptimizationResult.asNodeProperties()
+                    modularityOptimizationResult.asNodeProperties(),
+                    () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
                 );
             }),
             (result -> result::communityId),

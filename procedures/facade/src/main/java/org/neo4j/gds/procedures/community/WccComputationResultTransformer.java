@@ -49,7 +49,6 @@ final class WccComputationResultTransformer {
             var graph = computationResult.graph();
 
             var nodePropertyValues = CommunityResultCompanion.nodePropertyValues(
-                false,
                 configuration.consecutiveIds(),
                 wccResult.asNodeProperties(),
                 configuration.minCommunitySize(),

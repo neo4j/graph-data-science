@@ -50,7 +50,6 @@ final class LabelPropagationComputationResultTransformer {
 
 
             var nodePropertyValues = CommunityResultCompanion.nodePropertyValues(
-                false,
                 configuration.consecutiveIds(),
                 NodePropertyValuesAdapter.adapt(result.labels()),
                 configuration.minCommunitySize(),
