@@ -51,6 +51,7 @@ class CatalogFacadeTest {
             null,
             new User("current user", false),
             null,
+            null,
             businessFacade
         );
 
@@ -86,6 +87,7 @@ class CatalogFacadeTest {
             null,
             null,
             new User("current user", false),
+            null,
             userLogServices,
             businessFacade
         );
