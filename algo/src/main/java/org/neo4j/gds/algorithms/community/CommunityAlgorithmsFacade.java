@@ -380,7 +380,7 @@ public class CommunityAlgorithmsFacade {
         try {
             var algorithmResult = algorithm.compute();
 
-            return AlgorithmComputationResult.of(algorithmResult, graph, graphStore);
+            return AlgorithmComputationResult.of(algorithmResult, graph, graphStore, algorithm.getTerminationFlag());
         } catch (Exception e) {
             log.warn("Computation failed", e);
             algorithm.getProgressTracker().endSubTaskWithFailure();

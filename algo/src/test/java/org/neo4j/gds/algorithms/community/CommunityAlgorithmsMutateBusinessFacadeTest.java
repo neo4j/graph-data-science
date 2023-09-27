@@ -97,7 +97,7 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
         when(configMock.mutateProperty()).thenReturn("bugger-off");
         var result = HugeLongArray.newArray(graph.nodeCount());
         result.setAll(graph::toOriginalNodeId);
-        var algorithmResultMock = AlgorithmComputationResult.of(result, graph, graphStore);
+        var algorithmResultMock = AlgorithmComputationResult.of(result, graph, graphStore, null);
 
         var statisticsComputationInstructionsMock = mock(StatisticsComputationInstructions.class);
         when(statisticsComputationInstructionsMock.computeCountOnly()).thenReturn(true);
@@ -149,7 +149,7 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
         when(configMock.mutateProperty()).thenReturn("bugger-off");
         var result = HugeLongArray.newArray(graph.nodeCount());
         result.setAll(graph::toOriginalNodeId);
-        var algorithmResultMock = AlgorithmComputationResult.of(result, graph, graphStore);
+        var algorithmResultMock = AlgorithmComputationResult.of(result, graph, graphStore, null);
 
         CommunityAlgorithmsMutateBusinessFacade.NodePropertyValuesMapper<HugeLongArray, MutateNodePropertyConfig> nodePropertyValuesMapper =
             (r, c) -> NodePropertyValuesAdapter.adapt(r);

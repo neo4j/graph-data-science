@@ -160,7 +160,11 @@ public class CommunityProcedureProvider {
         );
         CommunityAlgorithmsWriteBusinessFacade writeBusinessFacade = new CommunityAlgorithmsWriteBusinessFacade(
             communityAlgorithmsFacade,
-            new WriteNodePropertyService(exportBuildersProvider.nodePropertyExporterBuilder(exporterContext), log)
+            new WriteNodePropertyService(
+                exportBuildersProvider.nodePropertyExporterBuilder(exporterContext),
+                log,
+                taskRegistryFactory
+            )
         );
 
         // procedure facade

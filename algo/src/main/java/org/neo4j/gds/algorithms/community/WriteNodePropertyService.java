@@ -19,22 +19,56 @@
  */
 package org.neo4j.gds.algorithms.community;
 
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.config.WriteConfig;
+import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.logging.Log;
+
+import java.util.Optional;
 
 public class WriteNodePropertyService {
 
     private final Log log;
     private  final NodePropertyExporterBuilder nodePropertyExporterBuilder;
+    private final TaskRegistryFactory taskRegistryFactory;
 
-    public WriteNodePropertyService(NodePropertyExporterBuilder nodePropertyExporterBuilder, Log log) {
+    public WriteNodePropertyService(
+        NodePropertyExporterBuilder nodePropertyExporterBuilder,
+        Log log,
+        TaskRegistryFactory taskRegistryFactory
+    ) {
         this.nodePropertyExporterBuilder=nodePropertyExporterBuilder;
         this.log = log;
+        this.taskRegistryFactory = taskRegistryFactory;
     }
 
     public WriteNodePropertyResult write(
+        Graph graph,
+        GraphStore graphStore,
+        NodePropertyValues nodePropertyValues,
+        int writeConcurrency,
+        String writeProperty,
+        String procedureName,
+        Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo,
+        TerminationFlag terminationFlag
     ) {
-        return  null;
+        return Neo4jDatabasePropertyWriter.writeNodeProperty(
+            nodePropertyExporterBuilder,
+            taskRegistryFactory,
+            graph,
+            graphStore,
+            nodePropertyValues,
+            writeConcurrency,
+            writeProperty,
+            procedureName,
+            arrowConnectionInfo,
+            terminationFlag,
+            (org.neo4j.logging.Log) log //TODO: check whats going on with log
+        );
     }
 
 
