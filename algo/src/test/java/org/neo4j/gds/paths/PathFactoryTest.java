@@ -51,7 +51,7 @@ class PathFactoryTest extends BaseProcTest {
             var nodeIds = new long[]{0L};
             var costs = new double[]{0.0D};
 
-            GraphDatabaseApiProxy.runInTransaction(db, tx -> {
+            GraphDatabaseApiProxy.runInFullAccessTransaction(db, tx -> {
                 var path = PathFactory.create(
                     tx::getNodeById,
                     nodeIds,
@@ -84,7 +84,7 @@ class PathFactoryTest extends BaseProcTest {
             var nodeIds = new long[]{0L, 1L, 2L};
             var costs = new double[]{0.0D, 1.0D, 4.0D};
 
-            GraphDatabaseApiProxy.runInTransaction(db, tx -> {
+            GraphDatabaseApiProxy.runInFullAccessTransaction(db, tx -> {
                 var path = PathFactory.create(
                     tx::getNodeById,
                     nodeIds,

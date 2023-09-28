@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.transaction;
 
+import org.jetbrains.annotations.TestOnly;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.BaseTest;
@@ -28,7 +29,6 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
-import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 
 import java.util.Arrays;
 import java.util.function.Consumer;
@@ -112,18 +112,15 @@ public abstract class TransactionContextTest extends BaseTest {
         }.toNeoAccessMode();
     }
 
-    protected void applyTxWithAccessMode(Consumer<Transaction> txConsumer, AccessMode noNodesAllowed) {
-        try (var topLevelTx = db.beginTx()) {
-            var securityContext = Neo4jProxy.securityContext(
-                "",
-                AuthSubject.ANONYMOUS,
-                noNodesAllowed,
-                db.databaseName()
-            );
-            ((InternalTransaction) topLevelTx)
-                .kernelTransaction()
-                .overrideWith(securityContext);
-
+    @TestOnly
+    protected void applyTxWithAccessMode(Consumer<Transaction> txConsumer, AccessMode accessMode) {
+        var securityContext = Neo4jProxy.securityContext(
+            "",
+            AuthSubject.ANONYMOUS,
+            accessMode,
+            db.databaseName()
+        );
+        try (var topLevelTx = GraphDatabaseApiProxy.beginTransaction(db, securityContext)) {
             txConsumer.accept(topLevelTx);
         }
     }

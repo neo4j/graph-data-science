@@ -34,7 +34,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.applyInTransaction;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.applyInFullAccessTransaction;
 
 /**
  * A->B; A->C; B->C;
@@ -252,6 +252,6 @@ class DegreesTest extends BaseTest {
     }
 
     private long nodeId(String name) {
-        return applyInTransaction(db, tx -> tx.findNode(Label.label("Node"), "name", name).getId());
+        return applyInFullAccessTransaction(db, tx -> tx.findNode(Label.label("Node"), "name", name).getId());
     }
 }

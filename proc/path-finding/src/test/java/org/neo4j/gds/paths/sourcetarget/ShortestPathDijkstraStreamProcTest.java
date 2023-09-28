@@ -40,7 +40,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInFullAccessTransaction;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -113,7 +113,7 @@ class ShortestPathDijkstraStreamProcTest extends BaseProcTest {
             .addParameter("relationshipWeightProperty", "cost")
             .yields();
 
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             PathFactory.RelationshipIds.set(0);
 
             var expectedPath = PathFactory.create(
@@ -147,10 +147,10 @@ class ShortestPathDijkstraStreamProcTest extends BaseProcTest {
             .addParameter("relationshipWeightProperty", "cost")
             .yields();
 
-        runInTransaction(db, tx -> runQueryWithoutClosingTheResult(tx, query, Map.of()).next());
+        runInFullAccessTransaction(db, tx -> runQueryWithoutClosingTheResult(tx, query, Map.of()).next());
 
         var messages = testLog.getMessages(TestLog.INFO);
         assertThat(messages.get(messages.size() - 1)).contains(":: Finished");
     }
-    
+
 }

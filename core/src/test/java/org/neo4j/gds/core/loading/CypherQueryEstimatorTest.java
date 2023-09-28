@@ -41,7 +41,7 @@ class CypherQueryEstimatorTest extends BaseTest {
 
     @Test
     void estimateNodes() {
-        GraphDatabaseApiProxy.runInTransaction(db, tx -> {
+        GraphDatabaseApiProxy.runInFullAccessTransaction(db, tx -> {
             CypherQueryEstimator estimator = new CypherQueryEstimator(DatabaseTransactionContext.of(db, tx));
 
             var estimation = estimator.getNodeEstimation(
@@ -54,7 +54,7 @@ class CypherQueryEstimatorTest extends BaseTest {
 
     @Test
     void estimateRelationships() {
-        GraphDatabaseApiProxy.runInTransaction(db, tx -> {
+        GraphDatabaseApiProxy.runInFullAccessTransaction(db, tx -> {
             CypherQueryEstimator estimator = new CypherQueryEstimator(DatabaseTransactionContext.of(db, tx));
 
             var estimation = estimator.getRelationshipEstimation(

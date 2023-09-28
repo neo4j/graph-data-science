@@ -57,9 +57,9 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.applyInTransaction;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.applyInFullAccessTransaction;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.getNodeById;
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInFullAccessTransaction;
 import static org.neo4j.gds.core.utils.RawValues.combineIntInt;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -77,7 +77,7 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
     void shouldLoadNodesInOrder() {
         Graph graph = loadEverything();
         final Set<Long> nodeIds;
-        nodeIds = applyInTransaction(db, tx -> tx.getAllNodes().stream()
+        nodeIds = applyInFullAccessTransaction(db, tx -> tx.getAllNodes().stream()
             .map(Node::getId)
             .collect(Collectors.toSet())
         );
@@ -96,7 +96,7 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
     @Timeout(value = 5)
     void shouldLoadAllRelationships() {
         Graph graph = loadEverything();
-        runInTransaction(db, tx -> graph.forEachNode(id -> testRelationships(tx, graph, id)));
+        runInFullAccessTransaction(db, tx -> graph.forEachNode(id -> testRelationships(tx, graph, id)));
     }
 
     @Test
@@ -138,14 +138,14 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
         @Test
         @Timeout(value = 5)
         void shouldLoadSparseNodes() {
-            runInTransaction(db, tx -> {
+            runInFullAccessTransaction(db, tx -> {
                 tx.findNodes(Label.label("Label2"))
                     .stream().forEach(n -> {
-                    long graphId = sparseGraph.nodes().toMappedNodeId(n.getId());
-                    assertNotEquals(-1, graphId, n + " not mapped");
-                    long neoId = sparseGraph.nodes().toOriginalNodeId(graphId);
-                    assertEquals(n.getId(), neoId, n + " mapped wrongly");
-                });
+                        long graphId = sparseGraph.nodes().toMappedNodeId(n.getId());
+                        assertNotEquals(-1, graphId, n + " not mapped");
+                        long neoId = sparseGraph.nodes().toOriginalNodeId(graphId);
+                        assertEquals(n.getId(), neoId, n + " mapped wrongly");
+                    });
             });
         }
     }

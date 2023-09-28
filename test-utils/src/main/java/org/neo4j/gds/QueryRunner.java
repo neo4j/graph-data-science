@@ -21,13 +21,13 @@ package org.neo4j.gds;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.intellij.lang.annotations.Language;
+import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -36,8 +36,8 @@ import java.util.function.Function;
 
 import static java.util.Collections.emptyMap;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.applyInTransaction;
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.applyInFullAccessTransaction;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInFullAccessTransaction;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runQueryWithoutClosingTheResult;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
@@ -48,6 +48,7 @@ public final class QueryRunner {
 
     private QueryRunner() {}
 
+    @TestOnly
     public static long runQueryWithRowConsumer(
         GraphDatabaseService db,
         String username,
@@ -56,9 +57,11 @@ public final class QueryRunner {
         BiConsumer<Transaction, Result.ResultRow> rowConsumer
     ) {
         var rowCounter = new MutableLong();
-        runInTransaction(db, tx -> {
-            try (KernelTransaction.Revertable ignored = withUsername(tx, username, db.databaseName());
-                 Result result = runQueryWithoutClosingTheResult(tx, query, params)) {
+
+        runWithUsername(username, db, tx -> {
+            try (
+                Result result = runQueryWithoutClosingTheResult(tx, query, params)
+            ) {
                 result.accept(row -> {
                     rowConsumer.accept(tx, row);
                     rowCounter.increment();
@@ -78,7 +81,7 @@ public final class QueryRunner {
         BiConsumer<Transaction, Result.ResultRow> rowConsumer
     ) {
         var rowCounter = new MutableLong();
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             try (Result result = runQueryWithoutClosingTheResult(tx, query, params)) {
                 result.accept(row -> {
                     rowConsumer.accept(tx, row);
@@ -98,7 +101,7 @@ public final class QueryRunner {
         Consumer<Result.ResultRow> rowConsumer
     ) {
         var rowCounter = new MutableLong();
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             try (Result result = runQueryWithoutClosingTheResult(tx, query, emptyMap())) {
                 result.accept(row -> {
                     rowConsumer.accept(row);
@@ -117,13 +120,14 @@ public final class QueryRunner {
     }
 
     public static void runQuery(GraphDatabaseService db, @Language("Cypher") String query, Map<String, Object> params) {
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             try (Result result = runQueryWithoutClosingTheResult(tx, query, params)) {
                 result.accept(CONSUME_ROWS);
             }
         });
     }
 
+    @TestOnly
     public static <T> T runQuery(
         GraphDatabaseService db,
         String username,
@@ -131,9 +135,8 @@ public final class QueryRunner {
         Map<String, Object> params,
         Function<Result, T> resultFunction
     ) {
-        return applyInTransaction(db, tx -> {
+        return applyWithUsername(username, db, tx -> {
             try (
-                KernelTransaction.Revertable ignored = withUsername(tx, username, db.databaseName());
                 Result result = runQueryWithoutClosingTheResult(tx, query, params)
             ) {
                 return resultFunction.apply(result);
@@ -141,15 +144,17 @@ public final class QueryRunner {
         });
     }
 
+    @TestOnly
     public static void runQuery(
         GraphDatabaseService db,
         String username,
         @Language("Cypher") String query,
         Map<String, Object> params
     ) {
-        runInTransaction(db, tx -> {
-            try (KernelTransaction.Revertable ignored = withUsername(tx, username, db.databaseName());
-                 Result result = runQueryWithoutClosingTheResult(tx, query, params)) {
+        runWithUsername(username, db, tx -> {
+            try (
+                Result result = runQueryWithoutClosingTheResult(tx, query, params)
+            ) {
                 result.accept(CONSUME_ROWS);
             }
         });
@@ -169,7 +174,7 @@ public final class QueryRunner {
         Map<String, Object> params,
         Function<Result, T> resultFunction
     ) {
-        return applyInTransaction(db, tx -> {
+        return applyInFullAccessTransaction(db, tx -> {
             try (var result = runQueryWithoutClosingTheResult(tx, query, params)) {
                 return resultFunction.apply(result);
             }
@@ -182,13 +187,14 @@ public final class QueryRunner {
         Map<String, Object> params,
         Consumer<Result> resultConsumer
     ) {
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             try (var result = runQueryWithoutClosingTheResult(tx, query, params)) {
                 resultConsumer.accept(result);
             }
         });
     }
 
+    @TestOnly
     public static void runQueryWithResultConsumer(
         GraphDatabaseService db,
         String username,
@@ -196,16 +202,19 @@ public final class QueryRunner {
         Map<String, Object> params,
         Consumer<Result> resultConsumer
     ) {
-        runInTransaction(db, tx -> {
-            try (KernelTransaction.Revertable ignored = withUsername(tx, username, db.databaseName())) {
-                try (var result = runQueryWithoutClosingTheResult(tx, query, params)) {
-                    resultConsumer.accept(result);
-                }
+        runWithUsername(username, db, tx -> {
+            try (var result = runQueryWithoutClosingTheResult(tx, query, params)) {
+                resultConsumer.accept(result);
             }
         });
     }
 
-    public static void runFailingQuery(GraphDatabaseService db, String query, Map<String, Object> queryParameters, Consumer<Throwable> exceptionConsumer) {
+    public static void runFailingQuery(
+        GraphDatabaseService db,
+        String query,
+        Map<String, Object> queryParameters,
+        Consumer<Throwable> exceptionConsumer
+    ) {
         try {
             QueryRunner.runQueryWithResultConsumer(db, query, queryParameters, Result::resultAsString);
             fail(formatWithLocale("Expected an exception to be thrown by query:\n%s", query));
@@ -214,10 +223,23 @@ public final class QueryRunner {
         }
     }
 
-    private static KernelTransaction.Revertable withUsername(Transaction tx, String username, String databaseName) {
-        InternalTransaction topLevelTransaction = (InternalTransaction) tx;
-        AuthSubject subject = topLevelTransaction.securityContext().subject();
-        var securityContext = Neo4jProxy.securityContext(username, subject, READ, databaseName);
-        return topLevelTransaction.overrideWith(securityContext);
+    @TestOnly
+    private static void runWithUsername(
+        String username,
+        GraphDatabaseService db,
+        Consumer<Transaction> block
+    ) {
+        var securityContext = Neo4jProxy.securityContext(username, AuthSubject.AUTH_DISABLED, READ, db.databaseName());
+        GraphDatabaseApiProxy.runInTransaction(db, securityContext, block);
+    }
+
+    @TestOnly
+    private static <T> T applyWithUsername(
+        String username,
+        GraphDatabaseService db,
+        Function<Transaction, T> block
+    ) {
+        var securityContext = Neo4jProxy.securityContext(username, AuthSubject.AUTH_DISABLED, READ, db.databaseName());
+        return GraphDatabaseApiProxy.applyInTransaction(db, securityContext, block);
     }
 }

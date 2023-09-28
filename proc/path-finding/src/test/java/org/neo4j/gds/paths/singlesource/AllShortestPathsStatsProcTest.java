@@ -41,7 +41,7 @@ public abstract class AllShortestPathsStatsProcTest extends AllShortestPathsProc
             .yields("preProcessingMillis", "computeMillis", "postProcessingMillis", "configuration");
 
         //@formatter:off
-        GraphDatabaseApiProxy.runInTransaction(db, tx -> {
+        GraphDatabaseApiProxy.runInFullAccessTransaction(db, tx -> {
             assertCypherResult(query, List.of(Map.of(
                 "preProcessingMillis", greaterThan(-1L),
                 "computeMillis", greaterThan(-1L),

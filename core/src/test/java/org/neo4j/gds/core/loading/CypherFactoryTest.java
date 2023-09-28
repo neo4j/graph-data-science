@@ -59,7 +59,7 @@ import static org.neo4j.gds.GraphFactoryTestSupport.FactoryType.CYPHER;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.applyInTransaction;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.applyInFullAccessTransaction;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class CypherFactoryTest extends BaseTest {
@@ -85,7 +85,7 @@ class CypherFactoryTest extends BaseTest {
         String rels = "MATCH (n)-[r]->(m) WHERE type(r) = 'REL' " +
             "RETURN id(n) AS source, id(m) AS target, coalesce(head(collect(r.prop)), 0)";
 
-        Graph graph = applyInTransaction(
+        Graph graph = applyInFullAccessTransaction(
             db,
             tx -> new CypherLoaderBuilder().databaseService(db)
                 .nodeQuery(nodes)
@@ -146,7 +146,7 @@ class CypherFactoryTest extends BaseTest {
             .nodeQuery(nodeStatement)
             .relationshipQuery(relStatement);
 
-        Graph graph = applyInTransaction(db, tx -> builder.build().graph());
+        Graph graph = applyInFullAccessTransaction(db, tx -> builder.build().graph());
 
         assertThat(graph.nodeCount()).isEqualTo(COUNT);
         assertThat(graph.relationshipCount()).isEqualTo(0);
@@ -161,7 +161,7 @@ class CypherFactoryTest extends BaseTest {
             .nodeQuery(nodeQuery)
             .relationshipQuery("RETURN 0 AS source, 0 AS target LIMIT 0");
 
-        var graph = applyInTransaction(db, tx -> builder.build().graph());
+        var graph = applyInFullAccessTransaction(db, tx -> builder.build().graph());
         assertThat(graph.nodeProperties("list").doubleArrayValue(0)).containsExactly(1.3, 3.7);
     }
 
@@ -176,7 +176,7 @@ class CypherFactoryTest extends BaseTest {
             .nodeQuery(nodeQuery)
             .relationshipQuery("RETURN 0 AS source, 0 AS target LIMIT 0");
 
-        var graph = applyInTransaction(db, tx -> builder.build().graph());
+        var graph = applyInFullAccessTransaction(db, tx -> builder.build().graph());
         assertThat(graph.nodeProperties("list").doubleArrayValue(0)).containsExactly(1.3, 3.7);
         assertThat(graph.nodeProperties("list").doubleArrayValue(1)).isEmpty();
     }
@@ -192,7 +192,7 @@ class CypherFactoryTest extends BaseTest {
             .nodeQuery(nodeQuery)
             .relationshipQuery("RETURN 0 AS source, 0 AS target LIMIT 0");
 
-        var graph = applyInTransaction(db, tx -> builder.build().graph());
+        var graph = applyInFullAccessTransaction(db, tx -> builder.build().graph());
         assertThat(graph.nodeProperties("list").longArrayValue(0)).containsExactly(1, 3, 3, 7);
         assertThat(graph.nodeProperties("list").longArrayValue(1)).isEmpty();
     }
@@ -206,7 +206,7 @@ class CypherFactoryTest extends BaseTest {
             .nodeQuery(nodeQuery)
             .relationshipQuery("RETURN 0 AS source, 0 AS target LIMIT 0");
 
-        var graph = applyInTransaction(db, tx -> builder.build().graph());
+        var graph = applyInFullAccessTransaction(db, tx -> builder.build().graph());
         assertThat(graph.nodeProperties("list").longArrayValue(0)).containsExactly(1L, 2L);
     }
 
@@ -219,7 +219,7 @@ class CypherFactoryTest extends BaseTest {
             .nodeQuery(nodeQuery)
             .relationshipQuery("RETURN 0 AS source, 0 AS target LIMIT 0");
 
-        var graph = applyInTransaction(db, tx -> builder.build().graph());
+        var graph = applyInFullAccessTransaction(db, tx -> builder.build().graph());
         assertThat(graph.nodeProperties("list").longArrayValue(0)).isEmpty();
     }
 
@@ -232,7 +232,7 @@ class CypherFactoryTest extends BaseTest {
             .nodeQuery(nodeQuery)
             .relationshipQuery("RETURN 0 AS source, 0 AS target LIMIT 0");
 
-        assertThatThrownBy(() -> applyInTransaction(db, tx -> builder.build().graph()))
+        assertThatThrownBy(() -> applyInFullAccessTransaction(db, tx -> builder.build().graph()))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Only lists of uniformly typed numbers are supported as GDS node properties")
             .hasMessageContaining("List{Long(1), Long(2), Boolean('true')}");
@@ -247,7 +247,7 @@ class CypherFactoryTest extends BaseTest {
             .nodeQuery(nodeQuery)
             .relationshipQuery("RETURN 0 AS source, 0 AS target LIMIT 0");
 
-        assertThatThrownBy(() -> applyInTransaction(db, tx -> builder.build().graph()))
+        assertThatThrownBy(() -> applyInFullAccessTransaction(db, tx -> builder.build().graph()))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Only lists of uniformly typed numbers are supported as GDS node properties")
             .hasMessageContaining("List{Long(1), Long(2), Double(1"); // omitting the rest of the double for locale reasons
@@ -262,7 +262,7 @@ class CypherFactoryTest extends BaseTest {
             .nodeQuery(nodeQuery)
             .relationshipQuery("RETURN 0 AS source, 0 AS target LIMIT 0");
 
-        assertThatThrownBy(() -> applyInTransaction(db, tx -> builder.build().graph()))
+        assertThatThrownBy(() -> applyInFullAccessTransaction(db, tx -> builder.build().graph()))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Only lists of uniformly typed numbers are supported as GDS node properties")
             .hasMessageContaining("List{String(\"forty\"), String(\"two\")}");
@@ -364,7 +364,7 @@ class CypherFactoryTest extends BaseTest {
             .parameters(Map.of("nodeProp", 42, "relProp", 21))
             .build();
 
-        Graph graph = applyInTransaction(db, tx -> loader.graph());
+        Graph graph = applyInFullAccessTransaction(db, tx -> loader.graph());
 
         assertGraphEquals(fromGdl("(a { nodeProp: 42 })-[{ w: 21 }]->(a)"), graph);
     }
@@ -393,7 +393,7 @@ class CypherFactoryTest extends BaseTest {
             .validateRelationships(false)
             .build();
 
-        GraphStore graphStore = applyInTransaction(db, tx -> loader.graphStore());
+        GraphStore graphStore = applyInFullAccessTransaction(db, tx -> loader.graphStore());
 
         Function<List<String>, Graph> getGraph = (List<String> labels) -> graphStore.getGraph(
             labels.stream().map(NodeLabel::of).collect(Collectors.toList()),
@@ -434,7 +434,7 @@ class CypherFactoryTest extends BaseTest {
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> applyInTransaction(db, tx -> loader.graphStore())
+            () -> applyInFullAccessTransaction(db, tx -> loader.graphStore())
         );
 
         assertTrue(ex.getMessage().contains("does not specify a label"));
@@ -450,7 +450,7 @@ class CypherFactoryTest extends BaseTest {
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> applyInTransaction(db, tx -> loader.graphStore())
+            () -> applyInFullAccessTransaction(db, tx -> loader.graphStore())
         );
 
         assertTrue(ex.getMessage().contains("should be of type List"));
@@ -466,7 +466,7 @@ class CypherFactoryTest extends BaseTest {
         String rels = "MATCH (n)" +
             "RETURN id(n) AS source, id(n) AS target";
 
-        Graph graph = applyInTransaction(
+        Graph graph = applyInFullAccessTransaction(
             db,
             tx -> new CypherLoaderBuilder().databaseService(db)
                 .nodeQuery(nodes)
@@ -489,7 +489,7 @@ class CypherFactoryTest extends BaseTest {
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
-            () -> applyInTransaction(db, tx -> loader.graphStore())
+            () -> applyInFullAccessTransaction(db, tx -> loader.graphStore())
         );
 
         assertEquals(
@@ -583,7 +583,7 @@ class CypherFactoryTest extends BaseTest {
             .nodeQuery(nodeStatement)
             .relationshipQuery(relStatement);
 
-        Graph graph = applyInTransaction(db, tx -> builder.build().graph());
+        Graph graph = applyInFullAccessTransaction(db, tx -> builder.build().graph());
 
         assertEquals(COUNT, graph.nodeCount());
         AtomicInteger relCount = new AtomicInteger();

@@ -37,7 +37,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInFullAccessTransaction;
 
 /**
  * Exports a graph as Cypher statements, so that you could inspect it during tests or similar.
@@ -188,13 +188,13 @@ public final class CypherExporter {
 
         @Override
         public void runInTx(GraphDatabaseService graph, Runnable action) {
-            runInTransaction(graph, tx -> action.run());
+            runInFullAccessTransaction(graph, tx -> action.run());
         }
 
 
         @Override
         public void forEachNode(GraphDatabaseService graph, Consumer<Node> action) {
-            runInTransaction(graph, tx -> tx.getAllNodes().forEach(action));
+            runInFullAccessTransaction(graph, tx -> tx.getAllNodes().forEach(action));
         }
 
         @Override

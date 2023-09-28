@@ -123,7 +123,7 @@ class ShortestPathYensStreamProcTest extends BaseProcTest {
             .addParameter("relationshipWeightProperty", "cost")
             .yields();
 
-        GraphDatabaseApiProxy.runInTransaction(db, tx -> {
+        GraphDatabaseApiProxy.runInFullAccessTransaction(db, tx -> {
             PathFactory.RelationshipIds.set(0);
             var path0 = PathFactory.create(
                 tx::getNodeById,
@@ -200,7 +200,7 @@ class ShortestPathYensStreamProcTest extends BaseProcTest {
             assertCypherResult(query, expected);
         });
     }
-    
+
     @AfterEach
     void teardown() {
         GraphStoreCatalog.removeAllLoadedGraphs();

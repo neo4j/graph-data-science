@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.transaction;
 
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
-import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.api.security.RestrictedAccessMode;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 
@@ -53,6 +53,13 @@ public final class DatabaseTransactionContext implements TransactionContext {
 
     /**
      * Creates a new {@code TransactionContext} with the provided {@link org.neo4j.internal.kernel.api.security.SecurityContext}.
+     */
+    public static TransactionContext of(GraphDatabaseService databaseService, SecurityContext securityContext) {
+        return new DatabaseTransactionContext(databaseService, securityContext);
+    }
+
+    /**
+     * Creates a new {@code TransactionContext} with a full-access {@link org.neo4j.internal.kernel.api.security.SecurityContext}.
      */
     public static TransactionContext withFullAccess(GraphDatabaseService databaseService) {
         return new DatabaseTransactionContext(databaseService, SecurityContext.AUTH_DISABLED);
@@ -84,9 +91,11 @@ public final class DatabaseTransactionContext implements TransactionContext {
 
     @Override
     public <T, E extends Exception> T apply(TxFunction<T, E> block) throws E {
-        Transaction tx = databaseService.beginTx();
-        KernelTransaction ktx = ((InternalTransaction) tx).kernelTransaction();
-        ktx.overrideWith(securityContext);
+        var tx = GraphDatabaseApiProxy.beginTransaction(
+            this.databaseService,
+            this.securityContext
+        );
+        var ktx = tx.kernelTransaction();
         try (tx) {
             var result = block.apply(tx, ktx);
             tx.commit();
@@ -96,9 +105,11 @@ public final class DatabaseTransactionContext implements TransactionContext {
 
     @Override
     public <E extends Exception> void accept(TxConsumer<E> block) throws E {
-        Transaction tx = databaseService.beginTx();
-        KernelTransaction ktx = ((InternalTransaction) tx).kernelTransaction();
-        ktx.overrideWith(securityContext);
+        var tx = GraphDatabaseApiProxy.beginTransaction(
+            this.databaseService,
+            this.securityContext
+        );
+        var ktx = tx.kernelTransaction();
         try (tx) {
             block.accept(tx, ktx);
             tx.commit();
@@ -114,8 +125,10 @@ public final class DatabaseTransactionContext implements TransactionContext {
 
     @Override
     public SecureTransaction fork() {
-        InternalTransaction tx = (InternalTransaction) databaseService.beginTx();
-        tx.kernelTransaction().overrideWith(securityContext);
+        var tx = GraphDatabaseApiProxy.beginTransaction(
+            this.databaseService,
+            this.securityContext
+        );
         return new SecureTransaction(tx);
     }
 }

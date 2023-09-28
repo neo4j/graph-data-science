@@ -54,7 +54,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInFullAccessTransaction;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 final class HugeGraphLoadingTest extends BaseTest {
@@ -87,7 +87,7 @@ final class HugeGraphLoadingTest extends BaseTest {
         var unused = Label.label("Unused");
         var label = Label.label("Foo");
 
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             for (int i = 0; i < offset; i++) {
                 tx.createNode(unused);
             }
@@ -134,7 +134,7 @@ final class HugeGraphLoadingTest extends BaseTest {
         final int pages = 10;
         int nodeCount = recordsPerPage * pages;
 
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             for (int i = 0; i < nodeCount; i++) {
                 tx.createNode();
             }
@@ -154,7 +154,7 @@ final class HugeGraphLoadingTest extends BaseTest {
         int nodeCount = 1_000;
         int parallelEdgeCount = 10;
 
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             Node n0 = tx.createNode();
             Node n1 = tx.createNode();
             Node last = null;
@@ -288,7 +288,7 @@ final class HugeGraphLoadingTest extends BaseTest {
         var labelABits = HugeAtomicBitSet.create(nodeCount);
         var labelBBits = HugeAtomicBitSet.create(nodeCount);
 
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             for (int i = 0; i < nodeCount; i++) {
                 if (i % 3 == 0) {
                     labelABits.set(tx.createNode(labelA).getId());
@@ -347,7 +347,7 @@ final class HugeGraphLoadingTest extends BaseTest {
         var centerNeoNodeId = new MutableLong();
         var expectedProperties = new LongDoubleHashMap();
 
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             var center = tx.createNode();
             centerNeoNodeId.setValue(center.getId());
 
@@ -389,7 +389,7 @@ final class HugeGraphLoadingTest extends BaseTest {
         var label = Label.label("Node");
         long labelCount = 2 * expectedBatchSize;
 
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             for (int i = 0; i < labelCount; i++) {
                 tx.createNode(label);
             }
@@ -419,7 +419,7 @@ final class HugeGraphLoadingTest extends BaseTest {
         long labelBCount = 3 * expectedBatchSize;
         long labelABCount = 1 * expectedBatchSize;
 
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             for (int i = 0; i < labelACount; i++) {
                 tx.createNode(labelA);
             }

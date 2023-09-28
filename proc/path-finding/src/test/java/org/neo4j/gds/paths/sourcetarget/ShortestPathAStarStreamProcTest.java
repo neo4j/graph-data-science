@@ -126,7 +126,7 @@ class ShortestPathAStarStreamProcTest extends BaseProcTest {
             .addParameter("relationshipWeightProperty", "cost")
             .yields();
 
-        GraphDatabaseApiProxy.runInTransaction(db, tx -> {
+        GraphDatabaseApiProxy.runInFullAccessTransaction(db, tx -> {
             PathFactory.RelationshipIds.set(0);
             var expectedPath = PathFactory.create(
                 tx::getNodeById,

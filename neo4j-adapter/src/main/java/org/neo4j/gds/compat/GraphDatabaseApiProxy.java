@@ -193,15 +193,38 @@ public final class GraphDatabaseApiProxy {
         return tx.internalTransaction().execute(query, params);
     }
 
-    public static void runInTransaction(GraphDatabaseService db, Consumer<Transaction> block) {
+    public static void runInFullAccessTransaction(GraphDatabaseService db, Consumer<Transaction> block) {
         try (Transaction tx = db.beginTx()) {
             block.accept(tx);
             tx.commit();
         }
     }
 
-    public static <T> T applyInTransaction(GraphDatabaseService db, Function<Transaction, T> block) {
+    public static void runInTransaction(
+        GraphDatabaseService db,
+        LoginContext loginContext,
+        Consumer<Transaction> block
+    ) {
+        try (Transaction tx = beginTransaction(db, loginContext)) {
+            block.accept(tx);
+            tx.commit();
+        }
+    }
+
+    public static <T> T applyInFullAccessTransaction(GraphDatabaseService db, Function<Transaction, T> block) {
         try (Transaction tx = db.beginTx()) {
+            T returnValue = block.apply(tx);
+            tx.commit();
+            return returnValue;
+        }
+    }
+
+    public static <T> T applyInTransaction(
+        GraphDatabaseService db,
+        LoginContext loginContext,
+        Function<Transaction, T> block
+    ) {
+        try (Transaction tx = beginTransaction(db, loginContext)) {
             T returnValue = block.apply(tx);
             tx.commit();
             return returnValue;
@@ -212,14 +235,11 @@ public final class GraphDatabaseApiProxy {
         return ((InternalTransaction) tx).kernelTransaction();
     }
 
-    public static InternalTransaction beginTransaction(
-        GraphDatabaseService db,
-        KernelTransaction.Type type,
-        LoginContext loginContext
-    ) {
-        return cast(db).beginTransaction(type, loginContext);
+    public static InternalTransaction beginTransaction(GraphDatabaseService db, LoginContext loginContext) {
+        return cast(db).beginTransaction(KernelTransaction.Type.EXPLICIT, loginContext);
     }
 
+    @TestOnly
     public static Transactions newKernelTransaction(GraphDatabaseService db) {
         Transaction tx = db.beginTx();
         return ImmutableTransactions.of(tx, kernelTransaction(tx));

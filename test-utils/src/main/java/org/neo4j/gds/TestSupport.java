@@ -75,7 +75,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.Orientation.REVERSE;
 import static org.neo4j.gds.QueryRunner.runQueryWithResultConsumer;
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInTransaction;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInFullAccessTransaction;
 import static org.neo4j.gds.utils.StringFormatting.formatNumber;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -438,7 +438,7 @@ public final class TestSupport {
         Map<String, Object> queryParameters,
         List<Map<String, Object>> expected
     ) {
-        runInTransaction(db, tx -> {
+        runInFullAccessTransaction(db, tx -> {
             var softAssertions = new SoftAssertions();
             List<Map<String, Object>> actual = new ArrayList<>();
             runQueryWithResultConsumer(db, query, queryParameters, result -> {

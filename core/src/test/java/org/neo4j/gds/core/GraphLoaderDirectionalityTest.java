@@ -31,7 +31,7 @@ import static org.neo4j.gds.GraphFactoryTestSupport.AllGraphStoreFactoryTypesTes
 import static org.neo4j.gds.GraphFactoryTestSupport.FactoryType;
 import static org.neo4j.gds.GraphFactoryTestSupport.FactoryType.CYPHER;
 import static org.neo4j.gds.GraphHelper.assertRelationships;
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.applyInTransaction;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.applyInFullAccessTransaction;
 
 class GraphLoaderDirectionalityTest extends BaseTest {
 
@@ -260,7 +260,7 @@ class GraphLoaderDirectionalityTest extends BaseTest {
                 .globalAggregation(aggregation)
                 .build();
         }
-        return applyInTransaction(db, tx -> graphLoader.graph());
+        return applyInFullAccessTransaction(db, tx -> graphLoader.graph());
     }
 
 }

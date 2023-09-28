@@ -45,7 +45,7 @@ public abstract class AllShortestPathsStreamProcTest extends AllShortestPathsPro
             " ORDER BY totalCost";
 
         //@formatter:off
-        GraphDatabaseApiProxy.runInTransaction(db, tx -> {
+        GraphDatabaseApiProxy.runInFullAccessTransaction(db, tx -> {
             var expected = List.of(
                 Map.of("sourceNode", idA, "targetNode", idA, "totalCost", 0.0D, "costs", asList(costs0), "nodeIds", asList(ids0), "path", isA(Path.class)),
                 Map.of("sourceNode", idA, "targetNode", idC, "totalCost", 2.0D, "costs", asList(costs1), "nodeIds", asList(ids1), "path", isA(Path.class)),
