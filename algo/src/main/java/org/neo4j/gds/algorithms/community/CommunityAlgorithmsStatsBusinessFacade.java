@@ -25,6 +25,7 @@ import org.neo4j.gds.algorithms.K1ColoringSpecificFields;
 import org.neo4j.gds.algorithms.KCoreSpecificFields;
 import org.neo4j.gds.algorithms.KmeansSpecificFields;
 import org.neo4j.gds.algorithms.LabelPropagationSpecificFields;
+import org.neo4j.gds.algorithms.LocalClusteringCoefficientSpecificFields;
 import org.neo4j.gds.algorithms.ModularitySpecificFields;
 import org.neo4j.gds.algorithms.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.StatsResult;
@@ -41,6 +42,7 @@ import org.neo4j.gds.modularity.ModularityStatsConfig;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.scc.SccStatsConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
 import org.neo4j.gds.triangle.TriangleCountStatsConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
 
@@ -112,6 +114,29 @@ public class CommunityAlgorithmsStatsBusinessFacade {
             statisticsComputationInstructions,
             intermediateResult.computeMilliseconds,
             () -> LabelPropagationSpecificFields.EMPTY
+        );
+    }
+
+    public StatsResult<LocalClusteringCoefficientSpecificFields> localClusteringCoefficient(
+        String graphName,
+        LocalClusteringCoefficientStatsConfig configuration,
+        User user,
+        DatabaseId databaseId
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> communityAlgorithmsFacade.localClusteringCoefficient(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return statsResult(
+            algorithmResult,
+            (result) -> new LocalClusteringCoefficientSpecificFields(
+                result.localClusteringCoefficients().size(),
+                result.averageClusteringCoefficient()
+            ),
+            intermediateResult.computeMilliseconds,
+            () -> LocalClusteringCoefficientSpecificFields.EMPTY
         );
     }
 

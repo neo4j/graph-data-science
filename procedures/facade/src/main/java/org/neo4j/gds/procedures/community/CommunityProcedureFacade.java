@@ -75,6 +75,7 @@ import org.neo4j.gds.procedures.community.scc.SccMutateResult;
 import org.neo4j.gds.procedures.community.scc.SccStatsResult;
 import org.neo4j.gds.procedures.community.scc.SccStreamResult;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientMutateResult;
+import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientStatsResult;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientStreamResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountMutateResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStatsResult;
@@ -87,6 +88,7 @@ import org.neo4j.gds.scc.SccMutateConfig;
 import org.neo4j.gds.scc.SccStatsConfig;
 import org.neo4j.gds.scc.SccStreamConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
 import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 import org.neo4j.gds.triangle.TriangleCountStatsConfig;
@@ -594,7 +596,7 @@ public class CommunityProcedureFacade {
         return Stream.of(KmeansComputationResultTransformer.toStatsResult(computationResult, statsConfig));
     }
 
-    public Stream<LocalClusteringCoefficientStreamResult> streamLocalClusteringCoefficient(
+    public Stream<LocalClusteringCoefficientStreamResult> LocalClusteringCoefficientStream(
         String graphName,
         Map<String, Object> configuration
     ) {
@@ -614,7 +616,7 @@ public class CommunityProcedureFacade {
     }
 
 
-    public Stream<LocalClusteringCoefficientMutateResult> mutateLocalClusteringCoefficient(
+    public Stream<LocalClusteringCoefficientMutateResult> LocalClusteringCoefficientMutate(
         String graphName,
         Map<String, Object> configuration
     ) {
@@ -629,6 +631,48 @@ public class CommunityProcedureFacade {
 
         return Stream.of(LCCComputationResultTransformer.toMutateResult(computationResult, mutateConfig));
     }
+
+    public Stream<LocalClusteringCoefficientStatsResult> LocalClusteringCoefficientStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var statsConfig = createConfig(configuration, LocalClusteringCoefficientStatsConfig::of);
+
+        var computationResult = statsBusinessFacade.localClusteringCoefficient(
+            graphName,
+            statsConfig,
+            user,
+            databaseId
+        );
+
+        return Stream.of(LCCComputationResultTransformer.toStatsResult(computationResult, statsConfig));
+    }
+
+
+    public Stream<MemoryEstimateResult> estimateLocalClusteringCoefficientMutate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, LocalClusteringCoefficientMutateConfig::of);
+        return Stream.of(estimateBusinessFacade.localClusteringCoefficient(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> estimateLocalClusteringCoefficientStats(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, LocalClusteringCoefficientStatsConfig::of);
+        return Stream.of(estimateBusinessFacade.localClusteringCoefficient(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> estimateLocalClusteringCoefficientStream(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, LocalClusteringCoefficientStreamConfig::of);
+        return Stream.of(estimateBusinessFacade.localClusteringCoefficient(graphNameOrConfiguration, config));
+    }
+
 
     public Stream<K1ColoringStreamResult> k1ColoringStream(
         String graphName,

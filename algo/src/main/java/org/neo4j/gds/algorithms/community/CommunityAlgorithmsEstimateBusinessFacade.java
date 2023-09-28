@@ -35,6 +35,8 @@ import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
 import org.neo4j.gds.memest.MemoryEstimationGraphConfigParser;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientFactory;
 import org.neo4j.gds.scc.SccAlgorithmFactory;
 import org.neo4j.gds.scc.SccBaseConfig;
 import org.neo4j.gds.wcc.WccAlgorithmFactory;
@@ -98,6 +100,18 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             configuration,
             Optional.empty(),
             new SccAlgorithmFactory<>()
+        );
+    }
+
+    public <C extends LocalClusteringCoefficientBaseConfig> MemoryEstimateResult localClusteringCoefficient(
+        Object graphNameOrConfiguration,
+        C configuration
+    ) {
+        return estimate(
+            graphNameOrConfiguration,
+            configuration,
+            Optional.empty(),
+            new LocalClusteringCoefficientFactory<>()
         );
     }
 
