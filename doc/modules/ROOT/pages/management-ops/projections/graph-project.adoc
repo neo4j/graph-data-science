@@ -3,8 +3,12 @@
 :description: This section details projecting GDS graphs using `native` projections.
 
 
-A native projection is the fastest and most scalable way to project a graph from a Neo4j database into the xref:management-ops/graph-catalog-ops.adoc[GDS Graph Catalog].
-Native projections are recommended for any use case, and for both the development and the production phase (see xref:common-usage/index.adoc[Common usage]).
+Native projections are the easiest way to create a xref:management-ops/index.adoc[GDS graph] from a Neo4j database.
+A native projection is entirely described by configuration parameters.
+
+_Node projections_ and _relationship projections_ describe the way nodes and relationships are loaded (_projected_) from the database into the in-memory graph.
+While node projections are based on node labels, relationship projections are based on relationship types.
+Both can include properties.
 
 
 == Considerations
