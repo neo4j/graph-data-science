@@ -20,9 +20,10 @@
 package org.neo4j.gds.k1coloring;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStatsResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -36,16 +37,16 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class K1ColoringStatsProc extends BaseProc {
 
+    @Context
+    public GraphDataScience facade;
+
     @Procedure(name = "gds.k1coloring.stats", mode = READ)
     @Description(K1_COLORING_DESCRIPTION)
     public Stream<K1ColoringStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new K1ColoringStatsSpecification(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.community().k1ColoringStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.k1coloring.stats.estimate", mode = READ)
@@ -54,11 +55,7 @@ public class K1ColoringStatsProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new K1ColoringStatsSpecification(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.community().estimateK1ColoringStats(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(name = "gds.beta.k1coloring.stats", mode = READ, deprecatedBy = "gds.k1coloring.stats")

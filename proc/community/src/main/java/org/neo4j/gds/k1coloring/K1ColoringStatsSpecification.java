@@ -26,6 +26,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStatsResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.stream.Stream;
@@ -63,7 +64,7 @@ public class K1ColoringStatsSpecification implements AlgorithmSpec<K1Coloring, K
         ComputationResult<K1Coloring, K1ColoringResult, K1ColoringStatsConfig> computeResult,
         ExecutionContext executionContext
     ) {
-        K1ColoringStatsResult.Builder builder = new K1ColoringStatsResult.Builder(
+        var builder = new k1ColoringStatsBuilder(
             executionContext.returnColumns(),
             computeResult.config().concurrency()
         );

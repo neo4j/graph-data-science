@@ -21,6 +21,7 @@ package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.CommunityStatisticsSpecificFields;
+import org.neo4j.gds.algorithms.K1ColoringSpecificFields;
 import org.neo4j.gds.algorithms.KCoreSpecificFields;
 import org.neo4j.gds.algorithms.KmeansSpecificFields;
 import org.neo4j.gds.algorithms.LabelPropagationSpecificFields;
@@ -32,6 +33,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.k1coloring.K1ColoringStatsConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
 import org.neo4j.gds.kmeans.KmeansStatsConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
@@ -141,6 +143,38 @@ public class CommunityAlgorithmsStatsBusinessFacade {
             () -> StandardCommunityStatisticsSpecificFields.EMPTY
         );
     }
+
+    public StatsResult<K1ColoringSpecificFields> k1coloring(
+        String graphName,
+        K1ColoringStatsConfig config,
+        User user,
+        DatabaseId databaseId,
+        boolean computeUsedColors
+    ) {
+
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> communityAlgorithmsFacade.k1Coloring(graphName, config, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return statsResult(
+            algorithmResult,
+            (result) -> {
+                long usedColors = (computeUsedColors) ? result.usedColors().cardinality() : 0;
+
+                return new K1ColoringSpecificFields(
+                    result.colors().size(),
+                    usedColors,
+                    result.ranIterations(),
+                    result.didConverge()
+                );
+            },
+            intermediateResult.computeMilliseconds,
+            () -> K1ColoringSpecificFields.EMPTY
+        );
+    }
+
 
     public StatsResult<KCoreSpecificFields> kCore(
         String graphName,

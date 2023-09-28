@@ -20,7 +20,6 @@
 package org.neo4j.gds.k1coloring;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -56,11 +55,7 @@ public class K1ColoringMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new K1ColoringMutateSpecification(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.community().estimateK1ColoringMutate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(value = "gds.beta.k1coloring.mutate", mode = READ, deprecatedBy = "gds.beta.k1coloring.mutate")

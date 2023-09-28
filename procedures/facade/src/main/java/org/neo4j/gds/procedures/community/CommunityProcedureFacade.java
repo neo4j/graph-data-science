@@ -33,6 +33,7 @@ import org.neo4j.gds.conductance.ConductanceStreamConfig;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
+import org.neo4j.gds.k1coloring.K1ColoringStatsConfig;
 import org.neo4j.gds.k1coloring.K1ColoringStreamConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
@@ -53,6 +54,7 @@ import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutMutateResul
 import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutStreamResult;
 import org.neo4j.gds.procedures.community.conductance.ConductanceStreamResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringMutateResult;
+import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStatsResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStreamResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionMutateResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStatsResult;
@@ -666,6 +668,51 @@ public class CommunityProcedureFacade {
 
         return Stream.of(K1ColoringComputationResultTransformer.toMutateResult(computationResult));
     }
+
+    public Stream<K1ColoringStatsResult> k1ColoringStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var statsConfig = createConfig(
+            configuration,
+            K1ColoringStatsConfig::of
+        );
+
+        var computationResult = statsBusinessFacade.k1coloring(
+            graphName,
+            statsConfig,
+            user,
+            databaseId,
+            procedureReturnColumns.contains("colorCount")
+        );
+
+        return Stream.of(K1ColoringComputationResultTransformer.toStatsResult(computationResult, statsConfig));
+    }
+
+    public Stream<MemoryEstimateResult> estimateK1ColoringMutate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, K1ColoringMutateConfig::of);
+        return Stream.of(estimateBusinessFacade.k1Coloring(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> estimateK1ColoringStats(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, K1ColoringStatsConfig::of);
+        return Stream.of(estimateBusinessFacade.k1Coloring(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> estimateK1ColoringStream(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, K1ColoringStreamConfig::of);
+        return Stream.of(estimateBusinessFacade.k1Coloring(graphNameOrConfiguration, config));
+    }
+
 
     public Stream<ConductanceStreamResult> conductanceStream(
         String graphName,

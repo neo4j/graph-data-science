@@ -29,6 +29,8 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
+import org.neo4j.gds.k1coloring.K1ColoringAlgorithmFactory;
+import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
 import org.neo4j.gds.memest.MemoryEstimationGraphConfigParser;
@@ -72,6 +74,18 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             configuration,
             configuration.relationshipWeightProperty(),
             new WccAlgorithmFactory<>()
+        );
+    }
+
+    public <C extends K1ColoringBaseConfig> MemoryEstimateResult k1Coloring(
+        Object graphNameOrConfiguration,
+        C configuration
+    ) {
+        return estimate(
+            graphNameOrConfiguration,
+            configuration,
+            Optional.empty(),
+            new K1ColoringAlgorithmFactory<>()
         );
     }
 
