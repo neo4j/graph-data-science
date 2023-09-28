@@ -21,13 +21,13 @@ package org.neo4j.gds.ml.kge;
 
 public class KGEStreamResult {
 
-    public final long node1;
-    public final long node2;
+    public final long sourceNodeId;
+    public final long targetNodeId;
     public final double score;
 
-    public KGEStreamResult(long node1, long node2, double score) {
-        this.node1 = node1;
-        this.node2 = node2;
+    public KGEStreamResult(long sourceNodeId, long targetNodeId, double score) {
+        this.sourceNodeId = sourceNodeId;
+        this.targetNodeId = targetNodeId;
         this.score = score;
     }
 

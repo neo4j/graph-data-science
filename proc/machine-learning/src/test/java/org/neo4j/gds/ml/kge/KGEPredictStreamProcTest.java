@@ -101,20 +101,20 @@ public class KGEPredictStreamProcTest extends BaseProcTest {
                 " scoringFunction: 'TransE'," +
                 " topK: 2" +
                 "})" +
-                "YIELD node1, node2, score" +
-                " RETURN node1, node2, score" +
-                " ORDER BY node1",
+                "YIELD sourceNodeId, targetNodeId, score" +
+                " RETURN sourceNodeId, targetNodeId, score" +
+                " ORDER BY sourceNodeId",
             List.of(
-                Map.of("node1", m0, "node2", n4, "score", 9.77358173854396),
-                Map.of("node1", m0, "node2", n0, "score", 10.33058081619809),
-                Map.of("node1", m1, "node2", n4, "score", 9.09521302664209),
-                Map.of("node1", m1, "node2", n0, "score", 9.649917098089496),
-                Map.of("node1", m2, "node2", n4, "score", 8.480736996275736),
-                Map.of("node1", m2, "node2", n0, "score", 9.028892512373819),
-                Map.of("node1", m3, "node2", n4, "score", 7.944992133413349),
-                Map.of("node1", m3, "node2", n0, "score", 8.480619081175618),
-                Map.of("node1", m4, "node2", n4, "score", 7.50485842637954),
-                Map.of("node1", m4, "node2", n0, "score", 8.020031172009245)
+                Map.of("sourceNodeId", m0, "targetNodeId", n4, "score", 9.77358173854396),
+                Map.of("sourceNodeId", m0, "targetNodeId", n0, "score", 10.33058081619809),
+                Map.of("sourceNodeId", m1, "targetNodeId", n4, "score", 9.09521302664209),
+                Map.of("sourceNodeId", m1, "targetNodeId", n0, "score", 9.649917098089496),
+                Map.of("sourceNodeId", m2, "targetNodeId", n4, "score", 8.480736996275736),
+                Map.of("sourceNodeId", m2, "targetNodeId", n0, "score", 9.028892512373819),
+                Map.of("sourceNodeId", m3, "targetNodeId", n4, "score", 7.944992133413349),
+                Map.of("sourceNodeId", m3, "targetNodeId", n0, "score", 8.480619081175618),
+                Map.of("sourceNodeId", m4, "targetNodeId", n4, "score", 7.50485842637954),
+                Map.of("sourceNodeId", m4, "targetNodeId", n0, "score", 8.020031172009245)
                 )
         );
 
