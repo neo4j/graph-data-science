@@ -237,6 +237,31 @@ CREATE (nMichael)-[:FOLLOW]->(nBridget);
 CALL gds.graph.project('graph', 'User', 'FOLLOW')
 ----
 
+[[algorithms-scc-mem-example]]
+
+=== Memory Estimation
+
+:mode: write
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher, role=noplay]
+----
+CALL gds.scc.write.estimate('graph', { writeProperty: 'componentId' })
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 6        | 10                | 33332       | 33332       | "32 KiB"
+|===
+--
+
+
 [[algorithms-scc-stream-example]]
 === Stream
 include::partial$/algorithms/shared/examples-stream-intro.adoc[]

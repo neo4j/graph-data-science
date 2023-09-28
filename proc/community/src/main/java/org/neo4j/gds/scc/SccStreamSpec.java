@@ -33,8 +33,8 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.scc.Scc.NOT_VALID;
 import static org.neo4j.gds.scc.Scc.SCC_DESCRIPTION;
+import static org.neo4j.gds.scc.Scc.UNORDERED;
 
 @GdsCallable(
     name = "gds.scc.stream",
@@ -68,7 +68,7 @@ public class SccStreamSpec implements AlgorithmSpec<Scc, HugeLongArray, SccStrea
                     var graph = computationResult.graph();
                     var components = computationResult.result().orElseGet(() -> HugeLongArray.newArray(0));
                     return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
-                        .filter(i -> components.get(i) != NOT_VALID)
+                        .filter(i -> components.get(i) != UNORDERED)
                         .mapToObj(i -> new SccStreamResult(graph.toOriginalNodeId(i), components.get(i)));
                 }).orElseGet(Stream::empty)
         );

@@ -21,9 +21,9 @@ package org.neo4j.gds.scc;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -171,5 +171,6 @@ class SccTest {
             );
 
     }
-    
+
+  
 }

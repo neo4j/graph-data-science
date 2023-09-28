@@ -71,4 +71,9 @@ public final class HugeLongArrayStack {
     public boolean isEmpty() {
         return size() == 0;
     }
+
+    public void clear() {
+        
+        size = 0;
+    }
 }
