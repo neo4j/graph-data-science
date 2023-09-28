@@ -528,6 +528,29 @@ public class CommunityProcedureFacade {
         return Stream.of(TriangleCountComputationResultTransformer.toStatsResult(computationResult, config));
     }
 
+    public Stream<MemoryEstimateResult> estimateTriangleCountStream(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, TriangleCountStreamConfig::of);
+        return Stream.of(estimateBusinessFacade.triangleCount(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> estimateTriangleCountMutate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, TriangleCountMutateConfig::of);
+        return Stream.of(estimateBusinessFacade.triangleCount(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> estimateTriangleCountStats(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, TriangleCountStatsConfig::of);
+        return Stream.of(estimateBusinessFacade.triangleCount(graphNameOrConfiguration, config));
+    }
 
     public Stream<LabelPropagationStreamResult> labelPropagationStream(
         String graphName,

@@ -39,10 +39,12 @@ import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
 import org.neo4j.gds.memest.MemoryEstimationGraphConfigParser;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.triangle.IntersectingTriangleCountFactory;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientFactory;
 import org.neo4j.gds.scc.SccAlgorithmFactory;
 import org.neo4j.gds.scc.SccBaseConfig;
+import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.wcc.WccAlgorithmFactory;
 import org.neo4j.gds.wcc.WccBaseConfig;
 
@@ -104,6 +106,18 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             configuration,
             Optional.empty(),
             new KCoreDecompositionAlgorithmFactory<>()
+        );
+    }
+
+    public <C extends TriangleCountBaseConfig> MemoryEstimateResult triangleCount(
+        Object graphNameOrConfiguration,
+        C configuration
+    ) {
+        return estimate(
+            graphNameOrConfiguration,
+            configuration,
+            Optional.empty(),
+            new IntersectingTriangleCountFactory<>()
         );
     }
 
