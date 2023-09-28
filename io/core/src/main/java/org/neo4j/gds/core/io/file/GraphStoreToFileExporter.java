@@ -46,6 +46,7 @@ import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
 
 public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFileExporterConfig> {
@@ -66,6 +67,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
     private final TaskRegistryFactory taskRegistryFactory;
     private final Log log;
     private final String rootTaskName;
+    private ExecutorService executorService;
 
     public GraphStoreToFileExporter(
         GraphStore graphStore,
@@ -84,7 +86,8 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         VisitorProducer<GraphPropertyVisitor> graphPropertyVisitorSupplier,
         TaskRegistryFactory taskRegistryFactory,
         Log log,
-        String rootTaskName
+        String rootTaskName,
+        ExecutorService executorService
     ) {
         super(graphStore, config, neoNodeProperties, nodeLabelMapping);
         this.nodeVisitorSupplier = nodeVisitorSupplier;
@@ -100,6 +103,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         this.taskRegistryFactory = taskRegistryFactory;
         this.log = log;
         this.rootTaskName = rootTaskName;
+        this.executorService = executorService;
     }
 
     @Override
@@ -168,6 +172,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         RunWithConcurrency.builder()
             .concurrency(config.writeConcurrency())
             .tasks(tasks)
+            .executor(executorService)
             .run();
         progressTracker.endSubTask();
     }
@@ -192,6 +197,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         RunWithConcurrency.builder()
             .concurrency(config.writeConcurrency())
             .tasks(tasks)
+            .executor(executorService)
             .mayInterruptIfRunning(false)
             .run();
         progressTracker.endSubTask();
@@ -218,6 +224,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             RunWithConcurrency.builder()
                 .concurrency(config.writeConcurrency())
                 .tasks(tasks)
+                .executor(executorService)
                 .run();
             progressTracker.endSubTask();
         }

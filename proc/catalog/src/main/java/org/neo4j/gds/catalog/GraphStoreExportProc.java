@@ -27,6 +27,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.io.GraphStoreExporterBaseConfig;
 import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.io.db.GraphStoreToDatabaseExporter;
@@ -160,7 +161,8 @@ public class GraphStoreExportProc extends BaseProc {
             exportConfig,
             neoNodeProperties(exportConfig, graphStore),
             executionContext().taskRegistryFactory(),
-            executionContext().log()
+            executionContext().log(),
+            DefaultPool.INSTANCE
         );
 
         return Stream.of(new FileExportResult(

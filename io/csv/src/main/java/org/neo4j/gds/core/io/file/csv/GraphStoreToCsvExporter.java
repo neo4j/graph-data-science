@@ -23,6 +23,7 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.io.NodeLabelMapping;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporter;
@@ -35,6 +36,7 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 
 public final class GraphStoreToCsvExporter {
 
@@ -44,7 +46,14 @@ public final class GraphStoreToCsvExporter {
         GraphStoreToFileExporterConfig config,
         Path exportPath
     ) {
-        return create(graphStore, config, exportPath, Optional.empty(), TaskRegistryFactory.empty(), NullLog.getInstance());
+        return create(graphStore,
+            config,
+            exportPath,
+            Optional.empty(),
+            TaskRegistryFactory.empty(),
+            NullLog.getInstance(),
+            DefaultPool.INSTANCE
+        );
     }
 
     public static GraphStoreToFileExporter create(
@@ -53,7 +62,8 @@ public final class GraphStoreToCsvExporter {
         Path exportPath,
         Optional<NeoNodeProperties> neoNodeProperties,
         TaskRegistryFactory taskRegistryFactory,
-        Log log
+        Log log,
+        ExecutorService executorService
     ) {
         Set<String> headerFiles = ConcurrentHashMap.newKeySet();
 
@@ -79,7 +89,7 @@ public final class GraphStoreToCsvExporter {
             config,
             neoNodeProperties,
             nodeLabelMapping,
-        () -> new UserInfoVisitor(exportPath),
+            () -> new UserInfoVisitor(exportPath),
             () -> new CsvGraphInfoVisitor(exportPath),
             () -> new CsvNodeSchemaVisitor(exportPath),
             () -> new CsvNodeLabelMappingVisitor(exportPath),
@@ -102,7 +112,8 @@ public final class GraphStoreToCsvExporter {
             ),
             taskRegistryFactory,
             log,
-            "Csv"
+            "Csv",
+            executorService
         );
     }
 
