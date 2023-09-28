@@ -30,7 +30,7 @@ import static java.lang.Math.min;
 
 public abstract class AbstractInMemoryRelationshipScanCursor extends InMemoryRelationshipCursor implements StorageRelationshipScanCursor {
 
-    private long highMark;
+    private long highMarkExclusive;
 
     public AbstractInMemoryRelationshipScanCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {
         super(graphStore, tokenHolders);
@@ -41,14 +41,14 @@ public abstract class AbstractInMemoryRelationshipScanCursor extends InMemoryRel
         reset();
         this.sourceId = 0;
         this.selection = RelationshipSelection.ALL_RELATIONSHIPS;
-        this.highMark = maxRelationshipId;
+        this.highMarkExclusive = totalRelationshipCount;
     }
 
     @Override
     public void single(long reference) {
         reset();
         setId(reference - 1);
-        this.highMark = reference;
+        this.highMarkExclusive = reference + 1;
         this.selection = RelationshipSelection.ALL_RELATIONSHIPS;
 
         initializeForRelationshipReference(reference);
@@ -57,7 +57,7 @@ public abstract class AbstractInMemoryRelationshipScanCursor extends InMemoryRel
     @Override
     public boolean next() {
         if (super.next()) {
-            return getId() <= highMark;
+            return getId() < highMarkExclusive;
         } else {
             this.sourceId++;
             if (this.sourceId >= graphStore.nodeCount()) {
@@ -75,16 +75,20 @@ public abstract class AbstractInMemoryRelationshipScanCursor extends InMemoryRel
             reset();
         }
 
-        highMark = maxRelationshipId;
+        highMarkExclusive = totalRelationshipCount;
         return ((BaseRecordScan<AbstractInMemoryRelationshipScanCursor>) scan).scanBatch(sizeHint, this);
     }
 
-    public boolean scanRange(long start, long stop) {
+    public boolean scanRange(long start, long stopInclusive) {
         reset();
         this.selection = RelationshipSelection.ALL_RELATIONSHIPS;
-        highMark = min(stop, maxRelationshipId);
+        if (stopInclusive < Long.MAX_VALUE) {
+            highMarkExclusive = min(stopInclusive + 1, totalRelationshipCount);
+        } else {
+            highMarkExclusive = totalRelationshipCount;
+        }
 
-        if (start > maxRelationshipId) {
+        if (start >= highMarkExclusive) {
             return false;
         }
         initializeForRelationshipReference(start);

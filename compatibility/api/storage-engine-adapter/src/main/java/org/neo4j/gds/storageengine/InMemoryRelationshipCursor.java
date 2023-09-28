@@ -52,7 +52,7 @@ public abstract class InMemoryRelationshipCursor
     private final List<PropertyCursor[]> propertyCursorCache;
     private MutableDoubleList propertyValuesCache;
 
-    protected long maxRelationshipId;
+    protected long totalRelationshipCount;
 
     protected long sourceId;
     protected long targetId;
@@ -73,7 +73,7 @@ public abstract class InMemoryRelationshipCursor
         this.propertyCursorCache = new ArrayList<>();
         this.propertyValuesCache = new DoubleArrayList();
 
-        this.maxRelationshipId = 0;
+        this.totalRelationshipCount = 0;
         this.graphStore.relationshipIds().registerUpdateListener(this);
     }
 
@@ -138,7 +138,7 @@ public abstract class InMemoryRelationshipCursor
         );
         var newSize = this.propertyCursorCache.stream().mapToInt(cursor -> cursor.length).max().orElse(0);
         this.propertyValuesCache = new DoubleArrayList(new double[newSize]);
-        this.maxRelationshipId += relationshipIdContext.relationshipCount();
+        this.totalRelationshipCount += relationshipIdContext.relationshipCount();
     }
 
     @Override
