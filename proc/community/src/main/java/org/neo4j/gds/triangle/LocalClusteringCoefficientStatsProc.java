@@ -45,7 +45,7 @@ public class LocalClusteringCoefficientStatsProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().LocalClusteringCoefficientStats(graphName, configuration);
+        return facade.community().localClusteringCoefficientStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.localClusteringCoefficient.stats.estimate", mode = READ)

@@ -46,7 +46,7 @@ public class LocalClusteringCoefficientStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().LocalClusteringCoefficientStream(graphName, configuration);
+        return facade.community().localClusteringCoefficientStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.localClusteringCoefficient.stream.estimate", mode = READ)

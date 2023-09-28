@@ -703,7 +703,7 @@ public class CommunityProcedureFacade {
         return Stream.of(KmeansComputationResultTransformer.toStatsResult(computationResult, statsConfig));
     }
 
-    public Stream<LocalClusteringCoefficientStreamResult> LocalClusteringCoefficientStream(
+    public Stream<LocalClusteringCoefficientStreamResult> localClusteringCoefficientStream(
         String graphName,
         Map<String, Object> configuration
     ) {
@@ -723,7 +723,7 @@ public class CommunityProcedureFacade {
     }
 
 
-    public Stream<LocalClusteringCoefficientMutateResult> LocalClusteringCoefficientMutate(
+    public Stream<LocalClusteringCoefficientMutateResult> localClusteringCoefficientMutate(
         String graphName,
         Map<String, Object> configuration
     ) {
@@ -739,7 +739,7 @@ public class CommunityProcedureFacade {
         return Stream.of(LCCComputationResultTransformer.toMutateResult(computationResult, mutateConfig));
     }
 
-    public Stream<LocalClusteringCoefficientStatsResult> LocalClusteringCoefficientStats(
+    public Stream<LocalClusteringCoefficientStatsResult> localClusteringCoefficientStats(
         String graphName,
         Map<String, Object> configuration
     ) {
