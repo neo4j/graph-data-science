@@ -21,12 +21,15 @@ package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.LeidenSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
+import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.community.CommunityResultCompanion;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.leiden.LeidenResult;
+import org.neo4j.gds.leiden.LeidenStatsConfig;
 import org.neo4j.gds.leiden.LeidenStreamConfig;
 import org.neo4j.gds.procedures.community.leiden.LeidenMutateResult;
+import org.neo4j.gds.procedures.community.leiden.LeidenStatsResult;
 import org.neo4j.gds.procedures.community.leiden.LeidenStreamResult;
 
 import java.util.stream.LongStream;
@@ -79,6 +82,25 @@ final class LeidenComputationResultTransformer {
             computationResult.algorithmSpecificFields().modularities(),
             computationResult.algorithmSpecificFields().modularity(),
             computationResult.configuration().toMap()
+        );
+    }
+
+    static LeidenStatsResult toStatsResult(
+        StatsResult<LeidenSpecificFields> computationResult,
+        LeidenStatsConfig configuration
+    ) {
+        return new LeidenStatsResult(
+            computationResult.algorithmSpecificFields().ranLevels(),
+            computationResult.algorithmSpecificFields().didConverge(),
+            computationResult.algorithmSpecificFields().nodeCount(),
+            computationResult.algorithmSpecificFields().communityCount(),
+            computationResult.algorithmSpecificFields().communityDistribution(),
+            computationResult.algorithmSpecificFields().modularity(),
+            computationResult.algorithmSpecificFields().modularities(),
+            computationResult.preProcessingMillis(),
+            computationResult.computeMillis(),
+            computationResult.postProcessingMillis(),
+            configuration.toMap()
         );
     }
 

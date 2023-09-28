@@ -20,10 +20,10 @@
 package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.procedures.community.leiden.StatsResult;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.leiden.LeidenStatsResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -36,16 +36,15 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class LeidenStatsProc extends BaseProc {
 
+    @Context
+    public GraphDataScience facade;
     @Procedure(value = "gds.leiden.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
-    public Stream<StatsResult> stats(
+    public Stream<LeidenStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new LeidenStatsSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.community().leidenStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.leiden.stats.estimate", mode = READ)
@@ -55,18 +54,15 @@ public class LeidenStatsProc extends BaseProc {
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
 
-        return new MemoryEstimationExecutor<>(
-            new LeidenStatsSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphName, configuration);
+        return facade.community().estimateLeidenStats(graphName, configuration);
+
     }
 
     @Deprecated(forRemoval = true)
     @Internal
     @Procedure(value = "gds.beta.leiden.stats", mode = READ, deprecatedBy = "gds.leiden.stats")
     @Description(STATS_DESCRIPTION)
-    public Stream<StatsResult> statsBeta(
+    public Stream<LeidenStatsResult> statsBeta(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

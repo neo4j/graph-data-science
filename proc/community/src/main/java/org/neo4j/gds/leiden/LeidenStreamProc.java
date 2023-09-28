@@ -20,7 +20,6 @@
 package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.leiden.LeidenStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -58,11 +57,8 @@ public class LeidenStreamProc extends BaseProc {
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
 
-        return new MemoryEstimationExecutor<>(
-            new LeidenStreamSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphName, configuration);
+        return facade.community().estimateLeidenStream(graphName, configuration);
+
     }
 
     @Deprecated(forRemoval = true)

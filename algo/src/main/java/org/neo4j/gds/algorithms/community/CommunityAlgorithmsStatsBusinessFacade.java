@@ -25,6 +25,7 @@ import org.neo4j.gds.algorithms.K1ColoringSpecificFields;
 import org.neo4j.gds.algorithms.KCoreSpecificFields;
 import org.neo4j.gds.algorithms.KmeansSpecificFields;
 import org.neo4j.gds.algorithms.LabelPropagationSpecificFields;
+import org.neo4j.gds.algorithms.LeidenSpecificFields;
 import org.neo4j.gds.algorithms.LocalClusteringCoefficientSpecificFields;
 import org.neo4j.gds.algorithms.ModularitySpecificFields;
 import org.neo4j.gds.algorithms.StandardCommunityStatisticsSpecificFields;
@@ -38,6 +39,7 @@ import org.neo4j.gds.k1coloring.K1ColoringStatsConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
 import org.neo4j.gds.kmeans.KmeansStatsConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
+import org.neo4j.gds.leiden.LeidenStatsConfig;
 import org.neo4j.gds.modularity.ModularityStatsConfig;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
@@ -252,6 +254,42 @@ public class CommunityAlgorithmsStatsBusinessFacade {
             () -> KmeansSpecificFields.EMPTY
         );
     }
+
+    public StatsResult<LeidenSpecificFields> leiden(
+        String graphName,
+        LeidenStatsConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        StatisticsComputationInstructions statisticsComputationInstructions
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> communityAlgorithmsFacade.leiden(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return statsResult(
+            algorithmResult,
+            configuration,
+            (result -> result.communities()::get),
+            (result, componentCount, communitySummary) -> {
+                return LeidenSpecificFields.from(
+                    result.communities().size(),
+                    result.modularity(),
+                    result.modularities(),
+                    componentCount,
+                    result.ranLevels(),
+                    result.didConverge(),
+                    communitySummary
+                );
+            },
+            statisticsComputationInstructions,
+            intermediateResult.computeMilliseconds,
+            () -> LeidenSpecificFields.EMPTY
+        );
+
+    }
+
 
     public StatsResult<TriangleCountSpecificFields> triangleCount(
         String graphName,

@@ -26,7 +26,7 @@ import org.neo4j.gds.results.StandardStatsResult;
 import java.util.List;
 import java.util.Map;
 
-public class StatsResult extends StandardStatsResult {
+public class LeidenStatsResult extends StandardStatsResult {
     public final long ranLevels;
     public final boolean didConverge;
     public final long nodeCount;
@@ -35,7 +35,7 @@ public class StatsResult extends StandardStatsResult {
     public final double modularity;
     public final List<Double> modularities;
 
-    public StatsResult(
+    public LeidenStatsResult(
         long ranLevels,
         boolean didConverge,
         long nodeCount,
@@ -58,7 +58,7 @@ public class StatsResult extends StandardStatsResult {
         this.modularity = modularity;
     }
 
-    public static class StatsBuilder extends AbstractCommunityResultBuilder<StatsResult> {
+    public static class StatsBuilder extends AbstractCommunityResultBuilder<LeidenStatsResult> {
 
         long levels = -1;
         boolean didConverge = false;
@@ -90,8 +90,8 @@ public class StatsResult extends StandardStatsResult {
         }
 
         @Override
-        protected StatsResult buildResult() {
-            return new StatsResult(
+        protected LeidenStatsResult buildResult() {
+            return new LeidenStatsResult(
                 levels,
                 didConverge,
                 nodeCount,

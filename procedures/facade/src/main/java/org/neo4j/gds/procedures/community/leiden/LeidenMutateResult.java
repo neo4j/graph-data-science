@@ -26,7 +26,7 @@ import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import java.util.List;
 import java.util.Map;
 
-public final class LeidenMutateResult extends StatsResult {
+public final class LeidenMutateResult extends LeidenStatsResult {
 
     public final long mutateMillis;
     public final long nodePropertiesWritten;

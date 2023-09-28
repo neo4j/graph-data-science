@@ -45,6 +45,7 @@ import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfig;
 import org.neo4j.gds.leiden.LeidenMutateConfig;
+import org.neo4j.gds.leiden.LeidenStatsConfig;
 import org.neo4j.gds.leiden.LeidenStreamConfig;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
@@ -66,6 +67,7 @@ import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationMutat
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStatsResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStreamResult;
 import org.neo4j.gds.procedures.community.leiden.LeidenMutateResult;
+import org.neo4j.gds.procedures.community.leiden.LeidenStatsResult;
 import org.neo4j.gds.procedures.community.leiden.LeidenStreamResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
@@ -334,6 +336,47 @@ public class CommunityProcedureFacade {
         return Stream.of(LeidenComputationResultTransformer.toMutateResult(computationResult));
     }
 
+    public Stream<LeidenStatsResult> leidenStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, LeidenStatsConfig::of);
+
+        var computationResult = statsBusinessFacade.leiden(
+            graphName,
+            config,
+            user,
+            databaseId,
+            ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
+        );
+
+        return Stream.of(LeidenComputationResultTransformer.toStatsResult(computationResult, config));
+    }
+
+
+    public Stream<MemoryEstimateResult> estimateLeidenStream(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, LeidenStreamConfig::of);
+        return Stream.of(estimateBusinessFacade.leiden(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> estimateLeidenMutate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, LeidenMutateConfig::of);
+        return Stream.of(estimateBusinessFacade.leiden(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> estimateLeidenStats(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, LeidenStatsConfig::of);
+        return Stream.of(estimateBusinessFacade.leiden(graphNameOrConfiguration, config));
+    }
 
     public Stream<SccStreamResult> sccStream(
         String graphName,

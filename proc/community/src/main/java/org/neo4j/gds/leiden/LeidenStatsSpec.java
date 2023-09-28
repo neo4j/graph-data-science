@@ -24,7 +24,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.procedures.community.leiden.StatsResult;
+import org.neo4j.gds.procedures.community.leiden.LeidenStatsResult;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -34,7 +34,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.leiden.LeidenStreamProc.DESCRIPTION;
 
 @GdsCallable(name = "gds.leiden.stats", aliases = {"gds.beta.leiden.stats"}, description = DESCRIPTION, executionMode = STREAM)
-public class LeidenStatsSpec implements AlgorithmSpec<Leiden, LeidenResult, LeidenStatsConfig, Stream<StatsResult>, LeidenAlgorithmFactory<LeidenStatsConfig>> {
+public class LeidenStatsSpec implements AlgorithmSpec<Leiden, LeidenResult, LeidenStatsConfig, Stream<LeidenStatsResult>, LeidenAlgorithmFactory<LeidenStatsConfig>> {
     @Override
     public String name() {
         return "LeidenStats";
@@ -51,14 +51,14 @@ public class LeidenStatsSpec implements AlgorithmSpec<Leiden, LeidenResult, Leid
     }
 
     @Override
-    public ComputationResultConsumer<Leiden, LeidenResult, LeidenStatsConfig, Stream<StatsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Leiden, LeidenResult, LeidenStatsConfig, Stream<LeidenStatsResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             if (computationResult.result().isEmpty()) {
                 return Stream.empty();
             }
 
             var leidenResult = computationResult.result().get();
-            var statsBuilder = new StatsResult.StatsBuilder(
+            var statsBuilder = new LeidenStatsResult.StatsBuilder(
                 executionContext.returnColumns(),
                 computationResult.config().concurrency()
             );
