@@ -17,38 +17,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.extension;
+package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.procedures.GraphDataScience;
-import org.neo4j.gds.procedures.integration.CatalogFacadeFactory;
-import org.neo4j.gds.procedures.integration.CommunityProcedureFactory;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
 /**
  * We use this at request time to construct the facade that the procedures call.
  */
-public class OpenGraphDataScienceProcedureFacadeProvider implements ThrowingFunction<Context, GraphDataScience, ProcedureException> {
+public class GraphDataScienceProvider implements ThrowingFunction<Context, GraphDataScience, ProcedureException> {
     private final Log log;
-    private final CatalogFacadeFactory catalogFacadeFactory;
-    private final CommunityProcedureFactory communityProcedureFactory;
+    private final CatalogFacadeProvider catalogFacadeProvider;
+    private final CommunityProcedureProvider communityProcedureProvider;
 
-    OpenGraphDataScienceProcedureFacadeProvider(
+    public GraphDataScienceProvider(
         Log log,
-        CatalogFacadeFactory catalogFacadeFactory,
-        CommunityProcedureFactory communityProcedureFactory
+        CatalogFacadeProvider catalogFacadeProvider,
+        CommunityProcedureProvider communityProcedureProvider
     ) {
         this.log = log;
-        this.catalogFacadeFactory = catalogFacadeFactory;
-        this.communityProcedureFactory = communityProcedureFactory;
+        this.catalogFacadeProvider = catalogFacadeProvider;
+        this.communityProcedureProvider = communityProcedureProvider;
     }
 
     @Override
     public GraphDataScience apply(Context context) throws ProcedureException {
-        var catalogFacade = catalogFacadeFactory.createCatalogFacade(context);
-        var communityProcedureFacade = communityProcedureFactory.createCommunityProcedureFacade(context);
+        var catalogFacade = catalogFacadeProvider.createCatalogFacade(context);
+        var communityProcedureFacade = communityProcedureProvider.createCommunityProcedureFacade(context);
 
         return new GraphDataScience(log, catalogFacade, communityProcedureFacade);
     }

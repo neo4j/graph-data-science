@@ -59,8 +59,8 @@ import org.neo4j.gds.procedures.TransactionContextAccessor;
 import org.neo4j.gds.procedures.catalog.CatalogFacade;
 import org.neo4j.gds.projection.GraphProjectNativeResult;
 import org.neo4j.gds.services.DatabaseIdAccessor;
-import org.neo4j.gds.services.UserLogServices;
 import org.neo4j.gds.services.UserAccessor;
+import org.neo4j.gds.services.UserLogServices;
 import org.neo4j.kernel.api.procedure.Context;
 
 import java.util.Optional;
@@ -72,8 +72,10 @@ import java.util.function.Function;
  * from a {@link org.neo4j.kernel.api.procedure.Context}, at request time.
  * <p>
  * We can resolve things like user and database id here, construct termination flags, and such.
+ * <p>
+ * We call it a provider because it is used as a sub-provider to the {@link org.neo4j.gds.procedures.GraphDataScience} provider.
  */
-public class CatalogFacadeFactory {
+public class CatalogFacadeProvider {
     // Global scoped/ global state/ stateless things
     private final CatalogConfigurationService catalogConfigurationService;
     private final Log log;
@@ -102,7 +104,7 @@ public class CatalogFacadeFactory {
      * Without it, I would have to stub out Neo4j's {@link org.neo4j.kernel.api.procedure.Context}, in a non-trivial,
      * ugly way. Now instead I can inject the user by stubbing out GDS' own little POJO service.
      */
-    public CatalogFacadeFactory(
+    public CatalogFacadeProvider(
         CatalogConfigurationService catalogConfigurationService,
         Log log,
         GraphNameValidationService graphNameValidationService,

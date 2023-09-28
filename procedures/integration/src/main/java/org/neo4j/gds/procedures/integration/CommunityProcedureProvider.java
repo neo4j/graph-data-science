@@ -48,7 +48,10 @@ import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
-public class CommunityProcedureFactory {
+/**
+ * We call it a provider because it is used as a sub-provider to the {@link org.neo4j.gds.procedures.GraphDataScience} provider.
+ */
+public class CommunityProcedureProvider {
     // Global state and services
     private final Log log;
     private final GraphStoreCatalogService graphStoreCatalogService;
@@ -63,7 +66,7 @@ public class CommunityProcedureFactory {
     private final UserLogServices userLogServices;
     private final UserAccessor userAccessor;
 
-    public CommunityProcedureFactory(
+    public CommunityProcedureProvider(
         Log log,
         GraphStoreCatalogService graphStoreCatalogService,
         boolean useMaxMemoryEstimation,
