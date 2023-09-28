@@ -27,6 +27,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
@@ -441,6 +442,37 @@ final class HugeGraphLoadingTest extends BaseTest {
                 .graph();
 
             assertThat(graph.nodeCount()).isEqualTo(labelACount + labelBCount + labelABCount);
+        });
+    }
+
+    @Test
+    void multiLabelPartitionScanWithProperties() {
+        long[] ids = {-1, -1};
+        runQuery("CREATE (a:A {prop1: 42}), (b:B {prop2: 1337}), (:A), (:A) RETURN id(a) AS a, id(b) AS b", res -> {
+            res.accept(row -> {
+                ids[0] = row.getNumber("a").longValue();
+                ids[1] = row.getNumber("b").longValue();
+                return true;
+            });
+            return null;
+        });
+
+        GdsFeatureToggles.USE_PARTITIONED_SCAN.enableAndRun(() -> {
+            var graph = new StoreLoaderBuilder()
+                .databaseService(db)
+                .addNodeProjection(NodeProjection.builder().label("A").addProperty(PropertyMapping.of("prop1")).build())
+                .addNodeProjection(NodeProjection.builder().label("B").addProperty(PropertyMapping.of("prop2")).build())
+                .build()
+                .graph();
+
+            long idA = graph.toMappedNodeId(ids[0]);
+            long idB = graph.toMappedNodeId(ids[1]);
+
+            assertThat(graph.nodeCount(NodeLabel.of("A"))).isEqualTo(3);
+            assertThat(graph.nodeCount(NodeLabel.of("B"))).isEqualTo(1);
+
+            assertThat(graph.nodeProperties("prop1").longValue(idA)).isEqualTo(42);
+            assertThat(graph.nodeProperties("prop2").longValue(idB)).isEqualTo(1337);
         });
     }
 }
