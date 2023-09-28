@@ -21,7 +21,6 @@ package org.neo4j.gds.compat._5x;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.neo4j.common.DependencyResolver;
-import org.neo4j.common.EntityType;
 import org.neo4j.configuration.BootloaderSettings;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
@@ -85,7 +84,6 @@ import org.neo4j.internal.kernel.api.PropertyIndexQuery;
 import org.neo4j.internal.kernel.api.QueryContext;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
-import org.neo4j.internal.kernel.api.TokenPredicate;
 import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
@@ -96,9 +94,7 @@ import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.internal.recordstorage.RecordIdType;
 import org.neo4j.internal.schema.IndexCapability;
-import org.neo4j.internal.schema.IndexDescriptor;
 import org.neo4j.internal.schema.IndexOrder;
-import org.neo4j.internal.schema.SchemaDescriptors;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.layout.Neo4jLayout;
@@ -139,7 +135,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -195,7 +190,7 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
         int batchSize,
         boolean allowPartitionedScan
     ) {
-        return partitionedNodeLabelIndexScan(transaction, batchSize, labelIds);
+        return PartitionedStoreScan.createScans(transaction, batchSize, labelIds);
     }
 
     @Override
@@ -280,7 +275,7 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
         int batchSize,
         boolean allowPartitionedScan
     ) {
-        return partitionedNodeLabelIndexScan(transaction, batchSize, labelId).get(0);
+        return PartitionedStoreScan.createScans(transaction, batchSize, labelId).get(0);
     }
 
     @Override
@@ -328,71 +323,6 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
         };
     }
 
-    protected List<StoreScan<NodeLabelIndexCursor>> partitionedNodeLabelIndexScan(
-        KernelTransaction transaction,
-        int batchSize,
-        int... labelIds
-    ) {
-        var indexDescriptor = NodeLabelIndexLookupImpl.findUsableMatchingIndex(
-            transaction,
-            SchemaDescriptors.forAnyEntityTokens(EntityType.NODE)
-        );
-
-        if (indexDescriptor == IndexDescriptor.NO_INDEX) {
-            throw new IllegalStateException("There is no index that can back a node label scan.");
-        }
-
-        var read = transaction.dataRead();
-
-        // Our current strategy is to select the token with the highest count
-        // and use that one as the driving partitioned index scan. The partitions
-        // of all other partitioned index scans will be aligned to that one.
-        int maxToken = labelIds[0];
-        long maxCount = read.countsForNodeWithoutTxState(labelIds[0]);
-        int maxIndex = 0;
-
-        for (int i = 1; i < labelIds.length; i++) {
-            long count = read.countsForNodeWithoutTxState(labelIds[i]);
-            if (count > maxCount) {
-                maxCount = count;
-                maxToken = labelIds[i];
-                maxIndex = i;
-            }
-        }
-
-        // swap the first label with the max count label
-        labelIds[maxIndex] = labelIds[0];
-        labelIds[0] = maxToken;
-
-        int numberOfPartitions = PartitionedStoreScan.getNumberOfPartitions(maxCount, batchSize);
-
-        try {
-            var session = read.tokenReadSession(indexDescriptor);
-
-            var partitionedScan = read.nodeLabelScan(
-                session,
-                numberOfPartitions,
-                transaction.cursorContext(),
-                new TokenPredicate(maxToken)
-            );
-
-            var scans = new ArrayList<StoreScan<NodeLabelIndexCursor>>(labelIds.length);
-            scans.add(new PartitionedStoreScan<>(partitionedScan));
-
-            // Initialize the remaining index scans with the partitioning of the first scan.
-            for (int i = 1; i < labelIds.length; i++) {
-                int labelToken = labelIds[i];
-                var scan = read.nodeLabelScan(session, partitionedScan, new TokenPredicate(labelToken));
-                scans.add(new PartitionedStoreScan<>(scan));
-            }
-
-            return scans;
-        } catch (KernelException e) {
-            // should not happen, we check for the index existence and applicability
-            // before reading it
-            throw new RuntimeException("Unexpected error while initialising reading from node label index", e);
-        }
-    }
 
     @Override
     public CompatIndexQuery rangeIndexQuery(
