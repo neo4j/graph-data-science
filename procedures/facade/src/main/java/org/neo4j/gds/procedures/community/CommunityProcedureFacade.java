@@ -635,6 +635,22 @@ public class CommunityProcedureFacade {
         return Stream.of(ModularityComputationResultTransformer.toStatsResult(computationResult, config));
     }
 
+    public Stream<MemoryEstimateResult> estimateModularityStream(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, ModularityStreamConfig::of);
+        return Stream.of(estimateBusinessFacade.modularity(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> estimateModularityStats(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, ModularityStatsConfig::of);
+        return Stream.of(estimateBusinessFacade.modularity(graphNameOrConfiguration, config));
+    }
+
     public Stream<KmeansStreamResult> kmeansStream(
         String graphName,
         Map<String, Object> configuration

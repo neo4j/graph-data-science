@@ -38,6 +38,8 @@ import org.neo4j.gds.leiden.LeidenBaseConfig;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
 import org.neo4j.gds.memest.MemoryEstimationGraphConfigParser;
+import org.neo4j.gds.modularity.ModularityBaseConfig;
+import org.neo4j.gds.modularity.ModularityCalculatorFactory;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.triangle.IntersectingTriangleCountFactory;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
@@ -155,6 +157,18 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             configuration,
             Optional.empty(),
             new LocalClusteringCoefficientFactory<>()
+        );
+    }
+
+    public <C extends ModularityBaseConfig> MemoryEstimateResult modularity(
+        Object graphNameOrConfiguration,
+        C configuration
+    ) {
+        return estimate(
+            graphNameOrConfiguration,
+            configuration,
+            configuration.relationshipWeightProperty(),
+            new ModularityCalculatorFactory<>()
         );
     }
 

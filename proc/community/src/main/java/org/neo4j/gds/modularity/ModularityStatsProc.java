@@ -20,7 +20,6 @@
 package org.neo4j.gds.modularity;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.modularity.ModularityStatsResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -55,11 +54,7 @@ public class ModularityStatsProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new ModularityStatsSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.community().estimateModularityStats(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Deprecated(forRemoval = true)
