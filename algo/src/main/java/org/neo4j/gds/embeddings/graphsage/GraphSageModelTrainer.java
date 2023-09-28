@@ -88,7 +88,7 @@ public class GraphSageModelTrainer {
 
     public static List<Task> progressTasks(GraphSageTrainConfig config, long nodeCount) {
         return List.of(
-            Tasks.leaf("Prepare batches", config.batchesPerIteration(nodeCount)),
+            Tasks.leaf("Prepare batches", config.numberOfBatches(nodeCount)),
             Tasks.iterativeDynamic(
                 "Train model",
                 () -> List.of(Tasks.iterativeDynamic(

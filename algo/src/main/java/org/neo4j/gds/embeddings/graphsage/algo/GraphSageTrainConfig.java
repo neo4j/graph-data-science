@@ -136,9 +136,15 @@ public interface GraphSageTrainConfig extends
     @Configuration.Ignore
     @Value.Derived
     default int batchesPerIteration(long nodeCount) {
+        var totalNumberOfBatches = numberOfBatches(nodeCount);
         var samplingRatio = maybeBatchSamplingRatio().orElse(Math.min(1.0, batchSize() * concurrency() / (double) nodeCount));
-        var totalNumberOfBatches = Math.ceil(nodeCount / (double) batchSize());
         return (int) Math.ceil(samplingRatio * totalNumberOfBatches);
+    }
+
+    @Configuration.Ignore
+    @Value.Derived
+    default long numberOfBatches(long nodeCount) {
+        return (long) Math.ceil(nodeCount / (double) batchSize());
     }
 
     @Value.Default
