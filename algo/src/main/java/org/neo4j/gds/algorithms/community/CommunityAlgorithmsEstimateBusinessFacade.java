@@ -31,6 +31,8 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.k1coloring.K1ColoringAlgorithmFactory;
 import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
+import org.neo4j.gds.kcore.KCoreDecompositionAlgorithmFactory;
+import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
 import org.neo4j.gds.leiden.LeidenAlgorithmFactory;
 import org.neo4j.gds.leiden.LeidenBaseConfig;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
@@ -92,6 +94,19 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             new K1ColoringAlgorithmFactory<>()
         );
     }
+
+    public <C extends KCoreDecompositionBaseConfig> MemoryEstimateResult kcore(
+        Object graphNameOrConfiguration,
+        C configuration
+    ) {
+        return estimate(
+            graphNameOrConfiguration,
+            configuration,
+            Optional.empty(),
+            new KCoreDecompositionAlgorithmFactory<>()
+        );
+    }
+
 
     public <C extends LeidenBaseConfig> MemoryEstimateResult leiden(
         Object graphNameOrConfiguration,

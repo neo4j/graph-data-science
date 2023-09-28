@@ -266,6 +266,31 @@ public class CommunityProcedureFacade {
         return Stream.of(KCoreComputationalResultTransformer.toStatsResult(computationResult, config));
     }
 
+    public Stream<MemoryEstimateResult> estimateKCoreStream(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, KCoreDecompositionStreamConfig::of);
+        return Stream.of(estimateBusinessFacade.kcore(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> estimateKCoreMutate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, KCoreDecompositionMutateConfig::of);
+        return Stream.of(estimateBusinessFacade.kcore(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> estimateKCoreStats(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, KCoreDecompositionStatsConfig::of);
+        return Stream.of(estimateBusinessFacade.kcore(graphNameOrConfiguration, config));
+    }
+
+
     // K-Core Decomposition end
 
     public Stream<LouvainStreamResult> louvainStream(
