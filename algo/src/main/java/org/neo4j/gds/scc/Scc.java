@@ -69,9 +69,7 @@ public class Scc extends Algorithm<HugeLongArray> {
         progressTracker.beginSubTask();
         index.fill(UNORDERED);
         connectedComponents.fill(UNORDERED);
-        todo.clear();
-        boundaries.clear();
-        stack.clear();
+
         graph.forEachNode(this::computePerNode);
         progressTracker.endSubTask();
         return connectedComponents;
@@ -85,6 +83,8 @@ public class Scc extends Algorithm<HugeLongArray> {
         if (index.get(nodeId) != UNORDERED) {
             return true;
         }
+
+        clearDataStructures();
 
         push(Action.VISIT, nodeId);
         while (!todo.isEmpty()) {
@@ -162,4 +162,10 @@ public class Scc extends Algorithm<HugeLongArray> {
 
     }
 
+    private void clearDataStructures() {
+        stack.clear();
+        todo.clear();
+        boundaries.clear();
+
+    }
 }
