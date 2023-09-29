@@ -21,13 +21,13 @@ package org.neo4j.gds.leiden;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.procedures.community.leiden.StatsResult;
+import org.neo4j.gds.procedures.community.leiden.LeidenStatsResult;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
 import java.util.List;
 import java.util.Map;
 
-public final class WriteResult extends StatsResult {
+public final class WriteResult extends LeidenStatsResult {
 
     public final long writeMillis;
     public final long nodePropertiesWritten;

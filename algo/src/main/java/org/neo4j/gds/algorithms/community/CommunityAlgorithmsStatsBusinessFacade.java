@@ -21,9 +21,12 @@ package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.CommunityStatisticsSpecificFields;
+import org.neo4j.gds.algorithms.K1ColoringSpecificFields;
 import org.neo4j.gds.algorithms.KCoreSpecificFields;
 import org.neo4j.gds.algorithms.KmeansSpecificFields;
 import org.neo4j.gds.algorithms.LabelPropagationSpecificFields;
+import org.neo4j.gds.algorithms.LeidenSpecificFields;
+import org.neo4j.gds.algorithms.LocalClusteringCoefficientSpecificFields;
 import org.neo4j.gds.algorithms.ModularitySpecificFields;
 import org.neo4j.gds.algorithms.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.StatsResult;
@@ -32,13 +35,16 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.k1coloring.K1ColoringStatsConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
 import org.neo4j.gds.kmeans.KmeansStatsConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
+import org.neo4j.gds.leiden.LeidenStatsConfig;
 import org.neo4j.gds.modularity.ModularityStatsConfig;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.scc.SccStatsConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
 import org.neo4j.gds.triangle.TriangleCountStatsConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
 
@@ -113,6 +119,29 @@ public class CommunityAlgorithmsStatsBusinessFacade {
         );
     }
 
+    public StatsResult<LocalClusteringCoefficientSpecificFields> localClusteringCoefficient(
+        String graphName,
+        LocalClusteringCoefficientStatsConfig configuration,
+        User user,
+        DatabaseId databaseId
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> communityAlgorithmsFacade.localClusteringCoefficient(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return statsResult(
+            algorithmResult,
+            (result) -> new LocalClusteringCoefficientSpecificFields(
+                result.localClusteringCoefficients().size(),
+                result.averageClusteringCoefficient()
+            ),
+            intermediateResult.computeMilliseconds,
+            () -> LocalClusteringCoefficientSpecificFields.EMPTY
+        );
+    }
+
     public StatsResult<StandardCommunityStatisticsSpecificFields> scc(
         String graphName,
         SccStatsConfig configuration,
@@ -141,6 +170,38 @@ public class CommunityAlgorithmsStatsBusinessFacade {
             () -> StandardCommunityStatisticsSpecificFields.EMPTY
         );
     }
+
+    public StatsResult<K1ColoringSpecificFields> k1coloring(
+        String graphName,
+        K1ColoringStatsConfig config,
+        User user,
+        DatabaseId databaseId,
+        boolean computeUsedColors
+    ) {
+
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> communityAlgorithmsFacade.k1Coloring(graphName, config, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return statsResult(
+            algorithmResult,
+            (result) -> {
+                long usedColors = (computeUsedColors) ? result.usedColors().cardinality() : 0;
+
+                return new K1ColoringSpecificFields(
+                    result.colors().size(),
+                    usedColors,
+                    result.ranIterations(),
+                    result.didConverge()
+                );
+            },
+            intermediateResult.computeMilliseconds,
+            () -> K1ColoringSpecificFields.EMPTY
+        );
+    }
+
 
     public StatsResult<KCoreSpecificFields> kCore(
         String graphName,
@@ -193,6 +254,42 @@ public class CommunityAlgorithmsStatsBusinessFacade {
             () -> KmeansSpecificFields.EMPTY
         );
     }
+
+    public StatsResult<LeidenSpecificFields> leiden(
+        String graphName,
+        LeidenStatsConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        StatisticsComputationInstructions statisticsComputationInstructions
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> communityAlgorithmsFacade.leiden(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return statsResult(
+            algorithmResult,
+            configuration,
+            (result -> result.communities()::get),
+            (result, componentCount, communitySummary) -> {
+                return LeidenSpecificFields.from(
+                    result.communities().size(),
+                    result.modularity(),
+                    result.modularities(),
+                    componentCount,
+                    result.ranLevels(),
+                    result.didConverge(),
+                    communitySummary
+                );
+            },
+            statisticsComputationInstructions,
+            intermediateResult.computeMilliseconds,
+            () -> LeidenSpecificFields.EMPTY
+        );
+
+    }
+
 
     public StatsResult<TriangleCountSpecificFields> triangleCount(
         String graphName,

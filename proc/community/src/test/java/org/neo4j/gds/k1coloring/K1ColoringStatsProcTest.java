@@ -29,7 +29,6 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 
@@ -37,7 +36,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class K1ColoringStatsProcTest extends BaseProcTest {
 
-    private static final String TEST_USERNAME = Username.EMPTY_USERNAME.username();
     private static final String K1COLORING_GRAPH = "myGraph";
 
     @Neo4jGraph

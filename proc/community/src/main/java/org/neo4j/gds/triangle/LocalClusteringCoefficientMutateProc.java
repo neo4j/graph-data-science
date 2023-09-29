@@ -20,7 +20,6 @@
 package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -46,7 +45,7 @@ public class LocalClusteringCoefficientMutateProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().mutateLocalClusteringCoefficient(graphName, configuration);
+        return facade.community().localClusteringCoefficientMutate(graphName, configuration);
     }
 
     @Procedure(value = "gds.localClusteringCoefficient.mutate.estimate", mode = READ)
@@ -55,10 +54,6 @@ public class LocalClusteringCoefficientMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new LocalClusteringCoefficientMutateSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.community().estimateLocalClusteringCoefficientMutate(graphNameOrConfiguration, algoConfiguration);
     }
 }

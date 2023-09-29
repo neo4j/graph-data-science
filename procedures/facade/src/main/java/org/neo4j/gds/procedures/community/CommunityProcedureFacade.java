@@ -33,6 +33,7 @@ import org.neo4j.gds.conductance.ConductanceStreamConfig;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
+import org.neo4j.gds.k1coloring.K1ColoringStatsConfig;
 import org.neo4j.gds.k1coloring.K1ColoringStreamConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
@@ -44,6 +45,7 @@ import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfig;
 import org.neo4j.gds.leiden.LeidenMutateConfig;
+import org.neo4j.gds.leiden.LeidenStatsConfig;
 import org.neo4j.gds.leiden.LeidenStreamConfig;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
@@ -53,6 +55,7 @@ import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutMutateResul
 import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutStreamResult;
 import org.neo4j.gds.procedures.community.conductance.ConductanceStreamResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringMutateResult;
+import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStatsResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStreamResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionMutateResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStatsResult;
@@ -64,6 +67,7 @@ import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationMutat
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStatsResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStreamResult;
 import org.neo4j.gds.procedures.community.leiden.LeidenMutateResult;
+import org.neo4j.gds.procedures.community.leiden.LeidenStatsResult;
 import org.neo4j.gds.procedures.community.leiden.LeidenStreamResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
@@ -73,6 +77,7 @@ import org.neo4j.gds.procedures.community.scc.SccMutateResult;
 import org.neo4j.gds.procedures.community.scc.SccStatsResult;
 import org.neo4j.gds.procedures.community.scc.SccStreamResult;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientMutateResult;
+import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientStatsResult;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientStreamResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountMutateResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStatsResult;
@@ -85,6 +90,7 @@ import org.neo4j.gds.scc.SccMutateConfig;
 import org.neo4j.gds.scc.SccStatsConfig;
 import org.neo4j.gds.scc.SccStreamConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
 import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 import org.neo4j.gds.triangle.TriangleCountStatsConfig;
@@ -260,6 +266,31 @@ public class CommunityProcedureFacade {
         return Stream.of(KCoreComputationalResultTransformer.toStatsResult(computationResult, config));
     }
 
+    public Stream<MemoryEstimateResult> estimateKCoreStream(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, KCoreDecompositionStreamConfig::of);
+        return Stream.of(estimateBusinessFacade.kcore(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> estimateKCoreMutate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, KCoreDecompositionMutateConfig::of);
+        return Stream.of(estimateBusinessFacade.kcore(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> estimateKCoreStats(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, KCoreDecompositionStatsConfig::of);
+        return Stream.of(estimateBusinessFacade.kcore(graphNameOrConfiguration, config));
+    }
+
+
     // K-Core Decomposition end
 
     public Stream<LouvainStreamResult> louvainStream(
@@ -330,6 +361,47 @@ public class CommunityProcedureFacade {
         return Stream.of(LeidenComputationResultTransformer.toMutateResult(computationResult));
     }
 
+    public Stream<LeidenStatsResult> leidenStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, LeidenStatsConfig::of);
+
+        var computationResult = statsBusinessFacade.leiden(
+            graphName,
+            config,
+            user,
+            databaseId,
+            ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
+        );
+
+        return Stream.of(LeidenComputationResultTransformer.toStatsResult(computationResult, config));
+    }
+
+
+    public Stream<MemoryEstimateResult> estimateLeidenStream(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, LeidenStreamConfig::of);
+        return Stream.of(estimateBusinessFacade.leiden(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> estimateLeidenMutate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, LeidenMutateConfig::of);
+        return Stream.of(estimateBusinessFacade.leiden(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> estimateLeidenStats(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, LeidenStatsConfig::of);
+        return Stream.of(estimateBusinessFacade.leiden(graphNameOrConfiguration, config));
+    }
 
     public Stream<SccStreamResult> sccStream(
         String graphName,
@@ -456,6 +528,29 @@ public class CommunityProcedureFacade {
         return Stream.of(TriangleCountComputationResultTransformer.toStatsResult(computationResult, config));
     }
 
+    public Stream<MemoryEstimateResult> estimateTriangleCountStream(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, TriangleCountStreamConfig::of);
+        return Stream.of(estimateBusinessFacade.triangleCount(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> estimateTriangleCountMutate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, TriangleCountMutateConfig::of);
+        return Stream.of(estimateBusinessFacade.triangleCount(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> estimateTriangleCountStats(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, TriangleCountStatsConfig::of);
+        return Stream.of(estimateBusinessFacade.triangleCount(graphNameOrConfiguration, config));
+    }
 
     public Stream<LabelPropagationStreamResult> labelPropagationStream(
         String graphName,
@@ -540,6 +635,22 @@ public class CommunityProcedureFacade {
         return Stream.of(ModularityComputationResultTransformer.toStatsResult(computationResult, config));
     }
 
+    public Stream<MemoryEstimateResult> estimateModularityStream(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, ModularityStreamConfig::of);
+        return Stream.of(estimateBusinessFacade.modularity(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> estimateModularityStats(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, ModularityStatsConfig::of);
+        return Stream.of(estimateBusinessFacade.modularity(graphNameOrConfiguration, config));
+    }
+
     public Stream<KmeansStreamResult> kmeansStream(
         String graphName,
         Map<String, Object> configuration
@@ -592,7 +703,7 @@ public class CommunityProcedureFacade {
         return Stream.of(KmeansComputationResultTransformer.toStatsResult(computationResult, statsConfig));
     }
 
-    public Stream<LocalClusteringCoefficientStreamResult> streamLocalClusteringCoefficient(
+    public Stream<LocalClusteringCoefficientStreamResult> localClusteringCoefficientStream(
         String graphName,
         Map<String, Object> configuration
     ) {
@@ -612,7 +723,7 @@ public class CommunityProcedureFacade {
     }
 
 
-    public Stream<LocalClusteringCoefficientMutateResult> mutateLocalClusteringCoefficient(
+    public Stream<LocalClusteringCoefficientMutateResult> localClusteringCoefficientMutate(
         String graphName,
         Map<String, Object> configuration
     ) {
@@ -627,6 +738,48 @@ public class CommunityProcedureFacade {
 
         return Stream.of(LCCComputationResultTransformer.toMutateResult(computationResult, mutateConfig));
     }
+
+    public Stream<LocalClusteringCoefficientStatsResult> localClusteringCoefficientStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var statsConfig = createConfig(configuration, LocalClusteringCoefficientStatsConfig::of);
+
+        var computationResult = statsBusinessFacade.localClusteringCoefficient(
+            graphName,
+            statsConfig,
+            user,
+            databaseId
+        );
+
+        return Stream.of(LCCComputationResultTransformer.toStatsResult(computationResult, statsConfig));
+    }
+
+
+    public Stream<MemoryEstimateResult> estimateLocalClusteringCoefficientMutate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, LocalClusteringCoefficientMutateConfig::of);
+        return Stream.of(estimateBusinessFacade.localClusteringCoefficient(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> estimateLocalClusteringCoefficientStats(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, LocalClusteringCoefficientStatsConfig::of);
+        return Stream.of(estimateBusinessFacade.localClusteringCoefficient(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> estimateLocalClusteringCoefficientStream(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, LocalClusteringCoefficientStreamConfig::of);
+        return Stream.of(estimateBusinessFacade.localClusteringCoefficient(graphNameOrConfiguration, config));
+    }
+
 
     public Stream<K1ColoringStreamResult> k1ColoringStream(
         String graphName,
@@ -666,6 +819,51 @@ public class CommunityProcedureFacade {
 
         return Stream.of(K1ColoringComputationResultTransformer.toMutateResult(computationResult));
     }
+
+    public Stream<K1ColoringStatsResult> k1ColoringStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var statsConfig = createConfig(
+            configuration,
+            K1ColoringStatsConfig::of
+        );
+
+        var computationResult = statsBusinessFacade.k1coloring(
+            graphName,
+            statsConfig,
+            user,
+            databaseId,
+            procedureReturnColumns.contains("colorCount")
+        );
+
+        return Stream.of(K1ColoringComputationResultTransformer.toStatsResult(computationResult, statsConfig));
+    }
+
+    public Stream<MemoryEstimateResult> estimateK1ColoringMutate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, K1ColoringMutateConfig::of);
+        return Stream.of(estimateBusinessFacade.k1Coloring(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> estimateK1ColoringStats(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, K1ColoringStatsConfig::of);
+        return Stream.of(estimateBusinessFacade.k1Coloring(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> estimateK1ColoringStream(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, K1ColoringStreamConfig::of);
+        return Stream.of(estimateBusinessFacade.k1Coloring(graphNameOrConfiguration, config));
+    }
+
 
     public Stream<ConductanceStreamResult> conductanceStream(
         String graphName,

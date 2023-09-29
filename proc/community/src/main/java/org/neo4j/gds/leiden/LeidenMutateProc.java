@@ -20,7 +20,6 @@
 package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.leiden.LeidenMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -55,11 +54,7 @@ public class LeidenMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new LeidenMutateSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphName, configuration);
+        return facade.community().estimateLeidenMutate(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)

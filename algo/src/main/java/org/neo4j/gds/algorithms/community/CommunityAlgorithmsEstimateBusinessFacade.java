@@ -29,12 +29,24 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
+import org.neo4j.gds.k1coloring.K1ColoringAlgorithmFactory;
+import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
+import org.neo4j.gds.kcore.KCoreDecompositionAlgorithmFactory;
+import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
+import org.neo4j.gds.leiden.LeidenAlgorithmFactory;
+import org.neo4j.gds.leiden.LeidenBaseConfig;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
 import org.neo4j.gds.memest.MemoryEstimationGraphConfigParser;
+import org.neo4j.gds.modularity.ModularityBaseConfig;
+import org.neo4j.gds.modularity.ModularityCalculatorFactory;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.triangle.IntersectingTriangleCountFactory;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientFactory;
 import org.neo4j.gds.scc.SccAlgorithmFactory;
 import org.neo4j.gds.scc.SccBaseConfig;
+import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.wcc.WccAlgorithmFactory;
 import org.neo4j.gds.wcc.WccBaseConfig;
 
@@ -75,6 +87,55 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
         );
     }
 
+    public <C extends K1ColoringBaseConfig> MemoryEstimateResult k1Coloring(
+        Object graphNameOrConfiguration,
+        C configuration
+    ) {
+        return estimate(
+            graphNameOrConfiguration,
+            configuration,
+            Optional.empty(),
+            new K1ColoringAlgorithmFactory<>()
+        );
+    }
+
+    public <C extends KCoreDecompositionBaseConfig> MemoryEstimateResult kcore(
+        Object graphNameOrConfiguration,
+        C configuration
+    ) {
+        return estimate(
+            graphNameOrConfiguration,
+            configuration,
+            Optional.empty(),
+            new KCoreDecompositionAlgorithmFactory<>()
+        );
+    }
+
+    public <C extends TriangleCountBaseConfig> MemoryEstimateResult triangleCount(
+        Object graphNameOrConfiguration,
+        C configuration
+    ) {
+        return estimate(
+            graphNameOrConfiguration,
+            configuration,
+            Optional.empty(),
+            new IntersectingTriangleCountFactory<>()
+        );
+    }
+
+
+    public <C extends LeidenBaseConfig> MemoryEstimateResult leiden(
+        Object graphNameOrConfiguration,
+        C configuration
+    ) {
+        return estimate(
+            graphNameOrConfiguration,
+            configuration,
+            configuration.relationshipWeightProperty(),
+            new LeidenAlgorithmFactory<>()
+        );
+    }
+
     public <C extends SccBaseConfig> MemoryEstimateResult estimateScc(
         Object graphNameOrConfiguration,
         C configuration
@@ -84,6 +145,30 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             configuration,
             Optional.empty(),
             new SccAlgorithmFactory<>()
+        );
+    }
+
+    public <C extends LocalClusteringCoefficientBaseConfig> MemoryEstimateResult localClusteringCoefficient(
+        Object graphNameOrConfiguration,
+        C configuration
+    ) {
+        return estimate(
+            graphNameOrConfiguration,
+            configuration,
+            Optional.empty(),
+            new LocalClusteringCoefficientFactory<>()
+        );
+    }
+
+    public <C extends ModularityBaseConfig> MemoryEstimateResult modularity(
+        Object graphNameOrConfiguration,
+        C configuration
+    ) {
+        return estimate(
+            graphNameOrConfiguration,
+            configuration,
+            configuration.relationshipWeightProperty(),
+            new ModularityCalculatorFactory<>()
         );
     }
 

@@ -30,7 +30,7 @@ public class LocalClusteringCoefficientStatsResult extends StandardStatsResult {
     public final double averageClusteringCoefficient;
     public final long nodeCount;
 
-    LocalClusteringCoefficientStatsResult(
+    public LocalClusteringCoefficientStatsResult(
         double averageClusteringCoefficient,
         long nodeCount,
         long preProcessingMillis,
