@@ -42,6 +42,7 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.projection.GraphProjectNativeResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.List;
 import java.util.Map;
@@ -204,6 +205,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
     public GraphProjectNativeResult nativeProject(
         User user,
         DatabaseId databaseId,
+        GraphDatabaseService graphDatabaseService,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
@@ -225,6 +227,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
 
         return nativeProjectApplication.project(
             databaseId,
+            graphDatabaseService,
             taskRegistryFactory,
             terminationFlag,
             transactionContext,
@@ -264,6 +267,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
     public GraphProjectCypherResult cypherProject(
         User user,
         DatabaseId databaseId,
+        GraphDatabaseService graphDatabaseService,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
@@ -285,6 +289,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
 
         return cypherProjectApplication.project(
             databaseId,
+            graphDatabaseService,
             taskRegistryFactory,
             terminationFlag,
             transactionContext,

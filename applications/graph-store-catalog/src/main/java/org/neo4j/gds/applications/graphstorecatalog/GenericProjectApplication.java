@@ -45,7 +45,6 @@ import java.util.function.Function;
  */
 public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIGURATION extends GraphProjectConfig, RESULT_BUILDER extends GraphProjectResult.Builder<RESULT>> {
     private final Log log;
-    private final GraphDatabaseService graphDatabaseService;
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final GraphProjectMemoryUsageService graphProjectMemoryUsageService;
 
@@ -53,13 +52,11 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
 
     public GenericProjectApplication(
         Log log,
-        GraphDatabaseService graphDatabaseService,
         GraphStoreCatalogService graphStoreCatalogService,
         GraphProjectMemoryUsageService graphProjectMemoryUsageService,
         Function<CONFIGURATION, RESULT_BUILDER> resultBuilderFactory
     ) {
         this.log = log;
-        this.graphDatabaseService = graphDatabaseService;
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.graphProjectMemoryUsageService = graphProjectMemoryUsageService;
         this.resultBuilderFactory = resultBuilderFactory;
@@ -67,6 +64,7 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
 
     public RESULT project(
         DatabaseId databaseId,
+        GraphDatabaseService graphDatabaseService,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
@@ -76,6 +74,7 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
         try {
             return projectGraph(
                 databaseId,
+                graphDatabaseService,
                 taskRegistryFactory,
                 terminationFlag,
                 transactionContext,
@@ -112,6 +111,7 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
 
     private RESULT projectGraph(
         DatabaseId databaseId,
+        GraphDatabaseService graphDatabaseService,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
@@ -132,6 +132,7 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
         try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withProjectMillis)) {
             var graphLoaderContext = graphLoaderContext(
                 databaseId,
+                graphDatabaseService,
                 taskRegistryFactory,
                 terminationFlag,
                 transactionContext,
@@ -164,6 +165,7 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
 
     private GraphLoaderContext graphLoaderContext(
         DatabaseId databaseId,
+        GraphDatabaseService graphDatabaseService,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,

@@ -28,20 +28,22 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 public class CypherProjectApplication {
     private final GenericProjectApplication<
-            GraphProjectCypherResult,
-            GraphProjectFromCypherConfig,
-            GraphProjectCypherResult.Builder> genericProjectApplication;
+        GraphProjectCypherResult,
+        GraphProjectFromCypherConfig,
+        GraphProjectCypherResult.Builder> genericProjectApplication;
 
     private final GraphProjectMemoryUsageService graphProjectMemoryUsageService;
 
     public CypherProjectApplication(
         GenericProjectApplication<
-                    GraphProjectCypherResult,
-                    GraphProjectFromCypherConfig,
-                    GraphProjectCypherResult.Builder> genericProjectApplication, GraphProjectMemoryUsageService graphProjectMemoryUsageService
+            GraphProjectCypherResult,
+            GraphProjectFromCypherConfig,
+            GraphProjectCypherResult.Builder> genericProjectApplication,
+        GraphProjectMemoryUsageService graphProjectMemoryUsageService
     ) {
         this.genericProjectApplication = genericProjectApplication;
         this.graphProjectMemoryUsageService = graphProjectMemoryUsageService;
@@ -49,6 +51,7 @@ public class CypherProjectApplication {
 
     public GraphProjectCypherResult project(
         DatabaseId databaseId,
+        GraphDatabaseService graphDatabaseService,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
@@ -57,6 +60,7 @@ public class CypherProjectApplication {
     ) {
         return genericProjectApplication.project(
             databaseId,
+            graphDatabaseService,
             taskRegistryFactory,
             terminationFlag,
             transactionContext,

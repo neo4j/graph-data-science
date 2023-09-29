@@ -194,6 +194,7 @@ class DefaultCatalogBusinessFacadeTest {
                 null,
                 null,
                 null,
+                null,
                 "   some graph   ",
                 null,
                 null,
@@ -203,6 +204,7 @@ class DefaultCatalogBusinessFacadeTest {
 
         assertThatIllegalArgumentException().isThrownBy(
             () -> facade.cypherProject(
+                null,
                 null,
                 null,
                 null,
@@ -259,11 +261,13 @@ class DefaultCatalogBusinessFacadeTest {
             null,
             null,
             null,
+            null,
             null
         )).withMessage("`graphName` can not be null or blank, but it was `null`");
 
         assertThatIllegalArgumentException().isThrownBy(() -> facade.nativeProject(
             new User("some user", false),
+            null,
             null,
             null,
             null,
@@ -284,6 +288,7 @@ class DefaultCatalogBusinessFacadeTest {
             null,
             null,
             null,
+            null,
             "some name",
             "some node projection",
             null,
@@ -292,6 +297,7 @@ class DefaultCatalogBusinessFacadeTest {
 
         assertThatIllegalArgumentException().isThrownBy(() -> facade.nativeProject(
             new User("some user", false),
+            null,
             null,
             null,
             null,
@@ -346,11 +352,13 @@ class DefaultCatalogBusinessFacadeTest {
             null,
             null,
             null,
+            null,
             null
         )).withMessage("`graphName` can not be null or blank, but it was `null`");
 
         assertThatIllegalArgumentException().isThrownBy(() -> facade.cypherProject(
             new User("some user", false),
+            null,
             null,
             null,
             null,
@@ -371,6 +379,7 @@ class DefaultCatalogBusinessFacadeTest {
             null,
             null,
             null,
+            null,
             "some name",
             "some node projection",
             null,
@@ -379,6 +388,7 @@ class DefaultCatalogBusinessFacadeTest {
 
         assertThatIllegalArgumentException().isThrownBy(() -> facade.cypherProject(
             new User("some user", false),
+            null,
             null,
             null,
             null,
@@ -436,6 +446,7 @@ class DefaultCatalogBusinessFacadeTest {
             null,
             null,
             null,
+            null,
             "some existing graph",
             "some node projection",
             "some relationship projection",
@@ -445,6 +456,7 @@ class DefaultCatalogBusinessFacadeTest {
         assertThatIllegalArgumentException().isThrownBy(() -> facade.cypherProject(
             user,
             databaseId,
+            null,
             null,
             null,
             null,

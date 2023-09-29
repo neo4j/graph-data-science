@@ -50,6 +50,7 @@ import org.neo4j.gds.core.utils.warnings.UserLogStore;
 import org.neo4j.gds.projection.GraphProjectNativeResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.List;
 import java.util.Map;
@@ -77,6 +78,7 @@ public class CatalogFacade {
     // services
     private final Consumer<AutoCloseable> streamCloser;
     private final DatabaseId databaseId;
+    private final GraphDatabaseService graphDatabaseService;
     private final ProcedureReturnColumns procedureReturnColumns;
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationFlag terminationFlag;
@@ -94,6 +96,7 @@ public class CatalogFacade {
     public CatalogFacade(
         Consumer<AutoCloseable> streamCloser,
         DatabaseId databaseId,
+        GraphDatabaseService graphDatabaseService,
         ProcedureReturnColumns procedureReturnColumns,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
@@ -105,6 +108,7 @@ public class CatalogFacade {
     ) {
         this.streamCloser = streamCloser;
         this.databaseId = databaseId;
+        this.graphDatabaseService = graphDatabaseService;
         this.procedureReturnColumns = procedureReturnColumns;
         this.taskRegistryFactory = taskRegistryFactory;
         this.terminationFlag = terminationFlag;
@@ -200,6 +204,7 @@ public class CatalogFacade {
         var result = businessFacade.nativeProject(
             user,
             databaseId,
+            graphDatabaseService,
             taskRegistryFactory,
             terminationFlag,
             transactionContext,
@@ -242,6 +247,7 @@ public class CatalogFacade {
         var result = businessFacade.cypherProject(
             user,
             databaseId,
+            graphDatabaseService,
             taskRegistryFactory,
             terminationFlag,
             transactionContext,

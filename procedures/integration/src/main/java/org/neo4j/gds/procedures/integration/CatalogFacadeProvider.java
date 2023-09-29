@@ -226,7 +226,6 @@ public class CatalogFacadeProvider {
         var nativeProjectApplication = new NativeProjectApplication(
             new GenericProjectApplication<>(
                 log,
-                graphDatabaseService, // request scope so need to change
                 graphStoreCatalogService,
                 graphProjectMemoryUsage, // request scope so need to change
                 GraphProjectNativeResult.Builder::new
@@ -235,7 +234,6 @@ public class CatalogFacadeProvider {
         var cypherProjectApplication = new CypherProjectApplication(
             new GenericProjectApplication<>(
                 log,
-                graphDatabaseService, // request scope so need to change
                 graphStoreCatalogService,
                 graphProjectMemoryUsage, // request scope so need to change
                 GraphProjectCypherResult.Builder::new
@@ -286,6 +284,7 @@ public class CatalogFacadeProvider {
         return new CatalogFacade(
             streamCloser,
             databaseId,
+            graphDatabaseService,
             procedureReturnColumns,
             taskRegistryFactory,
             terminationFlag,

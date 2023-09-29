@@ -28,20 +28,21 @@ import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphProjectNativeResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.graphdb.GraphDatabaseService;
 
 public class NativeProjectApplication {
     private final GenericProjectApplication<
-            GraphProjectNativeResult,
-            GraphProjectFromStoreConfig,
-            GraphProjectNativeResult.Builder> genericProjectApplication;
+        GraphProjectNativeResult,
+        GraphProjectFromStoreConfig,
+        GraphProjectNativeResult.Builder> genericProjectApplication;
 
     private final GraphProjectMemoryUsageService graphProjectMemoryUsageService;
 
     public NativeProjectApplication(
         GenericProjectApplication<
-                    GraphProjectNativeResult,
-                    GraphProjectFromStoreConfig,
-                    GraphProjectNativeResult.Builder> genericProjectApplication,
+            GraphProjectNativeResult,
+            GraphProjectFromStoreConfig,
+            GraphProjectNativeResult.Builder> genericProjectApplication,
         GraphProjectMemoryUsageService graphProjectMemoryUsageService
     ) {
         this.graphProjectMemoryUsageService = graphProjectMemoryUsageService;
@@ -50,6 +51,7 @@ public class NativeProjectApplication {
 
     public GraphProjectNativeResult project(
         DatabaseId databaseId,
+        GraphDatabaseService graphDatabaseService,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
@@ -58,6 +60,7 @@ public class NativeProjectApplication {
     ) {
         return genericProjectApplication.project(
             databaseId,
+            graphDatabaseService,
             taskRegistryFactory,
             terminationFlag,
             transactionContext,
