@@ -23,29 +23,43 @@ import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
+import org.neo4j.gds.algorithms.community.CommunityResultCompanion;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.procedures.community.scc.SccMutateResult;
 import org.neo4j.gds.procedures.community.scc.SccStatsResult;
 import org.neo4j.gds.procedures.community.scc.SccStreamResult;
 import org.neo4j.gds.scc.SccStatsConfig;
+import org.neo4j.gds.scc.SccStreamConfig;
 
+import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
-
-import static org.neo4j.gds.scc.Scc.UNORDERED;
 
 final class SccComputationResultTransformer {
 
     private SccComputationResultTransformer() {}
 
-    static Stream<SccStreamResult> toStreamResult(StreamComputationResult<HugeLongArray> computationResult) {
-        return computationResult.result().map(wccResult -> {
+    static Stream<SccStreamResult> toStreamResult(
+        StreamComputationResult<HugeLongArray> computationResult,
+        SccStreamConfig configuration
+    ) {
+        return computationResult.result().map(sccResult -> {
             var graph = computationResult.graph();
-            var components = computationResult.result().orElseGet(() -> HugeLongArray.newArray(0));
+            var nodePropertyValues = CommunityResultCompanion.nodePropertyValues(
+                false,
+                configuration.consecutiveIds(),
+                NodePropertyValuesAdapter.adapt(sccResult),
+                Optional.empty(),
+                configuration.concurrency()
+            );
             return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
-                .filter(i -> components.get(i) != UNORDERED)
-                .mapToObj(i -> new SccStreamResult(graph.toOriginalNodeId(i), components.get(i)));
+                .filter(nodePropertyValues::hasValue)
+                .mapToObj(i -> new SccStreamResult(
+                    graph.toOriginalNodeId(i),
+                    nodePropertyValues.longValue(i)
+                ));
 
         }).orElseGet(Stream::empty);
     }

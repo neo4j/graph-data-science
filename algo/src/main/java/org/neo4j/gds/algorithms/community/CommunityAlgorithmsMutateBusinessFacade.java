@@ -252,7 +252,11 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         return mutateNodeProperty(
             algorithmResult,
             configuration,
-            (result, config) -> NodePropertyValuesAdapter.adapt(result),
+            (result, config) -> CommunityResultCompanion.nodePropertyValues(
+                false,
+                config.consecutiveIds(),
+                NodePropertyValuesAdapter.adapt(result)
+            ),
             (result -> result::get),
             (result, componentCount, communitySummary) -> {
                 return new StandardCommunityStatisticsSpecificFields(

@@ -28,6 +28,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 
+import java.util.HashSet;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -105,6 +106,25 @@ class SccStreamProcTest extends BaseProcTest {
 
 
         // 3 sets with 3 elements each
+
+    }
+
+    @Test
+    void shouldStreamWithConsecutiveIds() {
+
+        String query = GdsCypher
+            .call(DEFAULT_GRAPH_NAME)
+            .algo("gds.scc")
+            .streamMode()
+            .addParameter("consecutiveIds", true)
+            .yields();
+
+        HashSet<Long> components = new HashSet<>();
+        runQueryWithRowConsumer(query, row ->
+            components.add(row.getNumber("componentId").longValue())
+        );
+
+        assertThat(components).containsExactly(0L, 1L, 2L);
 
     }
 }

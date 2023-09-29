@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.scc;
 
+import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
@@ -62,14 +63,25 @@ public class SccWriteSpec implements AlgorithmSpec<Scc, HugeLongArray, SccWriteC
 
     @Override
     public ComputationResultConsumer<Scc, HugeLongArray, SccWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+
+
         return new WriteNodePropertiesComputationResultConsumer<>(
             this::resultBuilder,
-            computationResult -> List.of(ImmutableNodeProperty.of(
+            computationResult -> {
+                var config = computationResult.config();
+                var nodeProperties =
+                    CommunityProcCompanion.nodeProperties(
+                        config,
+                        computationResult.result()
+                            .map(NodePropertyValuesAdapter::adapt)
+                            .orElse(EmptyLongNodePropertyValues.INSTANCE)
+                    );
+
+                return List.of(ImmutableNodeProperty.of(
                 computationResult.config().writeProperty(),
-                computationResult.result()
-                    .map(NodePropertyValuesAdapter::adapt)
-                    .orElse(EmptyLongNodePropertyValues.INSTANCE)
-            )),
+                    nodeProperties
+                ));
+            },
             name()
         );
     }

@@ -473,7 +473,7 @@ public class CommunityProcedureFacade {
             databaseId
         );
 
-        return SccComputationResultTransformer.toStreamResult(computationResult);
+        return SccComputationResultTransformer.toStreamResult(computationResult, streamConfig);
     }
 
     public Stream<SccMutateResult> sccMutate(

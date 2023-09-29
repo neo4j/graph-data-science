@@ -64,6 +64,8 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+include::partial$/algorithms/scc/specific-configuration.adoc[]
+
 |===
 
 .Results
@@ -99,6 +101,8 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+include::partial$/algorithms/scc/specific-configuration.adoc[]
+
 |===
 
 .Results
@@ -140,6 +144,7 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
+include::partial$/algorithms/scc/specific-configuration.adoc[]
 |===
 
 .Results
@@ -184,6 +189,8 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
+include::partial$/algorithms/scc/specific-configuration.adoc[]
+
 |===
 
 .Results
