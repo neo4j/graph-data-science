@@ -36,7 +36,7 @@ class SccAlgorithmFactoryTest {
 
         var memoryUsage = estimate.memoryUsage();
         assertThat(memoryUsage.min).isEqualTo(36348L);
-        assertThat(memoryUsage.max).isEqualTo(101916L);
+        assertThat(memoryUsage.max).isEqualTo(69132L);
     }
 
 }
