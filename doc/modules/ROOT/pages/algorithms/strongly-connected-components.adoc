@@ -4,6 +4,7 @@
 :description: This section describes the Strongly Connected Components algorithm in the Neo4j Graph Data Science library.
 :result: component
 :entity: node
+
 The Strongly Connected Components (SCC) algorithm finds maximal sets of connected nodes in a directed graph.
 A set is considered a strongly connected component if there is a directed path between each pair of nodes within the set.
 It is often used early in a graph analysis process to help us get an idea of how our graph is structured.
