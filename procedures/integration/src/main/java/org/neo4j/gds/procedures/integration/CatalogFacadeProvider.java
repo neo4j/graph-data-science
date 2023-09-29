@@ -192,7 +192,7 @@ public class CatalogFacadeProvider {
 
         // Derived data and services
         var databaseId = databaseIdAccessor.getDatabaseId(graphDatabaseService);
-        var graphProjectMemoryUsage = new GraphProjectMemoryUsageService(log, graphDatabaseService);
+        var graphProjectMemoryUsageService = new GraphProjectMemoryUsageService(log, graphDatabaseService);
         var procedureReturnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
         var streamCloser = new Consumer<AutoCloseable>() {
             @Override
@@ -227,17 +227,15 @@ public class CatalogFacadeProvider {
             new GenericProjectApplication<>(
                 log,
                 graphStoreCatalogService,
-                graphProjectMemoryUsage, // request scope so need to change
                 GraphProjectNativeResult.Builder::new
-            ), graphProjectMemoryUsage
+            )
         );
         var cypherProjectApplication = new CypherProjectApplication(
             new GenericProjectApplication<>(
                 log,
                 graphStoreCatalogService,
-                graphProjectMemoryUsage, // request scope so need to change
                 GraphProjectCypherResult.Builder::new
-            ), graphProjectMemoryUsage
+            )
         );
         // request scope so need to change
         var writeNodePropertiesApplication = new WriteNodePropertiesApplication(log, nodePropertyExporterBuilder);
@@ -285,6 +283,7 @@ public class CatalogFacadeProvider {
             streamCloser,
             databaseId,
             graphDatabaseService,
+            graphProjectMemoryUsageService,
             procedureReturnColumns,
             taskRegistryFactory,
             terminationFlag,

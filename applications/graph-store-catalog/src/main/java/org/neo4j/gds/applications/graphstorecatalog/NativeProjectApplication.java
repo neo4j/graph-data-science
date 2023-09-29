@@ -36,22 +36,19 @@ public class NativeProjectApplication {
         GraphProjectFromStoreConfig,
         GraphProjectNativeResult.Builder> genericProjectApplication;
 
-    private final GraphProjectMemoryUsageService graphProjectMemoryUsageService;
-
     public NativeProjectApplication(
         GenericProjectApplication<
             GraphProjectNativeResult,
             GraphProjectFromStoreConfig,
-            GraphProjectNativeResult.Builder> genericProjectApplication,
-        GraphProjectMemoryUsageService graphProjectMemoryUsageService
+            GraphProjectNativeResult.Builder> genericProjectApplication
     ) {
-        this.graphProjectMemoryUsageService = graphProjectMemoryUsageService;
         this.genericProjectApplication = genericProjectApplication;
     }
 
     public GraphProjectNativeResult project(
         DatabaseId databaseId,
         GraphDatabaseService graphDatabaseService,
+        GraphProjectMemoryUsageService graphProjectMemoryUsageService,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
@@ -61,6 +58,7 @@ public class NativeProjectApplication {
         return genericProjectApplication.project(
             databaseId,
             graphDatabaseService,
+            graphProjectMemoryUsageService,
             taskRegistryFactory,
             terminationFlag,
             transactionContext,
@@ -71,13 +69,17 @@ public class NativeProjectApplication {
 
     public MemoryEstimateResult estimate(
         DatabaseId databaseId,
+        GraphProjectMemoryUsageService graphProjectMemoryUsageService,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
         UserLogRegistryFactory userLogRegistryFactory,
         GraphProjectConfig configuration
     ) {
-        if (configuration.isFictitiousLoading()) return estimateButFictitiously(configuration);
+        if (configuration.isFictitiousLoading()) return estimateButFictitiously(
+            graphProjectMemoryUsageService,
+            configuration
+        );
 
         var memoryTreeWithDimensions = graphProjectMemoryUsageService.getEstimate(
             databaseId,
@@ -94,7 +96,10 @@ public class NativeProjectApplication {
     /**
      * Public because EstimationCLI tests needs it. Should redesign something here I think
      */
-    public MemoryEstimateResult estimateButFictitiously(GraphProjectConfig configuration) {
+    public MemoryEstimateResult estimateButFictitiously(
+        GraphProjectMemoryUsageService graphProjectMemoryUsageService,
+        GraphProjectConfig configuration
+    ) {
         var estimate = graphProjectMemoryUsageService.getFictitiousEstimate(configuration);
 
         return new MemoryEstimateResult(estimate);

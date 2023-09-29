@@ -46,25 +46,22 @@ import java.util.function.Function;
 public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIGURATION extends GraphProjectConfig, RESULT_BUILDER extends GraphProjectResult.Builder<RESULT>> {
     private final Log log;
     private final GraphStoreCatalogService graphStoreCatalogService;
-    private final GraphProjectMemoryUsageService graphProjectMemoryUsageService;
-
     private final Function<CONFIGURATION, RESULT_BUILDER> resultBuilderFactory;
 
     public GenericProjectApplication(
         Log log,
         GraphStoreCatalogService graphStoreCatalogService,
-        GraphProjectMemoryUsageService graphProjectMemoryUsageService,
         Function<CONFIGURATION, RESULT_BUILDER> resultBuilderFactory
     ) {
         this.log = log;
         this.graphStoreCatalogService = graphStoreCatalogService;
-        this.graphProjectMemoryUsageService = graphProjectMemoryUsageService;
         this.resultBuilderFactory = resultBuilderFactory;
     }
 
     public RESULT project(
         DatabaseId databaseId,
         GraphDatabaseService graphDatabaseService,
+        GraphProjectMemoryUsageService graphProjectMemoryUsageService,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
@@ -75,6 +72,7 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
             return projectGraph(
                 databaseId,
                 graphDatabaseService,
+                graphProjectMemoryUsageService,
                 taskRegistryFactory,
                 terminationFlag,
                 transactionContext,
@@ -89,13 +87,17 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
 
     public MemoryEstimateResult estimate(
         DatabaseId databaseId,
+        GraphProjectMemoryUsageService graphProjectMemoryUsageService,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
         UserLogRegistryFactory userLogRegistryFactory,
         GraphProjectConfig configuration
     ) {
-        if (configuration.isFictitiousLoading()) return estimateButFictitiously(configuration);
+        if (configuration.isFictitiousLoading()) return estimateButFictitiously(
+            graphProjectMemoryUsageService,
+            configuration
+        );
 
         var memoryTreeWithDimensions = graphProjectMemoryUsageService.getEstimate(
             databaseId,
@@ -112,6 +114,7 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
     private RESULT projectGraph(
         DatabaseId databaseId,
         GraphDatabaseService graphDatabaseService,
+        GraphProjectMemoryUsageService graphProjectMemoryUsageService,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
@@ -157,7 +160,10 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
     /**
      * Public because EstimationCLI tests needs it. Should redesign something here I think
      */
-    public MemoryEstimateResult estimateButFictitiously(GraphProjectConfig configuration) {
+    public MemoryEstimateResult estimateButFictitiously(
+        GraphProjectMemoryUsageService graphProjectMemoryUsageService,
+        GraphProjectConfig configuration
+    ) {
         var estimate = graphProjectMemoryUsageService.getFictitiousEstimate(configuration);
 
         return new MemoryEstimateResult(estimate);

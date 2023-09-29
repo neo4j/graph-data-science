@@ -206,6 +206,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         User user,
         DatabaseId databaseId,
         GraphDatabaseService graphDatabaseService,
+        GraphProjectMemoryUsageService graphProjectMemoryUsageService,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
@@ -228,6 +229,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         return nativeProjectApplication.project(
             databaseId,
             graphDatabaseService,
+            graphProjectMemoryUsageService,
             taskRegistryFactory,
             terminationFlag,
             transactionContext,
@@ -239,6 +241,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
     @Override
     public MemoryEstimateResult estimateNativeProject(
         DatabaseId databaseId,
+        GraphProjectMemoryUsageService graphProjectMemoryUsageService,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
@@ -255,6 +258,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
 
         return nativeProjectApplication.estimate(
             databaseId,
+            graphProjectMemoryUsageService,
             taskRegistryFactory,
             terminationFlag,
             transactionContext,
@@ -268,6 +272,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         User user,
         DatabaseId databaseId,
         GraphDatabaseService graphDatabaseService,
+        GraphProjectMemoryUsageService graphProjectMemoryUsageService,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
@@ -290,6 +295,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         return cypherProjectApplication.project(
             databaseId,
             graphDatabaseService,
+            graphProjectMemoryUsageService,
             taskRegistryFactory,
             terminationFlag,
             transactionContext,
@@ -301,6 +307,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
     @Override
     public MemoryEstimateResult estimateCypherProject(
         DatabaseId databaseId,
+        GraphProjectMemoryUsageService graphProjectMemoryUsageService,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
@@ -317,6 +324,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
 
         return cypherProjectApplication.estimate(
             databaseId,
+            graphProjectMemoryUsageService,
             taskRegistryFactory,
             terminationFlag,
             transactionContext,

@@ -25,6 +25,7 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.GraphGenerationStats;
 import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsage;
+import org.neo4j.gds.applications.graphstorecatalog.GraphProjectMemoryUsageService;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStreamNodePropertiesResult;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStreamNodePropertyOrPropertiesResultProducer;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStreamNodePropertyResult;
@@ -79,6 +80,7 @@ public class CatalogFacade {
     private final Consumer<AutoCloseable> streamCloser;
     private final DatabaseId databaseId;
     private final GraphDatabaseService graphDatabaseService;
+    private final GraphProjectMemoryUsageService graphProjectMemoryUsageService;
     private final ProcedureReturnColumns procedureReturnColumns;
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationFlag terminationFlag;
@@ -97,6 +99,7 @@ public class CatalogFacade {
         Consumer<AutoCloseable> streamCloser,
         DatabaseId databaseId,
         GraphDatabaseService graphDatabaseService,
+        GraphProjectMemoryUsageService graphProjectMemoryUsageService,
         ProcedureReturnColumns procedureReturnColumns,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
@@ -109,6 +112,7 @@ public class CatalogFacade {
         this.streamCloser = streamCloser;
         this.databaseId = databaseId;
         this.graphDatabaseService = graphDatabaseService;
+        this.graphProjectMemoryUsageService = graphProjectMemoryUsageService;
         this.procedureReturnColumns = procedureReturnColumns;
         this.taskRegistryFactory = taskRegistryFactory;
         this.terminationFlag = terminationFlag;
@@ -205,6 +209,7 @@ public class CatalogFacade {
             user,
             databaseId,
             graphDatabaseService,
+            graphProjectMemoryUsageService,
             taskRegistryFactory,
             terminationFlag,
             transactionContext,
@@ -226,6 +231,7 @@ public class CatalogFacade {
     ) {
         var result = businessFacade.estimateNativeProject(
             databaseId,
+            graphProjectMemoryUsageService,
             taskRegistryFactory,
             terminationFlag,
             transactionContext,
@@ -248,6 +254,7 @@ public class CatalogFacade {
             user,
             databaseId,
             graphDatabaseService,
+            graphProjectMemoryUsageService,
             taskRegistryFactory,
             terminationFlag,
             transactionContext,
@@ -268,6 +275,7 @@ public class CatalogFacade {
     ) {
         var result = businessFacade.estimateCypherProject(
             databaseId,
+            graphProjectMemoryUsageService,
             taskRegistryFactory,
             terminationFlag,
             transactionContext,

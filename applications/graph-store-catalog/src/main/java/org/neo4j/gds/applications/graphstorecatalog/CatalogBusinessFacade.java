@@ -62,6 +62,7 @@ public interface CatalogBusinessFacade {
         User user,
         DatabaseId databaseId,
         GraphDatabaseService graphDatabaseService,
+        GraphProjectMemoryUsageService graphProjectMemoryUsageService,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
@@ -74,6 +75,7 @@ public interface CatalogBusinessFacade {
 
     MemoryEstimateResult estimateNativeProject(
         DatabaseId databaseId,
+        GraphProjectMemoryUsageService graphProjectMemoryUsageService,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
@@ -87,6 +89,7 @@ public interface CatalogBusinessFacade {
         User user,
         DatabaseId databaseId,
         GraphDatabaseService graphDatabaseService,
+        GraphProjectMemoryUsageService graphProjectMemoryUsageService,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
@@ -99,6 +102,7 @@ public interface CatalogBusinessFacade {
 
     MemoryEstimateResult estimateCypherProject(
         DatabaseId databaseId,
+        GraphProjectMemoryUsageService graphProjectMemoryUsageService,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
