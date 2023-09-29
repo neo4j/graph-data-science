@@ -85,6 +85,8 @@ public class Scc extends Algorithm<HugeLongArray> {
 
         todo.clear();
 
+        push(Action.VISIT_NODE, nodeId);
+
         while (!todo.isEmpty()) {
             var action = todo.pop();
             var node = todo.pop();
