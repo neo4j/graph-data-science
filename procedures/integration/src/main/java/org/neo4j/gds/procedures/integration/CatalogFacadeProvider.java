@@ -46,7 +46,6 @@ import org.neo4j.gds.applications.graphstorecatalog.WriteNodeLabelApplication;
 import org.neo4j.gds.applications.graphstorecatalog.WriteNodePropertiesApplication;
 import org.neo4j.gds.applications.graphstorecatalog.WriteRelationshipPropertiesApplication;
 import org.neo4j.gds.applications.graphstorecatalog.WriteRelationshipsApplication;
-import org.neo4j.gds.beta.filter.GraphStoreFilterService;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.write.ExporterContext;
@@ -81,7 +80,6 @@ public class CatalogFacadeProvider {
     private final Log log;
     private final GraphNameValidationService graphNameValidationService;
     private final GraphStoreCatalogService graphStoreCatalogService;
-    private final GraphStoreFilterService graphStoreFilterService;
     private final GraphStoreValidationService graphStoreValidationService;
     private final ProcedureTransactionAccessor procedureTransactionAccessor;
 
@@ -95,6 +93,21 @@ public class CatalogFacadeProvider {
     private final UserLogServices userLogServices;
     private final UserAccessor userAccessor;
 
+    // applications
+    private final DropGraphApplication dropGraphApplication;
+    private final ListGraphApplication listGraphApplication;
+    private final SubGraphProjectApplication subGraphProjectApplication;
+    private final GraphMemoryUsageApplication graphMemoryUsageApplication;
+    private final DropNodePropertiesApplication dropNodePropertiesApplication;
+    private final DropRelationshipsApplication dropRelationshipsApplication;
+    private final NodeLabelMutatorApplication nodeLabelMutatorApplication;
+    private final StreamNodePropertiesApplication streamNodePropertiesApplication;
+    private final StreamRelationshipPropertiesApplication streamRelationshipPropertiesApplication;
+    private final StreamRelationshipsApplication streamRelationshipsApplication;
+    private final GraphSamplingApplication graphSamplingApplication;
+    private final EstimateCommonNeighbourAwareRandomWalkApplication estimateCommonNeighbourAwareRandomWalkApplication;
+    private final GenerateGraphApplication generateGraphApplication;
+
     // Business logic
     private final Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator;
 
@@ -104,12 +117,11 @@ public class CatalogFacadeProvider {
      * Without it, I would have to stub out Neo4j's {@link org.neo4j.kernel.api.procedure.Context}, in a non-trivial,
      * ugly way. Now instead I can inject the user by stubbing out GDS' own little POJO service.
      */
-    public CatalogFacadeProvider(
+    CatalogFacadeProvider(
         CatalogConfigurationService catalogConfigurationService,
         Log log,
         GraphNameValidationService graphNameValidationService,
         GraphStoreCatalogService graphStoreCatalogService,
-        GraphStoreFilterService graphStoreFilterService,
         GraphStoreValidationService graphStoreValidationService,
         ProcedureTransactionAccessor procedureTransactionAccessor,
         DatabaseIdAccessor databaseIdAccessor,
@@ -120,12 +132,24 @@ public class CatalogFacadeProvider {
         TransactionContextAccessor transactionContextAccessor,
         UserLogServices userLogServices,
         UserAccessor userAccessor,
+        DropGraphApplication dropGraphApplication,
+        DropNodePropertiesApplication dropNodePropertiesApplication,
+        DropRelationshipsApplication dropRelationshipsApplication,
+        EstimateCommonNeighbourAwareRandomWalkApplication estimateCommonNeighbourAwareRandomWalkApplication,
+        GenerateGraphApplication generateGraphApplication,
+        GraphMemoryUsageApplication graphMemoryUsageApplication,
+        GraphSamplingApplication graphSamplingApplication,
+        ListGraphApplication listGraphApplication,
+        NodeLabelMutatorApplication nodeLabelMutatorApplication,
+        StreamNodePropertiesApplication streamNodePropertiesApplication,
+        StreamRelationshipPropertiesApplication streamRelationshipPropertiesApplication,
+        StreamRelationshipsApplication streamRelationshipsApplication,
+        SubGraphProjectApplication subGraphProjectApplication,
         Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator
     ) {
         this.catalogConfigurationService = catalogConfigurationService;
         this.graphNameValidationService = graphNameValidationService;
         this.graphStoreCatalogService = graphStoreCatalogService;
-        this.graphStoreFilterService = graphStoreFilterService;
         this.graphStoreValidationService = graphStoreValidationService;
         this.log = log;
         this.procedureTransactionAccessor = procedureTransactionAccessor;
@@ -139,6 +163,20 @@ public class CatalogFacadeProvider {
         this.userLogServices = userLogServices;
         this.userAccessor = userAccessor;
 
+        this.dropGraphApplication = dropGraphApplication;
+        this.listGraphApplication = listGraphApplication;
+        this.subGraphProjectApplication = subGraphProjectApplication;
+        this.graphMemoryUsageApplication = graphMemoryUsageApplication;
+        this.dropNodePropertiesApplication = dropNodePropertiesApplication;
+        this.dropRelationshipsApplication = dropRelationshipsApplication;
+        this.nodeLabelMutatorApplication = nodeLabelMutatorApplication;
+        this.streamNodePropertiesApplication = streamNodePropertiesApplication;
+        this.streamRelationshipPropertiesApplication = streamRelationshipPropertiesApplication;
+        this.streamRelationshipsApplication = streamRelationshipsApplication;
+        this.graphSamplingApplication = graphSamplingApplication;
+        this.estimateCommonNeighbourAwareRandomWalkApplication = estimateCommonNeighbourAwareRandomWalkApplication;
+        this.generateGraphApplication = generateGraphApplication;
+
         this.businessFacadeDecorator = businessFacadeDecorator;
     }
 
@@ -146,7 +184,7 @@ public class CatalogFacadeProvider {
      * We construct the catalog facade at request time. At this point things like user and database id are set in stone.
      * And we can readily construct things like termination flags.
      */
-    public CatalogFacade createCatalogFacade(Context context) {
+    CatalogFacade createCatalogFacade(Context context) {
         // Neo4j's basic request scoped services
         var graphDatabaseService = context.graphDatabaseAPI();
         var kernelTransaction = kernelTransactionAccessor.getKernelTransaction(context);
@@ -185,38 +223,25 @@ public class CatalogFacadeProvider {
         var relationshipExporterBuilder = exportBuildersProvider.relationshipExporterBuilder(exporterContext);
 
         // GDS applications
-        var dropGraphApplication = new DropGraphApplication(graphStoreCatalogService);
-        var listGraphApplication = new ListGraphApplication(graphStoreCatalogService);
         var nativeProjectApplication = new NativeProjectApplication(
             new GenericProjectApplication<>(
                 log,
-                graphDatabaseService,
+                graphDatabaseService, // request scope so need to change
                 graphStoreCatalogService,
-                graphProjectMemoryUsage,
+                graphProjectMemoryUsage, // request scope so need to change
                 GraphProjectNativeResult.Builder::new
             ), graphProjectMemoryUsage
         );
         var cypherProjectApplication = new CypherProjectApplication(
             new GenericProjectApplication<>(
                 log,
-                graphDatabaseService,
+                graphDatabaseService, // request scope so need to change
                 graphStoreCatalogService,
-                graphProjectMemoryUsage,
+                graphProjectMemoryUsage, // request scope so need to change
                 GraphProjectCypherResult.Builder::new
             ), graphProjectMemoryUsage
         );
-        var subGraphProjectApplication = new SubGraphProjectApplication(
-            log,
-            graphStoreFilterService,
-            graphStoreCatalogService
-        );
-        var graphMemoryUsageApplication = new GraphMemoryUsageApplication(graphStoreCatalogService);
-        var dropNodePropertiesApplication = new DropNodePropertiesApplication(log);
-        var dropRelationshipsApplication = new DropRelationshipsApplication(log);
-        var nodeLabelMutatorApplication = new NodeLabelMutatorApplication();
-        var streamNodePropertiesApplication = new StreamNodePropertiesApplication(log);
-        var streamRelationshipPropertiesApplication = new StreamRelationshipPropertiesApplication(log);
-        var streamRelationshipsApplication = new StreamRelationshipsApplication();
+        // request scope so need to change
         var writeNodePropertiesApplication = new WriteNodePropertiesApplication(log, nodePropertyExporterBuilder);
         var writeRelationshipPropertiesApplication = new WriteRelationshipPropertiesApplication(
             log,
@@ -224,9 +249,6 @@ public class CatalogFacadeProvider {
         );
         var writeNodeLabelApplication = new WriteNodeLabelApplication(log, nodeLabelExporterBuilder);
         var writeRelationshipsApplication = new WriteRelationshipsApplication(log, relationshipExporterBuilder);
-        var graphSamplingApplication = new GraphSamplingApplication(log, graphStoreCatalogService);
-        var estimateCommonNeighbourAwareRandomWalkApplication = new EstimateCommonNeighbourAwareRandomWalkApplication();
-        var generateGraphApplication = new GenerateGraphApplication(log, graphStoreCatalogService);
 
         // GDS business facade
         CatalogBusinessFacade businessFacade = new DefaultCatalogBusinessFacade(

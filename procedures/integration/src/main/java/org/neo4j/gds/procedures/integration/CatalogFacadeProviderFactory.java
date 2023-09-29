@@ -21,8 +21,21 @@ package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogConfigurationService;
+import org.neo4j.gds.applications.graphstorecatalog.DropGraphApplication;
+import org.neo4j.gds.applications.graphstorecatalog.DropNodePropertiesApplication;
+import org.neo4j.gds.applications.graphstorecatalog.DropRelationshipsApplication;
+import org.neo4j.gds.applications.graphstorecatalog.EstimateCommonNeighbourAwareRandomWalkApplication;
+import org.neo4j.gds.applications.graphstorecatalog.GenerateGraphApplication;
+import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsageApplication;
 import org.neo4j.gds.applications.graphstorecatalog.GraphNameValidationService;
+import org.neo4j.gds.applications.graphstorecatalog.GraphSamplingApplication;
 import org.neo4j.gds.applications.graphstorecatalog.GraphStoreValidationService;
+import org.neo4j.gds.applications.graphstorecatalog.ListGraphApplication;
+import org.neo4j.gds.applications.graphstorecatalog.NodeLabelMutatorApplication;
+import org.neo4j.gds.applications.graphstorecatalog.StreamNodePropertiesApplication;
+import org.neo4j.gds.applications.graphstorecatalog.StreamRelationshipPropertiesApplication;
+import org.neo4j.gds.applications.graphstorecatalog.StreamRelationshipsApplication;
+import org.neo4j.gds.applications.graphstorecatalog.SubGraphProjectApplication;
 import org.neo4j.gds.beta.filter.GraphStoreFilterService;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.logging.Log;
@@ -70,23 +83,56 @@ public class CatalogFacadeProviderFactory {
         var procedureTransactionAccessor = new ProcedureTransactionAccessor();
         var transactionContextAccessor = new TransactionContextAccessor();
 
+        /*
+         * The applications capture business logic that is not generally reusable - if it was,
+         * it would be domain layer stuff. So we just need to squirrel them away somewhere.
+         */
+        var dropGraphApplication = new DropGraphApplication(graphStoreCatalogService);
+        var dropNodePropertiesApplication = new DropNodePropertiesApplication(log);
+        var dropRelationshipsApplication = new DropRelationshipsApplication(log);
+        var estimateCommonNeighbourAwareRandomWalkApplication = new EstimateCommonNeighbourAwareRandomWalkApplication();
+        var generateGraphApplication = new GenerateGraphApplication(log, graphStoreCatalogService);
+        var graphMemoryUsageApplication = new GraphMemoryUsageApplication(graphStoreCatalogService);
+        var graphSamplingApplication = new GraphSamplingApplication(log, graphStoreCatalogService);
+        var listGraphApplication = new ListGraphApplication(graphStoreCatalogService);
+        var nodeLabelMutatorApplication = new NodeLabelMutatorApplication();
+        var streamNodePropertiesApplication = new StreamNodePropertiesApplication(log);
+        var streamRelationshipPropertiesApplication = new StreamRelationshipPropertiesApplication(log);
+        var streamRelationshipsApplication = new StreamRelationshipsApplication();
+        var subGraphProjectApplication = new SubGraphProjectApplication(
+            log,
+            graphStoreFilterService,
+            graphStoreCatalogService
+        );
         return new CatalogFacadeProvider(
             catalogConfigurationService,
             log,
             graphNameValidationService,
             graphStoreCatalogService,
-            graphStoreFilterService,
             graphStoreValidationService,
             procedureTransactionAccessor,
             databaseIdAccessor,
-            exporterBuildersProviderService, // we always just offer native writes in OpenGDS
+            exporterBuildersProviderService,
             kernelTransactionAccessor,
             taskRegistryFactoryService,
             terminationFlagService,
             transactionContextAccessor,
             userLogServices,
             userServices,
-            businessFacadeDecorator // we have no extra checks to do in OpenGDS
+            dropGraphApplication,
+            dropNodePropertiesApplication,
+            dropRelationshipsApplication,
+            estimateCommonNeighbourAwareRandomWalkApplication,
+            generateGraphApplication,
+            graphMemoryUsageApplication,
+            graphSamplingApplication,
+            listGraphApplication,
+            nodeLabelMutatorApplication,
+            streamNodePropertiesApplication,
+            streamRelationshipPropertiesApplication,
+            streamRelationshipsApplication,
+            subGraphProjectApplication,
+            businessFacadeDecorator
         );
     }
 }
