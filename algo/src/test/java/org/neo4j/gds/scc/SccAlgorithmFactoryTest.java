@@ -32,11 +32,11 @@ class SccAlgorithmFactoryTest {
         var config = SccStreamConfigImpl.builder().build();
         var factory = new SccAlgorithmFactory<>();
         var estimate = factory.memoryEstimation(config)
-            .estimate(GraphDimensions.of(100, 3000), config.concurrency());
+            .estimate(GraphDimensions.of(100, 6000), config.concurrency());
 
         var memoryUsage = estimate.memoryUsage();
         assertThat(memoryUsage.min).isEqualTo(36348L);
-        assertThat(memoryUsage.max).isEqualTo(69132L);
+        assertThat(memoryUsage.max).isEqualTo(101916L);
     }
 
 }
