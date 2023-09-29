@@ -35,6 +35,10 @@ import static org.neo4j.gds.scc.Scc.SCC_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class SccStreamProc {
+
+    private static final String ESTIMATE_DESCRIPTION = "Returns an estimation of the memory consumption for that procedure.";
+
+
     @Context
     public GraphDataScience facade;
 
