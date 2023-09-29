@@ -3,16 +3,12 @@
 :page-aliases: management-ops/node-properties.adoc
 
 
-You can create graphs from different data sources.
+You can create a GDS graph from any of the following data sources:
 
-* From a Neo4j database by using either of
-** xref:management-ops/graph-creation/graph-project.adoc[Native projection]
-** xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[Cypher projection] for more complex projections
-* From external sources via an xref:management-ops/graph-export/graph-catalog-apache-arrow-ops.adoc[Apache Arrow connection].
-* From existing named graphs by either of
-** xref:management-ops/graph-creation/graph-filter.adoc[Filtering]
-** xref:management-ops/graph-creation/sampling/rwr.adoc[Sampling]
-* From xref:management-ops/graph-creation/graph-generation.adoc[Random data]
+* A Neo4j database, using a xref:management-ops/graph-creation/graph-project.adoc[native projection] (for ease of use) or a xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[Cypher projection] (for higher flexibility)
+* An external source, via an xref:management-ops/graph-export/graph-catalog-apache-arrow-ops.adoc[Apache Arrow connection]
+* An existing named graph, using xref:management-ops/graph-creation/graph-filter.adoc[filtering] or xref:management-ops/graph-creation/sampling/rwr.adoc[sampling]
+* xref:management-ops/graph-creation/graph-generation.adoc[Random data] (for testing purposes)
 
 Furthermore, the Python client provides several convenient methods to create graphs, for example from link:https://neo4j.com/docs/graph-data-science-client/current/graph-object/#construct[Pandas DataFrames] or some link:https://neo4j.com/docs/graph-data-science-client/current/common-datasets/[well-known datasets].
 
