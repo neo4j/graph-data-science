@@ -83,61 +83,22 @@ public class Scc extends Algorithm<HugeLongArray> {
             return true;
         }
 
-        todo.clear();
-
-        if (nodeId == 0) {
-            return computeForZero(); //specially handle 0 because -0 = 0;
-        }
-
-        todo.push(-nodeId);
+        todo.push(-nodeId); //push nodeId as a node visit
 
         while (!todo.isEmpty()) {
             var node = todo.pop();
 
             if (node < 0) { // if the node is <0, we know we are going to visit a node as a node
-
-                var actualNode = -node;
-
-                if (index.get(node) == UNORDERED) { //if the node has not been examined before, it is it's first visit
-                    visitNode(actualNode);
-                } else { //otherwise it is its last
-                    postVisitNode(actualNode);
-                }
-
-            } else { //otherwise it 's an  visit edge
+                distinguishNodeVisitType(-node);
+            } else if (node > 0) { //otherwise  if it's positive, then it 's an edge
                 visitEdge(node);
-            }
-        }
-        progressTracker.logProgress();
-        return true;
-    }
-
-
-    private boolean computeForZero() {
-
-        visitNode(0);//we know the first action:   we visit node 0
-        //visit node pushes  0 at the stack and it will remain until the end there
-        while (!todo.isEmpty()) {
-            var node = todo.pop();
-
-            if (node < 0) { // if the node is <0, we know we are going to visit a node as a node
-
-                var actualNode = -node;
-
-                if (index.get(node) == UNORDERED) { //if the node has not been examined before, it is it's first visit
-                    visitNode(actualNode);
-                } else { //otherwise it is its last
-                    postVisitNode(actualNode);
-                }
-
-            } else if (node > 0) { //otherwise it 's an edge
-                visitEdge(node);
-            } else { //the zero case
-                //-0 = 0 , so a 0 can indicate two things either a visit edge to 0, or the post visit to 0 which will conclude this loop
-                //so depending on whether stack is empty or not we can distinguish between the two cases
+            } else { //the 0 case
+                //-0 = 0 , so a 0 can indicate two things:
+                // (i) either a visit edge to 0
+                // (ii) or a node visit to 0 (here stuck must be empty: either it's the first action or the last)
                 if (todo.isEmpty()) {
-                    postVisitNode(0);
-                } else {
+                    distinguishNodeVisitType(0);
+                } else {    //otherwise, it's an edge action, do so
                     visitEdge(0);
                 }
             }
@@ -146,6 +107,13 @@ public class Scc extends Algorithm<HugeLongArray> {
         return true;
     }
 
+    private void distinguishNodeVisitType(long node) {
+        if (index.get(node) != UNORDERED) { //last visit
+            postVisitNode(node);
+        } else {            //first visit
+            visitNode(node);
+        }
+    }
 
     private void visitNode(long nodeId) {
         final long stackSize = stack.size();
