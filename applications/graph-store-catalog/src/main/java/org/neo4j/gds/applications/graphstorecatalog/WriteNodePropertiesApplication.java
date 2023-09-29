@@ -44,15 +44,14 @@ import java.util.stream.Collectors;
 
 public class WriteNodePropertiesApplication {
     private final Log log;
-    private final NodePropertyExporterBuilder nodePropertyExporterBuilder;
 
-    public WriteNodePropertiesApplication(Log log, NodePropertyExporterBuilder nodePropertyExporterBuilder) {
+    public WriteNodePropertiesApplication(Log log) {
         this.log = log;
-        this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
     }
 
     NodePropertiesWriteResult write(
         GraphStore graphStore,
+        NodePropertyExporterBuilder nodePropertyExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         UserLogRegistryFactory userLogRegistryFactory,

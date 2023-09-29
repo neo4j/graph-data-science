@@ -48,6 +48,7 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogStore;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.projection.GraphProjectNativeResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -81,6 +82,7 @@ public class CatalogFacade {
     private final DatabaseId databaseId;
     private final GraphDatabaseService graphDatabaseService;
     private final GraphProjectMemoryUsageService graphProjectMemoryUsageService;
+    private final NodePropertyExporterBuilder nodePropertyExporterBuilder;
     private final ProcedureReturnColumns procedureReturnColumns;
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationFlag terminationFlag;
@@ -100,6 +102,7 @@ public class CatalogFacade {
         DatabaseId databaseId,
         GraphDatabaseService graphDatabaseService,
         GraphProjectMemoryUsageService graphProjectMemoryUsageService,
+        NodePropertyExporterBuilder nodePropertyExporterBuilder,
         ProcedureReturnColumns procedureReturnColumns,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
@@ -113,6 +116,7 @@ public class CatalogFacade {
         this.databaseId = databaseId;
         this.graphDatabaseService = graphDatabaseService;
         this.graphProjectMemoryUsageService = graphProjectMemoryUsageService;
+        this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
         this.procedureReturnColumns = procedureReturnColumns;
         this.taskRegistryFactory = taskRegistryFactory;
         this.terminationFlag = terminationFlag;
@@ -512,6 +516,7 @@ public class CatalogFacade {
         var result = businessFacade.writeNodeProperties(
             user,
             databaseId,
+            nodePropertyExporterBuilder,
             taskRegistryFactory,
             terminationFlag,
             userLogRegistryFactory,

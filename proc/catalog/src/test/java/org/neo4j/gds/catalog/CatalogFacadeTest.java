@@ -48,6 +48,7 @@ class CatalogFacadeTest {
             null,
             null,
             null,
+            null,
             new User("current user", false),
             null,
             null,
@@ -79,6 +80,7 @@ class CatalogFacadeTest {
         var catalogFacade = new CatalogFacade(
             null,
             DatabaseId.of("current database"),
+            null,
             null,
             null,
             null,

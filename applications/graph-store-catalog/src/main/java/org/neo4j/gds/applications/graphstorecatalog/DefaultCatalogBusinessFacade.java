@@ -36,6 +36,7 @@ import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.graphsampling.RandomWalkBasedNodesSampler;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 import org.neo4j.gds.logging.Log;
@@ -643,6 +644,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
     public NodePropertiesWriteResult writeNodeProperties(
         User user,
         DatabaseId databaseId,
+        NodePropertyExporterBuilder nodePropertyExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         UserLogRegistryFactory userLogRegistryFactory,
@@ -670,12 +672,14 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
 
         graphStoreValidationService.ensureNodePropertiesMatchNodeLabels(
             graphStore,
-            nodeLabels, nodeLabelIdentifiers,
+            nodeLabels,
+            nodeLabelIdentifiers,
             nodeProperties
         );
 
         return writeNodePropertiesApplication.write(
             graphStore,
+            nodePropertyExporterBuilder,
             taskRegistryFactory,
             terminationFlag,
             userLogRegistryFactory,

@@ -106,6 +106,7 @@ public class CatalogFacadeProvider {
     private final StreamRelationshipPropertiesApplication streamRelationshipPropertiesApplication;
     private final StreamRelationshipsApplication streamRelationshipsApplication;
     private final SubGraphProjectApplication subGraphProjectApplication;
+    private final WriteNodePropertiesApplication writeNodePropertiesApplication;
 
     // Business logic
     private final Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator;
@@ -146,6 +147,7 @@ public class CatalogFacadeProvider {
         StreamRelationshipPropertiesApplication streamRelationshipPropertiesApplication,
         StreamRelationshipsApplication streamRelationshipsApplication,
         SubGraphProjectApplication subGraphProjectApplication,
+        WriteNodePropertiesApplication writeNodePropertiesApplication,
         Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator
     ) {
         this.catalogConfigurationService = catalogConfigurationService;
@@ -179,6 +181,7 @@ public class CatalogFacadeProvider {
         this.streamRelationshipPropertiesApplication = streamRelationshipPropertiesApplication;
         this.streamRelationshipsApplication = streamRelationshipsApplication;
         this.subGraphProjectApplication = subGraphProjectApplication;
+        this.writeNodePropertiesApplication = writeNodePropertiesApplication;
 
         this.businessFacadeDecorator = businessFacadeDecorator;
     }
@@ -227,7 +230,6 @@ public class CatalogFacadeProvider {
 
         // GDS applications
         // TODO request scope so need to change
-        var writeNodePropertiesApplication = new WriteNodePropertiesApplication(log, nodePropertyExporterBuilder);
         var writeRelationshipPropertiesApplication = new WriteRelationshipPropertiesApplication(
             log,
             relationshipPropertiesExporterBuilder
@@ -273,6 +275,7 @@ public class CatalogFacadeProvider {
             databaseId,
             graphDatabaseService,
             graphProjectMemoryUsageService,
+            nodePropertyExporterBuilder,
             procedureReturnColumns,
             taskRegistryFactory,
             terminationFlag,

@@ -112,17 +112,15 @@ class WriteNodePropertiesApplicationTest {
     @ParameterizedTest(name = "{1}")
     @MethodSource("nodeLabels")
     void writeNodeProperties(Object nodeLabels, String displayName) {
+        var nodePropertiesWriter = new WriteNodePropertiesApplication(new Neo4jBackedLogForTesting());
+
         var exporterBuilderMock = mock(NodePropertyExporterBuilder.class, Answers.RETURNS_SELF);
         var nodePropertyExporterMock = mock(NodePropertyExporter.class);
         when(exporterBuilderMock.build()).thenReturn(nodePropertyExporterMock);
         when(nodePropertyExporterMock.propertiesWritten()).thenReturn(8L, 11L);
-
-        var nodePropertiesWriter = new WriteNodePropertiesApplication(
-            new Neo4jBackedLogForTesting(),
-            exporterBuilderMock
-        );
         var writeResult = nodePropertiesWriter.write(
             graphStore,
+            exporterBuilderMock,
             EmptyTaskRegistryFactory.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
             EmptyUserLogRegistryFactory.INSTANCE,
@@ -158,17 +156,15 @@ class WriteNodePropertiesApplicationTest {
 
     @Test
     void writeNodePropertiesForLabel() {
+        var nodePropertiesWriter = new WriteNodePropertiesApplication(new Neo4jBackedLogForTesting());
+
         var exporterBuilderMock = mock(NodePropertyExporterBuilder.class, Answers.RETURNS_SELF);
         var nodePropertyExporterMock = mock(NodePropertyExporter.class);
         when(exporterBuilderMock.build()).thenReturn(nodePropertyExporterMock);
         when(nodePropertyExporterMock.propertiesWritten()).thenReturn(11L);
-
-        var nodePropertiesWriter = new WriteNodePropertiesApplication(
-            new Neo4jBackedLogForTesting(),
-            exporterBuilderMock
-        );
         var writeResult = nodePropertiesWriter.write(
             propertiesSubsetGraphStore,
+            exporterBuilderMock,
             EmptyTaskRegistryFactory.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
             EmptyUserLogRegistryFactory.INSTANCE,
@@ -198,16 +194,14 @@ class WriteNodePropertiesApplicationTest {
 
     @Test
     void writeNodePropertiesForLabelSubset() {
+        var nodePropertiesWriter = new WriteNodePropertiesApplication(new Neo4jBackedLogForTesting());
+
         var exporterBuilderMock = mock(NodePropertyExporterBuilder.class, Answers.RETURNS_SELF);
         var nodePropertyExporterMock = mock(NodePropertyExporter.class);
         when(exporterBuilderMock.build()).thenReturn(nodePropertyExporterMock);
-
-        var nodePropertiesWriter = new WriteNodePropertiesApplication(
-            new Neo4jBackedLogForTesting(),
-            exporterBuilderMock
-        );
         var writeResult = nodePropertiesWriter.write(
             graphStore,
+            exporterBuilderMock,
             EmptyTaskRegistryFactory.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
             EmptyUserLogRegistryFactory.INSTANCE,
@@ -236,16 +230,14 @@ class WriteNodePropertiesApplicationTest {
 
     @Test
     void shouldRenameSingleProperly() {
+        var nodePropertiesWriter = new WriteNodePropertiesApplication(new Neo4jBackedLogForTesting());
+
         var exporterBuilderMock = mock(NodePropertyExporterBuilder.class, Answers.RETURNS_SELF);
         var nodePropertyExporterMock = mock(NodePropertyExporter.class);
         when(exporterBuilderMock.build()).thenReturn(nodePropertyExporterMock);
-
-        var nodePropertiesWriter = new WriteNodePropertiesApplication(
-            new Neo4jBackedLogForTesting(),
-            exporterBuilderMock
-        );
         var writeResult = nodePropertiesWriter.write(
             graphStore,
+            exporterBuilderMock,
             EmptyTaskRegistryFactory.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
             EmptyUserLogRegistryFactory.INSTANCE,
@@ -271,16 +263,14 @@ class WriteNodePropertiesApplicationTest {
 
     @Test
     void shouldRenameMultipleProperties() {
+        var nodePropertiesWriter = new WriteNodePropertiesApplication(new Neo4jBackedLogForTesting());
+
         var exporterBuilderMock = mock(NodePropertyExporterBuilder.class, Answers.RETURNS_SELF);
         var nodePropertyExporterMock = mock(NodePropertyExporter.class);
         when(exporterBuilderMock.build()).thenReturn(nodePropertyExporterMock);
-
-        var nodePropertiesWriter = new WriteNodePropertiesApplication(
-            new Neo4jBackedLogForTesting(),
-            exporterBuilderMock
-        );
         var writeResult = nodePropertiesWriter.write(
             graphStore,
+            exporterBuilderMock,
             EmptyTaskRegistryFactory.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
             EmptyUserLogRegistryFactory.INSTANCE,
