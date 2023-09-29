@@ -41,7 +41,7 @@ public class Scc extends Algorithm<HugeLongArray> {
     private final HugeLongArray connectedComponents;
     private final HugeLongArray index;
     private final HugeLongArrayStack stack;
-    private final PagedLongStack todo; // stores pairs of (node-Id, TODO-Id)
+    private final PagedLongStack todo; // stores nodeIds either positive (edge visit) or negative (node visit)
     private final BitSet visited;
 
     public Scc(
@@ -69,7 +69,7 @@ public class Scc extends Algorithm<HugeLongArray> {
         index.fill(UNORDERED);
         connectedComponents.fill(UNORDERED);
 
-        graph.forEachNode(this::computePerNode);
+        graph.forEachNode(this::computePerNode); //this will visit 0 first
         progressTracker.endSubTask();
         return connectedComponents;
     }
@@ -85,40 +85,84 @@ public class Scc extends Algorithm<HugeLongArray> {
 
         todo.clear();
 
-        push(Action.VISIT_NODE, nodeId);
+        if (nodeId == 0) {
+            return computeForZero(); //specially handle 0 because -0 = 0;
+        }
+
+        todo.push(-nodeId);
 
         while (!todo.isEmpty()) {
-            var action = todo.pop();
             var node = todo.pop();
 
-            if (action == Action.VISIT_NODE.code) {
-                visitNode(node);
-            } else if (action == Action.VISIT_EDGE.code) {
+            if (node < 0) { // if the node is <0, we know we are going to visit a node as a node
+
+                var actualNode = -node;
+
+                if (index.get(node) == UNORDERED) { //if the node has not been examined before, it is it's first visit
+                    visitNode(actualNode);
+                } else { //otherwise it is its last
+                    postVisitNode(actualNode);
+                }
+
+            } else { //otherwise it 's an  visit edge
                 visitEdge(node);
-            } else {
-                postVisitNode(node);
             }
         }
         progressTracker.logProgress();
         return true;
     }
 
+
+    private boolean computeForZero() {
+
+        visitNode(0);//we know the first action:   we visit node 0
+        //visit node pushes  0 at the stack and it will remain until the end there
+        while (!todo.isEmpty()) {
+            var node = todo.pop();
+
+            if (node < 0) { // if the node is <0, we know we are going to visit a node as a node
+
+                var actualNode = -node;
+
+                if (index.get(node) == UNORDERED) { //if the node has not been examined before, it is it's first visit
+                    visitNode(actualNode);
+                } else { //otherwise it is its last
+                    postVisitNode(actualNode);
+                }
+
+            } else if (node > 0) { //otherwise it 's an edge
+                visitEdge(node);
+            } else { //the zero case
+                //-0 = 0 , so a 0 can indicate two things either a visit edge to 0, or the post visit to 0 which will conclude this loop
+                //so depending on whether stack is empty or not we can distinguish between the two cases
+                if (todo.isEmpty()) {
+                    postVisitNode(0);
+                } else {
+                    visitEdge(0);
+                }
+            }
+        }
+        progressTracker.logProgress();
+        return true;
+    }
+
+
     private void visitNode(long nodeId) {
         final long stackSize = stack.size();
         index.set(nodeId, stackSize);
         stack.push(nodeId); // push to stack (at most one entry per vertex)
         boundaries.push(stackSize); // push to stack (at most one entry per vertex)
-        push(Action.POST_VISIT_NODE, nodeId);
+        todo.push(-nodeId);
         graph.forEachRelationship(nodeId, (s, t) -> {
-            push(Action.VISIT_EDGE, t);
+            todo.push(t);
             return true;
         });
     }
 
     private void visitEdge(long nodeId) {
         if (index.get(nodeId) == UNORDERED) {
-            push(Action.VISIT_NODE, nodeId);
-        } else if (!visited.get(nodeId)) {
+            todo.push(-nodeId); //organize a first visit to nodeId
+        } else if (!visited.get(nodeId)) {          //skip nodes already in a component
             while (index.get(nodeId) < boundaries.peek()) {
                 boundaries.pop();
             }
@@ -137,26 +181,5 @@ public class Scc extends Algorithm<HugeLongArray> {
         }
     }
 
-    /**
-     * pushes an action and a nodeId on the stack
-     *
-     * @param action
-     * @param value
-     */
-    private void push(Action action, long value) {
-        todo.push(value);
-        todo.push(action.code);
-    }
 
-    private enum Action {
-        VISIT_NODE(0L),
-        VISIT_EDGE(1L),
-        POST_VISIT_NODE(2L);
-
-        final long code;
-
-        Action(long code) {
-            this.code = code;
-        }
-    }
 }
