@@ -73,7 +73,6 @@ public final class HugeLongArrayStack {
     }
 
     public void clear() {
-        
         size = 0;
     }
 }

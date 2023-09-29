@@ -32,7 +32,6 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -75,8 +74,8 @@ class SccTest {
 
     @Test
     void testDirect() {
-        Scc scc = new Scc(graph, ProgressTracker.NULL_TRACKER);
-        HugeLongArray components = scc.compute();
+        var scc = new Scc(graph, ProgressTracker.NULL_TRACKER);
+        var components = scc.compute();
 
         assertCC(components);
 
@@ -92,7 +91,6 @@ class SccTest {
         for (var entry : componentsMap.entrySet()) {
             min = Math.min(entry.getValue(), min);
             max = Math.max(entry.getValue(), max);
-
         }
 
         assertThat(componentsMap.keySet().size()).isEqualTo(3L);
@@ -108,41 +106,39 @@ class SccTest {
         assertCC(components);
     }
 
-    private void assertCC(HugeLongArray connectedComponents) {
+    private void assertCC(HugeLongArray components) {
         IdFunction idFunction = graph::toMappedNodeId;
 
-        assertBelongSameSet(connectedComponents,
+        assertBelongSameComponent(components, List.of(
             idFunction.of("a"),
             idFunction.of("b"),
             idFunction.of("c")
-        );
-        assertBelongSameSet(connectedComponents,
+        ));
+        assertBelongSameComponent(components, List.of(
             idFunction.of("d"),
             idFunction.of("e"),
             idFunction.of("f")
-        );
-        assertBelongSameSet(connectedComponents,
+        ));
+        assertBelongSameComponent(components, List.of(
             idFunction.of("g"),
             idFunction.of("h"),
             idFunction.of("i")
-        );
+        ));
     }
 
-    // TODO: Try to get this working with AssertJ
-    private void assertBelongSameSet(HugeLongArray data, Long... expected) {
+    private void assertBelongSameComponent(HugeLongArray components, List<Long> nodes) {
         // check if all belong to same set
-        final long needle = data.get(expected[0]);
-        for (long l : expected) {
-            assertThat(data.get(l)).isEqualTo(needle);
+        final long component = components.get(nodes.get(0));
+        for (long node : nodes) {
+            assertThat(components.get(node)).isEqualTo(component);
         }
 
-        final List<Long> exp = Arrays.asList(expected);
         // check no other element belongs to this set
-        for (long i = 0; i < data.size(); i++) {
-            if (exp.contains(i)) {
+        for (long node = 0; node < components.size(); node++) {
+            if (nodes.contains(node)) {
                 continue;
             }
-            assertThat(data.get(i)).isNotEqualTo(needle);
+            assertThat(components.get(node)).isNotEqualTo(component);
         }
     }
 
@@ -169,8 +165,6 @@ class SccTest {
                 "Scc 100%",
                 "Scc :: Finished"
             );
-
     }
 
-  
 }

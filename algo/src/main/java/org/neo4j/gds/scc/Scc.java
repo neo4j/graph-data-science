@@ -36,13 +36,13 @@ public class Scc extends Algorithm<HugeLongArray> {
     public static final int UNORDERED = -1;
     public static final String SCC_DESCRIPTION = "The SCC algorithm finds sets of connected nodes in an directed graph, " +
                                                  "where all nodes in the same set form a connected component.";
-    private Graph graph;
-    private HugeLongArray index;
-    private BitSet visited;
-    private HugeLongArray connectedComponents;
-    private HugeLongArrayStack stack;
-    private HugeLongArrayStack boundaries;
-    private PagedLongStack todo; // stores pairs of (node-Id, TODO-Id)
+    private final Graph graph;
+    private final HugeLongArrayStack boundaries;
+    private final HugeLongArray connectedComponents;
+    private final HugeLongArray index;
+    private final HugeLongArrayStack stack;
+    private final PagedLongStack todo; // stores pairs of (node-Id, TODO-Id)
+    private final BitSet visited;
 
     public Scc(
         Graph graph,
@@ -50,16 +50,15 @@ public class Scc extends Algorithm<HugeLongArray> {
     ) {
         super(progressTracker);
 
-        var nodeCount = graph.nodeCount();
-
         this.graph = graph;
+        var nodeCount = this.graph.nodeCount();
+
+        this.boundaries = HugeLongArrayStack.newStack(nodeCount);
+        this.connectedComponents = HugeLongArray.newArray(nodeCount);
         this.index = HugeLongArray.newArray(nodeCount);
         this.stack = HugeLongArrayStack.newStack(nodeCount);
-        this.visited = new BitSet(nodeCount);
-        this.connectedComponents = HugeLongArray.newArray(nodeCount);
-        this.boundaries = HugeLongArrayStack.newStack(nodeCount);
-
         this.todo = new PagedLongStack(nodeCount); //can be as high as `2 * graph.relationshipsCount()` if we are unlucky...
+        this.visited = new BitSet(nodeCount);
     }
 
     /**
@@ -84,28 +83,39 @@ public class Scc extends Algorithm<HugeLongArray> {
             return true;
         }
 
-        clearDataStructures();
+        todo.clear();
 
-        push(Action.VISIT, nodeId);
         while (!todo.isEmpty()) {
             var action = todo.pop();
             var node = todo.pop();
-            
-            if (action == Action.VISIT.code) {
-                firstVisitToNode(node);
-            } else if (action == Action.VISITEDGE.code) {
+
+            if (action == Action.VISIT_NODE.code) {
+                visitNode(node);
+            } else if (action == Action.VISIT_EDGE.code) {
                 visitEdge(node);
             } else {
-                postVisit(node);
+                postVisitNode(node);
             }
         }
         progressTracker.logProgress();
         return true;
     }
 
+    private void visitNode(long nodeId) {
+        final long stackSize = stack.size();
+        index.set(nodeId, stackSize);
+        stack.push(nodeId); // push to stack (at most one entry per vertex)
+        boundaries.push(stackSize); // push to stack (at most one entry per vertex)
+        push(Action.POST_VISIT_NODE, nodeId);
+        graph.forEachRelationship(nodeId, (s, t) -> {
+            push(Action.VISIT_EDGE, t);
+            return true;
+        });
+    }
+
     private void visitEdge(long nodeId) {
         if (index.get(nodeId) == UNORDERED) {
-            push(Action.VISIT, nodeId);
+            push(Action.VISIT_NODE, nodeId);
         } else if (!visited.get(nodeId)) {
             while (index.get(nodeId) < boundaries.peek()) {
                 boundaries.pop();
@@ -113,7 +123,7 @@ public class Scc extends Algorithm<HugeLongArray> {
         }
     }
 
-    private void postVisit(long nodeId) {
+    private void postVisitNode(long nodeId) {
         if (boundaries.peek() == index.get(nodeId)) {
             boundaries.pop();
             long element;
@@ -123,19 +133,6 @@ public class Scc extends Algorithm<HugeLongArray> {
                 visited.set(element);
             } while (element != nodeId);
         }
-
-    }
-
-    private void firstVisitToNode(long nodeId) {
-        final long stackSize = stack.size();
-        index.set(nodeId, stackSize);
-        stack.push(nodeId); // push to stack (at most one entry per vertex)
-        boundaries.push(stackSize); // push to stack (at most one entry per vertex)
-        push(Action.POSTVISIT, nodeId);
-        graph.forEachRelationship(nodeId, (s, t) -> {
-            push(Action.VISITEDGE, t);
-            return true;
-        });
     }
 
     /**
@@ -150,22 +147,14 @@ public class Scc extends Algorithm<HugeLongArray> {
     }
 
     private enum Action {
-        VISIT(0L),
-        VISITEDGE(1L),
-        POSTVISIT(2L);
+        VISIT_NODE(0L),
+        VISIT_EDGE(1L),
+        POST_VISIT_NODE(2L);
 
-        public final long code;
+        final long code;
 
         Action(long code) {
             this.code = code;
         }
-
-    }
-
-    private void clearDataStructures() {
-        stack.clear();
-        todo.clear();
-        boundaries.clear();
-
     }
 }
