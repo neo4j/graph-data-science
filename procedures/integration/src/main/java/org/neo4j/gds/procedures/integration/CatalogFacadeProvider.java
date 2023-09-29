@@ -29,7 +29,6 @@ import org.neo4j.gds.applications.graphstorecatalog.DropNodePropertiesApplicatio
 import org.neo4j.gds.applications.graphstorecatalog.DropRelationshipsApplication;
 import org.neo4j.gds.applications.graphstorecatalog.EstimateCommonNeighbourAwareRandomWalkApplication;
 import org.neo4j.gds.applications.graphstorecatalog.GenerateGraphApplication;
-import org.neo4j.gds.applications.graphstorecatalog.GenericProjectApplication;
 import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsageApplication;
 import org.neo4j.gds.applications.graphstorecatalog.GraphNameValidationService;
 import org.neo4j.gds.applications.graphstorecatalog.GraphProjectMemoryUsageService;
@@ -46,7 +45,6 @@ import org.neo4j.gds.applications.graphstorecatalog.WriteNodeLabelApplication;
 import org.neo4j.gds.applications.graphstorecatalog.WriteNodePropertiesApplication;
 import org.neo4j.gds.applications.graphstorecatalog.WriteRelationshipPropertiesApplication;
 import org.neo4j.gds.applications.graphstorecatalog.WriteRelationshipsApplication;
-import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.logging.Log;
@@ -56,7 +54,6 @@ import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.TerminationFlagService;
 import org.neo4j.gds.procedures.TransactionContextAccessor;
 import org.neo4j.gds.procedures.catalog.CatalogFacade;
-import org.neo4j.gds.projection.GraphProjectNativeResult;
 import org.neo4j.gds.services.DatabaseIdAccessor;
 import org.neo4j.gds.services.UserAccessor;
 import org.neo4j.gds.services.UserLogServices;
@@ -94,19 +91,21 @@ public class CatalogFacadeProvider {
     private final UserAccessor userAccessor;
 
     // applications
+    private final CypherProjectApplication cypherProjectApplication;
     private final DropGraphApplication dropGraphApplication;
-    private final ListGraphApplication listGraphApplication;
-    private final SubGraphProjectApplication subGraphProjectApplication;
-    private final GraphMemoryUsageApplication graphMemoryUsageApplication;
     private final DropNodePropertiesApplication dropNodePropertiesApplication;
     private final DropRelationshipsApplication dropRelationshipsApplication;
+    private final EstimateCommonNeighbourAwareRandomWalkApplication estimateCommonNeighbourAwareRandomWalkApplication;
+    private final GenerateGraphApplication generateGraphApplication;
+    private final GraphMemoryUsageApplication graphMemoryUsageApplication;
+    private final GraphSamplingApplication graphSamplingApplication;
+    private final ListGraphApplication listGraphApplication;
+    private final NativeProjectApplication nativeProjectApplication;
     private final NodeLabelMutatorApplication nodeLabelMutatorApplication;
     private final StreamNodePropertiesApplication streamNodePropertiesApplication;
     private final StreamRelationshipPropertiesApplication streamRelationshipPropertiesApplication;
     private final StreamRelationshipsApplication streamRelationshipsApplication;
-    private final GraphSamplingApplication graphSamplingApplication;
-    private final EstimateCommonNeighbourAwareRandomWalkApplication estimateCommonNeighbourAwareRandomWalkApplication;
-    private final GenerateGraphApplication generateGraphApplication;
+    private final SubGraphProjectApplication subGraphProjectApplication;
 
     // Business logic
     private final Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator;
@@ -132,6 +131,7 @@ public class CatalogFacadeProvider {
         TransactionContextAccessor transactionContextAccessor,
         UserLogServices userLogServices,
         UserAccessor userAccessor,
+        CypherProjectApplication cypherProjectApplication,
         DropGraphApplication dropGraphApplication,
         DropNodePropertiesApplication dropNodePropertiesApplication,
         DropRelationshipsApplication dropRelationshipsApplication,
@@ -140,6 +140,7 @@ public class CatalogFacadeProvider {
         GraphMemoryUsageApplication graphMemoryUsageApplication,
         GraphSamplingApplication graphSamplingApplication,
         ListGraphApplication listGraphApplication,
+        NativeProjectApplication nativeProjectApplication,
         NodeLabelMutatorApplication nodeLabelMutatorApplication,
         StreamNodePropertiesApplication streamNodePropertiesApplication,
         StreamRelationshipPropertiesApplication streamRelationshipPropertiesApplication,
@@ -163,19 +164,21 @@ public class CatalogFacadeProvider {
         this.userLogServices = userLogServices;
         this.userAccessor = userAccessor;
 
+        this.cypherProjectApplication = cypherProjectApplication;
         this.dropGraphApplication = dropGraphApplication;
-        this.listGraphApplication = listGraphApplication;
-        this.subGraphProjectApplication = subGraphProjectApplication;
-        this.graphMemoryUsageApplication = graphMemoryUsageApplication;
         this.dropNodePropertiesApplication = dropNodePropertiesApplication;
         this.dropRelationshipsApplication = dropRelationshipsApplication;
+        this.estimateCommonNeighbourAwareRandomWalkApplication = estimateCommonNeighbourAwareRandomWalkApplication;
+        this.generateGraphApplication = generateGraphApplication;
+        this.graphMemoryUsageApplication = graphMemoryUsageApplication;
+        this.graphSamplingApplication = graphSamplingApplication;
+        this.listGraphApplication = listGraphApplication;
+        this.nativeProjectApplication = nativeProjectApplication;
         this.nodeLabelMutatorApplication = nodeLabelMutatorApplication;
         this.streamNodePropertiesApplication = streamNodePropertiesApplication;
         this.streamRelationshipPropertiesApplication = streamRelationshipPropertiesApplication;
         this.streamRelationshipsApplication = streamRelationshipsApplication;
-        this.graphSamplingApplication = graphSamplingApplication;
-        this.estimateCommonNeighbourAwareRandomWalkApplication = estimateCommonNeighbourAwareRandomWalkApplication;
-        this.generateGraphApplication = generateGraphApplication;
+        this.subGraphProjectApplication = subGraphProjectApplication;
 
         this.businessFacadeDecorator = businessFacadeDecorator;
     }
@@ -223,21 +226,7 @@ public class CatalogFacadeProvider {
         var relationshipExporterBuilder = exportBuildersProvider.relationshipExporterBuilder(exporterContext);
 
         // GDS applications
-        var nativeProjectApplication = new NativeProjectApplication(
-            new GenericProjectApplication<>(
-                log,
-                graphStoreCatalogService,
-                GraphProjectNativeResult.Builder::new
-            )
-        );
-        var cypherProjectApplication = new CypherProjectApplication(
-            new GenericProjectApplication<>(
-                log,
-                graphStoreCatalogService,
-                GraphProjectCypherResult.Builder::new
-            )
-        );
-        // request scope so need to change
+        // TODO request scope so need to change
         var writeNodePropertiesApplication = new WriteNodePropertiesApplication(log, nodePropertyExporterBuilder);
         var writeRelationshipPropertiesApplication = new WriteRelationshipPropertiesApplication(
             log,
