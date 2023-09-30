@@ -97,8 +97,8 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
-|===
 include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
+|===
 
 .Results
 [opts="header",cols="1m,1,6"]
@@ -136,8 +136,8 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
-|===
 include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
+|===
 
 .Results
 [opts="header",cols="1,1,6"]
@@ -180,8 +180,8 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
-|===
 include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
+|===
 
 .Results
 [opts="header",cols="1,1,6"]
@@ -225,8 +225,8 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
-|===
 include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
+|===
 
 .Results
 [opts="header",cols="1,1,6"]
