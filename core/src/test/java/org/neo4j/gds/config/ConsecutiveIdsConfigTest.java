@@ -55,7 +55,7 @@ class ConsecutiveIdsConfigTest {
 
 
     @Configuration
-    interface TestConsecutiveIdsConfig extends ConsecutiveIdsConfig {
+    interface TestConsecutiveIdsConfig extends ConsecutiveIdsConfig, SeedConfig {
         static TestConsecutiveIdsConfig of(CypherMapWrapper map) {
             return new TestConsecutiveIdsConfigImpl(map);
         }

@@ -39,14 +39,13 @@ import java.util.Optional;
 
 public class WriteRelationshipsApplication {
     private final Log log;
-    private final RelationshipExporterBuilder relationshipExporterBuilder;
 
-    public WriteRelationshipsApplication(Log log, RelationshipExporterBuilder relationshipExporterBuilder) {
+    public WriteRelationshipsApplication(Log log) {
         this.log = log;
-        this.relationshipExporterBuilder = relationshipExporterBuilder;
     }
 
     WriteRelationshipResult compute(
+        RelationshipExporterBuilder relationshipExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         UserLogRegistryFactory userLogRegistryFactory,
@@ -76,6 +75,7 @@ public class WriteRelationshipsApplication {
         try (var ignored = ProgressTimer.start(builder::withWriteMillis)) {
             try {
                 long relationshipsWritten = writeRelationshipType(
+                    relationshipExporterBuilder,
                     terminationFlag,
                     progressTracker,
                     configuration.arrowConnectionInfo(),
@@ -96,6 +96,7 @@ public class WriteRelationshipsApplication {
     }
 
     private long writeRelationshipType(
+        RelationshipExporterBuilder relationshipExporterBuilder,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker,
         Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo,

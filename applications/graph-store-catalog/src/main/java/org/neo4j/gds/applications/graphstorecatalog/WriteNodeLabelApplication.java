@@ -35,14 +35,13 @@ import java.util.Map;
 
 public class WriteNodeLabelApplication {
     private final Log log;
-    private final NodeLabelExporterBuilder nodeLabelExporterBuilder;
 
-    public WriteNodeLabelApplication(Log log, NodeLabelExporterBuilder nodeLabelExporterBuilder) {
+    public WriteNodeLabelApplication(Log log) {
         this.log = log;
-        this.nodeLabelExporterBuilder = nodeLabelExporterBuilder;
     }
 
     WriteLabelResult compute(
+        NodeLabelExporterBuilder nodeLabelExporterBuilder,
         TerminationFlag terminationFlag,
         GraphStore graphStore,
         GraphName graphName,

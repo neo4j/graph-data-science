@@ -30,7 +30,10 @@ import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.write.NodeLabelExporterBuilder;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
+import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.core.write.RelationshipPropertiesExporterBuilder;
 import org.neo4j.gds.projection.GraphProjectNativeResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -216,6 +219,7 @@ public interface CatalogBusinessFacade {
     WriteRelationshipPropertiesResult writeRelationshipProperties(
         User user,
         DatabaseId databaseId,
+        RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder,
         TerminationFlag terminationFlag,
         String graphName,
         String relationshipType,
@@ -226,6 +230,7 @@ public interface CatalogBusinessFacade {
     WriteLabelResult writeNodeLabel(
         User user,
         DatabaseId databaseId,
+        NodeLabelExporterBuilder nodeLabelExporterBuilder,
         TerminationFlag terminationFlag,
         String graphName,
         String nodeLabel,
@@ -235,6 +240,7 @@ public interface CatalogBusinessFacade {
     WriteRelationshipResult writeRelationships(
         User user,
         DatabaseId databaseId,
+        RelationshipExporterBuilder relationshipExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         UserLogRegistryFactory userLogRegistryFactory,

@@ -48,7 +48,10 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogStore;
+import org.neo4j.gds.core.write.NodeLabelExporterBuilder;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
+import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.core.write.RelationshipPropertiesExporterBuilder;
 import org.neo4j.gds.projection.GraphProjectNativeResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -82,8 +85,11 @@ public class CatalogFacade {
     private final DatabaseId databaseId;
     private final GraphDatabaseService graphDatabaseService;
     private final GraphProjectMemoryUsageService graphProjectMemoryUsageService;
+    private final NodeLabelExporterBuilder nodeLabelExporterBuilder;
     private final NodePropertyExporterBuilder nodePropertyExporterBuilder;
     private final ProcedureReturnColumns procedureReturnColumns;
+    private final RelationshipExporterBuilder relationshipExporterBuilder;
+    private final RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder;
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationFlag terminationFlag;
     private final TransactionContext transactionContext;
@@ -102,8 +108,11 @@ public class CatalogFacade {
         DatabaseId databaseId,
         GraphDatabaseService graphDatabaseService,
         GraphProjectMemoryUsageService graphProjectMemoryUsageService,
+        NodeLabelExporterBuilder nodeLabelExporterBuilder,
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         ProcedureReturnColumns procedureReturnColumns,
+        RelationshipExporterBuilder relationshipExporterBuilder,
+        RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         TransactionContext transactionContext,
@@ -116,8 +125,11 @@ public class CatalogFacade {
         this.databaseId = databaseId;
         this.graphDatabaseService = graphDatabaseService;
         this.graphProjectMemoryUsageService = graphProjectMemoryUsageService;
+        this.nodeLabelExporterBuilder = nodeLabelExporterBuilder;
         this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
         this.procedureReturnColumns = procedureReturnColumns;
+        this.relationshipExporterBuilder = relationshipExporterBuilder;
+        this.relationshipPropertiesExporterBuilder = relationshipPropertiesExporterBuilder;
         this.taskRegistryFactory = taskRegistryFactory;
         this.terminationFlag = terminationFlag;
         this.transactionContext = transactionContext;
@@ -538,6 +550,7 @@ public class CatalogFacade {
         var result = businessFacade.writeRelationshipProperties(
             user,
             databaseId,
+            relationshipPropertiesExporterBuilder,
             terminationFlag,
             graphName,
             relationshipType,
@@ -556,6 +569,7 @@ public class CatalogFacade {
         var result = businessFacade.writeNodeLabel(
             user,
             databaseId,
+            nodeLabelExporterBuilder,
             terminationFlag,
             graphName,
             nodeLabel,
@@ -574,6 +588,7 @@ public class CatalogFacade {
         var result = businessFacade.writeRelationships(
             user,
             databaseId,
+            relationshipExporterBuilder,
             taskRegistryFactory,
             terminationFlag,
             userLogRegistryFactory,

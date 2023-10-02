@@ -106,7 +106,10 @@ public class CatalogFacadeProvider {
     private final StreamRelationshipPropertiesApplication streamRelationshipPropertiesApplication;
     private final StreamRelationshipsApplication streamRelationshipsApplication;
     private final SubGraphProjectApplication subGraphProjectApplication;
+    private final WriteNodeLabelApplication writeNodeLabelApplication;
     private final WriteNodePropertiesApplication writeNodePropertiesApplication;
+    private final WriteRelationshipPropertiesApplication writeRelationshipPropertiesApplication;
+    private final WriteRelationshipsApplication writeRelationshipsApplication;
 
     // Business logic
     private final Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator;
@@ -147,7 +150,10 @@ public class CatalogFacadeProvider {
         StreamRelationshipPropertiesApplication streamRelationshipPropertiesApplication,
         StreamRelationshipsApplication streamRelationshipsApplication,
         SubGraphProjectApplication subGraphProjectApplication,
+        WriteNodeLabelApplication writeNodeLabelApplication,
         WriteNodePropertiesApplication writeNodePropertiesApplication,
+        WriteRelationshipPropertiesApplication writeRelationshipPropertiesApplication,
+        WriteRelationshipsApplication writeRelationshipsApplication,
         Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator
     ) {
         this.catalogConfigurationService = catalogConfigurationService;
@@ -181,7 +187,10 @@ public class CatalogFacadeProvider {
         this.streamRelationshipPropertiesApplication = streamRelationshipPropertiesApplication;
         this.streamRelationshipsApplication = streamRelationshipsApplication;
         this.subGraphProjectApplication = subGraphProjectApplication;
+        this.writeNodeLabelApplication = writeNodeLabelApplication;
         this.writeNodePropertiesApplication = writeNodePropertiesApplication;
+        this.writeRelationshipPropertiesApplication = writeRelationshipPropertiesApplication;
+        this.writeRelationshipsApplication = writeRelationshipsApplication;
 
         this.businessFacadeDecorator = businessFacadeDecorator;
     }
@@ -222,20 +231,11 @@ public class CatalogFacadeProvider {
         // Exporter builders
         var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(graphDatabaseService);
         var exporterContext = new ExporterContext.ProcedureContextWrapper(context);
+        var nodeLabelExporterBuilder = exportBuildersProvider.nodeLabelExporterBuilder(exporterContext);
         var nodePropertyExporterBuilder = exportBuildersProvider.nodePropertyExporterBuilder(exporterContext);
+        var relationshipExporterBuilder = exportBuildersProvider.relationshipExporterBuilder(exporterContext);
         var relationshipPropertiesExporterBuilder = exportBuildersProvider.relationshipPropertiesExporterBuilder(
             exporterContext);
-        var nodeLabelExporterBuilder = exportBuildersProvider.nodeLabelExporterBuilder(exporterContext);
-        var relationshipExporterBuilder = exportBuildersProvider.relationshipExporterBuilder(exporterContext);
-
-        // GDS applications
-        // TODO request scope so need to change
-        var writeRelationshipPropertiesApplication = new WriteRelationshipPropertiesApplication(
-            log,
-            relationshipPropertiesExporterBuilder
-        );
-        var writeNodeLabelApplication = new WriteNodeLabelApplication(log, nodeLabelExporterBuilder);
-        var writeRelationshipsApplication = new WriteRelationshipsApplication(log, relationshipExporterBuilder);
 
         // GDS business facade
         CatalogBusinessFacade businessFacade = new DefaultCatalogBusinessFacade(
@@ -244,25 +244,25 @@ public class CatalogFacadeProvider {
             graphNameValidationService,
             graphStoreCatalogService,
             graphStoreValidationService,
-            dropGraphApplication,
-            listGraphApplication,
-            nativeProjectApplication,
             cypherProjectApplication,
-            subGraphProjectApplication,
-            graphMemoryUsageApplication,
+            dropGraphApplication,
             dropNodePropertiesApplication,
             dropRelationshipsApplication,
+            estimateCommonNeighbourAwareRandomWalkApplication,
+            generateGraphApplication,
+            graphMemoryUsageApplication,
+            graphSamplingApplication,
+            listGraphApplication,
+            nativeProjectApplication,
             nodeLabelMutatorApplication,
             streamNodePropertiesApplication,
             streamRelationshipPropertiesApplication,
             streamRelationshipsApplication,
+            subGraphProjectApplication,
             writeNodePropertiesApplication,
             writeRelationshipPropertiesApplication,
             writeNodeLabelApplication,
-            writeRelationshipsApplication,
-            graphSamplingApplication,
-            estimateCommonNeighbourAwareRandomWalkApplication,
-            generateGraphApplication
+            writeRelationshipsApplication
         );
 
         // wrap in decorator to inject conditional behaviour
@@ -275,8 +275,11 @@ public class CatalogFacadeProvider {
             databaseId,
             graphDatabaseService,
             graphProjectMemoryUsageService,
+            nodeLabelExporterBuilder,
             nodePropertyExporterBuilder,
             procedureReturnColumns,
+            relationshipExporterBuilder,
+            relationshipPropertiesExporterBuilder,
             taskRegistryFactory,
             terminationFlag,
             transactionContext,

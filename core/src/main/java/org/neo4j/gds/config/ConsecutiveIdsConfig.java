@@ -21,7 +21,7 @@ package org.neo4j.gds.config;
 
 import org.immutables.value.Value;
 
-public interface ConsecutiveIdsConfig extends SeedConfig {
+public interface ConsecutiveIdsConfig {
     @Value.Default
     default boolean consecutiveIds() {
         return false;
@@ -29,8 +29,12 @@ public interface ConsecutiveIdsConfig extends SeedConfig {
 
     @Value.Check
     default void forbidSeedingAndConsecutiveIds() {
-        if (isIncremental() && consecutiveIds()) {
-            throw new IllegalArgumentException("Seeding and the `consecutiveIds` option cannot be used at the same time.");
+        if (this instanceof SeedConfig) {
+            var thisAsASeedConfig = (SeedConfig) this;
+            if (thisAsASeedConfig.isIncremental() && consecutiveIds()) {
+                throw new IllegalArgumentException(
+                    "Seeding and the `consecutiveIds` option cannot be used at the same time.");
+            }
         }
     }
 }
