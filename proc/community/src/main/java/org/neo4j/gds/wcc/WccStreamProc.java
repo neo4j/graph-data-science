@@ -53,6 +53,6 @@ public class WccStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return facade.community().estimateWccStream(graphNameOrConfiguration, configuration);
+        return facade.community().wccEstimateStream(graphNameOrConfiguration, configuration);
     }
 }

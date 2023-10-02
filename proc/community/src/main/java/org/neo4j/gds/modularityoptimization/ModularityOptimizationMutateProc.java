@@ -47,7 +47,7 @@ public class ModularityOptimizationMutateProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return Stream.of(facade.community().mutateModularityOptimization(graphName, configuration));
+        return facade.community().modularityOptimizationMutate(graphName, configuration);
     }
 
     @Procedure(value = "gds.modularityOptimization.mutate.estimate", mode = READ)

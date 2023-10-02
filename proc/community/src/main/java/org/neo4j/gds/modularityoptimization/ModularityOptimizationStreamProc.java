@@ -48,7 +48,7 @@ public class ModularityOptimizationStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.community().streamModularityOptimization(
+        return facade.community().modularityOptimizationStream(
             graphName,
             configuration
         );

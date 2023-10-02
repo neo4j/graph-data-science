@@ -54,7 +54,7 @@ public class LeidenStatsProc extends BaseProc {
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
 
-        return facade.community().estimateLeidenStats(graphName, configuration);
+        return facade.community().leidenEstimateStats(graphName, configuration);
 
     }
 

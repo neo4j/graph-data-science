@@ -54,7 +54,7 @@ public class LocalClusteringCoefficientStatsProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().estimateLocalClusteringCoefficientStats(graphNameOrConfiguration, algoConfiguration);
+        return facade.community().localClusteringCoefficientEstimateStats(graphNameOrConfiguration, algoConfiguration);
     }
 
 

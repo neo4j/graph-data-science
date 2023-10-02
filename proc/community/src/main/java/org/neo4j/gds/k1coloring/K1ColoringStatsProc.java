@@ -55,7 +55,7 @@ public class K1ColoringStatsProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().estimateK1ColoringStats(graphNameOrConfiguration, algoConfiguration);
+        return facade.community().k1ColoringEstimateStats(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(name = "gds.beta.k1coloring.stats", mode = READ, deprecatedBy = "gds.k1coloring.stats")

@@ -57,7 +57,7 @@ public class SccStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().estimateSccStream(graphNameOrConfiguration, algoConfiguration);
+        return facade.community().sccEstimateStream(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(value = "gds.alpha.scc.stream", mode = READ, deprecatedBy = "gds.scc.stream")

@@ -53,7 +53,7 @@ public class KCoreDecompositionMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().estimateKCoreMutate(graphNameOrConfiguration, algoConfiguration);
+        return facade.community().kCoreEstimateMutate(graphNameOrConfiguration, algoConfiguration);
     }
 
 }

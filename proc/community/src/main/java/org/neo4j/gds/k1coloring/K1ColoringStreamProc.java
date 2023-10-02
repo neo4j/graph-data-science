@@ -54,7 +54,7 @@ public class K1ColoringStreamProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().estimateK1ColoringStream(graphNameOrConfiguration, algoConfiguration);
+        return facade.community().k1ColoringEstimateStream(graphNameOrConfiguration, algoConfiguration);
 
     }
     @Procedure(value = "gds.beta.k1coloring.stream", mode = READ, deprecatedBy = "gds.k1coloring.stream")

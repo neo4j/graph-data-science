@@ -54,7 +54,7 @@ public class LeidenMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return facade.community().estimateLeidenMutate(graphName, configuration);
+        return facade.community().leidenEstimateMutate(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)

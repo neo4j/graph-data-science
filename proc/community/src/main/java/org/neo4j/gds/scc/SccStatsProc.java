@@ -54,7 +54,7 @@ public class SccStatsProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().estimateSccStats(graphNameOrConfiguration, algoConfiguration);
+        return facade.community().sccEstimateStats(graphNameOrConfiguration, algoConfiguration);
     }
 
 }

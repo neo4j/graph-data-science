@@ -55,7 +55,7 @@ public class LocalClusteringCoefficientStreamProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().estimateLocalClusteringCoefficientStream(graphNameOrConfiguration, algoConfiguration);
+        return facade.community().localClusteringCoefficientEstimateStream(graphNameOrConfiguration, algoConfiguration);
 
     }
 }

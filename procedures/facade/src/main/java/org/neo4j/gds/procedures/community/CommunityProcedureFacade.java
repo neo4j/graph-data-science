@@ -192,7 +192,7 @@ public class CommunityProcedureFacade {
         return Stream.of(WccComputationResultTransformer.toStatsResult(computationResult, config));
     }
 
-    public Stream<MemoryEstimateResult> estimateWccMutate(
+    public Stream<MemoryEstimateResult> wccEstimateMutate(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
@@ -200,7 +200,7 @@ public class CommunityProcedureFacade {
         return Stream.of(estimateBusinessFacade.estimateWcc(graphNameOrConfiguration, config));
     }
 
-    public Stream<MemoryEstimateResult> estimateWccStats(
+    public Stream<MemoryEstimateResult> wccEstimateStats(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
@@ -208,7 +208,7 @@ public class CommunityProcedureFacade {
         return Stream.of(estimateBusinessFacade.estimateWcc(graphNameOrConfiguration, config));
     }
 
-    public Stream<MemoryEstimateResult> estimateWccStream(
+    public Stream<MemoryEstimateResult> wccEstimateStream(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
@@ -270,7 +270,7 @@ public class CommunityProcedureFacade {
         return Stream.of(KCoreComputationalResultTransformer.toStatsResult(computationResult, config));
     }
 
-    public Stream<MemoryEstimateResult> estimateKCoreStream(
+    public Stream<MemoryEstimateResult> kCoreEstimateStream(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
@@ -278,7 +278,7 @@ public class CommunityProcedureFacade {
         return Stream.of(estimateBusinessFacade.kcore(graphNameOrConfiguration, config));
     }
 
-    public Stream<MemoryEstimateResult> estimateKCoreMutate(
+    public Stream<MemoryEstimateResult> kCoreEstimateMutate(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
@@ -286,7 +286,7 @@ public class CommunityProcedureFacade {
         return Stream.of(estimateBusinessFacade.kcore(graphNameOrConfiguration, config));
     }
 
-    public Stream<MemoryEstimateResult> estimateKCoreStats(
+    public Stream<MemoryEstimateResult> kCoreEstimateStats(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
@@ -383,7 +383,7 @@ public class CommunityProcedureFacade {
     }
 
 
-    public Stream<MemoryEstimateResult> estimateLeidenStream(
+    public Stream<MemoryEstimateResult> leidenEstimateStream(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
@@ -391,7 +391,7 @@ public class CommunityProcedureFacade {
         return Stream.of(estimateBusinessFacade.leiden(graphNameOrConfiguration, config));
     }
 
-    public Stream<MemoryEstimateResult> estimateLeidenMutate(
+    public Stream<MemoryEstimateResult> leidenEstimateMutate(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
@@ -399,7 +399,7 @@ public class CommunityProcedureFacade {
         return Stream.of(estimateBusinessFacade.leiden(graphNameOrConfiguration, config));
     }
 
-    public Stream<MemoryEstimateResult> estimateLeidenStats(
+    public Stream<MemoryEstimateResult> leidenEstimateStats(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
@@ -458,7 +458,7 @@ public class CommunityProcedureFacade {
         return Stream.of(SccComputationResultTransformer.toStatsResult(computationResult, config));
     }
 
-    public Stream<MemoryEstimateResult> estimateSccMutate(
+    public Stream<MemoryEstimateResult> sccEstimateMutate(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
@@ -466,7 +466,7 @@ public class CommunityProcedureFacade {
         return Stream.of(estimateBusinessFacade.estimateScc(graphNameOrConfiguration, config));
     }
 
-    public Stream<MemoryEstimateResult> estimateSccStats(
+    public Stream<MemoryEstimateResult> sccEstimateStats(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
@@ -474,7 +474,7 @@ public class CommunityProcedureFacade {
         return Stream.of(estimateBusinessFacade.estimateScc(graphNameOrConfiguration, config));
     }
 
-    public Stream<MemoryEstimateResult> estimateSccStream(
+    public Stream<MemoryEstimateResult> sccEstimateStream(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
@@ -532,7 +532,7 @@ public class CommunityProcedureFacade {
         return Stream.of(TriangleCountComputationResultTransformer.toStatsResult(computationResult, config));
     }
 
-    public Stream<MemoryEstimateResult> estimateTriangleCountStream(
+    public Stream<MemoryEstimateResult> triangleCountEstimateStream(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
@@ -540,7 +540,7 @@ public class CommunityProcedureFacade {
         return Stream.of(estimateBusinessFacade.triangleCount(graphNameOrConfiguration, config));
     }
 
-    public Stream<MemoryEstimateResult> estimateTriangleCountMutate(
+    public Stream<MemoryEstimateResult> triangleCountEstimateMutate(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
@@ -548,7 +548,7 @@ public class CommunityProcedureFacade {
         return Stream.of(estimateBusinessFacade.triangleCount(graphNameOrConfiguration, config));
     }
 
-    public Stream<MemoryEstimateResult> estimateTriangleCountStats(
+    public Stream<MemoryEstimateResult> triangleCountEstimateStats(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
@@ -639,7 +639,7 @@ public class CommunityProcedureFacade {
         return Stream.of(ModularityComputationResultTransformer.toStatsResult(computationResult, config));
     }
 
-    public Stream<MemoryEstimateResult> estimateModularityStream(
+    public Stream<MemoryEstimateResult> modularityEstimateStream(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
@@ -647,7 +647,7 @@ public class CommunityProcedureFacade {
         return Stream.of(estimateBusinessFacade.modularity(graphNameOrConfiguration, config));
     }
 
-    public Stream<MemoryEstimateResult> estimateModularityStats(
+    public Stream<MemoryEstimateResult> modularityEstimateStats(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
@@ -760,7 +760,7 @@ public class CommunityProcedureFacade {
     }
 
 
-    public Stream<MemoryEstimateResult> estimateLocalClusteringCoefficientMutate(
+    public Stream<MemoryEstimateResult> localClusteringCoefficientEstimateMutate(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
@@ -768,7 +768,7 @@ public class CommunityProcedureFacade {
         return Stream.of(estimateBusinessFacade.localClusteringCoefficient(graphNameOrConfiguration, config));
     }
 
-    public Stream<MemoryEstimateResult> estimateLocalClusteringCoefficientStats(
+    public Stream<MemoryEstimateResult> localClusteringCoefficientEstimateStats(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
@@ -776,7 +776,7 @@ public class CommunityProcedureFacade {
         return Stream.of(estimateBusinessFacade.localClusteringCoefficient(graphNameOrConfiguration, config));
     }
 
-    public Stream<MemoryEstimateResult> estimateLocalClusteringCoefficientStream(
+    public Stream<MemoryEstimateResult> localClusteringCoefficientEstimateStream(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
@@ -823,7 +823,8 @@ public class CommunityProcedureFacade {
 
         return Stream.of(K1ColoringComputationResultTransformer.toMutateResult(computationResult));
     }
-    public Stream<ModularityOptimizationStreamResult> streamModularityOptimization(
+
+    public Stream<ModularityOptimizationStreamResult> modularityOptimizationStream(
         String graphName,
         Map<String, Object> configuration
     ) {
@@ -842,7 +843,7 @@ public class CommunityProcedureFacade {
         return ModularityOptimisationComputationResultTransformer.toStreamResult(computationResult, streamConfig);
     }
 
-    public ModularityOptimizationMutateResult mutateModularityOptimization(
+    public Stream<ModularityOptimizationMutateResult> modularityOptimizationMutate(
         String graphName,
         Map<String, Object> configuration
     ) {
@@ -856,7 +857,10 @@ public class CommunityProcedureFacade {
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
         );
 
-        return ModularityOptimisationComputationResultTransformer.toMutateResult(computationResult, mutateConfig);
+        return Stream.of(ModularityOptimisationComputationResultTransformer.toMutateResult(
+            computationResult,
+            mutateConfig
+        ));
     }
 
 
@@ -880,7 +884,7 @@ public class CommunityProcedureFacade {
         return Stream.of(K1ColoringComputationResultTransformer.toStatsResult(computationResult, statsConfig));
     }
 
-    public Stream<MemoryEstimateResult> estimateK1ColoringMutate(
+    public Stream<MemoryEstimateResult> k1ColoringEstimateMutate(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
@@ -888,7 +892,7 @@ public class CommunityProcedureFacade {
         return Stream.of(estimateBusinessFacade.k1Coloring(graphNameOrConfiguration, config));
     }
 
-    public Stream<MemoryEstimateResult> estimateK1ColoringStats(
+    public Stream<MemoryEstimateResult> k1ColoringEstimateStats(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
@@ -896,7 +900,7 @@ public class CommunityProcedureFacade {
         return Stream.of(estimateBusinessFacade.k1Coloring(graphNameOrConfiguration, config));
     }
 
-    public Stream<MemoryEstimateResult> estimateK1ColoringStream(
+    public Stream<MemoryEstimateResult> k1ColoringEstimateStream(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {

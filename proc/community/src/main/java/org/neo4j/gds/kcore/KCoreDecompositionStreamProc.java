@@ -52,7 +52,7 @@ public class KCoreDecompositionStreamProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().estimateKCoreStream(graphNameOrConfiguration, algoConfiguration);
+        return facade.community().kCoreEstimateStream(graphNameOrConfiguration, algoConfiguration);
 
     }
 

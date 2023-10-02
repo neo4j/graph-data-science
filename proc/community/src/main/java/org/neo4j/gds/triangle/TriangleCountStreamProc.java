@@ -54,7 +54,7 @@ public class TriangleCountStreamProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().estimateTriangleCountStream(graphNameOrConfiguration, algoConfiguration);
+        return facade.community().triangleCountEstimateStream(graphNameOrConfiguration, algoConfiguration);
 
     }
 

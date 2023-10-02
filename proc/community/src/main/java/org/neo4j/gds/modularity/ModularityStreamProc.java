@@ -56,7 +56,7 @@ public class ModularityStreamProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().estimateModularityStream(graphNameOrConfiguration, algoConfiguration);
+        return facade.community().modularityEstimateStream(graphNameOrConfiguration, algoConfiguration);
     }
     
     @Deprecated(forRemoval = true)

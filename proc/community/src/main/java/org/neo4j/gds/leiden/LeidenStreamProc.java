@@ -57,7 +57,7 @@ public class LeidenStreamProc extends BaseProc {
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
 
-        return facade.community().estimateLeidenStream(graphName, configuration);
+        return facade.community().leidenEstimateStream(graphName, configuration);
 
     }
 

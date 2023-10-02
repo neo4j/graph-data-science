@@ -55,7 +55,7 @@ public class K1ColoringMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().estimateK1ColoringMutate(graphNameOrConfiguration, algoConfiguration);
+        return facade.community().k1ColoringEstimateMutate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(value = "gds.beta.k1coloring.mutate", mode = READ, deprecatedBy = "gds.beta.k1coloring.mutate")

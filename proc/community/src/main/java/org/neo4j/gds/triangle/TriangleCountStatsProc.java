@@ -54,7 +54,7 @@ public class TriangleCountStatsProc extends BaseProc {
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
 
-        return facade.community().estimateTriangleCountStats(graphNameOrConfiguration, algoConfiguration);
+        return facade.community().triangleCountEstimateStats(graphNameOrConfiguration, algoConfiguration);
 
     }
 

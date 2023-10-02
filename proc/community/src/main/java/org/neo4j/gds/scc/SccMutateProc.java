@@ -54,7 +54,7 @@ public class SccMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().estimateSccMutate(graphNameOrConfiguration, algoConfiguration);
+        return facade.community().sccEstimateMutate(graphNameOrConfiguration, algoConfiguration);
     }
 
 

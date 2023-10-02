@@ -54,6 +54,6 @@ public class LocalClusteringCoefficientMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.community().estimateLocalClusteringCoefficientMutate(graphNameOrConfiguration, algoConfiguration);
+        return facade.community().localClusteringCoefficientEstimateMutate(graphNameOrConfiguration, algoConfiguration);
     }
 }
