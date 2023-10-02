@@ -34,17 +34,13 @@ import java.util.List;
 
 public class WriteRelationshipPropertiesApplication {
     private final Log log;
-    private final RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder;
 
-    public WriteRelationshipPropertiesApplication(
-        Log log,
-        RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder
-    ) {
+    public WriteRelationshipPropertiesApplication(Log log) {
         this.log = log;
-        this.relationshipPropertiesExporterBuilder = relationshipPropertiesExporterBuilder;
     }
 
     WriteRelationshipPropertiesResult compute(
+        RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder,
         TerminationFlag terminationFlag,
         GraphStore graphStore,
         GraphName graphName,

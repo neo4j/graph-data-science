@@ -39,7 +39,10 @@ import org.neo4j.gds.applications.graphstorecatalog.StreamNodePropertiesApplicat
 import org.neo4j.gds.applications.graphstorecatalog.StreamRelationshipPropertiesApplication;
 import org.neo4j.gds.applications.graphstorecatalog.StreamRelationshipsApplication;
 import org.neo4j.gds.applications.graphstorecatalog.SubGraphProjectApplication;
+import org.neo4j.gds.applications.graphstorecatalog.WriteNodeLabelApplication;
 import org.neo4j.gds.applications.graphstorecatalog.WriteNodePropertiesApplication;
+import org.neo4j.gds.applications.graphstorecatalog.WriteRelationshipPropertiesApplication;
+import org.neo4j.gds.applications.graphstorecatalog.WriteRelationshipsApplication;
 import org.neo4j.gds.beta.filter.GraphStoreFilterService;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -128,7 +131,10 @@ class CatalogFacadeProviderFactory {
             graphStoreFilterService,
             graphStoreCatalogService
         );
+        var writeNodeLabelApplication = new WriteNodeLabelApplication(this.log);
         var writeNodePropertiesApplication = new WriteNodePropertiesApplication(log);
+        var writeRelationshipPropertiesApplication = new WriteRelationshipPropertiesApplication(this.log);
+        var writeRelationshipsApplication = new WriteRelationshipsApplication(this.log);
 
         return new CatalogFacadeProvider(
             catalogConfigurationService,
@@ -160,7 +166,10 @@ class CatalogFacadeProviderFactory {
             streamRelationshipPropertiesApplication,
             streamRelationshipsApplication,
             subGraphProjectApplication,
+            writeNodeLabelApplication,
             writeNodePropertiesApplication,
+            writeRelationshipPropertiesApplication,
+            writeRelationshipsApplication,
             businessFacadeDecorator
         );
     }

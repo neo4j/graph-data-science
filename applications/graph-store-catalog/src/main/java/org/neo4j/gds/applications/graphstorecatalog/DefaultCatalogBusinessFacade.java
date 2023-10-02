@@ -36,7 +36,10 @@ import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.write.NodeLabelExporterBuilder;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
+import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.core.write.RelationshipPropertiesExporterBuilder;
 import org.neo4j.gds.graphsampling.RandomWalkBasedNodesSampler;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 import org.neo4j.gds.logging.Log;
@@ -111,25 +114,25 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         GraphNameValidationService graphNameValidationService,
         GraphStoreCatalogService graphStoreCatalogService,
         GraphStoreValidationService graphStoreValidationService,
-        DropGraphApplication dropGraphApplication,
-        ListGraphApplication listGraphApplication,
-        NativeProjectApplication nativeProjectApplication,
         CypherProjectApplication cypherProjectApplication,
-        SubGraphProjectApplication subGraphProjectApplication,
-        GraphMemoryUsageApplication graphMemoryUsageApplication,
+        DropGraphApplication dropGraphApplication,
         DropNodePropertiesApplication dropNodePropertiesApplication,
         DropRelationshipsApplication dropRelationshipsApplication,
+        EstimateCommonNeighbourAwareRandomWalkApplication estimateCommonNeighbourAwareRandomWalkApplication,
+        GenerateGraphApplication generateGraphApplication,
+        GraphMemoryUsageApplication graphMemoryUsageApplication,
+        GraphSamplingApplication graphSamplingApplication,
+        ListGraphApplication listGraphApplication,
+        NativeProjectApplication nativeProjectApplication,
         NodeLabelMutatorApplication nodeLabelMutatorApplication,
         StreamNodePropertiesApplication streamNodePropertiesApplication,
         StreamRelationshipPropertiesApplication streamRelationshipPropertiesApplication,
         StreamRelationshipsApplication streamRelationshipsApplication,
+        SubGraphProjectApplication subGraphProjectApplication,
         WriteNodePropertiesApplication writeNodePropertiesApplication,
         WriteRelationshipPropertiesApplication writeRelationshipPropertiesApplication,
         WriteNodeLabelApplication writeNodeLabelApplication,
-        WriteRelationshipsApplication writeRelationshipsApplication,
-        GraphSamplingApplication graphSamplingApplication,
-        EstimateCommonNeighbourAwareRandomWalkApplication estimateCommonNeighbourAwareRandomWalkApplication,
-        GenerateGraphApplication generateGraphApplication
+        WriteRelationshipsApplication writeRelationshipsApplication
     ) {
         this.log = log;
 
@@ -692,6 +695,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
     public WriteRelationshipPropertiesResult writeRelationshipProperties(
         User user,
         DatabaseId databaseId,
+        RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder,
         TerminationFlag terminationFlag,
         String graphNameAsString,
         String relationshipType,
@@ -713,6 +717,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         var configuration = catalogConfigurationService.parseWriteRelationshipPropertiesConfiguration(rawConfiguration);
 
         return writeRelationshipPropertiesApplication.compute(
+            relationshipPropertiesExporterBuilder,
             terminationFlag,
             graphStore,
             graphName,
@@ -726,6 +731,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
     public WriteLabelResult writeNodeLabel(
         User user,
         DatabaseId databaseId,
+        NodeLabelExporterBuilder nodeLabelExporterBuilder,
         TerminationFlag terminationFlag,
         String graphNameAsString,
         String nodeLabel,
@@ -741,6 +747,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         var nodeFilter = NodeFilterParser.parseAndValidate(graphStore, configuration.nodeFilter());
 
         return writeNodeLabelApplication.compute(
+            nodeLabelExporterBuilder,
             terminationFlag,
             graphStore,
             graphName,
@@ -754,6 +761,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
     public WriteRelationshipResult writeRelationships(
         User user,
         DatabaseId databaseId,
+        RelationshipExporterBuilder relationshipExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         UserLogRegistryFactory userLogRegistryFactory,
@@ -779,6 +787,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         );
 
         return writeRelationshipsApplication.compute(
+            relationshipExporterBuilder,
             taskRegistryFactory,
             terminationFlag,
             userLogRegistryFactory,
