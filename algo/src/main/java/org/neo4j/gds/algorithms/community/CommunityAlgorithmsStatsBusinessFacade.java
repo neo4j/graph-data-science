@@ -27,6 +27,7 @@ import org.neo4j.gds.algorithms.KmeansSpecificFields;
 import org.neo4j.gds.algorithms.LabelPropagationSpecificFields;
 import org.neo4j.gds.algorithms.LeidenSpecificFields;
 import org.neo4j.gds.algorithms.LocalClusteringCoefficientSpecificFields;
+import org.neo4j.gds.algorithms.ModularityOptimizationSpecificFields;
 import org.neo4j.gds.algorithms.ModularitySpecificFields;
 import org.neo4j.gds.algorithms.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.StatsResult;
@@ -41,6 +42,7 @@ import org.neo4j.gds.kmeans.KmeansStatsConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
 import org.neo4j.gds.leiden.LeidenStatsConfig;
 import org.neo4j.gds.modularity.ModularityStatsConfig;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.scc.SccStatsConfig;
@@ -51,6 +53,8 @@ import org.neo4j.gds.wcc.WccStatsConfig;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
+
+import static org.neo4j.gds.algorithms.community.AlgorithmRunner.runWithTiming;
 
 public class CommunityAlgorithmsStatsBusinessFacade {
     private final CommunityAlgorithmsFacade communityAlgorithmsFacade;
@@ -335,6 +339,39 @@ public class CommunityAlgorithmsStatsBusinessFacade {
             ),
             intermediateResult.computeMilliseconds,
             () -> ModularitySpecificFields.EMPTY
+        );
+    }
+
+    public StatsResult<ModularityOptimizationSpecificFields> modularityOptimization(
+        String graphName,
+        ModularityOptimizationStatsConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        StatisticsComputationInstructions statisticsComputationInstructions
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = runWithTiming(
+            () -> communityAlgorithmsFacade.modularityOptimization(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return statsResult(
+            algorithmResult,
+            configuration,
+            (result -> result::communityId),
+            (result, componentCount, communitySummary) -> {
+                return new ModularityOptimizationSpecificFields(
+                    result.modularity(),
+                    result.ranIterations(),
+                    result.didConverge(),
+                    result.asNodeProperties().nodeCount(),
+                    componentCount,
+                    communitySummary
+                );
+            },
+            statisticsComputationInstructions,
+            intermediateResult.computeMilliseconds,
+            () -> ModularityOptimizationSpecificFields.EMPTY
         );
     }
 

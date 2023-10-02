@@ -19,11 +19,12 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateProc;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamProc;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteProc;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.functions.AsNodeFunc;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateProc;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsProc;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamProc;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteProc;
 
 import java.util.List;
 
@@ -40,6 +41,7 @@ class ModularityOptimizationDocTest extends SingleFileDocTestBase {
             ModularityOptimizationMutateProc.class,
             ModularityOptimizationStreamProc.class,
             ModularityOptimizationWriteProc.class,
+            ModularityOptimizationStatsProc.class,
             GraphProjectProc.class
         );
     }

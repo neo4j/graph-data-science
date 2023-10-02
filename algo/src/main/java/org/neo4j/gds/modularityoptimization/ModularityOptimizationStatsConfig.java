@@ -17,29 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.doc.syntax;
+package org.neo4j.gds.modularityoptimization;
 
-import java.util.List;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.core.CypherMapWrapper;
 
-import static org.neo4j.gds.doc.syntax.SyntaxMode.MUTATE;
-import static org.neo4j.gds.doc.syntax.SyntaxMode.STATS;
-import static org.neo4j.gds.doc.syntax.SyntaxMode.STREAM;
-import static org.neo4j.gds.doc.syntax.SyntaxMode.WRITE;
+@ValueClass
+@Configuration
+@SuppressWarnings("immutables:subtype")
+public interface ModularityOptimizationStatsConfig extends ModularityOptimizationConfig {
 
-class ModularityOptimizationSyntaxTest extends SyntaxTestBase {
-
-    @Override
-    protected Iterable<SyntaxModeMeta> syntaxModes() {
-        return List.of(
-            SyntaxModeMeta.of(STREAM),
-            SyntaxModeMeta.of(MUTATE),
-            SyntaxModeMeta.of(WRITE),
-            SyntaxModeMeta.of(STATS)
-        );
-    }
-
-    @Override
-    protected String adocFile() {
-        return "pages/algorithms/modularity-optimization.adoc";
+    static ModularityOptimizationStatsConfig of(CypherMapWrapper userInput) {
+        return new ModularityOptimizationStatsConfigImpl(userInput);
     }
 }

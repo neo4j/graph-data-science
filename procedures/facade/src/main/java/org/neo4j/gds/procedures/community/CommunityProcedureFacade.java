@@ -52,6 +52,7 @@ import org.neo4j.gds.louvain.LouvainStreamConfig;
 import org.neo4j.gds.modularity.ModularityStatsConfig;
 import org.neo4j.gds.modularity.ModularityStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutMutateResult;
 import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutStreamResult;
@@ -76,6 +77,7 @@ import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
 import org.neo4j.gds.procedures.community.modularity.ModularityStatsResult;
 import org.neo4j.gds.procedures.community.modularity.ModularityStreamResult;
 import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationMutateResult;
+import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationStatsResult;
 import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationStreamResult;
 import org.neo4j.gds.procedures.community.scc.SccMutateResult;
 import org.neo4j.gds.procedures.community.scc.SccStatsResult;
@@ -862,6 +864,27 @@ public class CommunityProcedureFacade {
             mutateConfig
         ));
     }
+
+    public Stream<ModularityOptimizationStatsResult> modularityOptimizationStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var statsConfig = createConfig(configuration, ModularityOptimizationStatsConfig::of);
+
+        var computationResult = statsBusinessFacade.modularityOptimization(
+            graphName,
+            statsConfig,
+            user,
+            databaseId,
+            ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
+        );
+
+        return Stream.of(ModularityOptimisationComputationResultTransformer.toStatsResult(
+            computationResult,
+            statsConfig
+        ));
+    }
+
 
 
     public Stream<K1ColoringStatsResult> k1ColoringStats(
