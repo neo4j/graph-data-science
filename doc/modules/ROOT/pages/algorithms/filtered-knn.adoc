@@ -175,7 +175,7 @@ YIELD
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
-.General configuration for algorithm execution on a named graph.
+.Configuration
 [opts="header",cols="3,2,3m,2,8"]
 |===
 | Name          | Type   | Default | Optional | Description
@@ -227,7 +227,7 @@ YIELD
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
-.General configuration for algorithm execution on a named graph.
+.Configuration
 [opts="header",cols="3,2,3m,2,8"]
 |===
 | Name          | Type   | Default | Optional | Description
@@ -279,7 +279,7 @@ YIELD
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
-.General configuration for algorithm execution on a named graph.
+.Configuration
 [opts="header",cols="3,2,3m,2,8"]
 |===
 | Name          | Type   | Default | Optional | Description
