@@ -50,8 +50,7 @@ public class ModularityOptimizationStreamProc extends BaseProc {
     ) {
         return facade.community().streamModularityOptimization(
             graphName,
-            configuration,
-            executionContext().algorithmMetaDataSetter()
+            configuration
         );
     }
 

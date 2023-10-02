@@ -51,10 +51,10 @@ import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
 import org.neo4j.gds.modularity.ModularityStatsConfig;
 import org.neo4j.gds.modularity.ModularityStreamConfig;
-import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutMutateResult;
-import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutStreamResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
+import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutMutateResult;
+import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutStreamResult;
 import org.neo4j.gds.procedures.community.conductance.ConductanceStreamResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringMutateResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStatsResult;
@@ -825,8 +825,7 @@ public class CommunityProcedureFacade {
     }
     public Stream<ModularityOptimizationStreamResult> streamModularityOptimization(
         String graphName,
-        Map<String, Object> configuration,
-        AlgorithmMetaDataSetter algorithmMetaDataSetter
+        Map<String, Object> configuration
     ) {
         var streamConfig = createStreamConfig(
             configuration,
