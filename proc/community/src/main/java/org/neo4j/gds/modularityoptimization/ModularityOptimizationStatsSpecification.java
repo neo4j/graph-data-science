@@ -28,10 +28,12 @@ import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptim
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
+import static org.neo4j.gds.executor.ExecutionMode.STATS;
 import static org.neo4j.gds.modularityoptimization.ModularityOptimizationSpecificationHelper.MODULARITY_OPTIMIZATION_DESCRIPTION;
 
-@GdsCallable(name = "gds.modularityOptimization.stats", aliases = {"gds.beta.modularityOptimization.stats"}, description = MODULARITY_OPTIMIZATION_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
+@GdsCallable(
+    name = "gds.modularityOptimization.stats", description = MODULARITY_OPTIMIZATION_DESCRIPTION, executionMode = STATS
+)
 public class ModularityOptimizationStatsSpecification implements AlgorithmSpec<ModularityOptimization, ModularityOptimizationResult, ModularityOptimizationStatsConfig, Stream<ModularityOptimizationStatsResult>, ModularityOptimizationFactory<ModularityOptimizationStatsConfig>> {
 
     @Override
