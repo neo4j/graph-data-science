@@ -40,7 +40,7 @@ public interface AlgorithmComputationResult<RESULT> {
 
     GraphStore graphStore();
 
-    TerminationFlag terminationFlag();
+    Optional<TerminationFlag> algorithmTerminationFlag();
 
     static <R> AlgorithmComputationResult<R> of(
         R result,
@@ -48,7 +48,12 @@ public interface AlgorithmComputationResult<RESULT> {
         GraphStore graphStore,
         TerminationFlag terminationFlag
     ) {
-        return ImmutableAlgorithmComputationResult.of(result, graph, graphStore, terminationFlag);
+        return ImmutableAlgorithmComputationResult.of(
+            Optional.of(result),
+            graph,
+            graphStore,
+            Optional.of(terminationFlag)
+        );
     }
 
     static <R> AlgorithmComputationResult<R> withoutAlgorithmResult(Graph graph, GraphStore graphStore) {
@@ -56,7 +61,7 @@ public interface AlgorithmComputationResult<RESULT> {
             Optional.empty(),
             graph,
             graphStore,
-            TerminationFlag.RUNNING_TRUE
+            Optional.empty()
         );
     }
 }

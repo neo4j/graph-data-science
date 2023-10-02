@@ -157,7 +157,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
                 writeProperty,
                 procedureName,
                 arrowConnectionInfo,
-                algorithmResult.terminationFlag()
+                algorithmResult.algorithmTerminationFlag().get()
             );
 
             // 4. Compute result statistics
@@ -216,7 +216,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
                 writeProperty,
                 procedureName,
                 arrowConnectionInfo,
-                algorithmResult.terminationFlag()
+                algorithmResult.algorithmTerminationFlag().get()
             );
 
 
