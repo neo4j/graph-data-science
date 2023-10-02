@@ -1,8 +1,3 @@
-.Algorithm specific configuration
-[opts="header",cols="1,1,1m,1,4"]
-|===
-| Name         | Type            | Default     | Optional | Description
 | sourceNode   | Integer         | n/a         | no       | The node id of the node where to start the traversal.
 | targetNodes  | List of Integer | empty list  | yes      | Ids for target nodes. Traversal terminates when any target node is visited.
 | maxDepth     | Integer         | -1          | yes      | The maximum distance from the source node at which nodes are visited.
-|===
