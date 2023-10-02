@@ -103,7 +103,6 @@ public class Scc extends Algorithm<HugeLongArray> {
                 }
             }
         }
-        progressTracker.logProgress();
         return true;
     }
 
@@ -147,6 +146,7 @@ public class Scc extends Algorithm<HugeLongArray> {
                 visited.set(element);
             } while (element != nodeId);
         }
+        progressTracker.logProgress();
     }
 
 
