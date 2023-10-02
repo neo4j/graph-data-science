@@ -22,6 +22,7 @@ package org.neo4j.gds.modularityoptimization;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationStatsResult;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -46,4 +47,14 @@ public class ModularityOptimizationStatsProc extends BaseProc {
     ) {
         return facade.community().modularityOptimizationStats(graphName, configuration);
     }
+
+    @Procedure(value = "gds.modularityOptimization.stats.estimate", mode = READ)
+    @Description(ESTIMATE_DESCRIPTION)
+    public Stream<MemoryEstimateResult> estimate(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        return facade.community().modularityOptimizationEstimateStats(graphNameOrConfiguration, algoConfiguration);
+    }
+
 }

@@ -26,7 +26,7 @@ import org.neo4j.gds.result.AbstractResultBuilder;
 final class ModularityOptimizationSpecificationHelper {
     static final String MODULARITY_OPTIMIZATION_DESCRIPTION = "The Modularity Optimization algorithm groups the nodes in the graph by optimizing the graphs modularity.";
 
-    static <PROC_RESULT, CONFIG extends ModularityOptimizationConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
+    static <PROC_RESULT, CONFIG extends ModularityOptimizationBaseConfig> AbstractResultBuilder<PROC_RESULT> resultBuilder(
         ModularityOptimizationResultBuilder<PROC_RESULT> procResultBuilder,
         ComputationResult<ModularityOptimization, ModularityOptimizationResult, CONFIG> computeResult
     ) {

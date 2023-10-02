@@ -269,6 +269,30 @@ CALL gds.graph.project(
         }
     })
 ----
+[[algorithms-mo-mem-est]]
+=== Memory estimation
+
+
+:mode: write
+include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
+
+[role=query-example]
+--
+.The following will estimate the memory requirements for running the algorithm:
+[source, cypher, role=noplay]
+----
+CALL gds.modularityOptimization.write.estimate('myGraph', { relationshipWeightProperty: 'weight', writeProperty: 'community' })
+YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
+----
+
+.Results
+[opts="header"]
+|===
+| nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
+| 6        | 14                | 5168       | 5256       | "[5168 Bytes \... 5256 Bytes]"
+|===
+--
+
 
 [[algorithms-mo-stream]]
 === Stream
@@ -301,6 +325,8 @@ ORDER BY name
 
 [[algorithms-mo-stats]]
 === Stats
+:stats-syntax: algorithms-modularity-optimization-syntax
+include::partial$/algorithms/shared/examples-stats-intro.adoc[]
 
 [role=query-example]
 --

@@ -199,7 +199,7 @@ public class CommunityProcedureFacade {
         Map<String, Object> algoConfiguration
     ) {
         var config = createConfig(algoConfiguration, WccMutateConfig::of);
-        return Stream.of(estimateBusinessFacade.estimateWcc(graphNameOrConfiguration, config));
+        return Stream.of(estimateBusinessFacade.wcc(graphNameOrConfiguration, config));
     }
 
     public Stream<MemoryEstimateResult> wccEstimateStats(
@@ -207,7 +207,7 @@ public class CommunityProcedureFacade {
         Map<String, Object> algoConfiguration
     ) {
         var config = createConfig(algoConfiguration, WccStatsConfig::of);
-        return Stream.of(estimateBusinessFacade.estimateWcc(graphNameOrConfiguration, config));
+        return Stream.of(estimateBusinessFacade.wcc(graphNameOrConfiguration, config));
     }
 
     public Stream<MemoryEstimateResult> wccEstimateStream(
@@ -215,7 +215,7 @@ public class CommunityProcedureFacade {
         Map<String, Object> algoConfiguration
     ) {
         var config = createConfig(algoConfiguration, WccStreamConfig::of);
-        return Stream.of(estimateBusinessFacade.estimateWcc(graphNameOrConfiguration, config));
+        return Stream.of(estimateBusinessFacade.wcc(graphNameOrConfiguration, config));
     }
 
     // WCC end
@@ -885,6 +885,30 @@ public class CommunityProcedureFacade {
         ));
     }
 
+    public Stream<MemoryEstimateResult> modularityOptimizationEstimateStream(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, ModularityOptimizationStreamConfig::of);
+        return Stream.of(estimateBusinessFacade.modularityOptimization(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> modularityOptimizationEstimateStats(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, ModularityOptimizationStatsConfig::of);
+        return Stream.of(estimateBusinessFacade.modularityOptimization(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> modularityOptimizationEstimateMutate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, ModularityOptimizationMutateConfig::of);
+        return Stream.of(estimateBusinessFacade.modularityOptimization(graphNameOrConfiguration, config));
+    }
+
 
 
     public Stream<K1ColoringStatsResult> k1ColoringStats(
@@ -982,6 +1006,7 @@ public class CommunityProcedureFacade {
 
         return Stream.of(ApproxMaxKCutComputationResultTransformer.toMutateResult(computationResult));
     }
+
 
     private <C extends AlgoBaseConfig> C createStreamConfig(
         Map<String, Object> configuration,
