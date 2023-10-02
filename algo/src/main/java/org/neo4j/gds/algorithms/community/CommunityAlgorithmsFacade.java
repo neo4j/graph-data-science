@@ -63,6 +63,9 @@ import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityCalculatorFactory;
 import org.neo4j.gds.modularity.ModularityResult;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationConfig;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationFactory;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.scc.SccAlgorithmFactory;
 import org.neo4j.gds.scc.SccBaseConfig;
 import org.neo4j.gds.triangle.IntersectingTriangleCountFactory;
@@ -300,6 +303,23 @@ public class CommunityAlgorithmsFacade {
             config,
             config.relationshipWeightProperty(),
             new ApproxMaxKCutAlgorithmFactory<>(),
+            user,
+            databaseId
+        );
+    }
+
+
+    public AlgorithmComputationResult<ModularityOptimizationResult> modularityOptimization(
+        String graphName,
+        ModularityOptimizationConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
+        return run(
+            graphName,
+            config,
+            config.relationshipWeightProperty(),
+            new ModularityOptimizationFactory<>(),
             user,
             databaseId
         );

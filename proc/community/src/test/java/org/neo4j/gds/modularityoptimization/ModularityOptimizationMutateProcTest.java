@@ -42,10 +42,19 @@ import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestNativeGraphLoader;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsEstimateBusinessFacade;
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStatsBusinessFacade;
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
+import org.neo4j.gds.algorithms.community.NodePropertyService;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
+import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
@@ -57,10 +66,14 @@ import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
 import org.neo4j.gds.projection.ImmutableGraphProjectFromStoreConfig;
@@ -87,6 +100,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
 import static org.neo4j.gds.GdsCypher.ExecutionModes.MUTATE;
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
@@ -267,22 +281,25 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
         GraphLoader loader = storeLoaderBuilder.build();
         GraphStoreCatalog.set(loader.projectConfig(), loader.graphStore());
 
-        TestProcedureRunner.applyOnProcedure(db, ModularityOptimizationMutateProc.class, procedure ->
-            ProcedureMethodHelper.mutateMethods(procedure)
-                .forEach(mutateMethod -> {
-                    if (mutateMethod.getAnnotation(Deprecated.class) != null) {
-                        return;
-                    }
-                    Map<String, Object> config = Map.of(
-                        "nodeLabels", Collections.singletonList("B"),
-                        "mutateProperty", MUTATE_PROPERTY
-                    );
-                    try {
-                        mutateMethod.invoke(procedure, TEST_GRAPH_NAME, config);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        fail(e);
-                    }
-                }));
+        TestProcedureRunner.applyOnProcedure(db, ModularityOptimizationMutateProc.class, procedure -> {
+                procedure.facade = createFacade();
+                ProcedureMethodHelper.mutateMethods(procedure)
+                    .forEach(mutateMethod -> {
+                        if (mutateMethod.getAnnotation(Deprecated.class) != null) {
+                            return;
+                        }
+                        Map<String, Object> config = Map.of(
+                            "nodeLabels", Collections.singletonList("B"),
+                            "mutateProperty", MUTATE_PROPERTY
+                        );
+                        try {
+                            mutateMethod.invoke(procedure, TEST_GRAPH_NAME, config);
+                        } catch (IllegalAccessException | InvocationTargetException e) {
+                            fail(e);
+                        }
+                    });
+            }
+        );
 
         String graphWriteQuery =
             "CALL gds.graph.nodeProperties.write(" +
@@ -357,7 +374,9 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
 
         // mutate first time
         // mutate second time using same `mutateProperty`
-        TestProcedureRunner.applyOnProcedure(db, ModularityOptimizationMutateProc.class, procedure ->
+        TestProcedureRunner.applyOnProcedure(db, ModularityOptimizationMutateProc.class, procedure -> {
+            procedure.facade = createFacade();
+
             ProcedureMethodHelper.mutateMethods(procedure)
                 .forEach(mutateMethod -> {
                     if (mutateMethod.getAnnotation(Deprecated.class) != null) {
@@ -377,7 +396,9 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         fail(e);
                     }
-                }));
+                });
+            }
+        );
 
         Graph mutatedGraph = GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), graphName).graphStore().getUnion();
         TestSupport.assertGraphEquals(fromGdl(expectedMutatedGraph()), mutatedGraph);
@@ -402,6 +423,8 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
     void testRunOnEmptyGraph() {
         // Create a dummy node with label "X" so that "X" is a valid label to put use for property mappings later
         TestProcedureRunner.applyOnProcedure(db, ModularityOptimizationMutateProc.class, (proc) -> {
+            proc.facade = createFacade();
+
             var methods = ProcedureMethodHelper.mutateMethods(proc).collect(Collectors.toList());
 
             if (!methods.isEmpty()) {
@@ -484,7 +507,8 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
 
     @NotNull
     private GraphStore runMutation(String graphName, Map<String, Object> config) {
-        TestProcedureRunner.applyOnProcedure(db, ModularityOptimizationMutateProc.class, procedure ->
+        TestProcedureRunner.applyOnProcedure(db, ModularityOptimizationMutateProc.class, procedure -> {
+            procedure.facade = createFacade();
             ProcedureMethodHelper.mutateMethods(procedure)
                 .forEach(mutateMethod -> {
                     if (mutateMethod.getAnnotation(Deprecated.class) != null) {
@@ -495,7 +519,8 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
                     } catch (IllegalAccessException | InvocationTargetException e) {
                         fail(e);
                     }
-                }));
+                });
+        });
 
         return GraphStoreCatalog.get(TEST_USERNAME, DatabaseId.of(db.databaseName()), graphName).graphStore();
     }
@@ -524,6 +549,40 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             NodeProjections.create(Map.of(
                 ALL_NODES, ImmutableNodeProjection.of(PROJECT_ALL, ImmutablePropertyMappings.of())
             )), RelationshipProjections.ALL
+        );
+    }
+
+    private GraphDataScience createFacade() {
+        var logMock = mock(org.neo4j.gds.logging.Log.class);
+        when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
+
+        final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
+        final AlgorithmMemoryValidationService memoryUsageValidator = new AlgorithmMemoryValidationService(
+            logMock,
+            false
+        );
+
+        var algorithmsMutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
+            new CommunityAlgorithmsFacade(graphStoreCatalogService,
+                TaskRegistryFactory.empty(),
+                EmptyUserLogRegistryFactory.INSTANCE,
+                memoryUsageValidator, logMock),
+            new NodePropertyService(logMock)
+        );
+
+        return new GraphDataScience(
+            null,
+            null,
+            new CommunityProcedureFacade(
+                null,
+                DatabaseId.of(db.databaseName()),
+                ProcedureReturnColumns.EMPTY,
+                new User(getUsername(), false),
+                mock(CommunityAlgorithmsEstimateBusinessFacade.class),
+                algorithmsMutateBusinessFacade,
+                mock(CommunityAlgorithmsStatsBusinessFacade.class),
+                mock(CommunityAlgorithmsStreamBusinessFacade.class)
+            )
         );
     }
 }

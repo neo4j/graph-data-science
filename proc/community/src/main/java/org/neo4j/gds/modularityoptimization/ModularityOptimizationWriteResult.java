@@ -20,6 +20,7 @@
 package org.neo4j.gds.modularityoptimization;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationResultBuilder;
 
 import java.util.Map;
 

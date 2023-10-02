@@ -53,6 +53,8 @@ import org.neo4j.gds.modularity.ModularityStatsConfig;
 import org.neo4j.gds.modularity.ModularityStreamConfig;
 import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutMutateResult;
 import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutStreamResult;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.procedures.community.conductance.ConductanceStreamResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringMutateResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStatsResult;
@@ -73,6 +75,8 @@ import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
 import org.neo4j.gds.procedures.community.modularity.ModularityStatsResult;
 import org.neo4j.gds.procedures.community.modularity.ModularityStreamResult;
+import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationMutateResult;
+import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationStreamResult;
 import org.neo4j.gds.procedures.community.scc.SccMutateResult;
 import org.neo4j.gds.procedures.community.scc.SccStatsResult;
 import org.neo4j.gds.procedures.community.scc.SccStreamResult;
@@ -819,6 +823,43 @@ public class CommunityProcedureFacade {
 
         return Stream.of(K1ColoringComputationResultTransformer.toMutateResult(computationResult));
     }
+    public Stream<ModularityOptimizationStreamResult> streamModularityOptimization(
+        String graphName,
+        Map<String, Object> configuration,
+        AlgorithmMetaDataSetter algorithmMetaDataSetter
+    ) {
+        var streamConfig = createStreamConfig(
+            configuration,
+            ModularityOptimizationStreamConfig::of
+        );
+
+        var computationResult = streamBusinessFacade.modularityOptimization(
+            graphName,
+            streamConfig,
+            user,
+            databaseId
+        );
+
+        return ModularityOptimisationComputationResultTransformer.toStreamResult(computationResult, streamConfig);
+    }
+
+    public ModularityOptimizationMutateResult mutateModularityOptimization(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var mutateConfig = createConfig(configuration, ModularityOptimizationMutateConfig::of);
+
+        var computationResult = mutateBusinessFacade.modularityOptimization(
+            graphName,
+            mutateConfig,
+            user,
+            databaseId,
+            ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
+        );
+
+        return ModularityOptimisationComputationResultTransformer.toMutateResult(computationResult, mutateConfig);
+    }
+
 
     public Stream<K1ColoringStatsResult> k1ColoringStats(
         String graphName,

@@ -17,34 +17,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.modularityoptimization;
+package org.neo4j.gds.procedures.community.modularityoptimization;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
-abstract class ModularityOptimizationResultBuilder<PROC_RESULT> extends AbstractCommunityResultBuilder<PROC_RESULT> {
-    long ranIterations;
-    boolean didConverge;
-    double modularity;
+public abstract class ModularityOptimizationResultBuilder<PROC_RESULT> extends AbstractCommunityResultBuilder<PROC_RESULT> {
+    protected long ranIterations;
+    protected boolean didConverge;
+    protected double modularity;
 
-    ModularityOptimizationResultBuilder(
+    public ModularityOptimizationResultBuilder(
         ProcedureReturnColumns returnColumns,
         int concurrency
     ) {
         super(returnColumns, concurrency);
     }
 
-    ModularityOptimizationResultBuilder<PROC_RESULT> withRanIterations(long ranIterations) {
+    public ModularityOptimizationResultBuilder<PROC_RESULT> withRanIterations(long ranIterations) {
         this.ranIterations = ranIterations;
         return this;
     }
 
-    ModularityOptimizationResultBuilder<PROC_RESULT> didConverge(boolean didConverge) {
+    public ModularityOptimizationResultBuilder<PROC_RESULT> didConverge(boolean didConverge) {
         this.didConverge = didConverge;
         return this;
     }
 
-    ModularityOptimizationResultBuilder<PROC_RESULT> withModularity(double modularity) {
+    public ModularityOptimizationResultBuilder<PROC_RESULT> withModularity(double modularity) {
         this.modularity = modularity;
         return this;
     }
