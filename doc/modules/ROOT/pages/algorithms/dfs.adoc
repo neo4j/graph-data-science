@@ -47,7 +47,6 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name | Type | Default | Optional | Description
-
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
 include::partial$/algorithms/dfs/specific-configuration.adoc[]
 |===
@@ -86,7 +85,6 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name | Type | Default | Optional | Description
-
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
 include::partial$/algorithms/dfs/specific-configuration.adoc[]
 
