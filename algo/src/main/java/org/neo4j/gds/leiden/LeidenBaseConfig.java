@@ -25,6 +25,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConsecutiveIdsConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
+import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.config.ToleranceConfig;
 
 public interface LeidenBaseConfig extends
@@ -32,6 +33,7 @@ public interface LeidenBaseConfig extends
     ConsecutiveIdsConfig,
     RelationshipWeightConfig,
     RandomSeedConfig,
+    SeedConfig,
     ToleranceConfig {
 
     @Value.Default
