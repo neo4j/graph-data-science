@@ -34,12 +34,14 @@ import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class GraphInfo {
 
     public final String graphName;
     public final String database;
+    public final String databaseLocation;
     public final String memoryUsage;
     public final long sizeInBytes;
     public final long nodeCount;
@@ -56,6 +58,7 @@ public class GraphInfo {
     GraphInfo(
         String graphName,
         String database,
+        String databaseLocation,
         Map<String, Object> configuration,
         String memoryUsage,
         long sizeInBytes,
@@ -68,6 +71,7 @@ public class GraphInfo {
     ) {
         this.graphName = graphName;
         this.database = database;
+        this.databaseLocation = databaseLocation;
         this.memoryUsage = memoryUsage;
         this.sizeInBytes = sizeInBytes;
         this.nodeCount = nodeCount;
@@ -122,6 +126,7 @@ public class GraphInfo {
         return new GraphInfo(
             graphProjectConfig.graphName(),
             graphStore.databaseInfo().databaseId().databaseName(),
+            graphStore.databaseInfo().databaseLocation().name().toLowerCase(Locale.ROOT),
             configVisitor.configuration,
             memoryUsage,
             sizeInBytes,

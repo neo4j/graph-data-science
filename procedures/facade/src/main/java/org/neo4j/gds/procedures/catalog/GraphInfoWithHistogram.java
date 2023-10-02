@@ -36,6 +36,7 @@ public class GraphInfoWithHistogram extends GraphInfo {
         super(
             graphInfo.graphName,
             graphInfo.database,
+            graphInfo.databaseLocation,
             graphInfo.configuration,
             graphInfo.memoryUsage,
             graphInfo.sizeInBytes,
