@@ -162,6 +162,12 @@ class SccTest {
                 "Scc :: Start",
                 "Scc 11%",
                 "Scc 22%",
+                "Scc 33%",
+                "Scc 44%",
+                "Scc 55%",
+                "Scc 66%",
+                "Scc 77%",
+                "Scc 88%",
                 "Scc 100%",
                 "Scc :: Finished"
             );
