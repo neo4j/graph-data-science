@@ -21,10 +21,7 @@ package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.core.loading.DegreeDistribution;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.core.utils.TerminationFlag;
@@ -33,13 +30,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-public class ListGraphApplication {
-    private final GraphStoreCatalogService graphStoreCatalogService;
+public final class ListGraphApplication {
+    private final GraphListingService graphListingService;
+    private final DegreeDistributionApplier degreeDistributionApplier;
 
-    public ListGraphApplication(GraphStoreCatalogService graphStoreCatalogService) {
-        this.graphStoreCatalogService = graphStoreCatalogService;
+    ListGraphApplication(GraphListingService graphListingService, DegreeDistributionApplier degreeDistributionApplier) {
+        this.graphListingService = graphListingService;
+        this.degreeDistributionApplier = degreeDistributionApplier;
+    }
+
+    public static ListGraphApplication create(GraphStoreCatalogService graphStoreCatalogService) {
+        var graphListingService = new GraphListingService(graphStoreCatalogService);
+        var degreeDistributionApplier = new DegreeDistributionApplier(graphStoreCatalogService,
+            new DegreeDistributionService()
+        );
+
+        return new ListGraphApplication(graphListingService, degreeDistributionApplier);
     }
 
     public List<Pair<GraphStoreWithConfig, Map<String, Object>>> list(
@@ -48,72 +55,15 @@ public class ListGraphApplication {
         boolean includeDegreeDistribution,
         TerminationFlag terminationFlag
     ) {
-        var graphEntries = user.isAdmin()
-            ? listAll()
-            : listForUser(user);
+        var graphEntries = graphListingService.listGraphs(user);
 
         if (graphName.isPresent()) {
             // we should only list the provided graph
-            graphEntries = graphEntries.filter(e -> e.getKey().graphName().equals(graphName.get().getValue()));
+            graphEntries = graphEntries.stream()
+                .filter(e -> e.getKey().graphName().equals(graphName.get().getValue()))
+                .collect(Collectors.toList());
         }
 
-        return graphEntries.map(e ->
-        {
-            var graphStoreWithConfig = GraphStoreWithConfig.of(e.getValue(), e.getKey());
-            var degreeDistribution = getOrCreateDegreeDistribution(
-                includeDegreeDistribution,
-                graphStoreWithConfig,
-                terminationFlag
-            );
-            return Pair.of(graphStoreWithConfig, degreeDistribution);
-        }).collect(Collectors.toList());
-    }
-
-    /**
-     * This is get if cached; create if does not exist; or return null depending on the flag
-     */
-    private Map<String, Object> getOrCreateDegreeDistribution(
-        boolean includeDegreeDistribution,
-        GraphStoreWithConfig graphStoreWithConfig,
-        TerminationFlag terminationFlag
-    ) {
-        if (!includeDegreeDistribution) return null;
-
-        // we shall eventually have microtypes, by hook or by crook
-        var usernameAsString = graphStoreWithConfig.config().username();
-        var user = new User(usernameAsString, false);
-        var graphNameAsString = graphStoreWithConfig.config().graphName();
-        var graphName = GraphName.parse(graphNameAsString);
-
-        var maybeDegreeDistribution = graphStoreCatalogService.getDegreeDistribution(
-            user,
-            graphStoreWithConfig.graphStore().databaseId(),
-            graphName
-        );
-
-        return maybeDegreeDistribution.orElseGet(() -> {
-            var histogram = DegreeDistribution.compute(graphStoreWithConfig.graphStore().getUnion(), terminationFlag);
-            // Cache the computed degree distribution in the Catalog
-            graphStoreCatalogService.setDegreeDistribution(
-                user,
-                graphStoreWithConfig.graphStore().databaseId(),
-                graphName,
-                histogram
-            );
-            return histogram;
-        });
-    }
-
-    private Stream<Map.Entry<GraphProjectConfig, GraphStore>> listAll() {
-        return graphStoreCatalogService.getAllGraphStores()
-            .map(graphStore -> Map.entry(
-                    graphStore.config(),
-                    graphStore.graphStore()
-                )
-            );
-    }
-
-    private Stream<Map.Entry<GraphProjectConfig, GraphStore>> listForUser(User user) {
-        return graphStoreCatalogService.getGraphStores(user).entrySet().stream();
+        return degreeDistributionApplier.process(graphEntries, includeDegreeDistribution, terminationFlag);
     }
 }

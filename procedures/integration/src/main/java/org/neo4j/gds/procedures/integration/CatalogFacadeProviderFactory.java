@@ -114,7 +114,7 @@ class CatalogFacadeProviderFactory {
         var generateGraphApplication = new GenerateGraphApplication(log, graphStoreCatalogService);
         var graphMemoryUsageApplication = new GraphMemoryUsageApplication(graphStoreCatalogService);
         var graphSamplingApplication = new GraphSamplingApplication(log, graphStoreCatalogService);
-        var listGraphApplication = new ListGraphApplication(graphStoreCatalogService);
+        var listGraphApplication = ListGraphApplication.create(graphStoreCatalogService);
         var nativeProjectApplication = new NativeProjectApplication(
             new GenericProjectApplication<>(
                 this.log,
