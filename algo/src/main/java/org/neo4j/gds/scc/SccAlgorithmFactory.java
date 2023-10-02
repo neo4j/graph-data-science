@@ -68,7 +68,7 @@ public class SccAlgorithmFactory<CONFIG extends SccBaseConfig> extends GraphAlgo
             long relationshipCount = graphDimensions.relCountUpperBound();
             return MemoryRange.of(
                 PagedLongStack.memoryEstimation(nodeCount),
-                PagedLongStack.memoryEstimation(2 * Math.max(nodeCount, relationshipCount))
+                PagedLongStack.memoryEstimation(Math.max(nodeCount, relationshipCount))
                 //this bound is very-very-very loose
             );
         }));
