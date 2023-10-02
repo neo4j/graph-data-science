@@ -23,7 +23,7 @@ public interface Capabilities {
 
     WriteMode writeMode();
 
-    default boolean canWriteToDatabase() {
+    default boolean canWriteToLocalDatabase() {
         return writeMode() == WriteMode.LOCAL;
     }
 

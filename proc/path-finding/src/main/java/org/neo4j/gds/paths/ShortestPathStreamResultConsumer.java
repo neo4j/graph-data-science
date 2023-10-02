@@ -44,7 +44,7 @@ public final class ShortestPathStreamResultConsumer<ALGO extends Algorithm<PathF
                 .map(result -> {
                     var graph = computationResult.graph();
                     var shouldReturnPath = executionContext.returnColumns().contains("path")
-                        && computationResult.graphStore().capabilities().canWriteToDatabase();
+                        && computationResult.graphStore().capabilities().canWriteToLocalDatabase();
 
                     var resultBuilder = new StreamResult.Builder(graph, executionContext.nodeLookup());
 

@@ -65,7 +65,7 @@ public class BellmanFordStreamSpec implements AlgorithmSpec<BellmanFord, Bellman
                     var shouldReturnPath = executionContext
                         .returnColumns()
                         .contains("route")
-                        && computationResult.graphStore().capabilities().canWriteToDatabase();
+                        && computationResult.graphStore().capabilities().canWriteToLocalDatabase();
 
                     var containsNegativeCycle = result.containsNegativeCycle();
 

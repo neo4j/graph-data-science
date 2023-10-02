@@ -236,7 +236,7 @@ public class GraphStoreExportProc extends BaseProc {
     }
 
     private void validateReadAccess(GraphStore graphStore, boolean exportAdditionalNodeProperties) {
-        if (exportAdditionalNodeProperties && !graphStore.capabilities().canWriteToDatabase()) {
+        if (exportAdditionalNodeProperties && !graphStore.capabilities().canWriteToLocalDatabase()) {
             throw new IllegalArgumentException("Exporting additional node properties is not allowed for this graph.");
         }
     }

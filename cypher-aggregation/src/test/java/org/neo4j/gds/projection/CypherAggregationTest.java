@@ -746,7 +746,7 @@ class CypherAggregationTest extends BaseProcTest {
         );
 
         var graphStore = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore();
-        assertThat(graphStore.capabilities().canWriteToDatabase()).isFalse();
+        assertThat(graphStore.capabilities().canWriteToLocalDatabase()).isFalse();
     }
 
     @Test
@@ -757,7 +757,7 @@ class CypherAggregationTest extends BaseProcTest {
         );
 
         var graphStore = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore();
-        assertThat(graphStore.capabilities().canWriteToDatabase()).isTrue();
+        assertThat(graphStore.capabilities().canWriteToLocalDatabase()).isTrue();
     }
 
     @Test
