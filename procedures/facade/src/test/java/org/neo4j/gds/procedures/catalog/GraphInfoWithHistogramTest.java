@@ -95,6 +95,7 @@ class GraphInfoWithHistogramTest {
             )
         );
         assertThat(graphInfoWithHistogram.database).isEqualTo("some database");
+        assertThat(graphInfoWithHistogram.databaseLocation).isEqualTo("local");
         assertThat(graphInfoWithHistogram.degreeDistribution).containsExactlyInAnyOrderEntriesOf(Map.of(
             "min", 5L,
             "mean", 5.0D,
