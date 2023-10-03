@@ -77,10 +77,9 @@ public class ConfigurationParser {
         Collection<String> allowedConfigKeys
     ) throws IllegalArgumentException {
         Map<String, Object> newConfiguration = new HashMap<>(configuration);
-        allowedConfigKeys.stream().forEach(v -> newConfiguration.putIfAbsent(v, null)); //add any requiring
 
         CypherMapWrapper.create(newConfiguration)
-            .requireOnlyKeysFrom(allowedConfigKeys); //ensure user has not added any  incorrect params
+            .requireOnlyKeysFrom(allowedConfigKeys); //ensure user has not included any  incorrect params
     }
 
     @NotNull
