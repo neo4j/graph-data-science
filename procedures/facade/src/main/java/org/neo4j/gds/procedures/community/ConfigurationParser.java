@@ -80,6 +80,7 @@ public class ConfigurationParser {
 
         CypherMapWrapper.create(newConfiguration)
             .requireOnlyKeysFrom(allowedConfigKeys); //ensure user has not included any  incorrect params
+        //TODO: no reason creating CyperMapWrapper object for this, we should pull the logic here in a function here.
     }
 
     @NotNull
