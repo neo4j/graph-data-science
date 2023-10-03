@@ -608,6 +608,30 @@ public class CommunityProcedureFacade {
         return Stream.of(LabelPropagationComputationResultTransformer.toStatsResult(computationResult, config));
     }
 
+    public Stream<MemoryEstimateResult> labelPropagationEstimateStream(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, LabelPropagationStreamConfig::of);
+        return Stream.of(estimateBusinessFacade.labelPropagation(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> labelPropagationEstimateStats(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, LabelPropagationStatsConfig::of);
+        return Stream.of(estimateBusinessFacade.labelPropagation(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> labelPropagationEstimateMutate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, LabelPropagationMutateConfig::of);
+        return Stream.of(estimateBusinessFacade.labelPropagation(graphNameOrConfiguration, config));
+    }
+
     public Stream<ModularityStreamResult> modularityStream(
         String graphName,
         Map<String, Object> configuration
@@ -707,6 +731,30 @@ public class CommunityProcedureFacade {
         );
 
         return Stream.of(KmeansComputationResultTransformer.toStatsResult(computationResult, statsConfig));
+    }
+
+    public Stream<MemoryEstimateResult> kmeansEstimateMutate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, KmeansMutateConfig::of);
+        return Stream.of(estimateBusinessFacade.kmeans(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> kmeansEstimateStats(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, KmeansStatsConfig::of);
+        return Stream.of(estimateBusinessFacade.kmeans(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> kmeansEstimateStream(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, KmeansStreamConfig::of);
+        return Stream.of(estimateBusinessFacade.kmeans(graphNameOrConfiguration, config));
     }
 
     public Stream<LocalClusteringCoefficientStreamResult> localClusteringCoefficientStream(

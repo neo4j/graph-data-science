@@ -20,7 +20,6 @@
 package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.kmeans.KmeansStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -69,11 +68,7 @@ public class KmeansStreamProc extends BaseProc {
     ) {
         var spec = new KmeansStreamSpec();
 
-        return new MemoryEstimationExecutor<>(
-            spec,
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphName, configuration);
+        return facade.community().kmeansEstimateStream(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)

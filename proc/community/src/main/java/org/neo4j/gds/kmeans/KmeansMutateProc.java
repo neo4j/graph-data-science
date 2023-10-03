@@ -20,7 +20,6 @@
 package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.kmeans.KmeansMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -69,13 +68,8 @@ public class KmeansMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        var spec = new KmeansMutateSpec();
+        return facade.community().kmeansEstimateMutate(graphName, configuration);
 
-        return new MemoryEstimationExecutor<>(
-            spec,
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)
