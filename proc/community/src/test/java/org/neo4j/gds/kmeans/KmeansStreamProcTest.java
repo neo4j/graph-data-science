@@ -21,7 +21,8 @@ package org.neo4j.gds.kmeans;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.api.DefaultValue;
@@ -45,8 +46,9 @@ class KmeansStreamProcTest extends BaseProcTest {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
-    @Test
-    void shouldWork() {
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.kmeans","gds.beta.kmeans"})
+    void shouldWork(String procedureName) {
         String nodeCreateQuery =
             "CREATE" +
             "  (a:Person {kmeans: [1.0, 1.0]} )" +
@@ -65,7 +67,7 @@ class KmeansStreamProcTest extends BaseProcTest {
         runQuery(createQuery);
 
         String algoQuery = GdsCypher.call("graph")
-            .algo("gds.beta.kmeans")
+            .algo(procedureName)
             .streamMode()
             .addParameter("k", 2)
             .addParameter("nodeProperty", "kmeans")

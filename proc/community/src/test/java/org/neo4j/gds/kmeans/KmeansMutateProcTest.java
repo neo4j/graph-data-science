@@ -22,7 +22,8 @@ package org.neo4j.gds.kmeans;
 import org.assertj.core.data.Offset;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -56,8 +57,9 @@ class KmeansMutateProcTest extends BaseProcTest {
         );
     }
 
-    @Test
-    void testMutateYields() {
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.kmeans","gds.beta.kmeans"})
+    void testMutateYields(String procedureName) {
         runQuery(
             GdsCypher.call(DEFAULT_GRAPH_NAME)
                 .graphProject()
@@ -68,7 +70,7 @@ class KmeansMutateProcTest extends BaseProcTest {
 
         String query = GdsCypher
             .call(DEFAULT_GRAPH_NAME)
-            .algo("gds.beta.kmeans")
+            .algo(procedureName)
             .mutateMode()
             .addParameter("k", 3)
             .addParameter("randomSeed", 1337L)
