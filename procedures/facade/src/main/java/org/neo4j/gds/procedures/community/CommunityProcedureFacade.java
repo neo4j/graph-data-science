@@ -1161,9 +1161,13 @@ public class CommunityProcedureFacade {
         Map<String, Object> configuration,
         Function<CypherMapWrapper, C> configCreator
     ) {
-        var config = createConfig(configuration, configCreator);
-        algorithmMetaDataSetter.set(config);
-        return config;
+        return createConfig(
+            configuration,
+            configCreator.andThen(algorithmConfiguration -> {
+                algorithmMetaDataSetter.set(algorithmConfiguration);
+                return algorithmConfiguration;
+            })
+        );
     }
 
     private <C extends AlgoBaseConfig> C createConfig(

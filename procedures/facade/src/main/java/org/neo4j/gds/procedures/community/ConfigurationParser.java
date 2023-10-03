@@ -47,13 +47,18 @@ public class ConfigurationParser {
         this.limits = limits;
     }
 
-    public  Map<String,Object> applyDefaults(Map<String, Object> configuration, String username ) {
+    Map<String,Object> applyDefaults(Map<String, Object> configuration, String username) {
         // apply defaults
         return  defaults.apply(configuration, username);
     }
 
 
-    public <CONFIG  extends AlgoBaseConfig> void validateLimits(CONFIG algorithmConfiguration,String username, Map<String,Object> userInput, Map<String,Object> userInputWithDefaults) throws  IllegalArgumentException{
+    <CONFIG  extends AlgoBaseConfig> void validateLimits(
+        CONFIG algorithmConfiguration,
+        String username,
+        Map<String, Object> userInput,
+        Map<String, Object> userInputWithDefaults
+    ) throws  IllegalArgumentException{
         // handle limits
         var allowedKeys = new HashSet<>(algorithmConfiguration.configKeys());
         var irrelevantInputtedKeys = getIrrelevantInputtedKeys(userInput, allowedKeys);
