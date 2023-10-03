@@ -26,11 +26,12 @@ import org.neo4j.gds.configuration.LimitViolation;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.CypherMapWrapper;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Set;
+import java.util.function.Function;
 
 public class ConfigurationParser {
     private final DefaultsConfiguration defaults;
@@ -56,27 +57,30 @@ public class ConfigurationParser {
     <CONFIG  extends AlgoBaseConfig> void validateLimits(
         CONFIG algorithmConfiguration,
         String username,
-        Map<String, Object> userInput,
         Map<String, Object> userInputWithDefaults
     ) throws  IllegalArgumentException{
+
         // handle limits
         var allowedKeys = new HashSet<>(algorithmConfiguration.configKeys());
-        var irrelevantInputtedKeys = getIrrelevantInputtedKeys(userInput, allowedKeys);
+        var irrelevantInputtedKeys = getIrrelevantInputtedKeys(userInputWithDefaults, allowedKeys);
         var configurationButWithIrrelevantInputtedKeysRemoved = getConfigurationForLimitValidation(
-            userInput,
-            irrelevantInputtedKeys);
-
-        validateLimits(configurationButWithIrrelevantInputtedKeysRemoved,username);
-
-        // validate userInput
-        var addedKeys = findAddedKeys(userInputWithDefaults, userInput.keySet());
-        var addedButIrrelevantKeys = findIrrelevantKeys(addedKeys, allowedKeys);
-        var configurationWithDefaultsAppliedButIrrelevantKeysRemoved = weedOutIrrelevantKeys(
             userInputWithDefaults,
-            addedButIrrelevantKeys
-        );
-        validateConfig(allowedKeys, configurationWithDefaultsAppliedButIrrelevantKeysRemoved);
+            irrelevantInputtedKeys
+        ); //remove any useless configuration parameters e.g., sourceNode for Wcc
 
+        validateLimits(configurationButWithIrrelevantInputtedKeysRemoved, username);
+
+    }
+
+    void validateOriginalConfig(
+        Map<String, Object> configuration,
+        Collection<String> allowedConfigKeys
+    ) throws IllegalArgumentException {
+        Map<String, Object> newConfiguration = new HashMap<>(configuration);
+        allowedConfigKeys.stream().forEach(v -> newConfiguration.putIfAbsent(v, null)); //add any requiring
+
+        CypherMapWrapper.create(newConfiguration)
+            .requireOnlyKeysFrom(allowedConfigKeys); //ensure user has not added any  incorrect params
     }
 
     @NotNull
@@ -115,31 +119,17 @@ public class ConfigurationParser {
         throw new IllegalArgumentException(String.join(delimeter, violationMessages));
     }
 
-    @NotNull
-    private Set<String> findAddedKeys(Map<String, Object> configurationWithDefaultsApplied, Set<String> inputtedKeys) {
-        Set<String> addedKeys = new HashSet<>(configurationWithDefaultsApplied.keySet());
-        addedKeys.removeAll(inputtedKeys);
-        return addedKeys;
-    }
 
-    @NotNull
-    private Set<String> findIrrelevantKeys(Set<String> addedKeys, Set<String> allowedKeys) {
-        Set<String> irrelevantKeys = new HashSet<>(addedKeys);
-        irrelevantKeys.removeAll(allowedKeys);
-        return irrelevantKeys;
-    }
-
-    @NotNull
-    private HashMap<String, Object> weedOutIrrelevantKeys(
-        Map<String, Object> configurationWithDefaultsApplied,
-        Set<String> irrelevantKeys
+    public <CONFIG extends AlgoBaseConfig> CONFIG produceConfig(
+        Map<String, Object> configuration,
+        Function<CypherMapWrapper, CONFIG> configCreator,
+        String username
     ) {
-        var configurationWithDefaultsAppliedButIrrelevantKeysRemoved = new HashMap<>(configurationWithDefaultsApplied);
-        configurationWithDefaultsAppliedButIrrelevantKeysRemoved.keySet().removeAll(irrelevantKeys);
-        return configurationWithDefaultsAppliedButIrrelevantKeysRemoved;
+        var inputWithDefaults = applyDefaults(configuration, username);
+        var procConfig = configCreator.apply(CypherMapWrapper.create(inputWithDefaults));
+        validateOriginalConfig(configuration, procConfig.configKeys());
+        validateLimits(procConfig, username, inputWithDefaults);
+        return procConfig;
     }
 
-    private void validateConfig(Set<String> allowedKeys, Map<String, Object> configuration) {
-        CypherMapWrapper.create(configuration).requireOnlyKeysFrom(allowedKeys);
-    }
 }

@@ -1174,12 +1174,7 @@ public class CommunityProcedureFacade {
         Map<String, Object> configuration,
         Function<CypherMapWrapper, C> configCreator
     ) {
-
-        var inputWithDefaults = configurationParser.applyDefaults(configuration, user.getUsername());
-        var procConfig = configCreator.apply(CypherMapWrapper.create(inputWithDefaults));
-        configurationParser.validateLimits(procConfig, user.getUsername(), configuration, inputWithDefaults);
-
-        return procConfig;
+        return configurationParser.produceConfig(configuration, configCreator, user.getUsername());
     }
 
 }
