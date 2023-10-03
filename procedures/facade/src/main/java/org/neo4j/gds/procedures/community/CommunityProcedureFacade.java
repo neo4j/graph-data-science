@@ -236,6 +236,14 @@ public class CommunityProcedureFacade {
         return Stream.of(estimateBusinessFacade.wcc(graphNameOrConfiguration, config));
     }
 
+    public Stream<MemoryEstimateResult> wccEstimateWrite(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, WccWriteConfig::of);
+        return Stream.of(estimateBusinessFacade.wcc(graphNameOrConfiguration, config));
+    }
+
     public Stream<MemoryEstimateResult> wccEstimateStream(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
