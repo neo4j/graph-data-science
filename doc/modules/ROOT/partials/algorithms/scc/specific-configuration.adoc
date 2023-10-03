@@ -1,1 +1,1 @@
-| consecutiveIds                                                                   | Boolean | false   | yes      | Flag to decide whether component identifiers are mapped into a consecutive id space (requires additional memory).
+| consecutiveIds | Boolean | false   | yes      | Flag to decide whether component identifiers are mapped into a consecutive id space (requires additional memory).

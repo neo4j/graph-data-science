@@ -48,7 +48,6 @@ final class SccComputationResultTransformer {
         return computationResult.result().map(sccResult -> {
             var graph = computationResult.graph();
             var nodePropertyValues = CommunityResultCompanion.nodePropertyValues(
-                false,
                 configuration.consecutiveIds(),
                 NodePropertyValuesAdapter.adapt(sccResult),
                 Optional.empty(),

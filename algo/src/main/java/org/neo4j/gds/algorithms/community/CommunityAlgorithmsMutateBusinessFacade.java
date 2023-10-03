@@ -253,7 +253,6 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             algorithmResult,
             configuration,
             (result, config) -> CommunityResultCompanion.nodePropertyValues(
-                false,
                 config.consecutiveIds(),
                 NodePropertyValuesAdapter.adapt(result)
             ),
