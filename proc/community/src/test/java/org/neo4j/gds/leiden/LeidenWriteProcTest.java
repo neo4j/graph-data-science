@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
@@ -83,9 +84,10 @@ class LeidenWriteProcTest extends BaseProcTest {
         runQuery(projectQuery);
     }
 
-    @Test
-    void write() {
-        var query = "CALL gds.beta.leiden.write('leiden', { writeProperty: 'communityId', concurrency: 1 })";
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.leiden","gds.beta.leiden"})
+    void write(String procedureName) {
+        var query = "CALL " + procedureName + ".write('leiden', { writeProperty: 'communityId', concurrency: 1 })";
         assertLeidenQuery(query);
 
         String loadQuery = GdsCypher.call("writeGraph")
@@ -110,7 +112,7 @@ class LeidenWriteProcTest extends BaseProcTest {
 
     @Test
     void shouldWriteWithConsecutiveIds() {
-        var query = "CALL gds.beta.leiden.write('leiden', { writeProperty: 'communityId', consecutiveIds: true })";
+        var query = "CALL gds.leiden.write('leiden', { writeProperty: 'communityId', consecutiveIds: true })";
         assertLeidenQuery(query);
 
         String loadQuery = GdsCypher.call("writeGraph")
@@ -218,7 +220,7 @@ class LeidenWriteProcTest extends BaseProcTest {
 
     @Test
     void writeWithIntermediateCommunities() {
-        var query = "CALL gds.beta.leiden.write('leiden', {" +
+        var query = "CALL gds.leiden.write('leiden', {" +
                     "   writeProperty: 'intermediateCommunities'," +
                     "   includeIntermediateCommunities: true" +
                     "})";
@@ -232,7 +234,7 @@ class LeidenWriteProcTest extends BaseProcTest {
 
     @Test
     void shouldEstimateMemory() {
-        var query = "CALL gds.beta.leiden.write.estimate('leiden', {" +
+        var query = "CALL gds.leiden.write.estimate('leiden', {" +
                     "   writeProperty: 'intermediateCommunities'," +
                     "   includeIntermediateCommunities: true" +
                     "})";
@@ -249,7 +251,7 @@ class LeidenWriteProcTest extends BaseProcTest {
     @ParameterizedTest
     @MethodSource("communitySizeInputs")
     void writeWithMinCommunitySize(int minCommunitySize, List<Long> expectedCommunityIds) {
-        var query = "CALL gds.beta.leiden.write('leiden', {" +
+        var query = "CALL gds.leiden.write('leiden', {" +
                 "   writeProperty: 'communityId'," +
                 "   minCommunitySize: " + minCommunitySize +
                 "})";

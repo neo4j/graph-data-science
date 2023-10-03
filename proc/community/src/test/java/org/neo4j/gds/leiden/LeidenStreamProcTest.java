@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
@@ -78,9 +79,10 @@ class LeidenStreamProcTest extends BaseProcTest {
         runQuery(projectQuery);
     }
 
-    @Test
-    void stream() {
-        runQuery("CALL gds.leiden.stream('leiden')", result -> {
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.leiden","gds.beta.leiden"})
+    void stream(String procedureName) {
+        runQuery("CALL " + procedureName + ".stream('leiden')", result -> {
             assertThat(result.columns()).containsExactlyInAnyOrder("nodeId", "communityId", "intermediateCommunityIds");
             long resultRowCount = 0;
             var communities = new HashSet<Long>();

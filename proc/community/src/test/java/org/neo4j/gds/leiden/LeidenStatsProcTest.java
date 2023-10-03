@@ -21,6 +21,8 @@ package org.neo4j.gds.leiden;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
@@ -72,10 +74,11 @@ class LeidenStatsProcTest extends BaseProcTest {
         runQuery(projectQuery);
     }
 
-    @Test
-    void stats() {
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.leiden","gds.beta.leiden"})
+    void stats(String procedureName) {
 
-        var query = "CALL gds.leiden.stats('leiden')";
+        var query = "CALL " + procedureName + ".stats('leiden')";
 
         runQuery(query, result -> {
             assertThat(result.columns())

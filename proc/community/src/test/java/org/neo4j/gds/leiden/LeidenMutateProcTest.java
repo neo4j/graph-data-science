@@ -21,6 +21,8 @@ package org.neo4j.gds.leiden;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
@@ -79,9 +81,10 @@ class LeidenMutateProcTest  extends BaseProcTest {
         runQuery(projectQuery);
     }
 
-    @Test
-    void mutate() {
-        var query = "CALL gds.leiden.mutate('leiden', {mutateProperty: 'communityId', concurrency: 1})";
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.leiden","gds.beta.leiden"})
+    void mutate(String procedureName) {
+        var query = "CALL " + procedureName + ".mutate('leiden', {mutateProperty: 'communityId', concurrency: 1})";
         assertLeidenMutateQuery(query);
         Graph mutatedGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), "leiden").graphStore().getUnion();
         var communities = mutatedGraph.nodeProperties("communityId");
