@@ -304,6 +304,8 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
 
         "gds.modularityOptimization.mutate",
         "gds.modularityOptimization.mutate.estimate",
+        "gds.modularityOptimization.stats",
+        "gds.modularityOptimization.stats.estimate",
         "gds.modularityOptimization.stream",
         "gds.modularityOptimization.stream.estimate",
         "gds.modularityOptimization.write",
@@ -574,7 +576,7 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         );
 
         // If you find yourself updating this count, please also update the count in SmokeTest.kt
-        int expectedCount = 418;
+        int expectedCount = 420;
         assertEquals(
             expectedCount,
             returnedRows,

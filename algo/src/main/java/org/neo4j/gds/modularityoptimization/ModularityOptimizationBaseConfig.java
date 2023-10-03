@@ -28,7 +28,7 @@ import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.config.ToleranceConfig;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 
-public interface ModularityOptimizationConfig extends
+public interface ModularityOptimizationBaseConfig extends
     AlgoBaseConfig,
     IterationsConfig,
     SeedConfig,

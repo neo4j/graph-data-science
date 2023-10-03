@@ -28,7 +28,9 @@ import org.neo4j.gds.core.CypherMapWrapper;
 @Configuration
 @ValueClass
 @SuppressWarnings("immutables:subtype")
-public interface ModularityOptimizationWriteConfig extends ModularityOptimizationConfig, WritePropertyConfig, CommunitySizeConfig {
+public interface ModularityOptimizationWriteConfig extends ModularityOptimizationBaseConfig,
+    WritePropertyConfig,
+    CommunitySizeConfig {
 
     static ModularityOptimizationWriteConfig of(CypherMapWrapper config) {
         return new ModularityOptimizationWriteConfigImpl(config);

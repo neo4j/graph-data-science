@@ -63,7 +63,7 @@ import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityCalculatorFactory;
 import org.neo4j.gds.modularity.ModularityResult;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationConfig;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationFactory;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.scc.SccAlgorithmFactory;
@@ -311,7 +311,7 @@ public class CommunityAlgorithmsFacade {
 
     public AlgorithmComputationResult<ModularityOptimizationResult> modularityOptimization(
         String graphName,
-        ModularityOptimizationConfig config,
+        ModularityOptimizationBaseConfig config,
         User user,
         DatabaseId databaseId
     ) {

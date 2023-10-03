@@ -21,13 +21,16 @@ package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.ModularityOptimizationSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
+import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.community.CommunityResultCompanion;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationMutateResult;
+import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationStatsResult;
 import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationStreamResult;
 
 import java.util.stream.LongStream;
@@ -77,6 +80,24 @@ final class ModularityOptimisationComputationResultTransformer {
             computationResult.algorithmSpecificFields().communityCount(),
             computationResult.algorithmSpecificFields().communityDistribution(),
             mutateConfig.toMap()
+        );
+    }
+
+    static ModularityOptimizationStatsResult toStatsResult(
+        StatsResult<ModularityOptimizationSpecificFields> computationResult,
+        ModularityOptimizationStatsConfig configuration
+    ) {
+        return new ModularityOptimizationStatsResult(
+            computationResult.preProcessingMillis(),
+            computationResult.computeMillis(),
+            computationResult.postProcessingMillis(),
+            computationResult.algorithmSpecificFields().nodes(),
+            computationResult.algorithmSpecificFields().didConverge(),
+            computationResult.algorithmSpecificFields().ranIterations(),
+            computationResult.algorithmSpecificFields().modularity(),
+            computationResult.algorithmSpecificFields().communityCount(),
+            computationResult.algorithmSpecificFields().communityDistribution(),
+            configuration.toMap()
         );
     }
 }

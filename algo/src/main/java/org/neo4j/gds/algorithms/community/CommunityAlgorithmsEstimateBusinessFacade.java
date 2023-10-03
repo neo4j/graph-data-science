@@ -40,12 +40,14 @@ import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
 import org.neo4j.gds.memest.MemoryEstimationGraphConfigParser;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityCalculatorFactory;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationFactory;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.scc.SccAlgorithmFactory;
+import org.neo4j.gds.scc.SccBaseConfig;
 import org.neo4j.gds.triangle.IntersectingTriangleCountFactory;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientFactory;
-import org.neo4j.gds.scc.SccAlgorithmFactory;
-import org.neo4j.gds.scc.SccBaseConfig;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.wcc.WccAlgorithmFactory;
 import org.neo4j.gds.wcc.WccBaseConfig;
@@ -78,7 +80,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
         this.user = user;
     }
 
-    public <C extends WccBaseConfig> MemoryEstimateResult estimateWcc(Object graphNameOrConfiguration, C configuration) {
+    public <C extends WccBaseConfig> MemoryEstimateResult wcc(Object graphNameOrConfiguration, C configuration) {
         return estimate(
             graphNameOrConfiguration,
             configuration,
@@ -169,6 +171,18 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             configuration,
             configuration.relationshipWeightProperty(),
             new ModularityCalculatorFactory<>()
+        );
+    }
+
+    public <C extends ModularityOptimizationBaseConfig> MemoryEstimateResult modularityOptimization(
+        Object graphNameOrConfiguration,
+        C configuration
+    ) {
+        return estimate(
+            graphNameOrConfiguration,
+            configuration,
+            configuration.relationshipWeightProperty(),
+            new ModularityOptimizationFactory<>()
         );
     }
 

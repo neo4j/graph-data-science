@@ -43,7 +43,7 @@ import java.util.List;
 
 import static org.neo4j.gds.modularityoptimization.ModularityOptimization.K1COLORING_MAX_ITERATIONS;
 
-public class ModularityOptimizationFactory<T extends ModularityOptimizationConfig> extends GraphAlgorithmFactory<ModularityOptimization, T> {
+public class ModularityOptimizationFactory<T extends ModularityOptimizationBaseConfig> extends GraphAlgorithmFactory<ModularityOptimization, T> {
 
     private static final String MODULARITY_OPTIMIZATION_TASK_NAME = "ModularityOptimization";
 
