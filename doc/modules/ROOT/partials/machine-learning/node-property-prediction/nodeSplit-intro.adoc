@@ -1,6 +1,6 @@
 Node {pipeline-type} Pipelines manage the splitting of nodes into several sets, which are used for training, testing and validating the model candidates defined in the <<{parameterspace-link},parameter space>>.
 Configuring the splitting is optional, and if omitted, splitting will be done using default settings.
-The splitting configuration of a pipeline can be inspected by using `gds.beta.model.list` and yielding `splitConfig`.
+The splitting configuration of a pipeline can be inspected by using `gds.model.list` and yielding `splitConfig`.
 
 The node splits are used in the training process as follows:
 
