@@ -24,6 +24,7 @@ import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
+import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
@@ -35,7 +36,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class HashGNNStreamProc extends BaseProc {
 
-    @Procedure(value = "gds.beta.hashgnn.stream", mode = READ)
+    @Procedure(value = "gds.hashgnn.stream", mode = READ)
     @Description(DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") String graphName,
@@ -47,7 +48,20 @@ public class HashGNNStreamProc extends BaseProc {
         ).compute(graphName, configuration);
     }
 
-    @Procedure(value = "gds.beta.hashgnn.stream.estimate", mode = READ)
+    @Internal
+    @Deprecated(forRemoval = true)
+    @Procedure(value = "gds.beta.hashgnn.stream", deprecatedBy = "gds.hashgnn.stream", mode = READ)
+    @Description(DESCRIPTION)
+    public Stream<StreamResult> betaStream(
+        @Name(value = "graphName") String graphName,
+        @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+    ) {
+        executionContext().log()
+            .warn("Procedure `gds.beta.hashgnn.stream` has been deprecated, please use `gds.hashgnn.stream`.");
+        return stream(graphName, configuration);
+    }
+
+    @Procedure(value = "gds.hashgnn.stream.estimate", mode = READ)
     @Description(DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
@@ -60,5 +74,16 @@ public class HashGNNStreamProc extends BaseProc {
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
-
+    @Internal
+    @Deprecated(forRemoval = true)
+    @Procedure(value = "gds.beta.hashgnn.stream.estimate", deprecatedBy = "gds.hashgnn.stream.estimate", mode = READ)
+    @Description(DESCRIPTION)
+    public Stream<MemoryEstimateResult> betaEstimate(
+        @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
+        @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
+    ) {
+        executionContext().log()
+            .warn("Procedure `gds.beta.hashgnn.stream.estimate` has been deprecated, please use `gds.hashgnn.stream.estimate`.");
+        return estimate(graphNameOrConfiguration, algoConfiguration);
+    }
 }
