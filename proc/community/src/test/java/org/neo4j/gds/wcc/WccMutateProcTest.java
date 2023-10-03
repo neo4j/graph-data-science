@@ -71,6 +71,7 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
+import org.neo4j.gds.procedures.community.ConfigurationParser;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.ImmutableGraphProjectFromStoreConfig;
 
@@ -356,6 +357,7 @@ class WccMutateProcTest extends BaseProcTest {
                 null,
                 null,
                 new CommunityProcedureFacade(
+                    ConfigurationParser.EMPTY,
                     null,
                     DatabaseId.of(db.databaseName()),
                     ProcedureReturnColumns.EMPTY,
@@ -477,6 +479,7 @@ class WccMutateProcTest extends BaseProcTest {
                 null,
                 null,
                 new CommunityProcedureFacade(
+                    ConfigurationParser.EMPTY,
                     null,
                     DatabaseId.of(db.databaseName()),
                     ProcedureReturnColumns.EMPTY,
@@ -547,6 +550,7 @@ class WccMutateProcTest extends BaseProcTest {
                 null,
                 null,
                 new CommunityProcedureFacade(
+                    ConfigurationParser.EMPTY,
                     null,
                     DatabaseId.of(db.databaseName()),
                     ProcedureReturnColumns.EMPTY,
@@ -623,6 +627,7 @@ class WccMutateProcTest extends BaseProcTest {
                         null,
                         null,
                         new CommunityProcedureFacade(
+                            ConfigurationParser.EMPTY,
                             null,
                             DatabaseId.of(db.databaseName()),
                             ProcedureReturnColumns.EMPTY,

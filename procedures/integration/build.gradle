@@ -16,6 +16,7 @@ dependencies {
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-write')
+    implementation project(':defaults-and-limits-configuration')
     implementation project(':executor')
     implementation project(':graph-store-catalog-applications')
     implementation project(':logging')

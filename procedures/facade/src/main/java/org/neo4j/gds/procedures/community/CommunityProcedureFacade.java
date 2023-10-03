@@ -124,6 +124,7 @@ public class CommunityProcedureFacade {
     private final DatabaseId databaseId;
     private final ProcedureReturnColumns procedureReturnColumns;
     private final User user;
+    private final ConfigurationParser configurationParser;
 
     // business logic
     private final CommunityAlgorithmsEstimateBusinessFacade estimateBusinessFacade;
@@ -133,7 +134,10 @@ public class CommunityProcedureFacade {
     private final CommunityAlgorithmsWriteBusinessFacade writeBusinessFacade;
 
 
+
+
     public CommunityProcedureFacade(
+        ConfigurationParser configurationParser,
         AlgorithmMetaDataSetter algorithmMetaDataSetter,
         DatabaseId databaseId,
         ProcedureReturnColumns procedureReturnColumns,
@@ -144,6 +148,7 @@ public class CommunityProcedureFacade {
         CommunityAlgorithmsStreamBusinessFacade streamBusinessFacade,
         CommunityAlgorithmsWriteBusinessFacade writeBusinessFacade
     ) {
+        this.configurationParser = configurationParser;
         this.algorithmMetaDataSetter = algorithmMetaDataSetter;
         this.databaseId = databaseId;
         this.procedureReturnColumns = procedureReturnColumns;
@@ -1156,7 +1161,7 @@ public class CommunityProcedureFacade {
         Map<String, Object> configuration,
         Function<CypherMapWrapper, C> configCreator
     ) {
-        var config = configCreator.apply(CypherMapWrapper.create(configuration));
+        var config = createConfig(configuration, configCreator);
         algorithmMetaDataSetter.set(config);
         return config;
     }
@@ -1165,6 +1170,12 @@ public class CommunityProcedureFacade {
         Map<String, Object> configuration,
         Function<CypherMapWrapper, C> configCreator
     ) {
-        return configCreator.apply(CypherMapWrapper.create(configuration));
+
+        var inputWithDefaults = configurationParser.applyDefaults(configuration, user.getUsername());
+        var procConfig = configCreator.apply(CypherMapWrapper.create(inputWithDefaults));
+        configurationParser.validateLimits(procConfig, user.getUsername(), configuration, inputWithDefaults);
+
+        return procConfig;
     }
+
 }

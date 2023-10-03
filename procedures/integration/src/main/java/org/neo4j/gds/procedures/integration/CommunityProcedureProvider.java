@@ -32,6 +32,8 @@ import org.neo4j.gds.algorithms.community.WriteNodePropertyService;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
+import org.neo4j.gds.configuration.DefaultsConfiguration;
+import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -44,6 +46,7 @@ import org.neo4j.gds.procedures.KernelTransactionAccessor;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.TerminationFlagService;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
+import org.neo4j.gds.procedures.community.ConfigurationParser;
 import org.neo4j.gds.services.DatabaseIdAccessor;
 import org.neo4j.gds.services.UserAccessor;
 import org.neo4j.gds.services.UserLogServices;
@@ -166,9 +169,13 @@ public class CommunityProcedureProvider {
                 taskRegistryFactory
             )
         );
-
+        var configurationParser = new ConfigurationParser(
+            DefaultsConfiguration.Instance,
+            LimitsConfiguration.Instance
+        );
         // procedure facade
         return new CommunityProcedureFacade(
+            configurationParser,
             algorithmMetaDataSetter,
             databaseId,
             returnColumns,
