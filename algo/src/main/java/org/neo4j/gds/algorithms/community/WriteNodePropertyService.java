@@ -67,9 +67,7 @@ public class WriteNodePropertyService {
             procedureName,
             arrowConnectionInfo,
             terminationFlag,
-            (org.neo4j.logging.Log) log.getNeo4jLog() //TODO: check whats going on with log
+            log
         );
     }
-
-
 }

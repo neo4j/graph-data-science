@@ -37,7 +37,7 @@ import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.logging.Log;
+import org.neo4j.gds.logging.Log;
 
 import java.util.Collection;
 import java.util.List;
@@ -69,14 +69,11 @@ final class Neo4jDatabasePropertyWriter {
        TerminationFlag terminationFlag,
        Log log
    ) {
-
-
         var nodeProperties = List.of(ImmutableNodeProperty.of(writeProperty, nodePropertyValues));
 
         var writeMillis = new AtomicLong();
         var propertiesWritten = new MutableLong();
         try (ProgressTimer ignored = ProgressTimer.start(writeMillis::set)) {
-
             var progressTracker = createProgressTracker(
                 taskRegistryFactory,
                 graph.nodeCount(),
@@ -126,7 +123,7 @@ final class Neo4jDatabasePropertyWriter {
     ) {
         return new TaskProgressTracker(
             NodePropertyExporter.baseTask(name, taskVolume),
-            log,
+            (org.neo4j.logging.Log) log.getNeo4jLog(),
             writeConcurrency,
             taskRegistryFactory
         );
