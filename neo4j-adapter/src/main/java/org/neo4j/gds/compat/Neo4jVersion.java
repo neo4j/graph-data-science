@@ -80,7 +80,7 @@ public enum Neo4jVersion {
 
     public MajorMinorVersion semanticVersion() {
         if (this == V_RC) {
-            return ImmutableMajorMinorVersion.of(5, 12);
+            return ImmutableMajorMinorVersion.of(5, 13);
         }
 
         String version = toString();
