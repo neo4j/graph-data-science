@@ -21,6 +21,8 @@ package org.neo4j.gds.undirected;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
@@ -76,9 +78,10 @@ class ToUndirectedProcTest extends BaseProcTest {
         );
     }
 
-    @Test
-    void convertToUndirected() {
-        String query = "CALL gds.graph.relationships.toUndirected('graph', {relationshipType: 'REL', mutateRelationshipType: 'REL2'})";
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.graph.relationships.toUndirected", "gds.beta.graph.relationships.toUndirected"})
+    void convertToUndirected(String procedureName) {
+        String query = "CALL " + procedureName + "('graph', {relationshipType: 'REL', mutateRelationshipType: 'REL2'})";
 
         assertCypherResult(query, List.of(Map.of("inputRelationships", 3L,
             "relationshipsWritten", 6L,
@@ -120,7 +123,7 @@ class ToUndirectedProcTest extends BaseProcTest {
         );
 
         assertCypherResult(
-            "CALL gds.beta.graph.relationships.toUndirected('star_graph', {relationshipType: '*', mutateRelationshipType: 'UNDIRECTED'}) YIELD relationshipsWritten",
+            "CALL gds.graph.relationships.toUndirected('star_graph', {relationshipType: '*', mutateRelationshipType: 'UNDIRECTED'}) YIELD relationshipsWritten",
             List.of(Map.of("relationshipsWritten", 6L))
         );
     }
