@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.scc;
+package org.neo4j.gds.procedures.community.scc;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
-public class AlphaWriteResult {
+public class AlphaSccWriteResult {
 
     public final long preProcessingMillis;
     public final long computeMillis;
@@ -46,7 +46,7 @@ public class AlphaWriteResult {
     public final long p100;
     public final String writeProperty;
 
-    public AlphaWriteResult(
+    public AlphaSccWriteResult(
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
@@ -88,15 +88,15 @@ public class AlphaWriteResult {
         this.writeProperty = writeProperty;
     }
 
-    static class Builder extends AbstractCommunityResultBuilder<AlphaWriteResult> {
+    public static class Builder extends AbstractCommunityResultBuilder<AlphaSccWriteResult> {
 
-        Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+        public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 
         @Override
-        public AlphaWriteResult buildResult() {
-            return new AlphaWriteResult(
+        public AlphaSccWriteResult buildResult() {
+            return new AlphaSccWriteResult(
                 preProcessingMillis,
                 computeMillis,
                 writeMillis,

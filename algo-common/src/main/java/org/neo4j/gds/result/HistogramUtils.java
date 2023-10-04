@@ -50,16 +50,21 @@ public final class HistogramUtils {
     }
 
     public static Map<String, Object> communitySummary(AbstractHistogram histogram) {
-        return Map.of(
-            "min", histogram.getMinValue(),
-            "mean", histogram.getMean(),
-            "max", histogram.getMaxValue(),
-            "p50", histogram.getValueAtPercentile(50),
-            "p75", histogram.getValueAtPercentile(75),
-            "p90", histogram.getValueAtPercentile(90),
-            "p95", histogram.getValueAtPercentile(95),
-            "p99", histogram.getValueAtPercentile(99),
-            "p999", histogram.getValueAtPercentile(99.9)
+        return Map.ofEntries(
+            entry("min", histogram.getMinValue()),
+            entry("max", histogram.getMaxValue()),
+            entry("mean", histogram.getMean()),
+            entry("p1", histogram.getValueAtPercentile(1)),
+            entry("p5", histogram.getValueAtPercentile(5)),
+            entry("p10", histogram.getValueAtPercentile(10)),
+            entry("p25", histogram.getValueAtPercentile(25)),
+            entry("p50", histogram.getValueAtPercentile(50)),
+            entry("p75", histogram.getValueAtPercentile(75)),
+            entry("p90", histogram.getValueAtPercentile(90)),
+            entry("p95", histogram.getValueAtPercentile(95)),
+            entry("p99", histogram.getValueAtPercentile(99)),
+            entry("p999", histogram.getValueAtPercentile(99.9))
+
         );
     }
 

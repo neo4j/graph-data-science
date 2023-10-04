@@ -31,6 +31,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.scc.SccWriteResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -43,7 +44,7 @@ import static org.neo4j.gds.scc.Scc.SCC_DESCRIPTION;
     description = SCC_DESCRIPTION,
     executionMode = ExecutionMode.WRITE_NODE_PROPERTY
 )
-public class SccWriteSpec implements AlgorithmSpec<Scc, HugeLongArray, SccWriteConfig, Stream<WriteResult>, SccAlgorithmFactory<SccWriteConfig>> {
+public class SccWriteSpec implements AlgorithmSpec<Scc, HugeLongArray, SccWriteConfig, Stream<SccWriteResult>, SccAlgorithmFactory<SccWriteConfig>> {
 
     @Override
     public String name() {
@@ -61,7 +62,7 @@ public class SccWriteSpec implements AlgorithmSpec<Scc, HugeLongArray, SccWriteC
     }
 
     @Override
-    public ComputationResultConsumer<Scc, HugeLongArray, SccWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Scc, HugeLongArray, SccWriteConfig, Stream<SccWriteResult>> computationResultConsumer() {
 
 
         return new WriteNodePropertiesComputationResultConsumer<>(
@@ -76,12 +77,12 @@ public class SccWriteSpec implements AlgorithmSpec<Scc, HugeLongArray, SccWriteC
         );
     }
 
-    private AbstractResultBuilder<WriteResult> resultBuilder(
+    private AbstractResultBuilder<SccWriteResult> resultBuilder(
         ComputationResult<Scc, HugeLongArray, SccWriteConfig> computationResult,
         ExecutionContext executionContext
     ) {
         var config = computationResult.config();
-        var writeBuilder = new WriteResult.Builder(
+        var writeBuilder = new SccWriteResult.Builder(
             executionContext.returnColumns(),
             config.concurrency()
         )

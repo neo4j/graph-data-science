@@ -67,7 +67,7 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationFactory;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.scc.SccAlgorithmFactory;
-import org.neo4j.gds.scc.SccBaseConfig;
+import org.neo4j.gds.scc.SccCommonBaseConfig;
 import org.neo4j.gds.triangle.IntersectingTriangleCountFactory;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientFactory;
@@ -198,7 +198,7 @@ public class CommunityAlgorithmsFacade {
 
     AlgorithmComputationResult<HugeLongArray> scc(
         String graphName,
-        SccBaseConfig config,
+        SccCommonBaseConfig config,
         User user,
         DatabaseId databaseId
     ) {

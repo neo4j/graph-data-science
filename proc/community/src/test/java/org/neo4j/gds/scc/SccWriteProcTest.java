@@ -29,8 +29,11 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
+import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 
@@ -95,16 +98,21 @@ class SccWriteProcTest extends BaseProcTest {
                 .isInstanceOf(Map.class)
                 .asInstanceOf(MAP)
                 .containsExactlyInAnyOrderEntriesOf(
-                    Map.of(
-                        "p99", 3L,
-                        "min", 3L,
-                        "max", 3L,
-                        "mean", 3.0,
-                        "p999", 3L,
-                        "p95", 3L,
-                        "p90", 3L,
-                        "p75", 3L,
-                        "p50", 3L
+                    Map.ofEntries(
+                        entry("p99", 3L),
+                        entry("min", 3L),
+                        entry("max", 3L),
+                        entry("mean", 3.0),
+                        entry("p999", 3L),
+                        entry("p95", 3L),
+                        entry("p90", 3L),
+                        entry("p75", 3L),
+                        entry("p50", 3L),
+                        entry("p25", 3L),
+                        entry("p10", 3L),
+                        entry("p5", 3L),
+                        entry("p1", 3L)
+
                     )
                 );
 
@@ -127,6 +135,34 @@ class SccWriteProcTest extends BaseProcTest {
         for (IntIntCursor cursor : testMap) {
             assertThat(cursor.value).isEqualTo(3);
         }
+
+    }
+
+    @Test
+    void shouldUseConsecutiveIds() {
+
+        String query = GdsCypher
+            .call(DEFAULT_GRAPH_NAME)
+            .algo("gds.scc")
+            .writeMode()
+            .addParameter("consecutiveIds", true)
+            .addParameter("writeProperty", "scc")
+            .yields();
+
+        runQueryWithRowConsumer(query, row -> {
+
+            assertThat(row.get("configuration")).isInstanceOf(Map.class)
+                .asInstanceOf(MAP).containsAllEntriesOf(Map.of("writeProperty", "scc"));
+
+            assertThat(row.getNumber("nodePropertiesWritten")).isEqualTo(9L);
+
+        });
+
+        String validationQuery = "MATCH (n) RETURN n.scc as c";
+        final Set<Long> testSet = new HashSet<>();
+        runQueryWithRowConsumer(validationQuery, row -> testSet.add(row.getNumber("c").longValue()));
+        assertThat(testSet).containsExactly(0L, 1L, 2L);
+
     }
 
     @Test
@@ -146,7 +182,14 @@ class SccWriteProcTest extends BaseProcTest {
             assertThat(row.getNumber("nodes").longValue()).isEqualTo(9L);
 
             assertThat(row.getNumber("p1").longValue()).isGreaterThan(0L);
-            assertThat(row.getNumber("p90").longValue()).isGreaterThan(0L);
+
+            assertThat(row.getNumber("p99").longValue()).isEqualTo(3L);
+            assertThat(row.getNumber("p95").longValue()).isEqualTo(3L);
+            assertThat(row.getNumber("p90").longValue()).isEqualTo(3L);
+            assertThat(row.getNumber("p75").longValue()).isEqualTo(3L);
+            assertThat(row.getNumber("p50").longValue()).isEqualTo(3L);
+            assertThat(row.getNumber("p25").longValue()).isEqualTo(3L);
+
 
             assertThat(row.getNumber("setCount").longValue()).isEqualTo(3L);
             assertThat(row.getNumber("minSetSize").longValue()).isEqualTo(3L);

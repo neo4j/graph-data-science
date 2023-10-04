@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.scc;
+package org.neo4j.gds.procedures.community.scc;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
@@ -25,13 +25,13 @@ import org.neo4j.gds.results.StandardWriteResult;
 
 import java.util.Map;
 
-public class WriteResult extends StandardWriteResult {
+public class SccWriteResult extends StandardWriteResult {
 
     public final long componentCount;
     public final Map<String, Object> componentDistribution;
     public final long nodePropertiesWritten;
 
-    public WriteResult(
+    public SccWriteResult(
         long componentCount,
         Map<String, Object> componentDistribution,
         long preProcessingMillis,
@@ -48,15 +48,15 @@ public class WriteResult extends StandardWriteResult {
         this.componentDistribution = componentDistribution;
     }
 
-    static class Builder extends AbstractCommunityResultBuilder<WriteResult> {
+    public static class Builder extends AbstractCommunityResultBuilder<SccWriteResult> {
 
-        Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+        public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 
         @Override
-        public WriteResult buildResult() {
-            return new WriteResult(
+        public SccWriteResult buildResult() {
+            return new SccWriteResult(
                 maybeCommunityCount.orElse(0L),
                 communityHistogramOrNull(),
                 preProcessingMillis,
