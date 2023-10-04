@@ -42,7 +42,7 @@ public class FloatDistMultLinkScorer implements LinkScorer {
     public void init(long sourceNode) {
         this.currentSourceNode = sourceNode;
         this.currentCandidateTarget = embeddings.floatArrayValue(currentSourceNode).clone();
-        for(int i = 0; i < relationshipTypeEmbedding.length; i++){
+        for (int i = 0; i < relationshipTypeEmbedding.length; i++) {
             this.currentCandidateTarget[i] *= relationshipTypeEmbedding[i];
         }
     }
