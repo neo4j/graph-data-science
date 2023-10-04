@@ -29,11 +29,11 @@ import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -41,16 +41,15 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -159,15 +158,25 @@ class LabelPropagationTest {
             ProgressTracker.NULL_TRACKER
         );
         lp.withBatchSize(batchSize);
-        var result = lp.compute();
-        HugeLongArray labels = result.labels();
-        assertNotNull(labels);
-        IntObjectMap<IntArrayList> cluster = groupByPartitionInt(labels);
-        assertNotNull(cluster);
 
-        assertTrue(result.didConverge());
-        assertTrue(2L <= result.ranIterations(), "expected at least 2 iterations, got " + result.ranIterations());
-        assertEquals(2L, cluster.size());
+        var result = lp.compute();
+
+        var labels = result.labels();
+        assertThat(labels).isNotNull();
+
+       var cluster = groupByPartitionInt(labels);
+
+        assertThat(result.didConverge())
+            .as("The algorithms should have converged.")
+            .isTrue();
+
+        assertThat(result.ranIterations())
+            .as("Expected at least two iterations")
+            .isGreaterThanOrEqualTo(2);
+
+        assertThat(cluster)
+            .as("Expected exactly two clusters")
+            .hasSize(2);
 
         var firstCommunity = Stream.of("nAlice", "nBridget", "nMichael")
             .map(graph::toOriginalNodeId)
@@ -175,11 +184,10 @@ class LabelPropagationTest {
 
         for (IntObjectCursor<IntArrayList> cursor : cluster) {
             int[] ids = cursor.value.toArray();
-            Arrays.sort(ids);
             if (firstCommunity.contains((long) cursor.key)) {
-                soft.assertThat(ids).containsExactly(0, 1, 5);
+                soft.assertThat(ids).containsExactlyInAnyOrder(0, 1, 5);
             } else {
-                soft.assertThat(ids).containsExactly(2, 3, 4);
+                soft.assertThat(ids).containsExactlyInAnyOrder(2, 3, 4);
             }
         }
     }
