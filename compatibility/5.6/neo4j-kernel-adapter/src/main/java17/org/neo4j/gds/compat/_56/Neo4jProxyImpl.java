@@ -26,7 +26,6 @@ import org.neo4j.gds.compat.GlobalProcedureRegistry;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.gds.compat._5x.CommonNeo4jProxyImpl;
-import org.neo4j.gds.compat._5x.PartitionedStoreScan;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
@@ -80,7 +79,7 @@ public final class Neo4jProxyImpl extends CommonNeo4jProxyImpl {
         boolean allowPartitionedScan
     ) {
         if (allowPartitionedScan) {
-            return PartitionedStoreScan.createScans(transaction, batchSize, labelIds);
+            return this.partitionedCursorScan(transaction, batchSize, labelIds);
         } else {
             var read = transaction.dataRead();
             return Arrays
@@ -99,7 +98,7 @@ public final class Neo4jProxyImpl extends CommonNeo4jProxyImpl {
         boolean allowPartitionedScan
     ) {
         if (allowPartitionedScan) {
-            return PartitionedStoreScan.createScans(transaction, batchSize, labelId).get(0);
+            return this.partitionedCursorScan(transaction, batchSize, labelId).get(0);
         } else {
             var read = transaction.dataRead();
             var scan = read.nodeLabelScan(labelId);

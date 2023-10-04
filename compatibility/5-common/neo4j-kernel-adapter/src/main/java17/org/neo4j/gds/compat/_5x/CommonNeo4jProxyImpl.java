@@ -191,6 +191,15 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    public List<StoreScan<NodeLabelIndexCursor>> partitionedCursorScan(
+        KernelTransaction transaction,
+        int batchSize,
+        int... labelIds
+    ) {
+        return PartitionedStoreScan.createScans(transaction, batchSize, labelIds);
+    }
+
+    @Override
     public PropertyCursor allocatePropertyCursor(KernelTransaction kernelTransaction) {
         return kernelTransaction
             .cursors()

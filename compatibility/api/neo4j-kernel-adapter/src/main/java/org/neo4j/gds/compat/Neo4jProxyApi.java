@@ -119,6 +119,12 @@ public interface Neo4jProxyApi {
         boolean allowPartitionedScan
     );
 
+    List<StoreScan<NodeLabelIndexCursor>> partitionedCursorScan(
+        org.neo4j.kernel.api.KernelTransaction transaction,
+        int batchSize,
+        int... labelIds
+    );
+
     PropertyCursor allocatePropertyCursor(KernelTransaction kernelTransaction);
 
     PropertyReference propertyReference(NodeCursor nodeCursor);

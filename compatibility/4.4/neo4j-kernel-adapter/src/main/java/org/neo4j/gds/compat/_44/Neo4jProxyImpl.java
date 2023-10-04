@@ -211,6 +211,15 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    public List<StoreScan<NodeLabelIndexCursor>> partitionedCursorScan(
+        KernelTransaction transaction,
+        int batchSize,
+        int... labelIds
+    ) {
+        throw new UnsupportedOperationException("4.4 does not support partitioned scans");
+    }
+
+    @Override
     public PropertyCursor allocatePropertyCursor(KernelTransaction kernelTransaction) {
         return kernelTransaction
             .cursors()
