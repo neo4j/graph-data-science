@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.procedures.community;
 
+import org.neo4j.gds.algorithms.AlphaSccSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
+import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
@@ -27,9 +29,12 @@ import org.neo4j.gds.algorithms.community.CommunityResultCompanion;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.procedures.community.scc.AlphaSccWriteResult;
 import org.neo4j.gds.procedures.community.scc.SccMutateResult;
 import org.neo4j.gds.procedures.community.scc.SccStatsResult;
 import org.neo4j.gds.procedures.community.scc.SccStreamResult;
+import org.neo4j.gds.procedures.community.scc.SccWriteResult;
+import org.neo4j.gds.scc.SccAlphaWriteConfig;
 import org.neo4j.gds.scc.SccStatsConfig;
 import org.neo4j.gds.scc.SccStreamConfig;
 
@@ -89,5 +94,47 @@ final class SccComputationResultTransformer {
             config.toMap()
         );
     }
+
+    static SccWriteResult toWriteResult(NodePropertyWriteResult<StandardCommunityStatisticsSpecificFields> computationResult) {
+        return new SccWriteResult(
+            computationResult.algorithmSpecificFields().communityCount(),
+            computationResult.algorithmSpecificFields().communityDistribution(),
+            computationResult.preProcessingMillis(),
+            computationResult.computeMillis(),
+            computationResult.postProcessingMillis(),
+            computationResult.writeMillis(),
+            computationResult.nodePropertiesWritten(),
+            computationResult.configuration().toMap()
+        );
+    }
+
+    static AlphaSccWriteResult toAlphaWriteResult(
+        NodePropertyWriteResult<AlphaSccSpecificFields> computationResult,
+        SccAlphaWriteConfig config
+    ) {
+        return new AlphaSccWriteResult(
+            computationResult.preProcessingMillis(),
+            computationResult.computeMillis(),
+            computationResult.postProcessingMillis(),
+            computationResult.writeMillis(),
+            computationResult.algorithmSpecificFields().nodes(),
+            computationResult.algorithmSpecificFields().communityCount(),
+            //p100 is not a thing that actually exists,  max is probably its closest approximation
+            (long) computationResult.algorithmSpecificFields().communityDistribution().get("max"),
+            (long) computationResult.algorithmSpecificFields().communityDistribution().get("p99"),
+            (long) computationResult.algorithmSpecificFields().communityDistribution().get("p95"),
+            (long) computationResult.algorithmSpecificFields().communityDistribution().get("p90"),
+            (long) computationResult.algorithmSpecificFields().communityDistribution().get("p75"),
+            (long) computationResult.algorithmSpecificFields().communityDistribution().get("p50"),
+            (long) computationResult.algorithmSpecificFields().communityDistribution().get("p25"),
+            (long) computationResult.algorithmSpecificFields().communityDistribution().get("p10"),
+            (long) computationResult.algorithmSpecificFields().communityDistribution().get("p5"),
+            (long) computationResult.algorithmSpecificFields().communityDistribution().get("p1"),
+            (long) computationResult.algorithmSpecificFields().communityDistribution().get("min"),
+            (long) computationResult.algorithmSpecificFields().communityDistribution().get("max"),
+            config.writeProperty()
+        );
+    }
+
 
 }

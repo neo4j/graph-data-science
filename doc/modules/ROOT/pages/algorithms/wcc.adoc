@@ -110,7 +110,7 @@ include::partial$/algorithms/wcc/specific-configuration.adoc[]
 | preProcessingMillis   | Integer | Milliseconds for preprocessing the data.
 | computeMillis         | Integer | Milliseconds for running the algorithm.
 | postProcessingMillis  | Integer | Milliseconds for computing component count and distribution statistics.
-| componentDistribution | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of component sizes.
+| componentDistribution | Map     | Map containing min, max, mean as well as p1, p5, p10, p25, p50, p75, p90, p95, p99 and p999 percentile values of component sizes.
 | configuration         | Map     | The configuration used for running the algorithm.
 |===
 ======
@@ -156,7 +156,7 @@ include::partial$/algorithms/wcc/specific-configuration.adoc[]
 | computeMillis                 | Integer | Milliseconds for running the algorithm.
 | mutateMillis                  | Integer | Milliseconds for adding properties to the projected graph.
 | postProcessingMillis          | Integer | Milliseconds for computing component count and distribution statistics.
-| componentDistribution         | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of component sizes.
+| componentDistribution         | Map     | Map containing min, max, mean as well as p1, p5, p10, p25, p50, p75, p90, p95, p99 and p999 percentile values of component sizes.
 | configuration                 | Map     | The configuration used for running the algorithm.
 |===
 ======
@@ -202,7 +202,7 @@ include::partial$/algorithms/wcc/specific-configuration-write.adoc[]
 | computeMillis                 | Integer | Milliseconds for running the algorithm.
 | writeMillis                   | Integer | Milliseconds for writing result back to Neo4j.
 | postProcessingMillis          | Integer | Milliseconds for computing component count and distribution statistics.
-| componentDistribution         | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of component sizes.
+| componentDistribution         | Map     | Map containing min, max, mean as well as p1, p5, p10, p25, p50, p75, p90, p95, p99 and p999 percentile values of component sizes.
 | configuration                 | Map     | The configuration used for running the algorithm.
 |===
 ======

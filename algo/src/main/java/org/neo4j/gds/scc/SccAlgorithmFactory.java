@@ -32,7 +32,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.mem.MemoryUsage;
 
-public class SccAlgorithmFactory<CONFIG extends SccBaseConfig> extends GraphAlgorithmFactory<Scc, CONFIG> {
+public class SccAlgorithmFactory<CONFIG extends SccCommonBaseConfig> extends GraphAlgorithmFactory<Scc, CONFIG> {
 
     @Override
     public Scc build(Graph graph, CONFIG configuration, ProgressTracker progressTracker) {

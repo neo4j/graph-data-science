@@ -82,9 +82,11 @@ import org.neo4j.gds.procedures.community.modularity.ModularityStreamResult;
 import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationMutateResult;
 import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationStatsResult;
 import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationStreamResult;
+import org.neo4j.gds.procedures.community.scc.AlphaSccWriteResult;
 import org.neo4j.gds.procedures.community.scc.SccMutateResult;
 import org.neo4j.gds.procedures.community.scc.SccStatsResult;
 import org.neo4j.gds.procedures.community.scc.SccStreamResult;
+import org.neo4j.gds.procedures.community.scc.SccWriteResult;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientMutateResult;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientStatsResult;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientStreamResult;
@@ -96,9 +98,11 @@ import org.neo4j.gds.procedures.community.wcc.WccStatsResult;
 import org.neo4j.gds.procedures.community.wcc.WccStreamResult;
 import org.neo4j.gds.procedures.community.wcc.WccWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.scc.SccAlphaWriteConfig;
 import org.neo4j.gds.scc.SccMutateConfig;
 import org.neo4j.gds.scc.SccStatsConfig;
 import org.neo4j.gds.scc.SccStreamConfig;
+import org.neo4j.gds.scc.SccWriteConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
@@ -493,6 +497,23 @@ public class CommunityProcedureFacade {
         return Stream.of(SccComputationResultTransformer.toMutateResult(computationResult));
     }
 
+    public Stream<SccWriteResult> sccWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, SccWriteConfig::of);
+
+        var computationResult = writeBusinessFacade.scc(
+            graphName,
+            config,
+            user,
+            databaseId,
+            ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns)
+        );
+
+        return Stream.of(SccComputationResultTransformer.toWriteResult(computationResult));
+    }
+
     public Stream<SccStatsResult> sccStats(
         String graphName,
         Map<String, Object> configuration
@@ -508,6 +529,14 @@ public class CommunityProcedureFacade {
         );
 
         return Stream.of(SccComputationResultTransformer.toStatsResult(computationResult, config));
+    }
+
+    public Stream<MemoryEstimateResult> sccEstimateWrite(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, SccWriteConfig::of);
+        return Stream.of(estimateBusinessFacade.estimateScc(graphNameOrConfiguration, config));
     }
 
     public Stream<MemoryEstimateResult> sccEstimateMutate(
@@ -1055,6 +1084,23 @@ public class CommunityProcedureFacade {
         );
 
         return Stream.of(ApproxMaxKCutComputationResultTransformer.toMutateResult(computationResult));
+    }
+
+    public Stream<AlphaSccWriteResult> alphaSccWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, SccAlphaWriteConfig::of);
+
+        var computationResult = writeBusinessFacade.alphaScc(
+            graphName,
+            config,
+            user,
+            databaseId,
+            new ProcedureStatisticsComputationInstructions(true, true)
+        );
+
+        return Stream.of(SccComputationResultTransformer.toAlphaWriteResult(computationResult, config));
     }
 
 

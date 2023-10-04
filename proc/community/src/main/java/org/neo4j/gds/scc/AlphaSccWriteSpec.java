@@ -31,6 +31,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.scc.AlphaSccWriteResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -44,7 +45,7 @@ import static org.neo4j.gds.scc.Scc.SCC_DESCRIPTION;
     description = SCC_DESCRIPTION,
     executionMode = ExecutionMode.WRITE_NODE_PROPERTY
 )
-public class AlphaSccWriteSpec implements AlgorithmSpec<Scc, HugeLongArray, SccAlphaWriteConfig, Stream<AlphaWriteResult>, SccAlgorithmFactory<SccAlphaWriteConfig>> {
+public class AlphaSccWriteSpec implements AlgorithmSpec<Scc, HugeLongArray, SccAlphaWriteConfig, Stream<AlphaSccWriteResult>, SccAlgorithmFactory<SccAlphaWriteConfig>> {
 
     @Override
     public String name() {
@@ -62,7 +63,7 @@ public class AlphaSccWriteSpec implements AlgorithmSpec<Scc, HugeLongArray, SccA
     }
 
     @Override
-    public ComputationResultConsumer<Scc, HugeLongArray, SccAlphaWriteConfig, Stream<AlphaWriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Scc, HugeLongArray, SccAlphaWriteConfig, Stream<AlphaSccWriteResult>> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>(
             this::resultBuilder,
             computationResult -> List.of(ImmutableNodeProperty.of(
@@ -75,12 +76,12 @@ public class AlphaSccWriteSpec implements AlgorithmSpec<Scc, HugeLongArray, SccA
         );
     }
 
-    private AbstractResultBuilder<AlphaWriteResult> resultBuilder(
+    private AbstractResultBuilder<AlphaSccWriteResult> resultBuilder(
         ComputationResult<Scc, HugeLongArray, SccAlphaWriteConfig> computationResult,
         ExecutionContext executionContext
     ) {
         var config = computationResult.config();
-        var writeBuilder = new AlphaWriteResult.Builder(
+        var writeBuilder = new AlphaSccWriteResult.Builder(
             executionContext.returnColumns(),
             config.concurrency()
         )

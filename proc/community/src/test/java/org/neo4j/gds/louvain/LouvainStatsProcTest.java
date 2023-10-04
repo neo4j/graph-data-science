@@ -34,7 +34,6 @@ import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.isA;
 import static org.neo4j.gds.assertj.ConditionFactory.containsAllEntriesOf;
-import static org.neo4j.gds.assertj.ConditionFactory.containsExactlyInAnyOrderEntriesOf;
 
 class LouvainStatsProcTest extends BaseProcTest {
 
@@ -110,7 +109,7 @@ class LouvainStatsProcTest extends BaseProcTest {
             "modularity", closeTo(0.3816, 1e-5),
             "modularities", isA(List.class),
             "communityCount", 3L,
-            "communityDistribution", containsExactlyInAnyOrderEntriesOf(Map.of(
+            "communityDistribution", containsAllEntriesOf(Map.of(
                 "max",7L,
                 "mean",5.0,
                 "min",3L,

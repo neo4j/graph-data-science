@@ -40,7 +40,7 @@ public final class ProcedureStatisticsComputationInstructions implements Statist
         );
     }
 
-    private ProcedureStatisticsComputationInstructions(
+    ProcedureStatisticsComputationInstructions(
         boolean computeCount,
         boolean computeDistribution
     ) {

@@ -25,7 +25,7 @@ import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
-public interface SccAlphaWriteConfig extends SccBaseConfig, WritePropertyConfig {
+public interface SccAlphaWriteConfig extends SccCommonBaseConfig, WritePropertyConfig {
     
     @Value.Default
     @Override

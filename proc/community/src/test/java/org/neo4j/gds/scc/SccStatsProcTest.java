@@ -91,7 +91,8 @@ class SccStatsProcTest extends BaseProcTest {
             assertThat(row.get("componentDistribution"))
                 .isInstanceOf(Map.class)
                 .asInstanceOf(MAP)
-                .containsExactlyInAnyOrderEntriesOf(
+                .containsKeys("p1", "p5", "p10", "p25")
+                .containsAllEntriesOf(
                     Map.of(
                         "p99", 3L,
                         "min", 3L,

@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.scc;
 
-import org.neo4j.gds.config.ConsecutiveIdsConfig;
+import org.neo4j.gds.config.AlgoBaseConfig;
 
-public interface SccBaseConfig extends SccCommonBaseConfig, ConsecutiveIdsConfig {
+public interface SccCommonBaseConfig extends AlgoBaseConfig {
 
 }

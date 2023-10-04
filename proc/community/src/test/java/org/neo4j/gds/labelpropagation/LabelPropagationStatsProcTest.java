@@ -35,7 +35,6 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.neo4j.gds.assertj.ConditionFactory.containsAllEntriesOf;
-import static org.neo4j.gds.assertj.ConditionFactory.containsExactlyInAnyOrderEntriesOf;
 
 class LabelPropagationStatsProcTest extends BaseProcTest {
 
@@ -94,7 +93,8 @@ class LabelPropagationStatsProcTest extends BaseProcTest {
             "didConverge", true,
             "ranIterations", 2L,
             "communityCount", 10L,
-            "communityDistribution", containsExactlyInAnyOrderEntriesOf(Map.of(
+            "communityDistribution",
+            containsAllEntriesOf(Map.of(
                 "min", 1L,
                 "max", 2L,
                 "mean", 1.2,

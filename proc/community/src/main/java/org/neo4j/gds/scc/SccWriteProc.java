@@ -20,10 +20,9 @@
 package org.neo4j.gds.scc;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.scc.AlphaSccWriteResult;
+import org.neo4j.gds.procedures.community.scc.SccWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -40,20 +39,16 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 public class SccWriteProc extends BaseProc {
 
-
     @Context
-    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
+    public GraphDataScience facade;
 
     @Procedure(value = "gds.scc.write", mode = WRITE)
     @Description(SCC_DESCRIPTION)
-    public Stream<WriteResult> write(
+    public Stream<SccWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new SccWriteSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.community().sccWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.scc.write.estimate", mode = READ)
@@ -62,18 +57,14 @@ public class SccWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new SccWriteSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.community().sccEstimateWrite(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(value = "gds.alpha.scc.write", mode = WRITE, deprecatedBy = "gds.scc.write")
     @Description(SCC_DESCRIPTION)
     @Internal
     @Deprecated
-    public Stream<AlphaWriteResult> alphaWrite(
+    public Stream<AlphaSccWriteResult> alphaWrite(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -81,16 +72,8 @@ public class SccWriteProc extends BaseProc {
             .log()
             .warn(
                 "Procedure `gds.alpha.scc.write` has been deprecated, please use `gds.scc.write`.");
-        return new ProcedureExecutor<>(
-            new AlphaSccWriteSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.community().alphaSccWrite(graphName, configuration);
     }
 
-
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
-    }
 
 }

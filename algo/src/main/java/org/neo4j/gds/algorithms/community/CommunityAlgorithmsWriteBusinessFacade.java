@@ -20,6 +20,7 @@
 package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
+import org.neo4j.gds.algorithms.AlphaSccSpecificFields;
 import org.neo4j.gds.algorithms.CommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.KCoreSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
@@ -33,6 +34,8 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.kcore.KCoreDecompositionWriteConfig;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
+import org.neo4j.gds.scc.SccAlphaWriteConfig;
+import org.neo4j.gds.scc.SccWriteConfig;
 import org.neo4j.gds.wcc.WccWriteConfig;
 
 import java.util.Optional;
@@ -117,6 +120,84 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             intermediateResult.computeMilliseconds,
             () -> KCoreSpecificFields.EMPTY,
             "KCoreWrite",
+            configuration.writeConcurrency(),
+            configuration.writeProperty(),
+            configuration.arrowConnectionInfo()
+        );
+
+    }
+
+    public NodePropertyWriteResult<StandardCommunityStatisticsSpecificFields> scc(
+        String graphName,
+        SccWriteConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        StatisticsComputationInstructions statisticsComputationInstructions
+    ) {
+
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> communityAlgorithmsFacade.scc(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return writeToDatabase(
+            algorithmResult,
+            configuration,
+            (result, config) -> CommunityResultCompanion.nodePropertyValues(
+                config.consecutiveIds(),
+                NodePropertyValuesAdapter.adapt(result),
+                Optional.empty(),
+                config.concurrency()
+            ),
+            (result -> result::get),
+            (result, componentCount, communitySummary) -> {
+                return new StandardCommunityStatisticsSpecificFields(
+                    componentCount,
+                    communitySummary
+                );
+            },
+            statisticsComputationInstructions,
+            intermediateResult.computeMilliseconds,
+            () -> StandardCommunityStatisticsSpecificFields.EMPTY,
+            "SccWrite",
+            configuration.writeConcurrency(),
+            configuration.writeProperty(),
+            configuration.arrowConnectionInfo()
+        );
+
+    }
+
+    public NodePropertyWriteResult<AlphaSccSpecificFields> alphaScc(
+        String graphName,
+        SccAlphaWriteConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        StatisticsComputationInstructions statisticsComputationInstructions
+    ) {
+
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> communityAlgorithmsFacade.scc(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return writeToDatabase(
+            algorithmResult,
+            configuration,
+            (result, config) -> NodePropertyValuesAdapter.adapt(result),
+            (result -> result::get),
+            (result, componentCount, communitySummary) -> {
+                return new AlphaSccSpecificFields(
+                    result.size(),
+                    componentCount,
+                    communitySummary
+                );
+            },
+            statisticsComputationInstructions,
+            intermediateResult.computeMilliseconds,
+            () -> AlphaSccSpecificFields.EMPTY.EMPTY,
+            "SccWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo()
