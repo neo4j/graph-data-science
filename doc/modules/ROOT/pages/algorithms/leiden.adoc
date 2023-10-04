@@ -124,7 +124,7 @@ include::partial$/algorithms/leiden/specific-configuration.adoc[]
 | modularities          | List of Float | The modularity scores for each level.
 | nodeCount             | Integer   | The number of nodes in the graph.
 | didConverge           | Boolean   | Indicates if the algorithm converged.
-| communityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
+| communityDistribution | Map       | Map containing min, max, mean as well as p1, p5, p10, p25, p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
 | configuration         | Map       | The configuration used for running the algorithm.
 |===
 ======
@@ -179,7 +179,7 @@ include::partial$/algorithms/leiden/specific-configuration.adoc[]
 | nodeCount              | Integer   | Number of nodes in the graph.
 | didConverge            | Boolean   | Indicates if the algorithm converged.
 | nodePropertiesWritten  | Integer   | Number of properties added to the projected graph.
-| communityDistribution  | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
+| communityDistribution  | Map       | Map containing min, max, mean as well as p1, p5, p10, p25, p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
 | configuration          | Map       | The configuration used for running the algorithm.
 |===
 ======
@@ -235,7 +235,7 @@ include::partial$/algorithms/leiden/specific-configuration-write.adoc[]
 | nodeCount              | Integer       | Number of nodes in the graph.
 | didConverge            | Boolean       | Indicates if the algorithm converged.
 | nodePropertiesWritten  | Integer       | Number of properties added to the Neo4j database.
-| communityDistribution  | Map           | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
+| communityDistribution  | Map           | Map containing min, max, mean as well as p1, p5, p10, p25, p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
 | configuration          | Map           | The configuration used for running the algorithm.
 |===
 ======

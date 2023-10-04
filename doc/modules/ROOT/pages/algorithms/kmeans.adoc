@@ -143,7 +143,7 @@ include::partial$/algorithms/kmeans/specific-configuration.adoc[]
 | preProcessingMillis   | Integer   | Milliseconds for preprocessing the data.
 | computeMillis         | Integer   | Milliseconds for running the algorithm.
 | postProcessingMillis  | Integer   | Milliseconds for computing percentiles and community count.
-| communityDistribution | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
+| communityDistribution | Map       | Map containing min, max, mean as well as p1, p5, p10, p25, p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
 | centroids              | List of List of Float | List of centroid coordinates. Each item is a list containing the coordinates of one centroid.
 | averageDistanceToCentroid | Float| Average distance between node and centroid.
 | averageSilhouette | Float| Average silhouette score over all nodes.
@@ -193,7 +193,7 @@ include::partial$/algorithms/kmeans/specific-configuration.adoc[]
 | mutateMillis           | Integer   | Milliseconds for adding properties to the projected graph.
 | postProcessingMillis   | Integer   | Milliseconds for computing percentiles and community count.
 | nodePropertiesWritten  | Integer   | Number of properties added to the projected graph.
-| communityDistribution  | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
+| communityDistribution  | Map       | Map containing min, max, mean as well as p1, p5, p10, p25, p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
 | centroids              | List of List of Float | List of centroid coordinates. Each item is a list containing the coordinates of one centroid.
 | averageDistanceToCentroid | Float | Average distance between node and centroid.
 | averageSilhouette | Float| Average silhouette score over all nodes.
@@ -243,7 +243,7 @@ include::partial$/algorithms/kmeans/specific-configuration.adoc[]
 | writeMillis            | Integer   | Milliseconds for adding properties to the Neo4j database.
 | postProcessingMillis   | Integer   | Milliseconds for computing percentiles and community count.
 | nodePropertiesWritten  | Integer   | Number of properties added to the projected graph.
-| communityDistribution  | Map       | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
+| communityDistribution  | Map       | Map containing min, max, mean as well as p1, p5, p10, p25, p50, p75, p90, p95, p99 and p999 percentile values of community size for the last level.
 | centroids              | List of List of Float | List of centroid coordinates. Each item is a list containing the coordinates of one centroid.
 | averageDistanceToCentroid | Float | Average distance between node and centroid.
 | averageSilhouette | Float| Average silhouette score over all nodes.
@@ -388,7 +388,7 @@ YIELD communityDistribution
 [opts="header",cols="1"]
 |===
 | communityDistribution
-| { "p99": 3, "min": 2, "max": 3, "mean": 2.6666666666666665, "p90": 3, "p50": 3, "p999": 3, "p95": 3, "p75": 3 }
+| {max=3, mean=2.6666666666666665, min=2, p1=2, p10=2, p25=2, p5=2, p50=3, p75=3, p90=3, p95=3, p99=3, p999=3}
 |===
 --
 
@@ -416,7 +416,7 @@ YIELD communityDistribution
 [opts="header"]
 |===
 | communityDistribution
-| { "p99": 3, "min": 2, "max": 3, "mean": 2.6666666666666665, "p90": 3, "p50": 3, "p999": 3, "p95": 3, "p75": 3 }
+| {max=3, mean=2.6666666666666665, min=2, p1=2, p10=2, p25=2, p5=2, p50=3, p75=3, p90=3, p95=3, p99=3, p999=3}
 |===
 --
 

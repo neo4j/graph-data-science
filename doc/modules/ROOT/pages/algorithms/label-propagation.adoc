@@ -140,7 +140,7 @@ include::partial$/algorithms/label-propagation/specific-configuration.adoc[]
 | communityCount        | Integer | The number of communities found.
 | ranIterations         | Integer | The number of iterations that were executed.
 | didConverge           | Boolean | True if the algorithm did converge to a stable labelling within the provided number of maximum iterations.
-| communityDistribution | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size.
+| communityDistribution | Map     | Map containing min, max, mean as well as p1, p5, p10, p25, p50, p75, p90, p95, p99 and p999 percentile values of community size.
 | configuration         | Map     | The configuration used for running the algorithm.
 |===
 
@@ -192,7 +192,7 @@ include::partial$/algorithms/label-propagation/specific-configuration.adoc[]
 | communityCount        | Integer | The number of communities found.
 | ranIterations         | Integer | The number of iterations that were executed.
 | didConverge           | Boolean | True if the algorithm did converge to a stable labelling within the provided number of maximum iterations.
-| communityDistribution | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size.
+| communityDistribution | Map     | Map containing min, max, mean as well as p1, p5, p10, p25, p50, p75, p90, p95, p99 and p999 percentile values of community size.
 | configuration         | Map     | The configuration used for running the algorithm.
 |===
 
@@ -243,7 +243,7 @@ include::partial$/algorithms/label-propagation/specific-configuration-write.adoc
 | communityCount        | Integer | The number of communities found.
 | ranIterations         | Integer | The number of iterations that were executed.
 | didConverge           | Boolean | True if the algorithm did converge to a stable labelling within the provided number of maximum iterations.
-| communityDistribution | Map     | Map containing min, max, mean as well as p50, p75, p90, p95, p99 and p999 percentile values of community size.
+| communityDistribution | Map     | Map containing min, max, mean as well as p1, p5, p10, p25, p50, p75, p90, p95, p99 and p999 percentile values of community size.
 | configuration         | Map     | The configuration used for running the algorithm.
 |===
 
