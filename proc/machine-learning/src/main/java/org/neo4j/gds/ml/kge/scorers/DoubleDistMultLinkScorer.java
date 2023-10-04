@@ -41,7 +41,7 @@ public class DoubleDistMultLinkScorer implements LinkScorer {
     @Override
     public void init(long sourceNode) {
         this.currentSourceNode = sourceNode;
-        this.currentCandidateTarget = embeddings.doubleArrayValue(currentSourceNode);
+        this.currentCandidateTarget = embeddings.doubleArrayValue(currentSourceNode).clone();
         for(int i = 0; i < relationshipTypeEmbedding.length; i++){
             this.currentCandidateTarget[i] *= relationshipTypeEmbedding[i];
         }
