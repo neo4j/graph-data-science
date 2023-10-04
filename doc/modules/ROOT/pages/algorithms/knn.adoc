@@ -676,11 +676,11 @@ ORDER BY similarity DESCENDING, Person1, Person2
 [opts="header"]
 |===
 | Person1 | Person2 | similarity
-| "Alice" | "Carol" | 0.931216931216931
-| "Carol" | "Alice" | 0.931216931216931
-| "Bob"   | "Carol" | 0.432336103416436
-| "Eve"   | "Alice"   | 0.366920651602733
-| "Dave"  | "Bob"   | 0.243466706038683
+| "Alice" | "Carol" | 0.8874315534
+| "Carol" | "Alice" | 0.8874315534
+| "Bob"   | "Carol" | 0.4674429487
+| "Eve"   | "Bob"   | 0.3700361866
+| "Dave"  | "Bob"   | 0.2887113179
 |===
 
 Note that the two distinct maps in the query could be merged to a single one.

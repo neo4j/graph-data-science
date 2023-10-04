@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.similarity.knn.metrics;
 
+import java.util.function.IntToDoubleFunction;
+
 /**
  * Here we calculate Euclidean similarity metrics using Euclidean dictance as described in e.g.
  * https://en.wikipedia.org/wiki/Euclidean_distance
@@ -33,22 +35,28 @@ public final class Euclidean {
     private Euclidean() {}
 
     public static double floatMetric(float[] left, float[] right) {
-        var len = Math.min(left.length, right.length);
-        var result = 0D;
-        for (int i = 0; i < len; i++) {
-            double delta = left[i] - right[i];
-            result += delta * delta;
-        }
-        return 1.0 / (1.0 + result);
+        return compute(
+            Math.min(left.length, right.length),
+            i -> left[i],
+            i -> right[i]
+        );
     }
 
     public static double doubleMetric(double[] left, double[] right) {
-        var len = Math.min(left.length, right.length);
+        return compute(
+            Math.min(left.length, right.length),
+            i -> left[i],
+            i -> right[i]
+        );
+    }
+
+    private static double compute(int len, IntToDoubleFunction left, IntToDoubleFunction right) {
         var result = 0D;
         for (int i = 0; i < len; i++) {
-            double delta = left[i] - right[i];
+            double delta = left.applyAsDouble(i) - right.applyAsDouble(i);
             result += delta * delta;
         }
-        return 1.0 / (1.0 + result);
+
+        return 1.0 / (1.0 + Math.sqrt(result));
     }
 }
