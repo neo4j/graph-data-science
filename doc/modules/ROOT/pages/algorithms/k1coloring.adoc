@@ -62,9 +62,7 @@ YIELD nodeId, color
 [opts="header",cols="1,1,1m,1,4"]
 |===
 | Name                                                                                    | Type    | Default                | Optional | Description
-5+^|_Common parameters_
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
-5+^|_Algorithm-specific parameters_
 | xref:common-usage/running-algos.adoc#common-configuration-max-iterations[maxIterations] | Integer | 10                     | yes      | The maximum number of iterations of K1 Coloring to run.
 | minCommunitySize                                                                        | Integer | 0                      | yes      | Only nodes inside communities larger or equal the given value are returned.
 |===
