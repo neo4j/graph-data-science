@@ -77,7 +77,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.neo4j.gds.assertj.ConditionFactory.containsAllEntriesOf;
-import static org.neo4j.gds.assertj.ConditionFactory.containsExactlyInAnyOrderEntriesOf;
 
 class WccStatsProcTest extends BaseProcTest {
 
@@ -146,7 +145,7 @@ class WccStatsProcTest extends BaseProcTest {
 
         assertCypherResult(query, List.of(Map.of(
             "componentCount", 3L,
-            "componentDistribution", containsExactlyInAnyOrderEntriesOf(Map.of(
+            "componentDistribution", containsAllEntriesOf(Map.of(
                 "min", 1L,
                 "max", 7L,
                 "mean", 3.3333333333333335D,

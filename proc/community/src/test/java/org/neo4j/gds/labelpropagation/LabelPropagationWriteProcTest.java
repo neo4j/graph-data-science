@@ -149,7 +149,8 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
                 assertThat(row.get("communityDistribution"))
                     .isInstanceOf(Map.class)
                     .asInstanceOf(MAP)
-                    .containsExactlyInAnyOrderEntriesOf(
+                    .containsKeys("p1", "p5", "p10", "p25")
+                    .containsAllEntriesOf(
                         Map.of(
                             "p999", 2L,
                             "p99", 2L,
@@ -209,7 +210,8 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
                 assertThat(row.get("communityDistribution"))
                     .isInstanceOf(Map.class)
                     .asInstanceOf(MAP)
-                    .containsExactlyInAnyOrderEntriesOf(
+                    .containsKeys("p1", "p5", "p10", "p25")
+                    .containsAllEntriesOf(
                         Map.of(
                             "p999", 8L,
                             "p99", 8L,
@@ -441,7 +443,8 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
                     assertThat(row.get("communityDistribution"))
                         .isInstanceOf(Map.class)
                         .asInstanceOf(MAP)
-                        .containsExactlyInAnyOrderEntriesOf(
+                        .containsKeys("p1", "p5", "p10", "p25")
+                        .containsAllEntriesOf(
                             Map.of(
                                 "p999", 8L,
                                 "p99", 8L,
@@ -509,7 +512,8 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
                 assertThat(row.get("communityDistribution"))
                     .isInstanceOf(Map.class)
                     .asInstanceOf(MAP)
-                    .containsExactlyInAnyOrderEntriesOf(
+                    .containsKeys("p1", "p5", "p10", "p25")
+                    .containsAllEntriesOf(
                         Map.of(
                             "p999", 8L,
                             "p99", 8L,
@@ -568,7 +572,8 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
                 assertThat(row.get("communityDistribution"))
                     .isInstanceOf(Map.class)
                     .asInstanceOf(MAP)
-                    .containsExactlyInAnyOrderEntriesOf(
+                    .containsKeys("p1", "p5", "p10", "p25")
+                    .containsAllEntriesOf(
                         Map.of(
                             "p999", 6L,
                             "p99", 6L,
@@ -645,7 +650,8 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
                 assertThat(row.get("communityDistribution"))
                     .isInstanceOf(Map.class)
                     .asInstanceOf(MAP)
-                    .containsExactlyInAnyOrderEntriesOf(
+                    .containsKeys("p1", "p5", "p10", "p25")
+                    .containsAllEntriesOf(
                         Map.of(
                             "p999", 6L,
                             "p99", 6L,
