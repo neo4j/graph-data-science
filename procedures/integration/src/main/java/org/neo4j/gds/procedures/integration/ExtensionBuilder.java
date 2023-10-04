@@ -197,7 +197,7 @@ public final class ExtensionBuilder {
             businessFacadeDecorator
         );
 
-        var communityProcedureProvider = createCommunityProcedureProvider();
+        var communityProcedureProvider = createCommunityProcedureProvider(exporterBuildersProviderService);
 
         return new GraphDataScienceProvider(log, catalogFacadeProvider, communityProcedureProvider);
     }
@@ -223,7 +223,7 @@ public final class ExtensionBuilder {
         );
     }
 
-    private CommunityProcedureProvider createCommunityProcedureProvider() {
+    private CommunityProcedureProvider createCommunityProcedureProvider(ExporterBuildersProviderService exporterBuildersProviderService) {
         var algorithmMetaDataSetterService = new AlgorithmMetaDataSetterService();
 
         return new CommunityProcedureProvider(
@@ -233,6 +233,7 @@ public final class ExtensionBuilder {
             algorithmMetaDataSetterService,
             databaseIdAccessor,
             kernelTransactionAccessor,
+            exporterBuildersProviderService,
             taskRegistryFactoryService,
             terminationFlagService,
             userLogServices,

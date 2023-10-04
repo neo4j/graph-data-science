@@ -21,7 +21,7 @@ package org.neo4j.gds.kcore;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScience;
-import org.neo4j.gds.procedures.community.kcore.KCoreStreamResult;
+import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -40,7 +40,7 @@ public class KCoreDecompositionStreamProc extends BaseProc {
 
     @Procedure(value = "gds.kcore.stream", mode = READ)
     @Description(KCORE_DESCRIPTION)
-    public Stream<KCoreStreamResult> stream(
+    public Stream<KCoreDecompositionStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

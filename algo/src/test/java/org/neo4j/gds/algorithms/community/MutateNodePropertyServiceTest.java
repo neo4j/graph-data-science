@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 @GdlExtension
-class NodePropertyServiceTest {
+class MutateNodePropertyServiceTest {
 
     @GdlGraph
     private static final String GRAPH =
@@ -62,7 +62,7 @@ class NodePropertyServiceTest {
         values.setAll(graph::toOriginalNodeId);
         var nodePropertyValuesToMutate = NodePropertyValuesAdapter.adapt(values);
 
-        var nodePropertyService = new NodePropertyService(mock(Log.class));
+        var nodePropertyService = new MutateNodePropertyService(mock(Log.class));
         var result = nodePropertyService.mutate(
             "bugger-off",
             nodePropertyValuesToMutate,

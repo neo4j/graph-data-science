@@ -17,52 +17,59 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.kcore;
+package org.neo4j.gds.procedures.community.wcc;
 
-import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.results.StandardWriteResult;
+import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
 import java.util.Map;
 
-public class WriteResult extends StandardWriteResult {
+@SuppressWarnings("unused")
+public final class WccWriteResult extends WccStatsResult {
 
+    public final long writeMillis;
     public final long nodePropertiesWritten;
-    public final long degeneracy;
 
-    public WriteResult(
-        long nodePropertiesWritten,
-        long degeneracy,
+    public WccWriteResult(
+        long componentCount,
+        Map<String, Object> componentDistribution,
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
         long writeMillis,
+        long nodePropertiesWritten,
         Map<String, Object> configuration
     ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, writeMillis, configuration);
+        super(
+            componentCount,
+            componentDistribution,
+            preProcessingMillis,
+            computeMillis,
+            postProcessingMillis,
+            configuration
+        );
+        this.writeMillis = writeMillis;
         this.nodePropertiesWritten = nodePropertiesWritten;
-        this.degeneracy = degeneracy;
     }
 
-    static final class Builder extends AbstractResultBuilder<WriteResult> {
+    public static class Builder extends AbstractCommunityResultBuilder<WccWriteResult> {
 
-        private long degeneracy;
-
-        Builder withDegeneracy(long degeneracy) {
-            this.degeneracy = degeneracy;
-            return this;
+        public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+            super(returnColumns, concurrency);
         }
 
-        public WriteResult build() {
-            return new WriteResult(
-                nodePropertiesWritten,
-                degeneracy,
+        @Override
+        protected WccWriteResult buildResult() {
+            return new WccWriteResult(
+                maybeCommunityCount.orElse(0L),
+                communityHistogramOrNull(),
                 preProcessingMillis,
                 computeMillis,
-                -1L,
+                postProcessingDuration,
                 writeMillis,
+                nodePropertiesWritten,
                 config.toMap()
             );
         }
     }
-
 }

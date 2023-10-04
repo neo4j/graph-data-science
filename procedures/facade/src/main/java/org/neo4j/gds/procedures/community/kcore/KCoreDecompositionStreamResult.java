@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.procedures.community.kcore;
 
-public class KCoreStreamResult {
+public class KCoreDecompositionStreamResult {
     public final long nodeId;
     @SuppressWarnings("WeakerAccess")
     public final long coreValue;
 
-    public KCoreStreamResult(long nodeId, int coreValue) {
+    public KCoreDecompositionStreamResult(long nodeId, int coreValue) {
         this.nodeId = nodeId;
         this.coreValue = coreValue;
     }

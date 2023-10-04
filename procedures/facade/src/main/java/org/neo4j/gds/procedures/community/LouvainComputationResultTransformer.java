@@ -43,7 +43,6 @@ final class LouvainComputationResultTransformer {
             var graph = computationResult.graph();
 
             var nodePropertyValues = CommunityResultCompanion.nodePropertyValues(
-                false,
                 configuration.consecutiveIds(),
                 NodePropertyValuesAdapter.adapt(louvainResult.dendrogramManager().getCurrent()),
                 configuration.minCommunitySize(),

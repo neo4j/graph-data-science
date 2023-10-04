@@ -37,7 +37,6 @@ import org.neo4j.gds.algorithms.TriangleCountSpecificFields;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
@@ -69,13 +68,13 @@ import static org.neo4j.gds.algorithms.community.AlgorithmRunner.runWithTiming;
 public class CommunityAlgorithmsMutateBusinessFacade {
 
     private final CommunityAlgorithmsFacade communityAlgorithmsFacade;
-    private final NodePropertyService nodePropertyService;
+    private final MutateNodePropertyService mutateNodePropertyService;
 
     public CommunityAlgorithmsMutateBusinessFacade(
         CommunityAlgorithmsFacade communityAlgorithmsFacade,
-        NodePropertyService nodePropertyService
+        MutateNodePropertyService mutateNodePropertyService
     ) {
-        this.nodePropertyService = nodePropertyService;
+        this.mutateNodePropertyService = mutateNodePropertyService;
         this.communityAlgorithmsFacade = communityAlgorithmsFacade;
     }
 
@@ -97,8 +96,11 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             configuration,
             (result, config) -> CommunityResultCompanion.nodePropertyValues(
                 config.isIncremental(),
+                config.mutateProperty(),
+                config.seedProperty(),
                 config.consecutiveIds(),
-                result.asNodeProperties()
+                result.asNodeProperties(),
+                () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
             ),
             (result -> result::setIdOf),
             (result, componentCount, communitySummary) -> {
@@ -155,8 +157,11 @@ public class CommunityAlgorithmsMutateBusinessFacade {
                 ? createIntermediateCommunitiesNodePropertyValues(result::getIntermediateCommunities, result.size())
                 : CommunityResultCompanion.nodePropertyValues(
                     config.isIncremental(),
+                    config.mutateProperty(),
+                    config.seedProperty(),
                     config.consecutiveIds(),
-                    NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent())
+                    NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent()),
+                    () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
                 );
         });
 
@@ -201,8 +206,11 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             )
                 : CommunityResultCompanion.nodePropertyValues(
                     config.isIncremental(),
+                    config.mutateProperty(),
+                    config.seedProperty(),
                     config.consecutiveIds(),
-                    NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent())
+                    NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent()),
+                    () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
                 );
         });
 
@@ -278,8 +286,11 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             ((result1, config) -> {
                 return CommunityResultCompanion.nodePropertyValues(
                     config.isIncremental(),
+                    config.mutateProperty(),
+                    config.seedProperty(),
                     config.consecutiveIds(),
-                    NodePropertyValuesAdapter.adapt(result1.labels())
+                    NodePropertyValuesAdapter.adapt(result1.labels()),
+                    () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
                 );
             }),
             (result -> result.labels()::get),
@@ -378,7 +389,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             );
 
             // 3. Go and mutate the graph store
-            var addNodePropertyResult = nodePropertyService.mutate(
+            var addNodePropertyResult = mutateNodePropertyService.mutate(
                 configuration.mutateProperty(), nodePropertyValues,
                 configuration.nodeLabelIdentifiers(algorithmResult.graphStore()), algorithmResult.graph(),
                 algorithmResult.graphStore()
@@ -494,7 +505,6 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             ((result, configuration1) -> {
                 return CommunityResultCompanion.nodePropertyValues(
                     false,
-                    false,
                     NodePropertyValuesAdapter.adapt(result.candidateSolution())
                 );
             }),
@@ -526,8 +536,11 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             ((modularityOptimizationResult, config) -> {
                 return CommunityResultCompanion.nodePropertyValues(
                     config.isIncremental(),
+                    config.mutateProperty(),
+                    config.seedProperty(),
                     config.consecutiveIds(),
-                    modularityOptimizationResult.asNodeProperties()
+                    modularityOptimizationResult.asNodeProperties(),
+                    () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
                 );
             }),
             (result -> result::communityId),
@@ -564,7 +577,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             );
 
             // 3. Go and mutate the graph store
-            var addNodePropertyResult = nodePropertyService.mutate(
+            var addNodePropertyResult = mutateNodePropertyService.mutate(
                 configuration.mutateProperty(),
                 nodePropertyValues,
                 configuration.nodeLabelIdentifiers(algorithmResult.graphStore()),
@@ -615,11 +628,6 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             return result;
         }
         return null;
-    }
-
-    // Herein lie some private functional interfaces, so we know what we're doing 🤨
-    interface NodePropertyValuesMapper<R, C extends MutateNodePropertyConfig> {
-        NodePropertyValues map(R result, C configuration);
     }
 
 }

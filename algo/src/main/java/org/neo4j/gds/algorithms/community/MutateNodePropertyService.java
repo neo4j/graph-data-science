@@ -27,11 +27,11 @@ import org.neo4j.gds.logging.Log;
 
 import java.util.Collection;
 
-public class NodePropertyService {
+public class MutateNodePropertyService {
 
     private final Log log;
 
-    public NodePropertyService(Log log) {
+    public MutateNodePropertyService(Log log) {
         this.log = log;
     }
 

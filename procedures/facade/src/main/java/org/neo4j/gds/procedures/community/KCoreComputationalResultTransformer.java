@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.KCoreSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
+import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.api.IdMap;
@@ -28,7 +29,8 @@ import org.neo4j.gds.kcore.KCoreDecompositionResult;
 import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionMutateResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStatsResult;
-import org.neo4j.gds.procedures.community.kcore.KCoreStreamResult;
+import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStreamResult;
+import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionWriteResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -37,14 +39,14 @@ final class KCoreComputationalResultTransformer {
 
     private KCoreComputationalResultTransformer() {}
 
-    static Stream<KCoreStreamResult> toStreamResult(StreamComputationResult<KCoreDecompositionResult> computationResult) {
+    static Stream<KCoreDecompositionStreamResult> toStreamResult(StreamComputationResult<KCoreDecompositionResult> computationResult) {
         return computationResult.result().map(kCoreResult -> {
             var coreValues = kCoreResult.coreValues();
             var graph = computationResult.graph();
             return LongStream
                 .range(IdMap.START_NODE_ID, graph.nodeCount())
                 .mapToObj(nodeId ->
-                    new KCoreStreamResult(
+                    new KCoreDecompositionStreamResult(
                         graph.toOriginalNodeId(nodeId),
                         coreValues.get(nodeId)
                     ));
@@ -62,6 +64,19 @@ final class KCoreComputationalResultTransformer {
             computationResult.configuration().toMap()
         );
     }
+
+    static KCoreDecompositionWriteResult toWriteResult(NodePropertyWriteResult<KCoreSpecificFields> computationResult) {
+        return new KCoreDecompositionWriteResult(
+            computationResult.nodePropertiesWritten(),
+            computationResult.algorithmSpecificFields().degeneracy(),
+            computationResult.preProcessingMillis(),
+            computationResult.computeMillis(),
+            computationResult.postProcessingMillis(),
+            computationResult.writeMillis(),
+            computationResult.configuration().toMap()
+        );
+    }
+
 
     static KCoreDecompositionStatsResult toStatsResult(
         StatsResult<KCoreSpecificFields> computationResult,

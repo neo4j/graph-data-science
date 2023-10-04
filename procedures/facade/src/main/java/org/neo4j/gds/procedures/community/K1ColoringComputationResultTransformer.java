@@ -48,7 +48,6 @@ final class K1ColoringComputationResultTransformer {
             var graph = computationResult.graph();
             var nodePropertyValues = CommunityResultCompanion.nodePropertyValues(
                 false,
-                false,
                 NodePropertyValuesAdapter.adapt(k1ColoringResult.colors()),
                 configuration.minCommunitySize(),
                 configuration.concurrency()

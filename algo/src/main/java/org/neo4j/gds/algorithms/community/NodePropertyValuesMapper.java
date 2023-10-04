@@ -17,15 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.kcore;
+package org.neo4j.gds.algorithms.community;
 
-public class StreamResult {
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
-    public final long nodeId;
-    public final long coreValue;
-
-    public StreamResult(long nodeId, int coreValue) {
-        this.nodeId = nodeId;
-        this.coreValue = coreValue;
-    }
+// Herein lie some private functional interfaces, so we know what we're doing 🤨
+interface NodePropertyValuesMapper<R, C> {
+    NodePropertyValues map(R result, C configuration);
 }

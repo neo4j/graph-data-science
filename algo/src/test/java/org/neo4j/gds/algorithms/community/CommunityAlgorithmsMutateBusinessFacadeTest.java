@@ -27,6 +27,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -62,7 +63,7 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
         var configurationMock = mock(MutateNodePropertyConfig.class);
         var algorithmResult = AlgorithmComputationResult.<Long>withoutAlgorithmResult(graph, graphStore);
 
-        var nodePropertyServiceMock = mock(NodePropertyService.class);
+        var nodePropertyServiceMock = mock(MutateNodePropertyService.class);
 
         var businessFacade = new CommunityAlgorithmsMutateBusinessFacade(null, nodePropertyServiceMock);
 
@@ -89,7 +90,7 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
     @Test
     void mutateWithCommunityStatistics() {
 
-        var nodePropertyService = new NodePropertyService(mock(Log.class));
+        var nodePropertyService = new MutateNodePropertyService(mock(Log.class));
 
         var businessFacade = new CommunityAlgorithmsMutateBusinessFacade(null, nodePropertyService);
 
@@ -97,12 +98,17 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
         when(configMock.mutateProperty()).thenReturn("bugger-off");
         var result = HugeLongArray.newArray(graph.nodeCount());
         result.setAll(graph::toOriginalNodeId);
-        var algorithmResultMock = AlgorithmComputationResult.of(result, graph, graphStore);
+        var algorithmResultMock = AlgorithmComputationResult.of(
+            result,
+            graph,
+            graphStore,
+            TerminationFlag.RUNNING_TRUE
+        );
 
         var statisticsComputationInstructionsMock = mock(StatisticsComputationInstructions.class);
         when(statisticsComputationInstructionsMock.computeCountOnly()).thenReturn(true);
 
-        CommunityAlgorithmsMutateBusinessFacade.NodePropertyValuesMapper<HugeLongArray, MutateNodePropertyConfig> nodePropertyValuesMapper =
+        NodePropertyValuesMapper<HugeLongArray, MutateNodePropertyConfig> nodePropertyValuesMapper =
             (r, c) -> NodePropertyValuesAdapter.adapt(r);
 
         var mutateResult = businessFacade.mutateNodeProperty(
@@ -141,7 +147,7 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
     @Test
     void mutateWithoutCommunityStatistics() {
 
-        var nodePropertyService = new NodePropertyService(mock(Log.class));
+        var nodePropertyService = new MutateNodePropertyService(mock(Log.class));
 
         var businessFacade = new CommunityAlgorithmsMutateBusinessFacade(null, nodePropertyService);
 
@@ -149,9 +155,14 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
         when(configMock.mutateProperty()).thenReturn("bugger-off");
         var result = HugeLongArray.newArray(graph.nodeCount());
         result.setAll(graph::toOriginalNodeId);
-        var algorithmResultMock = AlgorithmComputationResult.of(result, graph, graphStore);
+        var algorithmResultMock = AlgorithmComputationResult.of(
+            result,
+            graph,
+            graphStore,
+            TerminationFlag.RUNNING_TRUE
+        );
 
-        CommunityAlgorithmsMutateBusinessFacade.NodePropertyValuesMapper<HugeLongArray, MutateNodePropertyConfig> nodePropertyValuesMapper =
+        NodePropertyValuesMapper<HugeLongArray, MutateNodePropertyConfig> nodePropertyValuesMapper =
             (r, c) -> NodePropertyValuesAdapter.adapt(r);
 
         var mutateResult = businessFacade.mutateNodeProperty(

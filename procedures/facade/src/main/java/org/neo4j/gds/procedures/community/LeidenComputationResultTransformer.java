@@ -46,7 +46,6 @@ final class LeidenComputationResultTransformer {
             var graph = computationResult.graph();
 
             var nodePropertyValues = CommunityResultCompanion.nodePropertyValues(
-                false,
                 configuration.consecutiveIds(),
                 NodePropertyValuesAdapter.adapt(leidenResult.dendrogramManager().getCurrent()),
                 configuration.minCommunitySize(),

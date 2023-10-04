@@ -23,6 +23,7 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsEstimateBusinessFac
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStatsBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ProcedureReturnColumns;
@@ -38,6 +39,7 @@ import org.neo4j.gds.k1coloring.K1ColoringStreamConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
+import org.neo4j.gds.kcore.KCoreDecompositionWriteConfig;
 import org.neo4j.gds.kmeans.KmeansMutateConfig;
 import org.neo4j.gds.kmeans.KmeansStatsConfig;
 import org.neo4j.gds.kmeans.KmeansStreamConfig;
@@ -62,7 +64,8 @@ import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStatsResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStreamResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionMutateResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStatsResult;
-import org.neo4j.gds.procedures.community.kcore.KCoreStreamResult;
+import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStreamResult;
+import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionWriteResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansMutateResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansStatsResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansStreamResult;
@@ -91,6 +94,7 @@ import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStreamResul
 import org.neo4j.gds.procedures.community.wcc.WccMutateResult;
 import org.neo4j.gds.procedures.community.wcc.WccStatsResult;
 import org.neo4j.gds.procedures.community.wcc.WccStreamResult;
+import org.neo4j.gds.procedures.community.wcc.WccWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.scc.SccMutateConfig;
 import org.neo4j.gds.scc.SccStatsConfig;
@@ -104,6 +108,7 @@ import org.neo4j.gds.triangle.TriangleCountStreamConfig;
 import org.neo4j.gds.wcc.WccMutateConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
 import org.neo4j.gds.wcc.WccStreamConfig;
+import org.neo4j.gds.wcc.WccWriteConfig;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -121,6 +126,8 @@ public class CommunityProcedureFacade {
     private final CommunityAlgorithmsMutateBusinessFacade mutateBusinessFacade;
     private final CommunityAlgorithmsStatsBusinessFacade statsBusinessFacade;
     private final CommunityAlgorithmsStreamBusinessFacade streamBusinessFacade;
+    private final CommunityAlgorithmsWriteBusinessFacade writeBusinessFacade;
+
 
     public CommunityProcedureFacade(
         AlgorithmMetaDataSetter algorithmMetaDataSetter,
@@ -130,7 +137,8 @@ public class CommunityProcedureFacade {
         CommunityAlgorithmsEstimateBusinessFacade estimateBusinessFacade,
         CommunityAlgorithmsMutateBusinessFacade mutateBusinessFacade,
         CommunityAlgorithmsStatsBusinessFacade statsBusinessFacade,
-        CommunityAlgorithmsStreamBusinessFacade streamBusinessFacade
+        CommunityAlgorithmsStreamBusinessFacade streamBusinessFacade,
+        CommunityAlgorithmsWriteBusinessFacade writeBusinessFacade
     ) {
         this.algorithmMetaDataSetter = algorithmMetaDataSetter;
         this.databaseId = databaseId;
@@ -140,6 +148,7 @@ public class CommunityProcedureFacade {
         this.mutateBusinessFacade = mutateBusinessFacade;
         this.statsBusinessFacade = statsBusinessFacade;
         this.streamBusinessFacade = streamBusinessFacade;
+        this.writeBusinessFacade = writeBusinessFacade;
     }
 
     // WCC
@@ -194,6 +203,23 @@ public class CommunityProcedureFacade {
         return Stream.of(WccComputationResultTransformer.toStatsResult(computationResult, config));
     }
 
+    public Stream<WccWriteResult> wccWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var writeConfig = createConfig(configuration, WccWriteConfig::of);
+
+        var computationResult = writeBusinessFacade.wcc(
+            graphName,
+            writeConfig,
+            user,
+            databaseId,
+            ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns)
+        );
+
+        return Stream.of(WccComputationResultTransformer.toWriteResult(computationResult));
+    }
+
     public Stream<MemoryEstimateResult> wccEstimateMutate(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
@@ -210,6 +236,14 @@ public class CommunityProcedureFacade {
         return Stream.of(estimateBusinessFacade.wcc(graphNameOrConfiguration, config));
     }
 
+    public Stream<MemoryEstimateResult> wccEstimateWrite(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, WccWriteConfig::of);
+        return Stream.of(estimateBusinessFacade.wcc(graphNameOrConfiguration, config));
+    }
+
     public Stream<MemoryEstimateResult> wccEstimateStream(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
@@ -221,7 +255,7 @@ public class CommunityProcedureFacade {
     // WCC end
 
     // K-Core Decomposition
-    public Stream<KCoreStreamResult> kCoreStream(
+    public Stream<KCoreDecompositionStreamResult> kCoreStream(
         String graphName,
         Map<String, Object> configuration
     ) {
@@ -270,6 +304,22 @@ public class CommunityProcedureFacade {
         );
 
         return Stream.of(KCoreComputationalResultTransformer.toStatsResult(computationResult, config));
+    }
+
+    public Stream<KCoreDecompositionWriteResult> kCoreWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, KCoreDecompositionWriteConfig::of);
+
+        var computationResult = writeBusinessFacade.kcore(
+            graphName,
+            config,
+            user,
+            databaseId
+        );
+
+        return Stream.of(KCoreComputationalResultTransformer.toWriteResult(computationResult));
     }
 
     public Stream<MemoryEstimateResult> kCoreEstimateStream(

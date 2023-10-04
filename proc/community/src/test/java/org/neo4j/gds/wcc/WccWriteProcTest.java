@@ -33,14 +33,19 @@ import org.neo4j.gds.ImmutableNodeProjection;
 import org.neo4j.gds.ImmutableNodeProjections;
 import org.neo4j.gds.ImmutablePropertyMappings;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.ProcedureMethodHelper;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
+import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
+import org.neo4j.gds.algorithms.community.WriteNodePropertyService;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
+import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
@@ -50,10 +55,12 @@ import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.projection.ImmutableGraphProjectFromStoreConfig;
 
 import java.lang.reflect.InvocationTargetException;
@@ -64,14 +71,13 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
-import static org.neo4j.gds.NodeLabel.ALL_NODES;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class WccWriteProcTest extends BaseProcTest {
@@ -429,6 +435,16 @@ class WccWriteProcTest extends BaseProcTest {
 
     @Test
     void testRunOnEmptyGraph() {
+
+        var logMock = mock(org.neo4j.gds.logging.Log.class);
+        when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
+        final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
+        final AlgorithmMemoryValidationService memoryUsageValidator = new AlgorithmMemoryValidationService(
+            logMock,
+            false
+        );
+
+
         applyOnProcedure(wccWriteProc -> {
             var methods = ProcedureMethodHelper.writeMethods(wccWriteProc).collect(Collectors.toList());
 
@@ -450,6 +466,38 @@ class WccWriteProcTest extends BaseProcTest {
                 var graphStore = graphLoader(graphProjectConfig).graphStore();
                 GraphStoreCatalog.set(graphProjectConfig, graphStore);
                 methods.forEach(method -> {
+
+                    var taskRegistry = EmptyTaskRegistryFactory.INSTANCE;
+                    var algorithmsBusinessFacade = new CommunityAlgorithmsWriteBusinessFacade(
+                        new CommunityAlgorithmsFacade(graphStoreCatalogService,
+                            taskRegistry,
+                            EmptyUserLogRegistryFactory.INSTANCE,
+                            memoryUsageValidator, logMock
+                        ),
+                        new WriteNodePropertyService(
+                            wccWriteProc.executionContext().nodePropertyExporterBuilder(),
+                            logMock,
+                            taskRegistry
+                        )
+                    );
+
+
+                    wccWriteProc.facade = new GraphDataScience(
+                        null,
+                        null,
+                        new CommunityProcedureFacade(
+                            null,
+                            DatabaseId.of(db.databaseName()),
+                            ProcedureReturnColumns.EMPTY,
+                            new User(getUsername(), false),
+                            null,
+                            null,
+                            null,
+                            null,
+                            algorithmsBusinessFacade
+                        )
+                    );
+
                     Map<String, Object> configMap = Map.of("writeProperty", WRITE_PROPERTY);
                     try {
                         Stream<?> result = (Stream<?>) method.invoke(wccWriteProc, graphName, configMap);
@@ -517,18 +565,4 @@ class WccWriteProcTest extends BaseProcTest {
             .build();
     }
 
-    private GraphProjectFromStoreConfig withNameAndRelationshipProjections(
-        String graphName,
-        RelationshipProjections rels
-    ) {
-        return ImmutableGraphProjectFromStoreConfig.of(
-            TEST_USERNAME,
-            graphName,
-            NodeProjections.create(singletonMap(
-                ALL_NODES,
-                ImmutableNodeProjection.of(PROJECT_ALL, ImmutablePropertyMappings.of())
-            )),
-            rels
-        );
-    }
 }

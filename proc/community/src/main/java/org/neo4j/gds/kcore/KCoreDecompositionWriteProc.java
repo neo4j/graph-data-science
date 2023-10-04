@@ -20,10 +20,9 @@
 package org.neo4j.gds.kcore;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -40,18 +39,15 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class KCoreDecompositionWriteProc extends BaseProc {
 
     @Context
-    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
+    public GraphDataScience facade;
 
     @Procedure(value = "gds.kcore.write", mode = WRITE)
     @Description(KCORE_DESCRIPTION)
-    public Stream<WriteResult> mutate(
+    public Stream<KCoreDecompositionWriteResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new KCoreDecompositionWriteSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.community().kCoreWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.kcore.write.estimate", mode = READ)
@@ -67,8 +63,4 @@ public class KCoreDecompositionWriteProc extends BaseProc {
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
-    }
 }

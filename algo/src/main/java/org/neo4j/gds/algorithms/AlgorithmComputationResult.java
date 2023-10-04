@@ -22,6 +22,7 @@ package org.neo4j.gds.algorithms;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.utils.TerminationFlag;
 
 import java.util.Optional;
 
@@ -39,11 +40,28 @@ public interface AlgorithmComputationResult<RESULT> {
 
     GraphStore graphStore();
 
-    static <R> AlgorithmComputationResult<R> of(R result, Graph graph, GraphStore graphStore) {
-        return ImmutableAlgorithmComputationResult.of(result, graph, graphStore);
+    Optional<TerminationFlag> algorithmTerminationFlag();
+
+    static <R> AlgorithmComputationResult<R> of(
+        R result,
+        Graph graph,
+        GraphStore graphStore,
+        TerminationFlag terminationFlag
+    ) {
+        return ImmutableAlgorithmComputationResult.of(
+            Optional.of(result),
+            graph,
+            graphStore,
+            Optional.of(terminationFlag)
+        );
     }
 
     static <R> AlgorithmComputationResult<R> withoutAlgorithmResult(Graph graph, GraphStore graphStore) {
-        return ImmutableAlgorithmComputationResult.of(Optional.empty(), graph, graphStore);
+        return ImmutableAlgorithmComputationResult.of(
+            Optional.empty(),
+            graph,
+            graphStore,
+            Optional.empty()
+        );
     }
 }

@@ -48,7 +48,6 @@ final class ModularityOptimisationComputationResultTransformer {
             .map(result -> {
                 var graph = computationResult.graph();
                 var nodePropertyValues = CommunityResultCompanion.nodePropertyValues(
-                    config.isIncremental(),
                     config.consecutiveIds(),
                     result.asNodeProperties(),
                     config.minCommunitySize(),

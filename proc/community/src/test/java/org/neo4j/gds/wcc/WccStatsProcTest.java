@@ -287,6 +287,7 @@ class WccStatsProcTest extends BaseProcTest {
                 null,
                 null,
                 statsBusinessFacade,
+                null,
                 null
             )
         );

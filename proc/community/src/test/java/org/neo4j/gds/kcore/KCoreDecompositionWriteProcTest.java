@@ -95,7 +95,7 @@ class KCoreDecompositionWriteProcTest extends BaseProcTest {
             assertThat(row.getNumber("postProcessingMillis"))
                 .as("postProcessingMillis")
                 .asInstanceOf(LONG)
-                .isEqualTo(-1L);
+                .isGreaterThan(-1L);
 
             assertThat(row.getNumber("writeMillis"))
                 .as("writeMillis")

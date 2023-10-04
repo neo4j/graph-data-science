@@ -21,7 +21,6 @@ package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.CommunityProcCompanion;
 import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
-import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.write.NodeProperty;
@@ -32,16 +31,14 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.procedures.community.wcc.WccStatsResult;
-import org.neo4j.gds.result.AbstractCommunityResultBuilder;
+import org.neo4j.gds.procedures.community.wcc.WccWriteResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
 @GdsCallable(name = "gds.wcc.write", description = WccSpecification.WCC_DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
-public class WccWriteSpecification implements AlgorithmSpec<Wcc, DisjointSetStruct, WccWriteConfig, Stream<WccWriteSpecification.WriteResult>, WccAlgorithmFactory<WccWriteConfig>> {
+public class WccWriteSpecification implements AlgorithmSpec<Wcc, DisjointSetStruct, WccWriteConfig, Stream<WccWriteResult>, WccAlgorithmFactory<WccWriteConfig>> {
 
     @Override
     public String name() {
@@ -59,7 +56,7 @@ public class WccWriteSpecification implements AlgorithmSpec<Wcc, DisjointSetStru
     }
 
     @Override
-    public ComputationResultConsumer<Wcc, DisjointSetStruct, WccWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Wcc, DisjointSetStruct, WccWriteConfig, Stream<WccWriteResult>> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>(
             this::resultBuilder,
             this::nodeProperties,
@@ -67,12 +64,12 @@ public class WccWriteSpecification implements AlgorithmSpec<Wcc, DisjointSetStru
         );
     }
 
-    private AbstractResultBuilder<WriteResult> resultBuilder(
+    private AbstractResultBuilder<WccWriteResult> resultBuilder(
         ComputationResult<Wcc, DisjointSetStruct, WccWriteConfig> computeResult,
         ExecutionContext executionContext
     ) {
         return WccSpecification.resultBuilder(
-            new WriteResult.Builder(executionContext.returnColumns(), computeResult.config().concurrency()),
+            new WccWriteResult.Builder(executionContext.returnColumns(), computeResult.config().concurrency()),
             computeResult
         );
     }
@@ -94,53 +91,4 @@ public class WccWriteSpecification implements AlgorithmSpec<Wcc, DisjointSetStru
         );
     }
 
-    @SuppressWarnings("unused")
-    public static final class WriteResult extends WccStatsResult {
-
-        public final long writeMillis;
-        public final long nodePropertiesWritten;
-
-        WriteResult(
-            long componentCount,
-            Map<String, Object> componentDistribution,
-            long preProcessingMillis,
-            long computeMillis,
-            long postProcessingMillis,
-            long writeMillis,
-            long nodePropertiesWritten,
-            Map<String, Object> configuration
-        ) {
-            super(
-                componentCount,
-                componentDistribution,
-                preProcessingMillis,
-                computeMillis,
-                postProcessingMillis,
-                configuration
-            );
-            this.writeMillis = writeMillis;
-            this.nodePropertiesWritten = nodePropertiesWritten;
-        }
-
-        static class Builder extends AbstractCommunityResultBuilder<WriteResult> {
-
-            Builder(ProcedureReturnColumns returnColumns, int concurrency) {
-                super(returnColumns, concurrency);
-            }
-
-            @Override
-            protected WriteResult buildResult() {
-                return new WriteResult(
-                    maybeCommunityCount.orElse(0L),
-                    communityHistogramOrNull(),
-                    preProcessingMillis,
-                    computeMillis,
-                    postProcessingDuration,
-                    writeMillis,
-                    nodePropertiesWritten,
-                    config.toMap()
-                );
-            }
-        }
-    }
 }
