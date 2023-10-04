@@ -24,9 +24,9 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.loading.AdjacencyBuffer;
 import org.neo4j.gds.core.loading.CompositeRelationshipsBatchBufferBuilder;
 import org.neo4j.gds.core.loading.RecordScannerTask;
-import org.neo4j.gds.core.loading.RecordsBatchBuffer;
 import org.neo4j.gds.core.loading.RelationshipReference;
 import org.neo4j.gds.core.loading.RelationshipsBatchBuffer;
+import org.neo4j.gds.core.loading.ScanState;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
 import org.neo4j.gds.core.loading.StoreScanner;
 import org.neo4j.gds.core.loading.ThreadLocalSingleTypeRelationshipImporter;
@@ -157,16 +157,9 @@ public final class RelationshipsScannerTask extends StatementAction implements R
 
             long allImportedRels = 0L;
             long allImportedWeights = 0L;
-            boolean scanNextBatch = true;
-            RecordsBatchBuffer.ScanState scanState;
+            var scanState = ScanState.of();
 
-            while ((scanState = compositeBuffer.scan(cursor, scanNextBatch)).requiresFlush()) {
-                // We proceed to the next batch, iff the current batch is
-                // completely consumed. If not, we remain in the current
-                // batch, flush the buffers and consume until the batch is
-                // drained.
-                scanNextBatch = scanState.reserveNextBatch();
-
+            while (scanState.scan(cursor, compositeBuffer)) {
                 terminationFlag.assertRunning();
                 long imported = 0L;
                 for (ThreadLocalSingleTypeRelationshipImporter importer : importers) {

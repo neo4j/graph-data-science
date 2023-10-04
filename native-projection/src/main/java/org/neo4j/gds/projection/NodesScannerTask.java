@@ -28,7 +28,7 @@ import org.neo4j.gds.core.loading.NodeReference;
 import org.neo4j.gds.core.loading.NodesBatchBuffer;
 import org.neo4j.gds.core.loading.NodesBatchBufferBuilder;
 import org.neo4j.gds.core.loading.RecordScannerTask;
-import org.neo4j.gds.core.loading.RecordsBatchBuffer;
+import org.neo4j.gds.core.loading.ScanState;
 import org.neo4j.gds.core.loading.StoreScanner;
 import org.neo4j.gds.core.utils.RawValues;
 import org.neo4j.gds.core.utils.StatementAction;
@@ -91,15 +91,8 @@ public final class NodesScannerTask extends StatementAction implements RecordSca
                 .readProperty(nodePropertyImporter != null)
                 .build();
 
-            boolean scanNextBatch = true;
-            RecordsBatchBuffer.ScanState scanState;
-
-            while ((scanState = nodesBatchBuffer.scan(cursor, scanNextBatch)).requiresFlush()) {
-                // We proceed to the next batch, iff the current batch is
-                // completely consumed. If not, we remain in the current
-                // batch, flush the buffers and consume until the batch is
-                // drained.
-                scanNextBatch = scanState.reserveNextBatch();
+            var scanState = ScanState.of();
+            while (scanState.scan(cursor, nodesBatchBuffer)) {
 
                 terminationFlag.assertRunning();
                 long imported = importNodes(

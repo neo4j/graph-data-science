@@ -55,7 +55,7 @@ abstract class AbstractCursorBasedScanner<Reference, EntityCursor extends Cursor
         }
 
         @Override
-        public boolean consumeBatch(RecordConsumer<Reference> consumer) {
+        public boolean consumeBatch(RecordConsumer<? super Reference> consumer) {
             while (cursor.next()) {
                 if (!consumer.offer(cursorReference)) {
                     return false;
