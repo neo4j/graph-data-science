@@ -33,7 +33,7 @@ import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.embeddings.hashgnn.HashGNNProcCompanion.DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
-@GdsCallable(name = "gds.beta.hashgnn.stream", description = DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.hashgnn.stream", aliases = {"gds.beta.hashgnn.stream"}, description = DESCRIPTION, executionMode = STREAM)
 public class HashGNNStreamSpec implements AlgorithmSpec<HashGNN,HashGNNResult,HashGNNStreamConfig, Stream<StreamResult>,HashGNNFactory<HashGNNStreamConfig>> {
 
     @Override

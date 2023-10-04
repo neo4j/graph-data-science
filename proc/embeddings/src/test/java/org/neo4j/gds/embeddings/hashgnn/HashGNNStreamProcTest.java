@@ -21,6 +21,8 @@ package org.neo4j.gds.embeddings.hashgnn;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -50,8 +52,9 @@ class HashGNNStreamProcTest extends BaseProcTest {
 
     }
 
-    @Test
-    void shouldComputeNonZeroEmbeddings() {
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.beta.hashgnn", "gds.hashgnn"})
+    void shouldComputeNonZeroEmbeddings(String procedureName) {
         String GRAPH_NAME = "myGraph";
 
         String graphCreateQuery = GdsCypher.call(GRAPH_NAME)
@@ -64,7 +67,7 @@ class HashGNNStreamProcTest extends BaseProcTest {
         runQuery(graphCreateQuery);
 
         GdsCypher.ParametersBuildStage queryBuilder = GdsCypher.call(GRAPH_NAME)
-            .algo("gds.beta.hashgnn")
+            .algo(procedureName)
             .streamMode()
             .addParameter("featureProperties", List.of("f1", "f2"))
             .addParameter("embeddingDensity", 2)

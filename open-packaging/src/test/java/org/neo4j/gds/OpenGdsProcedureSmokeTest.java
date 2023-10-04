@@ -138,10 +138,10 @@ class OpenGdsProcedureSmokeTest extends BaseProcTest {
         "gds.dag.topologicalSort.stream",
         "gds.dag.longestPath.stream",
 
-        "gds.beta.hashgnn.mutate",
-        "gds.beta.hashgnn.mutate.estimate",
-        "gds.beta.hashgnn.stream",
-        "gds.beta.hashgnn.stream.estimate",
+        "gds.hashgnn.mutate",
+        "gds.hashgnn.mutate.estimate",
+        "gds.hashgnn.stream",
+        "gds.hashgnn.stream.estimate",
 
         "gds.beta.pipeline.linkPrediction.addFeature",
         "gds.beta.pipeline.linkPrediction.addNodeProperty",

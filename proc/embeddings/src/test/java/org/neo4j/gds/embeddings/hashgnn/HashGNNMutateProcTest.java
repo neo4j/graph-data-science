@@ -21,6 +21,8 @@ package org.neo4j.gds.embeddings.hashgnn;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.api.DatabaseId;
@@ -74,9 +76,10 @@ class HashGNNMutateProcTest extends BaseProcTest {
         runQuery(graphCreateQuery);
     }
 
-    @Test
-    void shouldMutate() {
-        var query = GdsCypher.call("graph").algo("gds.beta.hashgnn")
+    @ParameterizedTest
+    @ValueSource(strings = {"gds.beta.hashgnn", "gds.hashgnn"})
+    void shouldMutate(String procedureName) {
+        var query = GdsCypher.call("graph").algo(procedureName)
             .mutateMode().addParameter("heterogeneous", true)
             .addParameter("iterations", 2)
             .addParameter("embeddingDensity", 2)
