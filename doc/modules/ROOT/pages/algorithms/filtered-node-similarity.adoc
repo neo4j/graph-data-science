@@ -82,17 +82,14 @@ CALL gds.nodeSimilarity.filtered.stream(
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
-.General configuration for algorithm execution on a named graph.
+.Configuration
 [opts="header",cols="3,2,3m,2,8"]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
-|===
-
-:nodeSimilaritySpecificConfigurationTableTitle: Node Similarity specific configuration
 include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
-
 include::partial$/algorithms/filtered-node-similarity/filtered-node-similarity-specific-algo-config.adoc[]
+|===
 
 .Results
 [opts="header",cols="1m,1,6"]
@@ -125,16 +122,14 @@ YIELD
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
-.General configuration for algorithm execution on a named graph.
+.Configuration
 [opts="header",cols="3,2,3m,2,8"]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
-|===
-
 include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
-
 include::partial$/algorithms/filtered-node-similarity/filtered-node-similarity-specific-algo-config.adoc[]
+|===
 
 .Results
 [opts="header",cols="1,1,6"]
@@ -172,17 +167,14 @@ YIELD
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
-.General configuration for algorithm execution on a named graph.
+.Configuration
 [opts="header",cols="3,2,3m,2,8"]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
-|===
-
-:nodeSimilaritySpecificConfigurationTableTitle: Node Similarity specific configuration
 include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
-
 include::partial$/algorithms/filtered-node-similarity/filtered-node-similarity-specific-algo-config.adoc[]
+|===
 
 .Results
 [opts="header",cols="1m,1,6"]
@@ -221,17 +213,14 @@ YIELD
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
-.General configuration for algorithm execution on a named graph.
+.Configuration
 [opts="header",cols="3,2,3m,2,8"]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
-|===
-
-:nodeSimilaritySpecificConfigurationTableTitle: Node Similarity specific configuration
 include::partial$/algorithms/node-similarity/specific-configuration.adoc[]
-
 include::partial$/algorithms/filtered-node-similarity/filtered-node-similarity-specific-algo-config.adoc[]
+|===
 
 .Results
 [opts="header",cols="1,1,6"]

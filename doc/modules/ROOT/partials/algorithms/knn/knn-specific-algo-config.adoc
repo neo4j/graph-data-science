@@ -1,8 +1,3 @@
-
-[caption='',title='{table-caption} {counter:table-number}. {knnSpecificConfigurationTableTitle}']
-[opts="header",cols="1,1,1m,1,4"]
-|===
-| Name                                                             | Type            | Default   | Optional | Description
 | nodeProperties                                                   | String or Map or List of Strings / Maps  | n/a       | no
 | The node properties to use for similarity computation along with their selected similarity metrics.
 Accepts a single property key,
@@ -24,4 +19,3 @@ Value must be between 0 (exclusive) and 1 (inclusive).
 Note that `concurrency` must be set to 1 when setting this parameter.
 | similarityCutoff                                                 | Float           | 0         | yes      | Filter out from the list of K-nearest neighbors nodes with similarity below this threshold.
 | perturbationRate                                                 | Float           | 0         | yes      | The probability of replacing the least similar known neighbor with an encountered neighbor of equal similarity.
-|===

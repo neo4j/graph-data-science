@@ -132,16 +132,14 @@ CALL gds.knn.filtered.stream(
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
-.General configuration for algorithm execution on a named graph.
+.Configuration
 [opts="header",cols="3,2,3m,2,8"]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
-|===
-
 include::partial$/algorithms/knn/knn-specific-algo-config.adoc[]
-
 include::partial$/algorithms/filtered-knn/filtered-knn-specific-algo-config.adoc[]
+|===
 
 .Results
 [opts="header",cols="1m,1,6"]
@@ -177,15 +175,14 @@ YIELD
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
-.General configuration for algorithm execution on a named graph.
+.Configuration
 [opts="header",cols="3,2,3m,2,8"]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
-|===
-
 include::partial$/algorithms/knn/knn-specific-algo-config.adoc[]
 include::partial$/algorithms/filtered-knn/filtered-knn-specific-algo-config.adoc[]
+|===
 
 
 .Results
@@ -230,15 +227,14 @@ YIELD
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
-.General configuration for algorithm execution on a named graph.
+.Configuration
 [opts="header",cols="3,2,3m,2,8"]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-mutate-configuration-entries.adoc[]
-|===
-
 include::partial$/algorithms/knn/knn-specific-algo-config.adoc[]
 include::partial$/algorithms/filtered-knn/filtered-knn-specific-algo-config.adoc[]
+|===
 
 .Results
 [opts="header",cols="1,1,6"]
@@ -283,15 +279,14 @@ YIELD
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
-.General configuration for algorithm execution on a named graph.
+.Configuration
 [opts="header",cols="3,2,3m,2,8"]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
-|===
-
 include::partial$/algorithms/knn/knn-specific-algo-config.adoc[]
 include::partial$/algorithms/filtered-knn/filtered-knn-specific-algo-config.adoc[]
+|===
 
 
 .Results

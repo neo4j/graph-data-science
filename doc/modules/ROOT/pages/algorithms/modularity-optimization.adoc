@@ -50,12 +50,13 @@ YIELD
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
-include::partial$/algorithms/common-configuration/common-configuration.adoc[]
-
-.Algorithm specific configuration
-[opts="header",cols="1,1,1,1,4"]
+.Configuration
+[opts="header",cols="3,2,3m,2,8"]
 |===
 | Name                                                                                                               | Type    | Default                | Optional | Description
+
+include::partial$/algorithms/common-configuration/common-stream-stats-configuration-entries.adoc[]
+
 | xref:common-usage/running-algos.adoc#common-configuration-max-iterations[maxIterations]                            | Integer | 10                     | yes      | The maximum number of iterations to run.
 | xref:common-usage/running-algos.adoc#common-configuration-tolerance[tolerance]                                     | Float   | 0.0001                 | yes      | Minimum change in modularity between iterations. If the modularity changes less than the tolerance value, the result is considered stable and the algorithm returns.
 | seedProperty                                                                                                       | String  | n/a                    | yes      | Used to define initial set of labels (must be a non-negative number).

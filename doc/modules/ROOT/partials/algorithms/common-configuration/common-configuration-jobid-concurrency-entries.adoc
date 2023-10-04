@@ -1,6 +1,10 @@
 ifeval::[{sequential} != true]
 | xref:common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]              | Integer  | 4       | yes      | The number of concurrent threads used for running the algorithm.
 endif::[]
+// There is no "elseifeval" at the moment
+ifeval::[{sequential} == true]
+| xref:common-usage/running-algos.adoc#common-configuration-concurrency[concurrency]              | Integer  | 1       | yes      | The algorithm is single-threaded and changing the concurrency parameter has no effect on the runtime.
+endif::[]
 
 | xref:common-usage/running-algos.adoc#common-configuration-jobid[jobId]                         | String   | Generated internally | yes      | An ID that can be provided to more easily track the algorithm's progress.
 | xref:common-usage/running-algos.adoc#common-configuration-logProgress[logProgress] | Boolean | true | yes | If disabled the progress percentage will not be logged.
