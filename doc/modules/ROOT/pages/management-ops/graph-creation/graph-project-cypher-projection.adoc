@@ -38,8 +38,9 @@ Relevant configuration options are `sourceNodeProperties`, `targetNodeProperties
 [[graph-project-cypher-projection-syntax]]
 == Syntax
 
-A Cypher projection is used in a query as an aggregation over the relationships that are being projected.
-It takes two mandatory arguments: `graphName`, and `sourceNode`.
+A Cypher projection is an aggregation function over the relationships that are being projected; as such, it returns an object containing information on the projected graph.
+
+The projection function takes two mandatory arguments, `graphName` and `sourceNode`.
 The third parameter is `targetNode` and is usually provided.
 The parameter is optional and can be `null` to project an unconnected node.
 The next and fourth optional `dataConfig` parameter can be used to project node properties and labels as well as relationship properties and type.
