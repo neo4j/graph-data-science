@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatException;
 import static org.junit.jupiter.api.Assertions.fail;
 
 class AlgoConfigParserTest {
@@ -195,5 +196,29 @@ class AlgoConfigParserTest {
                            " - Configuration parameter 'baz' with value '42' exceeds it's limit of '23'\n" +
                            " - Configuration parameter 'qux' with value '117' exceeds it's limit of '87'");
         }
+    }
+
+
+    @Test
+    void shouldComplainWhenAddedDefaultsDoNotAdhereToLimits() {
+        var configurationParser = new AlgoConfigParser<>(
+            "Miltos Tentoglou",
+            (NewConfigFunction<FooConfig>) (username, config) -> new FooConfigImpl(config),
+            new DefaultsConfiguration(
+                Map.of("bar", new Default(16L), "sudo", new Default(false)),
+                Collections.emptyMap()
+            ),
+            new LimitsConfiguration(
+                Map.of("bar", LimitFactory.create(8L), "sudo", LimitFactory.create(true)),
+                Collections.emptyMap()
+            )
+        );
+
+        assertThatException().isThrownBy(() -> configurationParser.processInput(Map.of())).withMessage(
+            "Configuration exceeded multiple limits:\n" +
+                " - Configuration parameter 'bar' with value '16' exceeds it's limit of '8'\n" +
+                " - Configuration parameter 'sudo' with value 'false' is in violation of it's set limit");
+
+
     }
 }
