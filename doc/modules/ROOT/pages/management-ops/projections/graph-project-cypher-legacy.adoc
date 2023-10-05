@@ -10,8 +10,8 @@ The replacement is to use the new Cypher projection, which is described in xref:
 A migration guide is available at xref:migration-lcp-to-cpv2/index.adoc[Appendix C, Migration from Legacy to new Cypher projection].
 --
 
-Using Legacy Cypher projections is a more flexible and expressive approach with diminished focus on performance compared to the xref:management-ops/projections/graph-project.adoc[native projections].
-Legacy Cypher projections are primarily recommended for the development phase (see xref:common-usage/index.adoc[Common usage]).
+Legacy Cypher projections are a more flexible and expressive approach compared to xref:management-ops/projections/graph-project.adoc[native projections].
+A Legacy Cypher projection uses Cypher to create (_project_) an in-memory graph from the Neo4j database.
 
 
 == Considerations
