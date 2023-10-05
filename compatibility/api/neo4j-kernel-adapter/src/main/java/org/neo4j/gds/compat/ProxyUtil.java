@@ -189,7 +189,7 @@ public final class ProxyUtil {
                     .reason(e)
                     .build()
                 )
-                .neo4jVersion(Neo4jVersion.V_Dev)
+                .neo4jVersion(Neo4jVersion.V_RC)
                 .build();
         }
     }
