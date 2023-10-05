@@ -32,6 +32,7 @@ import org.neo4j.fabric.FabricDatabaseManager;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.compat.BoltTransactionRunner;
 import org.neo4j.gds.compat.CompatCallableProcedure;
+import org.neo4j.gds.compat.CompatExecutionContext;
 import org.neo4j.gds.compat.CompatExecutionMonitor;
 import org.neo4j.gds.compat.CompatIndexQuery;
 import org.neo4j.gds.compat.CompatInput;
@@ -78,6 +79,7 @@ import org.neo4j.internal.kernel.api.IndexReadSession;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.NodeValueIndexCursor;
+import org.neo4j.internal.kernel.api.PartitionedScan;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.PropertyIndexQuery;
 import org.neo4j.internal.kernel.api.QueryContext;
@@ -209,6 +211,15 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    public List<StoreScan<NodeLabelIndexCursor>> partitionedCursorScan(
+        KernelTransaction transaction,
+        int batchSize,
+        int... labelIds
+    ) {
+        throw new UnsupportedOperationException("4.4 does not support partitioned scans");
+    }
+
+    @Override
     public PropertyCursor allocatePropertyCursor(KernelTransaction kernelTransaction) {
         return kernelTransaction
             .cursors()
@@ -294,9 +305,46 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
         return scanToStoreScan(read.nodeLabelScan(labelId), batchSize);
     }
 
-    @Override
-    public <C extends Cursor> StoreScan<C> scanToStoreScan(Scan<C> scan, int batchSize) {
+    private <C extends Cursor> StoreScan<C> scanToStoreScan(Scan<C> scan, int batchSize) {
         return new ScanBasedStoreScanImpl<>(scan, batchSize);
+    }
+
+    @Override
+    public StoreScan<NodeCursor> nodesScan(KernelTransaction ktx, long nodeCount, int batchSize) {
+        return new ScanBasedStoreScanImpl<>(ktx.dataRead().allNodesScan(), batchSize);
+    }
+
+    @Override
+    public StoreScan<RelationshipScanCursor> relationshipsScan(
+        KernelTransaction ktx,
+        long relationshipCount,
+        int batchSize
+    ) {
+        return new ScanBasedStoreScanImpl<>(ktx.dataRead().allRelationshipsScan(), batchSize);
+    }
+
+    @Override
+    public CompatExecutionContext executionContext(KernelTransaction ktx) {
+        return new CompatExecutionContext() {
+            @Override
+            public CursorContext cursorContext() {
+                return ktx.cursorContext();
+            }
+
+            @Override
+            public AccessMode accessMode() {
+                return ktx.securityContext().mode();
+            }
+
+            @Override
+            public <C extends Cursor> boolean reservePartition(PartitionedScan<C> scan, C cursor) {
+                return scan.reservePartition(cursor, ktx.cursorContext(), ktx.securityContext().mode());
+            }
+
+            @Override
+            public void close() {
+            }
+        };
     }
 
     @Override

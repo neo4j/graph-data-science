@@ -81,19 +81,19 @@ class NodeLabelIndexScanTest extends BaseTest {
                 usePartitionedScan
             );
 
-            var cursor = Neo4jProxy.allocateNodeLabelIndexCursor(ktx);
-
-            var aNodesCount = 0;
-            while (storeScan.reserveBatch(cursor, ktx)) {
-                while (cursor.next()) {
-                    assertThat(expectedSet.contains(cursor.nodeReference())).isTrue();
-                    aNodesCount += 1;
+            try (
+                var cursor = Neo4jProxy.allocateNodeLabelIndexCursor(ktx);
+                var ctx = Neo4jProxy.executionContext(ktx)
+            ) {
+                var aNodesCount = 0;
+                while (storeScan.reserveBatch(cursor, ctx)) {
+                    while (cursor.next()) {
+                        assertThat(expectedSet.contains(cursor.nodeReference())).isTrue();
+                        aNodesCount += 1;
+                    }
                 }
+                assertThat(aNodesCount).isEqualTo(expectedSet.size());
             }
-
-            assertThat(aNodesCount).isEqualTo(expectedSet.size());
-
-            cursor.close();
         });
     }
 

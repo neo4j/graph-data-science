@@ -17,24 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._5x;
+package org.neo4j.gds.compat;
 
-import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.internal.kernel.api.Cursor;
-import org.neo4j.internal.kernel.api.Scan;
-import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.internal.kernel.api.PartitionedScan;
+import org.neo4j.internal.kernel.api.security.AccessMode;
+import org.neo4j.io.pagecache.context.CursorContext;
 
-public final class ScanBasedStoreScanImpl<C extends Cursor> implements StoreScan<C> {
-    private final Scan<C> scan;
-    private final int batchSize;
+public interface CompatExecutionContext extends AutoCloseable {
 
-    public ScanBasedStoreScanImpl(Scan<C> scan, int batchSize) {
-        this.scan = scan;
-        this.batchSize = batchSize;
-    }
+     CursorContext cursorContext();
 
-    @Override
-    public boolean reserveBatch(C cursor, KernelTransaction ktx) {
-        return scan.reserveBatch(cursor, batchSize, ktx.cursorContext(), ktx.securityContext().mode());
-    }
+     AccessMode accessMode();
+
+     <C extends Cursor> boolean reservePartition(PartitionedScan<C> scan, C cursor);
+
+     @Override
+     void close();
 }

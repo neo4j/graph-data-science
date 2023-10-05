@@ -17,16 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat;
+package org.neo4j.gds.compat._57;
 
-public interface StoreScan<Cursor extends org.neo4j.internal.kernel.api.Cursor> {
+import org.neo4j.gds.compat.CompatExecutionContext;
+import org.neo4j.gds.compat.StoreScan;
+import org.neo4j.internal.kernel.api.Cursor;
+import org.neo4j.internal.kernel.api.Scan;
 
-    /**
-     * Advances the cursor to the next batch of the underlying scan.
-     *
-     * @param cursor a cursor to read the next batch
-     * @param ctx    the execution context of the executing kernel transaction
-     * @return true, iff the current batch contains data that must be consumed.
-     */
-    boolean reserveBatch(Cursor cursor, CompatExecutionContext ctx);
+public final class ScanBasedStoreScanImpl<C extends Cursor> implements StoreScan<C> {
+    private final Scan<C> scan;
+    private final int batchSize;
+
+    public ScanBasedStoreScanImpl(Scan<C> scan, int batchSize) {
+        this.scan = scan;
+        this.batchSize = batchSize;
+    }
+
+    @Override
+    public boolean reserveBatch(C cursor, CompatExecutionContext ctx) {
+        return scan.reserveBatch(cursor, batchSize, ctx.cursorContext(), ctx.accessMode());
+    }
 }

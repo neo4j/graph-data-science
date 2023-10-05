@@ -28,14 +28,13 @@ import org.neo4j.gds.core.loading.NodeReference;
 import org.neo4j.gds.core.loading.NodesBatchBuffer;
 import org.neo4j.gds.core.loading.NodesBatchBufferBuilder;
 import org.neo4j.gds.core.loading.RecordScannerTask;
-import org.neo4j.gds.core.loading.RecordsBatchBuffer;
+import org.neo4j.gds.core.loading.ScanState;
 import org.neo4j.gds.core.loading.StoreScanner;
 import org.neo4j.gds.core.utils.RawValues;
 import org.neo4j.gds.core.utils.StatementAction;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.transaction.TransactionContext;
-import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.Collection;
@@ -90,18 +89,10 @@ public final class NodesScannerTask extends StatementAction implements RecordSca
                 .capacity(scanner.bufferSize())
                 .hasLabelInformation(labels.size() > 1)
                 .readProperty(nodePropertyImporter != null)
-                .useCheckedBuffer(GdsFeatureToggles.USE_PARTITIONED_SCAN.isEnabled())
                 .build();
 
-            boolean scanNextBatch = true;
-            RecordsBatchBuffer.ScanState scanState;
-
-            while ((scanState = nodesBatchBuffer.scan(cursor, scanNextBatch)).requiresFlush()) {
-                // We proceed to the next batch, iff the current batch is
-                // completely consumed. If not, we remain in the current
-                // batch, flush the buffers and consume until the batch is
-                // drained.
-                scanNextBatch = scanState.reserveNextBatch();
+            var scanState = ScanState.of();
+            while (scanState.scan(cursor, nodesBatchBuffer)) {
 
                 terminationFlag.assertRunning();
                 long imported = importNodes(

@@ -103,7 +103,7 @@ public final class SingleTypeRelationshipImporter {
     ) {
         return new ThreadLocalSingleTypeRelationshipImporterBuilder()
             .adjacencyBuffer(adjacencyBuffer)
-            .relationshipsBatchBuffer(createBuffer(idMap, bulkSize, false))
+            .relationshipsBatchBuffer(createBuffer(idMap, bulkSize))
             .importMetaData(importMetaData)
             .propertyReader(propertyReader)
             .build();
@@ -112,8 +112,7 @@ public final class SingleTypeRelationshipImporter {
     public ThreadLocalSingleTypeRelationshipImporter threadLocalImporter(
         PartialIdMap idMap,
         int bulkSize,
-        KernelTransaction kernelTransaction,
-        boolean useCheckedBuffers
+        KernelTransaction kernelTransaction
     ) {
         var loadProperties = importMetaData.projection().properties().hasMappings();
 
@@ -123,20 +122,19 @@ public final class SingleTypeRelationshipImporter {
 
         return new ThreadLocalSingleTypeRelationshipImporterBuilder()
             .adjacencyBuffer(adjacencyBuffer)
-            .relationshipsBatchBuffer(createBuffer(idMap, bulkSize, useCheckedBuffers))
+            .relationshipsBatchBuffer(createBuffer(idMap, bulkSize))
             .importMetaData(importMetaData)
             .propertyReader(propertyReader)
             .build();
     }
 
     @NotNull
-    private RelationshipsBatchBuffer createBuffer(PartialIdMap idMap, int bulkSize, boolean useCheckedBuffers) {
+    private RelationshipsBatchBuffer createBuffer(PartialIdMap idMap, int bulkSize) {
         return new RelationshipsBatchBufferBuilder()
             .idMap(idMap)
             .type(typeId)
             .capacity(bulkSize)
             .skipDanglingRelationships(importMetaData.skipDanglingRelationships())
-            .useCheckedBuffer(useCheckedBuffers)
             .build();
     }
 

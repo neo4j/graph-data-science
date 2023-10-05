@@ -21,26 +21,38 @@ package org.neo4j.gds.compat._57;
 
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.compat.BoltTransactionRunner;
+import org.neo4j.gds.compat.CompatExecutionContext;
 import org.neo4j.gds.compat.GlobalProcedureRegistry;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.gds.compat._5x.CommonNeo4jProxyImpl;
+import org.neo4j.internal.kernel.api.Cursor;
+import org.neo4j.internal.kernel.api.NodeCursor;
+import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
+import org.neo4j.internal.kernel.api.PartitionedScan;
+import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
+import org.neo4j.internal.kernel.api.security.AccessMode;
+import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.io.pagecache.context.CursorContextFactory;
 import org.neo4j.io.pagecache.context.EmptyVersionContextSupplier;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
+import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 import org.neo4j.procedure.Mode;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class Neo4jProxyImpl extends CommonNeo4jProxyImpl {
@@ -57,6 +69,55 @@ public final class Neo4jProxyImpl extends CommonNeo4jProxyImpl {
             GlobalProcedures.class
         );
         return globalProcedures.getCurrentView().lookupComponentProvider(component, safe).apply(ctx);
+    }
+
+    @Override
+    public List<StoreScan<NodeLabelIndexCursor>> entityCursorScan(
+        KernelTransaction transaction,
+        int[] labelIds,
+        int batchSize,
+        boolean allowPartitionedScan
+    ) {
+        if (allowPartitionedScan) {
+            return this.partitionedCursorScan(transaction, batchSize, labelIds);
+        } else {
+            var read = transaction.dataRead();
+            return Arrays
+                .stream(labelIds)
+                .mapToObj(read::nodeLabelScan)
+                .map(scan -> new ScanBasedStoreScanImpl<>(scan, batchSize))
+                .collect(Collectors.toList());
+        }
+    }
+
+    @Override
+    public StoreScan<NodeLabelIndexCursor> nodeLabelIndexScan(
+        KernelTransaction transaction,
+        int labelId,
+        int batchSize,
+        boolean allowPartitionedScan
+    ) {
+        if (allowPartitionedScan) {
+            return this.partitionedCursorScan(transaction, batchSize, labelId).get(0);
+        } else {
+            var read = transaction.dataRead();
+            var scan = read.nodeLabelScan(labelId);
+            return new ScanBasedStoreScanImpl<>(scan, batchSize);
+        }
+    }
+
+    @Override
+    public StoreScan<NodeCursor> nodesScan(KernelTransaction ktx, long nodeCount, int batchSize) {
+        return new ScanBasedStoreScanImpl<>(ktx.dataRead().allNodesScan(), batchSize);
+    }
+
+    @Override
+    public StoreScan<RelationshipScanCursor> relationshipsScan(
+        KernelTransaction ktx,
+        long relationshipCount,
+        int batchSize
+    ) {
+        return new ScanBasedStoreScanImpl<>(ktx.dataRead().allRelationshipsScan(), batchSize);
     }
 
     @Override
@@ -141,5 +202,34 @@ public final class Neo4jProxyImpl extends CommonNeo4jProxyImpl {
             cacheTracer,
             EmptyVersionContextSupplier.EMPTY
         )).orElse(CursorContextFactory.NULL_CONTEXT_FACTORY);
+    }
+
+    @Override
+    public CompatExecutionContext executionContext(KernelTransaction ktx) {
+        var stmt = ktx.acquireStatement();
+        var ctx = ktx.createExecutionContext();
+        return new CompatExecutionContext() {
+            @Override
+            public CursorContext cursorContext() {
+                return ctx.cursorContext();
+            }
+
+            @Override
+            public AccessMode accessMode() {
+                return ctx.securityContext().mode();
+            }
+
+            @Override
+            public <C extends Cursor> boolean reservePartition(PartitionedScan<C> scan, C cursor) {
+                return scan.reservePartition(cursor, ctx);
+            }
+
+            @Override
+            public void close() {
+                ctx.complete();
+                ctx.close();
+                stmt.close();
+            }
+        };
     }
 }

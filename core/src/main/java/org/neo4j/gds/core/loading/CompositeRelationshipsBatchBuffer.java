@@ -21,22 +21,16 @@ package org.neo4j.gds.core.loading;
 
 import org.immutables.builder.Builder;
 
-import java.util.Optional;
+public final class CompositeRelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipReference> {
 
-public class CompositeRelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipReference> {
-
-    protected final RelationshipsBatchBuffer[] buffers;
+    private final RelationshipsBatchBuffer[] buffers;
 
     @Builder.Factory
     static RecordsBatchBuffer<RelationshipReference> compositeRelationshipsBatchBuffer(
-        RelationshipsBatchBuffer[] buffers,
-        Optional<Boolean> useCheckedBuffer
+        RelationshipsBatchBuffer[] buffers
     ) {
         if (buffers.length == 1) {
             return buffers[0];
-        }
-        if (useCheckedBuffer.orElse(false)) {
-            return new Checked(buffers);
         }
         return new CompositeRelationshipsBatchBuffer(buffers);
     }
@@ -48,39 +42,17 @@ public class CompositeRelationshipsBatchBuffer extends RecordsBatchBuffer<Relati
 
     @Override
     public boolean offer(RelationshipReference record) {
+        boolean offered = true;
         for (RelationshipsBatchBuffer buffer : buffers) {
-            buffer.offer(record);
+            offered = buffer.offer(record) && offered;
         }
-        return true;
+        return offered;
     }
 
     @Override
     public void reset() {
         for (RelationshipsBatchBuffer buffer : buffers) {
             buffer.reset();
-        }
-    }
-
-    /**
-     * A version of a relationships batch buffer that checks the
-     * buffer length before inserting a new record. This is necessary
-     * in the case where the number of records offered to this
-     * buffer can exceed the configured batch size.
-     */
-    private static final class Checked extends CompositeRelationshipsBatchBuffer {
-
-        Checked(RelationshipsBatchBuffer... buffers) {
-            super(buffers);
-        }
-
-        @Override
-        public boolean offer(RelationshipReference record) {
-            for (RelationshipsBatchBuffer buffer : buffers) {
-                if (!buffer.offer(record)) {
-                    return false;
-                }
-            }
-            return true;
         }
     }
 }

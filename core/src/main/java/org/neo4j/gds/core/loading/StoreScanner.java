@@ -37,6 +37,11 @@ public interface StoreScanner<Reference> extends AutoCloseable {
          * @return true, iff the consumer can consume more records
          */
         boolean offer(Reference reference);
+
+        /**
+         * Resets the internal state of the consumer so that a new batch of records can be consumed.
+         */
+        default void reset() {}
     }
 
     interface Factory<Reference> {
@@ -69,7 +74,7 @@ public interface StoreScanner<Reference> extends AutoCloseable {
          *                 usually a {@link org.neo4j.gds.core.loading.RecordsBatchBuffer}.
          * @return true, iff the batch is completely consumed
          */
-        boolean consumeBatch(RecordConsumer<Reference> consumer);
+        boolean consumeBatch(RecordConsumer<? super Reference> consumer);
 
         @Override
         void close();

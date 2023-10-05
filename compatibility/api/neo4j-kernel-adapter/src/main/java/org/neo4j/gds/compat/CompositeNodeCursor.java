@@ -83,11 +83,11 @@ public abstract class CompositeNodeCursor extends DefaultCloseListenable impleme
     public boolean next() {
         if (repopulateCursorQueue) {
             repopulateCursorQueue = false;
-            cursors.forEach(cursor -> {
+            for (var cursor : this.cursors) {
                 if (cursor != null && cursor.next()) {
                     cursorQueue.add(cursor);
                 }
-            });
+            }
         }
 
         if (current != null && current.next()) {

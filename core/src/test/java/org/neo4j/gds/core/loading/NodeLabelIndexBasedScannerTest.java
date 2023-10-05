@@ -121,7 +121,7 @@ class NodeLabelIndexBasedScannerTest extends BaseTest {
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = {false})
+    @ValueSource(booleans = {true, false})
     void testBatchSizeAlignment(boolean allowPartitionedScan) {
         var prefetchSize = StoreScanner.DEFAULT_PREFETCH_SIZE;
         // batchSize = prefetch size * PAGE_SIZE / NodeRecord size
@@ -152,19 +152,29 @@ class NodeLabelIndexBasedScannerTest extends BaseTest {
             ) {
                 assertThat(scanner.batchSize()).isEqualTo(expectedBatchSize);
 
-                var actualNodeCount = new MutableInt(0);
-                var nodesPerPartition = new MutableInt(0);
+                var consumer = new StoreScanner.RecordConsumer<>() {
+                    int partitionSize = 0;
 
-                while (storeScanner.reserveBatch() && storeScanner.consumeBatch(nodeReference -> {
-                    nodesPerPartition.increment();
-                    actualNodeCount.increment();
-                    return true;
-                })) {
-                    assertThat(nodesPerPartition.intValue()).isLessThanOrEqualTo(expectedBatchSize);
-                    nodesPerPartition.setValue(0);
+                    @Override
+                    public boolean offer(Object o) {
+                        partitionSize++;
+                        return (partitionSize < expectedBatchSize);
+                    }
+
+                    @Override
+                    public void reset() {
+                        partitionSize = 0;
+                    }
+                };
+
+                int actualNodeCount = 0;
+                var scan = ScanState.of();
+                while (scan.scan(storeScanner, consumer)) {
+                    assertThat(consumer.partitionSize).isLessThanOrEqualTo(expectedBatchSize);
+                    actualNodeCount += consumer.partitionSize;
                 }
 
-                assertThat(actualNodeCount.getValue()).isEqualTo(labelCount);
+                assertThat(actualNodeCount).isEqualTo(labelCount);
             }
         }
     }

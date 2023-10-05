@@ -25,13 +25,12 @@ import org.neo4j.gds.core.huge.DirectIdMap;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class CompositeRelationshipsBatchBufferTest {
 
     @Test
-    void shouldNotThrowOnCheckedBuffer() {
-        var compositeBatchBuffer = createCompositeBuffer(true,2, 2);
+    void shouldNotThrowWhenFull() {
+        var compositeBatchBuffer = createCompositeBuffer(2, 2);
 
         var type0Rel = ImmutableTestRelationship.builder()
             .typeTokenId(0)
@@ -56,46 +55,17 @@ class CompositeRelationshipsBatchBufferTest {
         assertThat(compositeBatchBuffer.isFull()).isTrue();
     }
 
-    @Test
-    void shouldThrowOnUncheckedBuffer() {
-        var compositeBatchBuffer = createCompositeBuffer(false,2, 2);
-
-        var type0Rel = ImmutableTestRelationship.builder()
-            .typeTokenId(0)
-            .relationshipId(0)
-            .sourceNodeReference(0)
-            .targetNodeReference(1)
-            .build();
-
-        var type1Rel = ImmutableTestRelationship.builder()
-            .typeTokenId(1)
-            .relationshipId(1)
-            .sourceNodeReference(0)
-            .targetNodeReference(1)
-            .build();
-
-        assertThat(compositeBatchBuffer.offer(type0Rel)).isTrue();
-        assertThat(compositeBatchBuffer.offer(type1Rel)).isTrue();
-        assertThat(compositeBatchBuffer.offer(type0Rel)).isTrue();
-        assertThat(compositeBatchBuffer.offer(type1Rel)).isTrue();
-        assertThatThrownBy(() -> compositeBatchBuffer.offer(type0Rel)).isInstanceOf(ArrayIndexOutOfBoundsException.class);
-        assertThatThrownBy(() -> compositeBatchBuffer.offer(type1Rel)).isInstanceOf(ArrayIndexOutOfBoundsException.class);
-        assertThat(compositeBatchBuffer.isFull()).isTrue();
-    }
-
-    private static RecordsBatchBuffer<RelationshipReference> createCompositeBuffer(boolean checked, int typeCount, int capacity) {
+    private static RecordsBatchBuffer<RelationshipReference> createCompositeBuffer(int typeCount, int capacity) {
         var buffers = IntStream.range(0, typeCount)
             .mapToObj(type -> new RelationshipsBatchBufferBuilder()
                 .idMap(new DirectIdMap(2))
                 .type(type)
                 .capacity(capacity)
-                .useCheckedBuffer(checked)
                 .build())
             .toArray(RelationshipsBatchBuffer[]::new);
 
         return new CompositeRelationshipsBatchBufferBuilder()
             .buffers(buffers)
-            .useCheckedBuffer(checked)
             .build();
     }
 

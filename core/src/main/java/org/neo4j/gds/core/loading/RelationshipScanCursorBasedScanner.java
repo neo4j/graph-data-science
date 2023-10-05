@@ -30,10 +30,23 @@ import org.neo4j.kernel.impl.store.format.standard.RelationshipRecordFormat;
 
 public final class RelationshipScanCursorBasedScanner extends AbstractCursorBasedScanner<RelationshipReference, RelationshipScanCursor> {
 
-    public static final StoreScanner.Factory<RelationshipReference> FACTORY = RelationshipScanCursorBasedScanner::new;
+    private final long relationshipCount;
 
-    private RelationshipScanCursorBasedScanner(int prefetchSize, TransactionContext transaction) {
+    public static StoreScanner.Factory<RelationshipReference> factory(long relationshipCount) {
+        return (prefetchSize, context) -> new RelationshipScanCursorBasedScanner(
+            prefetchSize,
+            relationshipCount,
+            context
+        );
+    }
+
+    private RelationshipScanCursorBasedScanner(
+        int prefetchSize,
+        long relationshipCount,
+        TransactionContext transaction
+    ) {
         super(prefetchSize, transaction);
+        this.relationshipCount = relationshipCount;
     }
 
     @Override
@@ -55,7 +68,7 @@ public final class RelationshipScanCursorBasedScanner extends AbstractCursorBase
 
     @Override
     StoreScan<RelationshipScanCursor> entityCursorScan(KernelTransaction transaction) {
-        return Neo4jProxy.scanToStoreScan(transaction.dataRead().allRelationshipsScan(), batchSize());
+        return Neo4jProxy.relationshipsScan(transaction, this.relationshipCount, batchSize());
     }
 
     @Override

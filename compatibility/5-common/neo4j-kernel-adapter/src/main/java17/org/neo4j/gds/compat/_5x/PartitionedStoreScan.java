@@ -19,16 +19,97 @@
  */
 package org.neo4j.gds.compat._5x;
 
+import org.neo4j.common.EntityType;
+import org.neo4j.exceptions.KernelException;
+import org.neo4j.gds.compat.CompatExecutionContext;
 import org.neo4j.gds.compat.StoreScan;
+import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.PartitionedScan;
+import org.neo4j.internal.kernel.api.TokenPredicate;
+import org.neo4j.internal.schema.IndexDescriptor;
+import org.neo4j.internal.schema.SchemaDescriptors;
 import org.neo4j.kernel.api.KernelTransaction;
 
-final class PartitionedStoreScan implements StoreScan<NodeLabelIndexCursor> {
-    private final PartitionedScan<NodeLabelIndexCursor> scan;
+import java.util.ArrayList;
+import java.util.List;
 
-    PartitionedStoreScan(PartitionedScan<NodeLabelIndexCursor> scan) {
+public final class PartitionedStoreScan<C extends Cursor> implements StoreScan<C> {
+    private final PartitionedScan<C> scan;
+
+    public PartitionedStoreScan(PartitionedScan<C> scan) {
         this.scan = scan;
+    }
+
+    @Override
+    public boolean reserveBatch(C cursor, CompatExecutionContext ctx) {
+        return ctx.reservePartition(scan, cursor);
+    }
+
+    public static List<StoreScan<NodeLabelIndexCursor>> createScans(
+        KernelTransaction transaction,
+        int batchSize,
+        int... labelIds
+    ) {
+        var indexDescriptor = NodeLabelIndexLookupImpl.findUsableMatchingIndex(
+            transaction,
+            SchemaDescriptors.forAnyEntityTokens(EntityType.NODE)
+        );
+
+        if (indexDescriptor == IndexDescriptor.NO_INDEX) {
+            throw new IllegalStateException("There is no index that can back a node label scan.");
+        }
+
+        var read = transaction.dataRead();
+
+        // Our current strategy is to select the token with the highest count
+        // and use that one as the driving partitioned index scan. The partitions
+        // of all other partitioned index scans will be aligned to that one.
+        int maxToken = labelIds[0];
+        long maxCount = read.countsForNodeWithoutTxState(labelIds[0]);
+        int maxIndex = 0;
+
+        for (int i = 1; i < labelIds.length; i++) {
+            long count = read.countsForNodeWithoutTxState(labelIds[i]);
+            if (count > maxCount) {
+                maxCount = count;
+                maxToken = labelIds[i];
+                maxIndex = i;
+            }
+        }
+
+        // swap the first label with the max count label
+        labelIds[maxIndex] = labelIds[0];
+        labelIds[0] = maxToken;
+
+        int numberOfPartitions = PartitionedStoreScan.getNumberOfPartitions(maxCount, batchSize);
+
+        try {
+            var session = read.tokenReadSession(indexDescriptor);
+
+            var partitionedScan = read.nodeLabelScan(
+                session,
+                numberOfPartitions,
+                transaction.cursorContext(),
+                new TokenPredicate(maxToken)
+            );
+
+            var scans = new ArrayList<StoreScan<NodeLabelIndexCursor>>(labelIds.length);
+            scans.add(new PartitionedStoreScan<>(partitionedScan));
+
+            // Initialize the remaining index scans with the partitioning of the first scan.
+            for (int i = 1; i < labelIds.length; i++) {
+                int labelToken = labelIds[i];
+                var scan = read.nodeLabelScan(session, partitionedScan, new TokenPredicate(labelToken));
+                scans.add(new PartitionedStoreScan<>(scan));
+            }
+
+            return scans;
+        } catch (KernelException e) {
+            // should not happen, we check for the index existence and applicability
+            // before reading it
+            throw new RuntimeException("Unexpected error while initialising reading from node label index", e);
+        }
     }
 
     static int getNumberOfPartitions(long nodeCount, int batchSize) {
@@ -49,10 +130,5 @@ final class PartitionedStoreScan implements StoreScan<NodeLabelIndexCursor> {
             numberOfPartitions = 1;
         }
         return numberOfPartitions;
-    }
-
-    @Override
-    public boolean reserveBatch(NodeLabelIndexCursor cursor, KernelTransaction ktx) {
-        return scan.reservePartition(cursor, ktx.cursorContext(), ktx.securityContext().mode());
     }
 }
