@@ -35,12 +35,12 @@ public class FloatEuclideanDistanceLinkScorer implements LinkScorer {
     FloatEuclideanDistanceLinkScorer(NodePropertyValues embeddings, DoubleArrayList relationshipTypeEmbedding) {
         this.embeddings = embeddings;
         this.relationshipTypeEmbedding = relationshipTypeEmbedding.toArray();
+        this.currentCandidateTarget = new float[this.relationshipTypeEmbedding.length];
     }
 
     @Override
     public void init(long sourceNode) {
         this.currentSourceNode = sourceNode;
-        this.currentCandidateTarget = new float[relationshipTypeEmbedding.length];
         var currentSource = embeddings.floatArrayValue(currentSourceNode);
         for(int i = 0; i < relationshipTypeEmbedding.length; i++){
             this.currentCandidateTarget[i] = (float) (currentSource[i] + relationshipTypeEmbedding[i]);

@@ -35,12 +35,12 @@ public class DoubleEuclideanDistanceLinkScorer implements LinkScorer {
     DoubleEuclideanDistanceLinkScorer(NodePropertyValues embeddings, DoubleArrayList relationshipTypeEmbedding) {
         this.embeddings = embeddings;
         this.relationshipTypeEmbedding = relationshipTypeEmbedding.toArray();
+        this.currentCandidateTarget = new double[this.relationshipTypeEmbedding.length];
     }
 
     @Override
     public void init(long sourceNode) {
         this.currentSourceNode = sourceNode;
-        this.currentCandidateTarget = new double[relationshipTypeEmbedding.length];
         var currentSource = embeddings.doubleArrayValue(currentSourceNode);
         for (int i = 0; i < relationshipTypeEmbedding.length; i++) {
             this.currentCandidateTarget[i] = currentSource[i] + relationshipTypeEmbedding[i];
