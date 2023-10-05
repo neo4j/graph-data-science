@@ -1,4 +1,4 @@
-[.create-cypher-db-syntax]
+[.create-ephemeral-db-syntax]
 --
 [source, cypher, role=noplay]
 ----

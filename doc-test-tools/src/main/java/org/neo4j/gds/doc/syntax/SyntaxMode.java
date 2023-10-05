@@ -76,8 +76,8 @@ public enum SyntaxMode {
     WRITE_NODE_LABEL("include-with-write-node-label", false),
     MUTATE_NODE_LABEL("include-with-mutate-node-label", false),
     GRAPH_GENERATE("include-with-graph-generate"),
-    DB_CREATE("create-cypher-db-syntax", false),
-    DB_DROP("drop-cypher-db-syntax", false);
+    DB_CREATE("create-ephemeral-db-syntax", false),
+    DB_DROP("drop-ephemeral-db-syntax", false);
 
     private final String mode;
     public final boolean hasParameters;
