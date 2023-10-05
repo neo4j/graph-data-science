@@ -36,14 +36,16 @@ public class FloatDistMultLinkScorer implements LinkScorer {
     FloatDistMultLinkScorer(NodePropertyValues embeddings, DoubleArrayList relationshipTypeEmbedding) {
         this.embeddings = embeddings;
         this.relationshipTypeEmbedding = relationshipTypeEmbedding.toArray();
+        this.currentCandidateTarget = new float[this.relationshipTypeEmbedding.length];
+
     }
 
     @Override
     public void init(long sourceNode) {
         this.currentSourceNode = sourceNode;
-        this.currentCandidateTarget = embeddings.floatArrayValue(currentSourceNode);
-        for(int i = 0; i < relationshipTypeEmbedding.length; i++){
-            this.currentCandidateTarget[i] *= relationshipTypeEmbedding[i];
+        var currentSource = embeddings.floatArrayValue(currentSourceNode);
+        for (int i = 0; i < relationshipTypeEmbedding.length; i++) {
+            this.currentCandidateTarget[i] = (float) (currentSource[i] * relationshipTypeEmbedding[i]);
         }
     }
 

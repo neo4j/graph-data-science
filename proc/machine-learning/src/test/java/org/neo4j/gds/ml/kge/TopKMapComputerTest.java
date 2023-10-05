@@ -20,16 +20,12 @@
 package org.neo4j.gds.ml.kge;
 
 import com.carrotsearch.hppc.BitSet;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.BaseTest;
-import org.neo4j.gds.Orientation;
-import org.neo4j.gds.RelationshipProjection;
-import org.neo4j.gds.StoreLoaderBuilder;
-import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.similarity.SimilarityResult;
 
 import java.util.Arrays;
@@ -40,9 +36,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.ml.kge.ScoreFunction.DISTMULT;
 import static org.neo4j.gds.ml.kge.ScoreFunction.TRANSE;
 
-class TopKMapComputerTest extends BaseTest {
+@GdlExtension
+class TopKMapComputerTest {
 
-
+    @GdlGraph
     private static final String DB_CYPHER =
         "CREATE" +
             "  (a:N {emb: [-3.0, 3.0]})" +
@@ -58,20 +55,13 @@ class TopKMapComputerTest extends BaseTest {
             ", (b)-[:REL {prop: 1.0}]->(c)" +
             ", (c)-[:REL {prop: 1.0}]->(b)";
 
-    @BeforeEach
-    void setUp() {
-        runQuery(DB_CYPHER);
-    }
+    @Inject
+    TestGraph graph;
 
     @Test
     void shouldComputeTopKMapTransE() {
-        Graph graph = new StoreLoaderBuilder().databaseService(db)
-            .addNodeProperty("emb", "emb", DefaultValue.of(new double[]{0.0, 0.0, 0.0}), Aggregation.NONE)
-            .build()
-            .graph();
-
-        var sourceNodes = create(0, 1, 2);
-        var targetNodes = create(3, 4, 5);
+        var sourceNodes = create(graph.toMappedNodeId("a"), graph.toMappedNodeId("b"), graph.toMappedNodeId("c"));
+        var targetNodes = create(graph.toMappedNodeId("d"), graph.toMappedNodeId("e"), graph.toMappedNodeId("f"));
         var topK = 1;
         var concurrency = 4;
 
@@ -103,13 +93,8 @@ class TopKMapComputerTest extends BaseTest {
 
     @Test
     void shouldComputeTopKMapDistMult() {
-        Graph graph = new StoreLoaderBuilder().databaseService(db)
-            .addNodeProperty("emb", "emb", DefaultValue.of(new double[]{0.0, 0.0, 0.0}), Aggregation.NONE)
-            .build()
-            .graph();
-
-        var sourceNodes = create(0, 1, 2);
-        var targetNodes = create(3, 4, 5);
+        var sourceNodes = create(graph.toMappedNodeId("a"), graph.toMappedNodeId("b"), graph.toMappedNodeId("c"));
+        var targetNodes = create(graph.toMappedNodeId("d"), graph.toMappedNodeId("e"), graph.toMappedNodeId("f"));
         var topK = 1;
         var concurrency = 4;
 
@@ -141,17 +126,10 @@ class TopKMapComputerTest extends BaseTest {
 
     @Test
     void shouldComputeOverCorrectFiltering() {
-        Graph graph = new StoreLoaderBuilder().databaseService(db)
-            .addNodeProperty("emb", "emb", DefaultValue.of(new double[]{0.0, 0.0, 0.0}), Aggregation.NONE)
-            .putRelationshipProjectionsWithIdentifier(
-                "REL",
-                RelationshipProjection.of("REL", Orientation.NATURAL)
-            )
-            .build()
-            .graph();
-
-        var sourceNodes = create(0, 1, 2);
-        var targetNodes = create(0, 1, 2, 3);
+        var sourceNodes = create(graph.toMappedNodeId("a"), graph.toMappedNodeId("b"), graph.toMappedNodeId("c"));
+        var targetNodes = create(graph.toMappedNodeId("a"), graph.toMappedNodeId("b"), graph.toMappedNodeId("c"),
+            graph.toMappedNodeId("d")
+        );
         var topK = 10;
         var concurrency = 4;
 

@@ -36,14 +36,15 @@ public class DoubleDistMultLinkScorer implements LinkScorer {
     DoubleDistMultLinkScorer(NodePropertyValues embeddings, DoubleArrayList relationshipTypeEmbedding) {
         this.embeddings = embeddings;
         this.relationshipTypeEmbedding = relationshipTypeEmbedding.toArray();
+        this.currentCandidateTarget = new double[this.relationshipTypeEmbedding.length];
     }
 
     @Override
     public void init(long sourceNode) {
         this.currentSourceNode = sourceNode;
-        this.currentCandidateTarget = embeddings.doubleArrayValue(currentSourceNode);
+        var currentSource = embeddings.doubleArrayValue(currentSourceNode);
         for(int i = 0; i < relationshipTypeEmbedding.length; i++){
-            this.currentCandidateTarget[i] *= relationshipTypeEmbedding[i];
+            this.currentCandidateTarget[i] = currentSource[i] * relationshipTypeEmbedding[i];
         }
     }
 
