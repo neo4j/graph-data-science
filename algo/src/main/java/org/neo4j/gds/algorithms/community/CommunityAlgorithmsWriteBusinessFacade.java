@@ -196,7 +196,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             },
             statisticsComputationInstructions,
             intermediateResult.computeMilliseconds,
-            () -> AlphaSccSpecificFields.EMPTY.EMPTY,
+            () -> AlphaSccSpecificFields.EMPTY,
             "SccWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
