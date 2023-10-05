@@ -33,6 +33,10 @@ import org.neo4j.gds.k1coloring.K1ColoringAlgorithmFactory;
 import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionAlgorithmFactory;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
+import org.neo4j.gds.kmeans.KmeansAlgorithmFactory;
+import org.neo4j.gds.kmeans.KmeansBaseConfig;
+import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
+import org.neo4j.gds.labelpropagation.LabelPropagationFactory;
 import org.neo4j.gds.leiden.LeidenAlgorithmFactory;
 import org.neo4j.gds.leiden.LeidenBaseConfig;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
@@ -113,6 +117,29 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
         );
     }
 
+    public <C extends KmeansBaseConfig> MemoryEstimateResult kmeans(
+        Object graphNameOrConfiguration,
+        C configuration
+    ) {
+        return estimate(
+            graphNameOrConfiguration,
+            configuration,
+            Optional.empty(),
+            new KmeansAlgorithmFactory<>()
+        );
+    }
+
+    public <C extends LabelPropagationBaseConfig> MemoryEstimateResult labelPropagation(
+        Object graphNameOrConfiguration,
+        C configuration
+    ) {
+        return estimate(
+            graphNameOrConfiguration,
+            configuration,
+            configuration.relationshipWeightProperty(),
+            new LabelPropagationFactory<>()
+        );
+    }
     public <C extends TriangleCountBaseConfig> MemoryEstimateResult triangleCount(
         Object graphNameOrConfiguration,
         C configuration
