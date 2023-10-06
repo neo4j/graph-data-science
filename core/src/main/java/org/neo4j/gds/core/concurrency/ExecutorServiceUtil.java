@@ -49,6 +49,10 @@ public final class ExecutorServiceUtil {
         return Executors.newSingleThreadExecutor(NamedThreadFactory.daemon(threadPrefix));
     }
 
+    static ExecutorService createThreadPool(int corePoolSize, int maxPoolSize) {
+        return createThreadPool(THREAD_NAME_PREFIX, corePoolSize, maxPoolSize);
+    }
+
     public static ExecutorService createThreadPool(String threadPrefix, int corePoolSize, int maxPoolSize) {
         return new ThreadPoolExecutor(
             corePoolSize,
