@@ -42,6 +42,7 @@ import static org.neo4j.gds.doc.DocumentationTestToolsConstants.QUERY_EXAMPLE_RO
 import static org.neo4j.gds.doc.DocumentationTestToolsConstants.ROLE_SELECTOR;
 import static org.neo4j.gds.doc.DocumentationTestToolsConstants.SETUP_QUERY_ROLE;
 import static org.neo4j.gds.doc.DocumentationTestToolsConstants.TABLE_CONTEXT;
+import static org.neo4j.gds.doc.DocumentationTestToolsConstants.TEST_DATABASE_ATTRIBUTE;
 import static org.neo4j.gds.doc.DocumentationTestToolsConstants.TEST_GROUP_ATTRIBUTE;
 import static org.neo4j.gds.doc.DocumentationTestToolsConstants.TEST_OPERATOR_ATTRIBUTE;
 import static org.neo4j.gds.doc.DocumentationTestToolsConstants.TEST_TYPE_NO_RESULT;
@@ -161,6 +162,10 @@ public class QueryCollectingTreeProcessor extends Treeprocessor {
 
         if (queryExampleNode.hasAttribute(TEST_OPERATOR_ATTRIBUTE)) {
             queryExampleBuilder.operator(queryExampleNode.getAttribute(TEST_OPERATOR_ATTRIBUTE).toString());
+        }
+
+        if (queryExampleNode.hasAttribute(TEST_DATABASE_ATTRIBUTE)) {
+            queryExampleBuilder.database(queryExampleNode.getAttribute(TEST_DATABASE_ATTRIBUTE).toString());
         }
 
         if (Boolean.parseBoolean(queryExampleNode.getAttribute(TEST_TYPE_NO_RESULT, false).toString())) {

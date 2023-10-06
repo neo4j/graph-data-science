@@ -20,6 +20,7 @@
 package org.neo4j.gds.doc.syntax;
 
 import org.immutables.value.Value;
+import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.annotation.ValueClass;
 
 /**
@@ -40,6 +41,9 @@ public interface DocQuery {
     default String operator() {
         return DEFAULT_OPERATOR;
     }
+
+    @Value.Default
+    default String database() { return GraphDatabaseSettings.DEFAULT_DATABASE_NAME;}
 
     static ImmutableDocQuery.Builder builder() {
         return ImmutableDocQuery.builder();

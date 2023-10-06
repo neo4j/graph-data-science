@@ -1,7 +1,7 @@
 Here we create a Neo4j database and xref:management-ops/graph-creation/graph-project.adoc[project] it into memory:
 
-[source, cypher, role=noplay]
-----
+[source, cypher, role=noplay setup-query]
+--
 CREATE
   (alice:Person { name: 'Alice', age: 23 }),
   (bob:Person { name: 'Bob', age: 42 }),
@@ -10,10 +10,10 @@ CREATE
   (alice)-[:KNOWS]->(bob),
   (bob)-[:KNOWS]->(alice),
   (alice)-[:KNOWS]->(carl)
-----
+--
 
 .Project `Person` nodes and `KNOWS` relationships:
-[source, cypher, role=noplay]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
   'social_network',
@@ -28,7 +28,7 @@ YIELD
 Next, we create an ephemeral database from the projected graph:
 
 .Create a new database `gdsdb` using our `social_network` graph:
-[source, cypher, role=noplay]
+[source, cypher, role=noplay query-example, no-result=true]
 ----
 CALL gds.ephemeral.database.create(
   'gdsdb',
@@ -38,22 +38,29 @@ CALL gds.ephemeral.database.create(
 
 We can use the Neo4j `SHOW DATABASES` command to verify that the new database has been created successfully:
 
-[source, cypher, role=noplay]
+[role=query-example, database=system]
+--
+[source, cypher, role=noplay, database=system, query-example]
 ----
 SHOW DATABASES
+YIELD name, requestedStatus, currentStatus, default
+RETURN name, requestedStatus, currentStatus, default
+ORDER BY name
 ----
 
 .Results
 [opts="header"]
 |===
-| name     | address          | role         | requestedStatus | currentStatus  | error  | default  | home
-| "neo4j"  | "localhost:7687" | "standalone" | "online"        | "online"       | ""     | true     | true
-| "system" | "localhost:7687" | "standalone" | "online"        | "online"       | ""     | false    | false
-| "gdsdb"  | "localhost:7687" | "standalone" | "online"        | "online"       | ""     | false    | false
+| name     | requestedStatus | currentStatus  | default
+| "gdsdb"  | "online"        | "online"       | false
+| "neo4j"  | "online"        | "online"       | true
+| "system" | "online"        | "online"       | false
 |===
+--
 
 Finally, we switch to the newly created database to start using it:
 
+// this is not valid cypher
 [source, cypher, role=noplay]
 ----
 :use gdsdb

@@ -24,15 +24,24 @@ import org.asciidoctor.Options;
 import org.asciidoctor.SafeMode;
 import org.assertj.core.api.Assertions;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.io.TempDir;
-import org.neo4j.gds.BaseProcTest;
+import org.neo4j.dbms.api.DatabaseManagementService;
+import org.neo4j.gds.QueryRunner;
 import org.neo4j.gds.compat.CompatUserAggregationFunction;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.Settings;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.doc.syntax.DocQuery;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Result;
+import org.neo4j.io.layout.Neo4jLayout;
+import org.neo4j.test.TestDatabaseManagementServiceBuilder;
+import org.neo4j.test.extension.Inject;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -44,27 +53,42 @@ import java.util.TreeMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatNoException;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.registerFunctions;
+import static org.neo4j.gds.compat.GraphDatabaseApiProxy.registerProcedures;
 
-public abstract class MultiFileDocTestBase extends BaseProcTest {
+public abstract class MultiFileDocTestBase {
     private List<DocQuery> beforeEachQueries;
 
     private List<DocQuery> beforeAllQueries;
 
     private List<QueryExampleGroup> queryExampleGroups;
 
+    @Inject
+    protected DatabaseManagementService dbms;
+
+    protected GraphDatabaseService defaultDb;
+
     protected abstract List<String> adocPaths();
 
     @BeforeEach
     void setUp(@TempDir File workingDirectory) throws Exception {
+        this.dbms = setupDbms(workingDirectory.toPath());
+        this.defaultDb = dbms.database("neo4j");
+
         Class<?>[] clazzArray = new Class<?>[0];
-        registerProcedures(procedures().toArray(clazzArray));
-        registerFunctions(functions().toArray(clazzArray));
-        for (var function : aggregationFunctions()) {
-            registerAggregationFunction(function);
+        GraphDatabaseService defaultDb = dbms.database("neo4j");
+        registerProcedures(defaultDb, procedures().toArray(clazzArray));
+        registerFunctions(defaultDb, functions().toArray(clazzArray));
+
+        for (CompatUserAggregationFunction func : aggregationFunctions()) {
+            GraphDatabaseApiProxy.register(defaultDb, Neo4jProxy.callableUserAggregationFunction(func));
         }
+
+
 
         var treeProcessor = new QueryCollectingTreeProcessor();
         var includeProcessor = new PartialsIncludeProcessor();
@@ -91,6 +115,22 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
         if (!setupNeo4jGraphPerTest()) {
             beforeAllQueries.forEach(this::runDocQuery);
         }
+    }
+
+    @AfterEach
+    void tearDownDbms() {
+        dbms.shutdown();
+    }
+
+    protected DatabaseManagementService setupDbms(Path workingDirectory) {
+        var builder = new TestDatabaseManagementServiceBuilder(Neo4jLayout.of(workingDirectory));
+        configureDbms(builder);
+        return builder.build();
+    }
+
+    protected void configureDbms(TestDatabaseManagementServiceBuilder builder) {
+        builder.noOpSystemGraphInitializer();
+        builder.setConfig(Settings.procedureUnrestricted(), singletonList("gds.*"));
     }
 
     private List<File> adocFiles() {
@@ -127,10 +167,9 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
     private void runDocQuery(DocQuery docQuery) {
         try {
             if (docQuery.runAsOperator()) {
-                String operatorHandle = docQuery.operator();
-                super.runQuery(operatorHandle, docQuery.query());
+                QueryRunner.runQuery(dbms.database(docQuery.database()), docQuery.operator(), docQuery.query(), Map.of());
             } else {
-                super.runQuery(docQuery.query());
+                QueryRunner.runQuery(dbms.database(docQuery.database()), docQuery.query());
             }
         } catch (Exception e) {
             throw new RuntimeException("Failed to run query: " + docQuery.query(), e);
@@ -152,11 +191,20 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
     }
 
     private void runQueryExampleWithResultConsumer(QueryExample queryExample, Consumer<Result> check) {
-        if (!queryExample.runAsOperator()) {
-            super.runQueryWithResultConsumer(queryExample.query(), check);
+        if (queryExample.runAsOperator()) {
+            QueryRunner.runQueryWithResultConsumer(
+                dbms.database(queryExample.database()),
+                queryExample.operator(),
+                queryExample.query(),
+                Map.of(),
+                check
+            );
         } else {
-            String operatorHandle = queryExample.operator();
-            super.runQueryWithResultConsumer(operatorHandle, queryExample.query(), check);
+            QueryRunner.runQueryWithResultConsumer(
+                dbms.database(queryExample.database()),
+                queryExample.query(),
+                Map.of(),
+                check);
         }
     }
 
@@ -207,15 +255,15 @@ public abstract class MultiFileDocTestBase extends BaseProcTest {
         return resultsFromDoc
             .stream()
             .map(list -> list.stream().map(string -> {
-                try {
-                    if (string.startsWith("[")) {
-                        return formatListOfNumbers(string);
+                    try {
+                        if (string.startsWith("[")) {
+                            return formatListOfNumbers(string);
+                        }
+                        return DocumentationTestToolsConstants.FLOAT_FORMAT.format(Double.parseDouble(string));
+                    } catch (NumberFormatException e) {
+                        return string;
                     }
-                    return DocumentationTestToolsConstants.FLOAT_FORMAT.format(Double.parseDouble(string));
-                } catch (NumberFormatException e) {
-                    return string;
-                }
-            }).collect(Collectors.toList())
+                }).collect(Collectors.toList())
             )
             .collect(Collectors.toList());
     }

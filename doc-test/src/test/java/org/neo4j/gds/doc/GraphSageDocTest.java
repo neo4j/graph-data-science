@@ -20,6 +20,7 @@
 package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.degree.DegreeCentralityMutateProc;
@@ -27,16 +28,10 @@ import org.neo4j.gds.embeddings.graphsage.GraphSageMutateProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageStreamProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageTrainProc;
 import org.neo4j.gds.embeddings.graphsage.GraphSageWriteProc;
-import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 
 import java.util.List;
 
-@Neo4jModelCatalogExtension
 class GraphSageDocTest extends SingleFileDocTestBase {
-
-    @Inject
-    ModelCatalog modelCatalog;
 
     @Override
     protected List<Class<?>> procedures() {
@@ -57,6 +52,7 @@ class GraphSageDocTest extends SingleFileDocTestBase {
 
     @Override
     protected Runnable cleanup() {
+        var modelCatalog = GraphDatabaseApiProxy.resolveDependency(defaultDb, ModelCatalog.class);
         return () -> {
             GraphStoreCatalog.removeAllLoadedGraphs();
             modelCatalog.removeAllLoadedModels();

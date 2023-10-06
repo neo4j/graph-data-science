@@ -1,4 +1,4 @@
-[.drop-cypher-db-syntax]
+[.drop-ephemeral-db-syntax]
 --
 [source, cypher, role=noplay]
 ----

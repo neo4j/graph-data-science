@@ -21,24 +21,27 @@ package org.neo4j.gds.doc;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.io.TempDir;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.TestCustomInfo;
-import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.model.catalog.TestTrainConfig;
 
+import java.io.File;
 import java.util.Map;
 
-@Neo4jModelCatalogExtension
 public abstract class ModelCatalogDocTestBase extends SingleFileDocTestBase {
 
-    @Inject
     ModelCatalog modelCatalog;
 
     @BeforeEach
-    void loadModel() {
+    @Override
+    void setUp(@TempDir File workingDirectory) throws Exception {
+        super.setUp(workingDirectory);
+        this.modelCatalog = GraphDatabaseApiProxy.resolveDependency(defaultDb, ModelCatalog.class);
+
         var exampleModel1 = Model.of(
             "example-model-type",
             GraphSchema.empty(),

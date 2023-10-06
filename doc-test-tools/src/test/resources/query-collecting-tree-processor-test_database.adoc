@@ -1,0 +1,8 @@
+[role=query-example, database=system, no-result=true]
+--
+.This is a test code block
+[source, cypher, role=noplay]
+----
+SHOW DATABASES
+----
+--
