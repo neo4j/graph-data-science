@@ -12,15 +12,13 @@ Additionally, GDS includes machine learning pipelines to train predictive superv
 The GDS API comprises Cypher procedures and functions.
 Each of these exist in one of three tiers of maturity:
 
-* Production-quality
-** Indicates that the feature has been tested with regards to stability and scalability.
-** Features in this tier are prefixed with `gds.<operation>`.
-* Beta
-** Indicates that the feature is a candidate for the production-quality tier.
-** Features in this tier are prefixed with `gds.beta.<operation>`.
-* Alpha
-** Indicates that the feature is experimental and might be changed or removed at any time.
-** Features in this tier are prefixed with `gds.alpha.<operation>`.
+Production-quality::
+Indicates that the feature has been tested with regards to stability and scalability.
+Beta::
+Indicates that the feature is a candidate for the production-quality tier.
+Alpha::
+Indicates that the feature is experimental and might be changed or removed at any time.
+
 
 The xref:operations-reference/appendix-a.adoc[Operations Reference], lists all operations in GDS according to their tier.
 
