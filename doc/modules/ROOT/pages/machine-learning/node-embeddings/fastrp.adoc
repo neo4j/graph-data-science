@@ -96,7 +96,7 @@ The last `propertyDimension` coordinates in the embedding captures information a
 === Usage in machine learning pipelines
 
 It may be useful to generate node embeddings with FastRP as a node property step in a machine learning pipeline (like xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[] and xref:machine-learning/node-property-prediction/index.adoc[]).
-Since FastRP is a random algorithm and xref:machine-learning/node-embeddings/index.adoc#node-embeddings-generalization[inductive] only for `propertyRatio=1.0`, there are some things to have in mind.
+Since FastRP is a random algorithm and is xref:machine-learning/node-embeddings/index.adoc#node-embeddings-generalization[inductive] (in other words, capable of generating embeddings for previously unseen nodes) only for `propertyRatio=1.0`, there are some things to have in mind.
 
 In order for a machine learning model to be able to make useful predictions, it is important that features produced during prediction are of a similar distribution to the features produced during training of the model.
 Moreover, node property steps (whether FastRP or not) added to a pipeline are executed both during training, and during the prediction by the trained model.
