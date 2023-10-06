@@ -31,11 +31,11 @@ The FastRP algorithm operates on graphs, in which case we care about preserving 
 This means that two nodes that have similar neighborhoods should be assigned similar embedding vectors.
 Conversely, two nodes that are not similar should be not be assigned similar embedding vectors.
 
-The FastRP algorithm initially assigns random vectors to all nodes using a technique called _very sparse random projection_, see (Achlioptas, 2003) below.
+The FastRP algorithm initially assigns random vectors to all nodes using a technique called _very sparse random projection_ footnote:[Achlioptas, Dimitris. "Database-friendly random projections: Johnson-Lindenstrauss with binary coins." _Journal of computer and System Sciences_ 66, no. 4 (2003): 671-687.].
 Moreover, in GDS it is possible to use node properties for the creation of these _initial random vectors_ in a way described xref:machine-learning/node-embeddings/fastrp.adoc#algorithms-embeddings-fastrp-examples-properties[below].
-We will also use _projection of a node_ synonymously with the initial random vector of a node.
+Differently from the original paperfootnote:[Chen, Haochen, Syed Fahad Sultan, Yingtao Tian, Muhao Chen, and Steven Skiena. "Fast and Accurate Network Embeddings via Very Sparse Random Projection." _arXiv preprint arXiv:1908.11512_ (2019).], the GDS implementation splits the concept of iteration weight into the `iterationWeights` and `nodeSelfInfluence` parameters.
 
-Starting with these random vectors and iteratively averaging over node neighborhoods, the algorithm constructs a sequence of _intermediate embeddings_ image:equations/fastrp/fastrp1.svg[e n to the ith] for each node _n_.
+Starting with random vectors (_node projections_) and iteratively averaging over node neighborhoods, the algorithm constructs a sequence of _intermediate embeddings_ image:equations/fastrp/fastrp1.svg[e n to the ith] for each node _n_.
 More precisely,
 
 image::equations/fastrp/fastrp2.svg[e n to the ith equals average of e m to the ith minus one,align="center"]
@@ -62,9 +62,6 @@ Therefore, using the orientations `NATURAL`, `REVERSE` or `UNDIRECTED` will all 
 In general, it is recommended to first use `UNDIRECTED` as this is what the original algorithm was evaluated on.
 
 For more information on this algorithm see:
-
-* https://arxiv.org/pdf/1908.11512.pdf[H. Chen, S.F. Sultan, Y. Tian, M. Chen, S. Skiena: Fast and Accurate Network Embeddings via Very Sparse Random Projection, 2019.^]
-* https://www.sciencedirect.com/science/article/pii/S0022000003000254[Dimitris Achlioptas. Database-friendly random projections: Johnson-Lindenstrauss with binary coins. Journal of Computer and System Sciences, 66(4):671–687, 2003.]
 
 
 === Node properties
@@ -147,6 +144,8 @@ In the original paper, hyperparameter tuning was done in the range of `[-1,0]` (
 
 
 === Iteration weights
+
+As mentioned in the introduction, iteration weights in the GDS implementation do not include the <<algorithms-embeddings-fastrp-node-self-influence,node self influence>>.
 
 The iteration weights parameter control two aspects: the number of iterations, and their relative impact on the final node embedding.
 The parameter is a list of numbers, indicating one iteration per number where the number is the weight applied to that iteration.
