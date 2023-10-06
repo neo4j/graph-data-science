@@ -154,13 +154,11 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
 
         @Override
         public void accept(final long nodeA, final long nodeB, final long nodeC) {
-            // only use this triangle where the id's are in order, not the other 5
-            if (nodeA < nodeB) { //  && nodeB < nodeC
-                triangleCounts.getAndAdd(nodeA, 1);
-                triangleCounts.getAndAdd(nodeB, 1);
-                triangleCounts.getAndAdd(nodeC, 1);
-                globalTriangleCounter.increment();
-            }
+            // only use this triangle where the id's are in order, not the other 5             triangleCounts.getAndAdd(nodeA, 1);
+            triangleCounts.getAndAdd(nodeA, 1);
+            triangleCounts.getAndAdd(nodeB, 1);
+            triangleCounts.getAndAdd(nodeC, 1);
+            globalTriangleCounter.increment();
         }
     }
 
