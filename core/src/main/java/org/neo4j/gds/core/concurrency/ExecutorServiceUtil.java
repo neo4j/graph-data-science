@@ -21,6 +21,7 @@ package org.neo4j.gds.core.concurrency;
 
 import org.neo4j.internal.helpers.NamedThreadFactory;
 
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -46,6 +47,22 @@ public final class ExecutorServiceUtil {
 
     public static ExecutorService createSingleThreadPool(String threadPrefix) {
         return Executors.newSingleThreadExecutor(NamedThreadFactory.daemon(threadPrefix));
+    }
+
+    static ExecutorService createThreadPool(int corePoolSize, int maxPoolSize) {
+        return createThreadPool(THREAD_NAME_PREFIX, corePoolSize, maxPoolSize);
+    }
+
+    public static ExecutorService createThreadPool(String threadPrefix, int corePoolSize, int maxPoolSize) {
+        return new ThreadPoolExecutor(
+            corePoolSize,
+            maxPoolSize,
+            30L,
+            TimeUnit.SECONDS,
+            new ArrayBlockingQueue<>(corePoolSize * 50),
+            NamedThreadFactory.daemon(threadPrefix),
+            new ExecutorServiceUtil.CallerBlocksPolicy()
+        );
     }
 
     public static ForkJoinPool createForkJoinPool(int concurrency) {
