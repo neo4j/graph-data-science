@@ -25,7 +25,6 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
@@ -186,9 +185,6 @@ public final class GraphStoreFilter {
                 .relationshipSchema()
                 .filter(filteredRelationshipTypes)
         );
-        if (relationshipSchema.availableTypes().isEmpty()) {
-            relationshipSchema.addRelationshipType(RelationshipType.ALL_RELATIONSHIPS, Direction.DIRECTED);
-        }
 
         return MutableGraphSchema.of(nodeSchema, relationshipSchema, Map.of());
     }
