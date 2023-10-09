@@ -162,7 +162,9 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
 
     @Override
     public void addNodeProperty(
-       Set<NodeLabel> nodeLabels, String propertyKey, NodePropertyValues propertyValues
+        Set<NodeLabel> nodeLabels,
+        String propertyKey,
+        NodePropertyValues propertyValues
     ) {
         graphStore.addNodeProperty(nodeLabels, propertyKey, propertyValues);
     }
@@ -224,7 +226,8 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
 
     @Override
     public RelationshipProperty relationshipPropertyValues(
-        RelationshipType relationshipType, String propertyKey
+        RelationshipType relationshipType,
+        String propertyKey
     ) {
         return graphStore.relationshipPropertyValues(relationshipType, propertyKey);
     }
@@ -270,28 +273,34 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
 
     @Override
     public Graph getGraph(
-        RelationshipType relationshipType, Optional<String> relationshipProperty
+        RelationshipType relationshipType,
+        Optional<String> relationshipProperty
     ) {
         return graphStore.getGraph(relationshipType, relationshipProperty);
     }
 
     @Override
     public Graph getGraph(
-        Collection<RelationshipType> relationshipTypes, Optional<String> maybeRelationshipProperty
+        Collection<RelationshipType> relationshipTypes,
+        Optional<String> maybeRelationshipProperty
     ) {
         return graphStore.getGraph(relationshipTypes, maybeRelationshipProperty);
     }
 
     @Override
     public Graph getGraph(
-        String nodeLabel, String relationshipType, Optional<String> maybeRelationshipProperty
+        String nodeLabel,
+        String relationshipType,
+        Optional<String> maybeRelationshipProperty
     ) {
         return graphStore.getGraph(nodeLabel, relationshipType, maybeRelationshipProperty);
     }
 
     @Override
     public Graph getGraph(
-        NodeLabel nodeLabel, RelationshipType relationshipType, Optional<String> maybeRelationshipProperty
+        NodeLabel nodeLabel,
+        RelationshipType relationshipType,
+        Optional<String> maybeRelationshipProperty
     ) {
         return graphStore.getGraph(nodeLabel, relationshipType, maybeRelationshipProperty);
     }
@@ -312,7 +321,8 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
 
     @Override
     public CompositeRelationshipIterator getCompositeRelationshipIterator(
-        RelationshipType relationshipType, Collection<String> propertyKeys
+        RelationshipType relationshipType,
+        Collection<String> propertyKeys
     ) {
         return graphStore.getCompositeRelationshipIterator(relationshipType, propertyKeys);
     }

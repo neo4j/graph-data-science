@@ -222,13 +222,15 @@ public final class GraphImporter {
     }
 
     private RelationshipsBuilder newRelImporter(RelationshipType relType, @Nullable PropertyValues properties) {
-        var orientation = this.undirectedRelationshipTypes.contains(relType.name) || this.undirectedRelationshipTypes.contains(
-            "*")
-            ? UNDIRECTED
-            : NATURAL;
+        var orientation = this.undirectedRelationshipTypes.contains(relType.name) || this.undirectedRelationshipTypes
+            .contains(
+                "*"
+            )
+                ? UNDIRECTED
+                : NATURAL;
 
-        boolean indexInverse = inverseIndexedRelationshipTypes.contains(relType.name)
-                               || inverseIndexedRelationshipTypes.contains("*");
+        boolean indexInverse = inverseIndexedRelationshipTypes.contains(relType.name) || inverseIndexedRelationshipTypes
+            .contains("*");
 
         var relationshipsBuilderBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(this.idMapBuilder)

@@ -72,8 +72,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 class GraphStoreToCsvExporterTest extends CsvTest {
 
     @GdlGraph(orientation = UNDIRECTED, propertyState = PropertyState.PERSISTENT)
-    private static final String GDL =
-        "CREATE" +
+    private static final String GDL = "CREATE" +
         "  (a:A:B { prop1: 0, prop2: 42, prop3: [1L, 3L, 3L, 7L]})" +
         ", (b:A:B { prop1: 1, prop2: 43})" +
         ", (c:A:C { prop1: 2, prop2: 44, prop3: [1L, 9L, 8L, 4L] })" +
@@ -92,8 +91,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
     private IdFunction idFunction;
 
     @GdlGraph(graphNamePrefix = "concurrent", orientation = NATURAL, propertyState = PropertyState.PERSISTENT)
-    private static final String GDL_FOR_CONCURRENCY =
-        "CREATE" +
+    private static final String GDL_FOR_CONCURRENCY = "CREATE" +
         "  (a)" +
         ", (b)" +
         ", (c)" +
@@ -109,8 +107,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
     public GraphStore concurrentGraphStore;
 
     @GdlGraph(graphNamePrefix = "noProperties", orientation = REVERSE)
-    private static final String GDL_WITHOUT_PROPERTIES =
-        "CREATE" +
+    private static final String GDL_WITHOUT_PROPERTIES = "CREATE" +
         "  (a:A)" +
         ", (b:A)" +
         ", (c:B)" +
@@ -160,13 +157,20 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         var rel1Schema = graphStore.schema().relationshipSchema().filter(Set.of(rel1Type)).unionProperties();
         var rel2Schema = graphStore.schema().relationshipSchema().filter(Set.of(rel2Type)).unionProperties();
 
-        assertCsvFiles(List.of(
-            "nodes_A_B_0.csv", "nodes_A_B_header.csv",
-            "nodes_A_C_0.csv", "nodes_A_C_header.csv",
-            "nodes_B_0.csv", "nodes_B_header.csv",
-            "relationships_REL1_0.csv", "relationships_REL1_header.csv",
-            "relationships_REL2_0.csv", "relationships_REL2_header.csv"
-        ));
+        assertCsvFiles(
+            List.of(
+                "nodes_A_B_0.csv",
+                "nodes_A_B_header.csv",
+                "nodes_A_C_0.csv",
+                "nodes_A_C_header.csv",
+                "nodes_B_0.csv",
+                "nodes_B_header.csv",
+                "relationships_REL1_0.csv",
+                "relationships_REL1_header.csv",
+                "relationships_REL2_0.csv",
+                "relationships_REL2_header.csv"
+            )
+        );
 
         // Assert nodes
 
@@ -292,9 +296,13 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         assertHeaderFile("relationships_REL1_header.csv", RELATIONSHIP_COLUMNS, Collections.emptyMap());
 
         // Sometimes we end up with only one file, so we cannot make absolute assumptions about the files created
-        var nodeContents = Arrays.stream(Objects.requireNonNull(tempDir
-            .toFile()
-            .listFiles((file, name) -> name.matches("nodes(_.+)?(_\\d+).csv"))))
+        var nodeContents = Arrays.stream(
+            Objects.requireNonNull(
+                tempDir
+                    .toFile()
+                    .listFiles((file, name) -> name.matches("nodes(_.+)?(_\\d+).csv"))
+            )
+        )
             .map(File::toPath)
             .flatMap(path -> {
                 try {
@@ -302,7 +310,8 @@ class GraphStoreToCsvExporterTest extends CsvTest {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-            }).collect(Collectors.toList());
+            })
+            .collect(Collectors.toList());
         assertThat(nodeContents).containsExactlyInAnyOrder(
             Long.toString(idFunction.of("a")),
             Long.toString(idFunction.of("b")),
@@ -310,9 +319,13 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             Long.toString(idFunction.of("d"))
         );
 
-        var relationshipContents = Arrays.stream(Objects.requireNonNull(tempDir
-            .toFile()
-            .listFiles((file, name) -> name.matches("relationships(_.+)?(_\\d+).csv"))))
+        var relationshipContents = Arrays.stream(
+            Objects.requireNonNull(
+                tempDir
+                    .toFile()
+                    .listFiles((file, name) -> name.matches("relationships(_.+)?(_\\d+).csv"))
+            )
+        )
             .map(File::toPath)
             .flatMap(path -> {
                 try {
@@ -320,7 +333,8 @@ class GraphStoreToCsvExporterTest extends CsvTest {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-            }).collect(Collectors.toList());
+            })
+            .collect(Collectors.toList());
         assertThat(relationshipContents).containsExactlyInAnyOrder(
             stringPair("a", "a"),
             stringPair("a", "b"),
@@ -362,11 +376,13 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         assertCsvFiles(
             LongStream
                 .range(0, config.writeConcurrency())
-                .mapToObj(i -> formatWithLocale(
-                    CsvGraphPropertyVisitor.GRAPH_PROPERTY_DATA_FILE_NAME_TEMPLATE,
-                    "graphProp",
-                    i
-                ))
+                .mapToObj(
+                    i -> formatWithLocale(
+                        CsvGraphPropertyVisitor.GRAPH_PROPERTY_DATA_FILE_NAME_TEMPLATE,
+                        "graphProp",
+                        i
+                    )
+                )
                 .collect(Collectors.toList())
         );
 
@@ -420,21 +436,82 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         var exporter = GraphStoreToCsvExporter.create(graphStore, config, tempDir);
         exporter.run();
 
-        assertCsvFiles(List.of(NODE_SCHEMA_FILE_NAME, RELATIONSHIP_SCHEMA_FILE_NAME, GRAPH_PROPERTY_SCHEMA_FILE_NAME, GRAPH_INFO_FILE_NAME));
+        assertCsvFiles(
+            List.of(
+                NODE_SCHEMA_FILE_NAME,
+                RELATIONSHIP_SCHEMA_FILE_NAME,
+                GRAPH_PROPERTY_SCHEMA_FILE_NAME,
+                GRAPH_INFO_FILE_NAME
+            )
+        );
 
         assertDataContent(
             NODE_SCHEMA_FILE_NAME,
             List.of(
                 NODE_SCHEMA_COLUMNS,
-                List.of("A", "prop1", ValueType.LONG.csvName(), ValueType.LONG.fallbackValue().toString(), PropertyState.PERSISTENT.name()),
-                List.of("A", "prop2", ValueType.LONG.csvName(), ValueType.LONG.fallbackValue().toString(), PropertyState.PERSISTENT.name()),
-                List.of("A", "prop3", ValueType.LONG_ARRAY.csvName(), ValueType.LONG_ARRAY.fallbackValue().toString(), PropertyState.PERSISTENT.name()),
-                List.of("B", "prop1", ValueType.LONG.csvName(), ValueType.LONG.fallbackValue().toString(), PropertyState.PERSISTENT.name()),
-                List.of("B", "prop2", ValueType.LONG.csvName(), ValueType.LONG.fallbackValue().toString(), PropertyState.PERSISTENT.name()),
-                List.of("B", "prop3", ValueType.LONG_ARRAY.csvName(), ValueType.LONG_ARRAY.fallbackValue().toString(), PropertyState.PERSISTENT.name()),
-                List.of("C", "prop1", ValueType.LONG.csvName(), ValueType.LONG.fallbackValue().toString(), PropertyState.PERSISTENT.name()),
-                List.of("C", "prop2", ValueType.LONG.csvName(), ValueType.LONG.fallbackValue().toString(), PropertyState.PERSISTENT.name()),
-                List.of("C", "prop3", ValueType.LONG_ARRAY.csvName(), ValueType.LONG_ARRAY.fallbackValue().toString(), PropertyState.PERSISTENT.name())
+                List.of(
+                    "A",
+                    "prop1",
+                    ValueType.LONG.csvName(),
+                    ValueType.LONG.fallbackValue().toString(),
+                    PropertyState.PERSISTENT.name()
+                ),
+                List.of(
+                    "A",
+                    "prop2",
+                    ValueType.LONG.csvName(),
+                    ValueType.LONG.fallbackValue().toString(),
+                    PropertyState.PERSISTENT.name()
+                ),
+                List.of(
+                    "A",
+                    "prop3",
+                    ValueType.LONG_ARRAY.csvName(),
+                    ValueType.LONG_ARRAY.fallbackValue().toString(),
+                    PropertyState.PERSISTENT.name()
+                ),
+                List.of(
+                    "B",
+                    "prop1",
+                    ValueType.LONG.csvName(),
+                    ValueType.LONG.fallbackValue().toString(),
+                    PropertyState.PERSISTENT.name()
+                ),
+                List.of(
+                    "B",
+                    "prop2",
+                    ValueType.LONG.csvName(),
+                    ValueType.LONG.fallbackValue().toString(),
+                    PropertyState.PERSISTENT.name()
+                ),
+                List.of(
+                    "B",
+                    "prop3",
+                    ValueType.LONG_ARRAY.csvName(),
+                    ValueType.LONG_ARRAY.fallbackValue().toString(),
+                    PropertyState.PERSISTENT.name()
+                ),
+                List.of(
+                    "C",
+                    "prop1",
+                    ValueType.LONG.csvName(),
+                    ValueType.LONG.fallbackValue().toString(),
+                    PropertyState.PERSISTENT.name()
+                ),
+                List.of(
+                    "C",
+                    "prop2",
+                    ValueType.LONG.csvName(),
+                    ValueType.LONG.fallbackValue().toString(),
+                    PropertyState.PERSISTENT.name()
+                ),
+                List.of(
+                    "C",
+                    "prop3",
+                    ValueType.LONG_ARRAY.csvName(),
+                    ValueType.LONG_ARRAY.fallbackValue().toString(),
+                    PropertyState.PERSISTENT.name()
+                )
             )
         );
 
@@ -442,10 +519,42 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             RELATIONSHIP_SCHEMA_FILE_NAME,
             List.of(
                 CsvRelationshipSchemaVisitorTest.RELATIONSHIP_SCHEMA_COLUMNS,
-                List.of("REL1", "UNDIRECTED", "averylongnamethatisgreaterthantwentyfour", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), PropertyState.PERSISTENT.name()),
-                List.of("REL1", "UNDIRECTED", "prop2", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), PropertyState.PERSISTENT.name()),
-                List.of("REL2", "UNDIRECTED", "prop3", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), PropertyState.PERSISTENT.name()),
-                List.of("REL2", "UNDIRECTED", "prop4", ValueType.DOUBLE.csvName(), ValueType.DOUBLE.fallbackValue().toString(), Aggregation.NONE.name(), PropertyState.PERSISTENT.name())
+                List.of(
+                    "REL1",
+                    "UNDIRECTED",
+                    "averylongnamethatisgreaterthantwentyfour",
+                    ValueType.DOUBLE.csvName(),
+                    ValueType.DOUBLE.fallbackValue().toString(),
+                    Aggregation.NONE.name(),
+                    PropertyState.PERSISTENT.name()
+                ),
+                List.of(
+                    "REL1",
+                    "UNDIRECTED",
+                    "prop2",
+                    ValueType.DOUBLE.csvName(),
+                    ValueType.DOUBLE.fallbackValue().toString(),
+                    Aggregation.NONE.name(),
+                    PropertyState.PERSISTENT.name()
+                ),
+                List.of(
+                    "REL2",
+                    "UNDIRECTED",
+                    "prop3",
+                    ValueType.DOUBLE.csvName(),
+                    ValueType.DOUBLE.fallbackValue().toString(),
+                    Aggregation.NONE.name(),
+                    PropertyState.PERSISTENT.name()
+                ),
+                List.of(
+                    "REL2",
+                    "UNDIRECTED",
+                    "prop4",
+                    ValueType.DOUBLE.csvName(),
+                    ValueType.DOUBLE.fallbackValue().toString(),
+                    Aggregation.NONE.name(),
+                    PropertyState.PERSISTENT.name()
+                )
             )
         );
 
@@ -453,7 +562,12 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             GRAPH_PROPERTY_SCHEMA_FILE_NAME,
             List.of(
                 GRAPH_PROPERTY_SCHEMA_COLUMNS,
-                List.of("graphProp", ValueType.LONG.csvName(), ValueType.LONG.fallbackValue().toString(), PropertyState.PERSISTENT.name())
+                List.of(
+                    "graphProp",
+                    ValueType.LONG.csvName(),
+                    ValueType.LONG.fallbackValue().toString(),
+                    PropertyState.PERSISTENT.name()
+                )
             )
         );
 
@@ -475,7 +589,9 @@ class GraphStoreToCsvExporterTest extends CsvTest {
                     graphStore.nodes().typeId(),
                     Long.toString(graphStore.nodeCount()),
                     Long.toString(graphStore.nodes().highestOriginalId()),
-                    CsvMapUtil.relationshipCountsToString(Map.of(RelationshipType.of("REL2"), 6L, RelationshipType.of("REL1"), 6L)),
+                    CsvMapUtil.relationshipCountsToString(
+                        Map.of(RelationshipType.of("REL2"), 6L, RelationshipType.of("REL1"), 6L)
+                    ),
                     ""
                 )
             )
@@ -560,10 +676,14 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         var exporter = GraphStoreToCsvExporter.create(graphStore, config, tempDir);
         exporter.run();
 
-        assertCsvFiles(List.of(
-            "nodes_0.csv", "nodes_header.csv",
-            "relationships_REL_0.csv", "relationships_REL_header.csv"
-        ));
+        assertCsvFiles(
+            List.of(
+                "nodes_0.csv",
+                "nodes_header.csv",
+                "relationships_REL_0.csv",
+                "relationships_REL_header.csv"
+            )
+        );
 
         assertDataContent(
             "nodes_0.csv",

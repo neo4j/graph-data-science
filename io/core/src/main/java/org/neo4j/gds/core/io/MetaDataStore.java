@@ -36,25 +36,35 @@ import java.util.stream.Collectors;
 @ValueClass
 public interface MetaDataStore {
     GraphInfo graphInfo();
+
     NodeSchema nodeSchema();
+
     RelationshipSchema relationshipSchema();
+
     Map<String, PropertySchema> graphPropertySchema();
 
     static MetaDataStore of(GraphStore graphStore) {
-        var relTypeCounts = graphStore.relationshipTypes().stream().collect(Collectors.toMap(
-            Function.identity(),
-            graphStore::relationshipCount
-        ));
+        var relTypeCounts = graphStore.relationshipTypes()
+            .stream()
+            .collect(
+                Collectors.toMap(
+                    Function.identity(),
+                    graphStore::relationshipCount
+                )
+            );
 
         var idMapTypeId = graphStore.nodes().typeId();
 
         if (idMapTypeId.equals(IdMap.NO_TYPE)) {
-            throw new IllegalArgumentException(String.format(
-                Locale.US,
-                "Cannot write graph store with untyped id map. Got instance of `%s`",
-                graphStore.nodes()
-                    .getClass()
-                    .getSimpleName()));
+            throw new IllegalArgumentException(
+                String.format(
+                    Locale.US,
+                    "Cannot write graph store with untyped id map. Got instance of `%s`",
+                    graphStore.nodes()
+                        .getClass()
+                        .getSimpleName()
+                )
+            );
         }
 
         GraphInfo graphInfo = ImmutableGraphInfo.of(

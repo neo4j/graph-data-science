@@ -54,42 +54,51 @@ class GraphStoreCatalogServiceTest {
         var configuration = GraphProjectConfig.emptyWithName("some user", "some graph");
         // we _could_ write a stub for GraphStore; this is good enough for now tho
         var graphStore = mock(GraphStore.class);
-        when(graphStore.databaseInfo()).thenReturn(ImmutableDatabaseInfo.of(
-            DatabaseId.of("some database"),
-            DatabaseLocation.LOCAL
-        ));
+        when(graphStore.databaseInfo()).thenReturn(
+            ImmutableDatabaseInfo.of(
+                DatabaseId.of("some database"),
+                DatabaseLocation.LOCAL
+            )
+        );
         GraphStoreCatalog.set(configuration, graphStore); // shorthand for project
         var service = new GraphStoreCatalogService();
 
-        assertTrue(service.graphExists(
-            new User("some user", false),
-            DatabaseId.of("some database"),
-            GraphName.parse("some graph")
-        ));
+        assertTrue(
+            service.graphExists(
+                new User("some user", false),
+                DatabaseId.of("some database"),
+                GraphName.parse("some graph")
+            )
+        );
 
         var graphStoreWithConfig = service.removeGraph(
             CatalogRequest.of("some user", "some database"),
-            GraphName.parse("some graph"), true
+            GraphName.parse("some graph"),
+            true
         );
         assertSame(configuration, graphStoreWithConfig.config());
         assertSame(graphStore, graphStoreWithConfig.graphStore());
 
-        assertFalse(service.graphExists(
-            new User("some user", false),
-            DatabaseId.of("some database"),
-            GraphName.parse("some graph")
-        ));
+        assertFalse(
+            service.graphExists(
+                new User("some user", false),
+                DatabaseId.of("some database"),
+                GraphName.parse("some graph")
+            )
+        );
     }
 
     @Test
     void shouldRespectFailFlag() {
         var service = new GraphStoreCatalogService();
 
-        assertNull(service.removeGraph(
-            CatalogRequest.of("some user", "some database"),
-            GraphName.parse("some graph"),
-            false
-        ));
+        assertNull(
+            service.removeGraph(
+                CatalogRequest.of("some user", "some database"),
+                GraphName.parse("some graph"),
+                false
+            )
+        );
 
         try {
             service.removeGraph(
@@ -101,7 +110,8 @@ class GraphStoreCatalogServiceTest {
             fail();
         } catch (NoSuchElementException e) {
             assertThat(e.getMessage()).isEqualTo(
-                "Graph with name `some graph` does not exist on database `some database`. It might exist on another database.");
+                "Graph with name `some graph` does not exist on database `some database`. It might exist on another database."
+            );
         }
     }
 

@@ -26,7 +26,8 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 public final class CypherGraphStoreCatalogHelper {
 
-    private CypherGraphStoreCatalogHelper() {}
+    private CypherGraphStoreCatalogHelper() {
+    }
 
     public static void setWrappedGraphStore(GraphProjectConfig config, GraphStoreWrapper graphStoreWrapper) {
         var catalogRequest = CatalogRequest.of(config.username(), graphStoreWrapper.databaseInfo().databaseId());
@@ -37,7 +38,9 @@ public final class CypherGraphStoreCatalogHelper {
         ).graphStore();
 
         if (graphStore != graphStoreWrapper.innerGraphStore()) {
-            throw new IllegalArgumentException("Attempted to override a graph store with an incompatible graph store wrapper.");
+            throw new IllegalArgumentException(
+                "Attempted to override a graph store with an incompatible graph store wrapper."
+            );
         }
 
         GraphStoreCatalog.overwrite(config, graphStoreWrapper);

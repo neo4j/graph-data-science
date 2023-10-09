@@ -50,8 +50,7 @@ class DegreeDistributionApplier {
         boolean includeDegreeDistribution,
         TerminationFlag terminationFlag
     ) {
-        return graphEntries.stream().map(configAndStore ->
-        {
+        return graphEntries.stream().map(configAndStore -> {
             var graphStoreWithConfig = GraphStoreWithConfig.of(configAndStore.getValue(), configAndStore.getKey());
             var degreeDistribution = getOrCreateDegreeDistribution(
                 includeDegreeDistribution,
@@ -80,7 +79,7 @@ class DegreeDistributionApplier {
 
         var maybeDegreeDistribution = graphStoreCatalogService.getDegreeDistribution(
             user,
-            graphStoreWithConfig.graphStore().databaseId(),
+            graphStoreWithConfig.graphStore().databaseInfo().databaseId(),
             graphName
         );
 
@@ -102,7 +101,7 @@ class DegreeDistributionApplier {
     ) {
         graphStoreCatalogService.setDegreeDistribution(
             user,
-            graphStoreWithConfig.graphStore().databaseId(),
+            graphStoreWithConfig.graphStore().databaseInfo().databaseId(),
             graphName,
             histogram
         );

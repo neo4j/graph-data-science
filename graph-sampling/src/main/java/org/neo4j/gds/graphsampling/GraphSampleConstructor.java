@@ -197,7 +197,8 @@ public class GraphSampleConstructor {
 
         @Override
         public void run() {
-            for (long mappedId = partition.startNode(); mappedId < partition.startNode() + partition.nodeCount(); mappedId++) {
+            for (long mappedId = partition.startNode(); mappedId < partition.startNode() + partition
+                .nodeCount(); mappedId++) {
                 if (!nodesBitSet.get(mappedId)) {
                     continue;
                 }

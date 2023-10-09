@@ -44,11 +44,14 @@ import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfi
 import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.NODE_IDS_KEY;
 import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
 
-public class ShortestPathWriteResultConsumer<ALGO extends Algorithm<PathFindingResult>, CONFIG extends AlgoBaseConfig & WriteRelationshipConfig & WritePathOptionsConfig> implements ComputationResultConsumer<ALGO, PathFindingResult, CONFIG, Stream<StandardWriteRelationshipsResult>> {
+public class ShortestPathWriteResultConsumer<ALGO extends Algorithm<PathFindingResult>, CONFIG extends AlgoBaseConfig & WriteRelationshipConfig & WritePathOptionsConfig>
+    implements
+    ComputationResultConsumer<ALGO, PathFindingResult, CONFIG, Stream<StandardWriteRelationshipsResult>> {
 
     @Override
     public Stream<StandardWriteRelationshipsResult> consume(
-        ComputationResult<ALGO, PathFindingResult, CONFIG> computationResult, ExecutionContext executionContext
+        ComputationResult<ALGO, PathFindingResult, CONFIG> computationResult,
+        ExecutionContext executionContext
     ) {
         return runWithExceptionLogging("Write relationships failed", executionContext.log(), () -> {
             var config = computationResult.config();
@@ -59,14 +62,16 @@ public class ShortestPathWriteResultConsumer<ALGO extends Algorithm<PathFindingR
                 .withConfig(config);
 
             if (computationResult.result().isEmpty()) {
-                return Stream.of(new StandardWriteRelationshipsResult(
-                    computationResult.preProcessingMillis(),
-                    0L,
-                    0L,
-                    0L,
-                    0L,
-                    config.toMap()
-                ));
+                return Stream.of(
+                    new StandardWriteRelationshipsResult(
+                        computationResult.preProcessingMillis(),
+                        0L,
+                        0L,
+                        0L,
+                        0L,
+                        config.toMap()
+                    )
+                );
             }
 
             var algorithm = computationResult.algorithm();
@@ -80,11 +85,13 @@ public class ShortestPathWriteResultConsumer<ALGO extends Algorithm<PathFindingR
             var graph = computationResult.graph();
 
             var relationshipStream = result
-                .mapPaths(pathResult -> ImmutableExportedRelationship.of(
-                    pathResult.sourceNode(),
-                    pathResult.targetNode(),
-                    createValues(graph, pathResult, writeNodeIds, writeCosts)
-                ));
+                .mapPaths(
+                    pathResult -> ImmutableExportedRelationship.of(
+                        pathResult.sourceNode(),
+                        pathResult.targetNode(),
+                        createValues(graph, pathResult, writeNodeIds, writeCosts)
+                    )
+                );
 
             var progressTracker = new TaskProgressTracker(
                 RelationshipStreamExporter.baseTask("Write shortest Paths"),
@@ -101,15 +108,20 @@ public class ShortestPathWriteResultConsumer<ALGO extends Algorithm<PathFindingR
                     .withRelationships(relationshipStream)
                     .withTerminationFlag(algorithm.getTerminationFlag())
                     .withProgressTracker(progressTracker)
-                    .withArrowConnectionInfo(config.arrowConnectionInfo(), computationResult.graphStore().databaseInfo().databaseId().databaseName())
+                    .withArrowConnectionInfo(
+                        config.arrowConnectionInfo(),
+                        computationResult.graphStore().databaseInfo().databaseId().databaseName()
+                    )
                     .build();
 
                 try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
-                    resultBuilder.withRelationshipsWritten(exporter.write(
-                        writeRelationshipType,
-                        createKeys(writeNodeIds, writeCosts),
-                        createTypes(writeNodeIds, writeCosts)
-                    ));
+                    resultBuilder.withRelationshipsWritten(
+                        exporter.write(
+                            writeRelationshipType,
+                            createKeys(writeNodeIds, writeCosts),
+                            createTypes(writeNodeIds, writeCosts)
+                        )
+                    );
                 }
             });
 

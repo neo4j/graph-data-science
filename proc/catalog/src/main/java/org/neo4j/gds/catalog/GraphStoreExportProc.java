@@ -74,7 +74,8 @@ public class GraphStoreExportProc extends BaseProc {
         validateConfig(cypherConfig, exportConfig);
 
         var result = runWithExceptionLogging(
-            "Graph creation failed", () -> {
+            "Graph creation failed",
+            () -> {
                 var graphStore = graphStoreFromCatalog(graphName, exportConfig).graphStore();
 
                 validateGraphStore(graphStore, exportConfig);
@@ -165,16 +166,18 @@ public class GraphStoreExportProc extends BaseProc {
             DefaultPool.INSTANCE
         );
 
-        return Stream.of(new FileExportResult(
-            graphName,
-            exportConfig.exportName(),
-            graphStore.nodeCount(),
-            graphStore.relationshipCount(),
-            graphStore.relationshipTypes().size(),
-            result.importedProperties().nodePropertyCount(),
-            result.importedProperties().relationshipPropertyCount(),
-            result.tookMillis()
-        ));
+        return Stream.of(
+            new FileExportResult(
+                graphName,
+                exportConfig.exportName(),
+                graphStore.nodeCount(),
+                graphStore.relationshipCount(),
+                graphStore.relationshipTypes().size(),
+                result.importedProperties().nodePropertyCount(),
+                result.importedProperties().relationshipPropertyCount(),
+                result.tookMillis()
+            )
+        );
     }
 
     @Internal
@@ -187,7 +190,9 @@ public class GraphStoreExportProc extends BaseProc {
     ) {
         executionContext()
             .log()
-            .warn("Procedure `gds.beta.graph.export.csv.estimate` has been deprecated, please use `gds.graph.export.csv.estimate`.");
+            .warn(
+                "Procedure `gds.beta.graph.export.csv.estimate` has been deprecated, please use `gds.graph.export.csv.estimate`."
+            );
 
         return csvEstimate(graphName, configuration);
     }
@@ -203,7 +208,8 @@ public class GraphStoreExportProc extends BaseProc {
         validateConfig(cypherConfig, exportConfig);
 
         var estimate = runWithExceptionLogging(
-            "CSV export estimation failed", () -> {
+            "CSV export estimation failed",
+            () -> {
                 var graphStore = graphStoreFromCatalog(graphName, exportConfig).graphStore();
 
 
@@ -249,10 +255,12 @@ public class GraphStoreExportProc extends BaseProc {
             .filter(nodeProperties::contains)
             .collect(Collectors.toList());
         if (!duplicateProperties.isEmpty()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "The following provided additional node properties are already present in the in-memory graph: %s",
-                StringJoining.joinVerbose(duplicateProperties)
-            ));
+            throw new IllegalArgumentException(
+                formatWithLocale(
+                    "The following provided additional node properties are already present in the in-memory graph: %s",
+                    StringJoining.joinVerbose(duplicateProperties)
+                )
+            );
         }
     }
 

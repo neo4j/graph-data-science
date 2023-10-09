@@ -41,7 +41,7 @@ class CsvGraphInfoVisitorTest extends CsvVisitorTest {
         String idMapBuilderType = "custom";
         CsvGraphInfoVisitor graphInfoVisitor = new CsvGraphInfoVisitor(tempDir);
         var relationshipTypeCounts = Map.of(RelationshipType.of("REL1"), 42L, RelationshipType.of("REL2"), 1337L);
-        var inverseIndexedRelTypes = List.of(RelationshipType.of("REL1"),RelationshipType.of("REL2"));
+        var inverseIndexedRelTypes = List.of(RelationshipType.of("REL1"), RelationshipType.of("REL2"));
         var graphInfo = ImmutableGraphInfo.builder()
             .databaseInfo(ImmutableDatabaseInfo.of(databaseId, DatabaseLocation.LOCAL))
             .idMapBuilderType(idMapBuilderType)

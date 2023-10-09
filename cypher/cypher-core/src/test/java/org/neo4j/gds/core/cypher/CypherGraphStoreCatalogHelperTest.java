@@ -60,7 +60,8 @@ class CypherGraphStoreCatalogHelperTest {
         var config = GraphProjectConfig.emptyWithName("", graphName);
         GraphStoreCatalog.set(config, aGraphStore);
         CypherGraphStoreCatalogHelper.setWrappedGraphStore(config, graphStoreWrapper);
-        assertThat(graphStoreWrapper).isSameAs(GraphStoreCatalog.get("", aGraphStore.databaseInfo().databaseId(), graphName).graphStore());
+        assertThat(graphStoreWrapper)
+            .isSameAs(GraphStoreCatalog.get("", aGraphStore.databaseInfo().databaseId(), graphName).graphStore());
     }
 
     @Test

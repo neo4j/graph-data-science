@@ -149,10 +149,12 @@ class DummyGraphStore implements GraphStore {
 
                     @Override
                     public Collection<MutableRelationshipSchemaEntry> entries() {
-                        return Set.of(new MutableRelationshipSchemaEntry(
-                            RelationshipType.of("REL"),
-                            Direction.DIRECTED
-                        ));
+                        return Set.of(
+                            new MutableRelationshipSchemaEntry(
+                                RelationshipType.of("REL"),
+                                Direction.DIRECTED
+                            )
+                        );
                     }
 
                     @Override

@@ -49,6 +49,33 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 
 class WriteConfigTest {
 
+    static Stream<Arguments> baseConfigs() {
+        return Stream.of(
+            Arguments.of(
+                TestWriteConfigImpl
+                    .builder()
+                    .arrowConnectionInfo(
+                        Optional.of(
+                            ImmutableArrowConnectionInfo.of(
+                                "localhost",
+                                4242,
+                                UUID.randomUUID().toString(),
+                                false
+                            )
+                        )
+                    )
+                    .concurrency(2)
+                    .build()
+            ),
+            Arguments.of(
+                TestWriteConfigImpl
+                    .builder()
+                    .concurrency(2)
+                    .build()
+            )
+        );
+    }
+
     @ParameterizedTest
     @EnumSource(WriteMode.class)
     void validateGraphStoreCapabilities(WriteMode writeMode) {
@@ -69,13 +96,16 @@ class WriteConfigTest {
             .concurrency(1)
             .build();
 
-        var assertion = assertThatCode(() -> testConfig.validateGraphIsSuitableForWrite(
-            testGraphStore,
-            List.of(),
-            List.of()
-        ));
+        var assertion = assertThatCode(
+            () -> testConfig.validateGraphIsSuitableForWrite(
+                testGraphStore,
+                List.of(),
+                List.of()
+            )
+        );
 
-        if (testGraphStore.capabilities().canWriteToLocalDatabase() || testGraphStore.capabilities().canWriteToRemoteDatabase()) {
+        if (testGraphStore.capabilities().canWriteToLocalDatabase() || testGraphStore.capabilities()
+            .canWriteToRemoteDatabase()) {
             assertion.doesNotThrowAnyException();
         } else {
             assertion
@@ -87,15 +117,21 @@ class WriteConfigTest {
     @Test
     void shouldParseArrowConnectionInfo() {
         var bearerToken = UUID.randomUUID().toString();
-        var cypherMap = CypherMapWrapper.create(Map.of(
-           "arrowConnectionInfo",
+        var cypherMap = CypherMapWrapper.create(
             Map.of(
-               "hostname", "localhost",
-                "port", 4242,
-                "bearerToken", bearerToken,
-                "useEncryption", false
+                "arrowConnectionInfo",
+                Map.of(
+                    "hostname",
+                    "localhost",
+                    "port",
+                    4242,
+                    "bearerToken",
+                    bearerToken,
+                    "useEncryption",
+                    false
+                )
             )
-        ));
+        );
 
         var config = new TestWriteConfigImpl(cypherMap);
         var arrowConnectionInfo = config.arrowConnectionInfo();
@@ -103,26 +139,6 @@ class WriteConfigTest {
         assertThat(arrowConnectionInfo.get().hostname()).isEqualTo("localhost");
         assertThat(arrowConnectionInfo.get().port()).isEqualTo(4242);
         assertThat(arrowConnectionInfo.get().bearerToken()).isEqualTo(bearerToken);
-    }
-
-    static Stream<Arguments> baseConfigs() {
-        return Stream.of(
-            Arguments.of(TestWriteConfigImpl
-                .builder()
-                .arrowConnectionInfo(Optional.of(ImmutableArrowConnectionInfo.of(
-                    "localhost",
-                    4242,
-                    UUID.randomUUID().toString(),
-                    false
-                )))
-                .concurrency(2)
-                .build()),
-            Arguments.of(TestWriteConfigImpl
-                .builder()
-                .concurrency(2)
-                .build()
-            )
-        );
     }
 
     @ParameterizedTest

@@ -83,7 +83,12 @@ class GraphStoreRelationshipVisitorTest {
             .initRelationshipsBuilder()
             .concurrency(1)
             .nodes(graph);
-        var relationshipVisitor = new GraphStoreRelationshipVisitor(relationshipSchema, relationshipBuilderSupplier, relationshipBuildersByType, List.of());
+        var relationshipVisitor = new GraphStoreRelationshipVisitor(
+            relationshipSchema,
+            relationshipBuilderSupplier,
+            relationshipBuildersByType,
+            List.of()
+        );
 
         var relationshipTypeR = RelationshipType.of("R");
         var relationshipTypeR1 = RelationshipType.of("R1");
@@ -177,13 +182,19 @@ class GraphStoreRelationshipVisitorTest {
             .getUnion();
     }
 
-    private void visitRelationshipType(GraphStoreRelationshipVisitor relationshipVisitor, long nodeId, RelationshipType relationshipType, Optional<String> relationshipPropertyKey) {
+    private void visitRelationshipType(
+        GraphStoreRelationshipVisitor relationshipVisitor,
+        long nodeId,
+        RelationshipType relationshipType,
+        Optional<String> relationshipPropertyKey
+    ) {
         graph
             .relationshipTypeFilteredGraph(Set.of(relationshipType))
             .forEachRelationship(nodeId, 0.0, (source, target, propertyValue) -> {
                 relationshipVisitor.startId(graph.toOriginalNodeId(source));
                 relationshipVisitor.endId(graph.toOriginalNodeId(target));
-                relationshipPropertyKey.ifPresent(propertyKey -> relationshipVisitor.property(propertyKey, propertyValue));
+                relationshipPropertyKey
+                    .ifPresent(propertyKey -> relationshipVisitor.property(propertyKey, propertyValue));
                 relationshipVisitor.type(relationshipType.name());
                 relationshipVisitor.endOfEntity();
                 return true;

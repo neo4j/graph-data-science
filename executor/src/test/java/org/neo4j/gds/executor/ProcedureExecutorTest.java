@@ -55,8 +55,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 class ProcedureExecutorTest {
 
     @GdlGraph
-    public static final String DB_CYPHER =
-        "CREATE " +
+    public static final String DB_CYPHER = "CREATE " +
         "  (a:Node)" +
         ", (b:Node)" +
         ", (a)-[:TYPE]->(b)";
@@ -81,9 +80,12 @@ class ProcedureExecutorTest {
         var executor = new ProcedureExecutor<>(new TestMutateSpec(), executionContext(taskStore));
         var someJobId = new JobId();
         var configuration = Map.of(
-            "mutateProperty", "mutateProperty",
-            "sudo", true,
-            "jobId", someJobId
+            "mutateProperty",
+            "mutateProperty",
+            "sudo",
+            true,
+            "jobId",
+            someJobId
         );
 
         // Act
@@ -100,8 +102,10 @@ class ProcedureExecutorTest {
         var executor1 = new ProcedureExecutor<>(new TestMutateSpec(), executionContext(taskStore));
         var executor2 = new ProcedureExecutor<>(new TestMutateSpec(), executionContext(taskStore));
         var configuration = Map.<String, Object>of(
-            "mutateProperty", "mutateProperty",
-            "sudo", true
+            "mutateProperty",
+            "mutateProperty",
+            "sudo",
+            true
         );
 
         // Act
@@ -110,10 +114,13 @@ class ProcedureExecutorTest {
 
         // Assert
         assertThat(taskStore.query())
-            .withFailMessage(() -> formatWithLocale(
-                "Expected no tasks to be open but found %s",
-                StringJoining.join(taskStore.query().map(TaskStore.UserTask::task).map(Task::description))
-            )).isEmpty();
+            .withFailMessage(
+                () -> formatWithLocale(
+                    "Expected no tasks to be open but found %s",
+                    StringJoining.join(taskStore.query().map(TaskStore.UserTask::task).map(Task::description))
+                )
+            )
+            .isEmpty();
 
         assertThat(taskStore.registerTaskInvocations)
             .as("We created two tasks => two tasks must have been registered")

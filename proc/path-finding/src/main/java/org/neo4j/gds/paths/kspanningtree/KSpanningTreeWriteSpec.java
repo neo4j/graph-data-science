@@ -41,9 +41,9 @@ import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
     name = "gds.kSpanningTree.write",
     aliases = "gds.alpha.kSpanningTree.write",
     description = KSpanningTreeWriteProc.DESCRIPTION,
-    executionMode = WRITE_RELATIONSHIP
-)
-public class KSpanningTreeWriteSpec implements AlgorithmSpec<KSpanningTree, SpanningTree, KSpanningTreeWriteConfig, Stream<KSpanningTreeWriteResult>, KSpanningTreeAlgorithmFactory<KSpanningTreeWriteConfig>> {
+    executionMode = WRITE_RELATIONSHIP)
+public class KSpanningTreeWriteSpec implements
+    AlgorithmSpec<KSpanningTree, SpanningTree, KSpanningTreeWriteConfig, Stream<KSpanningTreeWriteResult>, KSpanningTreeAlgorithmFactory<KSpanningTreeWriteConfig>> {
 
     @Override
     public String name() {
@@ -82,13 +82,18 @@ public class KSpanningTreeWriteSpec implements AlgorithmSpec<KSpanningTree, Span
                 executionContext.nodePropertyExporterBuilder()
                     .withIdMap(graph)
                     .withTerminationFlag(algorithm.getTerminationFlag())
-                    .withProgressTracker(AlgorithmSpecProgressTrackerProvider.createProgressTracker(
-                        name(),
-                        graph.nodeCount(),
-                        config.writeConcurrency(),
-                        executionContext
-                    ))
-                    .withArrowConnectionInfo(config.arrowConnectionInfo(), computationResult.graphStore().databaseInfo().databaseId().databaseName())
+                    .withProgressTracker(
+                        AlgorithmSpecProgressTrackerProvider.createProgressTracker(
+                            name(),
+                            graph.nodeCount(),
+                            config.writeConcurrency(),
+                            executionContext
+                        )
+                    )
+                    .withArrowConnectionInfo(
+                        config.arrowConnectionInfo(),
+                        computationResult.graphStore().databaseInfo().databaseId().databaseName()
+                    )
                     .build()
                     .write(config.writeProperty(), properties);
             }

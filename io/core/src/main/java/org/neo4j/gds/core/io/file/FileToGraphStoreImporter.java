@@ -113,6 +113,30 @@ public abstract class FileToGraphStoreImporter {
         }
     }
 
+    public static RelationshipImportResult relationshipImportResult(
+        Map<String, RelationshipsBuilder> relationshipBuildersByType
+    ) {
+        var relationshipsByType = relationshipBuildersByType.entrySet()
+            .stream()
+            .collect(
+                Collectors.toMap(
+                    e -> RelationshipType.of(e.getKey()),
+                    e -> e.getValue().build()
+                )
+            );
+
+        return RelationshipImportResult.builder().importResults(relationshipsByType).build();
+    }
+
+    private void importGraphStore(FileInput fileInput) {
+        graphStoreBuilder.databaseInfo(fileInput.graphInfo().databaseInfo());
+        graphStoreBuilder.capabilities(fileInput.capabilities());
+
+        var nodes = importNodes(fileInput);
+        importRelationships(fileInput, nodes.idMap());
+        importGraphProperties(fileInput);
+    }
+
     private ProgressTracker createProgressTracker(FileInput fileInput) {
         var graphInfo = fileInput.graphInfo();
         var nodeCount = graphInfo.nodeCount();
@@ -130,20 +154,11 @@ public abstract class FileToGraphStoreImporter {
         }
 
         var task = Tasks.task(
-           rootTaskName() + " import",
+            rootTaskName() + " import",
             importTasks
         );
 
         return new TaskProgressTracker(task, log, concurrency, taskRegistryFactory);
-    }
-
-    private void importGraphStore(FileInput fileInput) {
-        graphStoreBuilder.databaseInfo(fileInput.graphInfo().databaseInfo());
-        graphStoreBuilder.capabilities(fileInput.capabilities());
-
-        var nodes = importNodes(fileInput);
-        importRelationships(fileInput, nodes.idMap());
-        importGraphProperties(fileInput);
     }
 
     private Nodes importNodes(FileInput fileInput) {
@@ -153,9 +168,10 @@ public abstract class FileToGraphStoreImporter {
         nodeSchema.entries().stream().forEach(entry -> log.info("Imported node label schema: %s", entry.identifier()));
         var labelMapping = fileInput.labelMapping();
         if (labelMapping.isPresent()) {
-            labelMapping.get().entrySet().forEach(entry -> log.info("Label mapping: %s -> %s", entry.getKey(), entry.getValue()));
-        }
-        else {
+            labelMapping.get()
+                .entrySet()
+                .forEach(entry -> log.info("Label mapping: %s -> %s", entry.getKey(), entry.getValue()));
+        } else {
             log.info("Label mapping file was not found, continuing import without label mapping");
         }
 
@@ -203,7 +219,9 @@ public abstract class FileToGraphStoreImporter {
         var relationshipsIterator = fileInput.relationships(Collector.EMPTY).iterator();
         Collection<Runnable> tasks = ParallelUtil.tasks(
             concurrency,
-            (index) -> new ElementImportRunner<>(relationshipVisitorBuilder.build(), relationshipsIterator, progressTracker)
+            (
+                index
+            ) -> new ElementImportRunner<>(relationshipVisitorBuilder.build(), relationshipsIterator, progressTracker)
         );
 
         ParallelUtil.run(tasks, DefaultPool.INSTANCE);
@@ -238,36 +256,30 @@ public abstract class FileToGraphStoreImporter {
             ParallelUtil.run(tasks, DefaultPool.INSTANCE);
             graphStoreGraphPropertyVisitor.close();
 
-            graphStoreBuilder.graphProperties(GraphPropertyStoreFromVisitorHelper.fromGraphPropertyVisitor(
-                graphPropertySchema,
-                graphStoreGraphPropertyVisitor
-            ));
+            graphStoreBuilder.graphProperties(
+                GraphPropertyStoreFromVisitorHelper.fromGraphPropertyVisitor(
+                    graphPropertySchema,
+                    graphStoreGraphPropertyVisitor
+                )
+            );
 
             progressTracker.endSubTask();
         }
     }
 
-    public static RelationshipImportResult relationshipImportResult(Map<String, RelationshipsBuilder> relationshipBuildersByType) {
-        var relationshipsByType = relationshipBuildersByType.entrySet()
-            .stream()
-            .collect(Collectors.toMap(
-                e -> RelationshipType.of(e.getKey()),
-                e -> e.getValue().build()
-            ));
-
-        return RelationshipImportResult.builder().importResults(relationshipsByType).build();
-    }
-
     @ValueClass
     public interface UserGraphStore {
         String userName();
+
         GraphStore graphStore();
     }
 
     @ValueClass
     public interface RelationshipTopologyAndProperties {
         Map<RelationshipType, Topology> topologies();
+
         Map<RelationshipType, RelationshipPropertyStore> properties();
+
         long importedRelationships();
     }
 

@@ -119,7 +119,8 @@ public class GraphInfoLoader {
 
         @Override
         public Map<RelationshipType, Long> deserialize(
-            JsonParser parser, DeserializationContext ctxt
+            JsonParser parser,
+            DeserializationContext ctxt
         ) throws IOException {
             String mapString = parser.getText();
             return CsvMapUtil.fromString(mapString, RelationshipType::of, Long::parseLong);
@@ -138,7 +139,8 @@ public class GraphInfoLoader {
 
         @Override
         public List<RelationshipType> deserialize(
-            JsonParser parser, DeserializationContext ctxt
+            JsonParser parser,
+            DeserializationContext ctxt
         ) throws IOException {
             return Arrays.stream(parser.getText().split(";"))
                 .filter(s -> !s.isEmpty())

@@ -54,21 +54,22 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  */
 final class Neo4jDatabasePropertyWriter {
 
-    private Neo4jDatabasePropertyWriter() {}
+    private Neo4jDatabasePropertyWriter() {
+    }
 
-   static WriteNodePropertyResult writeNodeProperty(
-       NodePropertyExporterBuilder nodePropertyExporterBuilder,
-       TaskRegistryFactory taskRegistryFactory,
-       Graph graph,
-       GraphStore graphStore,
-       NodePropertyValues nodePropertyValues,
-       int writeConcurrency,
-       String writeProperty,
-       String procedureName,
-       Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo,
-       TerminationFlag terminationFlag,
-       Log log
-   ) {
+    static WriteNodePropertyResult writeNodeProperty(
+        NodePropertyExporterBuilder nodePropertyExporterBuilder,
+        TaskRegistryFactory taskRegistryFactory,
+        Graph graph,
+        GraphStore graphStore,
+        NodePropertyValues nodePropertyValues,
+        int writeConcurrency,
+        String writeProperty,
+        String procedureName,
+        Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo,
+        TerminationFlag terminationFlag,
+        Log log
+    ) {
         var nodeProperties = List.of(ImmutableNodeProperty.of(writeProperty, nodePropertyValues));
 
         var writeMillis = new AtomicLong();
@@ -98,7 +99,7 @@ final class Neo4jDatabasePropertyWriter {
                 .withProgressTracker(progressTracker)
                 .withArrowConnectionInfo(
                     arrowConnectionInfo,
-                    graphStore.databaseId().databaseName()
+                    graphStore.databaseInfo().databaseId().databaseName()
                 )
                 .parallel(DefaultPool.INSTANCE, writeConcurrency)
                 .build();
@@ -140,7 +141,8 @@ final class Neo4jDatabasePropertyWriter {
         }
         if (writeMode == Capabilities.WriteMode.LOCAL && hasArrowConnectionInfo) {
             throw new IllegalArgumentException(
-                "Arrow connection info was given although the write operation is targeting a local database");
+                "Arrow connection info was given although the write operation is targeting a local database"
+            );
         }
 
         var expectedPropertyState = expectedPropertyStateForWriteMode(writeMode);
@@ -157,19 +159,23 @@ final class Neo4jDatabasePropertyWriter {
                 var propertyState = propertySchema.state();
                 return !expectedPropertyState.test(propertyState);
             })
-            .map(nodeProperty -> formatWithLocale(
-                "NodeProperty{propertyKey=%s, propertyState=%s}",
-                nodeProperty.propertyKey(),
-                propertySchemas.get(nodeProperty.propertyKey()).state()
-            ))
+            .map(
+                nodeProperty -> formatWithLocale(
+                    "NodeProperty{propertyKey=%s, propertyState=%s}",
+                    nodeProperty.propertyKey(),
+                    propertySchemas.get(nodeProperty.propertyKey()).state()
+                )
+            )
             .collect(Collectors.toList());
 
         if (!unexpectedProperties.isEmpty()) {
-            throw new IllegalStateException(formatWithLocale(
-                "Expected all properties to be of state `%s` but some properties differ: %s",
-                expectedPropertyState,
-                unexpectedProperties
-            ));
+            throw new IllegalStateException(
+                formatWithLocale(
+                    "Expected all properties to be of state `%s` but some properties differ: %s",
+                    expectedPropertyState,
+                    unexpectedProperties
+                )
+            );
         }
     }
 
@@ -183,10 +189,12 @@ final class Neo4jDatabasePropertyWriter {
                 // We allow transient properties for the same reason as above
                 return state -> state == PropertyState.REMOTE || state == PropertyState.TRANSIENT;
             default:
-                throw new IllegalStateException(formatWithLocale(
-                    "Graph with write mode `%s` cannot write back to a database",
-                    writeMode
-                ));
+                throw new IllegalStateException(
+                    formatWithLocale(
+                        "Graph with write mode `%s` cannot write back to a database",
+                        writeMode
+                    )
+                );
         }
     }
 

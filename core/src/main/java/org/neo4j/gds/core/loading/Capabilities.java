@@ -32,8 +32,6 @@ public interface Capabilities {
     }
 
     enum WriteMode {
-        LOCAL,
-        REMOTE,
-        NONE
+        LOCAL, REMOTE, NONE
     }
 }

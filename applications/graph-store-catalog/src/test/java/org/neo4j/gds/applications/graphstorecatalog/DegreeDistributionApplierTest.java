@@ -22,7 +22,9 @@ package org.neo4j.gds.applications.graphstorecatalog;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
@@ -46,10 +48,14 @@ class DegreeDistributionApplierTest {
         var config2 = new StubGraphProjectConfig();
         var graphStore1 = new StubGraphStore();
         var graphStore2 = new StubGraphStore();
-        List<Pair<GraphStoreWithConfig, Map<String, Object>>> result = degreeDistributionApplier.process(List.of(
-            Pair.of(config1, graphStore1),
-            Pair.of(config2, graphStore2)
-        ), false, null);
+        List<Pair<GraphStoreWithConfig, Map<String, Object>>> result = degreeDistributionApplier.process(
+            List.of(
+                Pair.of(config1, graphStore1),
+                Pair.of(config2, graphStore2)
+            ),
+            false,
+            null
+        );
 
         assertThat(result).containsExactly(
             Pair.of(GraphStoreWithConfig.of(graphStore1, config1), null),
@@ -68,14 +74,28 @@ class DegreeDistributionApplierTest {
 
         var config1 = new StubGraphProjectConfig("Alice", "g1");
         var config2 = new StubGraphProjectConfig("Bob", "g2");
-        var graphStore1 = new StubGraphStore(DatabaseId.of("db1"));
-        var graphStore2 = new StubGraphStore(DatabaseId.of("db2"));
+        var graphStore1 = new StubGraphStore(
+            ImmutableDatabaseInfo.of(
+                DatabaseId.of("db1"),
+                DatabaseInfo.DatabaseLocation.LOCAL
+            )
+        );
+        var graphStore2 = new StubGraphStore(
+            ImmutableDatabaseInfo.of(
+                DatabaseId.of("db2"),
+                DatabaseInfo.DatabaseLocation.LOCAL
+            )
+        );
         when(degreeDistributionService.compute(graphStore1, null)).thenReturn(Map.of("some", 42));
         when(degreeDistributionService.compute(graphStore2, null)).thenReturn(Map.of("degdist", 87));
-        List<Pair<GraphStoreWithConfig, Map<String, Object>>> result = degreeDistributionApplier.process(List.of(
-            Pair.of(config1, graphStore1),
-            Pair.of(config2, graphStore2)
-        ), true, null);
+        List<Pair<GraphStoreWithConfig, Map<String, Object>>> result = degreeDistributionApplier.process(
+            List.of(
+                Pair.of(config1, graphStore1),
+                Pair.of(config2, graphStore2)
+            ),
+            true,
+            null
+        );
 
         assertThat(result).containsExactly(
             Pair.of(GraphStoreWithConfig.of(graphStore1, config1), Map.of("some", 42)),
@@ -104,22 +124,34 @@ class DegreeDistributionApplierTest {
 
         var config1 = new StubGraphProjectConfig("Alice", "g1");
         var config2 = new StubGraphProjectConfig("Bob", "g2");
-        var graphStore1 = new StubGraphStore(DatabaseId.of("db1"));
-        var graphStore2 = new StubGraphStore(DatabaseId.of("db2"));
-        when(graphStoreCatalogService.getDegreeDistribution(
-            new User("Alice", false),
-            DatabaseId.of("db1"),
-            GraphName.parse("g1")
-        )).thenReturn(Optional.of(Map.of("dd1", 7, "dd2", 11)));
-        when(graphStoreCatalogService.getDegreeDistribution(
-            new User("Bob", false),
-            DatabaseId.of("db2"),
-            GraphName.parse("g2")
-        )).thenReturn(Optional.of(Map.of("dd1", 512, "dd2", 1024)));
-        List<Pair<GraphStoreWithConfig, Map<String, Object>>> result = degreeDistributionApplier.process(List.of(
-            Pair.of(config1, graphStore1),
-            Pair.of(config2, graphStore2)
-        ), true, null);
+        var graphStore1 = new StubGraphStore(
+            ImmutableDatabaseInfo.of(DatabaseId.of("db1"), DatabaseInfo.DatabaseLocation.LOCAL)
+        );
+        var graphStore2 = new StubGraphStore(
+            ImmutableDatabaseInfo.of(DatabaseId.of("db2"), DatabaseInfo.DatabaseLocation.LOCAL)
+        );
+        when(
+            graphStoreCatalogService.getDegreeDistribution(
+                new User("Alice", false),
+                DatabaseId.of("db1"),
+                GraphName.parse("g1")
+            )
+        ).thenReturn(Optional.of(Map.of("dd1", 7, "dd2", 11)));
+        when(
+            graphStoreCatalogService.getDegreeDistribution(
+                new User("Bob", false),
+                DatabaseId.of("db2"),
+                GraphName.parse("g2")
+            )
+        ).thenReturn(Optional.of(Map.of("dd1", 512, "dd2", 1024)));
+        List<Pair<GraphStoreWithConfig, Map<String, Object>>> result = degreeDistributionApplier.process(
+            List.of(
+                Pair.of(config1, graphStore1),
+                Pair.of(config2, graphStore2)
+            ),
+            true,
+            null
+        );
 
         assertThat(result).containsExactly(
             Pair.of(GraphStoreWithConfig.of(graphStore1, config1), Map.of("dd1", 7, "dd2", 11)),

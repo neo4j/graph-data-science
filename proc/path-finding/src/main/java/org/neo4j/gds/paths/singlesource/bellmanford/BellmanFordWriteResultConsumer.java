@@ -43,7 +43,8 @@ import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfi
 import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.NODE_IDS_KEY;
 import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
 
-public class BellmanFordWriteResultConsumer implements ComputationResultConsumer<BellmanFord, BellmanFordResult, BellmanFordWriteConfig, Stream<BellmanFordWriteResult>> {
+public class BellmanFordWriteResultConsumer implements
+    ComputationResultConsumer<BellmanFord, BellmanFordResult, BellmanFordWriteConfig, Stream<BellmanFordWriteResult>> {
 
     @Override
     public Stream<BellmanFordWriteResult> consume(
@@ -55,15 +56,17 @@ public class BellmanFordWriteResultConsumer implements ComputationResultConsumer
 
 
             if (computationResult.result().isEmpty()) {
-                return Stream.of(new BellmanFordWriteResult(
-                    computationResult.preProcessingMillis(),
-                    0L,
-                    0L,
-                    0L,
-                    0L,
-                    false,
-                    config.toMap()
-                ));
+                return Stream.of(
+                    new BellmanFordWriteResult(
+                        computationResult.preProcessingMillis(),
+                        0L,
+                        0L,
+                        0L,
+                        0L,
+                        false,
+                        config.toMap()
+                    )
+                );
             }
 
             var algorithm = computationResult.algorithm();
@@ -83,7 +86,7 @@ public class BellmanFordWriteResultConsumer implements ComputationResultConsumer
             var graph = computationResult.graph();
 
             var paths = result.shortestPaths();
-            if(config.writeNegativeCycles() && result.containsNegativeCycle()) {
+            if (config.writeNegativeCycles() && result.containsNegativeCycle()) {
                 paths = result.negativeCycles();
             }
 
@@ -92,7 +95,8 @@ public class BellmanFordWriteResultConsumer implements ComputationResultConsumer
                     pathResult.sourceNode(),
                     pathResult.targetNode(),
                     createValues(graph, pathResult, writeNodeIds, writeCosts)
-                ));
+                )
+            );
 
             var progressTracker = new TaskProgressTracker(
                 RelationshipStreamExporter.baseTask("Write shortest Paths"),
@@ -109,15 +113,20 @@ public class BellmanFordWriteResultConsumer implements ComputationResultConsumer
                     .withRelationships(relationshipStream)
                     .withTerminationFlag(algorithm.getTerminationFlag())
                     .withProgressTracker(progressTracker)
-                    .withArrowConnectionInfo(config.arrowConnectionInfo(), computationResult.graphStore().databaseInfo().databaseId().databaseName())
+                    .withArrowConnectionInfo(
+                        config.arrowConnectionInfo(),
+                        computationResult.graphStore().databaseInfo().databaseId().databaseName()
+                    )
                     .build();
 
                 try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
-                    resultBuilder.withRelationshipsWritten(exporter.write(
-                        writeRelationshipType,
-                        createKeys(writeNodeIds, writeCosts),
-                        createTypes(writeNodeIds, writeCosts)
-                    ));
+                    resultBuilder.withRelationshipsWritten(
+                        exporter.write(
+                            writeRelationshipType,
+                            createKeys(writeNodeIds, writeCosts),
+                            createTypes(writeNodeIds, writeCosts)
+                        )
+                    );
                 }
             });
 

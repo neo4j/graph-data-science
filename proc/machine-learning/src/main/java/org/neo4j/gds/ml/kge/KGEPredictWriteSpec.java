@@ -36,14 +36,9 @@ import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
 @GdsCallable(
     name = "gds.ml.kge.predict.write",
     description = "Predicts new relationships using an existing KGE model",
-    executionMode = WRITE_RELATIONSHIP
-)
-public class KGEPredictWriteSpec implements AlgorithmSpec<
-    TopKMapComputer,
-    KGEPredictResult,
-    KGEPredictWriteConfig,
-    Stream<KGEWriteResult>,
-    KGEPredictAlgorithmFactory<KGEPredictWriteConfig>> {
+    executionMode = WRITE_RELATIONSHIP)
+public class KGEPredictWriteSpec implements
+    AlgorithmSpec<TopKMapComputer, KGEPredictResult, KGEPredictWriteConfig, Stream<KGEWriteResult>, KGEPredictAlgorithmFactory<KGEPredictWriteConfig>> {
     @Override
     public String name() {
         return "KGEPredictWrite";
@@ -80,12 +75,14 @@ public class KGEPredictWriteSpec implements AlgorithmSpec<
                     .withGraph(topKGraph)
                     .withIdMappingOperator(topKGraph::toOriginalNodeId)
                     .withTerminationFlag(computationResult.algorithm().getTerminationFlag())
-                    .withProgressTracker(AlgorithmSpecProgressTrackerProvider.createProgressTracker(
-                        name(),
-                        graph.nodeCount(),
-                        config.writeConcurrency(),
-                        executionContext
-                    ))
+                    .withProgressTracker(
+                        AlgorithmSpecProgressTrackerProvider.createProgressTracker(
+                            name(),
+                            graph.nodeCount(),
+                            config.writeConcurrency(),
+                            executionContext
+                        )
+                    )
                     .withArrowConnectionInfo(
                         config.arrowConnectionInfo(),
                         computationResult.graphStore().databaseInfo().databaseId().databaseName()

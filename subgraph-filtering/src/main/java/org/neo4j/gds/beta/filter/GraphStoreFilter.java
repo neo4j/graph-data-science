@@ -84,52 +84,7 @@ public final class GraphStoreFilter {
         );
     }
 
-    @NotNull
-    public static GraphStore filter(
-        GraphStore graphStore,
-        GraphProjectFromGraphConfig config,
-        ExecutorService executorService,
-        ProgressTracker progressTracker
-    ) throws ParseException, SemanticErrors {
-        var expressions = parseAndValidate(graphStore, config.nodeFilter(), config.relationshipFilter());
-
-        var inputNodes = graphStore.nodes();
-
-        progressTracker.beginSubTask();
-        try {
-            var filteredNodes = NodesFilter.filterNodes(
-                graphStore,
-                expressions.nodeExpression(),
-                config.concurrency(),
-                config.parameters(),
-                executorService,
-                progressTracker
-            );
-
-            var filteredRelationships = RelationshipsFilter.filterRelationships(
-                graphStore,
-                expressions.relationshipExpression(),
-                inputNodes,
-                filteredNodes.idMap(),
-                config.concurrency(),
-                config.parameters(),
-                executorService,
-                progressTracker
-            );
-
-            var filteredSchema = filterSchema(graphStore.schema(), filteredNodes, filteredRelationships.keySet());
-
-            return new GraphStoreBuilder()
-                .databaseInfo(graphStore.databaseInfo())
-                .capabilities(graphStore.capabilities())
-                .schema(filteredSchema)
-                .nodes(ImmutableNodes.of(filteredSchema.nodeSchema(), filteredNodes.idMap(), filteredNodes.propertyStores()))
-                .relationshipImportResult(RelationshipImportResult.of(filteredRelationships))
-                .concurrency(config.concurrency())
-                .build();
-        } finally {
-            progressTracker.endSubTask();
-        }
+    private GraphStoreFilter() {
     }
 
     @ValueClass
@@ -175,8 +130,64 @@ public final class GraphStoreFilter {
         return filter.equals(ElementProjection.PROJECT_ALL) ? "true" : filter;
     }
 
-    public static MutableGraphSchema filterSchema(GraphSchema inputGraphSchema, NodesFilter.FilteredNodes filteredNodes, Set<RelationshipType> filteredRelationshipTypes) {
-        var nodeSchema = MutableNodeSchema.from(inputGraphSchema.nodeSchema().filter(filteredNodes.idMap().availableNodeLabels()));
+    @NotNull
+    public static GraphStore filter(
+        GraphStore graphStore,
+        GraphProjectFromGraphConfig config,
+        ExecutorService executorService,
+        ProgressTracker progressTracker
+    ) throws ParseException, SemanticErrors {
+        var expressions = parseAndValidate(graphStore, config.nodeFilter(), config.relationshipFilter());
+
+        var inputNodes = graphStore.nodes();
+
+        progressTracker.beginSubTask();
+        try {
+            var filteredNodes = NodesFilter.filterNodes(
+                graphStore,
+                expressions.nodeExpression(),
+                config.concurrency(),
+                config.parameters(),
+                executorService,
+                progressTracker
+            );
+
+            var filteredRelationships = RelationshipsFilter.filterRelationships(
+                graphStore,
+                expressions.relationshipExpression(),
+                inputNodes,
+                filteredNodes.idMap(),
+                config.concurrency(),
+                config.parameters(),
+                executorService,
+                progressTracker
+            );
+
+            var filteredSchema = filterSchema(graphStore.schema(), filteredNodes, filteredRelationships.keySet());
+
+            return new GraphStoreBuilder()
+                .databaseInfo(graphStore.databaseInfo())
+                .capabilities(graphStore.capabilities())
+                .schema(filteredSchema)
+                .nodes(
+                    ImmutableNodes
+                        .of(filteredSchema.nodeSchema(), filteredNodes.idMap(), filteredNodes.propertyStores())
+                )
+                .relationshipImportResult(RelationshipImportResult.of(filteredRelationships))
+                .concurrency(config.concurrency())
+                .build();
+        } finally {
+            progressTracker.endSubTask();
+        }
+    }
+
+    public static MutableGraphSchema filterSchema(
+        GraphSchema inputGraphSchema,
+        NodesFilter.FilteredNodes filteredNodes,
+        Set<RelationshipType> filteredRelationshipTypes
+    ) {
+        var nodeSchema = MutableNodeSchema
+            .from(inputGraphSchema.nodeSchema().filter(filteredNodes.idMap().availableNodeLabels()));
         if (nodeSchema.availableLabels().isEmpty()) {
             nodeSchema.addLabel(NodeLabel.ALL_NODES);
         }
@@ -192,6 +203,4 @@ public final class GraphStoreFilter {
 
         return MutableGraphSchema.of(nodeSchema, relationshipSchema, Map.of());
     }
-
-    private GraphStoreFilter() {}
 }

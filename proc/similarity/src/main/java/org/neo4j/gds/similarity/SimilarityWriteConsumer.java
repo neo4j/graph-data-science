@@ -39,11 +39,9 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 
-public class SimilarityWriteConsumer<
-    ALGO extends Algorithm<ALGO_RESULT>,
-    ALGO_RESULT,
-    PROC_RESULT extends SimilarityWriteResult,
-    CONFIG extends WritePropertyConfig & WriteRelationshipConfig & AlgoBaseConfig> implements ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, Stream<PROC_RESULT>> {
+public class SimilarityWriteConsumer<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT, PROC_RESULT extends SimilarityWriteResult, CONFIG extends WritePropertyConfig & WriteRelationshipConfig & AlgoBaseConfig>
+    implements
+    ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, Stream<PROC_RESULT>> {
 
     private final Function<ComputationResult<ALGO, ALGO_RESULT, CONFIG>, SimilarityResultBuilder<PROC_RESULT>> resultBuilderFunction;
     private final Function<ComputationResult<ALGO, ALGO_RESULT, CONFIG>, SimilarityGraphResult> similarityGraphFunction;
@@ -114,7 +112,10 @@ public class SimilarityWriteConsumer<
                             .withGraph(similarityGraph)
                             .withTerminationFlag(algorithm.getTerminationFlag())
                             .withProgressTracker(progressTracker)
-                            .withArrowConnectionInfo(config.arrowConnectionInfo(), computationResult.graphStore().databaseInfo().databaseId().databaseName())
+                            .withArrowConnectionInfo(
+                                config.arrowConnectionInfo(),
+                                computationResult.graphStore().databaseInfo().databaseId().databaseName()
+                            )
                             .build();
 
                         if (SimilarityProc.shouldComputeHistogram(executionContext.returnColumns())) {

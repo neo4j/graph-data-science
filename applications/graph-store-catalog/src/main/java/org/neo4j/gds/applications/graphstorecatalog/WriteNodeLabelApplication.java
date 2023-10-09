@@ -66,7 +66,10 @@ public class WriteNodeLabelApplication {
             var nodeLabelExporter = nodeLabelExporterBuilder
                 .withIdMap(filteredNodes.idMap())
                 .withTerminationFlag(terminationFlag)
-                .withArrowConnectionInfo(configuration.arrowConnectionInfo(), graphStore.databaseInfo().databaseId().databaseName())
+                .withArrowConnectionInfo(
+                    configuration.arrowConnectionInfo(),
+                    graphStore.databaseInfo().databaseId().databaseName()
+                )
                 .parallel(DefaultPool.INSTANCE, configuration.concurrency())
                 .build();
 

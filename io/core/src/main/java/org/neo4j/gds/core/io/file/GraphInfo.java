@@ -29,9 +29,14 @@ import java.util.Map;
 @ValueClass
 public interface GraphInfo {
     DatabaseInfo databaseInfo();
+
     String idMapBuilderType();
+
     long nodeCount();
+
     long maxOriginalId();
+
     Map<RelationshipType, Long> relationshipTypeCounts();
+
     List<RelationshipType> inverseIndexedRelationshipTypes();
 }
