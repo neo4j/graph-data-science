@@ -31,6 +31,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.kmeans.KmeansWriteResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -39,7 +40,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.kmeans.Kmeans.KMEANS_DESCRIPTION;
 
 @GdsCallable(name = "gds.kmeans.write", aliases = {"gds.beta.kmeans.write"}, description = KMEANS_DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
-public class KmeansWriteSpec implements AlgorithmSpec<Kmeans, KmeansResult, KmeansWriteConfig, Stream<WriteResult>, KmeansAlgorithmFactory<KmeansWriteConfig>> {
+public class KmeansWriteSpec implements AlgorithmSpec<Kmeans, KmeansResult, KmeansWriteConfig, Stream<KmeansWriteResult>, KmeansAlgorithmFactory<KmeansWriteConfig>> {
 
     @Override
     public String name() {
@@ -57,7 +58,7 @@ public class KmeansWriteSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kmea
     }
 
         @Override
-        public ComputationResultConsumer<Kmeans, KmeansResult, KmeansWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+        public ComputationResultConsumer<Kmeans, KmeansResult, KmeansWriteConfig, Stream<KmeansWriteResult>> computationResultConsumer() {
             return new WriteNodePropertiesComputationResultConsumer<>(
                 this::resultBuilder,
                 computationResult -> {
@@ -75,11 +76,11 @@ public class KmeansWriteSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kmea
         }
 
     @NotNull
-    private AbstractResultBuilder<WriteResult> resultBuilder(
+    private AbstractResultBuilder<KmeansWriteResult> resultBuilder(
         ComputationResult<Kmeans, KmeansResult, KmeansWriteConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new WriteResult.Builder(
+        var builder = new KmeansWriteResult.Builder(
             executionContext.returnColumns(),
             computationResult.config().concurrency()
         );

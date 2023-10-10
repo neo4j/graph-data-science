@@ -17,22 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.kmeans;
+package org.neo4j.gds.procedures.community.kmeans;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.procedures.community.kmeans.KmeansStatsResult;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
 import java.util.List;
 import java.util.Map;
 
-public class WriteResult extends KmeansStatsResult {
+public class KmeansWriteResult extends KmeansStatsResult {
 
     public final long writeMillis;
     public final long nodePropertiesWritten;
 
-    public WriteResult(
+    public KmeansWriteResult(
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
@@ -58,20 +57,20 @@ public class WriteResult extends KmeansStatsResult {
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    static class Builder extends AbstractCommunityResultBuilder<WriteResult> {
+    public static class Builder extends AbstractCommunityResultBuilder<KmeansWriteResult> {
 
         private List<List<Double>> centroids;
         private double averageDistanceToCentroid;
 
         private double averageSilhouette;
 
-        Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+        public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 
         @Override
-        protected WriteResult buildResult() {
-            return new WriteResult(
+        protected KmeansWriteResult buildResult() {
+            return new KmeansWriteResult(
                 preProcessingMillis,
                 computeMillis,
                 postProcessingDuration,
