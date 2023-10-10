@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.K1ColoringSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
+import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.community.CommunityResultCompanion;
@@ -32,6 +33,7 @@ import org.neo4j.gds.k1coloring.K1ColoringStreamConfig;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringMutateResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStatsResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStreamResult;
+import org.neo4j.gds.procedures.community.k1coloring.K1ColoringWriteResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -88,6 +90,21 @@ final class K1ColoringComputationResultTransformer {
             computationResult.algorithmSpecificFields().ranIterations(),
             computationResult.algorithmSpecificFields().didConverge(),
             configuration.toMap()
+        );
+    }
+
+    static K1ColoringWriteResult toWriteResult(
+        NodePropertyWriteResult<K1ColoringSpecificFields> computationResult
+    ) {
+        return new K1ColoringWriteResult(
+            computationResult.preProcessingMillis(),
+            computationResult.computeMillis(),
+            computationResult.writeMillis(),
+            computationResult.algorithmSpecificFields().nodeCount(),
+            computationResult.algorithmSpecificFields().colorCount(),
+            computationResult.algorithmSpecificFields().ranIterations(),
+            computationResult.algorithmSpecificFields().didConverge(),
+            computationResult.configuration().toMap()
         );
     }
 

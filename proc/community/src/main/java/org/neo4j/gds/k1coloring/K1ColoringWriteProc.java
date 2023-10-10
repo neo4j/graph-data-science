@@ -20,10 +20,8 @@
 package org.neo4j.gds.k1coloring;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.k1coloring.K1ColoringWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -41,7 +39,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class K1ColoringWriteProc extends BaseProc {
 
     @Context
-    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
+    public GraphDataScience facade;
 
     @Procedure(name = "gds.k1coloring.write", mode = WRITE)
     @Description(K1_COLORING_DESCRIPTION)
@@ -49,10 +47,7 @@ public class K1ColoringWriteProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new K1ColoringWriteSpecification(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.community().k1ColoringWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.k1coloring.write.estimate", mode = READ)
@@ -61,11 +56,7 @@ public class K1ColoringWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new K1ColoringWriteSpecification(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.community().k1ColoringEstimateWrite(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(name = "gds.beta.k1coloring.write", mode = WRITE, deprecatedBy ="gds.k1coloring.write" )
@@ -98,8 +89,4 @@ public class K1ColoringWriteProc extends BaseProc {
         return estimate(graphNameOrConfiguration,algoConfiguration);
     }
 
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
-    }
 }

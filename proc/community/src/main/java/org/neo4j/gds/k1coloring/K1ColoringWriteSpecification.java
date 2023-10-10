@@ -32,6 +32,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.k1coloring.K1ColoringWriteResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -75,7 +76,7 @@ public class K1ColoringWriteSpecification implements AlgorithmSpec<K1Coloring, K
         ExecutionContext executionContext
     ) {
         var returnColumns = executionContext.returnColumns();
-        var builder = new K1ColoringWriteResult.Builder(returnColumns, computeResult.config().concurrency());
+        var builder = new K1ColoringWriteResultBuilder(returnColumns, computeResult.config().concurrency());
         return K1ColoringSpecificationHelper.resultBuilder(builder, computeResult, returnColumns);
     }
 
