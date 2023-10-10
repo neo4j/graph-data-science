@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.algorithms.community;
 
-import org.eclipse.collections.api.block.function.primitive.LongToObjectFunction;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.ApproxMaxKCutSpecificFields;
 import org.neo4j.gds.algorithms.CommunityStatisticsSpecificFields;
@@ -36,7 +35,6 @@ import org.neo4j.gds.algorithms.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.TriangleCountSpecificFields;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
@@ -59,10 +57,12 @@ import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 import org.neo4j.gds.wcc.WccMutateConfig;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 import static org.neo4j.gds.algorithms.community.AlgorithmRunner.runWithTiming;
-import static org.neo4j.gds.algorithms.community.CommunityHelper.arrayMatrixToListMatrix;
+import static org.neo4j.gds.algorithms.community.CommunityResultCompanion.createIntermediateCommunitiesNodePropertyValues;
 
 public class CommunityAlgorithmsMutateBusinessFacade {
 
@@ -600,21 +600,19 @@ public class CommunityAlgorithmsMutateBusinessFacade {
 
     }
 
-    private static LongArrayNodePropertyValues createIntermediateCommunitiesNodePropertyValues(
-        LongToObjectFunction<long[]> intermediateCommunitiesProvider,
-        long size
-    ) {
-        return new LongArrayNodePropertyValues() {
-            @Override
-            public long nodeCount() {
-                return size;
-            }
+    private List<List<Double>> arrayMatrixToListMatrix(boolean shouldCompute, double[][] matrix) {
+        if (shouldCompute) {
+            var result = new ArrayList<List<Double>>();
 
-            @Override
-            public long[] longArrayValue(long nodeId) {
-                return intermediateCommunitiesProvider.apply(nodeId);
+            for (double[] row : matrix) {
+                List<Double> rowList = new ArrayList<>();
+                result.add(rowList);
+                for (double column : row)
+                    rowList.add(column);
             }
-        };
+            return result;
+        }
+        return null;
     }
 
 }
