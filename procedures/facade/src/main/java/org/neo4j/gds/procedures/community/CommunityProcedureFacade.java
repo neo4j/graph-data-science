@@ -51,6 +51,7 @@ import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfig;
 import org.neo4j.gds.leiden.LeidenMutateConfig;
 import org.neo4j.gds.leiden.LeidenStatsConfig;
 import org.neo4j.gds.leiden.LeidenStreamConfig;
+import org.neo4j.gds.leiden.LeidenWriteConfig;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainStatsConfig;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
@@ -539,6 +540,14 @@ public class CommunityProcedureFacade {
         Map<String, Object> algoConfiguration
     ) {
         var config = createConfig(algoConfiguration, LeidenStatsConfig::of);
+        return Stream.of(estimateBusinessFacade.leiden(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> leidenEstimateWrite(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, LeidenWriteConfig::of);
         return Stream.of(estimateBusinessFacade.leiden(graphNameOrConfiguration, config));
     }
 
