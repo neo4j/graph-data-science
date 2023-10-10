@@ -48,6 +48,7 @@ import org.neo4j.gds.kmeans.KmeansWriteConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfig;
+import org.neo4j.gds.labelpropagation.LabelPropagationWriteConfig;
 import org.neo4j.gds.leiden.LeidenMutateConfig;
 import org.neo4j.gds.leiden.LeidenStatsConfig;
 import org.neo4j.gds.leiden.LeidenStreamConfig;
@@ -834,6 +835,13 @@ public class CommunityProcedureFacade {
         Map<String, Object> algoConfiguration
     ) {
         var config = createConfig(algoConfiguration, LabelPropagationMutateConfig::of);
+        return Stream.of(estimateBusinessFacade.labelPropagation(graphNameOrConfiguration, config));
+    }
+    public Stream<MemoryEstimateResult> labelPropagationEstimateWrite(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, LabelPropagationWriteConfig::of);
         return Stream.of(estimateBusinessFacade.labelPropagation(graphNameOrConfiguration, config));
     }
 
