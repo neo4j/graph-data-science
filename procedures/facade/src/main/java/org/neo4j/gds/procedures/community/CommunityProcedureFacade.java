@@ -95,6 +95,7 @@ import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientStr
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountMutateResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStatsResult;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStreamResult;
+import org.neo4j.gds.procedures.community.triangleCount.TriangleCountWriteResult;
 import org.neo4j.gds.procedures.community.wcc.WccMutateResult;
 import org.neo4j.gds.procedures.community.wcc.WccStatsResult;
 import org.neo4j.gds.procedures.community.wcc.WccStreamResult;
@@ -111,6 +112,7 @@ import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
 import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 import org.neo4j.gds.triangle.TriangleCountStatsConfig;
 import org.neo4j.gds.triangle.TriangleCountStreamConfig;
+import org.neo4j.gds.triangle.TriangleCountWriteConfig;
 import org.neo4j.gds.wcc.WccMutateConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
 import org.neo4j.gds.wcc.WccStreamConfig;
@@ -620,6 +622,22 @@ public class CommunityProcedureFacade {
         return Stream.of(TriangleCountComputationResultTransformer.toStatsResult(computationResult, config));
     }
 
+    public Stream<TriangleCountWriteResult> triangleCountWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, TriangleCountWriteConfig::of);
+
+        var computationResult = writeBusinessFacade.triangleCount(
+            graphName,
+            config,
+            user,
+            databaseId
+        );
+
+        return Stream.of(TriangleCountComputationResultTransformer.toWriteResult(computationResult));
+    }
+
     public Stream<MemoryEstimateResult> triangleCountEstimateStream(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
@@ -641,6 +659,14 @@ public class CommunityProcedureFacade {
         Map<String, Object> algoConfiguration
     ) {
         var config = createConfig(algoConfiguration, TriangleCountStatsConfig::of);
+        return Stream.of(estimateBusinessFacade.triangleCount(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> triangleCountEstimateWrite(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, TriangleCountWriteConfig::of);
         return Stream.of(estimateBusinessFacade.triangleCount(graphNameOrConfiguration, config));
     }
 

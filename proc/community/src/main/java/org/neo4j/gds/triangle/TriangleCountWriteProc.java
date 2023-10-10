@@ -20,10 +20,8 @@
 package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.triangleCount.TriangleCountWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -38,20 +36,15 @@ import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class TriangleCountWriteProc extends BaseProc {
-
     @Context
-    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
-
+    public GraphDataScience facade;
     @Procedure(value = "gds.triangleCount.write", mode = WRITE)
     @Description(DESCRIPTION)
     public Stream<TriangleCountWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new TriangleCountWriteSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.community().triangleCountWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.triangleCount.write.estimate", mode = READ)
@@ -60,16 +53,7 @@ public class TriangleCountWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new TriangleCountWriteSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
+        return facade.community().triangleCountEstimateWrite(graphNameOrConfiguration, algoConfiguration);
     }
 
 }
