@@ -22,6 +22,7 @@ package org.neo4j.gds.algorithms.community;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.AlphaSccSpecificFields;
 import org.neo4j.gds.algorithms.CommunityStatisticsSpecificFields;
+import org.neo4j.gds.algorithms.K1ColoringSpecificFields;
 import org.neo4j.gds.algorithms.KCoreSpecificFields;
 import org.neo4j.gds.algorithms.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.KmeansSpecificFields;
@@ -34,6 +35,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.k1coloring.K1ColoringWriteConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionWriteConfig;
 import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.kmeans.KmeansWriteConfig;
@@ -312,6 +314,49 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             configuration.arrowConnectionInfo()
         );
     }
+
+    public NodePropertyWriteResult<K1ColoringSpecificFields> k1coloring(
+        String graphName,
+        K1ColoringWriteConfig config,
+        User user,
+        DatabaseId databaseId,
+        boolean computeUsedColors
+    ) {
+
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = runWithTiming(
+            () -> communityAlgorithmsFacade.k1Coloring(graphName, config, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return writeToDatabase(
+            algorithmResult,
+            config,
+            (result, configuration) -> CommunityResultCompanion.nodePropertyValues(
+                false,
+                NodePropertyValuesAdapter.adapt(result.colors()),
+                configuration.minCommunitySize(),
+                configuration.concurrency()
+            ),
+            (result) -> {
+                long usedColors = (computeUsedColors) ? result.usedColors().cardinality() : 0;
+
+                return new K1ColoringSpecificFields(
+                    result.colors().size(),
+                    usedColors,
+                    result.ranIterations(),
+                    result.didConverge()
+                );
+            },
+            intermediateResult.computeMilliseconds,
+            () -> K1ColoringSpecificFields.EMPTY,
+            "K1ColoringWrite",
+            config.writeConcurrency(),
+            config.writeProperty(),
+            config.arrowConnectionInfo()
+        );
+    }
+
 
     public NodePropertyWriteResult<TriangleCountSpecificFields> triangleCount(
         String graphName,

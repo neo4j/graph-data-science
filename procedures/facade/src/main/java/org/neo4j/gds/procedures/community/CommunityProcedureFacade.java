@@ -36,6 +36,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
 import org.neo4j.gds.k1coloring.K1ColoringStatsConfig;
 import org.neo4j.gds.k1coloring.K1ColoringStreamConfig;
+import org.neo4j.gds.k1coloring.K1ColoringWriteConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionMutateConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionStreamConfig;
@@ -65,6 +66,7 @@ import org.neo4j.gds.procedures.community.conductance.ConductanceStreamResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringMutateResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStatsResult;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStreamResult;
+import org.neo4j.gds.procedures.community.k1coloring.K1ColoringWriteResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionMutateResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStatsResult;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStreamResult;
@@ -140,8 +142,6 @@ public class CommunityProcedureFacade {
     private final CommunityAlgorithmsStatsBusinessFacade statsBusinessFacade;
     private final CommunityAlgorithmsStreamBusinessFacade streamBusinessFacade;
     private final CommunityAlgorithmsWriteBusinessFacade writeBusinessFacade;
-
-
 
 
     public CommunityProcedureFacade(
@@ -1082,6 +1082,26 @@ public class CommunityProcedureFacade {
         return Stream.of(K1ColoringComputationResultTransformer.toMutateResult(computationResult));
     }
 
+    public Stream<K1ColoringWriteResult> k1ColoringWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var writeConfig = createConfig(
+            configuration,
+            K1ColoringWriteConfig::of
+        );
+
+        var computationResult = writeBusinessFacade.k1coloring(
+            graphName,
+            writeConfig,
+            user,
+            databaseId,
+            procedureReturnColumns.contains("colorCount")
+        );
+
+        return Stream.of(K1ColoringComputationResultTransformer.toWriteResult(computationResult));
+    }
+
     public Stream<ModularityOptimizationStreamResult> modularityOptimizationStream(
         String graphName,
         Map<String, Object> configuration
@@ -1210,6 +1230,15 @@ public class CommunityProcedureFacade {
         var config = createConfig(algoConfiguration, K1ColoringStreamConfig::of);
         return Stream.of(estimateBusinessFacade.k1Coloring(graphNameOrConfiguration, config));
     }
+
+    public Stream<MemoryEstimateResult> k1ColoringEstimateWrite(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, K1ColoringWriteConfig::of);
+        return Stream.of(estimateBusinessFacade.k1Coloring(graphNameOrConfiguration, config));
+    }
+
 
 
     public Stream<ConductanceStreamResult> conductanceStream(
