@@ -68,8 +68,7 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
 
         // iterates over neighbours of A
         CURSOR neighboursA = cacheA;
-        // current neighbour of A
-        long nodeCFromA = NOT_FOUND;
+
         // iterates over neighbours of B
         CURSOR neighboursB = cacheB;
         // current neighbour of B
@@ -99,6 +98,8 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
                 if (nodeCFromB != NOT_FOUND) {
                     // copy the state of A's cursor
                     neighboursA = copyCursor(neighboursAMain, neighboursA);
+
+                    var nodeCFromA = NOT_FOUND; //current neighbor from a
 
                     if (degreeFilter.test(degree(nodeCFromB))) {
                         // find the first neighbour Ca of A with id >= Cb
