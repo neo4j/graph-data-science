@@ -31,11 +31,14 @@ The FastRP algorithm operates on graphs, in which case we care about preserving 
 This means that two nodes that have similar neighborhoods should be assigned similar embedding vectors.
 Conversely, two nodes that are not similar should be not be assigned similar embedding vectors.
 
-The FastRP algorithm initially assigns random vectors to all nodes using a technique called _very sparse random projection_, see (Achlioptas, 2003) below.
-Moreover, in GDS it is possible to use node properties for the creation of these _initial random vectors_ in a way described xref:machine-learning/node-embeddings/fastrp.adoc#algorithms-embeddings-fastrp-examples-properties[below].
-We will also use _projection of a node_ synonymously with the initial random vector of a node.
+The GDS implementation of FastRP extends the original algorithmfootnote:[Chen, Haochen, Syed Fahad Sultan, Yingtao Tian, Muhao Chen, and Steven Skiena. "Fast and Accurate Network Embeddings via Very Sparse Random Projection." _arXiv preprint arXiv:1908.11512_ (2019).] in several ways:
 
-Starting with these random vectors and iteratively averaging over node neighborhoods, the algorithm constructs a sequence of _intermediate embeddings_ image:equations/fastrp/fastrp1.svg[e n to the ith] for each node _n_.
+- It allows the usage of <<_node_properties,node properties>> to influence the creation of the initial random vectors.
+- It introduces the <<algorithms-embeddings-fastrp-node-self-influence,`nodeSelfInfluence`>> parameter.
+- It supports <<algorithms-embeddings-fastrp-node-self-orientation,directed graphs>>.
+- It supports <<algorithms-embeddings-fastrp-weighted,weighted graphs>>.
+
+The FastRP algorithm initially assigns random vectors to all nodes using a technique called _very sparse random projection_ footnote:[Achlioptas, Dimitris. "Database-friendly random projections: Johnson-Lindenstrauss with binary coins." _Journal of computer and System Sciences_ 66, no. 4 (2003): 671-687.]. Starting with random vectors (_node projections_) and iteratively averaging over node neighborhoods, the algorithm constructs a sequence of _intermediate embeddings_ image:equations/fastrp/fastrp1.svg[e n to the ith] for each node _n_.
 More precisely,
 
 image::equations/fastrp/fastrp2.svg[e n to the ith equals average of e m to the ith minus one,align="center"]
@@ -51,20 +54,6 @@ We will return to xref:machine-learning/node-embeddings/fastrp.adoc#algorithms-e
 
 Therefore, each node's embedding depends on a neighborhood of radius equal to the number of iterations.
 This way FastRP exploits higher-order relationships in the graph while still being highly scalable.
-
-The present implementation extends the original algorithm to support weighted graphs, which computes weighted averages of neighboring embeddings using the relationship weights.
-In order to make use of this, the `relationshipWeightProperty` parameter should be set to an existing relationship property.
-
-The original algorithm is intended only for undirected graphs.
-We support running on both on directed graphs and undirected graph.
-For directed graphs we consider only the outgoing neighbors when computing the intermediate embeddings for a node.
-Therefore, using the orientations `NATURAL`, `REVERSE` or `UNDIRECTED` will all give different embeddings.
-In general, it is recommended to first use `UNDIRECTED` as this is what the original algorithm was evaluated on.
-
-For more information on this algorithm see:
-
-* https://arxiv.org/pdf/1908.11512.pdf[H. Chen, S.F. Sultan, Y. Tian, M. Chen, S. Skiena: Fast and Accurate Network Embeddings via Very Sparse Random Projection, 2019.^]
-* https://www.sciencedirect.com/science/article/pii/S0022000003000254[Dimitris Achlioptas. Database-friendly random projections: Johnson-Lindenstrauss with binary coins. Journal of Computer and System Sciences, 66(4):671–687, 2003.]
 
 
 === Node properties
@@ -96,7 +85,6 @@ The last `propertyDimension` coordinates in the embedding captures information a
 === Usage in machine learning pipelines
 
 It may be useful to generate node embeddings with FastRP as a node property step in a machine learning pipeline (like xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[] and xref:machine-learning/node-property-prediction/index.adoc[]).
-Since FastRP is a random algorithm and xref:machine-learning/node-embeddings/index.adoc#node-embeddings-generalization[inductive] only for `propertyRatio=1.0`, there are some things to have in mind.
 
 In order for a machine learning model to be able to make useful predictions, it is important that features produced during prediction are of a similar distribution to the features produced during training of the model.
 Moreover, node property steps (whether FastRP or not) added to a pipeline are executed both during training, and during the prediction by the trained model.
@@ -111,6 +99,8 @@ The reason for this is that FastRP is a random algorithm, and in this case is se
 If `propertyRatio=1.0` however, the random initial node embeddings are derived from node property vectors only, so there is no random seeding based on node ids.
 
 Additionally, in order for the initial random vectors (independent of `propertyRatio` used) to be consistent between runs (training and prediction calls), a value for the `randomSeed` configuration parameter must be provided when adding the FastRP node property step to the training pipeline.
+
+In summary, if you set a random seed and set `propertyRatio` to 1, FastRP is xref:machine-learning/node-embeddings/index.adoc#node-embeddings-generalization[inductive] because embeddings are based only on node properties projected deterministically into vectors.
 
 
 [[algorithms-embeddings-fastrp-parameter-tuning]]
@@ -188,11 +178,19 @@ Finally, node self influence can be used for pure dimensionality reduction to co
 If node properties are not used, using `nodeSelfInfluence` may also have a positive effect, depending on other settings and on the problem.
 
 
+[[algorithms-embeddings-fastrp-node-self-orientation]]
 === Orientation
 
 Choosing the right orientation when creating the graph may have the single greatest impact.
 The FastRP algorithm is designed to work with undirected graphs, and we expect this to be the best in most cases.
 If you expect only outgoing or incoming relationships to be informative for a prediction task, then you may want to try using the orientations `NATURAL` or `REVERSE` respectively.
+
+
+[[algorithms-embeddings-fastrp-weighted]]
+=== Weighted graphs
+
+By default, the algorithm treats the graph relationships as unweighted.
+You can specify a relationship weight with the `relationshipWeightProperty` parameter to instruct the algorithm to compute weighted averages of the neighboring embeddings.
 
 
 [[algorithms-embeddings-fastrp-syntax]]
@@ -584,8 +582,6 @@ Additionally, each of the seven nodes now has a new property `fastrp-embedding` 
 [[algorithms-embeddings-fastrp-examples-weighted]]
 === Weighted
 
-By default, the algorithm is considering the relationships of the graph to be unweighted.
-To change this behaviour we can use configuration parameter called `relationshipWeightProperty`.
 Below is an example of running the weighted variant of algorithm.
 
 [role=query-example]
