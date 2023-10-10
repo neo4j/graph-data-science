@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.louvain;
 
-import org.neo4j.gds.procedures.community.louvain.StatsResult;
+import org.neo4j.gds.procedures.community.louvain.LouvainStatsResult;
 
 import java.util.List;
 import java.util.Map;
 
-public final class WriteResult extends StatsResult {
+public final class WriteResult extends LouvainStatsResult {
     public final long writeMillis;
     public final long nodePropertiesWritten;
 

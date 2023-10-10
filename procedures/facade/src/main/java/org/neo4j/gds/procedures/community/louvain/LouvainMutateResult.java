@@ -22,7 +22,7 @@ package org.neo4j.gds.procedures.community.louvain;
 import java.util.List;
 import java.util.Map;
 
-public final class LouvainMutateResult extends StatsResult {
+public final class LouvainMutateResult extends LouvainStatsResult {
     public final long mutateMillis;
     public final long nodePropertiesWritten;
 

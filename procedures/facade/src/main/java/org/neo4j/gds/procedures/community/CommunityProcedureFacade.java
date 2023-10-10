@@ -50,6 +50,7 @@ import org.neo4j.gds.leiden.LeidenMutateConfig;
 import org.neo4j.gds.leiden.LeidenStatsConfig;
 import org.neo4j.gds.leiden.LeidenStreamConfig;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
+import org.neo4j.gds.louvain.LouvainStatsConfig;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
 import org.neo4j.gds.modularity.ModularityStatsConfig;
 import org.neo4j.gds.modularity.ModularityStreamConfig;
@@ -76,6 +77,7 @@ import org.neo4j.gds.procedures.community.leiden.LeidenMutateResult;
 import org.neo4j.gds.procedures.community.leiden.LeidenStatsResult;
 import org.neo4j.gds.procedures.community.leiden.LeidenStreamResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
+import org.neo4j.gds.procedures.community.louvain.LouvainStatsResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
 import org.neo4j.gds.procedures.community.modularity.ModularityStatsResult;
 import org.neo4j.gds.procedures.community.modularity.ModularityStreamResult;
@@ -357,6 +359,23 @@ public class CommunityProcedureFacade {
 
 
     // K-Core Decomposition end
+
+    public Stream<LouvainStatsResult> louvainStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, LouvainStatsConfig::of);
+
+        var computationResult = statsBusinessFacade.louvain(
+            graphName,
+            config,
+            user,
+            databaseId,
+            ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
+        );
+
+        return Stream.of(LouvainComputationResultTransformer.toStatsResult(computationResult, config));
+    }
 
     public Stream<LouvainStreamResult> louvainStream(
         String graphName,

@@ -24,14 +24,14 @@ import org.neo4j.gds.results.StandardStatsResult;
 import java.util.List;
 import java.util.Map;
 
-public class StatsResult extends StandardStatsResult {
+public class LouvainStatsResult extends StandardStatsResult {
     public final double modularity;
     public final List<Double> modularities;
     public final long ranLevels;
     public final long communityCount;
     public final Map<String, Object> communityDistribution;
 
-    public StatsResult(
+    public LouvainStatsResult(
         double modularity,
         List<Double> modularities,
         long ranLevels,

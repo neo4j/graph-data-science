@@ -27,6 +27,7 @@ import org.neo4j.gds.algorithms.KmeansSpecificFields;
 import org.neo4j.gds.algorithms.LabelPropagationSpecificFields;
 import org.neo4j.gds.algorithms.LeidenSpecificFields;
 import org.neo4j.gds.algorithms.LocalClusteringCoefficientSpecificFields;
+import org.neo4j.gds.algorithms.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.ModularityOptimizationSpecificFields;
 import org.neo4j.gds.algorithms.ModularitySpecificFields;
 import org.neo4j.gds.algorithms.StandardCommunityStatisticsSpecificFields;
@@ -41,6 +42,7 @@ import org.neo4j.gds.kcore.KCoreDecompositionStatsConfig;
 import org.neo4j.gds.kmeans.KmeansStatsConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
 import org.neo4j.gds.leiden.LeidenStatsConfig;
+import org.neo4j.gds.louvain.LouvainStatsConfig;
 import org.neo4j.gds.modularity.ModularityStatsConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.result.CommunityStatistics;
@@ -294,6 +296,37 @@ public class CommunityAlgorithmsStatsBusinessFacade {
 
     }
 
+    public StatsResult<LouvainSpecificFields> louvain(
+        String graphName,
+        LouvainStatsConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        StatisticsComputationInstructions statisticsComputationInstructions
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> communityAlgorithmsFacade.louvain(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return statsResult(
+            algorithmResult,
+            configuration,
+            (result -> result.communities()::get),
+            (result, componentCount, communitySummary) -> {
+                return LouvainSpecificFields.from(
+                    result.modularity(),
+                    result.modularities(),
+                    componentCount,
+                    result.ranLevels(),
+                    communitySummary
+                );
+            },
+            statisticsComputationInstructions,
+            intermediateResult.computeMilliseconds,
+            () -> LouvainSpecificFields.EMPTY
+        );
+    }
 
     public StatsResult<TriangleCountSpecificFields> triangleCount(
         String graphName,
