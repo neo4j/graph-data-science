@@ -35,8 +35,8 @@ The GDS implementation of FastRP extends the original algorithmfootnote:[Chen, H
 
 - It allows the usage of <<_node_properties,node properties>> to influence the creation of the initial random vectors.
 - It introduces the <<algorithms-embeddings-fastrp-node-self-influence,`nodeSelfInfluence`>> parameter.
-- It supports both undirected and <<algorithms-embeddings-fastrp-node-self-orientation,directed>> graphs.
-- It supports weighted graphs via the `relationshipWeightProperty` parameter (see the <<algorithms-embeddings-fastrp-examples-weighted,example>>).
+- It supports <<algorithms-embeddings-fastrp-node-self-orientation,directed graphs>>.
+- It supports <<algorithms-embeddings-fastrp-weighted,weighted graphs>>.
 
 The FastRP algorithm initially assigns random vectors to all nodes using a technique called _very sparse random projection_ footnote:[Achlioptas, Dimitris. "Database-friendly random projections: Johnson-Lindenstrauss with binary coins." _Journal of computer and System Sciences_ 66, no. 4 (2003): 671-687.]. Starting with random vectors (_node projections_) and iteratively averaging over node neighborhoods, the algorithm constructs a sequence of _intermediate embeddings_ image:equations/fastrp/fastrp1.svg[e n to the ith] for each node _n_.
 More precisely,
@@ -184,6 +184,13 @@ If node properties are not used, using `nodeSelfInfluence` may also have a posit
 Choosing the right orientation when creating the graph may have the single greatest impact.
 The FastRP algorithm is designed to work with undirected graphs, and we expect this to be the best in most cases.
 If you expect only outgoing or incoming relationships to be informative for a prediction task, then you may want to try using the orientations `NATURAL` or `REVERSE` respectively.
+
+
+[[algorithms-embeddings-fastrp-weighted]]
+=== Weighted graphs
+
+By default, the algorithm treats the graph relationships as unweighted.
+You can specify a relationship weight with the `relationshipWeightProperty` parameter to instruct the algorithm to compute weighted averages of the neighboring embeddings.
 
 
 [[algorithms-embeddings-fastrp-syntax]]
@@ -575,8 +582,6 @@ Additionally, each of the seven nodes now has a new property `fastrp-embedding` 
 [[algorithms-embeddings-fastrp-examples-weighted]]
 === Weighted
 
-By default, the algorithm is considering the relationships of the graph to be unweighted.
-To change this behaviour we can use configuration parameter called `relationshipWeightProperty`.
 Below is an example of running the weighted variant of algorithm.
 
 [role=query-example]
