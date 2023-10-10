@@ -87,6 +87,7 @@ import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.Scan;
 import org.neo4j.internal.kernel.api.TokenPredicate;
+import org.neo4j.internal.kernel.api.TokenSet;
 import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
@@ -96,6 +97,7 @@ import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
+import org.neo4j.internal.kernel.api.security.ReadSecurityPropertyProvider;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.internal.recordstorage.RecordIdType;
 import org.neo4j.internal.schema.IndexCapability;
@@ -154,6 +156,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -176,9 +179,17 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
 
     @Override
     public AccessMode accessMode(CustomAccessMode customAccessMode) {
-        return new CompatAccessModeImpl(customAccessMode);
+        return new CompatAccessModeImpl(customAccessMode) {
+            @Override
+            public boolean allowsReadNodeProperty(
+                Supplier<TokenSet> labels,
+                int propertyKey,
+                ReadSecurityPropertyProvider propertyProvider
+            ) {
+                return custom.allowsReadNodeProperty(propertyKey);
+            }
+        };
     }
-
     @Override
     public String username(AuthSubject subject) {
         return subject.executingUser();
