@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.LeidenSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
+import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.community.CommunityResultCompanion;
@@ -31,6 +32,7 @@ import org.neo4j.gds.leiden.LeidenStreamConfig;
 import org.neo4j.gds.procedures.community.leiden.LeidenMutateResult;
 import org.neo4j.gds.procedures.community.leiden.LeidenStatsResult;
 import org.neo4j.gds.procedures.community.leiden.LeidenStreamResult;
+import org.neo4j.gds.procedures.community.leiden.LeidenWriteResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -104,4 +106,21 @@ final class LeidenComputationResultTransformer {
     }
 
 
+    static LeidenWriteResult toWriteResult(NodePropertyWriteResult<LeidenSpecificFields> computationResult) {
+        return new LeidenWriteResult(
+            computationResult.algorithmSpecificFields().ranLevels(),
+            computationResult.algorithmSpecificFields().didConverge(),
+            computationResult.algorithmSpecificFields().nodeCount(),
+            computationResult.algorithmSpecificFields().communityCount(),
+            computationResult.preProcessingMillis(),
+            computationResult.computeMillis(),
+            computationResult.postProcessingMillis(),
+            computationResult.writeMillis(),
+            computationResult.nodePropertiesWritten(),
+            computationResult.algorithmSpecificFields().communityDistribution(),
+            computationResult.algorithmSpecificFields().modularities(),
+            computationResult.algorithmSpecificFields().modularity(),
+            computationResult.configuration().toMap()
+        );
+    }
 }

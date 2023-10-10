@@ -82,6 +82,7 @@ import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStrea
 import org.neo4j.gds.procedures.community.leiden.LeidenMutateResult;
 import org.neo4j.gds.procedures.community.leiden.LeidenStatsResult;
 import org.neo4j.gds.procedures.community.leiden.LeidenStreamResult;
+import org.neo4j.gds.procedures.community.leiden.LeidenWriteResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainStatsResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
@@ -518,6 +519,19 @@ public class CommunityProcedureFacade {
         return Stream.of(LeidenComputationResultTransformer.toStatsResult(computationResult, config));
     }
 
+    public Stream<LeidenWriteResult> leidenWrite(String graphName, Map<String, Object> configuration) {
+        var config = createConfig(configuration, LeidenWriteConfig::of);
+
+        var computationResult = writeBusinessFacade.leiden(
+            graphName,
+            config,
+            user,
+            databaseId,
+            ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
+        );
+
+        return Stream.of(LeidenComputationResultTransformer.toWriteResult(computationResult));
+    }
 
     public Stream<MemoryEstimateResult> leidenEstimateStream(
         Object graphNameOrConfiguration,

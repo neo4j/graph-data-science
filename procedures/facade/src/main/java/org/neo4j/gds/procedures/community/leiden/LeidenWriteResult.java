@@ -17,22 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.leiden;
+package org.neo4j.gds.procedures.community.leiden;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.procedures.community.leiden.LeidenStatsResult;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
 import java.util.List;
 import java.util.Map;
 
-public final class WriteResult extends LeidenStatsResult {
+public final class LeidenWriteResult extends LeidenStatsResult {
 
     public final long writeMillis;
     public final long nodePropertiesWritten;
 
-    private WriteResult(
+    public LeidenWriteResult(
         long ranLevels,
         boolean didConverge,
         long nodeCount,
@@ -64,7 +63,7 @@ public final class WriteResult extends LeidenStatsResult {
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    static class Builder extends AbstractCommunityResultBuilder<WriteResult> {
+    public static class Builder extends AbstractCommunityResultBuilder<LeidenWriteResult> {
 
         long levels = -1;
         boolean didConverge = false;
@@ -72,33 +71,33 @@ public final class WriteResult extends LeidenStatsResult {
         double modularity;
         List<Double> modularities;
 
-        Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+        public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 
-        Builder withLevels(long levels) {
+        public Builder withLevels(long levels) {
             this.levels = levels;
             return this;
         }
 
-        Builder withDidConverge(boolean didConverge) {
+        public Builder withDidConverge(boolean didConverge) {
             this.didConverge = didConverge;
             return this;
         }
 
-        Builder withModularity(double modularity) {
+        public Builder withModularity(double modularity) {
             this.modularity = modularity;
             return this;
         }
 
-        Builder withModularities(List<Double> modularities) {
+        public Builder withModularities(List<Double> modularities) {
             this.modularities = modularities;
             return this;
         }
 
         @Override
-        protected WriteResult buildResult() {
-            return new WriteResult(
+        protected LeidenWriteResult buildResult() {
+            return new LeidenWriteResult(
                 levels,
                 didConverge,
                 nodeCount,

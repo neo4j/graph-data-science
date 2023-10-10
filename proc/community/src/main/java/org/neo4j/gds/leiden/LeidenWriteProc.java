@@ -20,10 +20,8 @@
 package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.leiden.LeidenWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -43,19 +41,13 @@ public class LeidenWriteProc extends BaseProc {
     @Context
     public GraphDataScience facade;
 
-    @Context
-    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
-
     @Procedure(value = "gds.leiden.write", mode = WRITE)
     @Description(DESCRIPTION)
-    public Stream<WriteResult> write(
+    public Stream<LeidenWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new LeidenWriteSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.community().leidenWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.leiden.write.estimate", mode = READ)
@@ -71,7 +63,7 @@ public class LeidenWriteProc extends BaseProc {
     @Internal
     @Procedure(value = "gds.beta.leiden.write", mode = WRITE, deprecatedBy = "gds.leiden.write")
     @Description(DESCRIPTION)
-    public Stream<WriteResult> writeBeta(
+    public Stream<LeidenWriteResult> writeBeta(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -97,9 +89,4 @@ public class LeidenWriteProc extends BaseProc {
         return estimate(graphName, configuration);
     }
 
-
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
-    }
 }
