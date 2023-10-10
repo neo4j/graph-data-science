@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.KmeansSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
+import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.api.IdMap;
@@ -29,6 +30,7 @@ import org.neo4j.gds.kmeans.KmeansStatsConfig;
 import org.neo4j.gds.procedures.community.kmeans.KmeansMutateResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansStatsResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansStreamResult;
+import org.neo4j.gds.procedures.community.kmeans.KmeansWriteResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -83,6 +85,21 @@ final class KmeansComputationResultTransformer {
             computationResult.algorithmSpecificFields().averageDistanceToCentroid(),
             computationResult.algorithmSpecificFields().averageSilhouette(),
             config.toMap()
+        );
+    }
+
+    static KmeansWriteResult toWriteResult(NodePropertyWriteResult<KmeansSpecificFields> computationResult) {
+        return new KmeansWriteResult(
+            computationResult.preProcessingMillis(),
+            computationResult.computeMillis(),
+            computationResult.postProcessingMillis(),
+            computationResult.writeMillis(),
+            computationResult.nodePropertiesWritten(),
+            computationResult.algorithmSpecificFields().communityDistribution(),
+            computationResult.algorithmSpecificFields().centroids(),
+            computationResult.algorithmSpecificFields().averageDistanceToCentroid(),
+            computationResult.algorithmSpecificFields().averageSilhouette(),
+            computationResult.configuration().toMap()
         );
     }
 

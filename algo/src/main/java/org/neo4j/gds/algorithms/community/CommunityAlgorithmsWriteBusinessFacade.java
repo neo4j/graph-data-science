@@ -23,6 +23,7 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.AlphaSccSpecificFields;
 import org.neo4j.gds.algorithms.CommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.KCoreSpecificFields;
+import org.neo4j.gds.algorithms.KmeansSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.api.DatabaseId;
@@ -32,6 +33,8 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.kcore.KCoreDecompositionWriteConfig;
+import org.neo4j.gds.kmeans.KmeansResult;
+import org.neo4j.gds.kmeans.KmeansWriteConfig;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.scc.SccAlphaWriteConfig;
@@ -40,6 +43,9 @@ import org.neo4j.gds.wcc.WccWriteConfig;
 
 import java.util.Optional;
 import java.util.function.Supplier;
+
+import static org.neo4j.gds.algorithms.community.AlgorithmRunner.runWithTiming;
+import static org.neo4j.gds.algorithms.community.CommunityHelper.arrayMatrixToListMatrix;
 
 public class CommunityAlgorithmsWriteBusinessFacade {
 
@@ -203,6 +209,46 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             configuration.arrowConnectionInfo()
         );
 
+    }
+
+    public NodePropertyWriteResult<KmeansSpecificFields> kmeans(
+        String graphName,
+        KmeansWriteConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        StatisticsComputationInstructions statisticsComputationInstructions,
+        boolean computeListOfCentroids
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = runWithTiming(
+            () -> communityAlgorithmsFacade.kmeans(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        NodePropertyValuesMapper<KmeansResult, KmeansWriteConfig> mapper = ((result, config) ->
+            NodePropertyValuesAdapter.adapt(result.communities()));
+
+        return writeToDatabase(
+            algorithmResult,
+            configuration,
+            mapper,
+            (result -> result.communities()::get),
+            (result, componentCount, communitySummary) -> {
+                return new KmeansSpecificFields(
+                    communitySummary,
+                    arrayMatrixToListMatrix(computeListOfCentroids, result.centers()),
+                    result.averageDistanceToCentroid(),
+                    result.averageSilhouette()
+                );
+            },
+            statisticsComputationInstructions,
+            intermediateResult.computeMilliseconds,
+            () -> KmeansSpecificFields.EMPTY,
+            "KmeansWrite",
+            configuration.writeConcurrency(),
+            configuration.writeProperty(),
+            configuration.arrowConnectionInfo()
+        );
     }
 
 

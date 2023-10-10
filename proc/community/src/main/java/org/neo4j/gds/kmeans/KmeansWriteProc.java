@@ -20,10 +20,8 @@
 package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.community.kmeans.KmeansWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -39,29 +37,22 @@ import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class KmeansWriteProc extends BaseProc {
-
     @Context
-    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
-
+    public GraphDataScience facade;
     @Procedure(value = "gds.kmeans.write", mode = WRITE)
     @Description(KMEANS_DESCRIPTION)
-    public Stream<WriteResult> write(
+    public Stream<KmeansWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var writeSpec = new KmeansWriteSpec();
-
-        return new ProcedureExecutor<>(
-            writeSpec,
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.community().kmeansWrite(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)
     @Internal
     @Procedure(value = "gds.beta.kmeans.write", mode = WRITE, deprecatedBy = "gds.beta.kmeans.write")
     @Description(KMEANS_DESCRIPTION)
-    public Stream<WriteResult> betaWrite(
+    public Stream<KmeansWriteResult> betaWrite(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -76,13 +67,7 @@ public class KmeansWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        var writeSpec = new KmeansWriteSpec();
-
-        return new MemoryEstimationExecutor<>(
-            writeSpec,
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphName, configuration);
+        return facade.community().kmeansEstimateWrite(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)
@@ -98,8 +83,5 @@ public class KmeansWriteProc extends BaseProc {
         return estimate(graphName, configuration);
     }
 
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
-    }
+
 }

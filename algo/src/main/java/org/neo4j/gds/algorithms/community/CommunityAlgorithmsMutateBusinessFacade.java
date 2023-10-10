@@ -59,11 +59,10 @@ import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.TriangleCountMutateConfig;
 import org.neo4j.gds.wcc.WccMutateConfig;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Supplier;
 
 import static org.neo4j.gds.algorithms.community.AlgorithmRunner.runWithTiming;
+import static org.neo4j.gds.algorithms.community.CommunityHelper.arrayMatrixToListMatrix;
 
 public class CommunityAlgorithmsMutateBusinessFacade {
 
@@ -616,21 +615,6 @@ public class CommunityAlgorithmsMutateBusinessFacade {
                 return intermediateCommunitiesProvider.apply(nodeId);
             }
         };
-    }
-
-    private List<List<Double>> arrayMatrixToListMatrix(boolean shouldCompute, double[][] matrix) {
-        if (shouldCompute) {
-            var result = new ArrayList<List<Double>>();
-
-            for (double[] row : matrix) {
-                List<Double> rowList = new ArrayList<>();
-                result.add(rowList);
-                for (double column : row)
-                    rowList.add(column);
-            }
-            return result;
-        }
-        return null;
     }
 
 }

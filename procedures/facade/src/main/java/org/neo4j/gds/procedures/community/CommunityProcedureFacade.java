@@ -43,6 +43,7 @@ import org.neo4j.gds.kcore.KCoreDecompositionWriteConfig;
 import org.neo4j.gds.kmeans.KmeansMutateConfig;
 import org.neo4j.gds.kmeans.KmeansStatsConfig;
 import org.neo4j.gds.kmeans.KmeansStreamConfig;
+import org.neo4j.gds.kmeans.KmeansWriteConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationMutateConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStatsConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationStreamConfig;
@@ -69,6 +70,7 @@ import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionWriteResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansMutateResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansStatsResult;
 import org.neo4j.gds.procedures.community.kmeans.KmeansStreamResult;
+import org.neo4j.gds.procedures.community.kmeans.KmeansWriteResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationMutateResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStatsResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStreamResult;
@@ -799,6 +801,24 @@ public class CommunityProcedureFacade {
         return Stream.of(KmeansComputationResultTransformer.toMutateResult(computationResult));
     }
 
+    public Stream<KmeansWriteResult> kmeansWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var writeConfig = createConfig(configuration, KmeansWriteConfig::of);
+
+        var computationResult = writeBusinessFacade.kmeans(
+            graphName,
+            writeConfig,
+            user,
+            databaseId,
+            ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns),
+            procedureReturnColumns.contains("centroids")
+        );
+
+        return Stream.of(KmeansComputationResultTransformer.toWriteResult(computationResult));
+    }
+
     public Stream<KmeansStatsResult> kmeansStats(
         String graphName,
         Map<String, Object> configuration
@@ -838,6 +858,14 @@ public class CommunityProcedureFacade {
         Map<String, Object> algoConfiguration
     ) {
         var config = createConfig(algoConfiguration, KmeansStreamConfig::of);
+        return Stream.of(estimateBusinessFacade.kmeans(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> kmeansEstimateWrite(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, KmeansWriteConfig::of);
         return Stream.of(estimateBusinessFacade.kmeans(graphNameOrConfiguration, config));
     }
 
