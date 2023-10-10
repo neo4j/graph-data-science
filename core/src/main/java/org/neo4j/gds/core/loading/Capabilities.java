@@ -23,7 +23,7 @@ public interface Capabilities {
 
     WriteMode writeMode();
 
-    default boolean canWriteToDatabase() {
+    default boolean canWriteToLocalDatabase() {
         return writeMode() == WriteMode.LOCAL;
     }
 
@@ -32,8 +32,6 @@ public interface Capabilities {
     }
 
     enum WriteMode {
-        LOCAL,
-        REMOTE,
-        NONE
+        LOCAL, REMOTE, NONE
     }
 }

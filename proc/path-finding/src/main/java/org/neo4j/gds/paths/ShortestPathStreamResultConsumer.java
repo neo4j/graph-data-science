@@ -30,7 +30,9 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 
-public final class ShortestPathStreamResultConsumer<ALGO extends Algorithm<PathFindingResult>, CONFIG extends AlgoBaseConfig> implements ComputationResultConsumer<ALGO, PathFindingResult, CONFIG, Stream<StreamResult>> {
+public final class ShortestPathStreamResultConsumer<ALGO extends Algorithm<PathFindingResult>, CONFIG extends AlgoBaseConfig>
+    implements
+    ComputationResultConsumer<ALGO, PathFindingResult, CONFIG, Stream<StreamResult>> {
 
     @Override
     public Stream<StreamResult> consume(
@@ -43,8 +45,8 @@ public final class ShortestPathStreamResultConsumer<ALGO extends Algorithm<PathF
             () -> computationResult.result()
                 .map(result -> {
                     var graph = computationResult.graph();
-                    var shouldReturnPath = executionContext.returnColumns().contains("path")
-                        && computationResult.graphStore().capabilities().canWriteToDatabase();
+                    var shouldReturnPath = executionContext.returnColumns()
+                        .contains("path") && computationResult.graphStore().capabilities().canWriteToLocalDatabase();
 
                     var resultBuilder = new StreamResult.Builder(graph, executionContext.nodeLookup());
 
@@ -55,7 +57,8 @@ public final class ShortestPathStreamResultConsumer<ALGO extends Algorithm<PathF
                     executionContext.closeableResourceRegistry().register(resultStream);
 
                     return resultStream;
-                }).orElseGet(Stream::empty)
+                })
+                .orElseGet(Stream::empty)
         );
     }
 }

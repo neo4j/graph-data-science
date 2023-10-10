@@ -37,11 +37,13 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 
-@GdsCallable(name = "gds.spanningTree.write",
-             aliases = {"gds.beta.spanningTree.write"},
-             description = SpanningTreeWriteProc.DESCRIPTION,
-             executionMode = MUTATE_RELATIONSHIP)
-public class SpanningTreeWriteSpec implements AlgorithmSpec<Prim, SpanningTree, SpanningTreeWriteConfig, Stream<WriteResult>, SpanningTreeAlgorithmFactory<SpanningTreeWriteConfig>> {
+@GdsCallable(
+    name = "gds.spanningTree.write",
+    aliases = {"gds.beta.spanningTree.write"},
+    description = SpanningTreeWriteProc.DESCRIPTION,
+    executionMode = MUTATE_RELATIONSHIP)
+public class SpanningTreeWriteSpec implements
+    AlgorithmSpec<Prim, SpanningTree, SpanningTreeWriteConfig, Stream<WriteResult>, SpanningTreeAlgorithmFactory<SpanningTreeWriteConfig>> {
 
     @Override
     public String name() {
@@ -85,13 +87,18 @@ public class SpanningTreeWriteSpec implements AlgorithmSpec<Prim, SpanningTree, 
                     .withGraph(spanningGraph)
                     .withIdMappingOperator(spanningGraph::toOriginalNodeId)
                     .withTerminationFlag(prim.getTerminationFlag())
-                    .withProgressTracker(AlgorithmSpecProgressTrackerProvider.createProgressTracker(
-                        name(),
-                        graph.nodeCount(),
-                        config.writeConcurrency(),
-                        executionContext
-                    ))
-                    .withArrowConnectionInfo(config.arrowConnectionInfo(), computationResult.graphStore().databaseId().databaseName())
+                    .withProgressTracker(
+                        AlgorithmSpecProgressTrackerProvider.createProgressTracker(
+                            name(),
+                            graph.nodeCount(),
+                            config.writeConcurrency(),
+                            executionContext
+                        )
+                    )
+                    .withArrowConnectionInfo(
+                        config.arrowConnectionInfo(),
+                        computationResult.graphStore().databaseInfo().databaseId().databaseName()
+                    )
                     .build()
                     .write(config.writeRelationshipType(), config.writeProperty());
             }

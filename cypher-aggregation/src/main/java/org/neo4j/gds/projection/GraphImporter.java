@@ -22,6 +22,7 @@ package org.neo4j.gds.projection;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.compress.AdjacencyCompressor;
@@ -180,7 +181,7 @@ public final class GraphImporter {
     }
 
     public AggregationResult result(
-        DatabaseId databaseId,
+        DatabaseInfo databaseInfo,
         ProgressTimer timer,
         boolean hasSeenArbitraryId
     ) {
@@ -188,7 +189,7 @@ public final class GraphImporter {
 
         // in case something else has written something with the same graph name
         // validate again before doing the heavier graph building
-        validateGraphName(config.graphName(), config.username(), databaseId);
+        validateGraphName(config.graphName(), config.username(), databaseInfo.databaseId());
 
         this.idMapBuilder.prepareForFlush();
 
@@ -199,7 +200,7 @@ public final class GraphImporter {
         var graphStoreBuilder = new GraphStoreBuilder()
             .concurrency(this.config.readConcurrency())
             .capabilities(ImmutableStaticCapabilities.of(writeMode))
-            .databaseId(databaseId);
+            .databaseInfo(databaseInfo);
 
         var valueMapper = buildNodesWithProperties(graphStoreBuilder);
         buildRelationshipsWithProperties(graphStoreBuilder, valueMapper);
@@ -221,13 +222,15 @@ public final class GraphImporter {
     }
 
     private RelationshipsBuilder newRelImporter(RelationshipType relType, @Nullable PropertyValues properties) {
-        var orientation = this.undirectedRelationshipTypes.contains(relType.name) || this.undirectedRelationshipTypes.contains(
-            "*")
-            ? UNDIRECTED
-            : NATURAL;
+        var orientation = this.undirectedRelationshipTypes.contains(relType.name) || this.undirectedRelationshipTypes
+            .contains(
+                "*"
+            )
+                ? UNDIRECTED
+                : NATURAL;
 
-        boolean indexInverse = inverseIndexedRelationshipTypes.contains(relType.name)
-                               || inverseIndexedRelationshipTypes.contains("*");
+        boolean indexInverse = inverseIndexedRelationshipTypes.contains(relType.name) || inverseIndexedRelationshipTypes
+            .contains("*");
 
         var relationshipsBuilderBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(this.idMapBuilder)

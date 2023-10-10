@@ -33,8 +33,8 @@ public interface StaticCapabilities extends Capabilities {
 
     @Value.Lazy
     @Override
-    default boolean canWriteToDatabase() {
-        return Capabilities.super.canWriteToDatabase();
+    default boolean canWriteToLocalDatabase() {
+        return Capabilities.super.canWriteToLocalDatabase();
     }
 
     @Value.Lazy

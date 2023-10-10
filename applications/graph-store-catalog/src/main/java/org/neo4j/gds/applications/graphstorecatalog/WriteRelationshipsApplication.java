@@ -110,7 +110,7 @@ public class WriteRelationshipsApplication {
             .withIdMappingOperator(graph::toOriginalNodeId)
             .withGraph(graph)
             .withTerminationFlag(terminationFlag)
-            .withArrowConnectionInfo(arrowConnectionInfo, graphStore.databaseId().databaseName())
+            .withArrowConnectionInfo(arrowConnectionInfo, graphStore.databaseInfo().databaseId().databaseName())
             .withProgressTracker(progressTracker);
 
         if (relationshipProperty.isPresent()) {

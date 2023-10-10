@@ -52,34 +52,33 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 class GraphSamplingApplicationTest {
 
     @GdlGraph(idOffset = 42)
-    private static final String DB_CYPHER =
-        "CREATE" +
-            "  (x:Z {prop: 42})" +
-            ", (x1:Z {prop: 43})" +
-            ", (x2:Z {prop: 44})" +
-            ", (x3:Z {prop: 45})" +
-            ", (a:N {prop: 46})" +
-            ", (b:N {prop: 47})" +
-            ", (c:N {prop: 48, attr: 48})" +
-            ", (d:N {prop: 49, attr: 48})" +
-            ", (e:M {prop: 50, attr: 48})" +
-            ", (f:M {prop: 51, attr: 48})" +
-            ", (g:M {prop: 52})" +
-            ", (h:M {prop: 53})" +
-            ", (i:X {prop: 54})" +
-            ", (j:M {prop: 55})" +
-            ", (x)-[:R1]->(x1)" +
-            ", (x)-[:R1]->(x2)" +
-            ", (x)-[:R1]->(x3)" +
-            ", (e)-[:R1]->(d)" +
-            ", (i)-[:R1]->(g)" +
-            ", (a)-[:R1 {cost: 10.0, distance: 5.8}]->(b)" +
-            ", (a)-[:R1 {cost: 10.0, distance: 4.8}]->(c)" +
-            ", (c)-[:R1 {cost: 10.0, distance: 5.8}]->(d)" +
-            ", (d)-[:R1 {cost:  4.2, distance: 2.6}]->(e)" +
-            ", (e)-[:R1 {cost: 10.0, distance: 5.8}]->(f)" +
-            ", (f)-[:R1 {cost: 10.0, distance: 9.9}]->(g)" +
-            ", (h)-[:R2 {cost: 10.0, distance: 5.8}]->(i)";
+    private static final String DB_CYPHER = "CREATE" +
+        "  (x:Z {prop: 42})" +
+        ", (x1:Z {prop: 43})" +
+        ", (x2:Z {prop: 44})" +
+        ", (x3:Z {prop: 45})" +
+        ", (a:N {prop: 46})" +
+        ", (b:N {prop: 47})" +
+        ", (c:N {prop: 48, attr: 48})" +
+        ", (d:N {prop: 49, attr: 48})" +
+        ", (e:M {prop: 50, attr: 48})" +
+        ", (f:M {prop: 51, attr: 48})" +
+        ", (g:M {prop: 52})" +
+        ", (h:M {prop: 53})" +
+        ", (i:X {prop: 54})" +
+        ", (j:M {prop: 55})" +
+        ", (x)-[:R1]->(x1)" +
+        ", (x)-[:R1]->(x2)" +
+        ", (x)-[:R1]->(x3)" +
+        ", (e)-[:R1]->(d)" +
+        ", (i)-[:R1]->(g)" +
+        ", (a)-[:R1 {cost: 10.0, distance: 5.8}]->(b)" +
+        ", (a)-[:R1 {cost: 10.0, distance: 4.8}]->(c)" +
+        ", (c)-[:R1 {cost: 10.0, distance: 5.8}]->(d)" +
+        ", (d)-[:R1 {cost:  4.2, distance: 2.6}]->(e)" +
+        ", (e)-[:R1 {cost: 10.0, distance: 5.8}]->(f)" +
+        ", (f)-[:R1 {cost: 10.0, distance: 9.9}]->(g)" +
+        ", (h)-[:R2 {cost: 10.0, distance: 5.8}]->(i)";
 
     @Inject
     private GraphStore graphStore;
@@ -128,15 +127,17 @@ class GraphSamplingApplicationTest {
 
         assertThat(result.nodeCount).isEqualTo(expectedNodeCount);
 
-        assertThat(GraphStoreCatalog.exists(
-            user.getUsername(),
-            graphStore.databaseId().databaseName(),
-            "sample"
-        )).isTrue();
+        assertThat(
+            GraphStoreCatalog.exists(
+                user.getUsername(),
+                graphStore.databaseInfo().databaseId().databaseName(),
+                "sample"
+            )
+        ).isTrue();
 
         var sampledGraphStore = GraphStoreCatalog.get(
             user.getUsername(),
-            graphStore.databaseId().databaseName(),
+            graphStore.databaseInfo().databaseId().databaseName(),
             "sample"
         ).graphStore();
         assertThat(sampledGraphStore.nodeCount()).isEqualTo(expectedNodeCount);
@@ -165,15 +166,17 @@ class GraphSamplingApplicationTest {
         );
 
         assertThat(result.nodeCount).isEqualTo(expectedNodeCount);
-        assertThat(GraphStoreCatalog.exists(
-            user.getUsername(),
-            graphStore.databaseId(),
-            "sample"
-        )).isTrue();
+        assertThat(
+            GraphStoreCatalog.exists(
+                user.getUsername(),
+                graphStore.databaseInfo().databaseId(),
+                "sample"
+            )
+        ).isTrue();
 
         var sampledGraphStore = GraphStoreCatalog.get(
             user.getUsername(),
-            graphStore.databaseId(),
+            graphStore.databaseInfo().databaseId(),
             "sample"
         ).graphStore();
         assertThat(sampledGraphStore.nodeCount()).isEqualTo(expectedNodeCount);
@@ -198,10 +201,14 @@ class GraphSamplingApplicationTest {
             GraphName.parse("graph"),
             GraphName.parse("sample"),
             Map.of(
-                "samplingRatio", samplingRatio,
-                "concurrency", 1,
-                "startNodes", List.of(x),
-                "randomSeed", 42L
+                "samplingRatio",
+                samplingRatio,
+                "concurrency",
+                1,
+                "startNodes",
+                List.of(x),
+                "randomSeed",
+                42L
             ),
             SamplerCompanion.RWR_CONFIG_PROVIDER,
             SamplerCompanion.RWR_PROVIDER
@@ -209,11 +216,13 @@ class GraphSamplingApplicationTest {
 
         assertThat(result.startNodeCount).isEqualTo(expectedStartNodeCount);
 
-        assertThat(GraphStoreCatalog.exists(
-            user.getUsername(),
-            graphStore.databaseId(),
-            "sample"
-        )).isTrue();
+        assertThat(
+            GraphStoreCatalog.exists(
+                user.getUsername(),
+                graphStore.databaseInfo().databaseId(),
+                "sample"
+            )
+        ).isTrue();
 
     }
 
@@ -236,10 +245,14 @@ class GraphSamplingApplicationTest {
             GraphName.parse("graph"),
             GraphName.parse("sample"),
             Map.of(
-                "samplingRatio", samplingRatio,
-                "concurrency", 1,
-                "startNodes", List.of(x),
-                "randomSeed", 42L
+                "samplingRatio",
+                samplingRatio,
+                "concurrency",
+                1,
+                "startNodes",
+                List.of(x),
+                "randomSeed",
+                42L
             ),
             SamplerCompanion.CNARW_CONFIG_PROVIDER,
             SamplerCompanion.CNARW_PROVIDER
@@ -247,17 +260,19 @@ class GraphSamplingApplicationTest {
 
         assertThat(result.startNodeCount).isEqualTo(expectedStartNodeCount);
 
-        assertThat(GraphStoreCatalog.exists(
-            user.getUsername(),
-            graphStore.databaseId(),
-            "sample"
-        )).isTrue();
+        assertThat(
+            GraphStoreCatalog.exists(
+                user.getUsername(),
+                graphStore.databaseInfo().databaseId(),
+                "sample"
+            )
+        ).isTrue();
 
     }
 
     /**
      * @deprecated We need this just long enough that we can drive out usages of Neo4j's log.
-     *     Therefore, I do not want to build general support for this
+     *             Therefore, I do not want to build general support for this
      */
     @Deprecated
     private static class Neo4jBackedLogForTesting implements Log {

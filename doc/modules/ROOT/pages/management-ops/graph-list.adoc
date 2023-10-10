@@ -18,6 +18,7 @@ CALL gds.graph.list(
 ) YIELD
   graphName: String,
   database: String,
+  databaseLocation: String,
   configuration: Map,
   nodeCount: Integer,
   relationshipCount: Integer,
@@ -44,6 +45,7 @@ CALL gds.graph.list(
 | Name                   | Type     | Description
 | graphName              | String   | Name of the graph.
 | database               | String   | Name of the database in which the graph has been projected.
+| databaseLocation       | String   | Location of the database from which the graph has been projected. Can be one of `local`, `remote` or `none`.
 | configuration          | Map      | The configuration used to project the graph in memory.
 | nodeCount              | Integer  | Number of nodes in the graph.
 | relationshipCount      | Integer  | Number of relationships in the graph.

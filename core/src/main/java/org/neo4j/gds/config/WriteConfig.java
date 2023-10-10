@@ -62,7 +62,7 @@ public interface WriteConfig extends ConcurrencyConfig {
      * export builders.
      */
     @Configuration.ConvertWith(method = "org.neo4j.gds.config.WriteConfig.ArrowConnectionInfo#parse")
-    @Configuration.ToMapValue(value="org.neo4j.gds.config.WriteConfig.ArrowConnectionInfo#toMap")
+    @Configuration.ToMapValue(value = "org.neo4j.gds.config.WriteConfig.ArrowConnectionInfo#toMap")
     Optional<ArrowConnectionInfo> arrowConnectionInfo();
 
     @Configuration.GraphStoreValidationCheck
@@ -72,7 +72,8 @@ public interface WriteConfig extends ConcurrencyConfig {
         @SuppressWarnings("unused") Collection<NodeLabel> selectedLabels,
         @SuppressWarnings("unused") Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        if (!graphStore.capabilities().canWriteToDatabase() && !graphStore.capabilities().canWriteToRemoteDatabase()) {
+        if (!graphStore.capabilities().canWriteToLocalDatabase() && !graphStore.capabilities()
+            .canWriteToRemoteDatabase()) {
             throw new IllegalArgumentException("The provided graph does not support `write` execution mode.");
         }
     }
@@ -80,8 +81,11 @@ public interface WriteConfig extends ConcurrencyConfig {
     @ValueClass
     interface ArrowConnectionInfo {
         String hostname();
+
         int port();
+
         String bearerToken();
+
         @Value.Default
         default boolean useEncryption() {
             return true;
@@ -111,10 +115,12 @@ public interface WriteConfig extends ConcurrencyConfig {
             if (input instanceof ArrowConnectionInfo) {
                 return (ArrowConnectionInfo) input;
             }
-            throw new IllegalArgumentException(formatWithLocale(
-                "Expected input to be of type `map`, but got `%s`",
-                input.getClass().getSimpleName()
-            ));
+            throw new IllegalArgumentException(
+                formatWithLocale(
+                    "Expected input to be of type `map`, but got `%s`",
+                    input.getClass().getSimpleName()
+                )
+            );
         }
 
         static Map<String, Object> toMap(ArrowConnectionInfo info) {

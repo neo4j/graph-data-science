@@ -25,6 +25,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -50,7 +51,8 @@ import java.util.Map;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> extends GraphStoreFactory<CSRGraphStore, CONFIG> {
+public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> extends
+    GraphStoreFactory<CSRGraphStore, CONFIG> {
 
     public CSRGraphStoreFactory(
         CONFIG graphProjectConfig,
@@ -69,7 +71,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
         );
 
         return new GraphStoreBuilder()
-            .databaseId(loadingContext.databaseId())
+            .databaseInfo(ImmutableDatabaseInfo.of(loadingContext.databaseId(), DatabaseLocation.LOCAL))
             .capabilities(capabilities)
             .schema(schema)
             .nodes(nodes)
@@ -110,10 +112,12 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
         relationshipProjections.projections().forEach((relationshipType, relationshipProjection) -> {
             boolean undirected = relationshipProjection.orientation() == Orientation.UNDIRECTED;
             if (isLoading) {
-                builder.max(List.of(
-                    relationshipEstimationDuringLoading(relationshipType, relationshipProjection, undirected),
-                    relationshipEstimationAfterLoading(relationshipType, relationshipProjection, undirected)
-                ));
+                builder.max(
+                    List.of(
+                        relationshipEstimationDuringLoading(relationshipType, relationshipProjection, undirected),
+                        relationshipEstimationAfterLoading(relationshipType, relationshipProjection, undirected)
+                    )
+                );
             } else {
                 builder.add(MemoryEstimations.builder(HugeGraph.class).build());
                 builder.add(relationshipEstimationAfterLoading(relationshipType, relationshipProjection, undirected));
@@ -168,7 +172,8 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
                 indexSuffix
             ),
             AdjacencyBuffer.memoryEstimation(
-                relationshipType, (int) relationshipProjection.properties().stream().count(),
+                relationshipType,
+                (int) relationshipProjection.properties().stream().count(),
                 undirected
             )
         );
@@ -185,15 +190,17 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
         relationshipProjection
             .properties()
             .mappings()
-            .forEach(resolvedPropertyMapping -> estimationBuilder.perNode(
-                formatWithLocale(
-                    "property '%s.%s'%s",
-                    relationshipType,
-                    resolvedPropertyMapping.propertyKey(),
-                    indexSuffix
-                ),
-                HugeLongArray::memoryEstimation
-            ));
+            .forEach(
+                resolvedPropertyMapping -> estimationBuilder.perNode(
+                    formatWithLocale(
+                        "property '%s.%s'%s",
+                        relationshipType,
+                        resolvedPropertyMapping.propertyKey(),
+                        indexSuffix
+                    ),
+                    HugeLongArray::memoryEstimation
+                )
+            );
     }
 
     private static MemoryEstimation relationshipEstimationAfterLoading(

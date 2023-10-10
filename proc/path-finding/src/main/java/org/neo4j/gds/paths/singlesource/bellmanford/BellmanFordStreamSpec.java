@@ -36,7 +36,8 @@ import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 @GdsCallable(name = "gds.bellmanFord.stream", description = BellmanFord.DESCRIPTION, executionMode = STREAM)
-public class BellmanFordStreamSpec implements AlgorithmSpec<BellmanFord, BellmanFordResult, BellmanFordStreamConfig, Stream<StreamResult>, BellmanFordAlgorithmFactory<BellmanFordStreamConfig>> {
+public class BellmanFordStreamSpec implements
+    AlgorithmSpec<BellmanFord, BellmanFordResult, BellmanFordStreamConfig, Stream<StreamResult>, BellmanFordAlgorithmFactory<BellmanFordStreamConfig>> {
 
     @Override
     public String name() {
@@ -64,8 +65,7 @@ public class BellmanFordStreamSpec implements AlgorithmSpec<BellmanFord, Bellman
                     var graph = computationResult.graph();
                     var shouldReturnPath = executionContext
                         .returnColumns()
-                        .contains("route")
-                        && computationResult.graphStore().capabilities().canWriteToDatabase();
+                        .contains("route") && computationResult.graphStore().capabilities().canWriteToLocalDatabase();
 
                     var containsNegativeCycle = result.containsNegativeCycle();
 
@@ -85,7 +85,8 @@ public class BellmanFordStreamSpec implements AlgorithmSpec<BellmanFord, Bellman
                     // the progress tracker to close its root task
                     executionContext.closeableResourceRegistry().register(resultStream);
                     return resultStream;
-                }).orElseGet(Stream::empty)
+                })
+                .orElseGet(Stream::empty)
         );
     }
 

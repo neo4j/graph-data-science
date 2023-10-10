@@ -22,8 +22,10 @@ package org.neo4j.gds.core.io.file;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.core.io.GraphStoreRelationshipVisitor;
@@ -81,7 +83,12 @@ class GraphStoreRelationshipVisitorTest {
             .initRelationshipsBuilder()
             .concurrency(1)
             .nodes(graph);
-        var relationshipVisitor = new GraphStoreRelationshipVisitor(relationshipSchema, relationshipBuilderSupplier, relationshipBuildersByType, List.of());
+        var relationshipVisitor = new GraphStoreRelationshipVisitor(
+            relationshipSchema,
+            relationshipBuilderSupplier,
+            relationshipBuildersByType,
+            List.of()
+        );
 
         var relationshipTypeR = RelationshipType.of("R");
         var relationshipTypeR1 = RelationshipType.of("R1");
@@ -169,19 +176,25 @@ class GraphStoreRelationshipVisitorTest {
             .capabilities(ImmutableStaticCapabilities.of(WriteMode.LOCAL))
             .nodes(nodes)
             .relationshipImportResult(actualRelationships)
-            .databaseId(DatabaseId.random())
+            .databaseInfo(ImmutableDatabaseInfo.of(DatabaseId.random(), DatabaseLocation.LOCAL))
             .concurrency(1)
             .build()
             .getUnion();
     }
 
-    private void visitRelationshipType(GraphStoreRelationshipVisitor relationshipVisitor, long nodeId, RelationshipType relationshipType, Optional<String> relationshipPropertyKey) {
+    private void visitRelationshipType(
+        GraphStoreRelationshipVisitor relationshipVisitor,
+        long nodeId,
+        RelationshipType relationshipType,
+        Optional<String> relationshipPropertyKey
+    ) {
         graph
             .relationshipTypeFilteredGraph(Set.of(relationshipType))
             .forEachRelationship(nodeId, 0.0, (source, target, propertyValue) -> {
                 relationshipVisitor.startId(graph.toOriginalNodeId(source));
                 relationshipVisitor.endId(graph.toOriginalNodeId(target));
-                relationshipPropertyKey.ifPresent(propertyKey -> relationshipVisitor.property(propertyKey, propertyValue));
+                relationshipPropertyKey
+                    .ifPresent(propertyKey -> relationshipVisitor.property(propertyKey, propertyValue));
                 relationshipVisitor.type(relationshipType.name());
                 relationshipVisitor.endOfEntity();
                 return true;

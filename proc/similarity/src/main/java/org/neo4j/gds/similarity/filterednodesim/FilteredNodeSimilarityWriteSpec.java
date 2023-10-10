@@ -41,14 +41,13 @@ import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 import static org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamProc.DESCRIPTION;
 
-@GdsCallable(name = "gds.nodeSimilarity.filtered.write", aliases = {"gds.alpha.nodeSimilarity.filtered.write"}, description = DESCRIPTION, executionMode = ExecutionMode.WRITE_RELATIONSHIP)
-public class FilteredNodeSimilarityWriteSpec implements AlgorithmSpec<
-    NodeSimilarity,
-    NodeSimilarityResult,
-    FilteredNodeSimilarityWriteConfig,
-    Stream<SimilarityWriteResult>,
-    FilteredNodeSimilarityFactory<FilteredNodeSimilarityWriteConfig>
-    > {
+@GdsCallable(
+    name = "gds.nodeSimilarity.filtered.write",
+    aliases = {"gds.alpha.nodeSimilarity.filtered.write"},
+    description = DESCRIPTION,
+    executionMode = ExecutionMode.WRITE_RELATIONSHIP)
+public class FilteredNodeSimilarityWriteSpec implements
+    AlgorithmSpec<NodeSimilarity, NodeSimilarityResult, FilteredNodeSimilarityWriteConfig, Stream<SimilarityWriteResult>, FilteredNodeSimilarityFactory<FilteredNodeSimilarityWriteConfig>> {
 
     @Override
     public String name() {
@@ -56,7 +55,9 @@ public class FilteredNodeSimilarityWriteSpec implements AlgorithmSpec<
     }
 
     @Override
-    public FilteredNodeSimilarityFactory<FilteredNodeSimilarityWriteConfig> algorithmFactory(ExecutionContext executionContext) {
+    public FilteredNodeSimilarityFactory<FilteredNodeSimilarityWriteConfig> algorithmFactory(
+        ExecutionContext executionContext
+    ) {
         return new FilteredNodeSimilarityFactory<>();
     }
 
@@ -67,7 +68,10 @@ public class FilteredNodeSimilarityWriteSpec implements AlgorithmSpec<
 
     @Override
     public ComputationResultConsumer<NodeSimilarity, NodeSimilarityResult, FilteredNodeSimilarityWriteConfig, Stream<SimilarityWriteResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging("Graph write failed", executionContext.log(), () -> {
+        return (
+            computationResult,
+            executionContext
+        ) -> runWithExceptionLogging("Graph write failed", executionContext.log(), () -> {
             var config = computationResult.config();
             var resultBuilder = new SimilarityWriteResult.Builder();
 
@@ -111,7 +115,10 @@ public class FilteredNodeSimilarityWriteSpec implements AlgorithmSpec<
                                 .withGraph(similarityGraph)
                                 .withTerminationFlag(algorithm.getTerminationFlag())
                                 .withProgressTracker(progressTracker)
-                                .withArrowConnectionInfo(config.arrowConnectionInfo(), computationResult.graphStore().databaseId().databaseName())
+                                .withArrowConnectionInfo(
+                                    config.arrowConnectionInfo(),
+                                    computationResult.graphStore().databaseInfo().databaseId().databaseName()
+                                )
                                 .build();
 
                             if (SimilarityProc.shouldComputeHistogram(executionContext.returnColumns())) {

@@ -121,7 +121,7 @@ public class GraphSampleConstructor {
         var relationshipImportResult = RelationshipImportResult.of(filteredRelationships);
 
         var outputGraphStore = new GraphStoreBuilder()
-            .databaseId(inputGraphStore.databaseId())
+            .databaseInfo(inputGraphStore.databaseInfo())
             .capabilities(inputGraphStore.capabilities())
             .schema(filteredSchema)
             .nodes(ImmutableNodes.of(filteredSchema.nodeSchema(), idMap, nodePropertyStore))
@@ -197,7 +197,8 @@ public class GraphSampleConstructor {
 
         @Override
         public void run() {
-            for (long mappedId = partition.startNode(); mappedId < partition.startNode() + partition.nodeCount(); mappedId++) {
+            for (long mappedId = partition.startNode(); mappedId < partition.startNode() + partition
+                .nodeCount(); mappedId++) {
                 if (!nodesBitSet.get(mappedId)) {
                     continue;
                 }

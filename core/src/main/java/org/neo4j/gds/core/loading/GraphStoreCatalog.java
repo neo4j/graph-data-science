@@ -53,7 +53,8 @@ public final class GraphStoreCatalog {
     // we make the log injectable
     private static Optional<Log> log = Optional.empty();
 
-    private GraphStoreCatalog() { }
+    private GraphStoreCatalog() {
+    }
 
     public static void registerListener(GraphStoreCatalogListener listener) {
         listeners.add(listener);
@@ -79,9 +80,11 @@ public final class GraphStoreCatalog {
         var usersWithMatchingGraphs = userCatalogs
             .entrySet()
             .stream()
-            .flatMap(e -> Stream
-                .ofNullable(e.getValue().get(userCatalogKey, false))
-                .map(graph -> Map.entry(e.getKey(), graph)))
+            .flatMap(
+                e -> Stream
+                    .ofNullable(e.getValue().get(userCatalogKey, false))
+                    .map(graph -> Map.entry(e.getKey(), graph))
+            )
             .collect(Collectors.toList());
 
         if (usersWithMatchingGraphs.size() == 1) {
@@ -99,11 +102,13 @@ public final class GraphStoreCatalog {
                 .collect(Collectors.toSet())
         );
 
-        throw new IllegalArgumentException(formatWithLocale(
-            "Multiple graphs that match '%s' are found from the users %s.",
-            graphName,
-            usernames
-        ));
+        throw new IllegalArgumentException(
+            formatWithLocale(
+                "Multiple graphs that match '%s' are found from the users %s.",
+                graphName,
+                usernames
+            )
+        );
     }
 
     public static void remove(
@@ -116,7 +121,8 @@ public final class GraphStoreCatalog {
         var ownCatalog = getUserCatalog(request.username());
 
         var didRemove = ownCatalog.remove(
-            userCatalogKey, removedGraphConsumer,
+            userCatalogKey,
+            removedGraphConsumer,
             failOnMissing && request.restrictSearchToUsernameCatalog()
         );
         if (didRemove || request.restrictSearchToUsernameCatalog()) {
@@ -136,11 +142,13 @@ public final class GraphStoreCatalog {
 
         if (usersWithMatchingGraphs.size() > 1) {
             var usernames = StringJoining.joinVerbose(usersWithMatchingGraphs);
-            throw new IllegalArgumentException(formatWithLocale(
-                "Multiple graphs that match '%s' are found from the users %s.",
-                graphName,
-                usernames
-            ));
+            throw new IllegalArgumentException(
+                formatWithLocale(
+                    "Multiple graphs that match '%s' are found from the users %s.",
+                    graphName,
+                    usernames
+                )
+            );
         }
 
         if (!usersWithMatchingGraphs.isEmpty()) {
@@ -177,7 +185,7 @@ public final class GraphStoreCatalog {
                 userCatalog = new UserCatalog();
             }
             userCatalog.set(
-                UserCatalog.UserCatalogKey.of(graphStore.databaseId(), config.graphName()),
+                UserCatalog.UserCatalogKey.of(graphStore.databaseInfo().databaseId(), config.graphName()),
                 config,
                 graphStore,
                 overwrite
@@ -185,7 +193,8 @@ public final class GraphStoreCatalog {
             return userCatalog;
         });
 
-        listeners.forEach(listener -> ExceptionUtil.safeRunWithLogException(
+        listeners.forEach(
+            listener -> ExceptionUtil.safeRunWithLogException(
                 log.orElseGet(Neo4jProxy::testLog),
                 () -> String.format(
                     Locale.US,
@@ -195,7 +204,7 @@ public final class GraphStoreCatalog {
                 ),
                 () -> listener.onProject(
                     config.username(),
-                    graphStore.databaseId().databaseName(),
+                    graphStore.databaseInfo().databaseId().databaseName(),
                     config.graphName()
                 )
             )
@@ -323,10 +332,12 @@ public final class GraphStoreCatalog {
             GraphStoreWithConfig graphStoreWithConfig = GraphStoreWithConfig.of(graphStore, config);
 
             if (!overwrite && graphsByName.containsKey(userCatalogKey)) {
-                throw new IllegalStateException(formatWithLocale(
-                    "Graph name %s already loaded",
-                    config.graphName()
-                ));
+                throw new IllegalStateException(
+                    formatWithLocale(
+                        "Graph name %s already loaded",
+                        config.graphName()
+                    )
+                );
             }
             graphsByName.put(userCatalogKey, graphStoreWithConfig);
         }
@@ -337,10 +348,12 @@ public final class GraphStoreCatalog {
                 throw new IllegalArgumentException("Both name and degreeDistribution must be not null");
             }
             if (!graphsByName.containsKey(userCatalogKey)) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "Cannot set degreeDistribution because graph %s does not exist",
-                    userCatalogKey.graphName()
-                ));
+                throw new IllegalArgumentException(
+                    formatWithLocale(
+                        "Cannot set degreeDistribution because graph %s does not exist",
+                        userCatalogKey.graphName()
+                    )
+                );
             }
             degreeDistributionByName.put(userCatalogKey, degreeDistribution);
         }
@@ -405,28 +418,34 @@ public final class GraphStoreCatalog {
             return graphsByName
                 .values()
                 .stream()
-                .map(graphStoreWithConfig -> ImmutableGraphStoreWithUserNameAndConfig.of(
-                    graphStoreWithConfig.graphStore(),
-                    userName,
-                    graphStoreWithConfig.config()
-                ));
+                .map(
+                    graphStoreWithConfig -> ImmutableGraphStoreWithUserNameAndConfig.of(
+                        graphStoreWithConfig.graphStore(),
+                        userName,
+                        graphStoreWithConfig.config()
+                    )
+                );
         }
 
         private Map<GraphProjectConfig, GraphStore> getGraphStores() {
-            return graphsByName.values().stream()
-                .collect(Collectors.toMap(
-                    GraphStoreWithConfig::config,
-                    GraphStoreWithConfig::graphStore
+            return graphsByName.values()
+                .stream()
+                .collect(
+                    Collectors.toMap(
+                        GraphStoreWithConfig::config,
+                        GraphStoreWithConfig::graphStore
                     )
                 );
         }
 
         private Map<GraphProjectConfig, GraphStore> getGraphStores(DatabaseId databaseId) {
-            return graphsByName.entrySet().stream()
+            return graphsByName.entrySet()
+                .stream()
                 .filter(entry -> entry.getKey().databaseName().equals(databaseId.databaseName()))
-                .collect(Collectors.toMap(
-                    entry -> entry.getValue().config(),
-                    entry -> entry.getValue().graphStore()
+                .collect(
+                    Collectors.toMap(
+                        entry -> entry.getValue().config(),
+                        entry -> entry.getValue().graphStore()
                     )
                 );
         }

@@ -45,7 +45,8 @@ import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm<ALGO_RESULT>, ALGO_RESULT, CONFIG extends WritePropertyConfig & AlgoBaseConfig, RESULT>
-    implements ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, Stream<RESULT>> {
+    implements
+    ComputationResultConsumer<ALGO, ALGO_RESULT, CONFIG, Stream<RESULT>> {
 
     private final ResultBuilderFunction<ALGO, ALGO_RESULT, CONFIG, RESULT> resultBuilderFunction;
     private final WriteNodePropertyListFunction<ALGO, ALGO_RESULT, CONFIG> nodePropertyListFunction;
@@ -61,9 +62,91 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
         this.procedureName = procedureName;
     }
 
+    private static void validatePropertiesCanBeWritten(
+        WriteMode writeMode,
+        Map<String, PropertySchema> propertySchemas,
+        Collection<NodeProperty> nodeProperties,
+        boolean hasArrowConnectionInfo
+    ) {
+        if (writeMode == WriteMode.REMOTE && !hasArrowConnectionInfo) {
+            throw new IllegalArgumentException("Missing arrow connection information");
+        }
+        if (writeMode == WriteMode.LOCAL && hasArrowConnectionInfo) {
+            throw new IllegalArgumentException(
+                "Arrow connection info was given although the write operation is targeting a local database"
+            );
+        }
+
+        var expectedPropertyState = expectedPropertyStateForWriteMode(writeMode);
+
+        var unexpectedProperties = nodeProperties
+            .stream()
+            .filter(nodeProperty -> {
+                var propertySchema = propertySchemas.get(nodeProperty.propertyKey());
+                if (propertySchema == null) {
+                    // We are executing an algorithm write mode and the property we are writing is
+                    // not in the GraphStore, therefore we do not perform any more checks
+                    return false;
+                }
+                var propertyState = propertySchema.state();
+                return !expectedPropertyState.test(propertyState);
+            })
+            .map(
+                nodeProperty -> formatWithLocale(
+                    "NodeProperty{propertyKey=%s, propertyState=%s}",
+                    nodeProperty.propertyKey(),
+                    propertySchemas.get(nodeProperty.propertyKey()).state()
+                )
+            )
+            .collect(Collectors.toList());
+
+        if (!unexpectedProperties.isEmpty()) {
+            throw new IllegalStateException(
+                formatWithLocale(
+                    "Expected all properties to be of state `%s` but some properties differ: %s",
+                    expectedPropertyState,
+                    unexpectedProperties
+                )
+            );
+        }
+    }
+
+    private static Predicate<PropertyState> expectedPropertyStateForWriteMode(WriteMode writeMode) {
+        switch (writeMode) {
+            case LOCAL:
+                // We need to allow persistent and transient as for example algorithms that support seeding will reuse a
+                // mutated (transient) property to write back properties that are in fact backed by a database
+                return state -> state == PropertyState.PERSISTENT || state == PropertyState.TRANSIENT;
+            case REMOTE:
+                // We allow transient properties for the same reason as above
+                return state -> state == PropertyState.REMOTE || state == PropertyState.TRANSIENT;
+            default:
+                throw new IllegalStateException(
+                    formatWithLocale(
+                        "Graph with write mode `%s` cannot write back to a database",
+                        writeMode
+                    )
+                );
+        }
+    }
+
+    ProgressTracker createProgressTracker(
+        long taskVolume,
+        int writeConcurrency,
+        ExecutionContext executionContext
+    ) {
+        return new TaskProgressTracker(
+            NodePropertyExporter.baseTask(this.procedureName, taskVolume),
+            executionContext.log(),
+            writeConcurrency,
+            executionContext.taskRegistryFactory()
+        );
+    }
+
     @Override
     public Stream<RESULT> consume(
-        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult, ExecutionContext executionContext
+        ComputationResult<ALGO, ALGO_RESULT, CONFIG> computationResult,
+        ExecutionContext executionContext
     ) {
         return runWithExceptionLogging("Graph write failed", executionContext.log(), () -> {
             CONFIG config = computationResult.config();
@@ -110,7 +193,10 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
                 .withIdMap(graph)
                 .withTerminationFlag(computationResult.algorithm().terminationFlag)
                 .withProgressTracker(progressTracker)
-                .withArrowConnectionInfo(config.arrowConnectionInfo(), computationResult.graphStore().databaseId().databaseName())
+                .withArrowConnectionInfo(
+                    config.arrowConnectionInfo(),
+                    computationResult.graphStore().databaseInfo().databaseId().databaseName()
+                )
                 .parallel(DefaultPool.INSTANCE, config.writeConcurrency())
                 .build();
 
@@ -122,80 +208,6 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
 
             resultBuilder.withNodeCount(computationResult.graph().nodeCount());
             resultBuilder.withNodePropertiesWritten(exporter.propertiesWritten());
-        }
-    }
-
-    ProgressTracker createProgressTracker(
-        long taskVolume,
-        int writeConcurrency,
-        ExecutionContext executionContext
-    ) {
-        return new TaskProgressTracker(
-            NodePropertyExporter.baseTask(this.procedureName, taskVolume),
-            executionContext.log(),
-            writeConcurrency,
-            executionContext.taskRegistryFactory()
-        );
-    }
-
-    private static void validatePropertiesCanBeWritten(
-        WriteMode writeMode,
-        Map<String, PropertySchema> propertySchemas,
-        Collection<NodeProperty> nodeProperties,
-        boolean hasArrowConnectionInfo
-    ) {
-        if (writeMode == WriteMode.REMOTE && !hasArrowConnectionInfo) {
-            throw new IllegalArgumentException("Missing arrow connection information");
-        }
-        if (writeMode == WriteMode.LOCAL && hasArrowConnectionInfo) {
-            throw new IllegalArgumentException(
-                "Arrow connection info was given although the write operation is targeting a local database");
-        }
-
-        var expectedPropertyState = expectedPropertyStateForWriteMode(writeMode);
-
-        var unexpectedProperties = nodeProperties
-            .stream()
-            .filter(nodeProperty -> {
-                var propertySchema = propertySchemas.get(nodeProperty.propertyKey());
-                if (propertySchema == null) {
-                    // We are executing an algorithm write mode and the property we are writing is
-                    // not in the GraphStore, therefore we do not perform any more checks
-                    return false;
-                }
-                var propertyState = propertySchema.state();
-                return !expectedPropertyState.test(propertyState);
-            })
-            .map(nodeProperty -> formatWithLocale(
-                "NodeProperty{propertyKey=%s, propertyState=%s}",
-                nodeProperty.propertyKey(),
-                propertySchemas.get(nodeProperty.propertyKey()).state()
-            ))
-            .collect(Collectors.toList());
-
-        if (!unexpectedProperties.isEmpty()) {
-            throw new IllegalStateException(formatWithLocale(
-                "Expected all properties to be of state `%s` but some properties differ: %s",
-                expectedPropertyState,
-                unexpectedProperties
-            ));
-        }
-    }
-
-    private static Predicate<PropertyState> expectedPropertyStateForWriteMode(WriteMode writeMode) {
-        switch (writeMode) {
-            case LOCAL:
-                // We need to allow persistent and transient as for example algorithms that support seeding will reuse a
-                // mutated (transient) property to write back properties that are in fact backed by a database
-                return state -> state == PropertyState.PERSISTENT || state == PropertyState.TRANSIENT;
-            case REMOTE:
-                // We allow transient properties for the same reason as above
-                return state -> state == PropertyState.REMOTE || state == PropertyState.TRANSIENT;
-            default:
-                throw new IllegalStateException(formatWithLocale(
-                    "Graph with write mode `%s` cannot write back to a database",
-                    writeMode
-                ));
         }
     }
 }

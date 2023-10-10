@@ -131,18 +131,21 @@ public class WriteNodePropertiesApplication {
                     .withTerminationFlag(terminationFlag)
                     .parallel(DefaultPool.INSTANCE, config.writeConcurrency())
                     .withProgressTracker(progressTracker)
-                    .withArrowConnectionInfo(config.arrowConnectionInfo(), graphStore.databaseId().databaseName())
+                    .withArrowConnectionInfo(
+                        config.arrowConnectionInfo(),
+                        graphStore.databaseInfo().databaseId().databaseName()
+                    )
                     .build();
 
-                var writeNodeProperties =
-                    config.nodeProperties().stream()
-                        .map(nodePropertyKey ->
-                            ImmutableNodeProperty.of(
-                                nodePropertyKey.writeProperty(),
-                                subGraph.nodeProperties(nodePropertyKey.nodeProperty())
-                            )
+                var writeNodeProperties = config.nodeProperties()
+                    .stream()
+                    .map(
+                        nodePropertyKey -> ImmutableNodeProperty.of(
+                            nodePropertyKey.writeProperty(),
+                            subGraph.nodeProperties(nodePropertyKey.nodeProperty())
                         )
-                        .collect(Collectors.toList());
+                    )
+                    .collect(Collectors.toList());
 
                 exporter.write(writeNodeProperties);
 

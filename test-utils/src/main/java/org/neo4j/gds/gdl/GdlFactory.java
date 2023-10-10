@@ -25,9 +25,11 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.Direction;
@@ -99,11 +101,13 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         Optional<Capabilities> graphCapabilities,
         Optional<String> idMapBuilderType
     ) {
-        var config = graphProjectConfig.orElseGet(() -> ImmutableGraphProjectFromGdlConfig.builder()
-            .username(userName.orElse(Username.EMPTY_USERNAME.username()))
-            .graphName(graphName.orElse("graph"))
-            .gdlGraph(gdlGraph.orElse(""))
-            .build());
+        var config = graphProjectConfig.orElseGet(
+            () -> ImmutableGraphProjectFromGdlConfig.builder()
+                .username(userName.orElse(Username.EMPTY_USERNAME.username()))
+                .graphName(graphName.orElse("graph"))
+                .gdlGraph(gdlGraph.orElse(""))
+                .build()
+        );
 
         var nextVertexId = nodeIdFunction
             .map(supplier -> (Function<Optional<String>, Long>) (ignored) -> supplier.getAsLong())
@@ -174,7 +178,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         );
 
         return new GraphStoreBuilder()
-            .databaseId(databaseId)
+            .databaseInfo(ImmutableDatabaseInfo.of(databaseId, DatabaseLocation.LOCAL))
             .capabilities(capabilities)
             .schema(schema)
             .nodes(nodes)
@@ -231,22 +235,26 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         var isFloat = firstType.equals(Float.class);
 
         if (!isLong && !isDouble && !isFloat) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "List property contains in-compatible type: %s.",
-                firstType.getSimpleName()
-            ));
+            throw new IllegalArgumentException(
+                formatWithLocale(
+                    "List property contains in-compatible type: %s.",
+                    firstType.getSimpleName()
+                )
+            );
         }
 
         var sameType = list.stream().allMatch(firstType::isInstance);
         if (!sameType) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "List property contains mixed types: %s",
-                list
-                    .stream()
-                    .map(Object::getClass)
-                    .map(Class::getSimpleName)
-                    .collect(Collectors.joining(", ", "[", "]"))
-            ));
+            throw new IllegalArgumentException(
+                formatWithLocale(
+                    "List property contains mixed types: %s",
+                    list
+                        .stream()
+                        .map(Object::getClass)
+                        .map(Class::getSimpleName)
+                        .collect(Collectors.joining(", ", "[", "]"))
+                )
+            );
         }
 
         var array = Array.newInstance(firstType, list.size());
@@ -255,7 +263,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         }
         return array;
     }
-    
+
     private RelationshipImportResult loadRelationships(IdMap idMap) {
         var propertyKeysByRelType = propertyKeysByRelType();
         var relationshipBuilders = createRelationshipBuilders(idMap, propertyKeysByRelType);
@@ -279,17 +287,21 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         gdlHandler.getEdges().forEach(edge -> {
             var relType = RelationshipType.of(edge.getLabel());
             var entry = relationshipSchema.getOrCreateRelationshipType(relType, orientation);
-            edge.getProperties().keySet().forEach(propertyKey ->
-                entry.addProperty(propertyKey, ValueType.DOUBLE, PropertyState.PERSISTENT)
-            );
+            edge.getProperties()
+                .keySet()
+                .forEach(
+                    propertyKey -> entry.addProperty(propertyKey, ValueType.DOUBLE, PropertyState.PERSISTENT)
+                );
         });
 
         relationshipSchema
             .availableTypes()
-            .forEach(relType -> propertyKeysByRelType.put(
-                relType,
-                new ArrayList<>(relationshipSchema.allProperties(relType))
-            ));
+            .forEach(
+                relType -> propertyKeysByRelType.put(
+                    relType,
+                    new ArrayList<>(relationshipSchema.allProperties(relType))
+                )
+            );
 
         return propertyKeysByRelType;
     }
@@ -328,33 +340,37 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         IdMap idMap,
         Map<RelationshipType, List<String>> propertyKeysByRelType
     ) {
-        return propertyKeysByRelType.entrySet().stream()
-            .collect(Collectors.toMap(
-                Map.Entry::getKey,
-                relTypeAndProperty -> {
-                    var propertyKeys = relTypeAndProperty.getValue();
-                    var propertyConfigs = propertyKeys
-                        .stream()
-                        .map(propertyKey -> ImmutablePropertyConfig.builder()
-                            .propertyKey(propertyKey)
-                            .aggregation(graphProjectConfig.aggregation())
-                            .propertyState(graphProjectConfig.propertyState())
-                            .defaultValue(DefaultValue.forDouble())
-                            .build()
-                        )
-                        .collect(Collectors.toList());
+        return propertyKeysByRelType.entrySet()
+            .stream()
+            .collect(
+                Collectors.toMap(
+                    Map.Entry::getKey,
+                    relTypeAndProperty -> {
+                        var propertyKeys = relTypeAndProperty.getValue();
+                        var propertyConfigs = propertyKeys
+                            .stream()
+                            .map(
+                                propertyKey -> ImmutablePropertyConfig.builder()
+                                    .propertyKey(propertyKey)
+                                    .aggregation(graphProjectConfig.aggregation())
+                                    .propertyState(graphProjectConfig.propertyState())
+                                    .defaultValue(DefaultValue.forDouble())
+                                    .build()
+                            )
+                            .collect(Collectors.toList());
 
-                    return GraphFactory.initRelationshipsBuilder()
-                        .nodes(idMap)
-                        .relationshipType(relTypeAndProperty.getKey())
-                        .orientation(graphProjectConfig.orientation())
-                        .aggregation(graphProjectConfig.aggregation())
-                        .indexInverse(graphProjectConfig.indexInverse())
-                        .addAllPropertyConfigs(propertyConfigs)
-                        .executorService(loadingContext.executor())
-                        .build();
-                }
-            ));
+                        return GraphFactory.initRelationshipsBuilder()
+                            .nodes(idMap)
+                            .relationshipType(relTypeAndProperty.getKey())
+                            .orientation(graphProjectConfig.orientation())
+                            .aggregation(graphProjectConfig.aggregation())
+                            .indexInverse(graphProjectConfig.indexInverse())
+                            .addAllPropertyConfigs(propertyConfigs)
+                            .executorService(loadingContext.executor())
+                            .build();
+                    }
+                )
+            );
     }
 
     private double gdsValue(Element element, String propertyKey, Object gdlValue) {
@@ -365,14 +381,16 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
         } else if (gdlValue instanceof String && gdlValue.equals("NaN")) {
             return Double.NaN;
         } else {
-            throw new IllegalArgumentException(String.format(
-                Locale.ENGLISH,
-                "%s property '%s' must be of type Number, but was %s for %s.",
-                element.getClass().getTypeName(),
-                propertyKey,
-                gdlValue.getClass(),
-                element
-            ));
+            throw new IllegalArgumentException(
+                String.format(
+                    Locale.ENGLISH,
+                    "%s property '%s' must be of type Number, but was %s for %s.",
+                    element.getClass().getTypeName(),
+                    propertyKey,
+                    gdlValue.getClass(),
+                    element
+                )
+            );
         }
     }
 

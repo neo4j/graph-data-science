@@ -23,9 +23,12 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.DatabaseInfo;
+import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Topology;
@@ -64,8 +67,8 @@ class DummyGraphStore implements GraphStore {
     }
 
     @Override
-    public DatabaseId databaseId() {
-        return DatabaseId.of("some database");
+    public DatabaseInfo databaseInfo() {
+        return ImmutableDatabaseInfo.of(DatabaseId.of("some database"), DatabaseLocation.LOCAL);
     }
 
     @Override
@@ -146,10 +149,12 @@ class DummyGraphStore implements GraphStore {
 
                     @Override
                     public Collection<MutableRelationshipSchemaEntry> entries() {
-                        return Set.of(new MutableRelationshipSchemaEntry(
-                            RelationshipType.of("REL"),
-                            Direction.DIRECTED
-                        ));
+                        return Set.of(
+                            new MutableRelationshipSchemaEntry(
+                                RelationshipType.of("REL"),
+                                Direction.DIRECTED
+                            )
+                        );
                     }
 
                     @Override

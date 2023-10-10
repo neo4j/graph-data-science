@@ -25,9 +25,11 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Topology;
@@ -51,19 +53,24 @@ import java.util.UUID;
  * Just a stub to facilitate testing
  */
 class StubGraphStore implements GraphStore {
-    private final DatabaseId databaseId;
+    private final DatabaseInfo databaseInfo;
 
-    StubGraphStore(DatabaseId databaseId) {
-        this.databaseId = databaseId;
+    StubGraphStore(DatabaseInfo databaseInfo) {
+        this.databaseInfo = databaseInfo;
     }
 
     StubGraphStore() {
-        this(DatabaseId.of(UUID.randomUUID().toString()));
+        this(
+            ImmutableDatabaseInfo.of(
+                DatabaseId.of(UUID.randomUUID().toString()),
+                DatabaseInfo.DatabaseLocation.LOCAL
+            )
+        );
     }
 
     @Override
-    public DatabaseId databaseId() {
-        return databaseId;
+    public DatabaseInfo databaseInfo() {
+        return databaseInfo;
     }
 
     @Override

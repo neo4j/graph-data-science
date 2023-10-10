@@ -24,6 +24,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
+import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.compat.CompatUserAggregator;
 import org.neo4j.gds.core.ConfigKeyValidation;
@@ -177,11 +179,13 @@ abstract class GraphAggregator implements CompatUserAggregator {
         var nodeLabelToken = nodeLabels.map(ReadNodeLabels.INSTANCE);
 
         if (nodeLabelToken.isInvalid()) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "The value of `%s` must be either a `List of Strings`, a `String`, or a `Boolean`, but was `%s`.",
-                nodeLabelKey,
-                nodeLabels.getTypeName()
-            ));
+            throw new IllegalArgumentException(
+                formatWithLocale(
+                    "The value of `%s` must be either a `List of Strings`, a `String`, or a `Boolean`, but was `%s`.",
+                    nodeLabelKey,
+                    nodeLabels.getTypeName()
+                )
+            );
         }
 
         return nodeLabelToken;
@@ -229,7 +233,7 @@ abstract class GraphAggregator implements CompatUserAggregator {
         }
 
         this.result = importer.result(
-            this.databaseId,
+            ImmutableDatabaseInfo.of(this.databaseId, DatabaseLocation.LOCAL),
             this.progressTimer,
             extractNodeId.hasSeenArbitraryIds()
         );
@@ -256,11 +260,13 @@ abstract class GraphAggregator implements CompatUserAggregator {
             return null;
         }
 
-        throw new IllegalArgumentException(formatWithLocale(
-            "The value of `%s` must be a `Map of Property Values`, but was `%s`.",
-            key,
-            properties.getTypeName()
-        ));
+        throw new IllegalArgumentException(
+            formatWithLocale(
+                "The value of `%s` must be a `Map of Property Values`, but was `%s`.",
+                key,
+                properties.getTypeName()
+            )
+        );
     }
 
     private static RelationshipType typeConfig(
@@ -275,11 +281,13 @@ abstract class GraphAggregator implements CompatUserAggregator {
             return RelationshipType.ALL_RELATIONSHIPS;
         }
 
-        throw new IllegalArgumentException(formatWithLocale(
-            "The value of `%s` must be `String`, but was `%s`.",
-            relationshipTypeKey,
-            relationshipTypeEntry.valueRepresentation().valueGroup()
-        ));
+        throw new IllegalArgumentException(
+            formatWithLocale(
+                "The value of `%s` must be `String`, but was `%s`.",
+                relationshipTypeKey,
+                relationshipTypeEntry.valueRepresentation().valueGroup()
+            )
+        );
     }
 
     public static final class ConfigValidator {
@@ -330,9 +338,8 @@ abstract class GraphAggregator implements CompatUserAggregator {
         }
 
         private void validateProjectionConfig(MapValue projectionConfig, AnyValue migrationConfig) {
-            var containsRelationshipKeys = projectionConfig.containsKey(RELATIONSHIP_PROPERTIES)
-                || projectionConfig.containsKey(RELATIONSHIP_TYPE)
-                || projectionConfig.containsKey(ALPHA_RELATIONSHIP_PROPERTIES);
+            var containsRelationshipKeys = projectionConfig.containsKey(RELATIONSHIP_PROPERTIES) || projectionConfig
+                .containsKey(RELATIONSHIP_TYPE) || projectionConfig.containsKey(ALPHA_RELATIONSHIP_PROPERTIES);
 
             var configAsAlphaParameter = migrationConfig != NoValue.NO_VALUE;
 

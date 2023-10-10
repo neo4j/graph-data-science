@@ -56,7 +56,7 @@ public class GraphCapabilitiesLoaderTest {
         var capabilitiesLoader = new GraphCapabilitiesLoader(exportDir, CSV_MAPPER);
         var capabilities = capabilitiesLoader.load();
 
-        assertThat(capabilities.canWriteToDatabase()).isEqualTo(writeMode == WriteMode.LOCAL);
+        assertThat(capabilities.canWriteToLocalDatabase()).isEqualTo(writeMode == WriteMode.LOCAL);
         assertThat(capabilities.canWriteToRemoteDatabase()).isEqualTo(writeMode == WriteMode.REMOTE);
     }
 

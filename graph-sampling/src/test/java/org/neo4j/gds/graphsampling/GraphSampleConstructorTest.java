@@ -57,8 +57,7 @@ class GraphSampleConstructorTest {
 
     @GdlGraph(graphNamePrefix = "undirected", idOffset = 42, orientation = UNDIRECTED)
     @GdlGraph(graphNamePrefix = "natural", idOffset = 42)
-    private static final String DB_CYPHER =
-        "CREATE" +
+    private static final String DB_CYPHER = "CREATE" +
         "  (x:Z {prop: 42})" +
         ", (x1:Z {prop: 43})" +
         ", (x2:Z {prop: 44})" +
@@ -163,12 +162,11 @@ class GraphSampleConstructorTest {
             .usingRecursiveComparison()
             .isEqualTo(subgraph.schema().relationshipSchema());
         assertThat(naturalGraphStore.capabilities()).usingRecursiveComparison().isEqualTo(subgraph.capabilities());
-        assertThat(naturalGraphStore.databaseId()).usingRecursiveComparison().isEqualTo(subgraph.databaseId());
+        assertThat(naturalGraphStore.databaseInfo()).usingRecursiveComparison().isEqualTo(subgraph.databaseInfo());
         assertFalse(subgraph.schema().isUndirected());
 
 
-        var expectedGraph =
-            "  (a:N {prop: 46})" +
+        var expectedGraph = "  (a:N {prop: 46})" +
             ", (b:N {prop: 47})" +
             ", (c:N {prop: 48, attr: 48})" +
             ", (d:N {prop: 49, attr: 48})" +
@@ -220,12 +218,13 @@ class GraphSampleConstructorTest {
         assertThat(undirectedGraphStore.schema().relationshipSchema().filter(Set.of(RelationshipType.of("R1"))))
             .usingRecursiveComparison()
             .isEqualTo(sampledGraph.schema().relationshipSchema());
-        assertThat(undirectedGraphStore.capabilities()).usingRecursiveComparison().isEqualTo(sampledGraph.capabilities());
-        assertThat(undirectedGraphStore.databaseId()).usingRecursiveComparison().isEqualTo(sampledGraph.databaseId());
+        assertThat(undirectedGraphStore.capabilities()).usingRecursiveComparison()
+            .isEqualTo(sampledGraph.capabilities());
+        assertThat(undirectedGraphStore.databaseInfo()).usingRecursiveComparison()
+            .isEqualTo(sampledGraph.databaseInfo());
         assertTrue(sampledGraph.schema().isUndirected());
 
-        var expectedGraph =
-            "  (a:N {prop: 46})" +
+        var expectedGraph = "  (a:N {prop: 46})" +
             ", (b:N {prop: 47})" +
             ", (c:N {prop: 48, attr: 48})" +
             ", (d:N {prop: 49, attr: 48})" +
@@ -277,8 +276,7 @@ class GraphSampleConstructorTest {
 
         var subgraph = graphConstructor.compute();
         assertThat(subgraph.getUnion().nodeCount()).isEqualTo(3);
-        var expectedGraph =
-            "  (e:M {prop: 50, attr: 48})" +
+        var expectedGraph = "  (e:M {prop: 50, attr: 48})" +
             ", (f:M {prop: 51, attr: 48})" +
             ", (g:M {prop: 52})" +
             ", (e)-[:R1 {distance: 5.8}]->(f)" +

@@ -42,9 +42,9 @@ import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
     name = "gds.steinerTree.write",
     aliases = {"gds.beta.steinerTree.write"},
     description = Constants.DESCRIPTION,
-    executionMode = WRITE_RELATIONSHIP
-)
-public class SteinerTreeWriteSpec implements AlgorithmSpec<ShortestPathsSteinerAlgorithm, SteinerTreeResult, SteinerTreeWriteConfig, Stream<WriteResult>, SteinerTreeAlgorithmFactory<SteinerTreeWriteConfig>> {
+    executionMode = WRITE_RELATIONSHIP)
+public class SteinerTreeWriteSpec implements
+    AlgorithmSpec<ShortestPathsSteinerAlgorithm, SteinerTreeResult, SteinerTreeWriteConfig, Stream<WriteResult>, SteinerTreeAlgorithmFactory<SteinerTreeWriteConfig>> {
 
     @Override
     public String name() {
@@ -89,13 +89,17 @@ public class SteinerTreeWriteSpec implements AlgorithmSpec<ShortestPathsSteinerA
                     );
                     var spanningGraph = new SpanningGraph(graph, spanningTree);
 
-                    RelationshipExporterBuilder relationshipExporterBuilder = executionContext.relationshipExporterBuilder();
+                    RelationshipExporterBuilder relationshipExporterBuilder = executionContext
+                        .relationshipExporterBuilder();
                     relationshipExporterBuilder
                         .withGraph(spanningGraph)
                         .withIdMappingOperator(spanningGraph::toOriginalNodeId)
                         .withTerminationFlag(terminationFlag)
                         .withProgressTracker(ProgressTracker.NULL_TRACKER)
-                        .withArrowConnectionInfo(config.arrowConnectionInfo(), computationResult.graphStore().databaseId().databaseName())
+                        .withArrowConnectionInfo(
+                            config.arrowConnectionInfo(),
+                            computationResult.graphStore().databaseInfo().databaseId().databaseName()
+                        )
                         .build()
                         .write(
                             config.writeRelationshipType(),
@@ -106,11 +110,13 @@ public class SteinerTreeWriteSpec implements AlgorithmSpec<ShortestPathsSteinerA
                 builder.withRelationshipsWritten(steinerTreeResult.effectiveNodeCount() - 1);
             });
 
-            return Stream.of(builder
-                .withComputeMillis(computationResult.computeMillis())
-                .withPreProcessingMillis(computationResult.preProcessingMillis())
-                .withConfig(config)
-                .build());
+            return Stream.of(
+                builder
+                    .withComputeMillis(computationResult.computeMillis())
+                    .withPreProcessingMillis(computationResult.preProcessingMillis())
+                    .withConfig(config)
+                    .build()
+            );
         };
     }
 }

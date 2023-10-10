@@ -17,26 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.io.file;
+package org.neo4j.gds.api;
 
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.DatabaseInfo;
-
-import java.util.List;
-import java.util.Map;
 
 @ValueClass
-public interface GraphInfo {
-    DatabaseInfo databaseInfo();
+public interface DatabaseInfo {
 
-    String idMapBuilderType();
+    enum DatabaseLocation {
+        LOCAL, REMOTE, NONE
+    }
 
-    long nodeCount();
+    DatabaseId databaseId();
 
-    long maxOriginalId();
-
-    Map<RelationshipType, Long> relationshipTypeCounts();
-
-    List<RelationshipType> inverseIndexedRelationshipTypes();
+    DatabaseLocation databaseLocation();
 }

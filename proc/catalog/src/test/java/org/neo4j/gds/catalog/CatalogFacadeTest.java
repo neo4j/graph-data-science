@@ -27,9 +27,12 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.DatabaseInfo;
+import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
@@ -165,7 +168,8 @@ class CatalogFacadeTest {
 
         // the return columns mock returns false by default (all simple types get defaults btw) - should I code that explicitly?
         when(businessFacade.listGraphs(new User("Bob", false), "foo", false, null))
-            .thenReturn(List.of(
+            .thenReturn(
+                List.of(
                     Pair.of(GraphStoreWithConfig.of(new StubGraphStore(), mock(GraphProjectConfig.class)), null)
                 )
             );
@@ -200,7 +204,8 @@ class CatalogFacadeTest {
 
         when(procedureReturnColumns.contains("degreeDistribution")).thenReturn(true);
         when(businessFacade.listGraphs(new User("Bob", false), "foo", true, null))
-            .thenReturn(List.of(
+            .thenReturn(
+                List.of(
                     Pair.of(
                         GraphStoreWithConfig.of(new StubGraphStore(), mock(GraphProjectConfig.class)),
                         Map.of("deg", 117, "ree", 23, "dist", 512)
@@ -210,11 +215,16 @@ class CatalogFacadeTest {
         var graphs = catalogFacade.listGraphs("foo");
 
         // when we specify that we do want a degree distribution, we get a map of stuff
-        assertThat(graphs.findFirst().orElseThrow().degreeDistribution).containsExactlyInAnyOrderEntriesOf(Map.of(
-            "deg", 117,
-            "ree", 23,
-            "dist", 512
-        ));
+        assertThat(graphs.findFirst().orElseThrow().degreeDistribution).containsExactlyInAnyOrderEntriesOf(
+            Map.of(
+                "deg",
+                117,
+                "ree",
+                23,
+                "dist",
+                512
+            )
+        );
     }
 
     @Test
@@ -242,7 +252,8 @@ class CatalogFacadeTest {
 
         // the return columns mock returns false by default (all simple types get defaults btw) - should I code that explicitly?
         when(businessFacade.listGraphs(new User("Bob", false), "foo", false, null))
-            .thenReturn(List.of(
+            .thenReturn(
+                List.of(
                     Pair.of(GraphStoreWithConfig.of(new StubGraphStore(), mock(GraphProjectConfig.class)), null)
                 )
             );
@@ -280,7 +291,8 @@ class CatalogFacadeTest {
 
         when(procedureReturnColumns.contains(returnColumn)).thenReturn(true);
         when(businessFacade.listGraphs(new User("Bob", false), "foo", false, null))
-            .thenReturn(List.of(
+            .thenReturn(
+                List.of(
                     Pair.of(GraphStoreWithConfig.of(new StubGraphStore(), mock(GraphProjectConfig.class)), null)
                 )
             );
@@ -294,8 +306,8 @@ class CatalogFacadeTest {
 
     private static class StubGraphStore implements GraphStore {
         @Override
-        public DatabaseId databaseId() {
-            return DatabaseId.of("foo");
+        public DatabaseInfo databaseInfo() {
+            return ImmutableDatabaseInfo.of(DatabaseId.of("foo"), DatabaseLocation.LOCAL);
         }
 
         @Override
