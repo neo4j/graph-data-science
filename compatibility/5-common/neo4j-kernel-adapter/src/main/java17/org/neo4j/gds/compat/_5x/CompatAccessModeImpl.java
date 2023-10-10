@@ -26,9 +26,9 @@ import org.neo4j.internal.kernel.api.TokenSet;
 
 import java.util.function.Supplier;
 
-public final class CompatAccessModeImpl extends CompatAccessMode {
+public class CompatAccessModeImpl extends CompatAccessMode {
 
-    CompatAccessModeImpl(CustomAccessMode custom) {
+    public CompatAccessModeImpl(CustomAccessMode custom) {
         super(custom);
     }
 
