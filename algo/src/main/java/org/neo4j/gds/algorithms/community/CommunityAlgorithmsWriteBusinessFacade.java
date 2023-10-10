@@ -25,6 +25,7 @@ import org.neo4j.gds.algorithms.CommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.K1ColoringSpecificFields;
 import org.neo4j.gds.algorithms.KCoreSpecificFields;
 import org.neo4j.gds.algorithms.KmeansSpecificFields;
+import org.neo4j.gds.algorithms.LabelPropagationSpecificFields;
 import org.neo4j.gds.algorithms.LeidenSpecificFields;
 import org.neo4j.gds.algorithms.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
@@ -40,6 +41,7 @@ import org.neo4j.gds.k1coloring.K1ColoringWriteConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionWriteConfig;
 import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.kmeans.KmeansWriteConfig;
+import org.neo4j.gds.labelpropagation.LabelPropagationWriteConfig;
 import org.neo4j.gds.leiden.LeidenResult;
 import org.neo4j.gds.leiden.LeidenWriteConfig;
 import org.neo4j.gds.louvain.LouvainResult;
@@ -271,6 +273,53 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             intermediateResult.computeMilliseconds,
             () -> LouvainSpecificFields.EMPTY,
             "LouvainWrite",
+            configuration.writeConcurrency(),
+            configuration.writeProperty(),
+            configuration.arrowConnectionInfo()
+        );
+    }
+
+    public NodePropertyWriteResult<LabelPropagationSpecificFields>  labelPropagation(
+        String graphName,
+        LabelPropagationWriteConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        StatisticsComputationInstructions statisticsComputationInstructions
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = runWithTiming(
+            () -> communityAlgorithmsFacade.labelPropagation(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return writeToDatabase(
+            algorithmResult,
+            configuration,
+            ((result, config) -> {
+                return CommunityResultCompanion.nodePropertyValues(
+                    config.isIncremental(),
+                    config.writeProperty(),
+                    config.seedProperty(),
+                    config.consecutiveIds(),
+                    NodePropertyValuesAdapter.adapt(result.labels()),
+                    config.minCommunitySize(),
+                    config.concurrency(),
+                    () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
+                );
+            }),
+            (result -> result.labels()::get),
+            (result, componentCount, communitySummary) -> {
+                return LabelPropagationSpecificFields.from(
+                    result.ranIterations(),
+                    result.didConverge(),
+                    componentCount,
+                    communitySummary
+                );
+            },
+            statisticsComputationInstructions,
+            intermediateResult.computeMilliseconds,
+            () -> LabelPropagationSpecificFields.EMPTY,
+            "LabelPropagationWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo()

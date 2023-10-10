@@ -20,9 +20,6 @@
 package org.neo4j.gds.labelpropagation;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -43,19 +40,13 @@ public class LabelPropagationWriteProc extends BaseProc {
     @Context
     public GraphDataScience facade;
 
-    @Context
-    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
-
     @Procedure(value = "gds.labelPropagation.write", mode = WRITE)
     @Description(LABEL_PROPAGATION_DESCRIPTION)
     public Stream<LabelPropagationWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new LabelPropagationWriteSpecification(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.community().labelPropagationWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.labelPropagation.write.estimate", mode = READ)
@@ -65,10 +56,5 @@ public class LabelPropagationWriteProc extends BaseProc {
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         return facade.community().labelPropagationEstimateWrite(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
     }
 }

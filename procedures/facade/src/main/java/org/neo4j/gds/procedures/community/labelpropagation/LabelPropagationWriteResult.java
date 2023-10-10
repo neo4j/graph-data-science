@@ -28,7 +28,7 @@ public class LabelPropagationWriteResult extends LabelPropagationStatsResult {
     public final long writeMillis;
     public final long nodePropertiesWritten;
 
-    private LabelPropagationWriteResult(
+    public LabelPropagationWriteResult(
         long ranIterations,
         boolean didConverge,
         long communityCount,

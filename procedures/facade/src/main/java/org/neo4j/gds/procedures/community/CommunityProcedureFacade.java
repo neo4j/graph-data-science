@@ -80,6 +80,7 @@ import org.neo4j.gds.procedures.community.kmeans.KmeansWriteResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationMutateResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStatsResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStreamResult;
+import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationWriteResult;
 import org.neo4j.gds.procedures.community.leiden.LeidenMutateResult;
 import org.neo4j.gds.procedures.community.leiden.LeidenStatsResult;
 import org.neo4j.gds.procedures.community.leiden.LeidenStreamResult;
@@ -812,6 +813,23 @@ public class CommunityProcedureFacade {
         );
 
         return Stream.of(LabelPropagationComputationResultTransformer.toStatsResult(computationResult, config));
+    }
+
+    public Stream<LabelPropagationWriteResult> labelPropagationWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, LabelPropagationWriteConfig::of);
+
+        var computationResult = writeBusinessFacade.labelPropagation(
+            graphName,
+            config,
+            user,
+            databaseId,
+            ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
+        );
+
+        return Stream.of(LabelPropagationComputationResultTransformer.toWriteResult(computationResult));
     }
 
     public Stream<MemoryEstimateResult> labelPropagationEstimateStream(
