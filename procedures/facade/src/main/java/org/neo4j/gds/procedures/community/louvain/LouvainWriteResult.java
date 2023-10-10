@@ -17,18 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.louvain;
-
-import org.neo4j.gds.procedures.community.louvain.LouvainStatsResult;
+package org.neo4j.gds.procedures.community.louvain;
 
 import java.util.List;
 import java.util.Map;
 
-public final class WriteResult extends LouvainStatsResult {
+public final class LouvainWriteResult extends LouvainStatsResult {
     public final long writeMillis;
     public final long nodePropertiesWritten;
 
-    WriteResult(
+    public LouvainWriteResult(
         double modularity,
         List<Double> modularities,
         long ranLevels,

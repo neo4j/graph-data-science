@@ -29,6 +29,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.community.louvain.LouvainWriteResult;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -36,7 +37,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.louvain.LouvainConstants.DESCRIPTION;
 
 @GdsCallable(name = "gds.louvain.write", description = DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
-public class LouvainWriteSpec implements AlgorithmSpec<Louvain, LouvainResult, LouvainWriteConfig, Stream<WriteResult>, LouvainAlgorithmFactory<LouvainWriteConfig>> {
+public class LouvainWriteSpec implements AlgorithmSpec<Louvain, LouvainResult, LouvainWriteConfig, Stream<LouvainWriteResult>, LouvainAlgorithmFactory<LouvainWriteConfig>> {
     @Override
     public String name() {
         return "LouvainWrite";
@@ -53,7 +54,7 @@ public class LouvainWriteSpec implements AlgorithmSpec<Louvain, LouvainResult, L
     }
 
     @Override
-    public ComputationResultConsumer<Louvain, LouvainResult, LouvainWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Louvain, LouvainResult, LouvainWriteConfig, Stream<LouvainWriteResult>> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>(
             LouvainResultBuilder::createForWrite,
             computationResult -> List.of(ImmutableNodeProperty.of(

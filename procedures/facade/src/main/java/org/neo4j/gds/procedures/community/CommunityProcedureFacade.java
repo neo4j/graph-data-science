@@ -53,6 +53,7 @@ import org.neo4j.gds.leiden.LeidenStreamConfig;
 import org.neo4j.gds.louvain.LouvainMutateConfig;
 import org.neo4j.gds.louvain.LouvainStatsConfig;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
+import org.neo4j.gds.louvain.LouvainWriteConfig;
 import org.neo4j.gds.modularity.ModularityStatsConfig;
 import org.neo4j.gds.modularity.ModularityStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
@@ -81,6 +82,7 @@ import org.neo4j.gds.procedures.community.leiden.LeidenStreamResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainStatsResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
+import org.neo4j.gds.procedures.community.louvain.LouvainWriteResult;
 import org.neo4j.gds.procedures.community.modularity.ModularityStatsResult;
 import org.neo4j.gds.procedures.community.modularity.ModularityStreamResult;
 import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationMutateResult;
@@ -436,6 +438,31 @@ public class CommunityProcedureFacade {
         Map<String, Object> algoConfiguration
     ) {
         var config = createConfig(algoConfiguration, LouvainMutateConfig::of);
+        return Stream.of(estimateBusinessFacade.louvain(graphNameOrConfiguration, config));
+    }
+
+    public Stream<LouvainWriteResult> louvainWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, LouvainWriteConfig::of);
+
+        var computationResult = writeBusinessFacade.louvain(
+            graphName,
+            config,
+            user,
+            databaseId,
+            ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
+        );
+
+        return Stream.of(LouvainComputationResultTransformer.toWriteResult(computationResult, config));
+    }
+
+    public Stream<MemoryEstimateResult> louvainEstimateWrite(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, LouvainWriteConfig::of);
         return Stream.of(estimateBusinessFacade.louvain(graphNameOrConfiguration, config));
     }
 

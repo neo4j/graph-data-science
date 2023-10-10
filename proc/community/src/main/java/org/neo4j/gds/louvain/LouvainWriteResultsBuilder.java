@@ -20,18 +20,19 @@
 package org.neo4j.gds.louvain;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.procedures.community.louvain.LouvainWriteResult;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-class LouvainWriteResultsBuilder extends LouvainResultBuilder<WriteResult> {
+class LouvainWriteResultsBuilder extends LouvainResultBuilder<LouvainWriteResult> {
     LouvainWriteResultsBuilder(ProcedureReturnColumns returnColumns, int concurrency) {
         super(returnColumns, concurrency);
     }
 
     @Override
-    protected WriteResult buildResult() {
-        return new WriteResult(
+    protected LouvainWriteResult buildResult() {
+        return new LouvainWriteResult(
             modularity,
             Arrays.stream(modularities).boxed().collect(Collectors.toList()),
             levels,

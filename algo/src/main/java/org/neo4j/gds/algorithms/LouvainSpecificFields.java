@@ -56,7 +56,7 @@ public final class LouvainSpecificFields implements CommunityStatisticsSpecificF
         );
     }
 
-    private LouvainSpecificFields(
+    public LouvainSpecificFields(
         double modularity,
         List<Double> modularities,
         long ranLevels,

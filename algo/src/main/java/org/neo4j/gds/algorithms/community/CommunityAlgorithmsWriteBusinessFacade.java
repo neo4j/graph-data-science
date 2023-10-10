@@ -23,6 +23,7 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.AlphaSccSpecificFields;
 import org.neo4j.gds.algorithms.CommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.KCoreSpecificFields;
+import org.neo4j.gds.algorithms.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.KmeansSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.StandardCommunityStatisticsSpecificFields;
@@ -36,6 +37,8 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.kcore.KCoreDecompositionWriteConfig;
 import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.kmeans.KmeansWriteConfig;
+import org.neo4j.gds.louvain.LouvainResult;
+import org.neo4j.gds.louvain.LouvainWriteConfig;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.scc.SccAlphaWriteConfig;
@@ -43,11 +46,15 @@ import org.neo4j.gds.scc.SccWriteConfig;
 import org.neo4j.gds.triangle.TriangleCountWriteConfig;
 import org.neo4j.gds.wcc.WccWriteConfig;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
+import static org.neo4j.gds.algorithms.community.CommunityResultCompanion.createIntermediateCommunitiesNodePropertyValues;
 
 import static org.neo4j.gds.algorithms.community.AlgorithmRunner.runWithTiming;
-import static org.neo4j.gds.algorithms.community.CommunityHelper.arrayMatrixToListMatrix;
+import static org.neo4j.gds.algorithms.community.CommunityResultCompanion.arrayMatrixToListMatrix;
 
 public class CommunityAlgorithmsWriteBusinessFacade {
 
@@ -211,6 +218,59 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             configuration.arrowConnectionInfo()
         );
 
+    }
+
+    public NodePropertyWriteResult<LouvainSpecificFields> louvain(
+        String graphName,
+        LouvainWriteConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        StatisticsComputationInstructions statisticsComputationInstructions
+    ) {
+
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> communityAlgorithmsFacade.louvain(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        NodePropertyValuesMapper<LouvainResult, LouvainWriteConfig> mapper = ((result, config) -> {
+            return config.includeIntermediateCommunities()
+                ? createIntermediateCommunitiesNodePropertyValues(result::getIntermediateCommunities, result.size())
+                : CommunityResultCompanion.nodePropertyValues(
+                    config.isIncremental(),
+                    config.writeProperty(),
+                    config.seedProperty(),
+                    config.consecutiveIds(),
+                    NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent()),
+                    config.minCommunitySize(),
+                    config.concurrency(),
+                    () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
+                );
+        });
+
+        return writeToDatabase(
+            algorithmResult,
+            configuration,
+            mapper,
+            (result -> result::getCommunity),
+            (result, componentCount, communitySummary) -> {
+                return new LouvainSpecificFields(
+                    result.modularity(),
+                    Arrays.stream(result.modularities()).boxed().collect(Collectors.toList()),
+                    result.ranLevels(),
+                    componentCount,
+                    communitySummary
+                );
+            },
+            statisticsComputationInstructions,
+            intermediateResult.computeMilliseconds,
+            () -> LouvainSpecificFields.EMPTY,
+            "LouvainWrite",
+            configuration.writeConcurrency(),
+            configuration.writeProperty(),
+            configuration.arrowConnectionInfo()
+        );
     }
 
     public NodePropertyWriteResult<KmeansSpecificFields> kmeans(

@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.algorithms.community;
 
+import org.eclipse.collections.api.block.function.primitive.LongToObjectFunction;
+import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
@@ -28,6 +30,8 @@ import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.values.storable.LongValue;
 import org.neo4j.values.storable.Value;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -104,6 +108,23 @@ public final class CommunityResultCompanion {
         return nodePropertyValues(consecutiveIds, resultAfterMinFilter);
     }
 
+    static LongArrayNodePropertyValues createIntermediateCommunitiesNodePropertyValues(
+        LongToObjectFunction<long[]> intermediateCommunitiesProvider,
+        long size
+    ) {
+        return new LongArrayNodePropertyValues() {
+            @Override
+            public long nodeCount() {
+                return size;
+            }
+
+            @Override
+            public long[] longArrayValue(long nodeId) {
+                return intermediateCommunitiesProvider.apply(nodeId);
+            }
+        };
+    }
+
 
     private static LongNodePropertyValues applySizeFilter(
         LongNodePropertyValues nodeProperties,
@@ -117,6 +138,21 @@ public final class CommunityResultCompanion {
             concurrency
         );
         return new CommunitySizeFilter(nodeProperties, communitySizes, size);
+    }
+
+    static List<List<Double>> arrayMatrixToListMatrix(boolean shouldCompute, double[][] matrix) {
+        if (shouldCompute) {
+            var result = new ArrayList<List<Double>>();
+
+            for (double[] row : matrix) {
+                List<Double> rowList = new ArrayList<>();
+                result.add(rowList);
+                for (double column : row)
+                    rowList.add(column);
+            }
+            return result;
+        }
+        return null;
     }
 
     private static class CommunitySizeFilter implements LongNodePropertyValues {

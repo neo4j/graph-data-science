@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
+import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.community.CommunityResultCompanion;
@@ -28,9 +29,11 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.louvain.LouvainStatsConfig;
 import org.neo4j.gds.louvain.LouvainStreamConfig;
+import org.neo4j.gds.louvain.LouvainWriteConfig;
 import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainStatsResult;
 import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
+import org.neo4j.gds.procedures.community.louvain.LouvainWriteResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -97,6 +100,22 @@ final class LouvainComputationResultTransformer {
             computationResult.preProcessingMillis(),
             computationResult.computeMillis(),
             computationResult.postProcessingMillis(),
+            config.toMap()
+        );
+    }
+
+    static LouvainWriteResult toWriteResult(NodePropertyWriteResult<LouvainSpecificFields> computationResult, LouvainWriteConfig config) {
+        return new LouvainWriteResult(
+            computationResult.algorithmSpecificFields().modularity(),
+            computationResult.algorithmSpecificFields().modularities(),
+            computationResult.algorithmSpecificFields().ranLevels(),
+            computationResult.algorithmSpecificFields().communityCount(),
+            computationResult.algorithmSpecificFields().communityDistribution(),
+            computationResult.preProcessingMillis(),
+            computationResult.computeMillis(),
+            computationResult.postProcessingMillis(),
+            computationResult.writeMillis(),
+            computationResult.nodePropertiesWritten(),
             config.toMap()
         );
     }
