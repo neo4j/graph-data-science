@@ -31,7 +31,9 @@ import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.core.io.file.GraphInfo;
 import org.neo4j.gds.core.io.file.ImmutableGraphInfo;
 
@@ -65,7 +67,7 @@ public class GraphInfoLoader {
             var line = mappingIterator.next();
             var databaseId = DatabaseId.of(line.databaseName);
             return ImmutableGraphInfo.builder()
-                .databaseId(databaseId)
+                .databaseInfo(ImmutableDatabaseInfo.of(databaseId, line.databaseLocation))
                 .idMapBuilderType(line.idMapBuilderType)
                 .nodeCount(line.nodeCount)
                 .maxOriginalId(line.maxOriginalId)
@@ -85,6 +87,9 @@ public class GraphInfoLoader {
 
         @JsonProperty
         String databaseName;
+
+        @JsonProperty
+        DatabaseLocation databaseLocation = DatabaseLocation.LOCAL;
 
         @JsonProperty
         String idMapBuilderType = IdMap.NO_TYPE;

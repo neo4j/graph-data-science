@@ -29,7 +29,7 @@ public final class CypherGraphStoreCatalogHelper {
     private CypherGraphStoreCatalogHelper() {}
 
     public static void setWrappedGraphStore(GraphProjectConfig config, GraphStoreWrapper graphStoreWrapper) {
-        var catalogRequest = CatalogRequest.of(config.username(), graphStoreWrapper.databaseId());
+        var catalogRequest = CatalogRequest.of(config.username(), graphStoreWrapper.databaseInfo().databaseId());
         var graphName = config.graphName();
         var graphStore = GraphStoreCatalog.get(
             catalogRequest,

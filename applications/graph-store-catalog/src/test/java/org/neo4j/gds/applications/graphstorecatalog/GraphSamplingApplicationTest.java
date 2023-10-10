@@ -130,13 +130,13 @@ class GraphSamplingApplicationTest {
 
         assertThat(GraphStoreCatalog.exists(
             user.getUsername(),
-            graphStore.databaseId().databaseName(),
+            graphStore.databaseInfo().databaseId().databaseName(),
             "sample"
         )).isTrue();
 
         var sampledGraphStore = GraphStoreCatalog.get(
             user.getUsername(),
-            graphStore.databaseId().databaseName(),
+            graphStore.databaseInfo().databaseId().databaseName(),
             "sample"
         ).graphStore();
         assertThat(sampledGraphStore.nodeCount()).isEqualTo(expectedNodeCount);
@@ -167,13 +167,13 @@ class GraphSamplingApplicationTest {
         assertThat(result.nodeCount).isEqualTo(expectedNodeCount);
         assertThat(GraphStoreCatalog.exists(
             user.getUsername(),
-            graphStore.databaseId(),
+            graphStore.databaseInfo().databaseId(),
             "sample"
         )).isTrue();
 
         var sampledGraphStore = GraphStoreCatalog.get(
             user.getUsername(),
-            graphStore.databaseId(),
+            graphStore.databaseInfo().databaseId(),
             "sample"
         ).graphStore();
         assertThat(sampledGraphStore.nodeCount()).isEqualTo(expectedNodeCount);
@@ -211,7 +211,7 @@ class GraphSamplingApplicationTest {
 
         assertThat(GraphStoreCatalog.exists(
             user.getUsername(),
-            graphStore.databaseId(),
+            graphStore.databaseInfo().databaseId(),
             "sample"
         )).isTrue();
 
@@ -249,7 +249,7 @@ class GraphSamplingApplicationTest {
 
         assertThat(GraphStoreCatalog.exists(
             user.getUsername(),
-            graphStore.databaseId(),
+            graphStore.databaseInfo().databaseId(),
             "sample"
         )).isTrue();
 

@@ -25,6 +25,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -69,7 +70,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
         );
 
         return new GraphStoreBuilder()
-            .databaseId(loadingContext.databaseId())
+            .databaseInfo(ImmutableDatabaseInfo.of(loadingContext.databaseId(), DatabaseLocation.LOCAL))
             .capabilities(capabilities)
             .schema(schema)
             .nodes(nodes)

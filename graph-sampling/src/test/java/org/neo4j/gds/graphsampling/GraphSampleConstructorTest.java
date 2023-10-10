@@ -163,7 +163,7 @@ class GraphSampleConstructorTest {
             .usingRecursiveComparison()
             .isEqualTo(subgraph.schema().relationshipSchema());
         assertThat(naturalGraphStore.capabilities()).usingRecursiveComparison().isEqualTo(subgraph.capabilities());
-        assertThat(naturalGraphStore.databaseId()).usingRecursiveComparison().isEqualTo(subgraph.databaseId());
+        assertThat(naturalGraphStore.databaseInfo()).usingRecursiveComparison().isEqualTo(subgraph.databaseInfo());
         assertFalse(subgraph.schema().isUndirected());
 
 
@@ -221,7 +221,7 @@ class GraphSampleConstructorTest {
             .usingRecursiveComparison()
             .isEqualTo(sampledGraph.schema().relationshipSchema());
         assertThat(undirectedGraphStore.capabilities()).usingRecursiveComparison().isEqualTo(sampledGraph.capabilities());
-        assertThat(undirectedGraphStore.databaseId()).usingRecursiveComparison().isEqualTo(sampledGraph.databaseId());
+        assertThat(undirectedGraphStore.databaseInfo()).usingRecursiveComparison().isEqualTo(sampledGraph.databaseInfo());
         assertTrue(sampledGraph.schema().isUndirected());
 
         var expectedGraph =

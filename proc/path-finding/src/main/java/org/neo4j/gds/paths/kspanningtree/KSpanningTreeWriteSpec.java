@@ -88,7 +88,7 @@ public class KSpanningTreeWriteSpec implements AlgorithmSpec<KSpanningTree, Span
                         config.writeConcurrency(),
                         executionContext
                     ))
-                    .withArrowConnectionInfo(config.arrowConnectionInfo(), computationResult.graphStore().databaseId().databaseName())
+                    .withArrowConnectionInfo(config.arrowConnectionInfo(), computationResult.graphStore().databaseInfo().databaseId().databaseName())
                     .build()
                     .write(config.writeProperty(), properties);
             }

@@ -21,14 +21,14 @@ package org.neo4j.gds.core.io.file;
 
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.DatabaseInfo;
 
 import java.util.List;
 import java.util.Map;
 
 @ValueClass
 public interface GraphInfo {
-    DatabaseId databaseId();
+    DatabaseInfo databaseInfo();
     String idMapBuilderType();
     long nodeCount();
     long maxOriginalId();

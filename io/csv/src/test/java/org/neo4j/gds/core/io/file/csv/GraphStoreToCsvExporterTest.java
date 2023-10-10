@@ -462,6 +462,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             List.of(
                 List.of(
                     CsvGraphInfoVisitor.DATABASE_NAME_COLUMN_NAME,
+                    CsvGraphInfoVisitor.DATABASE_LOCATION_COLUMN_NAME,
                     CsvGraphInfoVisitor.ID_MAP_BUILDER_TYPE_COLUMN_NAME,
                     CsvGraphInfoVisitor.NODE_COUNT_COLUMN_NAME,
                     CsvGraphInfoVisitor.MAX_ORIGINAL_ID_COLUMN_NAME,
@@ -469,7 +470,8 @@ class GraphStoreToCsvExporterTest extends CsvTest {
                     CsvGraphInfoVisitor.INVERSE_INDEXED_REL_TYPES
                 ),
                 List.of(
-                    graphStore.databaseId().databaseName(),
+                    graphStore.databaseInfo().databaseId().databaseName(),
+                    graphStore.databaseInfo().databaseLocation().name(),
                     graphStore.nodes().typeId(),
                     Long.toString(graphStore.nodeCount()),
                     Long.toString(graphStore.nodes().highestOriginalId()),

@@ -121,7 +121,7 @@ public class GraphInfo {
 
         return new GraphInfo(
             graphProjectConfig.graphName(),
-            graphStore.databaseId().databaseName(),
+            graphStore.databaseInfo().databaseId().databaseName(),
             configVisitor.configuration,
             memoryUsage,
             sizeInBytes,

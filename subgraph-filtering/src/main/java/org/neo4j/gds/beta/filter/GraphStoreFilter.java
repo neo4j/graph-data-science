@@ -120,7 +120,7 @@ public final class GraphStoreFilter {
             var filteredSchema = filterSchema(graphStore.schema(), filteredNodes, filteredRelationships.keySet());
 
             return new GraphStoreBuilder()
-                .databaseId(graphStore.databaseId())
+                .databaseInfo(graphStore.databaseInfo())
                 .capabilities(graphStore.capabilities())
                 .schema(filteredSchema)
                 .nodes(ImmutableNodes.of(filteredSchema.nodeSchema(), filteredNodes.idMap(), filteredNodes.propertyStores()))

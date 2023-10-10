@@ -114,7 +114,7 @@ public class SimilarityWriteConsumer<
                             .withGraph(similarityGraph)
                             .withTerminationFlag(algorithm.getTerminationFlag())
                             .withProgressTracker(progressTracker)
-                            .withArrowConnectionInfo(config.arrowConnectionInfo(), computationResult.graphStore().databaseId().databaseName())
+                            .withArrowConnectionInfo(config.arrowConnectionInfo(), computationResult.graphStore().databaseInfo().databaseId().databaseName())
                             .build();
 
                         if (SimilarityProc.shouldComputeHistogram(executionContext.returnColumns())) {

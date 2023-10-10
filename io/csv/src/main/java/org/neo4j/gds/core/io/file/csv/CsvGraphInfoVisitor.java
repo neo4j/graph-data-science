@@ -33,6 +33,7 @@ public class CsvGraphInfoVisitor implements SingleRowVisitor<GraphInfo> {
 
     public static final String GRAPH_INFO_FILE_NAME = "graph_info.csv";
     public static final String DATABASE_NAME_COLUMN_NAME = "databaseName";
+    public static final String DATABASE_LOCATION_COLUMN_NAME = "databaseLocation";
     public static final String ID_MAP_BUILDER_TYPE_COLUMN_NAME = "idMapBuilderType";
     public static final String NODE_COUNT_COLUMN_NAME = "nodeCount";
     public static final String MAX_ORIGINAL_ID_COLUMN_NAME = "maxOriginalId";
@@ -61,7 +62,8 @@ public class CsvGraphInfoVisitor implements SingleRowVisitor<GraphInfo> {
             .collect(Collectors.joining(";"));
 
         this.csvWriter.writeRow(
-            graphInfo.databaseId().databaseName(),
+            graphInfo.databaseInfo().databaseId().databaseName(),
+            graphInfo.databaseInfo().databaseLocation().name(),
             graphInfo.idMapBuilderType(),
             Long.toString(graphInfo.nodeCount()),
             Long.toString(graphInfo.maxOriginalId()),
@@ -82,6 +84,7 @@ public class CsvGraphInfoVisitor implements SingleRowVisitor<GraphInfo> {
     private void writeHeader() {
         this.csvWriter.writeRow(
             DATABASE_NAME_COLUMN_NAME,
+            DATABASE_LOCATION_COLUMN_NAME,
             ID_MAP_BUILDER_TYPE_COLUMN_NAME,
             NODE_COUNT_COLUMN_NAME,
             MAX_ORIGINAL_ID_COLUMN_NAME,

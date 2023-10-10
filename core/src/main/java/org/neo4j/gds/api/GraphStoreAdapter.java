@@ -50,8 +50,8 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
     }
 
     @Override
-    public DatabaseId databaseId() {
-        return graphStore.databaseId();
+    public DatabaseInfo databaseInfo() {
+        return graphStore.databaseInfo();
     }
 
     @Override

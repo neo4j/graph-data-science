@@ -138,7 +138,7 @@ public abstract class FileToGraphStoreImporter {
     }
 
     private void importGraphStore(FileInput fileInput) {
-        graphStoreBuilder.databaseId(fileInput.graphInfo().databaseId());
+        graphStoreBuilder.databaseInfo(fileInput.graphInfo().databaseInfo());
         graphStoreBuilder.capabilities(fileInput.capabilities());
 
         var nodes = importNodes(fileInput);

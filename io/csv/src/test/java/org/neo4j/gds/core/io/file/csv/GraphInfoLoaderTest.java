@@ -54,8 +54,8 @@ class GraphInfoLoaderTest {
         var graphInfo = graphInfoLoader.load();
 
         assertThat(graphInfo).isNotNull();
-        assertThat(graphInfo.databaseId()).isEqualTo(databaseId);
-        assertThat(graphInfo.databaseId().databaseName()).isEqualTo("my-database");
+        assertThat(graphInfo.databaseInfo()).isEqualTo(databaseId);
+        assertThat(graphInfo.databaseInfo().databaseId().databaseName()).isEqualTo("my-database");
 
         assertThat(graphInfo.idMapBuilderType()).isEqualTo(ArrayIdMapBuilder.ID);
 
@@ -101,8 +101,8 @@ class GraphInfoLoaderTest {
         var graphInfo = graphInfoLoader.load();
 
         assertThat(graphInfo).isNotNull();
-        assertThat(graphInfo.databaseId()).isEqualTo(databaseId);
-        assertThat(graphInfo.databaseId().databaseName()).isEqualTo("my-database");
+        assertThat(graphInfo.databaseInfo()).isEqualTo(databaseId);
+        assertThat(graphInfo.databaseInfo().databaseId().databaseName()).isEqualTo("my-database");
 
         assertThat(graphInfo.idMapBuilderType()).isEqualTo(IdMap.NO_TYPE);
 

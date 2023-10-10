@@ -22,8 +22,10 @@ package org.neo4j.gds.core.loading;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.GraphProjectConfig;
 
@@ -52,7 +54,10 @@ class GraphStoreCatalogServiceTest {
         var configuration = GraphProjectConfig.emptyWithName("some user", "some graph");
         // we _could_ write a stub for GraphStore; this is good enough for now tho
         var graphStore = mock(GraphStore.class);
-        when(graphStore.databaseId()).thenReturn(DatabaseId.of("some database"));
+        when(graphStore.databaseInfo()).thenReturn(ImmutableDatabaseInfo.of(
+            DatabaseId.of("some database"),
+            DatabaseLocation.LOCAL
+        ));
         GraphStoreCatalog.set(configuration, graphStore); // shorthand for project
         var service = new GraphStoreCatalogService();
 

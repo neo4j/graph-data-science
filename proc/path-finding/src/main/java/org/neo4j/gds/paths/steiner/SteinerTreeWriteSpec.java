@@ -95,7 +95,7 @@ public class SteinerTreeWriteSpec implements AlgorithmSpec<ShortestPathsSteinerA
                         .withIdMappingOperator(spanningGraph::toOriginalNodeId)
                         .withTerminationFlag(terminationFlag)
                         .withProgressTracker(ProgressTracker.NULL_TRACKER)
-                        .withArrowConnectionInfo(config.arrowConnectionInfo(), computationResult.graphStore().databaseId().databaseName())
+                        .withArrowConnectionInfo(config.arrowConnectionInfo(), computationResult.graphStore().databaseInfo().databaseId().databaseName())
                         .build()
                         .write(
                             config.writeRelationshipType(),

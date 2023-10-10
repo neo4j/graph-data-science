@@ -110,7 +110,7 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
                 .withIdMap(graph)
                 .withTerminationFlag(computationResult.algorithm().terminationFlag)
                 .withProgressTracker(progressTracker)
-                .withArrowConnectionInfo(config.arrowConnectionInfo(), computationResult.graphStore().databaseId().databaseName())
+                .withArrowConnectionInfo(config.arrowConnectionInfo(), computationResult.graphStore().databaseInfo().databaseId().databaseName())
                 .parallel(DefaultPool.INSTANCE, config.writeConcurrency())
                 .build();
 

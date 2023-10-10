@@ -123,7 +123,7 @@ class ProcedureExecutorTest {
     private ExecutionContext executionContext(TaskStore taskStore) {
         return ImmutableExecutionContext
             .builder()
-            .databaseId(graphStore.databaseId())
+            .databaseId(graphStore.databaseInfo().databaseId())
             .log(Neo4jProxy.testLog())
             .returnColumns(ProcedureCallContextReturnColumns.EMPTY)
             .taskRegistryFactory(jobId -> new TaskRegistry("", taskStore, jobId))

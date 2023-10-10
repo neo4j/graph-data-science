@@ -27,7 +27,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
-import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.GraphCharacteristics;
 import org.neo4j.gds.api.GraphStore;
@@ -79,7 +79,7 @@ public final class CSRGraphStore implements GraphStore {
 
     private final int concurrency;
 
-    private final DatabaseId databaseId;
+    private final DatabaseInfo databaseInfo;
 
     private final Capabilities capabilities;
 
@@ -95,30 +95,8 @@ public final class CSRGraphStore implements GraphStore {
 
     private ZonedDateTime modificationTime;
 
-    @Builder.Factory
-    public static CSRGraphStore of(
-        DatabaseId databaseId,
-        Capabilities capabilities,
-        MutableGraphSchema schema,
-        Nodes nodes,
-        RelationshipImportResult relationshipImportResult,
-        Optional<GraphPropertyStore> graphProperties,
-        int concurrency
-    ) {
-        return new CSRGraphStore(
-            databaseId,
-            capabilities,
-            schema,
-            nodes.idMap(),
-            nodes.properties(),
-            relationshipImportResult.importResults(),
-            graphProperties.orElseGet(GraphPropertyStore::empty),
-            concurrency
-        );
-    }
-
     private CSRGraphStore(
-        DatabaseId databaseId,
+        DatabaseInfo databaseInfo,
         Capabilities capabilities,
         MutableGraphSchema schema,
         IdMap nodes,
@@ -127,7 +105,7 @@ public final class CSRGraphStore implements GraphStore {
         GraphPropertyStore graphProperties,
         int concurrency
     ) {
-        this.databaseId = databaseId;
+        this.databaseInfo = databaseInfo;
         this.capabilities = capabilities;
 
         this.schema = schema;
@@ -144,9 +122,31 @@ public final class CSRGraphStore implements GraphStore {
         this.modificationTime = TimeUtil.now();
     }
 
+    @Builder.Factory
+    public static CSRGraphStore of(
+        DatabaseInfo databaseInfo,
+        Capabilities capabilities,
+        MutableGraphSchema schema,
+        Nodes nodes,
+        RelationshipImportResult relationshipImportResult,
+        Optional<GraphPropertyStore> graphProperties,
+        int concurrency
+    ) {
+        return new CSRGraphStore(
+            databaseInfo,
+            capabilities,
+            schema,
+            nodes.idMap(),
+            nodes.properties(),
+            relationshipImportResult.importResults(),
+            graphProperties.orElseGet(GraphPropertyStore::empty),
+            concurrency
+        );
+    }
+
     @Override
-    public DatabaseId databaseId() {
-        return databaseId;
+    public DatabaseInfo databaseInfo() {
+        return databaseInfo;
     }
 
     @Override

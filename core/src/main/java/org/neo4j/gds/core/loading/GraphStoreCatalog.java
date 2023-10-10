@@ -177,7 +177,7 @@ public final class GraphStoreCatalog {
                 userCatalog = new UserCatalog();
             }
             userCatalog.set(
-                UserCatalog.UserCatalogKey.of(graphStore.databaseId(), config.graphName()),
+                UserCatalog.UserCatalogKey.of(graphStore.databaseInfo().databaseId(), config.graphName()),
                 config,
                 graphStore,
                 overwrite
@@ -195,7 +195,7 @@ public final class GraphStoreCatalog {
                 ),
                 () -> listener.onProject(
                     config.username(),
-                    graphStore.databaseId().databaseName(),
+                    graphStore.databaseInfo().databaseId().databaseName(),
                     config.graphName()
                 )
             )

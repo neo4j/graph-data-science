@@ -91,7 +91,7 @@ public class SpanningTreeWriteSpec implements AlgorithmSpec<Prim, SpanningTree, 
                         config.writeConcurrency(),
                         executionContext
                     ))
-                    .withArrowConnectionInfo(config.arrowConnectionInfo(), computationResult.graphStore().databaseId().databaseName())
+                    .withArrowConnectionInfo(config.arrowConnectionInfo(), computationResult.graphStore().databaseInfo().databaseId().databaseName())
                     .build()
                     .write(config.writeRelationshipType(), config.writeProperty());
             }

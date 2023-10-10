@@ -24,6 +24,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
+import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.compat.CompatUserAggregator;
 import org.neo4j.gds.core.ConfigKeyValidation;
@@ -229,7 +231,7 @@ abstract class GraphAggregator implements CompatUserAggregator {
         }
 
         this.result = importer.result(
-            this.databaseId,
+            ImmutableDatabaseInfo.of(this.databaseId, DatabaseLocation.LOCAL),
             this.progressTimer,
             extractNodeId.hasSeenArbitraryIds()
         );

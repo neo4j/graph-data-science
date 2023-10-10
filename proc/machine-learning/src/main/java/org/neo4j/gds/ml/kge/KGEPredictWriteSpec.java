@@ -88,7 +88,7 @@ public class KGEPredictWriteSpec implements AlgorithmSpec<
                     ))
                     .withArrowConnectionInfo(
                         config.arrowConnectionInfo(),
-                        computationResult.graphStore().databaseId().databaseName()
+                        computationResult.graphStore().databaseInfo().databaseId().databaseName()
                     )
                     .build()
                     .write(config.writeRelationshipType(), config.writeProperty());

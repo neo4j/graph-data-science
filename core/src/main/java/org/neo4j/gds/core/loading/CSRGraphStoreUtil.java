@@ -22,7 +22,9 @@ package org.neo4j.gds.core.loading;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.Properties;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
@@ -96,7 +98,7 @@ public final class CSRGraphStoreUtil {
         }
 
         return new GraphStoreBuilder()
-            .databaseId(databaseId)
+            .databaseInfo(ImmutableDatabaseInfo.of(databaseId, DatabaseLocation.LOCAL))
             // TODO: is it correct that we only use this for generated graphs?
             .capabilities(ImmutableStaticCapabilities.of(WriteMode.NONE))
             .schema(schema)
