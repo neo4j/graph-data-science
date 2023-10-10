@@ -377,6 +377,14 @@ public class CommunityProcedureFacade {
         return Stream.of(LouvainComputationResultTransformer.toStatsResult(computationResult, config));
     }
 
+    public Stream<MemoryEstimateResult> louvainEstimateStats(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, LouvainStatsConfig::of);
+        return Stream.of(estimateBusinessFacade.louvain(graphNameOrConfiguration, config));
+    }
+
     public Stream<LouvainStreamResult> louvainStream(
         String graphName,
         Map<String, Object> configuration
@@ -394,6 +402,14 @@ public class CommunityProcedureFacade {
         return LouvainComputationResultTransformer.toStreamResult(computationResult, streamConfig);
     }
 
+    public Stream<MemoryEstimateResult> louvainEstimateStream(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, LouvainStreamConfig::of);
+        return Stream.of(estimateBusinessFacade.louvain(graphNameOrConfiguration, config));
+    }
+
     public Stream<LouvainMutateResult> louvainMutate(
         String graphName,
         Map<String, Object> configuration
@@ -409,6 +425,14 @@ public class CommunityProcedureFacade {
         );
 
         return Stream.of(LouvainComputationResultTransformer.toMutateResult(computationResult));
+    }
+
+    public Stream<MemoryEstimateResult> louvainEstimateMutate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, LouvainMutateConfig::of);
+        return Stream.of(estimateBusinessFacade.louvain(graphNameOrConfiguration, config));
     }
 
     public Stream<LeidenStreamResult> leidenStream(

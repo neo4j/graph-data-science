@@ -20,7 +20,6 @@
 package org.neo4j.gds.louvain;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.louvain.LouvainStatsResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -54,10 +53,6 @@ public class LouvainStatsProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new LouvainStatsSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphName, configuration);
+        return facade.community().louvainEstimateStats(graphName, configuration);
     }
 }

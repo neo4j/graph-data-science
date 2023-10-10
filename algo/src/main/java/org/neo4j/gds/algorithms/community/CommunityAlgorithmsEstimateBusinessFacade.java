@@ -39,6 +39,8 @@ import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
 import org.neo4j.gds.labelpropagation.LabelPropagationFactory;
 import org.neo4j.gds.leiden.LeidenAlgorithmFactory;
 import org.neo4j.gds.leiden.LeidenBaseConfig;
+import org.neo4j.gds.louvain.LouvainAlgorithmFactory;
+import org.neo4j.gds.louvain.LouvainBaseConfig;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
 import org.neo4j.gds.memest.MemoryEstimationGraphConfigParser;
@@ -165,6 +167,18 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
         );
     }
 
+    public <C extends LouvainBaseConfig> MemoryEstimateResult louvain(
+        Object graphNameOrConfiguration,
+        C configuration
+    ) {
+        return estimate(
+            graphNameOrConfiguration,
+            configuration,
+            configuration.relationshipWeightProperty(),
+            new LouvainAlgorithmFactory<>()
+        );
+    }
+
     public <C extends SccBaseConfig> MemoryEstimateResult estimateScc(
         Object graphNameOrConfiguration,
         C configuration
@@ -257,5 +271,4 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
 
         return new MemoryEstimateResult(new MemoryTreeWithDimensions(memoryTree, dimensions));
     }
-
 }
