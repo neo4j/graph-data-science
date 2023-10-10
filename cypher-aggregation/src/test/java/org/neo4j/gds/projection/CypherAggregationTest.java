@@ -380,6 +380,9 @@ class CypherAggregationTest extends BaseProcTest {
             "RETURN gds.graph.project('g', s, null, { sourceNodeLabels: " + labels + ", targetNodeLabels: NULL })");
 
         var graphStore = GraphStoreCatalog.get("", db.databaseName(), "g").graphStore();
+
+        assertThat(graphStore.relationshipTypes()).containsExactlyInAnyOrderElementsOf(graphStore.schema().relationshipSchema().availableTypes());
+
         assertThat(graphStore.nodeLabels()).extracting(NodeLabel::name).containsExactly("A", "B");
     }
 
