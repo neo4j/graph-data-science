@@ -26,12 +26,14 @@ import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStreamBusinessFac
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.procedures.community.ConfigurationParser;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfig;
 
 import java.util.Map;
@@ -47,6 +49,7 @@ public class SimilarityProcedureFacade {
     private final SimilarityAlgorithmsStatsBusinessFacade statsBusinessFacade;
     private final SimilarityAlgorithmsStreamBusinessFacade streamBusinessFacade;
     private final SimilarityAlgorithmsWriteBusinessFacade writeBusinessFacade;
+    private final ProcedureReturnColumns procedureReturnColumns;
 
     private final SimilarityAlgorithmsEstimateBusinessFacade estimateBusinessFacade;
     private final AlgorithmMetaDataSetter algorithmMetaDataSetter;
@@ -55,6 +58,7 @@ public class SimilarityProcedureFacade {
         ConfigurationParser configurationParser,
         DatabaseId databaseId,
         User user,
+        ProcedureReturnColumns procedureReturnColumns,
         SimilarityAlgorithmsMutateBusinessFacade mutateBusinessFacade,
         SimilarityAlgorithmsStatsBusinessFacade statsBusinessFacade,
         SimilarityAlgorithmsStreamBusinessFacade streamBusinessFacade,
@@ -65,6 +69,7 @@ public class SimilarityProcedureFacade {
         this.configurationParser = configurationParser;
         this.databaseId = databaseId;
         this.user = user;
+        this.procedureReturnColumns = procedureReturnColumns;
         this.mutateBusinessFacade = mutateBusinessFacade;
         this.statsBusinessFacade = statsBusinessFacade;
         this.streamBusinessFacade = streamBusinessFacade;
@@ -87,6 +92,23 @@ public class SimilarityProcedureFacade {
         );
 
         return NodeSimilarityComputationResultTransformer.toStreamResult(computationResult);
+    }
+
+    public Stream<SimilarityStatsResult> nodeSimilarityStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var statsConfig = createConfig(configuration, NodeSimilarityStatsConfig::of);
+
+        var computationResult = statsBusinessFacade.nodeSimilarity(
+            graphName,
+            statsConfig,
+            user,
+            databaseId,
+            procedureReturnColumns.contains("similarityDistribution")
+        );
+
+        return Stream.of(NodeSimilarityComputationResultTransformer.toStatsResult(computationResult, statsConfig));
     }
 
     public Stream<MemoryEstimateResult> nodeSimilarityEstimateStream(

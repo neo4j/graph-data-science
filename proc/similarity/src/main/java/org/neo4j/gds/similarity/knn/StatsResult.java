@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.similarity.knn;
 
+import org.neo4j.gds.procedures.similarity.SimilarityStatsResult;
 import org.neo4j.gds.similarity.SimilarityResultBuilder;
-import org.neo4j.gds.similarity.SimilarityStatsResult;
 
 import java.util.Map;
 

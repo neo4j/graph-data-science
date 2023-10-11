@@ -21,9 +21,10 @@ package org.neo4j.gds.similarity.nodesim;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.similarity.SimilarityStatsResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.similarity.SimilarityStatsResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -35,17 +36,15 @@ import static org.neo4j.gds.similarity.nodesim.NodeSimilarityProc.NODE_SIMILARIT
 import static org.neo4j.procedure.Mode.READ;
 
 public class NodeSimilarityStatsProc extends BaseProc {
-
+    @Context
+    public GraphDataScience facade;
     @Procedure(name = "gds.nodeSimilarity.stats", mode = READ)
     @Description(NODE_SIMILARITY_DESCRIPTION)
     public Stream<SimilarityStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new NodeSimilarityStatsSpecification(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.similarity().nodeSimilarityStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.nodeSimilarity.stats.estimate", mode = READ)

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.integration;
 
+import org.neo4j.gds.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
@@ -93,6 +94,7 @@ public class SimilarityProcedureProvider {
         // Neo4j's services
         var algorithmMemoryValidationService = new AlgorithmMemoryValidationService(log, useMaxMemoryEstimation);
         var databaseId = databaseIdAccessor.getDatabaseId(context.graphDatabaseAPI());
+        var returnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
         var user = userAccessor.getUser(context.securityContext());
 
         var kernelTransaction = kernelTransactionAccessor.getKernelTransaction(context);
@@ -146,18 +148,20 @@ public class SimilarityProcedureProvider {
             )
         );
         var mutateBusinessFacade = new SimilarityAlgorithmsMutateBusinessFacade();
-        var statsBusinessFacade = new SimilarityAlgorithmsStatsBusinessFacade();
+        var statsBusinessFacade = new SimilarityAlgorithmsStatsBusinessFacade(similarityAlgorithmsFacade);
         var writeBusinessFacade = new SimilarityAlgorithmsWriteBusinessFacade();
         return new SimilarityProcedureFacade(
             configurationParser,
             databaseId,
             user,
+            returnColumns,
             mutateBusinessFacade,
             statsBusinessFacade,
             streamBusinessFacade,
             writeBusinessFacade,
             estimateBusinessFacade,
             algorithmMetaDataSetter
+
         );
     }
 

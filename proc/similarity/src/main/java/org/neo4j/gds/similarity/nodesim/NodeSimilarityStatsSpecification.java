@@ -25,9 +25,9 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.similarity.SimilarityStatsResult;
 import org.neo4j.gds.similarity.SimilarityProc;
 import org.neo4j.gds.similarity.SimilarityResultBuilder;
-import org.neo4j.gds.similarity.SimilarityStatsResult;
 
 import java.util.Collections;
 import java.util.stream.Stream;
@@ -76,7 +76,11 @@ public class NodeSimilarityStatsSpecification implements AlgorithmSpec<NodeSimil
                 }
 
                 SimilarityResultBuilder<SimilarityStatsResult> resultBuilder =
-                    SimilarityProc.withGraphsizeAndTimings(new SimilarityStatsResult.Builder(), computationResult, NodeSimilarityResult::graphResult);
+                    SimilarityProc.withGraphsizeAndTimings(
+                        new NodeSimilarityStatsResultBuilder(),
+                        computationResult,
+                        NodeSimilarityResult::graphResult
+                    );
 
                 if (shouldComputeHistogram(executionContext.returnColumns())) {
                     try (ProgressTimer ignored = resultBuilder.timePostProcessing()) {
