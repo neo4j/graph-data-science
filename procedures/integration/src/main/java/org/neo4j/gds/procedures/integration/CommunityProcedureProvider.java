@@ -29,6 +29,7 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.algorithms.community.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.community.WriteNodePropertyService;
+import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
@@ -152,11 +153,13 @@ public class CommunityProcedureProvider {
 
         // business facades
         var estimateBusinessFacade = new CommunityAlgorithmsEstimateBusinessFacade(
-            graphStoreCatalogService,
-            fictitiousGraphStoreEstimationService,
-            databaseGraphStoreEstimationService,
-            databaseId,
-            user
+            new AlgorithmEstimator(
+                graphStoreCatalogService,
+                fictitiousGraphStoreEstimationService,
+                databaseGraphStoreEstimationService,
+                databaseId,
+                user
+            )
         );
         var statsBusinessFacade = new CommunityAlgorithmsStatsBusinessFacade(communityAlgorithmsFacade);
         var streamBusinessFacade = new CommunityAlgorithmsStreamBusinessFacade(communityAlgorithmsFacade);

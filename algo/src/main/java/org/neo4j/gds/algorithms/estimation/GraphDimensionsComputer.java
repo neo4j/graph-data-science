@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms.community;
+package org.neo4j.gds.algorithms.estimation;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
@@ -38,11 +38,11 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-final class GraphDimensionsComputer {
+public final class GraphDimensionsComputer {
 
     private GraphDimensionsComputer() {}
 
-    static GraphDimensions of(GraphStore graphStore, AlgoBaseConfig config) {
+    public static GraphDimensions of(GraphStore graphStore, AlgoBaseConfig config) {
         Collection<NodeLabel> labelFilter = ElementTypeValidator.resolve(graphStore, config.nodeLabels());
         Collection<RelationshipType> typeFilter = ElementTypeValidator.resolveTypes(
             graphStore,
