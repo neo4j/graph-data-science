@@ -20,7 +20,6 @@
 package org.neo4j.gds.approxmaxkcut;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -55,11 +54,7 @@ public class ApproxMaxKCutMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new ApproxMaxKCutMutateSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.community().approxMaxKCutEstimateMutate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Deprecated

@@ -1315,8 +1315,6 @@ public class CommunityProcedureFacade {
         return Stream.of(estimateBusinessFacade.k1Coloring(graphNameOrConfiguration, config));
     }
 
-
-
     public Stream<ConductanceStreamResult> conductanceStream(
         String graphName,
         Map<String, Object> configuration
@@ -1366,6 +1364,22 @@ public class CommunityProcedureFacade {
         );
 
         return Stream.of(ApproxMaxKCutComputationResultTransformer.toMutateResult(computationResult));
+    }
+
+    public Stream<MemoryEstimateResult> approxMaxKCutEstimateStream(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, ApproxMaxKCutStreamConfig::of);
+        return Stream.of(estimateBusinessFacade.approxMaxKCut(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> approxMaxKCutEstimateMutate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, ApproxMaxKCutMutateConfig::of);
+        return Stream.of(estimateBusinessFacade.approxMaxKCut(graphNameOrConfiguration, config));
     }
 
     public Stream<AlphaSccWriteResult> alphaSccWrite(
