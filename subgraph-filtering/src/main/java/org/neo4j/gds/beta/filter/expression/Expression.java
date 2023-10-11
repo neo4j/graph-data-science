@@ -610,8 +610,14 @@ public interface Expression {
             List<RelationshipType> typeSelection();
 
             @Override
+            default ValueType valueType() {
+                return ValueType.LONG;
+            }
+
+            @Override
             default double evaluate(EvaluationContext context) {
-                return context.degree(this.typeSelection());
+                long degree = context.degree(this.typeSelection());
+                return Double.longBitsToDouble(degree);
             }
         }
     }

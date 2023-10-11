@@ -404,7 +404,7 @@ class ExpressionEvaluatorTest {
     void degree() throws ParseException {
         var expr = ExpressionParser.parse("degree('REL')", Map.of());
         var evaluationContext = ImmutableTestContext.builder().addLabelsOrType("REL").build();
-        assertThat(expr.evaluate(evaluationContext)).isEqualTo(42);
+        assertThat(expr.evaluate(evaluationContext)).isEqualTo(Double.longBitsToDouble(42));
     }
 
     private static final EvaluationContext EMPTY_EVALUATION_CONTEXT = new EvaluationContext(Map.of()) {
