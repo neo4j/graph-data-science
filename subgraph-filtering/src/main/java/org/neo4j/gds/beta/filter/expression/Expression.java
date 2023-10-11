@@ -536,6 +536,24 @@ public interface Expression {
                 return FALSE;
             }
         }
+
+        @ValueClass
+        interface StringLiteral extends Literal {
+            String value();
+
+            @Override
+            default ValueType valueType() {
+                return ValueType.DOUBLE;
+            }
+
+            @Value.Derived
+            @Override
+            default double evaluate(EvaluationContext context) {
+                return value().hashCode();
+            }
+
+            default String prettyString() {return value();}
+        }
     }
 
     static Optional<String> literalTypeHint(Expression lhs, Expression rhs) {

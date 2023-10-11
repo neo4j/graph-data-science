@@ -83,6 +83,11 @@ class GdsAstFactory extends AstFactoryAdapter {
     }
 
     @Override
+    public Expression newString(InputPosition p, String image) {
+        return ImmutableStringLiteral.builder().value(image).build();
+    }
+
+    @Override
     public Expression hasLabelsOrTypes(Expression subject, List<ASTFactory.StringPos<InputPosition>> labels) {
         if (subject instanceof Expression.LeafExpression.Variable) {
             var variable = (Expression.LeafExpression.Variable) subject;

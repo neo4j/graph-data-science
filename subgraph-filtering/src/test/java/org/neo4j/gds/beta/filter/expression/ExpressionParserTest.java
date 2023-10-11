@@ -111,6 +111,13 @@ class ExpressionParserTest {
         assertThat(actual).isEqualTo(expected);
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"Foo", "bar", "BAZ", "42"})
+    void stringLiteral(String string) throws ParseException {
+        var actual = ExpressionParser.parse("'" + string + "'", Map.of());
+        assertThat(actual).isEqualTo(ImmutableStringLiteral.builder().value(string).build());
+    }
+
     // binary
 
     static Stream<Arguments> ands() {
