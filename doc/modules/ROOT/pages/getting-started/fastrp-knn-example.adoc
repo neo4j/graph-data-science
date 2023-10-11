@@ -1,3 +1,5 @@
+:page-aliases: end-to-end-examples/end-to-end-examples.adoc, end-to-end-examples/fastrp-knn-example.adoc
+
 [[fastrp-knn-example]]
 = FastRP and kNN example
 
