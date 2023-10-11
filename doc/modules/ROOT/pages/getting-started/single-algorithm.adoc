@@ -11,3 +11,96 @@ The example can be a variation of the one from Dijkstra Source-Target Shortest P
 * tracks + stations instead of roads + locations?
 * added explanations
 * no memory estimation (not for a quickstart)
+
+=== Setup
+
+[source, cypher, role=noplay setup-query]
+----
+CREATE (a:Station {name: 'Kings Cross'}),
+       (b:Station {name: 'Euston'}),
+       (c:Station {name: 'Camden Town'}),
+       (d:Station {name: 'Mornington Crescent'}),
+       (e:Station {name: 'Kentish Town'}),
+       (a)-[:CONNECTION {distance: 0.7}]->(b),
+       (b)-[:CONNECTION {distance: 1.3}]->(c),
+       (b)-[:CONNECTION {distance: 0.7}]->(d),
+       (d)-[:CONNECTION {distance: 0.6}]->(c),
+       (c)-[:CONNECTION {distance: 1.3}]->(e)
+----
+
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.graph.project(
+    'myGraph',
+    'Station',
+    'CONNECTION',
+    {
+        relationshipProperties: 'distance'
+    }
+)
+----
+
+=== Query
+
+[role=query-example]
+--
+.Title?
+[source, cypher, role=noplay]
+----
+MATCH (source:Station {name: 'Kings Cross'}), (target:Station {name: 'Kentish Town'})
+CALL gds.shortestPath.dijkstra.stream('myGraph', {
+    sourceNode: source,
+    targetNode: target,
+    relationshipWeightProperty: 'distance'
+})
+YIELD index, sourceNode, targetNode, totalCost, path
+RETURN
+    index,
+    gds.util.asNode(sourceNode).name AS sourceNodeName,
+    gds.util.asNode(targetNode).name AS targetNodeName,
+    totalCost,
+    nodes(path) as path
+ORDER BY index
+----
+
+.Results
+[opts="header"]
+|===
+| index | sourceNodeName | targetNodeName | totalCost | path
+| 0     | "Kings Cross"  | "Kentish Town" | 3.3       | [Node[0], Node[1], Node[2], Node[4]]
+|===
+--
+
+* Skips nodeIds, costs
+* Only one index because one path
+* Explain `asNode` and `nodes`
+
+=== Write
+
+[role=query-example]
+--
+.The following will run the algorithm in `write` mode:
+[source, cypher, role=noplay]
+----
+MATCH (source:Station {name: 'Kings Cross'}), (target:Station {name: 'Kentish Town'})
+CALL gds.shortestPath.dijkstra.write('myGraph', {
+    sourceNode: source,
+    targetNode: target,
+    relationshipWeightProperty: 'distance',
+    writeRelationshipType: 'PATH',
+    writeNodeIds: true,
+    writeCosts: true
+})
+YIELD relationshipsWritten
+RETURN relationshipsWritten
+----
+
+.Results
+[opts="header"]
+|===
+| relationshipsWritten
+| 1
+|===
+--
+
+TODO: Run MATCH query and see new rel
