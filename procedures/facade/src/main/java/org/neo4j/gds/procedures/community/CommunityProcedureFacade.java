@@ -62,6 +62,7 @@ import org.neo4j.gds.modularity.ModularityStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
 import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutMutateResult;
 import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutStreamResult;
 import org.neo4j.gds.procedures.community.conductance.ConductanceStreamResult;
@@ -1231,6 +1232,14 @@ public class CommunityProcedureFacade {
         Map<String, Object> algoConfiguration
     ) {
         var config = createConfig(algoConfiguration, ModularityOptimizationMutateConfig::of);
+        return Stream.of(estimateBusinessFacade.modularityOptimization(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> modularityOptimizationEstimateWrite(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, ModularityOptimizationWriteConfig::of);
         return Stream.of(estimateBusinessFacade.modularityOptimization(graphNameOrConfiguration, config));
     }
 
