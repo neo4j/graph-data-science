@@ -156,7 +156,6 @@ include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 |===
 | Name          | Type   | Default | Optional | Description
 include::partial$/algorithms/common-configuration/common-write-configuration-entries.adoc[]
-| Name              | Type    | Default | Optional | Description
 | sourceNode        | Integer | n/a     | no       | The Neo4j source node or node id.
 ifeval::["{source-target}" == "true"]
 | targetNode        | Integer | n/a     | no       | The Neo4j target node or node id.
