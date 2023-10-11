@@ -24,8 +24,9 @@ import org.neo4j.gds.algorithms.AlphaSccSpecificFields;
 import org.neo4j.gds.algorithms.CommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.K1ColoringSpecificFields;
 import org.neo4j.gds.algorithms.KCoreSpecificFields;
-import org.neo4j.gds.algorithms.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.KmeansSpecificFields;
+import org.neo4j.gds.algorithms.LeidenSpecificFields;
+import org.neo4j.gds.algorithms.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.TriangleCountSpecificFields;
@@ -39,6 +40,8 @@ import org.neo4j.gds.k1coloring.K1ColoringWriteConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionWriteConfig;
 import org.neo4j.gds.kmeans.KmeansResult;
 import org.neo4j.gds.kmeans.KmeansWriteConfig;
+import org.neo4j.gds.leiden.LeidenResult;
+import org.neo4j.gds.leiden.LeidenWriteConfig;
 import org.neo4j.gds.louvain.LouvainResult;
 import org.neo4j.gds.louvain.LouvainWriteConfig;
 import org.neo4j.gds.result.CommunityStatistics;
@@ -53,10 +56,9 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.algorithms.community.CommunityResultCompanion.createIntermediateCommunitiesNodePropertyValues;
-
 import static org.neo4j.gds.algorithms.community.AlgorithmRunner.runWithTiming;
 import static org.neo4j.gds.algorithms.community.CommunityResultCompanion.arrayMatrixToListMatrix;
+import static org.neo4j.gds.algorithms.community.CommunityResultCompanion.createIntermediateCommunitiesNodePropertyValues;
 
 public class CommunityAlgorithmsWriteBusinessFacade {
 
@@ -274,6 +276,64 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             configuration.arrowConnectionInfo()
         );
     }
+
+    public NodePropertyWriteResult<LeidenSpecificFields> leiden(
+        String graphName,
+        LeidenWriteConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        StatisticsComputationInstructions statisticsComputationInstructions
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> communityAlgorithmsFacade.leiden(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        NodePropertyValuesMapper<LeidenResult, LeidenWriteConfig> mapper = ((result, config) -> {
+            return config.includeIntermediateCommunities()
+                ? createIntermediateCommunitiesNodePropertyValues(
+                result::getIntermediateCommunities,
+                result.communities().size()
+            )
+                : CommunityResultCompanion.nodePropertyValues(
+                    config.isIncremental(),
+                    config.writeProperty(),
+                    config.seedProperty(),
+                    config.consecutiveIds(),
+                    NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent()),
+                    config.minCommunitySize(),
+                    config.concurrency(),
+                    () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
+                );
+        });
+
+        return writeToDatabase(
+            algorithmResult,
+            configuration,
+            mapper,
+            (result -> result.communities()::get),
+            (result, componentCount, communitySummary) -> {
+                return LeidenSpecificFields.from(
+                    result.communities().size(),
+                    result.modularity(),
+                    result.modularities(),
+                    componentCount,
+                    result.ranLevels(),
+                    result.didConverge(),
+                    communitySummary
+                );
+            },
+            statisticsComputationInstructions,
+            intermediateResult.computeMilliseconds,
+            () -> LeidenSpecificFields.EMPTY,
+            "LeidenWrite",
+            configuration.writeConcurrency(),
+            configuration.writeProperty(),
+            configuration.arrowConnectionInfo()
+        );
+    }
+
 
     public NodePropertyWriteResult<KmeansSpecificFields> kmeans(
         String graphName,
@@ -494,7 +554,5 @@ public class CommunityAlgorithmsWriteBusinessFacade {
         }).orElseGet(() -> NodePropertyWriteResult.empty(emptyASFSupplier.get(), configuration));
 
     }
-
-
 
 }
