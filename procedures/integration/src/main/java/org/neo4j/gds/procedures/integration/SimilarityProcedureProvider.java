@@ -24,7 +24,10 @@ import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsFacade;
+import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsMutateBusinessFacade;
+import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStatsBusinessFacade;
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStreamBusinessFacade;
+import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -142,11 +145,17 @@ public class SimilarityProcedureProvider {
                 user
             )
         );
+        var mutateBusinessFacade = new SimilarityAlgorithmsMutateBusinessFacade();
+        var statsBusinessFacade = new SimilarityAlgorithmsStatsBusinessFacade();
+        var writeBusinessFacade = new SimilarityAlgorithmsWriteBusinessFacade();
         return new SimilarityProcedureFacade(
             configurationParser,
             databaseId,
             user,
+            mutateBusinessFacade,
+            statsBusinessFacade,
             streamBusinessFacade,
+            writeBusinessFacade,
             estimateBusinessFacade,
             algorithmMetaDataSetter
         );

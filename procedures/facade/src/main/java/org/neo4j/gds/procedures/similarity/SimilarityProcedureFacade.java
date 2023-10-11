@@ -20,7 +20,10 @@
 package org.neo4j.gds.procedures.similarity;
 
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsEstimateBusinessFacade;
+import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsMutateBusinessFacade;
+import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStatsBusinessFacade;
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStreamBusinessFacade;
+import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
@@ -40,7 +43,10 @@ public class SimilarityProcedureFacade {
     private final ConfigurationParser configurationParser;
     private final DatabaseId databaseId;
     private final User user;
+    private final SimilarityAlgorithmsMutateBusinessFacade mutateBusinessFacade;
+    private final SimilarityAlgorithmsStatsBusinessFacade statsBusinessFacade;
     private final SimilarityAlgorithmsStreamBusinessFacade streamBusinessFacade;
+    private final SimilarityAlgorithmsWriteBusinessFacade writeBusinessFacade;
 
     private final SimilarityAlgorithmsEstimateBusinessFacade estimateBusinessFacade;
     private final AlgorithmMetaDataSetter algorithmMetaDataSetter;
@@ -49,14 +55,20 @@ public class SimilarityProcedureFacade {
         ConfigurationParser configurationParser,
         DatabaseId databaseId,
         User user,
+        SimilarityAlgorithmsMutateBusinessFacade mutateBusinessFacade,
+        SimilarityAlgorithmsStatsBusinessFacade statsBusinessFacade,
         SimilarityAlgorithmsStreamBusinessFacade streamBusinessFacade,
+        SimilarityAlgorithmsWriteBusinessFacade writeBusinessFacade,
         SimilarityAlgorithmsEstimateBusinessFacade estimateBusinessFacade,
         AlgorithmMetaDataSetter algorithmMetaDataSetter
     ) {
         this.configurationParser = configurationParser;
         this.databaseId = databaseId;
         this.user = user;
+        this.mutateBusinessFacade = mutateBusinessFacade;
+        this.statsBusinessFacade = statsBusinessFacade;
         this.streamBusinessFacade = streamBusinessFacade;
+        this.writeBusinessFacade = writeBusinessFacade;
         this.estimateBusinessFacade = estimateBusinessFacade;
         this.algorithmMetaDataSetter = algorithmMetaDataSetter;
     }
