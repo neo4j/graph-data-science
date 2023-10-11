@@ -17,14 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.modularityoptimization;
+package org.neo4j.gds.procedures.community.modularityoptimization;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationResultBuilder;
 
 import java.util.Map;
 
-@SuppressWarnings("unused")
 public class ModularityOptimizationWriteResult {
 
     public final long preProcessingMillis;
@@ -39,7 +37,7 @@ public class ModularityOptimizationWriteResult {
     public final Map<String, Object> communityDistribution;
     public final Map<String, Object> configuration;
 
-    ModularityOptimizationWriteResult(
+    public ModularityOptimizationWriteResult(
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
@@ -65,9 +63,9 @@ public class ModularityOptimizationWriteResult {
         this.configuration = configuration;
     }
 
-    static class Builder extends ModularityOptimizationResultBuilder<ModularityOptimizationWriteResult> {
+    public static class Builder extends ModularityOptimizationResultBuilder<ModularityOptimizationWriteResult> {
 
-        Builder(
+        public Builder(
             ProcedureReturnColumns returnColumns,
             int concurrency
         ) {

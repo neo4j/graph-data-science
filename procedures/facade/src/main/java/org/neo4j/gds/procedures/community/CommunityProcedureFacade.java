@@ -95,6 +95,7 @@ import org.neo4j.gds.procedures.community.modularity.ModularityStreamResult;
 import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationMutateResult;
 import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationStatsResult;
 import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationStreamResult;
+import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationWriteResult;
 import org.neo4j.gds.procedures.community.scc.AlphaSccWriteResult;
 import org.neo4j.gds.procedures.community.scc.SccMutateResult;
 import org.neo4j.gds.procedures.community.scc.SccStatsResult;
@@ -1209,6 +1210,23 @@ public class CommunityProcedureFacade {
             computationResult,
             statsConfig
         ));
+    }
+
+    public Stream<ModularityOptimizationWriteResult> modularityOptimizationWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var writeConfig = createConfig(configuration, ModularityOptimizationWriteConfig::of);
+
+        var computationResult = writeBusinessFacade.modularityOptimization(
+            graphName,
+            writeConfig,
+            user,
+            databaseId,
+            ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
+        );
+
+        return Stream.of(ModularityOptimisationComputationResultTransformer.toWriteResult(computationResult));
     }
 
     public Stream<MemoryEstimateResult> modularityOptimizationEstimateStream(

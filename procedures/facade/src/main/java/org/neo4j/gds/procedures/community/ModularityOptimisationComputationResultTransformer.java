@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.community;
 
 import org.neo4j.gds.algorithms.ModularityOptimizationSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
+import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.community.CommunityResultCompanion;
@@ -32,6 +33,7 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationMutateResult;
 import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationStatsResult;
 import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationStreamResult;
+import org.neo4j.gds.procedures.community.modularityoptimization.ModularityOptimizationWriteResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -97,6 +99,22 @@ final class ModularityOptimisationComputationResultTransformer {
             computationResult.algorithmSpecificFields().communityCount(),
             computationResult.algorithmSpecificFields().communityDistribution(),
             configuration.toMap()
+        );
+    }
+
+    static ModularityOptimizationWriteResult toWriteResult(NodePropertyWriteResult<ModularityOptimizationSpecificFields> computationResult) {
+        return new ModularityOptimizationWriteResult(
+            computationResult.preProcessingMillis(),
+            computationResult.computeMillis(),
+            computationResult.postProcessingMillis(),
+            computationResult.writeMillis(),
+            computationResult.algorithmSpecificFields().nodes(),
+            computationResult.algorithmSpecificFields().didConverge(),
+            computationResult.algorithmSpecificFields().ranIterations(),
+            computationResult.algorithmSpecificFields().modularity(),
+            computationResult.algorithmSpecificFields().communityCount(),
+            computationResult.algorithmSpecificFields().communityDistribution(),
+            computationResult.configuration().toMap()
         );
     }
 }
