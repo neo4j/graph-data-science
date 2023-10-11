@@ -26,8 +26,10 @@ import org.opencypher.v9_0.ast.factory.ASTFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.neo4j.gds.core.StringSimilarity.prettySuggestions;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class GdsAstFactory extends AstFactoryAdapter {
@@ -124,6 +126,37 @@ class GdsAstFactory extends AstFactoryAdapter {
         var propertyType = properties.getOrDefault(propertyKey, ValueType.UNKNOWN);
 
         return ImmutableProperty.builder().in(subject).propertyKey(propertyKey).valueType(propertyType).build();
+    }
+
+    @Override
+    public Expression functionInvocation(
+        InputPosition p,
+        List<String> namespace,
+        String name,
+        boolean distinct,
+        List<Expression> arguments
+    ) {
+        switch (name) {
+            case Expression.Function.Degree.NAME: {
+                var relationshipTypes = arguments
+                    .stream()
+                    // todo throw is non-string literal
+                    .filter(expr -> expr instanceof Expression.Literal.StringLiteral)
+                    .map(expr -> (Expression.Literal.StringLiteral) expr)
+                    .map(Expression.Literal.StringLiteral::value)
+                    .map(RelationshipType::of)
+                    .collect(Collectors.toSet());
+
+                return ImmutableDegree.builder().typeSelection(relationshipTypes).build();
+            }
+            default:
+                throw new UnsupportedOperationException(
+                    prettySuggestions(
+                        formatWithLocale("Unknown function `%s`.", name),
+                        name,
+                        Set.of(Expression.Function.Degree.NAME)
+                    ));
+        }
     }
 
     @Override

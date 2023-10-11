@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.fabric.eval.Catalog;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
@@ -31,6 +32,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -41,7 +43,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 public class EvaluationContextTest {
 
     @GdlGraph
-    public static final String GDL = "(a:A:B:C { p1: 42.0, p2: 42 })-[:REL { baz: 84.0 }]->(b:B { p1: 1337.0, p2: 1337 })";
+    public static final String GDL = "(a:A:B:C { p1: 42.0, p2: 42 })-[:REL { baz: 84.0 }]->(b:B { p1: 1337.0, p2: 1337 })-[:BAR]->(c)";
 
     @Inject
     private GraphStore graphStore;
@@ -95,8 +97,28 @@ public class EvaluationContextTest {
     @MethodSource("nodesNegative")
     void nodeEvaluationContextNegative(String variable, List<String> unExpectedLabels) {
         var context = new EvaluationContext.NodeEvaluationContext(graphStore, Map.of());
-        context.init(idFunction.of(variable));
+        context.init(graphStore.nodes().toMappedNodeId(idFunction.of(variable)));
         assertThat(context.hasLabelsOrTypes(unExpectedLabels)).isFalse();
+    }
+
+    static Stream<Arguments> degrees() {
+        return Stream.of(
+            Arguments.of("a", List.of(), 1),
+            Arguments.of("a", List.of(RelationshipType.of("REL")), 1),
+            Arguments.of("a", List.of(RelationshipType.of("REL"), RelationshipType.of("BAR")), 1),
+            Arguments.of("a", List.of(RelationshipType.of("BAR")), 0),
+            Arguments.of("b", List.of(RelationshipType.of("REL")), 0),
+            Arguments.of("b", List.of(RelationshipType.of("BAR")), 1),
+            Arguments.of("c", List.of(), 0)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("degrees")
+    void degree(String variable, Collection<RelationshipType> types, int expectedDegree) {
+        var context = new EvaluationContext.NodeEvaluationContext(graphStore, Map.of());
+        context.init(graphStore.nodes().toMappedNodeId(idFunction.of(variable)));
+        assertThat(context.degree(types)).isEqualTo(expectedDegree);
     }
 
     @Test

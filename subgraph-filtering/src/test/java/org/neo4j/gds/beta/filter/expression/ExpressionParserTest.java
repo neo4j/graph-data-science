@@ -24,10 +24,15 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.utils.StringJoining;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -365,6 +370,24 @@ class ExpressionParserTest {
             .in(ImmutableVariable.builder().name("n").build())
             .propertyKey("foo")
             .valueType(expectedValueType)
+            .build());
+    }
+
+    static Stream<List<String>> types() {
+        return Stream.of(
+            List.of(),
+            List.of("Foo"),
+            List.of("Foo", "Bar")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("types")
+    void degree(Collection<String> types) throws ParseException {
+        var exprString = StringJoining.join(types.stream().map(type -> "'" + type + "'"), ", ", "degree(", ")");
+        var expr = ExpressionParser.parse(exprString, Map.of());
+        assertThat(expr).isEqualTo(ImmutableDegree.builder()
+            .addAllTypeSelection(types.stream().map(RelationshipType::of).collect(Collectors.toSet()))
             .build());
     }
 }

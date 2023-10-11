@@ -28,8 +28,10 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public abstract class EvaluationContext {
 
@@ -50,6 +52,8 @@ public abstract class EvaluationContext {
     public abstract boolean hasRelationshipTypes(List<RelationshipType> types);
 
     public abstract boolean hasLabelsOrTypes(List<String> labelsOrTypes);
+
+    public abstract int degree(Collection<RelationshipType> typeSelection);
 
     public static class NodeEvaluationContext extends EvaluationContext {
 
@@ -100,6 +104,13 @@ public abstract class EvaluationContext {
             return hasAllLabels;
         }
 
+        @Override
+        public int degree(Collection<RelationshipType> typeSelection) {
+            return typeSelection.isEmpty()
+                ? graphStore.getUnion().degree(nodeId)
+                : graphStore.getGraph(typeSelection, Optional.empty()).degree(nodeId);
+        }
+
         public void init(long nodeId) {
             this.nodeId = nodeId;
         }
@@ -148,6 +159,11 @@ public abstract class EvaluationContext {
                 hasAnyType |= this.relType.name.equals(relType);
             }
             return hasAnyType;
+        }
+
+        @Override
+        public int degree(Collection<RelationshipType> typeSelection) {
+            throw new UnsupportedOperationException("Degree is not supported for relationship evaluation context");
         }
 
         public void init(RelationshipType relType) {

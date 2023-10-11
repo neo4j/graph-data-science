@@ -600,4 +600,20 @@ public interface Expression {
         )));
     }
 
+    interface Function extends Expression {
+
+        @ValueClass
+        interface Degree extends Function {
+
+            String NAME = "degree";
+
+            List<RelationshipType> typeSelection();
+
+            @Override
+            default double evaluate(EvaluationContext context) {
+                return context.degree(this.typeSelection());
+            }
+        }
+    }
+
 }
