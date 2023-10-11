@@ -35,6 +35,7 @@ import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
+import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ProcedureReturnColumns;
@@ -195,10 +196,14 @@ class K1ColoringStreamProcTest extends BaseProcTest {
             proc.taskRegistryFactory = taskRegistryFactory;
 
             var algorithmsStreamBusinessFacade = new CommunityAlgorithmsStreamBusinessFacade(
-                new CommunityAlgorithmsFacade(graphStoreCatalogService,
-                    taskRegistryFactory,
-                    EmptyUserLogRegistryFactory.INSTANCE,
-                    memoryUsageValidator, logMock
+                new CommunityAlgorithmsFacade(
+                    new AlgorithmRunner(
+                        graphStoreCatalogService,
+                        memoryUsageValidator,
+                        taskRegistryFactory,
+                        EmptyUserLogRegistryFactory.INSTANCE,
+                        logMock
+                    )
                 ));
             proc.facade = new GraphDataScience(
                 null,

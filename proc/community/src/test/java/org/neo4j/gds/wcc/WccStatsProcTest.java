@@ -38,6 +38,7 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStatsBusinessFacade;
+import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.api.ProcedureReturnColumns;
@@ -270,10 +271,15 @@ class WccStatsProcTest extends BaseProcTest {
         );
 
         var statsBusinessFacade = new CommunityAlgorithmsStatsBusinessFacade(
-            new CommunityAlgorithmsFacade(graphStoreCatalogService,
-                TaskRegistryFactory.empty(),
-                EmptyUserLogRegistryFactory.INSTANCE,
-                memoryUsageValidator, logMock)
+            new CommunityAlgorithmsFacade(
+                new AlgorithmRunner(
+                    graphStoreCatalogService,
+                    memoryUsageValidator,
+                    TaskRegistryFactory.empty(),
+                    EmptyUserLogRegistryFactory.INSTANCE,
+                    logMock
+                )
+            )
         );
 
         return new GraphDataScience(

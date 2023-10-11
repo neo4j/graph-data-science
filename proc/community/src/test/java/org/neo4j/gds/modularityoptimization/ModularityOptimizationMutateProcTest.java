@@ -50,6 +50,7 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStatsBusinessFacade
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.algorithms.community.MutateNodePropertyService;
+import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -565,10 +566,15 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
         );
 
         var algorithmsMutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
-            new CommunityAlgorithmsFacade(graphStoreCatalogService,
-                TaskRegistryFactory.empty(),
-                EmptyUserLogRegistryFactory.INSTANCE,
-                memoryUsageValidator, logMock),
+            new CommunityAlgorithmsFacade(
+                new AlgorithmRunner(
+                    graphStoreCatalogService,
+                    memoryUsageValidator,
+                    TaskRegistryFactory.empty(),
+                    EmptyUserLogRegistryFactory.INSTANCE,
+                    logMock
+                )
+            ),
             new MutateNodePropertyService(logMock)
         );
 

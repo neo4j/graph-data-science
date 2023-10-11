@@ -23,6 +23,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
+import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -96,11 +97,13 @@ class CommunityAlgorithmsStreamBusinessFacadeTest {
 
             var algorithmsBusinessFacade = new CommunityAlgorithmsStreamBusinessFacade(
                 new CommunityAlgorithmsFacade(
-                    graphStoreCatalogServiceMock,
-                    TaskRegistryFactory.empty(),
-                    EmptyUserLogRegistryFactory.INSTANCE,
-                    mock(AlgorithmMemoryValidationService.class),
-                    logMock
+                    new AlgorithmRunner(
+                        graphStoreCatalogServiceMock,
+                        mock(AlgorithmMemoryValidationService.class),
+                        TaskRegistryFactory.empty(),
+                        EmptyUserLogRegistryFactory.INSTANCE,
+                        logMock
+                    )
                 )
             );
 
@@ -132,10 +135,14 @@ class CommunityAlgorithmsStreamBusinessFacadeTest {
                 .when(graphStoreCatalogServiceMock)
                 .getGraphWithGraphStore(any(), any(), any(), any(), any());
             var algorithmsBusinessFacade = new CommunityAlgorithmsStreamBusinessFacade(
-                new CommunityAlgorithmsFacade(graphStoreCatalogServiceMock,
-                    mock(TaskRegistryFactory.class),
-                    mock(UserLogRegistryFactory.class),
-                    null, null
+                new CommunityAlgorithmsFacade(
+                    new AlgorithmRunner(
+                        graphStoreCatalogServiceMock,
+                        null,
+                        mock(TaskRegistryFactory.class),
+                        mock(UserLogRegistryFactory.class),
+                        null
+                    )
                 )
             );
 

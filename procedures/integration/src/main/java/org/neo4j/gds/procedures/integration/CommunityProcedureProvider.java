@@ -29,6 +29,7 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.algorithms.community.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.community.WriteNodePropertyService;
+import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
@@ -123,11 +124,13 @@ public class CommunityProcedureProvider {
 
         // algorithm facade
         var communityAlgorithmsFacade = new CommunityAlgorithmsFacade(
-            graphStoreCatalogService,
-            taskRegistryFactory,
-            userLogRegistryFactory,
-            algorithmMemoryValidationService,
-            log
+            new AlgorithmRunner(
+                graphStoreCatalogService,
+                algorithmMemoryValidationService,
+                taskRegistryFactory,
+                userLogRegistryFactory,
+                log
+            )
         );
 
         // moar services
