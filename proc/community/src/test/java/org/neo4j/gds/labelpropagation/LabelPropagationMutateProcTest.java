@@ -343,7 +343,8 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     null,
                     null,
                     null
-                )
+                ),
+                null
             );
 
             ProcedureMethodHelper.mutateMethods(procedure)
@@ -466,7 +467,8 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     null,
                     null,
                     null
-                )
+                ),
+                null
             );
 
             ProcedureMethodHelper.mutateMethods(procedure)
@@ -544,7 +546,8 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     null,
                     null,
                     null
-                )
+                ),
+                null
             );
 
             var methods = ProcedureMethodHelper.mutateMethods(procedure).collect(Collectors.toList());
@@ -625,7 +628,8 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     null,
                     null,
                     null
-                )
+                ),
+                null
             );
             ProcedureMethodHelper.mutateMethods(procedure)
                 .forEach(mutateMethod -> {

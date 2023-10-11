@@ -219,7 +219,8 @@ class K1ColoringStreamProcTest extends BaseProcTest {
                     null,
                     algorithmsStreamBusinessFacade,
                     null
-                )
+                ),
+                null
             );
             var someJobId = new JobId();
             Map<String, Object> configMap = Map.of("jobId", someJobId);

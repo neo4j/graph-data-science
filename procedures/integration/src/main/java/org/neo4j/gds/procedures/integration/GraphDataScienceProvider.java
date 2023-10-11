@@ -32,22 +32,26 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
     private final Log log;
     private final CatalogFacadeProvider catalogFacadeProvider;
     private final CommunityProcedureProvider communityProcedureProvider;
+    private final SimilarityProcedureProvider similarityProcedureProvider;
 
     public GraphDataScienceProvider(
         Log log,
         CatalogFacadeProvider catalogFacadeProvider,
-        CommunityProcedureProvider communityProcedureProvider
+        CommunityProcedureProvider communityProcedureProvider,
+        SimilarityProcedureProvider similarityProcedureProvider
     ) {
         this.log = log;
         this.catalogFacadeProvider = catalogFacadeProvider;
         this.communityProcedureProvider = communityProcedureProvider;
+        this.similarityProcedureProvider = similarityProcedureProvider;
     }
 
     @Override
     public GraphDataScience apply(Context context) throws ProcedureException {
         var catalogFacade = catalogFacadeProvider.createCatalogFacade(context);
         var communityProcedureFacade = communityProcedureProvider.createCommunityProcedureFacade(context);
+        var similarityProcedureFacade = similarityProcedureProvider.createSimilarityProcedureFacade(context);
 
-        return new GraphDataScience(log, catalogFacade, communityProcedureFacade);
+        return new GraphDataScience(log, catalogFacade, communityProcedureFacade, similarityProcedureFacade);
     }
 }

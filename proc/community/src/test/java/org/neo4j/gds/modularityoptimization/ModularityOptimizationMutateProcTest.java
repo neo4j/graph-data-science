@@ -592,7 +592,8 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
                 mock(CommunityAlgorithmsStatsBusinessFacade.class),
                 mock(CommunityAlgorithmsStreamBusinessFacade.class),
                 mock(CommunityAlgorithmsWriteBusinessFacade.class)
-            )
+            ),
+            null
         );
     }
 }
