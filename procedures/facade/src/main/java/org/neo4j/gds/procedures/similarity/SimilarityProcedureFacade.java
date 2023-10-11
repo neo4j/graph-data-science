@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.similarity;
 
+import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.DatabaseId;
@@ -26,6 +27,7 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.procedures.community.ConfigurationParser;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfig;
 
@@ -39,6 +41,8 @@ public class SimilarityProcedureFacade {
     private final DatabaseId databaseId;
     private final User user;
     private final SimilarityAlgorithmsStreamBusinessFacade streamBusinessFacade;
+
+    private final SimilarityAlgorithmsEstimateBusinessFacade estimateBusinessFacade;
     private final AlgorithmMetaDataSetter algorithmMetaDataSetter;
 
     public SimilarityProcedureFacade(
@@ -46,12 +50,14 @@ public class SimilarityProcedureFacade {
         DatabaseId databaseId,
         User user,
         SimilarityAlgorithmsStreamBusinessFacade streamBusinessFacade,
+        SimilarityAlgorithmsEstimateBusinessFacade estimateBusinessFacade,
         AlgorithmMetaDataSetter algorithmMetaDataSetter
     ) {
         this.configurationParser = configurationParser;
         this.databaseId = databaseId;
         this.user = user;
         this.streamBusinessFacade = streamBusinessFacade;
+        this.estimateBusinessFacade = estimateBusinessFacade;
         this.algorithmMetaDataSetter = algorithmMetaDataSetter;
     }
 
@@ -69,6 +75,14 @@ public class SimilarityProcedureFacade {
         );
 
         return NodeSimilarityComputationResultTransformer.toStreamResult(computationResult);
+    }
+
+    public Stream<MemoryEstimateResult> nodeSimilarityEstimateStream(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, NodeSimilarityStreamConfig::of);
+        return Stream.of(estimateBusinessFacade.nodeSimilarity(graphNameOrConfiguration, config));
     }
 
     // FIXME: the following two methods are duplicate, find a good place for them.

@@ -255,7 +255,7 @@ public final class ExtensionBuilder {
             databaseIdAccessor,
             kernelTransactionAccessor,
             taskRegistryFactoryService,
-            userLogServices,
+            terminationFlagService, userLogServices,
             userAccessor
         );
     }

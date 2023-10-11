@@ -31,15 +31,9 @@ import org.neo4j.gds.algorithms.community.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.community.WriteNodePropertyService;
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.GraphLoaderContext;
-import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.utils.TerminationFlag;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
@@ -52,7 +46,6 @@ import org.neo4j.gds.procedures.community.ConfigurationParser;
 import org.neo4j.gds.services.DatabaseIdAccessor;
 import org.neo4j.gds.services.UserAccessor;
 import org.neo4j.gds.services.UserLogServices;
-import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
@@ -136,12 +129,13 @@ public class CommunityProcedureProvider {
 
         // moar services
         var fictitiousGraphStoreEstimationService = new FictitiousGraphStoreEstimationService();
-        var graphLoaderContext = buildGraphLoaderContext(
+        var graphLoaderContext = GraphLoaderContextProvider.buildGraphLoaderContext(
             context,
             databaseId,
             taskRegistryFactory,
             terminationFlag,
-            userLogRegistryFactory
+            userLogRegistryFactory,
+            log
         );
         var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(
             user,
@@ -192,27 +186,5 @@ public class CommunityProcedureProvider {
             streamBusinessFacade,
             writeBusinessFacade
         );
-    }
-
-    private GraphLoaderContext buildGraphLoaderContext(
-        Context context,
-        DatabaseId databaseId,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
-        UserLogRegistryFactory userLogRegistryFactory
-    ) throws ProcedureException {
-        return ImmutableGraphLoaderContext
-            .builder()
-            .databaseId(databaseId)
-            .dependencyResolver(context.dependencyResolver())
-            .log((org.neo4j.logging.Log) log.getNeo4jLog())
-            .taskRegistryFactory(taskRegistryFactory)
-            .userLogRegistryFactory(userLogRegistryFactory)
-            .terminationFlag(terminationFlag)
-            .transactionContext(DatabaseTransactionContext.of(
-                context.graphDatabaseAPI(),
-                context.internalTransaction()
-            ))
-            .build();
     }
 }

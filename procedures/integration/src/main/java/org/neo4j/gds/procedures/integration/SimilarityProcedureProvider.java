@@ -20,15 +20,20 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
+import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
+import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
+import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
 import org.neo4j.gds.procedures.KernelTransactionAccessor;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
+import org.neo4j.gds.procedures.TerminationFlagService;
 import org.neo4j.gds.procedures.community.ConfigurationParser;
 import org.neo4j.gds.procedures.similarity.SimilarityProcedureFacade;
 import org.neo4j.gds.services.DatabaseIdAccessor;
@@ -51,6 +56,8 @@ public class SimilarityProcedureProvider {
     private final DatabaseIdAccessor databaseIdAccessor;
     private final KernelTransactionAccessor kernelTransactionAccessor;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
+    private final TerminationFlagService terminationFlagService;
+
     private final UserLogServices userLogServices;
     private final UserAccessor userAccessor;
 
@@ -62,7 +69,7 @@ public class SimilarityProcedureProvider {
         DatabaseIdAccessor databaseIdAccessor,
         KernelTransactionAccessor kernelTransactionAccessor,
         TaskRegistryFactoryService taskRegistryFactoryService,
-        UserLogServices userLogServices,
+        TerminationFlagService terminationFlagService, UserLogServices userLogServices,
         UserAccessor userAccessor
     ) {
         this.log = log;
@@ -73,6 +80,7 @@ public class SimilarityProcedureProvider {
         this.databaseIdAccessor = databaseIdAccessor;
         this.kernelTransactionAccessor = kernelTransactionAccessor;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
+        this.terminationFlagService = terminationFlagService;
         this.userLogServices = userLogServices;
         this.userAccessor = userAccessor;
     }
@@ -110,12 +118,38 @@ public class SimilarityProcedureProvider {
             LimitsConfiguration.Instance
         );
 
+        var terminationFlag = terminationFlagService.createTerminationFlag(kernelTransaction);
+        var fictitiousGraphStoreEstimationService = new FictitiousGraphStoreEstimationService();
+        var graphLoaderContext = GraphLoaderContextProvider.buildGraphLoaderContext(
+            context,
+            databaseId,
+            taskRegistryFactory,
+            terminationFlag,
+            userLogRegistryFactory,
+            log
+        );
+        var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(
+            user,
+            graphLoaderContext
+        );
+
+        var estimateBusinessFacade = new SimilarityAlgorithmsEstimateBusinessFacade(
+            new AlgorithmEstimator(
+                graphStoreCatalogService,
+                fictitiousGraphStoreEstimationService,
+                databaseGraphStoreEstimationService,
+                databaseId,
+                user
+            )
+        );
         return new SimilarityProcedureFacade(
             configurationParser,
             databaseId,
             user,
             streamBusinessFacade,
+            estimateBusinessFacade,
             algorithmMetaDataSetter
         );
     }
+
 }
