@@ -40,6 +40,7 @@ import org.neo4j.gds.similarity.knn.KnnStatsConfig;
 import org.neo4j.gds.similarity.knn.KnnStreamConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfig;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteConfig;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -116,6 +117,23 @@ public class SimilarityProcedureFacade {
         return Stream.of(NodeSimilarityComputationResultTransformer.toStatsResult(computationResult, statsConfig));
     }
 
+    public Stream<SimilarityWriteResult> nodeSimilarityWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var statsConfig = createConfig(configuration, NodeSimilarityWriteConfig::of);
+
+        var computationResult = writeBusinessFacade.nodeSimilarity(
+            graphName,
+            statsConfig,
+            user,
+            databaseId,
+            procedureReturnColumns.contains("similarityDistribution")
+        );
+
+        return Stream.of(NodeSimilarityComputationResultTransformer.toWriteResult(computationResult));
+    }
+
     public Stream<MemoryEstimateResult> nodeSimilarityEstimateStream(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
@@ -179,6 +197,14 @@ public class SimilarityProcedureFacade {
         Map<String, Object> algoConfiguration
     ) {
         var config = createConfig(algoConfiguration, FilteredNodeSimilarityStatsConfig::of);
+        return Stream.of(estimateBusinessFacade.nodeSimilarity(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> nodeSimilarityEstimateWrite(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, NodeSimilarityWriteConfig::of);
         return Stream.of(estimateBusinessFacade.nodeSimilarity(graphNameOrConfiguration, config));
     }
 

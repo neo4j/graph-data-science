@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity;
+package org.neo4j.gds.procedures.similarity;
 
 import java.util.Map;
 
@@ -54,20 +54,5 @@ public class SimilarityWriteResult {
         this.configuration = configuration;
     }
 
-    public static class Builder extends SimilarityResultBuilder<SimilarityWriteResult> {
-
-        @Override
-        public SimilarityWriteResult build() {
-            return new SimilarityWriteResult(
-                preProcessingMillis,
-                computeMillis,
-                writeMillis,
-                postProcessingMillis,
-                nodesCompared,
-                relationshipsWritten,
-                distribution(),
-                config.toMap()
-            );
-        }
-    }
+    
 }
