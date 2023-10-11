@@ -3,6 +3,11 @@
 [[fastrp-knn-example]]
 = FastRP and kNN example
 
+[WARNING]
+====
+Review and simplify if possible
+====
+
 In this example we consider a graph of products and customers, and we want to find new products to recommend for each customer.
 We want to use the xref:algorithms/knn.adoc[K-Nearest Neighbors algorithm (kNN)] to identify similar customers and base our product recommendations on that.
 In order to be able to leverage topological information about the graph in kNN, we will first create node embeddings using xref:machine-learning/node-embeddings/fastrp.adoc[FastRP].

@@ -3,3 +3,11 @@
 :description: This chapter shows a complete example using one algorithm from the Neo4j Graph Data Science library.
 :keywords: GDS, getting started, algorithm
 
+A common problem with graphs is the finding the shortest path between nodes.
+
+== Example [TODO]
+The example can be a variation of the one from Dijkstra Source-Target Shortest Path, potentially with:
+
+* tracks + stations instead of roads + locations?
+* added explanations
+* no memory estimation (not for a quickstart)
