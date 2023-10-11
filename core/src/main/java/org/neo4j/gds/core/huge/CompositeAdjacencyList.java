@@ -126,19 +126,19 @@ public final class CompositeAdjacencyList implements AdjacencyList {
         if (reuse instanceof CompositeAdjacencyCursor) {
             var compositeReuse = (CompositeAdjacencyCursor) reuse;
             var iter = compositeReuse.cursors().listIterator();
-            boolean cursorsAreUpdated = false;
+
             while (iter.hasNext()) {
                 var index = iter.nextIndex();
                 var cursor = iter.next();
                 var newCursor = adjacencyLists.get(index).adjacencyCursor(cursor, node, fallbackValue);
                 if (newCursor != cursor) {
                     iter.set(adjacencyCursorWrapperFactory.create(newCursor));
-                    cursorsAreUpdated = true;
                 }
             }
-            if (cursorsAreUpdated) {
-                compositeReuse.updateCursorsQueue();
-            }
+            //we must update all the cursors all the time because old cursor might be further ahead instead of start
+            //then, object equality can be then the same, but in reality not so much
+            compositeReuse.reinitializeCursors();
+
             return compositeReuse;
         }
         return adjacencyCursor(node, fallbackValue);
