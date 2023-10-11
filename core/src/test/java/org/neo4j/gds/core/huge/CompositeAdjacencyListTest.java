@@ -20,11 +20,12 @@
 package org.neo4j.gds.core.huge;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.api.Graph;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @GdlExtension
@@ -47,4 +48,26 @@ class CompositeAdjacencyListTest {
         var cursor = adjacencyList.adjacencyCursor(0);
         assertEquals(2, cursor.remaining());
     }
+
+    @Test
+    void shouldReuseCursor() {
+
+        var adjacencyList = ((UnionGraph) graph).relationshipTopology();
+        var cursor = adjacencyList.adjacencyCursor(null, 0);
+        assertThat(cursor.peekVLong()).isEqualTo(1L);
+        cursor.nextVLong();
+
+        cursor = adjacencyList.adjacencyCursor(cursor, 0);
+        assertThat(cursor.peekVLong()).isEqualTo(1L);
+
+        
+        cursor.nextVLong();
+        cursor.nextVLong();
+
+        cursor = adjacencyList.adjacencyCursor(cursor, 0);
+        assertThat(cursor.hasNextVLong()).isTrue();
+
+
+    }
+
 }

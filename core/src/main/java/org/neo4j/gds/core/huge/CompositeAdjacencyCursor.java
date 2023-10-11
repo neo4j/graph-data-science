@@ -51,9 +51,10 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
         return cursors;
     }
 
-    void updateCursorsQueue() {
+    void reinitializeCursors() {
         cursorQueue.clear();
-        cursorQueue.addAll(cursors);
+        initializeQueue();
+
     }
     @Override
     public int size() {
