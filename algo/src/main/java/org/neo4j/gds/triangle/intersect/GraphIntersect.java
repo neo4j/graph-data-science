@@ -38,6 +38,10 @@ import static org.neo4j.gds.api.AdjacencyCursor.NOT_FOUND;
 public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements RelationshipIntersect {
 
     private final IntPredicate degreeFilter;
+    private CURSOR origNeighborsOfa;
+    private CURSOR helpingCursorOfa;
+    private CURSOR helpingCursorOfb;
+
 
     protected GraphIntersect(long maxDegree) {
         this.degreeFilter = maxDegree < Long.MAX_VALUE
@@ -53,7 +57,7 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
             return;
         }
 
-        CURSOR origNeighborsOfa = cursorForNode(null, a, degreeOfa);
+        origNeighborsOfa = cursorForNode(origNeighborsOfa, a, degreeOfa);
 
         triangles(a, degreeOfa, origNeighborsOfa, consumer);
     }
@@ -68,13 +72,13 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
         while (b != NOT_FOUND && b < a) {
             var degreeOfb = degree(b);
             if (degreeFilter.test(degreeOfb)) {
-                var helpingCursorOfb = cursorForNode(
-                    null,
+                helpingCursorOfb = cursorForNode(
+                    helpingCursorOfb,
                     b,
                     degreeOfb
                 );
 
-                var helpingCursorOfa = cursorForNode(null, a, degreeOfa);
+                helpingCursorOfa = cursorForNode(helpingCursorOfa, a, degreeOfa);
 
                 triangles(
                     a,
