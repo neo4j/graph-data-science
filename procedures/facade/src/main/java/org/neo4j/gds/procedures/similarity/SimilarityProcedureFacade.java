@@ -119,6 +119,14 @@ public class SimilarityProcedureFacade {
         return Stream.of(estimateBusinessFacade.nodeSimilarity(graphNameOrConfiguration, config));
     }
 
+    public Stream<MemoryEstimateResult> nodeSimilarityEstimateStats(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, NodeSimilarityStatsConfig::of);
+        return Stream.of(estimateBusinessFacade.nodeSimilarity(graphNameOrConfiguration, config));
+    }
+
     // FIXME: the following two methods are duplicate, find a good place for them.
     private <C extends AlgoBaseConfig> C createStreamConfig(
         Map<String, Object> configuration,
