@@ -20,10 +20,10 @@
 package org.neo4j.gds.similarity.filterednodesim;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -35,6 +35,10 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 
 public class FilteredNodeSimilarityStreamProc extends BaseProc {
+
+    @Context
+    public GraphDataScience facade;
+
 
     static final String DESCRIPTION =
         "The Filtered Node Similarity algorithm compares a set of nodes based on the nodes they are connected to. " +
@@ -48,10 +52,7 @@ public class FilteredNodeSimilarityStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ){
-        return new ProcedureExecutor<>(
-            new FilteredNodeSimilarityStreamSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.similarity().filteredNodeSimilarityStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.nodeSimilarity.filtered.stream.estimate", mode = READ)
@@ -60,11 +61,7 @@ public class FilteredNodeSimilarityStreamProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new FilteredNodeSimilarityStreamSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.similarity().filteredNodeSimilarityEstimateStream(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Deprecated(forRemoval = true)

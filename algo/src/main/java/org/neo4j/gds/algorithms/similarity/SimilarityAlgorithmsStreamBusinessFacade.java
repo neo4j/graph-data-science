@@ -23,6 +23,7 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfig;
 
@@ -42,6 +43,18 @@ public class SimilarityAlgorithmsStreamBusinessFacade {
 
     ) {
         var result = similarityAlgorithmsFacade.nodeSimilarity(graphName, config, user, databaseId);
+
+        return createStreamComputationResult(result);
+    }
+
+    public StreamComputationResult<NodeSimilarityResult> filteredNodeSimilarity(
+        String graphName,
+        FilteredNodeSimilarityStreamConfig config,
+        User user,
+        DatabaseId databaseId
+
+    ) {
+        var result = similarityAlgorithmsFacade.filteredNodeSimilarity(graphName, config, user, databaseId);
 
         return createStreamComputationResult(result);
     }

@@ -28,6 +28,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.result.SimilarityStatistics;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
 
 import java.util.function.Function;
@@ -71,6 +72,36 @@ public class SimilarityAlgorithmsStatsBusinessFacade {
         );
     }
 
+    public StatsResult<SimilaritySpecificFieldsWithDistribution> filteredNodeSimilarity(
+        String graphName,
+        FilteredNodeSimilarityStatsConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        boolean computeSimilarityDistribution
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> similarityAlgorithmsFacade.filteredNodeSimilarity(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return statsResult(
+            algorithmResult,
+            result -> result.graphResult(),
+            ((result, similarityDistribution) -> {
+                var graphResult = result.graphResult();
+                return new SimilaritySpecificFieldsWithDistribution(
+                    graphResult.comparedNodes(),
+                    graphResult.similarityGraph().relationshipCount(),
+                    similarityDistribution
+                );
+            }),
+            intermediateResult.computeMilliseconds,
+            () -> SimilaritySpecificFieldsWithDistribution.EMPTY,
+            computeSimilarityDistribution
+        );
+    }
+    
     <RESULT, ASF extends SimilaritySpecificFields> StatsResult<ASF> statsResult(
         AlgorithmComputationResult<RESULT> algorithmResult,
         Function<RESULT, SimilarityGraphResult> similarityGraphResultSupplier,
