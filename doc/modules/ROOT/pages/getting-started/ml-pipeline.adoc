@@ -3,7 +3,19 @@
 :description: This chapter shows a complete example using machine learning pipelines from the Neo4j Graph Data Science library.
 :keywords: GDS, getting started, machine learning, pipeline
 
+Currently, the following types of pipelines:
+
+* Node Classification
+* Link Prediction
+* Node Regression
+
+Example with a Link Prediction pipeline.
+
+:sectnums!:
+
 == Setup
+
+image::lp-graph.svg["LP example data."]
 
 ----
 CREATE
@@ -16,9 +28,6 @@ CREATE
   (greg:Person {name: 'Greg', age: 29}),
   (veselin:Person {name: 'Veselin', age: 3}),
 
-  (london:City {name: 'London'}),
-  (malmo:City {name: 'Malmo'}),
-
   (alice)-[:KNOWS]->(michael),
   (michael)-[:KNOWS]->(karin),
   (michael)-[:KNOWS]->(chris),
@@ -30,21 +39,7 @@ CREATE
   (greg)-[:KNOWS]->(chris),
   (veselin)-[:KNOWS]->(chris),
   (karin)-[:KNOWS]->(veselin),
-  (chris)-[:KNOWS]->(karin),
-
-  (alice)-[:LIVES]->(london),
-  (michael)-[:LIVES]->(london),
-  (karin)-[:LIVES]->(london),
-  (chris)-[:LIVES]->(malmo),
-  (will)-[:LIVES]->(malmo),
-
-  (alice)-[:BORN]->(london),
-  (michael)-[:BORN]->(london),
-  (karin)-[:BORN]->(malmo),
-  (chris)-[:BORN]->(london),
-  (will)-[:BORN]->(malmo),
-  (greg)-[:BORN]->(london),
-  (veselin)-[:BORN]->(malmo)
+  (chris)-[:KNOWS]->(karin)
 ----
 
 NOTE: The Link Prediction model requires the graph to be created using the UNDIRECTED orientation for relationships.
@@ -65,11 +60,76 @@ CALL gds.graph.project(
 )
 ----
 
-== Config
+== Configuration
+
+=== Alternative 1: steps with explanation and code
+
+Create:
 
 ----
 CALL gds.beta.pipeline.linkPrediction.create('pipe')
+----
 
+Steps to configuration:
+
+. Add calculated node properties (if needed).
++
+----
+CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'fastRP', {
+  mutateProperty: 'embedding',
+  embeddingDimension: 256,
+  randomSeed: 42
+})
+----
+
+. Add features (existing + created).
++
+----
+CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'hadamard', {
+  nodeProperties: ['embedding', 'age']
+}) YIELD featureSteps
+----
+
+. Define the split.
++
+----
+CALL gds.beta.pipeline.linkPrediction.configureSplit('pipe', {
+  testFraction: 0.25,
+  trainFraction: 0.6,
+  validationFolds: 3
+})
+YIELD splitConfig
+----
+
+. Add the candidate models.
++
+----
+// "Naive" model
+CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe')
+YIELD parameterSpace
+----
++
+----
+// More sophisticated model
+CALL gds.alpha.pipeline.linkPrediction.addMLP('pipe',
+{hiddenLayerSizes: [4, 2], penalty: 0.5, patience: 2, classWeights: [0.55, 0.45], focusWeight: {range: [0.0, 0.1]}})
+YIELD parameterSpace
+----
+
+Skipped:
+
+* Autotuning
+
+=== Alternative 2: explanation first, then the whole code block
+
+Steps to configuration:
+
+. Add calculated node properties (if needed).
+. Add features (existing + created).
+. Define the split.
+. Add the candidate models.
+
+----
 CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'fastRP', {
   mutateProperty: 'embedding',
   embeddingDimension: 256,
@@ -87,26 +147,19 @@ CALL gds.beta.pipeline.linkPrediction.configureSplit('pipe', {
 })
 YIELD splitConfig
 
-//
+// "Naive" model
 CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe')
 YIELD parameterSpace
 
-CALL gds.beta.pipeline.linkPrediction.addRandomForest('pipe', {numberOfDecisionTrees: 10})
-YIELD parameterSpace
-
+// More sophisticated model
 CALL gds.alpha.pipeline.linkPrediction.addMLP('pipe',
 {hiddenLayerSizes: [4, 2], penalty: 0.5, patience: 2, classWeights: [0.55, 0.45], focusWeight: {range: [0.0, 0.1]}})
 YIELD parameterSpace
-
-CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe', {maxEpochs: 500, penalty: {range: [1e-4, 1e2]}})
-YIELD parameterSpace
-RETURN parameterSpace.RandomForest AS randomForestSpace, parameterSpace.LogisticRegression AS logisticRegressionSpace, parameterSpace.MultilayerPerceptron AS MultilayerPerceptronSpace
-//
-
-CALL gds.alpha.pipeline.linkPrediction.configureAutoTuning('pipe', {
-  maxTrials: 2
-}) YIELD autoTuningConfig
 ----
+
+Skipped:
+
+* Autotuning
 
 == Train
 
@@ -114,7 +167,7 @@ CALL gds.alpha.pipeline.linkPrediction.configureAutoTuning('pipe', {
 CALL gds.beta.pipeline.linkPrediction.train('myGraph', {
   pipeline: 'pipe',
   modelName: 'lp-pipeline-model',
-  metrics: ['AUCPR', 'OUT_OF_BAG_ERROR'],
+  metrics: ['AUCPR'],
   targetRelationshipType: 'KNOWS',
   randomSeed: 12
 }) YIELD modelInfo, modelSelectionStats
