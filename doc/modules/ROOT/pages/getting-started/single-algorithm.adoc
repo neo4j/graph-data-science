@@ -110,8 +110,8 @@ RETURN source.name, r.nodeIds, r.costs, r.totalCost, target.name
 .Results
 [opts="header"]
 |===
-| source.name | r.nodeIds | r.costs | r.totalCost | target.name
-|"Kings Cross" | [3389, 3390, 3391, 3393] | [0.0, 0.7, 2.0, 3.3] | 3.3 | "Kentish Town"
+| source.name  | r.nodeIds | r.costs | r.totalCost | target.name
+|"Kings Cross" | [Node[0], Node[1], Node[2], Node[4] | [0.0, 0.7, 2.0, 3.3] | 3.3 | "Kentish Town"
 |===
 --
 
