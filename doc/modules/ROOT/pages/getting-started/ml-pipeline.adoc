@@ -3,4 +3,138 @@
 :description: This chapter shows a complete example using machine learning pipelines from the Neo4j Graph Data Science library.
 :keywords: GDS, getting started, machine learning, pipeline
 
-TODO
+== Setup
+
+----
+CREATE
+  (alice:Person {name: 'Alice', age: 38}),
+  (michael:Person {name: 'Michael', age: 67}),
+  (karin:Person {name: 'Karin', age: 30}),
+  (chris:Person {name: 'Chris', age: 52}),
+  (will:Person {name: 'Will', age: 6}),
+  (mark:Person {name: 'Mark', age: 32}),
+  (greg:Person {name: 'Greg', age: 29}),
+  (veselin:Person {name: 'Veselin', age: 3}),
+
+  (london:City {name: 'London'}),
+  (malmo:City {name: 'Malmo'}),
+
+  (alice)-[:KNOWS]->(michael),
+  (michael)-[:KNOWS]->(karin),
+  (michael)-[:KNOWS]->(chris),
+  (michael)-[:KNOWS]->(greg),
+  (will)-[:KNOWS]->(michael),
+  (will)-[:KNOWS]->(chris),
+  (mark)-[:KNOWS]->(michael),
+  (mark)-[:KNOWS]->(will),
+  (greg)-[:KNOWS]->(chris),
+  (veselin)-[:KNOWS]->(chris),
+  (karin)-[:KNOWS]->(veselin),
+  (chris)-[:KNOWS]->(karin),
+
+  (alice)-[:LIVES]->(london),
+  (michael)-[:LIVES]->(london),
+  (karin)-[:LIVES]->(london),
+  (chris)-[:LIVES]->(malmo),
+  (will)-[:LIVES]->(malmo),
+
+  (alice)-[:BORN]->(london),
+  (michael)-[:BORN]->(london),
+  (karin)-[:BORN]->(malmo),
+  (chris)-[:BORN]->(london),
+  (will)-[:BORN]->(malmo),
+  (greg)-[:BORN]->(london),
+  (veselin)-[:BORN]->(malmo)
+----
+
+NOTE: The Link Prediction model requires the graph to be created using the UNDIRECTED orientation for relationships.
+
+----
+CALL gds.graph.project(
+  'myGraph',
+  {
+    Person: {
+      properties: ['age']
+    }
+  },
+  {
+    KNOWS: {
+      orientation: 'UNDIRECTED'
+    }
+  }
+)
+----
+
+== Config
+
+----
+CALL gds.beta.pipeline.linkPrediction.create('pipe')
+
+CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'fastRP', {
+  mutateProperty: 'embedding',
+  embeddingDimension: 256,
+  randomSeed: 42
+})
+
+CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'hadamard', {
+  nodeProperties: ['embedding', 'age']
+}) YIELD featureSteps
+
+CALL gds.beta.pipeline.linkPrediction.configureSplit('pipe', {
+  testFraction: 0.25,
+  trainFraction: 0.6,
+  validationFolds: 3
+})
+YIELD splitConfig
+
+//
+CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe')
+YIELD parameterSpace
+
+CALL gds.beta.pipeline.linkPrediction.addRandomForest('pipe', {numberOfDecisionTrees: 10})
+YIELD parameterSpace
+
+CALL gds.alpha.pipeline.linkPrediction.addMLP('pipe',
+{hiddenLayerSizes: [4, 2], penalty: 0.5, patience: 2, classWeights: [0.55, 0.45], focusWeight: {range: [0.0, 0.1]}})
+YIELD parameterSpace
+
+CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe', {maxEpochs: 500, penalty: {range: [1e-4, 1e2]}})
+YIELD parameterSpace
+RETURN parameterSpace.RandomForest AS randomForestSpace, parameterSpace.LogisticRegression AS logisticRegressionSpace, parameterSpace.MultilayerPerceptron AS MultilayerPerceptronSpace
+//
+
+CALL gds.alpha.pipeline.linkPrediction.configureAutoTuning('pipe', {
+  maxTrials: 2
+}) YIELD autoTuningConfig
+----
+
+== Train
+
+----
+CALL gds.beta.pipeline.linkPrediction.train('myGraph', {
+  pipeline: 'pipe',
+  modelName: 'lp-pipeline-model',
+  metrics: ['AUCPR', 'OUT_OF_BAG_ERROR'],
+  targetRelationshipType: 'KNOWS',
+  randomSeed: 12
+}) YIELD modelInfo, modelSelectionStats
+RETURN
+  modelInfo.bestParameters AS winningModel,
+  modelInfo.metrics.AUCPR.train.avg AS avgTrainScore,
+  modelInfo.metrics.AUCPR.outerTrain AS outerTrainScore,
+  modelInfo.metrics.AUCPR.test AS testScore,
+  [cand IN modelSelectionStats.modelCandidates | cand.metrics.AUCPR.validation.avg] AS validationScores
+----
+
+== Use for prediction
+
+----
+CALL gds.beta.pipeline.linkPrediction.predict.stream('myGraph', {
+  modelName: 'lp-pipeline-model',
+  topN: 5,
+  threshold: 0.5
+})
+ YIELD node1, node2, probability
+ RETURN gds.util.asNode(node1).name AS person1, gds.util.asNode(node2).name AS person2, probability
+ ORDER BY probability DESC, person1
+----
