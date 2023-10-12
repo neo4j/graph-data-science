@@ -27,6 +27,7 @@ import org.neo4j.gds.algorithms.KCoreSpecificFields;
 import org.neo4j.gds.algorithms.KmeansSpecificFields;
 import org.neo4j.gds.algorithms.LabelPropagationSpecificFields;
 import org.neo4j.gds.algorithms.LeidenSpecificFields;
+import org.neo4j.gds.algorithms.LocalClusteringCoefficientSpecificFields;
 import org.neo4j.gds.algorithms.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.ModularityOptimizationSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
@@ -53,6 +54,7 @@ import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.scc.SccAlphaWriteConfig;
 import org.neo4j.gds.scc.SccWriteConfig;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientWriteConfig;
 import org.neo4j.gds.triangle.TriangleCountWriteConfig;
 import org.neo4j.gds.wcc.WccWriteConfig;
 
@@ -539,6 +541,36 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             intermediateResult.computeMilliseconds,
             () -> TriangleCountSpecificFields.EMPTY,
             "TriangleCountWrite",
+            config.writeConcurrency(),
+            config.writeProperty(),
+            config.arrowConnectionInfo()
+        );
+    }
+
+    public NodePropertyWriteResult<LocalClusteringCoefficientSpecificFields> localClusteringCoefficient(
+        String graphName,
+        LocalClusteringCoefficientWriteConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
+
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = runWithTiming(
+            () -> communityAlgorithmsFacade.localClusteringCoefficient(graphName, config, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return writeToDatabase(
+            algorithmResult,
+            config,
+            (result, configuration) -> NodePropertyValuesAdapter.adapt(result.localClusteringCoefficients()),
+            (result) -> new LocalClusteringCoefficientSpecificFields(
+                result.localClusteringCoefficients().size(),
+                result.averageClusteringCoefficient()
+            ),
+            intermediateResult.computeMilliseconds,
+            () -> LocalClusteringCoefficientSpecificFields.EMPTY,
+            "LocalClusteringCoefficientWrite",
             config.writeConcurrency(),
             config.writeProperty(),
             config.arrowConnectionInfo()

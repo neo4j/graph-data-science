@@ -20,10 +20,7 @@
 package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
@@ -41,7 +38,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class LocalClusteringCoefficientWriteProc extends BaseProc {
 
     @Context
-    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
+    public GraphDataScience facade;
 
     @Procedure(value = "gds.localClusteringCoefficient.write", mode = WRITE)
     @Description(DESCRIPTION)
@@ -49,10 +46,8 @@ public class LocalClusteringCoefficientWriteProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new LocalClusteringCoefficientWriteSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.community().localClusteringCoefficientWrite(graphName, configuration);
+
     }
 
     @Procedure(value = "gds.localClusteringCoefficient.write.estimate", mode = READ)
@@ -61,15 +56,7 @@ public class LocalClusteringCoefficientWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new LocalClusteringCoefficientWriteSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.community().localClusteringCoefficientEstimateWrite(graphNameOrConfiguration, algoConfiguration);
     }
 
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
-    }
 }
