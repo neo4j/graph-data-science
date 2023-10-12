@@ -7,8 +7,8 @@ The fastest way to understand how the GDS library works is by example.
 
 The main modes of operation for GDS are the following:
 
-* Run one or more algorithms on a graph, reading the result of the computation and potentially writing it back to Neo4j.
-* Configure and run a machine learning pipeline.
+* Run one or more algorithms on a graph, inspecting its result of the computation and potentially persisting the result via write back to Neo4j.
+* Configure a machine learning pipeline, train a model based on the pipeline, and use the model for prediction.
 
 :sectnums!:
 
@@ -17,13 +17,13 @@ The main modes of operation for GDS are the following:
 Algorithm execution modes:
 
 * stream: Returns the result of the algorithm as a stream of records.
-* stats: Returns a single record of summary statistics, but does not write to the Neo4j database.
-* mutate: Writes the results of the algorithm to the projected graph and returns a single record of summary statistics.
+* stats: Returns a single record of summary statistics, but does not update any graph.
+* mutate: Updates the projected graph with the result and returns a single record of summary statistics.
 * write: Writes the results of the algorithm to the Neo4j database and returns a single record of summary statistics.
 
 image::algorithm-modes.svg["Algorithms workflow.",400]
 
-These are examplified in xref:getting-started/single-algorithm.adoc[simple example] and xref:getting-started/fastrp-knn-example.adoc[end-to-end example].
+These are examplified in xref:getting-started/single-algorithm.adoc[simple example] and xref:getting-started/fastrp-knn-example.adoc[chained-algorithms example].
 
 == Machine learning pipelines
 
