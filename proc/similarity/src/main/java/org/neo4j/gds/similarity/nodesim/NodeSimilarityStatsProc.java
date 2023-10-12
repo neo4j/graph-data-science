@@ -35,8 +35,10 @@ import static org.neo4j.gds.similarity.nodesim.NodeSimilarityProc.NODE_SIMILARIT
 import static org.neo4j.procedure.Mode.READ;
 
 public class NodeSimilarityStatsProc extends BaseProc {
+
     @Context
     public GraphDataScience facade;
+
     @Procedure(name = "gds.nodeSimilarity.stats", mode = READ)
     @Description(NODE_SIMILARITY_DESCRIPTION)
     public Stream<SimilarityStatsResult> stats(

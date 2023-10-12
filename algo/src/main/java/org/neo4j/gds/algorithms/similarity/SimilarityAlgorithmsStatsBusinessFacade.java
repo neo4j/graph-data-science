@@ -21,7 +21,7 @@ package org.neo4j.gds.algorithms.similarity;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.SimilaritySpecificFields;
-import org.neo4j.gds.algorithms.StandardSimilaritySpecificFields;
+import org.neo4j.gds.algorithms.SimilaritySpecificFieldsWithDistribution;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.DatabaseId;
@@ -41,7 +41,7 @@ public class SimilarityAlgorithmsStatsBusinessFacade {
         this.similarityAlgorithmsFacade = similarityAlgorithmsFacade;
     }
 
-    public StatsResult<StandardSimilaritySpecificFields> nodeSimilarity(
+    public StatsResult<SimilaritySpecificFieldsWithDistribution> nodeSimilarity(
         String graphName,
         NodeSimilarityStatsConfig configuration,
         User user,
@@ -59,14 +59,14 @@ public class SimilarityAlgorithmsStatsBusinessFacade {
             result -> result.graphResult(),
             ((result, similarityDistribution) -> {
                 var graphResult = result.graphResult();
-                return new StandardSimilaritySpecificFields(
+                return new SimilaritySpecificFieldsWithDistribution(
                     graphResult.comparedNodes(),
                     graphResult.similarityGraph().relationshipCount(),
                     similarityDistribution
                 );
             }),
             intermediateResult.computeMilliseconds,
-            () -> StandardSimilaritySpecificFields.EMPTY,
+            () -> SimilaritySpecificFieldsWithDistribution.EMPTY,
             computeSimilarityDistribution
         );
     }

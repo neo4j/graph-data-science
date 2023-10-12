@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.procedures.similarity;
 
-import org.neo4j.gds.algorithms.StandardSimilaritySpecificFields;
+import org.neo4j.gds.algorithms.SimilaritySpecificFieldsWithDistribution;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.similarity.SimilarityResult;
@@ -46,7 +46,7 @@ final class NodeSimilarityComputationResultTransformer {
     }
 
     static SimilarityStatsResult toStatsResult(
-        StatsResult<StandardSimilaritySpecificFields> statsResult,
+        StatsResult<SimilaritySpecificFieldsWithDistribution> statsResult,
         NodeSimilarityStatsConfig config
     ) {
 

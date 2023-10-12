@@ -21,9 +21,9 @@ package org.neo4j.gds.algorithms;
 
 import java.util.Map;
 
-public class StandardSimilaritySpecificFields implements SimilaritySpecificFields {
+public class SimilaritySpecificFieldsWithDistribution implements SimilaritySpecificFields {
 
-    public static final StandardSimilaritySpecificFields EMPTY = new StandardSimilaritySpecificFields(
+    public static final SimilaritySpecificFieldsWithDistribution EMPTY = new SimilaritySpecificFieldsWithDistribution(
         0,
         0,
         Map.of()
@@ -33,7 +33,7 @@ public class StandardSimilaritySpecificFields implements SimilaritySpecificField
     private final long relationshipsWritten;
     private final Map<String, Object> similarityDistribution;
 
-    public StandardSimilaritySpecificFields(
+    public SimilaritySpecificFieldsWithDistribution(
         long nodesCompared,
         long relationshipsWritten,
         Map<String, Object> similarityDistribution
