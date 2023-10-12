@@ -390,4 +390,18 @@ class ExpressionParserTest {
             .addAllTypeSelection(types.stream().map(RelationshipType::of).collect(Collectors.toSet()))
             .build());
     }
+
+    @Test
+    void degreeFailsForNonString() {
+        assertThatThrownBy(() -> ExpressionParser.parse("degree(42)", Map.of()))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Invalid argument for `degree`. Only strings are allowed. Got `42`.");
+    }
+
+    @Test
+    void functionInvocationFailsForUnknownFunction() {
+        assertThatThrownBy(() -> ExpressionParser.parse("foobar()", Map.of()))
+            .isInstanceOf(UnsupportedOperationException.class)
+            .hasMessageContaining("Unknown function `foobar`.");
+    }
 }

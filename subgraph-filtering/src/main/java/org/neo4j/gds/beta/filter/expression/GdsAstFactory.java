@@ -140,8 +140,17 @@ class GdsAstFactory extends AstFactoryAdapter {
             case Expression.Function.Degree.NAME: {
                 var relationshipTypes = arguments
                     .stream()
-                    // todo throw is non-string literal
-                    .filter(expr -> expr instanceof Expression.Literal.StringLiteral)
+                    .filter(expr -> {
+                        if (expr instanceof Expression.Literal.StringLiteral) {
+                            return true;
+                        }
+                        throw new IllegalArgumentException(formatWithLocale(
+                            "Invalid argument for `%s`. Only strings are allowed. Got `%s`.",
+                            Expression.Function.Degree.NAME,
+                            expr.prettyString()
+                        ));
+
+                    })
                     .map(expr -> (Expression.Literal.StringLiteral) expr)
                     .map(Expression.Literal.StringLiteral::value)
                     .map(RelationshipType::of)
