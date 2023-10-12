@@ -19,9 +19,12 @@
  */
 package org.neo4j.gds.procedures.similarity;
 
+import org.neo4j.gds.algorithms.SimilaritySpecificFieldsWithDistribution;
+import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
 
 import java.util.stream.Stream;
 
@@ -41,4 +44,22 @@ final class NodeSimilarityComputationResultTransformer {
                 });
         }).orElseGet(Stream::empty);
     }
+
+    static SimilarityStatsResult toStatsResult(
+        StatsResult<SimilaritySpecificFieldsWithDistribution> statsResult,
+        NodeSimilarityStatsConfig config
+    ) {
+
+        return new SimilarityStatsResult(
+            statsResult.preProcessingMillis(),
+            statsResult.computeMillis(),
+            statsResult.postProcessingMillis(),
+            statsResult.algorithmSpecificFields().nodesCompared(),
+            statsResult.algorithmSpecificFields().relationshipsWritten(),
+            statsResult.algorithmSpecificFields().similarityDistribution(),
+            config.toMap()
+        );
+    }
+
+
 }
