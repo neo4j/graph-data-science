@@ -5,14 +5,7 @@
 
 A common problem with graphs is the finding the shortest path between nodes.
 
-== Example [TODO]
-The example can be a variation of the one from Dijkstra Source-Target Shortest Path, potentially with:
-
-* tracks + stations instead of roads + locations?
-* added explanations
-* no memory estimation (not for a quickstart)
-
-=== Setup
+== Setup
 
 [source, cypher, role=noplay setup-query]
 ----
@@ -40,7 +33,7 @@ CALL gds.graph.project(
 )
 ----
 
-=== Query
+== Query
 
 [role=query-example]
 --
@@ -75,7 +68,7 @@ ORDER BY index
 * Only one index because one path
 * Explain `asNode` and `nodes`
 
-=== Write
+== Write
 
 [role=query-example]
 --
@@ -103,4 +96,26 @@ RETURN relationshipsWritten
 |===
 --
 
-TODO: Run MATCH query and see new rel
+== Check written data
+
+[role=query-example]
+--
+.Check:
+[source, cypher, role=noplay]
+----
+MATCH (source)-[r:PATH]->(target)
+RETURN source.name, r.nodeIds, r.costs, r.totalCost, target.name
+----
+
+.Results
+[opts="header"]
+|===
+| source.name | r.nodeIds | r.costs | r.totalCost | target.name
+|"Kings Cross" | [3389, 3390, 3391, 3393] | [0.0, 0.7, 2.0, 3.3] | 3.3 | "Kentish Town"
+|===
+--
+
+== Further topics to explore
+
+- Other modes (estimation and stats)
+- xref:getting-started/fastrp-knn-example.adoc[Combination of algorithms]
