@@ -37,46 +37,6 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class Neo4jDatabaseRelationshipWriter {
 
-    public static WriteRelationshipResult writeRelationship(
-        String writeRelationshipType,
-        String writeProperty,
-        TaskRegistryFactory taskRegistryFactory,
-        RelationshipExporterBuilder relationshipExporterBuilder,
-        Graph graph,
-        GraphStore graphStore,
-        IdMap rootIdMap,
-        Log log,
-        String taskName,
-        TerminationFlag algorithmTerminationFlag,
-        Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo
-
-    ){
-        var writeMillis = new AtomicLong();
-        try (ProgressTimer ignored = ProgressTimer.start(writeMillis::set)) {
-            var progressTracker = new TaskProgressTracker(
-                RelationshipExporter.baseTask(taskName, graph.relationshipCount()),
-                (org.neo4j.logging.Log) log.getNeo4jLog(),
-                RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY,
-                taskRegistryFactory
-            );
-
-            var exporter = relationshipExporterBuilder
-                .withIdMappingOperator(rootIdMap::toOriginalNodeId)
-                .withGraph(graph)
-                .withTerminationFlag(algorithmTerminationFlag)
-                .withProgressTracker(progressTracker)
-                .withArrowConnectionInfo(
-                    arrowConnectionInfo,
-                    graphStore.databaseInfo().databaseId().databaseName()
-                )
-                .build();
-
-                exporter.write(writeRelationshipType, writeProperty);
-
-
-        }
-        return new WriteRelationshipResult(graph.relationshipCount(), writeMillis.get());
-    }
 
     public static WriteRelationshipResult writeRelationship(
         String writeRelationshipType,
@@ -123,4 +83,5 @@ public class Neo4jDatabaseRelationshipWriter {
         return new WriteRelationshipResult(graph.relationshipCount(), writeMillis.get());
 
     }
+    
 }

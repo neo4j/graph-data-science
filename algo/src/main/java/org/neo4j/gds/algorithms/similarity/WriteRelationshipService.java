@@ -70,7 +70,8 @@ public class WriteRelationshipService {
             log,
             taskName,
             algorithmTerminationFlag,
-            arrowConnectionInfo
+            arrowConnectionInfo,
+            (sourceNodeId, targetNodeId, property) -> true
         );
 
 
