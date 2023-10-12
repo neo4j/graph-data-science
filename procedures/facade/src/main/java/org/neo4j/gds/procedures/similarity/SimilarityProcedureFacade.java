@@ -33,6 +33,8 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.procedures.community.ConfigurationParser;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStatsConfig;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfig;
 
@@ -124,6 +126,56 @@ public class SimilarityProcedureFacade {
         Map<String, Object> algoConfiguration
     ) {
         var config = createConfig(algoConfiguration, NodeSimilarityStatsConfig::of);
+        return Stream.of(estimateBusinessFacade.nodeSimilarity(graphNameOrConfiguration, config));
+    }
+
+    //filtered
+    public Stream<SimilarityResult> filteredNodeSimilarityStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var streamConfig = createStreamConfig(configuration, FilteredNodeSimilarityStreamConfig::of);
+
+        var computationResult = streamBusinessFacade.filteredNodeSimilarity(
+            graphName,
+            streamConfig,
+            user,
+            databaseId
+        );
+
+        return NodeSimilarityComputationResultTransformer.toStreamResult(computationResult);
+    }
+
+    public Stream<SimilarityStatsResult> filteredNodeSimilarityStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var statsConfig = createConfig(configuration, FilteredNodeSimilarityStatsConfig::of);
+
+        var computationResult = statsBusinessFacade.filteredNodeSimilarity(
+            graphName,
+            statsConfig,
+            user,
+            databaseId,
+            procedureReturnColumns.contains("similarityDistribution")
+        );
+
+        return Stream.of(NodeSimilarityComputationResultTransformer.toStatsResult(computationResult, statsConfig));
+    }
+
+    public Stream<MemoryEstimateResult> filteredNodeSimilarityEstimateStream(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, FilteredNodeSimilarityStreamConfig::of);
+        return Stream.of(estimateBusinessFacade.nodeSimilarity(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> filteredNodeSimilarityEstimateStats(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, FilteredNodeSimilarityStatsConfig::of);
         return Stream.of(estimateBusinessFacade.nodeSimilarity(graphNameOrConfiguration, config));
     }
 
