@@ -162,8 +162,6 @@
 *** xref:machine-learning/training-methods/mlp.adoc[]
 *** xref:machine-learning/training-methods/linear-regression.adoc[]
 ** xref:machine-learning/auto-tuning.adoc[]
-* xref:end-to-end-examples/end-to-end-examples.adoc[]
-** xref:end-to-end-examples/fastrp-knn-example.adoc[]
 * xref:production-deployment/index.adoc[]
 ** xref:production-deployment/defaults-and-limits.adoc[]
 ** xref:production-deployment/transaction-handling.adoc[]
