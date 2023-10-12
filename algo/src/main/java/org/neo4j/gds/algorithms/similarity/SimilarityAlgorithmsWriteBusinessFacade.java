@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.algorithms.similarity;
 
-import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.RelationshipWriteResult;
 import org.neo4j.gds.algorithms.SimilaritySpecificFields;
@@ -29,16 +28,12 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WriteConfig;
-import org.neo4j.gds.result.SimilarityStatistics;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteConfig;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
-import static org.neo4j.gds.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 
 public class SimilarityAlgorithmsWriteBusinessFacade {
 
@@ -113,43 +108,22 @@ public class SimilarityAlgorithmsWriteBusinessFacade {
                 ? similarityGraph
                 : algorithmResult.graphStore().nodes();
 
-            // 2. Compute result statistics (but also write)
-            Map<String, Object> similaritySummary;
-            WriteRelationshipResult writeResult;
 
-            if (shouldComputeSimilarityDistribution) {
-                DoubleHistogram histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
-                writeResult = writeRelationshipService.write(
-                    writeRelationshipType,
-                    writeProperty,
-                    similarityGraph, algorithmResult.graphStore(),
-                    rootIdMap,
-                    taskName,
-                    algorithmResult.algorithmTerminationFlag().get(),
-                    arrowConnectionInfo,
-                    (node1, node2, similarity) -> {
-                        histogram.recordValue(similarity);
-                        return true;
-                    }
+            var similarityDistributionBuilder = SimilaritySummaryBuilder.of(shouldComputeSimilarityDistribution);
+            var writeResult = writeRelationshipService.write(
+                writeRelationshipType,
+                writeProperty,
+                similarityGraph,
+                algorithmResult.graphStore(),
+                rootIdMap,
+                taskName,
+                algorithmResult.algorithmTerminationFlag().get(),
+                arrowConnectionInfo,
+                similarityDistributionBuilder.similarityConsumer()
+            );
 
-                );
+            var similaritySummary = similarityDistributionBuilder.similaritySummary();
 
-                similaritySummary = SimilarityStatistics.similaritySummary(Optional.of(histogram));
-
-            } else {
-                writeResult = writeRelationshipService.write(
-                    writeRelationshipType,
-                    writeProperty,
-                    similarityGraph, algorithmResult.graphStore(),
-                    rootIdMap,
-                    taskName,
-                    algorithmResult.algorithmTerminationFlag().get(),
-                    arrowConnectionInfo
-                );
-                similaritySummary = Map.of();
-
-            }
-            
             var specificFields = specificFieldsSupplier.specificFields(result, similaritySummary);
 
             return RelationshipWriteResult.<ASF>builder()
