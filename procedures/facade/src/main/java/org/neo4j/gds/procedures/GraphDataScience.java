@@ -22,16 +22,21 @@ package org.neo4j.gds.procedures;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.procedures.catalog.CatalogFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
+import org.neo4j.gds.procedures.similarity.SimilarityProcedureFacade;
 
 public class GraphDataScience {
     private final Log log;
     private final CatalogFacade catalogFacade;
     private final CommunityProcedureFacade communityProcedureFacade;
+    private final SimilarityProcedureFacade similarityProcedureFacade;
 
-    public GraphDataScience(Log log, CatalogFacade catalogFacade, CommunityProcedureFacade communityProcedureFacade) {
+    public GraphDataScience(Log log, CatalogFacade catalogFacade, CommunityProcedureFacade communityProcedureFacade,
+        SimilarityProcedureFacade similarityProcedureFacade
+    ) {
         this.log = log;
         this.catalogFacade = catalogFacade;
         this.communityProcedureFacade = communityProcedureFacade;
+        this.similarityProcedureFacade = similarityProcedureFacade;
     }
 
     public Log log() {
@@ -44,5 +49,9 @@ public class GraphDataScience {
 
     public CommunityProcedureFacade community() {
         return communityProcedureFacade;
+    }
+
+    public SimilarityProcedureFacade similarity() {
+        return similarityProcedureFacade;
     }
 }

@@ -17,17 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms.community;
+package org.neo4j.gds.algorithms.similarity;
 
-final class AlgorithmResultWithTiming<T> {
-    final T algorithmResult;
-    final long computeMilliseconds;
-
-    AlgorithmResultWithTiming(
-        T algorithmResult,
-        long computeMilliseconds
-    ) {
-        this.computeMilliseconds = computeMilliseconds;
-        this.algorithmResult = algorithmResult;
-    }
+public class SimilarityAlgorithmsStatsBusinessFacade {
 }

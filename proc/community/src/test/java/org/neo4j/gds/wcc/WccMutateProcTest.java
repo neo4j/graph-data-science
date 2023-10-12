@@ -43,6 +43,7 @@ import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
 import org.neo4j.gds.algorithms.community.MutateNodePropertyService;
+import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
@@ -345,10 +346,15 @@ class WccMutateProcTest extends BaseProcTest {
             false
         );
         var algorithmsMutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
-            new CommunityAlgorithmsFacade(graphStoreCatalogService,
-                TaskRegistryFactory.empty(),
-                EmptyUserLogRegistryFactory.INSTANCE,
-                memoryUsageValidator, logMock),
+            new CommunityAlgorithmsFacade(
+                new AlgorithmRunner(
+                    graphStoreCatalogService,
+                    memoryUsageValidator,
+                    TaskRegistryFactory.empty(),
+                    EmptyUserLogRegistryFactory.INSTANCE,
+                    logMock
+                )
+            ),
             new MutateNodePropertyService(logMock)
         );
 
@@ -367,7 +373,8 @@ class WccMutateProcTest extends BaseProcTest {
                     null,
                     null,
                     null
-                )
+                ),
+                null
             );
 
             ProcedureMethodHelper.mutateMethods(procedure)
@@ -468,10 +475,15 @@ class WccMutateProcTest extends BaseProcTest {
                 false
             );
             var algorithmsBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
-                new CommunityAlgorithmsFacade(graphStoreCatalogService,
-                    TaskRegistryFactory.empty(),
-                    EmptyUserLogRegistryFactory.INSTANCE,
-                    memoryUsageValidator, logMock),
+                new CommunityAlgorithmsFacade(
+                    new AlgorithmRunner(
+                        graphStoreCatalogService,
+                        memoryUsageValidator,
+                        TaskRegistryFactory.empty(),
+                        EmptyUserLogRegistryFactory.INSTANCE,
+                        logMock
+                    )
+                ),
                 new MutateNodePropertyService(logMock)
             );
 
@@ -489,7 +501,8 @@ class WccMutateProcTest extends BaseProcTest {
                     null,
                     null,
                     null
-                )
+                ),
+                null
             );
                 ProcedureMethodHelper.mutateMethods(procedure)
                     .forEach(mutateMethod -> {
@@ -540,10 +553,15 @@ class WccMutateProcTest extends BaseProcTest {
                 false
             );
             var algorithmsBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
-                new CommunityAlgorithmsFacade(graphStoreCatalogService,
-                    TaskRegistryFactory.empty(),
-                    EmptyUserLogRegistryFactory.INSTANCE,
-                    memoryUsageValidator, null),
+                new CommunityAlgorithmsFacade(
+                    new AlgorithmRunner(
+                        graphStoreCatalogService,
+                        memoryUsageValidator,
+                        TaskRegistryFactory.empty(),
+                        EmptyUserLogRegistryFactory.INSTANCE,
+                        null
+                    )
+                ),
                 new MutateNodePropertyService(logMock)
             );
             proc.facade = new GraphDataScience(
@@ -560,7 +578,8 @@ class WccMutateProcTest extends BaseProcTest {
                     null,
                     null,
                     null
-                )
+                ),
+                null
             );
 
             var methods = ProcedureMethodHelper.mutateMethods(proc).collect(Collectors.toList());
@@ -613,10 +632,15 @@ class WccMutateProcTest extends BaseProcTest {
             false
         );
         var algorithmsBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
-            new CommunityAlgorithmsFacade(graphStoreCatalogService,
-                TaskRegistryFactory.empty(),
-                EmptyUserLogRegistryFactory.INSTANCE,
-                memoryUsageValidator, logMock),
+            new CommunityAlgorithmsFacade(
+                new AlgorithmRunner(
+                    graphStoreCatalogService,
+                    memoryUsageValidator,
+                    TaskRegistryFactory.empty(),
+                    EmptyUserLogRegistryFactory.INSTANCE,
+                    logMock
+                )
+            ),
             new MutateNodePropertyService(logMock)
         );
 
@@ -637,7 +661,8 @@ class WccMutateProcTest extends BaseProcTest {
                             null,
                             null,
                             null
-                        )
+                        ),
+                        null
                     );
                     Map<String, Object> config = new HashMap<>(additionalConfig);
                     config.put("mutateProperty", MUTATE_PROPERTY);

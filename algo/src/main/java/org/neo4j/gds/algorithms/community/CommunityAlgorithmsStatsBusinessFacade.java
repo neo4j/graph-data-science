@@ -33,6 +33,7 @@ import org.neo4j.gds.algorithms.ModularitySpecificFields;
 import org.neo4j.gds.algorithms.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.TriangleCountSpecificFields;
+import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -56,7 +57,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static org.neo4j.gds.algorithms.community.AlgorithmRunner.runWithTiming;
+import static org.neo4j.gds.algorithms.runner.AlgorithmRunner.runWithTiming;
 
 public class CommunityAlgorithmsStatsBusinessFacade {
     private final CommunityAlgorithmsFacade communityAlgorithmsFacade;
