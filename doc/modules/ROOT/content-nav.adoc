@@ -11,6 +11,7 @@
 * xref:getting-started/index.adoc[]
 ** xref:getting-started/single-algorithm.adoc[]
 ** xref:getting-started/fastrp-knn-example.adoc[]
+** xref:getting-started/ml-pipeline.adoc[]
 * xref:common-usage/index.adoc[]
 ** xref:common-usage/memory-estimation.adoc[]
 ** xref:common-usage/projecting-graphs.adoc[]

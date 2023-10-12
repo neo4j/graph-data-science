@@ -29,4 +29,4 @@ These are examplified in xref:getting-started/single-algorithm.adoc[simple examp
 
 image::pipeline-model.svg["Workflow of pipelines and models.",400]
 
-Example TODO or skip section altogether?
+xref:getting-started/ml-pipeline.adoc[ML pipeline example]
