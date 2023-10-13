@@ -10,6 +10,7 @@ Currently, the following types of pipelines:
 * Node Regression
 
 Example with a Link Prediction pipeline.
+This is a simplified version of the example described in the xref:machine-learning/linkprediction-pipelines/config.adoc[configuration] and xref:machine-learning/linkprediction-pipelines/training.adoc[training] sections of the manual.
 
 :sectnums!:
 
