@@ -210,7 +210,7 @@ class Node2VecModelTest {
         var walks = new CompressedRandomWalks(
             numberOfClusters * clusterSize * numberOfWalks
         );
-
+        int index = 0;
         for (long clusterId = 0; clusterId < numberOfClusters; clusterId++) {
             long finalClusterId = clusterId;
             long bound = clusterSize * (clusterId + 1);
@@ -221,10 +221,12 @@ class Node2VecModelTest {
                         .toArray();
 
                     probabilitiesBuilder.registerWalk(walk);
-                    walks.add(walk);
+                    walks.add(index++, walk);
                 }
             }
         }
+        walks.setSize(index);
+        walks.setMaxWalkLength((int) walkLength);
 
         return walks;
     }

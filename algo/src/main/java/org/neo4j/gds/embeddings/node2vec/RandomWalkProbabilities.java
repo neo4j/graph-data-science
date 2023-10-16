@@ -21,12 +21,12 @@ package org.neo4j.gds.embeddings.node2vec;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.collections.ha.HugeDoubleArray;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 
 import java.util.stream.LongStream;
 
@@ -73,13 +73,13 @@ interface RandomWalkProbabilities {
             this.sampleCount = new MutableLong(0);
         }
 
-        RandomWalkProbabilities.Builder registerWalk(long[] walk) {
+        synchronized //wip to break for the day
+        void registerWalk(long[] walk) {
             for (long node : walk) {
                 nodeFrequencies.addTo(node, 1);
             }
             this.sampleCount.add(walk.length);
 
-            return this;
         }
 
         RandomWalkProbabilities build() {
