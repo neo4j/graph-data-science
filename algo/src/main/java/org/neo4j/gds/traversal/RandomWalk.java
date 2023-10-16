@@ -132,12 +132,12 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         var tasks = IntStream
             .range(0, this.config.concurrency())
             .mapToObj(i ->
-                RandomWalkTask.of(
+                new RandomWalkTask(
                     nextNodeSupplier,
                     cumulativeWeightSupplier,
-                    this.graph.concurrentCopy(),
                     this.config,
                     walks,
+                    this.graph.concurrentCopy(),
                     randomSeed,
                     this.progressTracker,
                     terminationFlag
@@ -211,135 +211,6 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
 
         void stop() {
             this.running = false;
-        }
-    }
-
-    private static final class RandomWalkTask implements Runnable {
-
-        private final Graph graph;
-        private final BlockingQueue<long[]> walks;
-        private final NextNodeSupplier nextNodeSupplier;
-        private final long[][] buffer;
-        private final ProgressTracker progressTracker;
-        private final TerminationFlag terminationFlag;
-        private final RandomWalkBaseConfig config;
-        private final RandomWalkSampler sampler;
-
-        static RandomWalkTask of(
-            NextNodeSupplier nextNodeSupplier,
-            RandomWalkSampler.CumulativeWeightSupplier cumulativeWeightSupplier,
-            Graph graph,
-            RandomWalkBaseConfig config,
-            BlockingQueue<long[]> walks,
-            long randomSeed,
-            ProgressTracker progressTracker,
-            TerminationFlag terminationFlag
-        ) {
-            var maxProbability = Math.max(Math.max(1 / config.returnFactor(), 1.0), 1 / config.inOutFactor());
-            var normalizedReturnProbability = (1 / config.returnFactor()) / maxProbability;
-            var normalizedSameDistanceProbability = 1 / maxProbability;
-            var normalizedInOutProbability = (1 / config.inOutFactor()) / maxProbability;
-
-            return new RandomWalkTask(
-                nextNodeSupplier,
-                cumulativeWeightSupplier,
-                config,
-                walks,
-                normalizedReturnProbability,
-                normalizedSameDistanceProbability,
-                normalizedInOutProbability,
-                graph,
-                randomSeed,
-                progressTracker,
-                terminationFlag
-            );
-        }
-
-        private RandomWalkTask(
-            NextNodeSupplier nextNodeSupplier,
-            RandomWalkSampler.CumulativeWeightSupplier cumulativeWeightSupplier,
-            RandomWalkBaseConfig config,
-            BlockingQueue<long[]> walks,
-            double normalizedReturnProbability,
-            double normalizedSameDistanceProbability,
-            double normalizedInOutProbability,
-            Graph graph,
-            long randomSeed,
-            ProgressTracker progressTracker,
-            TerminationFlag terminationFlag
-        ) {
-            this.nextNodeSupplier = nextNodeSupplier;
-            this.graph = graph;
-            this.config = config;
-            this.walks = walks;
-            this.progressTracker = progressTracker;
-            this.terminationFlag = terminationFlag;
-            this.sampler = new RandomWalkSampler(
-                cumulativeWeightSupplier,
-                config.walkLength(),
-                normalizedReturnProbability,
-                normalizedSameDistanceProbability,
-                normalizedInOutProbability,
-                graph,
-                randomSeed
-            );
-
-            this.buffer = new long[1000][];
-        }
-
-        @Override
-        public void run() {
-            long nodeId;
-            int bufferLength = 0;
-
-            while (true) {
-                nodeId = nextNodeSupplier.nextNode();
-
-                if (nodeId == NextNodeSupplier.NO_MORE_NODES) break;
-
-                if (graph.degree(nodeId) == 0) {
-                    progressTracker.logProgress();
-                    continue;
-                }
-                var walksPerNode = config.walksPerNode();
-
-                sampler.prepareForNewNode(nodeId);
-
-                for (int walkIndex = 0; walkIndex < walksPerNode; walkIndex++) {
-                    buffer[bufferLength++] = sampler.walk(nodeId);
-                    if (bufferLength == buffer.length) {
-                        var shouldStop = flushBuffer(bufferLength);
-                        bufferLength = 0;
-                        if (!shouldStop) {
-                            break;
-                        }
-                    }
-                }
-
-                progressTracker.logProgress();
-            }
-
-            flushBuffer(bufferLength);
-        }
-
-        // returns false if execution should be stopped, otherwise true
-        private boolean flushBuffer(int bufferLength) {
-            bufferLength = Math.min(bufferLength, this.buffer.length);
-
-            int i = 0;
-            while (i < bufferLength && terminationFlag.running()) {
-                try {
-                    // allow termination to occur if queue is full
-                    if (walks.offer(this.buffer[i], 100, TimeUnit.MILLISECONDS)) {
-                        i++;
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    return false;
-                }
-            }
-
-            return terminationFlag.running();
         }
     }
 
