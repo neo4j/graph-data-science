@@ -21,26 +21,20 @@ package org.neo4j.gds.traversal;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.config.SourceNodesConfig;
 import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.QueueBasedSpliterator;
-import org.neo4j.gds.degree.DegreeCentrality;
-import org.neo4j.gds.degree.ImmutableDegreeCentralityConfig;
 import org.neo4j.gds.ml.core.EmbeddingUtils;
 import org.neo4j.gds.ml.core.samplers.RandomWalkSampler;
 
-import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -87,15 +81,18 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
     public Stream<long[]> compute() {
         progressTracker.beginSubTask("RandomWalk");
 
-        RandomWalkSampler.CumulativeWeightSupplier cumulativeWeightSupplier = graph.hasRelationshipProperty()
-            ? cumulativeWeights()::get
-            : graph::degree;
-
         var randomSeed = config.randomSeed().orElseGet(() -> new Random().nextLong());
 
-        NextNodeSupplier nextNodeSupplier = config.sourceNodes() == null || config.sourceNodes().isEmpty()
-            ? new NextNodeSupplier.GraphNodeSupplier(graph.nodeCount())
-            : NextNodeSupplier.ListNodeSupplier.of(config, graph);
+
+        var cumulativeWeightSupplier = RandomWalkCompanion.cumulativeWeights(
+            graph,
+            config,
+            executorService,
+            progressTracker
+        );
+
+
+        var nextNodeSupplier = RandomWalkCompanion.nextNodeSupplier(graph, config);
 
         var terminationFlag = new ExternalTerminationFlag(this);
 
@@ -106,20 +103,6 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         return walksQueueConsumer(terminationFlag, TOMB, walks);
     }
 
-    private DegreeCentrality.DegreeFunction cumulativeWeights() {
-        var degreeCentralityConfig = ImmutableDegreeCentralityConfig.builder()
-            .concurrency(config.concurrency())
-            // DegreeCentrality internally decides its computation on the config. The actual property key is not relevant
-            .relationshipWeightProperty("DUMMY")
-            .build();
-
-        return new DegreeCentrality(
-            graph,
-            executorService,
-            degreeCentralityConfig,
-            progressTracker
-        ).compute();
-    }
 
     private void startWalkers(
         TerminationFlag terminationFlag,
@@ -214,47 +197,4 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         }
     }
 
-    @FunctionalInterface
-    interface NextNodeSupplier {
-        long NO_MORE_NODES = -1;
-
-        long nextNode();
-
-        class GraphNodeSupplier implements NextNodeSupplier {
-            private final long numberOfNodes;
-            private final AtomicLong nextNodeId;
-
-            GraphNodeSupplier(long numberOfNodes) {
-                this.numberOfNodes = numberOfNodes;
-                this.nextNodeId = new AtomicLong(0);
-            }
-
-            @Override
-            public long nextNode() {
-                var nextNode = nextNodeId.getAndIncrement();
-                return nextNode < numberOfNodes ? nextNode : NO_MORE_NODES;
-            }
-        }
-
-        final class ListNodeSupplier implements NextNodeSupplier {
-            private final List<Long> nodes;
-            private final AtomicInteger nextIndex;
-
-            static ListNodeSupplier of(SourceNodesConfig config, Graph graph) {
-                var mappedIds = config.sourceNodes().stream().map(graph::toMappedNodeId).collect(Collectors.toList());
-                return new ListNodeSupplier(mappedIds);
-            }
-
-            private ListNodeSupplier(List<Long> nodes) {
-                this.nodes = nodes;
-                this.nextIndex = new AtomicInteger(0);
-            }
-
-            @Override
-            public long nextNode() {
-                var index = nextIndex.getAndIncrement();
-                return index < nodes.size() ? nodes.get(index) : NO_MORE_NODES;
-            }
-        }
-    }
 }

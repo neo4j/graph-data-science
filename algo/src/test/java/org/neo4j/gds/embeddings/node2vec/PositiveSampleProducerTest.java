@@ -319,17 +319,29 @@ class PositiveSampleProducerTest {
 
     private static CompressedRandomWalks createCompressedRandomWalks(long[]... walksInput) {
         var walks = new CompressedRandomWalks(walksInput.length);
+        int i = 0;
+        int maxWalkLength = 0;
+
         for (long[] walk : walksInput) {
-            walks.add(walk);
+            maxWalkLength = Math.max(maxWalkLength, walk.length);
+            walks.add(i++, walk);
         }
+        walks.setSize(walksInput.length);
+        walks.setMaxWalkLength(maxWalkLength);
+
         return walks;
     }
 
     private static CompressedRandomWalks createCompressedRandomWalks(long count, WalkSupplier walkSupplier) {
         var walks = new CompressedRandomWalks(count);
+        int maxWalkLength = 0;
         for (long i = 0; i < count; i++) {
-            walks.add(walkSupplier.getWalk(i));
+            var walk = walkSupplier.getWalk(i);
+            maxWalkLength = Math.max(maxWalkLength, walk.length);
+            walks.add((int) i, walk);
         }
+        walks.setSize(count);
+        walks.setMaxWalkLength(maxWalkLength);
         return walks;
     }
 

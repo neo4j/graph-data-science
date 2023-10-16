@@ -23,11 +23,21 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryUsage;
-import org.neo4j.gds.traversal.RandomWalk;
+import org.neo4j.gds.ml.core.EmbeddingUtils;
+import org.neo4j.gds.traversal.RandomWalkBaseConfig;
+import org.neo4j.gds.traversal.RandomWalkCompanion;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Node2Vec extends Algorithm<Node2VecModel.Result> {
 
@@ -56,12 +66,15 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
     public Node2VecModel.Result compute() {
         progressTracker.beginSubTask("Node2Vec");
 
-        RandomWalk randomWalk = RandomWalk.create(
-            graph,
-            config,
-            progressTracker,
-            DefaultPool.INSTANCE
-        );
+        if (graph.hasRelationshipProperty()) {
+            EmbeddingUtils.validateRelationshipWeightPropertyValue(
+                graph,
+                config.concurrency(),
+                weight -> weight >= 0,
+                "Node2Vec only supports non-negative weights.",
+                DefaultPool.INSTANCE
+            );
+        }
 
         var probabilitiesBuilder = new RandomWalkProbabilities.Builder(
             graph.nodeCount(),
@@ -71,10 +84,33 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
         );
         var walks = new CompressedRandomWalks(graph.nodeCount() * config.walksPerNode());
 
-        randomWalk.compute().forEach(walk -> {
-            probabilitiesBuilder.registerWalk(walk);
-            walks.add(walk);
-        });
+        progressTracker.beginSubTask("RandomWalk");
+
+        var tasks = tasks(
+            walks,
+            probabilitiesBuilder,
+            graph,
+            config,
+            DefaultPool.INSTANCE,
+            progressTracker,
+            terminationFlag
+        );
+
+        progressTracker.beginSubTask("create walks");
+        RunWithConcurrency.builder().concurrency(config.concurrency()).tasks(tasks).run();
+        walks.setMaxWalkLength(tasks.stream()
+            .map(task -> task.maxWalkLength())
+            .max(Integer::compareTo)
+            .orElse(0));
+
+        walks.setSize(tasks.stream()
+            .map(task -> (1 + task.maxIndex()))
+            .max(Long::compareTo)
+            .orElse(0L));
+
+        progressTracker.endSubTask("create walks");
+        progressTracker.endSubTask("RandomWalk");
+
 
         var node2VecModel = new Node2VecModel(
             graph::toOriginalNodeId,
@@ -89,6 +125,43 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
 
         progressTracker.endSubTask("Node2Vec");
         return result;
+    }
+
+    private List<Node2VecRandomWalkTask> tasks(
+        CompressedRandomWalks compressedRandomWalks,
+        RandomWalkProbabilities.Builder randomWalkPropabilitiesBuilder,
+        Graph graph,
+        RandomWalkBaseConfig config,
+        ExecutorService executorService,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ) {
+        ArrayList<Node2VecRandomWalkTask> tasks = new ArrayList<>();
+        var randomSeed = config.randomSeed().orElseGet(() -> new Random().nextLong());
+        int concurrency = config.concurrency();
+        var nextNodeSupplier = RandomWalkCompanion.nextNodeSupplier(graph, config);
+        var cumulativeWeightsSupplier = RandomWalkCompanion.cumulativeWeights(
+            graph,
+            config,
+            executorService,
+            progressTracker
+        );
+
+        AtomicLong index = new AtomicLong();
+        for (int i = 0; i < concurrency; ++i) {
+            tasks.add(new Node2VecRandomWalkTask(nextNodeSupplier,
+                cumulativeWeightsSupplier,
+                config,
+                graph.concurrentCopy(),
+                randomSeed,
+                progressTracker,
+                terminationFlag,
+                index,
+                compressedRandomWalks,
+                randomWalkPropabilitiesBuilder
+            ));
+        }
+        return tasks;
     }
 
 }

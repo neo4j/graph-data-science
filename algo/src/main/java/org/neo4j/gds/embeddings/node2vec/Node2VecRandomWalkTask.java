@@ -17,34 +17,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.traversal;
+package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.samplers.RandomWalkSampler;
+import org.neo4j.gds.traversal.GeneralRandomWalkTask;
+import org.neo4j.gds.traversal.NextNodeSupplier;
+import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
-final class RandomWalkTask extends GeneralRandomWalkTask {
-
-    private final BlockingQueue<long[]> walks;
-    private final long[][] buffer;
-    private int bufferLength;
+final class Node2VecRandomWalkTask extends GeneralRandomWalkTask {
+    
+    private int walks;
     private final TerminationFlag terminationFlag;
+    private  int  maxWalkLength;
+    private long maxIndex;
 
-
-    public RandomWalkTask(
+    public Node2VecRandomWalkTask(
         NextNodeSupplier nextNodeSupplier,
         RandomWalkSampler.CumulativeWeightSupplier cumulativeWeightSupplier,
         RandomWalkBaseConfig config,
-        BlockingQueue<long[]> walks,
         Graph graph,
         long randomSeed,
         ProgressTracker progressTracker,
-        TerminationFlag terminationFlag
+        TerminationFlag terminationFlag,
+        AtomicLong walkIndex,
+        CompressedRandomWalks compressedRandomWalks,
+        RandomWalkProbabilities.Builder randomWalkProbabilitiesBuilder
     ) {
         super(
             nextNodeSupplier,
@@ -54,46 +57,31 @@ final class RandomWalkTask extends GeneralRandomWalkTask {
             randomSeed,
             progressTracker
         );
-        this.terminationFlag = terminationFlag;
-        this.walks = walks;
-        this.buffer = new long[1000][];
-        Function<long[], Boolean> func = path -> {
-            buffer[bufferLength++] = path;
-            if (bufferLength == buffer.length) {
-                var shouldStop = flushBuffer(bufferLength);
-                bufferLength = 0;
-                return shouldStop;
 
+        this.terminationFlag = terminationFlag;
+
+        Function<long[], Boolean> func = path -> {
+            var index = walkIndex.getAndIncrement(); //perhaps we can also use a buffer to minimize walkIndex atomic operations
+            maxIndex = index;
+            randomWalkProbabilitiesBuilder.registerWalk(path);
+            compressedRandomWalks.add(index, path);
+            maxWalkLength = Math.max(path.length, maxWalkLength);
+            if (walks++ == 1000) { //this is just to get the same
+                walks = 0;
+                return this.terminationFlag.running();
             }
             return true;
-        };
+             };
+
         withPathConsumer(func);
 
     }
 
-    @Override
-    public void run() {
-        super.run();
-        flushBuffer(bufferLength);
+    public int maxWalkLength(){
+        return  maxWalkLength;
     }
 
-    // returns false if execution should be stopped, otherwise true
-    private boolean flushBuffer(int bufferLength) {
-        bufferLength = Math.min(bufferLength, this.buffer.length);
-
-        int i = 0;
-        while (i < bufferLength && terminationFlag.running()) {
-            try {
-                // allow termination to occur if queue is full
-                if (walks.offer(this.buffer[i], 100, TimeUnit.MILLISECONDS)) {
-                    i++;
-                }
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return false;
-            }
-        }
-
-        return terminationFlag.running();
+    public long maxIndex() {
+        return maxIndex;
     }
 }
