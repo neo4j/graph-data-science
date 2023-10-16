@@ -43,7 +43,7 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 public class EvaluationContextTest {
 
     @GdlGraph
-    public static final String GDL = "(a:A:B:C { p1: 42.0, p2: 42 })-[:REL { baz: 84.0 }]->(b:B { p1: 1337.0, p2: 1337 })-[:BAR]->(c)";
+    public static final String GDL = "(a:A:B:C { p1: 42.0, p2: 42 })-[:REL1 { baz: 84.0 }]->(b:B { p1: 1337.0, p2: 1337 })-[:REL2]->(c)";
 
     @Inject
     private GraphStore graphStore;
@@ -104,11 +104,11 @@ public class EvaluationContextTest {
     static Stream<Arguments> degrees() {
         return Stream.of(
             Arguments.of("a", List.of(), 1),
-            Arguments.of("a", List.of(RelationshipType.of("REL")), 1),
-            Arguments.of("a", List.of(RelationshipType.of("REL"), RelationshipType.of("BAR")), 1),
-            Arguments.of("a", List.of(RelationshipType.of("BAR")), 0),
-            Arguments.of("b", List.of(RelationshipType.of("REL")), 0),
-            Arguments.of("b", List.of(RelationshipType.of("BAR")), 1),
+            Arguments.of("a", List.of(RelationshipType.of("REL1")), 1),
+            Arguments.of("a", List.of(RelationshipType.of("REL1"), RelationshipType.of("REL2")), 1),
+            Arguments.of("a", List.of(RelationshipType.of("REL2")), 0),
+            Arguments.of("b", List.of(RelationshipType.of("REL1")), 0),
+            Arguments.of("b", List.of(RelationshipType.of("REL2")), 1),
             Arguments.of("c", List.of(), 0)
         );
     }
@@ -124,15 +124,15 @@ public class EvaluationContextTest {
     @Test
     void relationshipEvaluationContextPositive() {
         var context = new EvaluationContext.RelationshipEvaluationContext(Map.of("baz", 0), Map.of());
-        context.init(RelationshipType.of("REL"), new double[]{84});
+        context.init(RelationshipType.of("REL1"), new double[]{84});
         assertThat(context.getProperty("baz", ValueType.DOUBLE)).isEqualTo(84);
-        assertThat(context.hasLabelsOrTypes(List.of("REL"))).isTrue();
+        assertThat(context.hasLabelsOrTypes(List.of("REL1"))).isTrue();
     }
 
     @Test
     void relationshipEvaluationContextNegative() {
         var context = new EvaluationContext.RelationshipEvaluationContext(Map.of(), Map.of());
         context.init(RelationshipType.of("REL"));
-        assertThat(context.hasLabelsOrTypes(List.of("BAR"))).isFalse();
+        assertThat(context.hasLabelsOrTypes(List.of("REL2"))).isFalse();
     }
 }
