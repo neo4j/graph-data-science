@@ -31,10 +31,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 final class Node2VecRandomWalkTask extends GeneralRandomWalkTask {
-    
+
     private int walks;
     private final TerminationFlag terminationFlag;
-    private  int  maxWalkLength;
+    private int maxWalkLength;
     private long maxIndex;
 
     public Node2VecRandomWalkTask(
@@ -71,14 +71,13 @@ final class Node2VecRandomWalkTask extends GeneralRandomWalkTask {
                 return this.terminationFlag.running();
             }
             return true;
-             };
+        };
 
         withPathConsumer(func);
-
     }
 
-    public int maxWalkLength(){
-        return  maxWalkLength;
+    public int maxWalkLength() {
+        return maxWalkLength;
     }
 
     public long maxIndex() {

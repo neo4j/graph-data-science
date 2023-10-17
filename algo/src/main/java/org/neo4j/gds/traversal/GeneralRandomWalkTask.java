@@ -68,6 +68,7 @@ public class GeneralRandomWalkTask implements Runnable {
     public void withPathConsumer(Function<long[], Boolean> pathConsumer) {
         this.pathConsumer = pathConsumer;
     }
+
     @Override
     public void run() {
         long nodeId;
@@ -86,16 +87,13 @@ public class GeneralRandomWalkTask implements Runnable {
             sampler.prepareForNewNode(nodeId);
 
             for (int walkIndex = 0; walkIndex < walksPerNode; walkIndex++) {
-                var path= sampler.walk(nodeId);
-                   boolean shouldContinue= pathConsumer.apply(path);
-                    if (!shouldContinue){
-                        break;
-                    }
+                var path = sampler.walk(nodeId);
+                boolean shouldContinue = pathConsumer.apply(path);
+                if (!shouldContinue) {
+                    break;
+                }
             }
-
             progressTracker.logProgress();
         }
-
     }
-
 }

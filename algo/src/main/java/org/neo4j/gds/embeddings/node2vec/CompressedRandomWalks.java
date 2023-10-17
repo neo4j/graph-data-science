@@ -69,7 +69,6 @@ public class CompressedRandomWalks {
 
         compressedWalks.set(currentIndex, compressedData);
         walkLengths.set(currentIndex, walk.length);
-
     }
 
     public Iterator<long[]> iterator(long startIndex, long length) {

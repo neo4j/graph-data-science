@@ -111,7 +111,6 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
         progressTracker.endSubTask("create walks");
         progressTracker.endSubTask("RandomWalk");
 
-
         var node2VecModel = new Node2VecModel(
             graph::toOriginalNodeId,
             graph.nodeCount(),
@@ -149,7 +148,8 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
 
         AtomicLong index = new AtomicLong();
         for (int i = 0; i < concurrency; ++i) {
-            tasks.add(new Node2VecRandomWalkTask(nextNodeSupplier,
+            tasks.add(new Node2VecRandomWalkTask(
+                nextNodeSupplier,
                 cumulativeWeightsSupplier,
                 config,
                 graph.concurrentCopy(),
@@ -163,5 +163,4 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
         }
         return tasks;
     }
-
 }
