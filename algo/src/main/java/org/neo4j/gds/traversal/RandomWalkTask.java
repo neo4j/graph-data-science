@@ -26,54 +26,85 @@ import org.neo4j.gds.ml.core.samplers.RandomWalkSampler;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
-final class RandomWalkTask extends GeneralRandomWalkTask {
+final class RandomWalkTask implements Runnable {
 
+    private final Graph graph;
+    private final NextNodeSupplier nextNodeSupplier;
     private final BlockingQueue<long[]> walks;
-    private final long[][] buffer;
-    private int bufferLength;
+    private final long walksPerNode;
+    private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
+    private final RandomWalkSampler sampler;
+    private final long[][] buffer;
 
+    private int bufferLength;
 
-    public RandomWalkTask(
+    RandomWalkTask(
+        Graph graph,
+        RandomWalkBaseConfig config,
         NextNodeSupplier nextNodeSupplier,
         RandomWalkSampler.CumulativeWeightSupplier cumulativeWeightSupplier,
-        RandomWalkBaseConfig config,
         BlockingQueue<long[]> walks,
-        Graph graph,
+        long walksPerNode,
         long randomSeed,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        super(
-            nextNodeSupplier,
-            cumulativeWeightSupplier,
-            config,
-            graph,
-            randomSeed,
-            progressTracker
-        );
-        this.terminationFlag = terminationFlag;
+        this.graph = graph;
+        this.nextNodeSupplier = nextNodeSupplier;
         this.walks = walks;
-        this.buffer = new long[1000][];
-        Function<long[], Boolean> func = path -> {
-            buffer[bufferLength++] = path;
-            if (bufferLength == buffer.length) {
-                var shouldStop = flushBuffer(bufferLength);
-                bufferLength = 0;
-                return shouldStop;
+        this.walksPerNode = walksPerNode;
+        this.progressTracker = progressTracker;
+        this.terminationFlag = terminationFlag;
 
-            }
-            return true;
-        };
-        withPathConsumer(func);
+        this.buffer = new long[1000][];
+        this.sampler = RandomWalkSampler.create(
+            graph,
+            cumulativeWeightSupplier,
+            config.walkLength(),
+            config.returnFactor(),
+            config.inOutFactor(),
+            randomSeed
+        );
     }
 
     @Override
     public void run() {
-        super.run();
+        long nodeId;
+
+        while (true) {
+            nodeId = nextNodeSupplier.nextNode();
+
+            if (nodeId == NextNodeSupplier.NO_MORE_NODES) break;
+
+            if (graph.degree(nodeId) == 0) {
+                progressTracker.logProgress();
+                continue;
+            }
+            sampler.prepareForNewNode(nodeId);
+
+            for (int walkIndex = 0; walkIndex < walksPerNode; walkIndex++) {
+                var path = sampler.walk(nodeId);
+                boolean shouldContinue = consumePath(path);
+                if (!shouldContinue) {
+                    break;
+                }
+            }
+            progressTracker.logProgress();
+        }
         flushBuffer(bufferLength);
+    }
+
+    private boolean consumePath(long[] path) {
+        buffer[bufferLength++] = path;
+
+        if (bufferLength == buffer.length) {
+            var shouldStop = flushBuffer(bufferLength);
+            bufferLength = 0;
+            return shouldStop;
+        }
+        return true;
     }
 
     // returns false if execution should be stopped, otherwise true

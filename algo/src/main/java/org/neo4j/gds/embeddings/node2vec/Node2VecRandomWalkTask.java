@@ -23,25 +23,31 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.samplers.RandomWalkSampler;
-import org.neo4j.gds.traversal.GeneralRandomWalkTask;
 import org.neo4j.gds.traversal.NextNodeSupplier;
 import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Function;
 
-final class Node2VecRandomWalkTask extends GeneralRandomWalkTask {
+final class Node2VecRandomWalkTask implements Runnable {
 
-    private int walks;
+    private final Graph graph;
+    private final NextNodeSupplier nextNodeSupplier;
+    private final int walksPerNode;
+    private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
+    private final AtomicLong walkIndex;
+    private final CompressedRandomWalks compressedRandomWalks;
+    private final RandomWalkProbabilities.Builder randomWalkProbabilitiesBuilder;
+    private final RandomWalkSampler sampler;
+    private int walks;
     private int maxWalkLength;
     private long maxIndex;
 
-    public Node2VecRandomWalkTask(
+    Node2VecRandomWalkTask(
+        Graph graph,
+        RandomWalkBaseConfig config,
         NextNodeSupplier nextNodeSupplier,
         RandomWalkSampler.CumulativeWeightSupplier cumulativeWeightSupplier,
-        RandomWalkBaseConfig config,
-        Graph graph,
         long randomSeed,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag,
@@ -49,38 +55,72 @@ final class Node2VecRandomWalkTask extends GeneralRandomWalkTask {
         CompressedRandomWalks compressedRandomWalks,
         RandomWalkProbabilities.Builder randomWalkProbabilitiesBuilder
     ) {
-        super(
-            nextNodeSupplier,
-            cumulativeWeightSupplier,
-            config,
-            graph,
-            randomSeed,
-            progressTracker
-        );
-
+        this.graph = graph;
+        this.nextNodeSupplier = nextNodeSupplier;
+        this.walksPerNode = config.walksPerNode();
+        this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
+        this.walkIndex = walkIndex;
+        this.compressedRandomWalks = compressedRandomWalks;
+        this.randomWalkProbabilitiesBuilder = randomWalkProbabilitiesBuilder;
 
-        Function<long[], Boolean> func = path -> {
-            var index = walkIndex.getAndIncrement(); //perhaps we can also use a buffer to minimize walkIndex atomic operations
-            maxIndex = index;
-            randomWalkProbabilitiesBuilder.registerWalk(path);
-            compressedRandomWalks.add(index, path);
-            maxWalkLength = Math.max(path.length, maxWalkLength);
-            if (walks++ == 1000) { //this is just to get the same
-                walks = 0;
-                return this.terminationFlag.running();
-            }
-            return true;
-        };
-
-        withPathConsumer(func);
+        this.sampler = RandomWalkSampler.create(
+            graph,
+            cumulativeWeightSupplier,
+            config.walkLength(),
+            config.returnFactor(),
+            config.inOutFactor(),
+            randomSeed
+        );
+        this.walks = 0;
+        this.maxWalkLength = 0;
+        this.maxIndex = 0;
     }
 
-    public int maxWalkLength() {
+    private boolean consumePath(long[] path) {
+        var index = walkIndex.getAndIncrement(); //perhaps we can also use a buffer to minimize walkIndex atomic operations
+        maxIndex = index;
+        randomWalkProbabilitiesBuilder.registerWalk(path);
+        compressedRandomWalks.add(index, path);
+        maxWalkLength = Math.max(path.length, maxWalkLength);
+        if (walks++ == 1000) { //this is just to get the same
+            walks = 0;
+            return this.terminationFlag.running();
+        }
+        return true;
+    }
+
+    int maxWalkLength() {
         return maxWalkLength;
     }
 
-    public long maxIndex() {
+    long maxIndex() {
         return maxIndex;
+    }
+
+    @Override
+    public void run() {
+        long nodeId;
+
+        while (true) {
+            nodeId = nextNodeSupplier.nextNode();
+
+            if (nodeId == NextNodeSupplier.NO_MORE_NODES) break;
+
+            if (graph.degree(nodeId) == 0) {
+                progressTracker.logProgress();
+                continue;
+            }
+            sampler.prepareForNewNode(nodeId);
+
+            for (int walkIndex = 0; walkIndex < walksPerNode; walkIndex++) {
+                var path = sampler.walk(nodeId);
+                boolean shouldContinue = consumePath(path);
+                if (!shouldContinue) {
+                    break;
+                }
+            }
+            progressTracker.logProgress();
+        }
     }
 }

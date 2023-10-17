@@ -114,13 +114,14 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
             .range(0, this.config.concurrency())
             .mapToObj(i ->
                 new RandomWalkTask(
+                    graph.concurrentCopy(),
+                    config,
                     nextNodeSupplier,
                     cumulativeWeightSupplier,
-                    this.config,
                     walks,
-                    this.graph.concurrentCopy(),
+                    config.walksPerNode(),
                     randomSeed,
-                    this.progressTracker,
+                    progressTracker,
                     terminationFlag
                 )).collect(Collectors.toList());
 
