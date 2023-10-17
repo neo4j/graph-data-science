@@ -60,8 +60,9 @@ public class RandomWalkCompanion {
         ).compute();
 
     }
-    public static  NextNodeSupplier nextNodeSupplier(Graph graph, RandomWalkBaseConfig config){
-      return   config.sourceNodes() == null || config.sourceNodes().isEmpty()
+
+    public static NextNodeSupplier nextNodeSupplier(Graph graph, RandomWalkBaseConfig config) {
+        return config.sourceNodes() == null || config.sourceNodes().isEmpty()
             ? new NextNodeSupplier.GraphNodeSupplier(graph.nodeCount())
             : NextNodeSupplier.ListNodeSupplier.of(config, graph);
     }

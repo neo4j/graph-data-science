@@ -83,14 +83,12 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
 
         var randomSeed = config.randomSeed().orElseGet(() -> new Random().nextLong());
 
-
         var cumulativeWeightSupplier = RandomWalkCompanion.cumulativeWeights(
             graph,
             config,
             executorService,
             progressTracker
         );
-
 
         var nextNodeSupplier = RandomWalkCompanion.nextNodeSupplier(graph, config);
 

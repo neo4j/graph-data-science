@@ -68,7 +68,6 @@ final class RandomWalkTask extends GeneralRandomWalkTask {
             return true;
         };
         withPathConsumer(func);
-
     }
 
     @Override
