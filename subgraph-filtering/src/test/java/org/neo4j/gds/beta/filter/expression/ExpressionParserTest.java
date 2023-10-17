@@ -391,6 +391,14 @@ class ExpressionParserTest {
             .build());
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"degree", "DEGREE", "dEgReE"})
+    void degreeIsCaseInsensitive(String funcName) throws ParseException {
+        var exprString = funcName + "()";
+        var expr = ExpressionParser.parse(exprString, Map.of());
+        assertThat(expr).isEqualTo(ImmutableDegree.builder().build());
+    }
+
     @Test
     void degreeFailsForNonString() {
         assertThatThrownBy(() -> ExpressionParser.parse("degree(42)", Map.of()))

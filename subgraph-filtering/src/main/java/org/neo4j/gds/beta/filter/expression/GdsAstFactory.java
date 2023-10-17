@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.StringSimilarity.prettySuggestions;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.toLowerCaseWithLocale;
 
 class GdsAstFactory extends AstFactoryAdapter {
 
@@ -136,7 +137,7 @@ class GdsAstFactory extends AstFactoryAdapter {
         boolean distinct,
         List<Expression> arguments
     ) {
-        switch (name) {
+        switch (toLowerCaseWithLocale(name)) {
             case Expression.Function.Degree.NAME: {
                 var relationshipTypes = arguments
                     .stream()
