@@ -3,20 +3,27 @@
 :description: This chapter shows a complete example using machine learning pipelines from the Neo4j Graph Data Science library.
 :keywords: GDS, getting started, machine learning, pipeline
 
-Currently, the following types of pipelines:
+A GDS pipeline is:
+
+. Configured
+. Trained
+. Used for prediction
+
+Currently, the following types of pipelines are available:
 
 * Node Classification
 * Link Prediction
 * Node Regression
 
-Example with a Link Prediction pipeline.
-This is a simplified version of the example described in the xref:machine-learning/linkprediction-pipelines/config.adoc[configuration] and xref:machine-learning/linkprediction-pipelines/training.adoc[training] sections of the manual.
+[NOTE]
+====
+This example is a simplified version of the Link Prediction pipeline described in the xref:machine-learning/linkprediction-pipelines/config.adoc[configuration] and xref:machine-learning/linkprediction-pipelines/training.adoc[training] sections of the manual.
+As such, the model performance is not expected to be the best.
+====
 
 :sectnums!:
 
 == Setup
-
-image::lp-graph.svg["LP example data."]
 
 ----
 CREATE
@@ -43,6 +50,8 @@ CREATE
   (chris)-[:KNOWS]->(karin)
 ----
 
+image::lp-graph.svg["LP example data."]
+
 NOTE: The Link Prediction model requires the graph to be created using the UNDIRECTED orientation for relationships.
 
 ----
@@ -63,132 +72,84 @@ CALL gds.graph.project(
 
 == Configuration
 
-=== Alternative 1: steps with explanation and code
-
-Create:
-
-----
-CALL gds.beta.pipeline.linkPrediction.create('pipe')
-----
-
 Steps to configuration:
 
-. Add calculated node properties (if needed).
-+
-----
-CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'fastRP', {
-  mutateProperty: 'embedding',
-  embeddingDimension: 256,
-  randomSeed: 42
-})
-----
-
-. Add features (existing + created).
-+
-----
-CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'hadamard', {
-  nodeProperties: ['embedding', 'age']
-}) YIELD featureSteps
-----
-
-. Define the split.
-+
-----
-CALL gds.beta.pipeline.linkPrediction.configureSplit('pipe', {
-  testFraction: 0.25,
-  trainFraction: 0.6,
-  validationFolds: 3
-})
-YIELD splitConfig
-----
-
-. Add the candidate models.
-+
-----
-// "Naive" model
-CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe')
-YIELD parameterSpace
-----
-+
-----
-// More sophisticated model
-CALL gds.alpha.pipeline.linkPrediction.addMLP('pipe',
-{hiddenLayerSizes: [4, 2], penalty: 0.5, patience: 2, classWeights: [0.55, 0.45], focusWeight: {range: [0.0, 0.1]}})
-YIELD parameterSpace
-----
-
-Skipped:
-
-* Autotuning
-
-=== Alternative 2: explanation first, then the whole code block
-
-Steps to configuration:
-
-. Add calculated node properties (if needed).
-. Add features (existing + created).
+. Create the pipeline.
+. Add features.
 . Define the split.
 . Add the candidate models.
 
+Whole block without returning values (no YIELD, no RETURN):
+
 ----
-CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'fastRP', {
-  mutateProperty: 'embedding',
-  embeddingDimension: 256,
-  randomSeed: 42
-})
+CALL gds.beta.pipeline.linkPrediction.create('pipe');
 
-CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'hadamard', {
-  nodeProperties: ['embedding', 'age']
-}) YIELD featureSteps
+CALL gds.beta.pipeline.linkPrediction.addFeature(
+  'pipe', 
+  'cosine',
+  {
+    nodeProperties: ['age']
+  }
+);
 
-CALL gds.beta.pipeline.linkPrediction.configureSplit('pipe', {
-  testFraction: 0.25,
-  trainFraction: 0.6,
-  validationFolds: 3
-})
-YIELD splitConfig
+CALL gds.beta.pipeline.linkPrediction.configureSplit(
+  'pipe',
+  {
+    testFraction: 0.25,
+    trainFraction: 0.6,
+    validationFolds: 3
+  }
+);
 
-// "Naive" model
-CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe')
-YIELD parameterSpace
-
-// More sophisticated model
-CALL gds.alpha.pipeline.linkPrediction.addMLP('pipe',
-{hiddenLayerSizes: [4, 2], penalty: 0.5, patience: 2, classWeights: [0.55, 0.45], focusWeight: {range: [0.0, 0.1]}})
-YIELD parameterSpace
+CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe');
 ----
 
-Skipped:
+Optionally, two more steps:
 
+* Add node property
 * Autotuning
 
 == Train
 
+The configured pipeline is ready for training.
+
 ----
-CALL gds.beta.pipeline.linkPrediction.train('myGraph', {
-  pipeline: 'pipe',
-  modelName: 'lp-pipeline-model',
-  metrics: ['AUCPR'],
-  targetRelationshipType: 'KNOWS',
-  randomSeed: 12
-}) YIELD modelInfo, modelSelectionStats
+CALL gds.beta.pipeline.linkPrediction.train(
+  'myGraph',
+  {
+    pipeline: 'pipe',
+    modelName: 'lp-pipeline-model',
+    metrics: ['AUCPR'],
+    targetRelationshipType: 'KNOWS'
+  }
+)
+YIELD modelInfo, modelSelectionStats
 RETURN
   modelInfo.bestParameters AS winningModel,
   modelInfo.metrics.AUCPR.train.avg AS avgTrainScore,
+  modelInfo.metrics.AUCPR.validation.avg AS avgValidationScore,
   modelInfo.metrics.AUCPR.outerTrain AS outerTrainScore,
-  modelInfo.metrics.AUCPR.test AS testScore,
-  [cand IN modelSelectionStats.modelCandidates | cand.metrics.AUCPR.validation.avg] AS validationScores
+  modelInfo.metrics.AUCPR.test AS testScore
 ----
 
-== Use for prediction
+Various metrics are reported.
+
+== Predict
+
+Predict the probability that a link exists between two nodes.
 
 ----
-CALL gds.beta.pipeline.linkPrediction.predict.stream('myGraph', {
-  modelName: 'lp-pipeline-model',
-  topN: 5,
-  threshold: 0.5
-})
- YIELD node1, node2, probability
- RETURN gds.util.asNode(node1).name AS person1, gds.util.asNode(node2).name AS person2, probability
- ORDER BY probability DESC, person1
+CALL gds.beta.pipeline.linkPrediction.predict.stream(
+  'myGraph',
+  {
+    modelName: 'lp-pipeline-model',
+    topN: 5
+  }
+)
+YIELD node1, node2, probability
+RETURN
+  gds.util.asNode(node1).name AS person1,
+  gds.util.asNode(node2).name AS person2,
+  probability
+ORDER BY probability DESC, person1
 ----
