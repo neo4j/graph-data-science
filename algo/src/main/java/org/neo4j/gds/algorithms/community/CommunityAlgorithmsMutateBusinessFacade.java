@@ -61,7 +61,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static org.neo4j.gds.algorithms.community.AlgorithmRunner.runWithTiming;
+import static org.neo4j.gds.algorithms.runner.AlgorithmRunner.runWithTiming;
 import static org.neo4j.gds.algorithms.community.CommunityResultCompanion.createIntermediateCommunitiesNodePropertyValues;
 
 public class CommunityAlgorithmsMutateBusinessFacade {

@@ -20,10 +20,10 @@
 package org.neo4j.gds.similarity.filterednodesim;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.similarity.SimilarityStatsResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.similarity.SimilarityStatsResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -37,16 +37,16 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class FilteredNodeSimilarityStatsProc extends BaseProc {
 
+    @Context
+    public GraphDataScience facade;
+
     @Procedure(value = "gds.nodeSimilarity.filtered.stats", mode = READ)
     @Description(DESCRIPTION)
     public Stream<SimilarityStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ){
-        return new ProcedureExecutor<>(
-            new FilteredNodeSimilarityStatsSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.similarity().filteredNodeSimilarityStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.nodeSimilarity.filtered.stats.estimate", mode = READ)
@@ -55,11 +55,7 @@ public class FilteredNodeSimilarityStatsProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new FilteredNodeSimilarityStatsSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.similarity().filteredNodeSimilarityEstimateStats(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Deprecated(forRemoval = true)

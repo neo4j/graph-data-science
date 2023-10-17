@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms.community;
+package org.neo4j.gds.algorithms.runner;
 
-final class AlgorithmResultWithTiming<T> {
-    final T algorithmResult;
-    final long computeMilliseconds;
+public final class AlgorithmResultWithTiming<T> {
+    public final T algorithmResult;
+    public final long computeMilliseconds;
 
-    AlgorithmResultWithTiming(
+    public AlgorithmResultWithTiming(
         T algorithmResult,
         long computeMilliseconds
     ) {

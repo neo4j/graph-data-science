@@ -29,7 +29,7 @@ public final class LocalClusteringCoefficientWriteResult extends LocalClustering
     public long writeMillis;
     public long nodePropertiesWritten;
 
-    private LocalClusteringCoefficientWriteResult(
+    public LocalClusteringCoefficientWriteResult(
         double averageClusteringCoefficient,
         long nodeCount,
         long preProcessingMillis,

@@ -26,10 +26,11 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.similarity.SimilarityStatsResult;
+import org.neo4j.gds.procedures.similarity.SimilarityStatsResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarity;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsResultBuilder;
 
 import java.util.Collections;
 import java.util.stream.Stream;
@@ -84,7 +85,7 @@ public class FilteredNodeSimilarityStatsSpec implements AlgorithmSpec<
             }
 
             var resultBuilder = withGraphsizeAndTimings(
-                new SimilarityStatsResult.Builder(),
+                new NodeSimilarityStatsResultBuilder(),
                 computationResult,
                 NodeSimilarityResult::graphResult
             );

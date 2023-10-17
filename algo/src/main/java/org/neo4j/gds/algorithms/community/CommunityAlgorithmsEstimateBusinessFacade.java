@@ -19,18 +19,9 @@
  */
 package org.neo4j.gds.algorithms.community;
 
-import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.AlgorithmFactory;
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.api.User;
+import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutAlgorithmFactory;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.k1coloring.K1ColoringAlgorithmFactory;
 import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionAlgorithmFactory;
@@ -43,9 +34,6 @@ import org.neo4j.gds.leiden.LeidenAlgorithmFactory;
 import org.neo4j.gds.leiden.LeidenBaseConfig;
 import org.neo4j.gds.louvain.LouvainAlgorithmFactory;
 import org.neo4j.gds.louvain.LouvainBaseConfig;
-import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
-import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
-import org.neo4j.gds.memest.MemoryEstimationGraphConfigParser;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
 import org.neo4j.gds.modularity.ModularityCalculatorFactory;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
@@ -60,36 +48,20 @@ import org.neo4j.gds.triangle.TriangleCountBaseConfig;
 import org.neo4j.gds.wcc.WccAlgorithmFactory;
 import org.neo4j.gds.wcc.WccBaseConfig;
 
-import java.util.Map;
 import java.util.Optional;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class CommunityAlgorithmsEstimateBusinessFacade {
 
-    private final GraphStoreCatalogService graphStoreCatalogService;
-
-    private final FictitiousGraphStoreEstimationService fictitiousGraphStoreEstimationService;
-    private final DatabaseGraphStoreEstimationService databaseGraphStoreEstimationService;
-    private final DatabaseId databaseId;
-    private final User user;
+    private final AlgorithmEstimator algorithmEstimator;
 
     public CommunityAlgorithmsEstimateBusinessFacade(
-        GraphStoreCatalogService graphStoreCatalogService,
-        FictitiousGraphStoreEstimationService fictitiousGraphStoreEstimationService,
-        DatabaseGraphStoreEstimationService databaseGraphStoreEstimationService,
-        DatabaseId databaseId,
-        User user
+        AlgorithmEstimator algorithmEstimator
     ) {
-        this.graphStoreCatalogService = graphStoreCatalogService;
-        this.fictitiousGraphStoreEstimationService = fictitiousGraphStoreEstimationService;
-        this.databaseGraphStoreEstimationService = databaseGraphStoreEstimationService;
-        this.databaseId = databaseId;
-        this.user = user;
+        this.algorithmEstimator = algorithmEstimator;
     }
 
     public <C extends WccBaseConfig> MemoryEstimateResult wcc(Object graphNameOrConfiguration, C configuration) {
-        return estimate(
+        return algorithmEstimator.estimate(
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
@@ -99,7 +71,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
 
 
     public <C extends ApproxMaxKCutBaseConfig> MemoryEstimateResult approxMaxKCut(Object graphNameOrConfiguration, C configuration) {
-        return estimate(
+        return algorithmEstimator.estimate(
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
@@ -111,7 +83,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
         Object graphNameOrConfiguration,
         C configuration
     ) {
-        return estimate(
+        return algorithmEstimator.estimate(
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
@@ -123,7 +95,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
         Object graphNameOrConfiguration,
         C configuration
     ) {
-        return estimate(
+        return algorithmEstimator.estimate(
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
@@ -135,7 +107,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
         Object graphNameOrConfiguration,
         C configuration
     ) {
-        return estimate(
+        return algorithmEstimator.estimate(
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
@@ -147,7 +119,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
         Object graphNameOrConfiguration,
         C configuration
     ) {
-        return estimate(
+        return algorithmEstimator.estimate(
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
@@ -158,7 +130,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
         Object graphNameOrConfiguration,
         C configuration
     ) {
-        return estimate(
+        return algorithmEstimator.estimate(
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
@@ -171,7 +143,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
         Object graphNameOrConfiguration,
         C configuration
     ) {
-        return estimate(
+        return algorithmEstimator.estimate(
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
@@ -183,7 +155,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
         Object graphNameOrConfiguration,
         C configuration
     ) {
-        return estimate(
+        return algorithmEstimator.estimate(
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
@@ -195,7 +167,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
         Object graphNameOrConfiguration,
         C configuration
     ) {
-        return estimate(
+        return algorithmEstimator.estimate(
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
@@ -207,7 +179,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
         Object graphNameOrConfiguration,
         C configuration
     ) {
-        return estimate(
+        return algorithmEstimator.estimate(
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
@@ -219,7 +191,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
         Object graphNameOrConfiguration,
         C configuration
     ) {
-        return estimate(
+        return algorithmEstimator.estimate(
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
@@ -231,56 +203,11 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
         Object graphNameOrConfiguration,
         C configuration
     ) {
-        return estimate(
+        return algorithmEstimator.estimate(
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
             new ModularityOptimizationFactory<>()
         );
-    }
-
-
-    private <G, A extends Algorithm<?>, C extends AlgoBaseConfig> MemoryEstimateResult estimate(
-        Object graphNameOrConfiguration,
-        C config,
-        Optional<String> maybeRelationshipProperty,
-        AlgorithmFactory<G, A, C> algorithmFactory
-    ) {
-        GraphDimensions dimensions;
-
-        var estimationBuilder = MemoryEstimations.builder("Memory Estimation");
-        if (graphNameOrConfiguration instanceof Map) {
-            var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(user.getUsername());
-            var graphProjectConfig = memoryEstimationGraphConfigParser.parse(graphNameOrConfiguration);
-
-            var graphMemoryEstimation = graphProjectConfig.isFictitiousLoading()
-                ? fictitiousGraphStoreEstimationService.estimate(graphProjectConfig)
-                : databaseGraphStoreEstimationService.estimate(graphProjectConfig);
-
-            dimensions = graphMemoryEstimation.dimensions();
-            estimationBuilder.add("graph", graphMemoryEstimation.estimateMemoryUsageAfterLoading());
-        } else if (graphNameOrConfiguration instanceof String) {
-            var graphStore = graphStoreCatalogService.getGraphWithGraphStore(
-                GraphName.parse(
-                    (String) graphNameOrConfiguration),
-                config,
-                maybeRelationshipProperty,
-                user,
-                databaseId
-            ).getRight();
-            dimensions = GraphDimensionsComputer.of(graphStore, config);
-        } else {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Expected `graphNameOrConfiguration` to be of type String or Map, but got `%s`",
-                graphNameOrConfiguration.getClass().getSimpleName()
-            ));
-        }
-
-        var memoryTree = estimationBuilder
-            .add("algorithm", algorithmFactory.memoryEstimation(config))
-            .build()
-            .estimate(dimensions, config.concurrency());
-
-        return new MemoryEstimateResult(new MemoryTreeWithDimensions(memoryTree, dimensions));
     }
 }

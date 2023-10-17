@@ -42,6 +42,7 @@ import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.algorithms.community.WriteNodePropertyService;
+import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.api.ProcedureReturnColumns;
@@ -57,6 +58,7 @@ import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.procedures.GraphDataScience;
@@ -471,10 +473,14 @@ class WccWriteProcTest extends BaseProcTest {
 
                     var taskRegistry = EmptyTaskRegistryFactory.INSTANCE;
                     var algorithmsBusinessFacade = new CommunityAlgorithmsWriteBusinessFacade(
-                        new CommunityAlgorithmsFacade(graphStoreCatalogService,
-                            taskRegistry,
-                            EmptyUserLogRegistryFactory.INSTANCE,
-                            memoryUsageValidator, logMock
+                        new CommunityAlgorithmsFacade(
+                            new AlgorithmRunner(
+                                graphStoreCatalogService,
+                                memoryUsageValidator,
+                                TaskRegistryFactory.empty(),
+                                EmptyUserLogRegistryFactory.INSTANCE,
+                                logMock
+                            )
                         ),
                         new WriteNodePropertyService(
                             wccWriteProc.executionContext().nodePropertyExporterBuilder(),
@@ -498,7 +504,8 @@ class WccWriteProcTest extends BaseProcTest {
                             null,
                             null,
                             algorithmsBusinessFacade
-                        )
+                        ),
+                        null
                     );
 
                     Map<String, Object> configMap = Map.of("writeProperty", WRITE_PROPERTY);

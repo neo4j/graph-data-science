@@ -21,28 +21,25 @@ package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.gds.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
-import org.neo4j.gds.algorithms.community.CommunityAlgorithmsEstimateBusinessFacade;
-import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
-import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
-import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStatsBusinessFacade;
-import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
-import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
-import org.neo4j.gds.algorithms.community.MutateNodePropertyService;
-import org.neo4j.gds.algorithms.community.WriteNodePropertyService;
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
+import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsEstimateBusinessFacade;
+import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsFacade;
+import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsMutateBusinessFacade;
+import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStatsBusinessFacade;
+import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStreamBusinessFacade;
+import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
 import org.neo4j.gds.procedures.KernelTransactionAccessor;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.TerminationFlagService;
-import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.community.ConfigurationParser;
+import org.neo4j.gds.procedures.similarity.SimilarityProcedureFacade;
 import org.neo4j.gds.services.DatabaseIdAccessor;
 import org.neo4j.gds.services.UserAccessor;
 import org.neo4j.gds.services.UserLogServices;
@@ -52,7 +49,7 @@ import org.neo4j.kernel.api.procedure.Context;
 /**
  * We call it a provider because it is used as a sub-provider to the {@link org.neo4j.gds.procedures.GraphDataScience} provider.
  */
-public class CommunityProcedureProvider {
+public class SimilarityProcedureProvider {
     // Global state and services
     private final Log log;
     private final GraphStoreCatalogService graphStoreCatalogService;
@@ -61,24 +58,22 @@ public class CommunityProcedureProvider {
     // Request scoped state and services
     private final AlgorithmMetaDataSetterService algorithmMetaDataSetterService;
     private final DatabaseIdAccessor databaseIdAccessor;
-    private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final KernelTransactionAccessor kernelTransactionAccessor;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final TerminationFlagService terminationFlagService;
+
     private final UserLogServices userLogServices;
     private final UserAccessor userAccessor;
 
-    public CommunityProcedureProvider(
+    SimilarityProcedureProvider(
         Log log,
         GraphStoreCatalogService graphStoreCatalogService,
         boolean useMaxMemoryEstimation,
         AlgorithmMetaDataSetterService algorithmMetaDataSetterService,
         DatabaseIdAccessor databaseIdAccessor,
         KernelTransactionAccessor kernelTransactionAccessor,
-        ExporterBuildersProviderService exporterBuildersProviderService,
         TaskRegistryFactoryService taskRegistryFactoryService,
-        TerminationFlagService terminationFlagService,
-        UserLogServices userLogServices,
+        TerminationFlagService terminationFlagService, UserLogServices userLogServices,
         UserAccessor userAccessor
     ) {
         this.log = log;
@@ -88,36 +83,30 @@ public class CommunityProcedureProvider {
         this.algorithmMetaDataSetterService = algorithmMetaDataSetterService;
         this.databaseIdAccessor = databaseIdAccessor;
         this.kernelTransactionAccessor = kernelTransactionAccessor;
-        this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.terminationFlagService = terminationFlagService;
         this.userLogServices = userLogServices;
         this.userAccessor = userAccessor;
     }
 
-    public CommunityProcedureFacade createCommunityProcedureFacade(Context context) throws ProcedureException {
+    SimilarityProcedureFacade createSimilarityProcedureFacade(Context context) throws ProcedureException {
 
         // Neo4j's services
-        var graphDatabaseService = context.graphDatabaseAPI();
-
-        var kernelTransaction = kernelTransactionAccessor.getKernelTransaction(context);
-
-        var algorithmMetaDataSetter = algorithmMetaDataSetterService.getAlgorithmMetaDataSetter(kernelTransaction);
         var algorithmMemoryValidationService = new AlgorithmMemoryValidationService(log, useMaxMemoryEstimation);
         var databaseId = databaseIdAccessor.getDatabaseId(context.graphDatabaseAPI());
         var returnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
-        var terminationFlag = terminationFlagService.createTerminationFlag(kernelTransaction);
         var user = userAccessor.getUser(context.securityContext());
+
+        var kernelTransaction = kernelTransactionAccessor.getKernelTransaction(context);
+        var algorithmMetaDataSetter = algorithmMetaDataSetterService.getAlgorithmMetaDataSetter(kernelTransaction);
+
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(
             databaseId,
             user
         );
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
 
-        var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(graphDatabaseService);
-
-        // algorithm facade
-        var communityAlgorithmsFacade = new CommunityAlgorithmsFacade(
+        var similarityAlgorithmsFacade = new SimilarityAlgorithmsFacade(
             new AlgorithmRunner(
                 graphStoreCatalogService,
                 algorithmMemoryValidationService,
@@ -127,7 +116,14 @@ public class CommunityProcedureProvider {
             )
         );
 
-        // moar services
+
+        var streamBusinessFacade = new SimilarityAlgorithmsStreamBusinessFacade(similarityAlgorithmsFacade);
+        var configurationParser = new ConfigurationParser(
+            DefaultsConfiguration.Instance,
+            LimitsConfiguration.Instance
+        );
+
+        var terminationFlag = terminationFlagService.createTerminationFlag(kernelTransaction);
         var fictitiousGraphStoreEstimationService = new FictitiousGraphStoreEstimationService();
         var graphLoaderContext = GraphLoaderContextProvider.buildGraphLoaderContext(
             context,
@@ -142,11 +138,7 @@ public class CommunityProcedureProvider {
             graphLoaderContext
         );
 
-        var exporterContext = new ExporterContext.ProcedureContextWrapper(context);
-
-
-        // business facades
-        var estimateBusinessFacade = new CommunityAlgorithmsEstimateBusinessFacade(
+        var estimateBusinessFacade = new SimilarityAlgorithmsEstimateBusinessFacade(
             new AlgorithmEstimator(
                 graphStoreCatalogService,
                 fictitiousGraphStoreEstimationService,
@@ -155,36 +147,22 @@ public class CommunityProcedureProvider {
                 user
             )
         );
-        var statsBusinessFacade = new CommunityAlgorithmsStatsBusinessFacade(communityAlgorithmsFacade);
-        var streamBusinessFacade = new CommunityAlgorithmsStreamBusinessFacade(communityAlgorithmsFacade);
-        var mutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
-            communityAlgorithmsFacade,
-            new MutateNodePropertyService(log)
-        );
-        CommunityAlgorithmsWriteBusinessFacade writeBusinessFacade = new CommunityAlgorithmsWriteBusinessFacade(
-            communityAlgorithmsFacade,
-            new WriteNodePropertyService(
-                exportBuildersProvider.nodePropertyExporterBuilder(exporterContext),
-                log,
-                taskRegistryFactory
-            )
-        );
-        var configurationParser = new ConfigurationParser(
-            DefaultsConfiguration.Instance,
-            LimitsConfiguration.Instance
-        );
-        // procedure facade
-        return new CommunityProcedureFacade(
+        var mutateBusinessFacade = new SimilarityAlgorithmsMutateBusinessFacade();
+        var statsBusinessFacade = new SimilarityAlgorithmsStatsBusinessFacade(similarityAlgorithmsFacade);
+        var writeBusinessFacade = new SimilarityAlgorithmsWriteBusinessFacade();
+        return new SimilarityProcedureFacade(
             configurationParser,
-            algorithmMetaDataSetter,
             databaseId,
-            returnColumns,
             user,
-            estimateBusinessFacade,
+            returnColumns,
             mutateBusinessFacade,
             statsBusinessFacade,
             streamBusinessFacade,
-            writeBusinessFacade
+            writeBusinessFacade,
+            estimateBusinessFacade,
+            algorithmMetaDataSetter
+
         );
     }
+
 }
