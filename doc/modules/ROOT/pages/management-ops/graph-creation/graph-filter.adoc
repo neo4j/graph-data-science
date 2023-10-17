@@ -107,7 +107,7 @@ Boolean predicates combine two expressions and return either `true` or `false`.
 GDS supports the following boolean predicates:
 
 * greater/lower than, such as `n.age > 42` or `r.since < 1984`
-* greater/lower than or equal, such as `n.age > 42` or `r.since < 1984`
+* greater/lower than or equal, such as `n.age >= 42` or `r.since <= 1984`
 * equality, such as `n.age = 23` or `r.since = 2020`
 * logical operators, such as
   * `n.age > 23 AND n.age < 42`
@@ -119,8 +119,7 @@ Variable names that can be used within predicates are not arbitrary.
 A node predicate must refer to variable `n`.
 A relationship predicate must refer to variable `r`.
 
-An exception is the `degree` function, which can be used in node predicates.
-The function is always bound to the current node.
+An exception is the degree function, which simply returns the node's degree.
 The function takes relationship types as arguments.
 Multiple types are considered as disjunctive.
 For example, `degree() > 42` filters nodes with a degree greater than 42 across all relationship types.
