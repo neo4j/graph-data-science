@@ -54,13 +54,13 @@ class RandomWalkKnnSampler implements KnnSampler {
         assert k > 0;
 
         this.randomWalkSampler = new RandomWalkSampler(
+            graph,
             graph::degree,
             WALK_LENGTH_MULTIPLIER * k,
             // Prefer deeper walks.
             0.4,
             0.6,
             1.0,
-            graph,
            randomSeed.orElseGet(() -> new Random().nextLong())
         );
         this.uniformSamplerFromRange = new LongUniformSamplerFromRange(random);

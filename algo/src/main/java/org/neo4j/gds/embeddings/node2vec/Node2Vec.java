@@ -99,7 +99,7 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
         progressTracker.beginSubTask("create walks");
         RunWithConcurrency.builder().concurrency(config.concurrency()).tasks(tasks).run();
         walks.setMaxWalkLength(tasks.stream()
-            .map(task -> task.maxWalkLength())
+            .map(Node2VecRandomWalkTask::maxWalkLength)
             .max(Integer::compareTo)
             .orElse(0));
 
@@ -135,7 +135,7 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        ArrayList<Node2VecRandomWalkTask> tasks = new ArrayList<>();
+        List<Node2VecRandomWalkTask> tasks = new ArrayList<>();
         var randomSeed = config.randomSeed().orElseGet(() -> new Random().nextLong());
         int concurrency = config.concurrency();
         var nextNodeSupplier = RandomWalkCompanion.nextNodeSupplier(graph, config);
@@ -149,10 +149,10 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
         AtomicLong index = new AtomicLong();
         for (int i = 0; i < concurrency; ++i) {
             tasks.add(new Node2VecRandomWalkTask(
+                graph.concurrentCopy(),
+                config,
                 nextNodeSupplier,
                 cumulativeWeightsSupplier,
-                config,
-                graph.concurrentCopy(),
                 randomSeed,
                 progressTracker,
                 terminationFlag,
