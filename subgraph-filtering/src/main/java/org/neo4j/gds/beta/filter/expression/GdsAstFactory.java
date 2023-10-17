@@ -26,9 +26,12 @@ import org.opencypher.v9_0.ast.factory.ASTFactory;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.neo4j.gds.core.StringSimilarity.prettySuggestions;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.utils.StringFormatting.toLowerCaseWithLocale;
 
 class GdsAstFactory extends AstFactoryAdapter {
 
@@ -83,6 +86,11 @@ class GdsAstFactory extends AstFactoryAdapter {
     }
 
     @Override
+    public Expression newString(InputPosition p, String image) {
+        return ImmutableStringLiteral.builder().value(image).build();
+    }
+
+    @Override
     public Expression hasLabelsOrTypes(Expression subject, List<ASTFactory.StringPos<InputPosition>> labels) {
         if (subject instanceof Expression.LeafExpression.Variable) {
             var variable = (Expression.LeafExpression.Variable) subject;
@@ -119,6 +127,46 @@ class GdsAstFactory extends AstFactoryAdapter {
         var propertyType = properties.getOrDefault(propertyKey, ValueType.UNKNOWN);
 
         return ImmutableProperty.builder().in(subject).propertyKey(propertyKey).valueType(propertyType).build();
+    }
+
+    @Override
+    public Expression functionInvocation(
+        InputPosition p,
+        List<String> namespace,
+        String name,
+        boolean distinct,
+        List<Expression> arguments
+    ) {
+        switch (toLowerCaseWithLocale(name)) {
+            case Expression.Function.Degree.NAME: {
+                var relationshipTypes = arguments
+                    .stream()
+                    .filter(expr -> {
+                        if (expr instanceof Expression.Literal.StringLiteral) {
+                            return true;
+                        }
+                        throw new IllegalArgumentException(formatWithLocale(
+                            "Invalid argument for `%s`. Only strings are allowed. Got `%s`.",
+                            Expression.Function.Degree.NAME,
+                            expr.prettyString()
+                        ));
+
+                    })
+                    .map(expr -> (Expression.Literal.StringLiteral) expr)
+                    .map(Expression.Literal.StringLiteral::value)
+                    .map(RelationshipType::of)
+                    .collect(Collectors.toSet());
+
+                return ImmutableDegree.builder().typeSelection(relationshipTypes).build();
+            }
+            default:
+                throw new UnsupportedOperationException(
+                    prettySuggestions(
+                        formatWithLocale("Unknown function `%s`.", name),
+                        name,
+                        Set.of(Expression.Function.Degree.NAME)
+                    ));
+        }
     }
 
     @Override

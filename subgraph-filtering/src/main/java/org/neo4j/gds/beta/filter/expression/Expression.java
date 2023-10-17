@@ -536,6 +536,24 @@ public interface Expression {
                 return FALSE;
             }
         }
+
+        @ValueClass
+        interface StringLiteral extends Literal {
+            String value();
+
+            @Override
+            default ValueType valueType() {
+                return ValueType.DOUBLE;
+            }
+
+            @Value.Derived
+            @Override
+            default double evaluate(EvaluationContext context) {
+                return value().hashCode();
+            }
+
+            default String prettyString() {return value();}
+        }
     }
 
     static Optional<String> literalTypeHint(Expression lhs, Expression rhs) {
@@ -580,6 +598,28 @@ public interface Expression {
             labelOrType,
             availableLabelsOrTypes
         )));
+    }
+
+    interface Function extends Expression {
+
+        @ValueClass
+        interface Degree extends Function {
+
+            String NAME = "degree";
+
+            List<RelationshipType> typeSelection();
+
+            @Override
+            default ValueType valueType() {
+                return ValueType.LONG;
+            }
+
+            @Override
+            default double evaluate(EvaluationContext context) {
+                long degree = context.degree(this.typeSelection());
+                return Double.longBitsToDouble(degree);
+            }
+        }
     }
 
 }

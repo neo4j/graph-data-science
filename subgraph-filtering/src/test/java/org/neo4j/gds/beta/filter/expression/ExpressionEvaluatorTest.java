@@ -399,6 +399,13 @@ class ExpressionEvaluatorTest {
         assertThat(expr.evaluate(evaluationContext) == TRUE).isEqualTo(expected);
     }
 
+    @Test
+    void degree() throws ParseException {
+        var expr = ExpressionParser.parse("degree('REL')", Map.of());
+        var evaluationContext = ImmutableTestContext.builder().addLabelsOrType("REL").build();
+        assertThat(expr.evaluate(evaluationContext)).isEqualTo(Double.longBitsToDouble(42));
+    }
+
     private static final EvaluationContext EMPTY_EVALUATION_CONTEXT = new EvaluationContext(Map.of()) {
         @Override
         double getProperty(String propertyKey, ValueType valueType) {
@@ -417,6 +424,11 @@ class ExpressionEvaluatorTest {
 
         @Override
         public boolean hasLabelsOrTypes(List<String> labelsOrTypes) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public int degree(Collection<RelationshipType> typeSelection) {
             throw new UnsupportedOperationException();
         }
     };
@@ -465,6 +477,16 @@ class ExpressionEvaluatorTest {
         @Value.Derived
         public boolean hasLabelsOrTypes(List<String> labelsOrTypes) {
             return labelsOrTypes().containsAll(labelsOrTypes);
+        }
+
+        @Override
+        public int degree(Collection<RelationshipType> typeSelection) {
+            assertThat(labelsOrTypes()).containsExactlyElementsOf(
+                typeSelection.stream()
+                    .map(RelationshipType::name)
+                    .collect(Collectors.toList())
+            );
+            return 42;
         }
     }
 

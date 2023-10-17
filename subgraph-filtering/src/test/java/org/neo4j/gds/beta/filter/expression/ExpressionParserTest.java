@@ -24,10 +24,15 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.utils.StringJoining;
 import org.opencypher.v9_0.parser.javacc.ParseException;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -109,6 +114,13 @@ class ExpressionParserTest {
     void doubleLiteral(String cypher, Expression.Literal.DoubleLiteral expected) throws ParseException {
         var actual = ExpressionParser.parse(cypher, Map.of());
         assertThat(actual).isEqualTo(expected);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"Foo", "bar", "BAZ", "42"})
+    void stringLiteral(String string) throws ParseException {
+        var actual = ExpressionParser.parse("'" + string + "'", Map.of());
+        assertThat(actual).isEqualTo(ImmutableStringLiteral.builder().value(string).build());
     }
 
     // binary
@@ -359,5 +371,45 @@ class ExpressionParserTest {
             .propertyKey("foo")
             .valueType(expectedValueType)
             .build());
+    }
+
+    static Stream<List<String>> types() {
+        return Stream.of(
+            List.of(),
+            List.of("Foo"),
+            List.of("Foo", "Bar")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("types")
+    void degree(Collection<String> types) throws ParseException {
+        var exprString = StringJoining.join(types.stream().map(type -> "'" + type + "'"), ", ", "degree(", ")");
+        var expr = ExpressionParser.parse(exprString, Map.of());
+        assertThat(expr).isEqualTo(ImmutableDegree.builder()
+            .addAllTypeSelection(types.stream().map(RelationshipType::of).collect(Collectors.toSet()))
+            .build());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"degree", "DEGREE", "dEgReE"})
+    void degreeIsCaseInsensitive(String funcName) throws ParseException {
+        var exprString = funcName + "()";
+        var expr = ExpressionParser.parse(exprString, Map.of());
+        assertThat(expr).isEqualTo(ImmutableDegree.builder().build());
+    }
+
+    @Test
+    void degreeFailsForNonString() {
+        assertThatThrownBy(() -> ExpressionParser.parse("degree(42)", Map.of()))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Invalid argument for `degree`. Only strings are allowed. Got `42`.");
+    }
+
+    @Test
+    void functionInvocationFailsForUnknownFunction() {
+        assertThatThrownBy(() -> ExpressionParser.parse("foobar()", Map.of()))
+            .isInstanceOf(UnsupportedOperationException.class)
+            .hasMessageContaining("Unknown function `foobar`.");
     }
 }

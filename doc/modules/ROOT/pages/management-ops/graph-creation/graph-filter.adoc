@@ -107,7 +107,7 @@ Boolean predicates combine two expressions and return either `true` or `false`.
 GDS supports the following boolean predicates:
 
 * greater/lower than, such as `n.age > 42` or `r.since < 1984`
-* greater/lower than or equal, such as `n.age > 42` or `r.since < 1984`
+* greater/lower than or equal, such as `n.age >= 42` or `r.since <= 1984`
 * equality, such as `n.age = 23` or `r.since = 2020`
 * logical operators, such as
   * `n.age > 23 AND n.age < 42`
@@ -118,6 +118,12 @@ GDS supports the following boolean predicates:
 Variable names that can be used within predicates are not arbitrary.
 A node predicate must refer to variable `n`.
 A relationship predicate must refer to variable `r`.
+
+An exception is the degree function, which simply returns the node's degree.
+The function takes relationship types as arguments.
+Multiple types are considered as disjunctive.
+For example, `degree() > 42` filters nodes with a degree greater than 42 across all relationship types.
+The expression `degree('Foo', 'Bar') > 42` filters nodes where the sum of `Foo` and `Bar` relationships is greater than 42.
 
 
 == Examples
@@ -186,6 +192,30 @@ YIELD graphName, fromGraphName, nodeCount, relationshipCount
 |===
 | graphName    | fromGraphName    | nodeCount | relationshipCount
 | "teenagers"  | "social-graph"   | 2         | 1
+|===
+--
+
+=== Node degree Filtering
+
+[role=query-example]
+--
+.Create a new graph containing only nodes with more than two relationships:
+[source, cypher, role=noplay]
+----
+CALL gds.graph.filter(
+  'degree-graph',
+  'social-graph',
+  'degree() > 2',
+  '*'
+)
+YIELD graphName, fromGraphName, nodeCount, relationshipCount
+----
+
+.Results
+[opts="header"]
+|===
+| graphName         | fromGraphName  | nodeCount | relationshipCount
+| "degree-graph"    | "social-graph" | 1         | 0
 |===
 --
 
