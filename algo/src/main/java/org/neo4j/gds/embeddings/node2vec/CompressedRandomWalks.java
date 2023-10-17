@@ -40,12 +40,12 @@ public class CompressedRandomWalks {
     private int maxWalkLength;
     private long size = 0L;
 
-    public void setSize(long size) {
-        this.size = size;
-    }
     public CompressedRandomWalks(long maxWalkCount) {
         this.compressedWalks = HugeObjectArray.newArray(byte[].class, maxWalkCount);
         this.walkLengths = HugeIntArray.newArray(maxWalkCount);
+    }
+    public void setSize(long size) {
+        this.size = size;
     }
 
     public void setMaxWalkLength(int maxWalkLength) {
