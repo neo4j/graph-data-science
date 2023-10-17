@@ -33,10 +33,14 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -73,6 +77,10 @@ class LeidenWriteProcTest extends BaseProcTest {
         "  (a5)-[:R {weight: 1.0}]->(a7)," +
         "  (a6)-[:R {weight: 1.0}]->(a7)";
 
+    @Inject
+    IdFunction idFunction;
+
+
     @BeforeEach
     void setUp() throws Exception {
         registerProcedures(
@@ -100,15 +108,35 @@ class LeidenWriteProcTest extends BaseProcTest {
 
 
         var writeGraph = GraphStoreCatalog.get(getUsername(), DatabaseId.of(db.databaseName()), "writeGraph").graphStore().getUnion();
+
         var communities = writeGraph.nodeProperties("communityId");
-        var communitySet = new HashSet<Long>();
+
+        HashMap<Long, Long> communitiesSet = new HashMap<>();
+
         writeGraph.forEachNode(nodeId -> {
-            communitySet.add(communities.longValue(nodeId));
+            var community = communities.longValue(nodeId);
+            var neo4jId = writeGraph.toOriginalNodeId(nodeId);
+            communitiesSet.put(neo4jId, community);
             return true;
         });
-        assertThat(communitySet).containsExactly(3L, 6L);
+
+        Function<String, Long> map = node -> communitiesSet.get(idFunction.of(node));
+
+        //community 1
+        assertThat(map.apply("a0"))
+            .isEqualTo(map.apply("a2"))
+            .isEqualTo(map.apply("a3"))
+            .isEqualTo(map.apply("a4"))
+            .isNotEqualTo(map.apply("a1"));
+
+        //community 2
+        assertThat(map.apply("a1"))
+            .isEqualTo(map.apply("a5"))
+            .isEqualTo(map.apply("a6"))
+            .isEqualTo(map.apply("a7"));
 
     }
+
 
     @Test
     void shouldWriteWithConsecutiveIds() {
