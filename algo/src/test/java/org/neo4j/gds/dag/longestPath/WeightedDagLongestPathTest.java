@@ -20,14 +20,20 @@
 package org.neo4j.gds.dag.longestPath;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.TestProgressTracker;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @GdlExtension
 class WeightedDagLongestPathTest {
@@ -52,23 +58,62 @@ class WeightedDagLongestPathTest {
 
     @Test
     void basicWeightedLongestPath() {
-        DagLongestPath longestPath = new DagLongestPathFactory().build(
+        IdFunction idFunction = basicGraph::toMappedNodeId;
+
+        long[] a = new long[]{
+            idFunction.of("n0"),
+            idFunction.of("n1"),
+            idFunction.of("n2"),
+            idFunction.of("n3"),
+        };
+
+        var longestPath = new DagLongestPathFactory().build(
             basicGraph,
             CONFIG,
             ProgressTracker.NULL_TRACKER
         );
 
-        TopologicalSortResult result = longestPath.compute();
+        PathFindingResult result = longestPath.compute();
 
-        var longestPathsDistances = result.maxSourceDistances().get();
-        var firstLongestPathDistance = longestPathsDistances.get(0);
-        var secondLongestPathDistance = longestPathsDistances.get(1);
-        var thirdLongestPathDistance = longestPathsDistances.get(2);
-        var fourthLongestPathDistance = longestPathsDistances.get(3);
+        long[][] EXPECTED_PATHS = new long[4][];
+        EXPECTED_PATHS[(int) a[0]] = new long[]{a[3], a[0]};
+        EXPECTED_PATHS[(int) a[1]] = new long[]{a[3], a[0], a[1]};
+        EXPECTED_PATHS[(int) a[2]] = new long[]{a[3], a[0], a[2]};
+        EXPECTED_PATHS[(int) a[3]] = new long[]{a[3]};
+        double[] EXPECTED_COSTS = new double[4];
+        EXPECTED_COSTS[(int) a[0]] = 8;
+        EXPECTED_COSTS[(int) a[1]] = 16;
+        EXPECTED_COSTS[(int) a[2]] = 13;
+        EXPECTED_COSTS[(int) a[3]] = 0;
 
-        assertThat(firstLongestPathDistance).isEqualTo(8.0);
-        assertThat(secondLongestPathDistance).isEqualTo(16.0);
-        assertThat(thirdLongestPathDistance).isEqualTo(13.0);
-        assertThat(fourthLongestPathDistance).isEqualTo(0.0);
+        long counter = 0;
+        for (var path : result.pathSet()) {
+            counter++;
+            int currentTargetNode = (int) path.targetNode();
+            assertThat(path.nodeIds()).isEqualTo(EXPECTED_PATHS[currentTargetNode]);
+            assertThat(EXPECTED_COSTS[currentTargetNode]).isEqualTo(path.totalCost());
+        }
+        assertThat(counter).isEqualTo(4L);
+    }
+
+    @Test
+    void shouldLogProgress() {
+        var lpFactory = new DagLongestPathFactory<>();
+        var progressTask = lpFactory.progressTask(basicGraph, CONFIG);
+        var log = Neo4jProxy.testLog();
+        var testTracker = new TestProgressTracker(
+            progressTask,
+            log,
+            CONFIG.concurrency(),
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+
+        var lp = lpFactory.build(basicGraph, CONFIG, testTracker);
+        lp.compute().pathSet();
+
+        String taskName = lpFactory.taskName();
+
+        assertTrue(log.containsMessage(TestLog.INFO, taskName + " :: Start"));
+        assertTrue(log.containsMessage(TestLog.INFO, taskName + " :: Finished"));
     }
 }
