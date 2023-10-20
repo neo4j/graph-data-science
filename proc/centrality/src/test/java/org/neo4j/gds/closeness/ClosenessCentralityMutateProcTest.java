@@ -157,7 +157,10 @@ class ClosenessCentralityMutateProcTest extends BaseProcTest {
 
         assertCypherResult(
             formatWithLocale(
-                "CALL gds.graph.nodeProperties.stream('graph',['%1$s']) YIELD nodeId, propertyValue AS %1$s",
+                "CALL gds.graph.nodeProperties.stream('graph',['%1$s']) " +
+                    "YIELD nodeId, propertyValue AS %1$s " +
+                    "RETURN * " +
+                    "  ORDER BY nodeId ASC",
                 MUTATE_PROPERTY
             ),
             expectedCentralityResult
@@ -195,7 +198,10 @@ class ClosenessCentralityMutateProcTest extends BaseProcTest {
 
         assertCypherResult(
             formatWithLocale(
-                "CALL gds.graph.nodeProperties.stream('graph',['%1$s']) YIELD nodeId, propertyValue AS %1$s",
+                "CALL gds.graph.nodeProperties.stream('graph',['%1$s']) " +
+                    "YIELD nodeId, propertyValue AS %1$s " +
+                    "RETURN * " +
+                    "  ORDER BY nodeId ASC",
                 MUTATE_PROPERTY
             ),
             expectedCentralityResult
