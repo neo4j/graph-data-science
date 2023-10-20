@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.paths.dag.longestPath;
 
+import org.assertj.core.api.SoftAssertions;
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
@@ -26,9 +28,10 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.graphdb.Path;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import java.util.List;
+import java.util.Map;
 
 class DagLongestPathStreamProcTest extends BaseProcTest {
 
@@ -63,26 +66,69 @@ class DagLongestPathStreamProcTest extends BaseProcTest {
 
     @Test
     void testStreamWithWeights() {
+        SoftAssertions assertions = new SoftAssertions();
+        long[] a = new long[]{idFunction.of("n0"), idFunction.of("n1"), idFunction.of("n2"), idFunction.of("n3")};
+
         String query = GdsCypher.call("last")
             .algo("gds.dag.longestPath")
             .streamMode()
             .addParameter("relationshipWeightProperty", "prop")
             .yields();
 
-        runQueryWithResultConsumer(query, result -> {
-            var record = result.next();
-            assertEquals(idFunction.of("n0"), record.get("targetNodeId"));
-            assertEquals(0.0, record.get("distance"));
-            record = result.next();
-            assertEquals(idFunction.of("n2"), record.get("targetNodeId"));
-            assertEquals(5.0, record.get("distance"));
-            record = result.next();
-            assertEquals(idFunction.of("n1"), record.get("targetNodeId"));
-            assertEquals(8.0, record.get("distance"));
-            record = result.next();
-            assertEquals(idFunction.of("n3"), record.get("targetNodeId"));
-            assertEquals(9.0, record.get("distance"));
-            assertFalse(result.hasNext());
-        });
+        var EXPECTED_PATHS = Map.of(
+            a[0], new long[]{a[0]},
+            a[1], new long[]{a[0], a[1]},
+            a[2], new long[]{a[0], a[2]},
+            a[3], new long[]{a[0], a[2], a[3]}
+        );
+
+        var EXPECTED_COSTS = Map.of(
+            a[0], 0d,
+            a[1], 8d,
+            a[2], 7d,
+            a[3], 9d
+        );
+
+        var EXPECTED_EDGECOSTS = Map.of(
+            a[0], new double[]{0.0},
+            a[1], new double[]{0.0, 8.0},
+            a[2], new double[]{0.0, 5.0},
+            a[3], new double[]{0.0, 5.0, 4.0}
+        );
+
+        var rowCount = runQueryWithRowConsumer(
+            query,
+            row -> {
+                assertions.assertThat(row.getNumber("index").longValue()).isBetween(0L, 3L);
+
+                assertions.assertThat(row.getNumber("sourceNode").longValue()).isEqualTo(idFunction.of("n0"));
+
+                long targetNode = row.getNumber("targetNode").longValue();
+                assertions.assertThat(targetNode).isIn(EXPECTED_COSTS.keySet());
+
+                assertions.assertThat(row.get("totalCost")).isInstanceOf(Double.class);
+                assertions.assertThat(row.getNumber("totalCost").doubleValue()).isCloseTo(
+                    EXPECTED_COSTS.get(targetNode),
+                    Offset.offset(1e-5)
+                );
+                assertions.assertThat(row.get("costs")).isInstanceOf(List.class);
+                var costsValues = (List<Double>) row.get("costs");
+                assertions.assertThat(row.get("nodeIds")).isInstanceOf(List.class);
+                var nodeIds = (List<Long>) row.get("nodeIds");
+
+                assertions.assertThat(row.get("path")).isInstanceOf(Path.class);
+                long[] expectedPath = EXPECTED_PATHS.get(targetNode);
+                double[] expectedCosts = EXPECTED_EDGECOSTS.get(targetNode);
+
+                assertions.assertThat(nodeIds.size()).isEqualTo(expectedPath.length);
+                int length = nodeIds.size();
+                for (int i = 0; i < length; ++i) {
+                    double edgeCost = expectedCosts[i];
+                    assertions.assertThat(nodeIds.get(i)).isEqualTo(expectedPath[i]);
+                    assertions.assertThat(costsValues.get(i)).isCloseTo(edgeCost, Offset.offset(1e-5));
+                }
+            }
+        );
+
     }
 }

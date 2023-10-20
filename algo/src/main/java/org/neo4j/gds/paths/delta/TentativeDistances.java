@@ -20,12 +20,15 @@
 package org.neo4j.gds.paths.delta;
 
 
+import com.carrotsearch.hppc.predicates.DoubleDoublePredicate;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 
 import java.util.Optional;
+import java.util.function.BiPredicate;
+import java.util.function.BinaryOperator;
 
 public interface TentativeDistances {
 
@@ -75,9 +78,18 @@ public interface TentativeDistances {
         long size,
         int concurrency
     ) {
+        return distanceAndPredecessors(size, concurrency, DIST_INF, (a, b) -> a > b);
+    }
+
+    public static DistanceAndPredecessor distanceAndPredecessors(
+        long size,
+        int concurrency,
+        double distanceDefault,
+        DoubleDoublePredicate distanceComparator
+    ) {
         var distances = HugeAtomicDoubleArray.of(
             size,
-            ParallelDoublePageCreator.of(concurrency, index -> DIST_INF)
+            ParallelDoublePageCreator.of(concurrency, index -> distanceDefault)
         );
 
         var predecessors = HugeAtomicLongArray.of(
@@ -85,7 +97,7 @@ public interface TentativeDistances {
             ParalleLongPageCreator.of(concurrency, index -> NO_PREDECESSOR)
         );
 
-        return new DistanceAndPredecessor(predecessors, distances);
+        return new DistanceAndPredecessor(predecessors, distances, distanceComparator);
     }
 
     class DistanceOnly implements TentativeDistances {
@@ -130,10 +142,12 @@ public interface TentativeDistances {
         private final HugeAtomicLongArray predecessors;
         // Use atomic array since it get/set methods are volatile
         private final HugeAtomicDoubleArray distances;
+        private final DoubleDoublePredicate distanceComparator;
 
-        public DistanceAndPredecessor(HugeAtomicLongArray predecessors, HugeAtomicDoubleArray distances) {
+        public DistanceAndPredecessor(HugeAtomicLongArray predecessors, HugeAtomicDoubleArray distances, DoubleDoublePredicate distanceComparator) {
             this.predecessors = predecessors;
             this.distances = distances;
+            this.distanceComparator = distanceComparator;
         }
 
         @Override
@@ -188,7 +202,7 @@ public interface TentativeDistances {
 
             double oldDistance = distances.get(nodeId);
 
-            if (oldDistance > newDistance) {
+            if (distanceComparator.apply(oldDistance, newDistance)) {
                 distances.set(nodeId, newDistance);
                 // unlock
                 predecessors.set(nodeId, predecessor);
