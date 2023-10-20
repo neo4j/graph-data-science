@@ -20,6 +20,7 @@
 package org.neo4j.gds.compat._5x;
 
 import org.neo4j.gds.compat.CompatAccessMode;
+import org.neo4j.gds.compat.CustomAccessMode;
 import org.neo4j.internal.kernel.api.RelTypeSupplier;
 import org.neo4j.internal.kernel.api.TokenSet;
 
