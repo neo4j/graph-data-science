@@ -51,11 +51,14 @@ The algorithm can also be used to determine if the graph contains a cycle or not
 
 ==== Maximum distance from source
 
-In addition to the sorted node IDs, the algorithm can return the maximal distance that each node has to a source node (a source is a node without incoming edges). This is similar to running the unweighted xref:algorithms/dag/longest-path.adoc[longest path] algorithm.
+In addition to the sorted node IDs, the algorithm can return the maximal distance of a noe from any source node (i.e., a node without any incoming relationships).
+If you are interested at the actual longest paths, you should look into the xref:algorithms/dag/longest-path.adoc[longest path] algorithm instead.
 
-In case the nodes model tasks with dependencies between them, this extra information about the nodes enables smarter scheduling of the tasks. Every two nodes that have the same maximal distance from a source are guaranteed to not have dependencies between them, and therefore can be scheduled in parallel.
+In the case that nodes model tasks with dependencies between them,  knowing maximal distances can help schedule tasks more efficient:
+If two nodes have the same maximal distance from a source, then they have no dependencies between them, and can be scheduled in parallel.
 
-To use this feature set computeMaxDistanceFromSource to true. Notice that this comes with higher memory usage and slightly longer run time.
+To use this feature set `computeMaxDistanceFromSource` to true.
+Note that this comes with higher memory usage and slightly longer run time.
 
 
 == Syntax
@@ -74,7 +77,9 @@ CALL gds.dag.topologicalSort.stream(
   graphName: String,
   configuration: Map
 ) YIELD
-  nodeId: Integer
+  nodeId: Integer,
+  maxDistanceFromSource: Float
+
 ----
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
@@ -128,7 +133,8 @@ CREATE
        (n5)-[:REQUIRED]->(n6)
 ----
 
-This graph describes a simplified supply chain of building a house. Each part of the house cannot be ready before its dependencies are ready. For example, we cannot build support before we get the steel, the skeleton is not ready until  both support and base are ready, and the house in the bottom is only ready when all the other things are done.
+This graph describes a simplified supply chain of building a house. Each part of the house cannot be worked on before its requirements are met.
+For example, we cannot build support before getting the steel, the skeleton is not ready until both support and base are ready.
 
 .The following Cypher statement will project the graph to GDS:
 [source, cypher, role=noplay setup-query]
@@ -153,7 +159,7 @@ CALL gds.dag.topologicalSort.stream("g", {computeMaxDistanceFromSource: true})
 YIELD nodeId, maxDistanceFromSource
 RETURN gds.util.asNode(nodeId).name AS name, maxDistanceFromSource
 ----
-We use the utility function asNode to return the name of node instead of its ID to make results more readable.
+We use the utility function `asNode` to return the name of node instead of its ID to make results more readable.
 
 .Results
 [opts="header"]

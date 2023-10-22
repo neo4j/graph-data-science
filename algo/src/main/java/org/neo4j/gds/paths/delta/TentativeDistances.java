@@ -27,8 +27,6 @@ import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 
 import java.util.Optional;
-import java.util.function.BiPredicate;
-import java.util.function.BinaryOperator;
 
 public interface TentativeDistances {
 
