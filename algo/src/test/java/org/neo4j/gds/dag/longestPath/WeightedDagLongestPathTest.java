@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.dag.longestPath;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -41,79 +42,164 @@ class WeightedDagLongestPathTest {
         .concurrency(4)
         .build();
 
-    @GdlGraph(graphNamePrefix = "basic")
-    private static final String basicQuery =
-        "CREATE" +
-        "  (n0)" +
-        ", (n1)" +
-        ", (n2)" +
-        ", (n3)" +
-        ", (n0)-[:T {prop: 8.0}]->(n1)" +
-        ", (n0)-[:T {prop: 5.0}]->(n2)" +
-        ", (n2)-[:T {prop: 2.0}]->(n1)" +
-        ", (n3)-[:T {prop: 8.0}]->(n0)";
+    @GdlExtension
+    @Nested
+    class GraphWithSingleSource {
+        @GdlGraph
+        private static final String DB_QUERY =
+            "CREATE" +
+                "  (n0)" +
+                ", (n1)" +
+                ", (n2)" +
+                ", (n3)" +
+                ", (n0)-[:T {prop: 8.0}]->(n1)" +
+                ", (n0)-[:T {prop: 5.0}]->(n2)" +
+                ", (n2)-[:T {prop: 2.0}]->(n1)" +
+                ", (n3)-[:T {prop: 8.0}]->(n0)";
 
-    @Inject
-    private TestGraph basicGraph;
+        @Inject
+        private TestGraph graph;
 
-    @Test
-    void basicWeightedLongestPath() {
-        IdFunction idFunction = basicGraph::toMappedNodeId;
+        @Test
+        void basicWeightedLongestPath() {
+            IdFunction idFunction = graph::toMappedNodeId;
 
-        long[] a = new long[]{
-            idFunction.of("n0"),
-            idFunction.of("n1"),
-            idFunction.of("n2"),
-            idFunction.of("n3"),
-        };
+            long[] a = new long[]{
+                idFunction.of("n0"),
+                idFunction.of("n1"),
+                idFunction.of("n2"),
+                idFunction.of("n3"),
+            };
 
-        var longestPath = new DagLongestPathFactory().build(
-            basicGraph,
-            CONFIG,
-            ProgressTracker.NULL_TRACKER
-        );
+            var longestPath = new DagLongestPathFactory().build(
+                graph,
+                CONFIG,
+                ProgressTracker.NULL_TRACKER
+            );
 
-        PathFindingResult result = longestPath.compute();
+            PathFindingResult result = longestPath.compute();
 
-        long[][] EXPECTED_PATHS = new long[4][];
-        EXPECTED_PATHS[(int) a[0]] = new long[]{a[3], a[0]};
-        EXPECTED_PATHS[(int) a[1]] = new long[]{a[3], a[0], a[1]};
-        EXPECTED_PATHS[(int) a[2]] = new long[]{a[3], a[0], a[2]};
-        EXPECTED_PATHS[(int) a[3]] = new long[]{a[3]};
-        double[] EXPECTED_COSTS = new double[4];
-        EXPECTED_COSTS[(int) a[0]] = 8;
-        EXPECTED_COSTS[(int) a[1]] = 16;
-        EXPECTED_COSTS[(int) a[2]] = 13;
-        EXPECTED_COSTS[(int) a[3]] = 0;
+            long[][] EXPECTED_PATHS = new long[4][];
+            EXPECTED_PATHS[(int) a[0]] = new long[]{a[3], a[0]};
+            EXPECTED_PATHS[(int) a[1]] = new long[]{a[3], a[0], a[1]};
+            EXPECTED_PATHS[(int) a[2]] = new long[]{a[3], a[0], a[2]};
+            EXPECTED_PATHS[(int) a[3]] = new long[]{a[3]};
+            double[] EXPECTED_COSTS = new double[4];
+            EXPECTED_COSTS[(int) a[0]] = 8;
+            EXPECTED_COSTS[(int) a[1]] = 16;
+            EXPECTED_COSTS[(int) a[2]] = 13;
+            EXPECTED_COSTS[(int) a[3]] = 0;
 
-        long counter = 0;
-        for (var path : result.pathSet()) {
-            counter++;
-            int currentTargetNode = (int) path.targetNode();
-            assertThat(path.nodeIds()).isEqualTo(EXPECTED_PATHS[currentTargetNode]);
-            assertThat(EXPECTED_COSTS[currentTargetNode]).isEqualTo(path.totalCost());
+            long counter = 0;
+            for (var path : result.pathSet()) {
+                counter++;
+                int currentTargetNode = (int) path.targetNode();
+                assertThat(path.nodeIds()).isEqualTo(EXPECTED_PATHS[currentTargetNode]);
+                assertThat(path.totalCost()).isEqualTo(EXPECTED_COSTS[currentTargetNode]);
+            }
+            assertThat(counter).isEqualTo(4L);
         }
-        assertThat(counter).isEqualTo(4L);
+
+        @Test
+        void shouldLogProgress() {
+            var lpFactory = new DagLongestPathFactory<>();
+            var progressTask = lpFactory.progressTask(graph, CONFIG);
+            var log = Neo4jProxy.testLog();
+            var testTracker = new TestProgressTracker(
+                progressTask,
+                log,
+                CONFIG.concurrency(),
+                EmptyTaskRegistryFactory.INSTANCE
+            );
+
+            var lp = lpFactory.build(graph, CONFIG, testTracker);
+            lp.compute().pathSet();
+
+            String taskName = lpFactory.taskName();
+
+            assertTrue(log.containsMessage(TestLog.INFO, taskName + " :: Start"));
+            assertTrue(log.containsMessage(TestLog.INFO, taskName + " :: Finished"));
+        }
     }
 
-    @Test
-    void shouldLogProgress() {
-        var lpFactory = new DagLongestPathFactory<>();
-        var progressTask = lpFactory.progressTask(basicGraph, CONFIG);
-        var log = Neo4jProxy.testLog();
-        var testTracker = new TestProgressTracker(
-            progressTask,
-            log,
-            CONFIG.concurrency(),
-            EmptyTaskRegistryFactory.INSTANCE
-        );
+    @GdlExtension
+    @Nested
+    class GraphWithMultipleSources {
+        @GdlGraph
+        private static final String DB_QUERY =
+            "CREATE" +
+                "  (n0)" +
+                ", (n1)" +
+                ", (n2)" +
+                ", (n3)" +
+                ", (n4)" +
+                ", (n5)" +
+                ", (n6)" +
+                ", (n0)-[:T {prop: 8.0}]->(n2)" +
+                ", (n0)-[:T {prop: 7.0}]->(n3)" +
+                ", (n2)-[:T {prop: 5.0}]->(n3)" +
+                ", (n1)-[:T {prop: 2.0}]->(n3)" +
+                ", (n1)-[:T {prop: 10.0}]->(n2)" +
+                ", (n4)-[:T {prop: 100.0}]->(n5)" +
+                ", (n3)-[:T {prop: 10.0}]->(n4)" +
+                ", (n0)-[:T {prop: 20.0}]->(n5)" +
+                ", (n0)-[:T {prop: 30.0}]->(n6)" +
+                ", (n6)-[:T {prop: 2000.0}]->(n4)";
 
-        var lp = lpFactory.build(basicGraph, CONFIG, testTracker);
-        lp.compute().pathSet();
+        @Inject
+        private TestGraph graph;
 
-        String taskName = lpFactory.taskName();
+        @Test
+        void shouldWorkWithMultipleSources() {
+            IdFunction idFunction = graph::toMappedNodeId;
 
-        assertTrue(log.containsMessage(TestLog.INFO, taskName + " :: Start"));
-        assertTrue(log.containsMessage(TestLog.INFO, taskName + " :: Finished"));
+            long[] a = new long[]{
+                idFunction.of("n0"),
+                idFunction.of("n1"),
+                idFunction.of("n2"),
+                idFunction.of("n3"),
+                idFunction.of("n4"),
+                idFunction.of("n5"),
+                idFunction.of("n6"),
+
+            };
+
+            var longestPath = new DagLongestPathFactory().build(
+                graph,
+                CONFIG,
+                ProgressTracker.NULL_TRACKER
+            );
+
+            PathFindingResult result = longestPath.compute();
+
+            long[][] EXPECTED_PATHS = new long[7][];
+            EXPECTED_PATHS[(int) a[0]] = new long[]{a[0]};
+            EXPECTED_PATHS[(int) a[1]] = new long[]{a[1]};
+            EXPECTED_PATHS[(int) a[2]] = new long[]{a[1], a[2]};
+            EXPECTED_PATHS[(int) a[3]] = new long[]{a[1], a[2], a[3]};
+            EXPECTED_PATHS[(int) a[4]] = new long[]{a[0], a[6], a[4]};
+            EXPECTED_PATHS[(int) a[5]] = new long[]{a[0], a[6], a[4], a[5]};
+            EXPECTED_PATHS[(int) a[6]] = new long[]{a[0], a[6]};
+
+
+            double[] EXPECTED_COSTS = new double[7];
+            EXPECTED_COSTS[(int) a[0]] = 0;
+            EXPECTED_COSTS[(int) a[1]] = 0;
+            EXPECTED_COSTS[(int) a[2]] = 10;
+            EXPECTED_COSTS[(int) a[3]] = 15;
+            EXPECTED_COSTS[(int) a[4]] = 2030;
+            EXPECTED_COSTS[(int) a[5]] = 2130;
+            EXPECTED_COSTS[(int) a[6]] = 30;
+
+
+            long counter = 0;
+            for (var path : result.pathSet()) {
+                counter++;
+                int currentTargetNode = (int) path.targetNode();
+                assertThat(path.nodeIds()).isEqualTo(EXPECTED_PATHS[currentTargetNode]);
+                assertThat(path.totalCost()).isEqualTo(EXPECTED_COSTS[currentTargetNode]);
+            }
+            assertThat(counter).isEqualTo(7L);
+        }
     }
 }
