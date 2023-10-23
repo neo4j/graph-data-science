@@ -25,6 +25,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.similarity.knn.Knn;
 import org.neo4j.gds.similarity.knn.KnnContext;
+import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.knn.SimilarityFunction;
 
 import java.util.Optional;
@@ -92,7 +93,7 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
 
     @Override
     public FilteredKnnResult compute() {
-        Knn.Result result = delegate.compute();
+        KnnResult result = delegate.compute();
 
         return ImmutableFilteredKnnResult.of(
             result.ranIterations(),

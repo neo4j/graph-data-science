@@ -34,7 +34,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STATS;
 import static org.neo4j.gds.similarity.knn.KnnProc.KNN_DESCRIPTION;
 
 @GdsCallable(name = "gds.knn.stats", description = KNN_DESCRIPTION, executionMode = STATS)
-public class KnnStatsSpecification implements AlgorithmSpec<Knn, Knn.Result, KnnStatsConfig, Stream<StatsResult>, KnnFactory<KnnStatsConfig>> {
+public class KnnStatsSpecification implements AlgorithmSpec<Knn, KnnResult, KnnStatsConfig, Stream<StatsResult>, KnnFactory<KnnStatsConfig>> {
     @Override
     public String name() {
         return "KnnStats";
@@ -51,7 +51,7 @@ public class KnnStatsSpecification implements AlgorithmSpec<Knn, Knn.Result, Knn
     }
 
     @Override
-    public ComputationResultConsumer<Knn, Knn.Result, KnnStatsConfig, Stream<StatsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Knn, KnnResult, KnnStatsConfig, Stream<StatsResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
 
             var config = computationResult.config();

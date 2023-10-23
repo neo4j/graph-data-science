@@ -35,6 +35,7 @@ import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamConfig;
+import org.neo4j.gds.similarity.knn.KnnStreamConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfig;
 
@@ -80,7 +81,7 @@ public class SimilarityProcedureFacade {
         this.algorithmMetaDataSetter = algorithmMetaDataSetter;
     }
 
-    public Stream<SimilarityResult> nodeSimilarity(
+    public Stream<SimilarityResult> nodeSimilarityStream(
         String graphName,
         Map<String, Object> configuration
     ) {
@@ -178,6 +179,31 @@ public class SimilarityProcedureFacade {
         var config = createConfig(algoConfiguration, FilteredNodeSimilarityStatsConfig::of);
         return Stream.of(estimateBusinessFacade.nodeSimilarity(graphNameOrConfiguration, config));
     }
+
+    public Stream<SimilarityResult> knnStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var streamConfig = createStreamConfig(configuration, KnnStreamConfig::of);
+
+        var computationResult = streamBusinessFacade.knn(
+            graphName,
+            streamConfig,
+            user,
+            databaseId
+        );
+
+        return KnnComputationResultTransformer.toStreamResult(computationResult);
+    }
+
+    public Stream<MemoryEstimateResult> knnStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, KnnStreamConfig::of);
+        return Stream.of(estimateBusinessFacade.knn(graphNameOrConfiguration, config));
+    }
+
 
     // FIXME: the following two methods are duplicate, find a good place for them.
     private <C extends AlgoBaseConfig> C createStreamConfig(

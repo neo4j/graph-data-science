@@ -35,7 +35,7 @@ import static org.neo4j.gds.similarity.knn.KnnProc.KNN_DESCRIPTION;
 import static org.neo4j.gds.similarity.knn.KnnProc.computeToGraph;
 
 @GdsCallable(name = "gds.knn.write", description = KNN_DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
-public class KnnWriteSpecification implements AlgorithmSpec<Knn, Knn.Result, KnnWriteConfig, Stream<WriteResult>, KnnFactory<KnnWriteConfig>> {
+public class KnnWriteSpecification implements AlgorithmSpec<Knn, KnnResult, KnnWriteConfig, Stream<WriteResult>, KnnFactory<KnnWriteConfig>> {
     @Override
     public String name() {
         return "KnnWrite";
@@ -52,7 +52,7 @@ public class KnnWriteSpecification implements AlgorithmSpec<Knn, Knn.Result, Knn
     }
 
     @Override
-    public ComputationResultConsumer<Knn, Knn.Result, KnnWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Knn, KnnResult, KnnWriteConfig, Stream<WriteResult>> computationResultConsumer() {
         return new SimilarityWriteConsumer<>(
             this::resultBuilderFunction,
             (computationResult) -> {
@@ -72,7 +72,7 @@ public class KnnWriteSpecification implements AlgorithmSpec<Knn, Knn.Result, Knn
         );
     }
 
-    private WriteResult.Builder resultBuilderFunction(ComputationResult<Knn, Knn.Result, KnnWriteConfig> computationResult) {
+    private WriteResult.Builder resultBuilderFunction(ComputationResult<Knn, KnnResult, KnnWriteConfig> computationResult) {
         var builder = new WriteResult.Builder();
 
         computationResult.result().ifPresent(result -> {
