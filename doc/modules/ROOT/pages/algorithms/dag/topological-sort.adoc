@@ -158,6 +158,7 @@ For more details on the stream mode in general, see xref:common-usage/running-al
 CALL gds.dag.topologicalSort.stream("g", {computeMaxDistanceFromSource: true})
 YIELD nodeId, maxDistanceFromSource
 RETURN gds.util.asNode(nodeId).name AS name, maxDistanceFromSource
+ORDER BY maxDistanceFromSource, name
 ----
 We use the utility function `asNode` to return the name of node instead of its ID to make results more readable.
 
@@ -165,8 +166,8 @@ We use the utility function `asNode` to return the name of node instead of its I
 [opts="header"]
 |===
 | name       | maxDistanceFromSource
-|"Steel"     | 0.0
 |"Cement"    | 0.0
+|"Steel"     | 0.0
 |"Base"      | 1.0
 |"Support"   | 1.0
 |"Skeleton"  | 2.0
