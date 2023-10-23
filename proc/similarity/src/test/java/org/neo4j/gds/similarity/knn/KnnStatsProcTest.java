@@ -73,10 +73,13 @@ class KnnStatsProcTest extends BaseProcTest {
 
         var rowCount = runQueryWithRowConsumer(query, row -> {
             assertThat(row.getNumber("nodesCompared"))
+                .as("nodesCompared")
                 .asInstanceOf(LONG)
                 .isEqualTo(3L);
 
             assertThat(row.getNumber("nodePairsConsidered"))
+                .as("nodePairsConsidered")
+
                 .asInstanceOf(LONG)
                 .isEqualTo(37L);
 
@@ -84,9 +87,11 @@ class KnnStatsProcTest extends BaseProcTest {
 
             assertThat(row.getNumber("ranIterations"))
                 .asInstanceOf(LONG)
+                .as("ranIterations")
                 .isEqualTo(1);
 
             assertThat(row.getNumber("similarityPairs"))
+                .as("similarityPairs")
                 .asInstanceOf(LONG)
                 .isEqualTo(3);
 

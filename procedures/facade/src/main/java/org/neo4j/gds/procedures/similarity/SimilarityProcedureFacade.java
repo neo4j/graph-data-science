@@ -31,10 +31,12 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.procedures.community.ConfigurationParser;
+import org.neo4j.gds.procedures.similarity.knn.KnnStatsResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamConfig;
+import org.neo4j.gds.similarity.knn.KnnStatsConfig;
 import org.neo4j.gds.similarity.knn.KnnStreamConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfig;
@@ -196,11 +198,36 @@ public class SimilarityProcedureFacade {
         return KnnComputationResultTransformer.toStreamResult(computationResult);
     }
 
+    public Stream<KnnStatsResult> knnStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var statsConfig = createConfig(configuration, KnnStatsConfig::of);
+
+        var computationResult = statsBusinessFacade.knn(
+            graphName,
+            statsConfig,
+            user,
+            databaseId,
+            procedureReturnColumns.contains("similarityDistribution")
+        );
+
+        return Stream.of(KnnComputationResultTransformer.toStatsResult(computationResult, statsConfig));
+    }
+
     public Stream<MemoryEstimateResult> knnStreamEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
         var config = createConfig(algoConfiguration, KnnStreamConfig::of);
+        return Stream.of(estimateBusinessFacade.knn(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> knnStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, KnnStatsConfig::of);
         return Stream.of(estimateBusinessFacade.knn(graphNameOrConfiguration, config));
     }
 

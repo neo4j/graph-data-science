@@ -40,6 +40,9 @@ public abstract class KnnResult {
 
     public abstract long nodePairsConsidered();
 
+    public abstract long nodeCount();
+
+
     public LongStream neighborsOf(long nodeId) {
         return neighborList().get(nodeId).elements().map(NeighborList::clearCheckedFlag);
     }

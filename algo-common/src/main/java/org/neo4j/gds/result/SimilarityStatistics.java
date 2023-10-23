@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 
 import static org.neo4j.gds.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 
@@ -45,7 +46,7 @@ public final class SimilarityStatistics {
     }
 
     public static SimilarityStats similarityStats(
-        Graph maybeSimilarityGraph,
+        Supplier<Graph> maybeSimilarityGraph,
         boolean shouldComputeDistribution
         ) {
         if (!shouldComputeDistribution) {
@@ -55,7 +56,7 @@ public final class SimilarityStatistics {
         Optional<DoubleHistogram> maybeHistogram;
         var computeMilliseconds = new AtomicLong(0);
         try(var ignored = ProgressTimer.start(computeMilliseconds::set)) {
-                 maybeHistogram= computeHistogram(maybeSimilarityGraph);
+            maybeHistogram = computeHistogram(maybeSimilarityGraph.get());
         }
 
         return ImmutableSimilarityStats.of( maybeHistogram, computeMilliseconds.get());

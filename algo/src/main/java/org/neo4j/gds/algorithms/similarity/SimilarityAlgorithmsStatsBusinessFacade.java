@@ -20,6 +20,7 @@
 package org.neo4j.gds.algorithms.similarity;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
+import org.neo4j.gds.algorithms.KnnSpecificFields;
 import org.neo4j.gds.algorithms.SimilaritySpecificFields;
 import org.neo4j.gds.algorithms.SimilaritySpecificFieldsWithDistribution;
 import org.neo4j.gds.algorithms.StatsResult;
@@ -29,6 +30,7 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.result.SimilarityStatistics;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStatsConfig;
+import org.neo4j.gds.similarity.knn.KnnStatsConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
 
 import java.util.function.Function;
@@ -59,10 +61,10 @@ public class SimilarityAlgorithmsStatsBusinessFacade {
             algorithmResult,
             result -> result.graphResult(),
             ((result, similarityDistribution) -> {
-                var graphResult = result.graphResult();
+                var similarityGraphResult = result.graphResult();
                 return new SimilaritySpecificFieldsWithDistribution(
-                    graphResult.comparedNodes(),
-                    graphResult.similarityGraph().relationshipCount(),
+                    similarityGraphResult.comparedNodes(),
+                    similarityGraphResult.similarityGraph().relationshipCount(),
                     similarityDistribution
                 );
             }),
@@ -89,10 +91,10 @@ public class SimilarityAlgorithmsStatsBusinessFacade {
             algorithmResult,
             result -> result.graphResult(),
             ((result, similarityDistribution) -> {
-                var graphResult = result.graphResult();
+                var similarityGraphResult = result.graphResult();
                 return new SimilaritySpecificFieldsWithDistribution(
-                    graphResult.comparedNodes(),
-                    graphResult.similarityGraph().relationshipCount(),
+                    similarityGraphResult.comparedNodes(),
+                    similarityGraphResult.similarityGraph().relationshipCount(),
                     similarityDistribution
                 );
             }),
@@ -101,6 +103,45 @@ public class SimilarityAlgorithmsStatsBusinessFacade {
             computeSimilarityDistribution
         );
     }
+
+    public StatsResult<KnnSpecificFields> knn(
+        String graphName,
+        KnnStatsConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        boolean computeSimilarityDistribution
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> similarityAlgorithmsFacade.knn(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return statsResult(
+            algorithmResult,
+            result -> SimilarityResultCompanion.computeToGraph(
+                algorithmResult.graph(),
+                algorithmResult.graph().nodeCount(),
+                configuration.concurrency(),
+                result
+            ),
+
+            ((result, similarityDistribution) -> {
+                return new KnnSpecificFields(
+                    result.nodeCount(),
+                    result.nodePairsConsidered(),
+                    result.didConverge(),
+                    result.ranIterations(),
+                    result.totalSimilarityPairs(),
+                    similarityDistribution
+                );
+            }),
+            intermediateResult.computeMilliseconds,
+            () -> KnnSpecificFields.EMPTY.EMPTY,
+            computeSimilarityDistribution
+        );
+    }
+
     
     <RESULT, ASF extends SimilaritySpecificFields> StatsResult<ASF> statsResult(
         AlgorithmComputationResult<RESULT> algorithmResult,
@@ -113,18 +154,22 @@ public class SimilarityAlgorithmsStatsBusinessFacade {
 
         return algorithmResult.result().map(result -> {
 
-            var similarityGraphResult = similarityGraphResultSupplier.apply(result);
 
             // 2. Compute result statistics
             var communityStatistics = SimilarityStatistics.similarityStats(
-                similarityGraphResult.similarityGraph(),
+                () -> similarityGraphResultSupplier.apply(result).similarityGraph(),
                 shouldComputeSimilarityDistribution
             );
 
             var similaritySummary = SimilarityStatistics.similaritySummary(communityStatistics.histogram());
 
-            var specificFields = specificFieldsSupplier.specificFields(result, similaritySummary);
+            //3. Create the specific fields
+            var specificFields = specificFieldsSupplier.specificFields(
+                result,
+                similaritySummary
+            );
 
+            //4. Produce the results
             return StatsResult.<ASF>builder()
                 .computeMillis(computeMilliseconds)
                 .postProcessingMillis(communityStatistics.computeMilliseconds())

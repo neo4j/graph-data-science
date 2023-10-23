@@ -188,7 +188,13 @@ public class Knn extends Algorithm<KnnResult> {
             this.progressTracker.endSubTask();
 
             this.progressTracker.endSubTask();
-            return ImmutableKnnResult.of(neighbors, iteration, didConverge, this.nodePairsConsidered);
+            return ImmutableKnnResult.of(
+                neighbors,
+                iteration,
+                didConverge,
+                this.nodePairsConsidered,
+                graph.nodeCount()
+            );
         }
     }
 
@@ -617,6 +623,11 @@ public class Knn extends Algorithm<KnnResult> {
 
         @Override
         public long size() {
+            return 0;
+        }
+
+        @Override
+        public long nodeCount() {
             return 0;
         }
     }

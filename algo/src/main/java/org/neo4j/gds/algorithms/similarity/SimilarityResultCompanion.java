@@ -19,11 +19,26 @@
  */
 package org.neo4j.gds.algorithms.similarity;
 
-import java.util.Map;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.similarity.SimilarityGraphBuilder;
+import org.neo4j.gds.similarity.SimilarityGraphResult;
+import org.neo4j.gds.similarity.knn.KnnResult;
 
-interface SpecificFieldsWithSimilarityStatisticsSupplier<R, ASF> {
-    ASF specificFields(
-        R result,
-        Map<String, Object> similarityDistribution
-    );
+ class SimilarityResultCompanion {
+
+    static SimilarityGraphResult computeToGraph(
+        Graph graph,
+        long nodeCount,
+        int concurrency,
+        KnnResult result) {
+        Graph similarityGraph = new SimilarityGraphBuilder(
+            graph,
+            concurrency,
+            DefaultPool.INSTANCE,
+            TerminationFlag.RUNNING_TRUE
+        ).build(result.streamSimilarityResult());
+        return new SimilarityGraphResult(similarityGraph, nodeCount, false);
+    }
 }
