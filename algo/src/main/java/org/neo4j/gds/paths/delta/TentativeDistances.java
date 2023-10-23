@@ -79,7 +79,7 @@ public interface TentativeDistances {
         return distanceAndPredecessors(size, concurrency, DIST_INF, (a, b) -> Double.compare(a, b) > 0);
     }
 
-    public static DistanceAndPredecessor distanceAndPredecessors(
+    static DistanceAndPredecessor distanceAndPredecessors(
         long size,
         int concurrency,
         double distanceDefault,

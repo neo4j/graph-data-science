@@ -113,7 +113,7 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
         ForkJoinPool forkJoinPool = ExecutorServiceUtil.createForkJoinPool(concurrency);
         var tasks = ConcurrentHashMap.<ForkJoinTask<Void>>newKeySet();
 
-        LongFunction<CountedCompleter> taskProducer =
+        LongFunction<CountedCompleter<Void>> taskProducer =
             (nodeId) -> new LongestPathTask(
                 null,
                 nodeId,
@@ -125,8 +125,7 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
         ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, nodeId -> {
             if (inDegrees.get(nodeId) == 0L) {
                 tasks.add(taskProducer.apply(nodeId));
-                parentsAndDistances.predecessors().get().set(nodeId, nodeId);
-                parentsAndDistances.distances().set(nodeId, 0);
+                parentsAndDistances.set(nodeId, nodeId, 0);
             }
             // Might not reach 100% if there are cycles in the graph
             progressTracker.logProgress();
@@ -146,7 +145,7 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
         private final long sourceId;
         private final Graph graph;
         private final HugeAtomicLongArray inDegrees;
-        private TentativeDistances parentsAndDistances;
+        private final TentativeDistances parentsAndDistances;
 
         LongestPathTask(
             @Nullable DagLongestPath.LongestPathTask parent,
