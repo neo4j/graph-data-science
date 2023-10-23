@@ -38,7 +38,6 @@ import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.delta.TentativeDistances;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
-import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -90,23 +89,21 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
 
     private void initializeInDegrees() {
         this.progressTracker.beginSubTask("Initialization");
-        try (var concurrentCopy = CloseableThreadLocal.withInitial(graph::concurrentCopy)) {
-            ParallelUtil.parallelForEachNode(
-                graph.nodeCount(),
-                concurrency,
-                terminationFlag,
-                nodeId -> {
-                    concurrentCopy.get().forEachRelationship(
-                            nodeId,
-                            (source, target) -> {
-                                inDegrees.getAndAdd(target, 1L);
-                                return true;
-                            }
-                        );
-                    progressTracker.logProgress();
-                }
-            );
-        }
+        ParallelUtil.parallelForEachNode(
+            graph.nodeCount(),
+            concurrency,
+            terminationFlag,
+            nodeId -> {
+                graph.concurrentCopy().forEachRelationship(
+                    nodeId,
+                    (source, target) -> {
+                        inDegrees.getAndAdd(target, 1L);
+                        return true;
+                    }
+                );
+                progressTracker.logProgress();
+            }
+        );
         this.progressTracker.endSubTask("Initialization");
     }
 
