@@ -74,7 +74,7 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
         this.nodeCount = graph.nodeCount();
         this.concurrency = concurrency;
         this.inDegrees = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(this.concurrency));
-        this.parentsAndDistances = TentativeDistances.distanceAndPredecessors(nodeCount, concurrency, Double.MIN_VALUE, (a, b) -> a < b);
+        this.parentsAndDistances = TentativeDistances.distanceAndPredecessors(nodeCount, concurrency, Double.MIN_VALUE, (a, b) -> Double.compare(a, b) < 0);
     }
 
     @Override
@@ -191,9 +191,9 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
             // the source distance will never change anymore, but the target distance might
             var potentialDistance = parentsAndDistances.distance(source) + weight;
             var currentTargetDistance = parentsAndDistances.distance(target);
-            while(potentialDistance > currentTargetDistance) {
+            while (Double.compare(potentialDistance, currentTargetDistance) > 0) {
                 var witnessValue = parentsAndDistances.compareAndExchange(target, currentTargetDistance, potentialDistance, source);
-                if(currentTargetDistance == witnessValue) {
+                if (Double.compare(currentTargetDistance, witnessValue) == 0) {
                     break;
                 }
                 currentTargetDistance = parentsAndDistances.distance(target);

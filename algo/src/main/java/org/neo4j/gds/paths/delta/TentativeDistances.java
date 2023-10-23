@@ -76,7 +76,7 @@ public interface TentativeDistances {
         long size,
         int concurrency
     ) {
-        return distanceAndPredecessors(size, concurrency, DIST_INF, (a, b) -> a > b);
+        return distanceAndPredecessors(size, concurrency, DIST_INF, (a, b) -> Double.compare(a, b) > 0);
     }
 
     public static DistanceAndPredecessor distanceAndPredecessors(
@@ -183,7 +183,7 @@ public interface TentativeDistances {
                 //we  should signal failure
                 // for that we must be sure not to return the 'expectedDistance' by accident!
                 //we hence return its negation (or -1 if ==0)
-                return (Double.compare(expectedDistance, 0.0) == 0) ? -1.0 : -expectedDistance;
+                return Double.compare(expectedDistance, 0.0) == 0 ? -1.0 : -expectedDistance;
             }
 
             var witness = predecessors.compareAndExchange(nodeId, currentPredecessor, -predecessor - 1);
@@ -192,7 +192,7 @@ public interface TentativeDistances {
             if (witness != currentPredecessor) {
                 //we  should signal failure
                 // for that we must be sure not to return the 'expectedDistance' by accident!
-                return (Double.compare(expectedDistance, 0.0) == 0) ? -1.0 : -expectedDistance;
+                return Double.compare(expectedDistance, 0.0) == 0 ? -1.0 : -expectedDistance;
             }
 
             // we have the lock; no-one else can write on nodeId at the moment.
