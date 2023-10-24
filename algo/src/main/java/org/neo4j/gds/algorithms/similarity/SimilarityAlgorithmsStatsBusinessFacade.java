@@ -29,6 +29,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.result.SimilarityStatistics;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnStatsConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.knn.KnnStatsConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
@@ -123,16 +124,54 @@ public class SimilarityAlgorithmsStatsBusinessFacade {
                 algorithmResult.graph(),
                 algorithmResult.graph().nodeCount(),
                 configuration.concurrency(),
-                result
+                result.streamSimilarityResult()
             ),
 
             ((result, similarityDistribution) -> {
                 return new KnnSpecificFields(
-                    result.nodeCount(),
+                    result.nodesCompared(),
                     result.nodePairsConsidered(),
                     result.didConverge(),
                     result.ranIterations(),
                     result.totalSimilarityPairs(),
+                    similarityDistribution
+                );
+            }),
+            intermediateResult.computeMilliseconds,
+            () -> KnnSpecificFields.EMPTY,
+            computeSimilarityDistribution
+        );
+    }
+
+    public StatsResult<KnnSpecificFields> filteredKnn(
+        String graphName,
+        FilteredKnnStatsConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        boolean computeSimilarityDistribution
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> similarityAlgorithmsFacade.filteredKnn(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return statsResult(
+            algorithmResult,
+            result -> SimilarityResultCompanion.computeToGraph(
+                algorithmResult.graph(),
+                algorithmResult.graph().nodeCount(),
+                configuration.concurrency(),
+                result.similarityResultStream()
+            ),
+
+            ((result, similarityDistribution) -> {
+                return new KnnSpecificFields(
+                    result.nodesCompared(),
+                    result.nodePairsConsidered(),
+                    result.didConverge(),
+                    result.ranIterations(),
+                    result.numberOfSimilarityPairs(),
                     similarityDistribution
                 );
             }),

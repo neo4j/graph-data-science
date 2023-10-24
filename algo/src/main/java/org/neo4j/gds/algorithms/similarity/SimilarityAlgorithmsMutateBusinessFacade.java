@@ -136,11 +136,11 @@ public class SimilarityAlgorithmsMutateBusinessFacade {
                 algorithmResult.graph(),
                 algorithmResult.graph().nodeCount(),
                 configuration.concurrency(),
-                result
+                result.streamSimilarityResult()
             ),
             (result, similarityDistribution) -> {
                 return new KnnSpecificFields(
-                    result.nodeCount(),
+                    result.nodesCompared(),
                     result.nodePairsConsidered(),
                     result.didConverge(),
                     result.ranIterations(),

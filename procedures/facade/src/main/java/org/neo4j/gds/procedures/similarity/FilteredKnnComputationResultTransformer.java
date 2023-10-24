@@ -19,9 +19,13 @@
  */
 package org.neo4j.gds.procedures.similarity;
 
+import org.neo4j.gds.algorithms.KnnSpecificFields;
+import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
+import org.neo4j.gds.procedures.similarity.knn.KnnStatsResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnStatsConfig;
 
 import java.util.stream.Stream;
 
@@ -40,6 +44,25 @@ final class FilteredKnnComputationResultTransformer {
                     return similarityResult;
                 });
         }).orElseGet(Stream::empty);
+    }
+
+    static KnnStatsResult toStatsResult(
+        StatsResult<KnnSpecificFields> statsResult,
+        FilteredKnnStatsConfig config
+    ) {
+
+        return new KnnStatsResult(
+            statsResult.preProcessingMillis(),
+            statsResult.computeMillis(),
+            statsResult.postProcessingMillis(),
+            statsResult.algorithmSpecificFields().nodesCompared(),
+            statsResult.algorithmSpecificFields().relationshipsWritten(),
+            statsResult.algorithmSpecificFields().similarityDistribution(),
+            statsResult.algorithmSpecificFields().didConverge(),
+            statsResult.algorithmSpecificFields().ranIterations(),
+            statsResult.algorithmSpecificFields().nodePairsConsidered(),
+            config.toMap()
+        );
     }
 
 

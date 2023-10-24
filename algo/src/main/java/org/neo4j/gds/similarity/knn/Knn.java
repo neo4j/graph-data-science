@@ -627,7 +627,7 @@ public class Knn extends Algorithm<KnnResult> {
         }
 
         @Override
-        public long nodeCount() {
+        public long nodesCompared() {
             return 0;
         }
     }
