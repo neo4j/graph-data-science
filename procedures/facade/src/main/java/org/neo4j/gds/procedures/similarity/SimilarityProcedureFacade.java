@@ -37,6 +37,7 @@ import org.neo4j.gds.procedures.similarity.knn.KnnWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityMutateConfig;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnStreamConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityWriteConfig;
@@ -265,7 +266,7 @@ public class SimilarityProcedureFacade {
         Map<String, Object> algoConfiguration
     ) {
         var config = createConfig(algoConfiguration, FilteredNodeSimilarityStreamConfig::of);
-        return Stream.of(estimateBusinessFacade.nodeSimilarity(graphNameOrConfiguration, config));
+        return Stream.of(estimateBusinessFacade.filteredNodeSimilarity(graphNameOrConfiguration, config));
     }
 
     public Stream<MemoryEstimateResult> filteredNodeSimilarityEstimateStats(
@@ -273,7 +274,7 @@ public class SimilarityProcedureFacade {
         Map<String, Object> algoConfiguration
     ) {
         var config = createConfig(algoConfiguration, FilteredNodeSimilarityStatsConfig::of);
-        return Stream.of(estimateBusinessFacade.nodeSimilarity(graphNameOrConfiguration, config));
+        return Stream.of(estimateBusinessFacade.filteredNodeSimilarity(graphNameOrConfiguration, config));
     }
 
     public Stream<MemoryEstimateResult> filteredNodeSimilarityEstimateMutate(
@@ -391,6 +392,31 @@ public class SimilarityProcedureFacade {
         var config = createConfig(algoConfiguration, KnnMutateConfig::of);
         return Stream.of(estimateBusinessFacade.knn(graphNameOrConfiguration, config));
     }
+
+    public Stream<SimilarityResult> filteredKnnStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var streamConfig = createStreamConfig(configuration, FilteredKnnStreamConfig::of);
+
+        var computationResult = streamBusinessFacade.filteredKnn(
+            graphName,
+            streamConfig,
+            user,
+            databaseId
+        );
+
+        return FilteredKnnComputationResultTransformer.toStreamResult(computationResult);
+    }
+
+    public Stream<MemoryEstimateResult> filteredKnnStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, FilteredKnnStreamConfig::of);
+        return Stream.of(estimateBusinessFacade.filteredKnn(graphNameOrConfiguration, config));
+    }
+
 
 
     // FIXME: the following two methods are duplicate, find a good place for them.

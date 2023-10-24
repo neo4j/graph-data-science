@@ -23,6 +23,8 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnStreamConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamConfig;
 import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.knn.KnnStreamConfig;
@@ -42,7 +44,6 @@ public class SimilarityAlgorithmsStreamBusinessFacade {
         NodeSimilarityStreamConfig config,
         User user,
         DatabaseId databaseId
-
     ) {
         var result = similarityAlgorithmsFacade.nodeSimilarity(graphName, config, user, databaseId);
 
@@ -54,7 +55,6 @@ public class SimilarityAlgorithmsStreamBusinessFacade {
         KnnStreamConfig config,
         User user,
         DatabaseId databaseId
-
     ) {
         var result = similarityAlgorithmsFacade.knn(graphName, config, user, databaseId);
 
@@ -66,9 +66,20 @@ public class SimilarityAlgorithmsStreamBusinessFacade {
         FilteredNodeSimilarityStreamConfig config,
         User user,
         DatabaseId databaseId
-
     ) {
         var result = similarityAlgorithmsFacade.filteredNodeSimilarity(graphName, config, user, databaseId);
+
+        return createStreamComputationResult(result);
+    }
+
+    public StreamComputationResult<FilteredKnnResult> filteredKnn(
+        String graphName,
+        FilteredKnnStreamConfig config,
+        User user,
+        DatabaseId databaseId
+
+    ) {
+        var result = similarityAlgorithmsFacade.filteredKnn(graphName, config, user, databaseId);
 
         return createStreamComputationResult(result);
     }
