@@ -17,35 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.knn;
+package org.neo4j.gds.algorithms.similarity;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
+import org.neo4j.gds.similarity.knn.KnnResult;
 
-import java.util.concurrent.ExecutorService;
-
-final class KnnProc {
-
-    static final String KNN_DESCRIPTION =
-        "The k-nearest neighbor graph algorithm constructs relationships between nodes if the distance " +
-        "between two nodes is among the k nearest distances compared to other nodes." +
-        "KNN computes distances based on the similarity of node properties";
-
-    private KnnProc() {}
+ class SimilarityResultCompanion {
 
     static SimilarityGraphResult computeToGraph(
         Graph graph,
         long nodeCount,
         int concurrency,
-        KnnResult result,
-        ExecutorService executor
-    ) {
+        KnnResult result) {
         Graph similarityGraph = new SimilarityGraphBuilder(
             graph,
             concurrency,
-            executor,
+            DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
         ).build(result.streamSimilarityResult());
         return new SimilarityGraphResult(similarityGraph, nodeCount, false);

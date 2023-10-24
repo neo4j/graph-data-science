@@ -21,8 +21,12 @@ package org.neo4j.gds.algorithms.similarity;
 
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.similarity.knn.KnnBaseConfig;
+import org.neo4j.gds.similarity.knn.KnnFactory;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityFactory;
+
+import java.util.Optional;
 
 public class SimilarityAlgorithmsEstimateBusinessFacade {
 
@@ -40,6 +44,18 @@ public class SimilarityAlgorithmsEstimateBusinessFacade {
             configuration,
             configuration.relationshipWeightProperty(),
             new NodeSimilarityFactory<>()
+        );
+    }
+
+    public <C extends KnnBaseConfig> MemoryEstimateResult knn(
+        Object graphNameOrConfiguration,
+        C configuration
+    ) {
+        return algorithmEstimator.estimate(
+            graphNameOrConfiguration,
+            configuration,
+            Optional.empty(),
+            new KnnFactory<>()
         );
     }
 }

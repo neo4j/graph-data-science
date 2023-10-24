@@ -43,7 +43,7 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 import static org.neo4j.gds.similarity.knn.KnnProc.KNN_DESCRIPTION;
 
 @GdsCallable(name = "gds.knn.mutate", description = KNN_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
-public class KnnMutateSpecification implements AlgorithmSpec<Knn, Knn.Result, KnnMutateConfig, Stream<MutateResult>, KnnFactory<KnnMutateConfig>> {
+public class KnnMutateSpecification implements AlgorithmSpec<Knn, KnnResult, KnnMutateConfig, Stream<MutateResult>, KnnFactory<KnnMutateConfig>> {
     @Override
     public String name() {
         return "KnnMutate";
@@ -59,7 +59,7 @@ public class KnnMutateSpecification implements AlgorithmSpec<Knn, Knn.Result, Kn
         return (__, userInput) -> KnnMutateConfig.of(userInput);
     }
 
-    public ComputationResultConsumer<Knn, Knn.Result, KnnMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Knn, KnnResult, KnnMutateConfig, Stream<MutateResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Graph mutation failed",
             executionContext.log(),

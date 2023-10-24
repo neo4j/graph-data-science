@@ -19,52 +19,17 @@
  */
 package org.neo4j.gds.similarity.knn;
 
-import org.neo4j.gds.procedures.similarity.SimilarityStatsResult;
+import org.neo4j.gds.procedures.similarity.knn.KnnStatsResult;
 import org.neo4j.gds.similarity.SimilarityResultBuilder;
 
-import java.util.Map;
-
-@SuppressWarnings("unused")
-public class StatsResult extends SimilarityStatsResult {
-    public final long ranIterations;
-    public final boolean didConverge;
-    public final long nodePairsConsidered;
-
-    public StatsResult(
-        long preProcessingMillis,
-        long computeMillis,
-        long postProcessingMillis,
-        long nodesCompared,
-        long nodePairs,
-        Map<String, Object> similarityDistribution,
-        boolean didConverge,
-        long ranIterations,
-        long nodePairsConsidered,
-        Map<String, Object> configuration
-    ) {
-        super(
-            preProcessingMillis,
-            computeMillis,
-            postProcessingMillis,
-            nodesCompared,
-            nodePairs,
-            similarityDistribution,
-            configuration
-        );
-
-        this.nodePairsConsidered = nodePairsConsidered;
-        this.ranIterations = ranIterations;
-        this.didConverge = didConverge;
-    }
-
-    public static class Builder extends SimilarityResultBuilder<StatsResult> {
+public class KnnStatsResultBuilder  extends SimilarityResultBuilder<KnnStatsResult> {
         private long ranIterations;
         private boolean didConverge;
         private long nodePairsConsidered;
 
         @Override
-        public StatsResult build() {
-            return new StatsResult(
+        public KnnStatsResult build() {
+            return new KnnStatsResult(
                 preProcessingMillis,
                 computeMillis,
                 postProcessingMillis,
@@ -78,19 +43,19 @@ public class StatsResult extends SimilarityStatsResult {
             );
         }
 
-        public Builder withDidConverge(boolean didConverge) {
+        public KnnStatsResultBuilder withDidConverge(boolean didConverge) {
             this.didConverge = didConverge;
             return this;
         }
 
-        public Builder withRanIterations(long ranIterations) {
+        public KnnStatsResultBuilder withRanIterations(long ranIterations) {
             this.ranIterations = ranIterations;
             return this;
         }
 
-        Builder withNodePairsConsidered(long nodePairsConsidered) {
+    KnnStatsResultBuilder withNodePairsConsidered(long nodePairsConsidered) {
             this.nodePairsConsidered = nodePairsConsidered;
             return this;
         }
     }
-}
+
