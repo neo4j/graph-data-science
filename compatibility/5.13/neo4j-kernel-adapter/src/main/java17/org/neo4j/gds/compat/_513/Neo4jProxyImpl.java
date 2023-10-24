@@ -22,17 +22,21 @@ package org.neo4j.gds.compat._513;
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.compat.BoltTransactionRunner;
 import org.neo4j.gds.compat.CompatExecutionContext;
+import org.neo4j.gds.compat.CustomAccessMode;
 import org.neo4j.gds.compat.GlobalProcedureRegistry;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat._5x.CommonNeo4jProxyImpl;
+import org.neo4j.gds.compat._5x.CompatAccessModeImpl;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.PartitionedScan;
+import org.neo4j.internal.kernel.api.TokenSet;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.internal.kernel.api.security.AccessMode;
+import org.neo4j.internal.kernel.api.security.ReadSecurityPropertyProvider;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.io.pagecache.context.CursorContextFactory;
 import org.neo4j.io.pagecache.context.FixedVersionContextSupplier;
@@ -47,6 +51,7 @@ import org.neo4j.procedure.Mode;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public final class Neo4jProxyImpl extends CommonNeo4jProxyImpl {
@@ -175,6 +180,20 @@ public final class Neo4jProxyImpl extends CommonNeo4jProxyImpl {
                 ctx.complete();
                 ctx.close();
                 stmt.close();
+            }
+        };
+    }
+
+    @Override
+    public AccessMode accessMode(CustomAccessMode customAccessMode) {
+        return new CompatAccessModeImpl(customAccessMode) {
+            @Override
+            public boolean allowsReadNodeProperty(
+                Supplier<TokenSet> labels,
+                int propertyKey,
+                ReadSecurityPropertyProvider propertyProvider
+            ) {
+                return custom.allowsReadNodeProperty(propertyKey);
             }
         };
     }
