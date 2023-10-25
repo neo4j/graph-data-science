@@ -372,6 +372,8 @@ public final class MemoryUsage {
          */
         @SuppressForbidden(reason = "we want to use system.out here")
         private static boolean isVmInfoAvailable() {
+            intelMacWorkaround();
+
             var sysOut = System.out;
             try {
                 var swallowSysOut = new PrintStream(NullOutputStream.NULL_OUTPUT_STREAM, true, StandardCharsets.UTF_8);
@@ -383,6 +385,24 @@ public final class MemoryUsage {
                 return false;
             } finally {
                 System.setOut(sysOut);
+            }
+        }
+
+        /**
+         * JOL currently gets stuck on Azul Zulu 17.44.53-ca-jdk17.0.8.1 on Intel Macs.
+         * <p>
+         * We can work around this by skipping the Hotspot SA attach.
+         * See <a href="https://bugs.openjdk.org/browse/CODETOOLS-7903447">OpenJDK issue</a>
+         * </p>
+         */
+        @Deprecated(forRemoval = true)
+        private static void intelMacWorkaround() {
+            var isAzul = System.getProperty("java.vendor").contains("Azul Systems");
+            var isIntel = System.getProperty("os.arch").contains("x86_64");
+            var isMac = System.getProperty("os.name").contains("Mac");
+
+            if (isAzul && isIntel && isMac) {
+                System.setProperty("jol.skipHotspotSAAttach", "true");
             }
         }
 
