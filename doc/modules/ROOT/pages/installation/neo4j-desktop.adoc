@@ -29,3 +29,11 @@ If the procedure allowlist is configured, make sure to also include procedures f
 ----
 dbms.security.procedures.allowlist=gds.*
 ----
+
+If you are running MacOS on an intel CPU, it is required to add the following configuration entry to the configuration:
+
+---
+server.jvm.additional=-Djol.skipHotspotSAAttach=true
+---
+
+This is a workaround for a bug in the Java runtime that is used by Neo4j Desktop.
