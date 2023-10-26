@@ -87,7 +87,10 @@ public final class GraphStoreUpdater {
 
             graphStore.addRelationshipType(resultRelationships);
         }
-        return new AddRelationshipResult(singleTypeRelationshipsProducer.relationships(), mutateMilliseconds.get());
+        return new AddRelationshipResult(
+            singleTypeRelationshipsProducer.relationshipsCount(),
+            mutateMilliseconds.get()
+        );
     }
 
 }

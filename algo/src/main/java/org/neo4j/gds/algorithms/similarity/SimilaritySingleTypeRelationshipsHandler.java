@@ -37,6 +37,7 @@ import org.neo4j.gds.similarity.nodesim.TopKGraph;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static org.neo4j.gds.result.SimilarityStatistics.computeHistogram;
 
@@ -44,13 +45,19 @@ public class SimilaritySingleTypeRelationshipsHandler implements SingleTypeRelat
 
     private final boolean shouldComputeStatistics;
     private final Graph graph;
-    private final SimilarityGraphResult similarityGraphResult;
+    private final Supplier<SimilarityGraphResult> similarityGraphResultSupplier;
     private Map<String,Object> similaritySummary;
+    private long relationshipCount;
 
-    public SimilaritySingleTypeRelationshipsHandler(Graph graph,SimilarityGraphResult similarityGraphResult,boolean shouldComputeStatistics){
-            this.shouldComputeStatistics = shouldComputeStatistics;
-            this.similarityGraphResult = similarityGraphResult;
-            this.graph=graph;
+    public SimilaritySingleTypeRelationshipsHandler(
+        Graph graph,
+        Supplier<SimilarityGraphResult> similarityGraphResultSupplier,
+        boolean shouldComputeStatistics
+    ) {
+        
+        this.shouldComputeStatistics = shouldComputeStatistics;
+        this.similarityGraphResultSupplier = similarityGraphResultSupplier;
+        this.graph = graph;
     }
 
     public Map<String, Object> similaritySummary() {
@@ -61,7 +68,7 @@ public class SimilaritySingleTypeRelationshipsHandler implements SingleTypeRelat
     public SingleTypeRelationships getRelationships(String mutateRelationshipType, String mutateProperty) {
 
         RelationshipType relationshipType = RelationshipType.of(mutateRelationshipType);
-
+        var similarityGraphResult = similarityGraphResultSupplier.get();
         SingleTypeRelationships relationships;
 
         if (similarityGraphResult.isTopKGraph()) {
@@ -111,12 +118,13 @@ public class SimilaritySingleTypeRelationshipsHandler implements SingleTypeRelat
                 similaritySummary = Map.of();
             }
         }
+        this.relationshipCount = similarityGraphResult.similarityGraph().relationshipCount();
         return relationships;
     }
 
     @Override
-    public long relationships() {
-        return similarityGraphResult.similarityGraph().relationshipCount();
+    public long relationshipsCount() {
+        return relationshipCount;
     }
 }
 

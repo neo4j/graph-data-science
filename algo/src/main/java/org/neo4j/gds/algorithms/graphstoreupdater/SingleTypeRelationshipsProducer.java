@@ -28,5 +28,5 @@ public interface SingleTypeRelationshipsProducer {
 
     SingleTypeRelationships getRelationships(String mutateRelationshipType, String mutateProperty);
 
-    long relationships();
+    long relationshipsCount();
 }

@@ -33,7 +33,9 @@ public interface RelationshipMutateResult<ALGORITHM_SPECIFIC_FIELDS>  {
 
     long computeMillis();
     long mutateMillis();
-    long postProcessingMillis();
+
+    @Value.Default
+    default long postProcessingMillis() {return 0L;}
     long relationshipsWritten();
     AlgoBaseConfig configuration();
 

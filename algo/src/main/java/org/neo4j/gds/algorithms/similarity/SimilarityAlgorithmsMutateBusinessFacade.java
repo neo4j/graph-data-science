@@ -94,12 +94,10 @@ public class SimilarityAlgorithmsMutateBusinessFacade {
     ) {
 
         return algorithmResult.result().map(result -> {
-            //TODO: Add a timer when porting KNN
-            var similarityGraphResult = similarityGraphResultSupplier.apply(result);
 
             var similaritySingleTypeRelationshipsHandler = new SimilaritySingleTypeRelationshipsHandler(
                 algorithmResult.graph(),
-                similarityGraphResult,
+                () -> similarityGraphResultSupplier.apply(result),
                 shouldComputeSimilarityDistribution
             );
 
@@ -119,10 +117,10 @@ public class SimilarityAlgorithmsMutateBusinessFacade {
                 .computeMillis(computeMilliseconds)
                 .mutateMillis(mutateResult.mutateMilliseconds())
                 .relationshipsWritten(mutateResult.relationshipsAdded())
-                .postProcessingMillis(0) //everything seems to happen in write-millis time
                 .algorithmSpecificFields(specificFields)
                 .configuration(configuration)
                 .build();
+            
         }).orElseGet(() -> RelationshipMutateResult.empty(emptyASFSupplier.get(), configuration));
 
     }
