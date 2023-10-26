@@ -29,9 +29,11 @@ import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsMutateBusinessFac
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStatsBusinessFacade;
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsWriteBusinessFacade;
+import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
@@ -58,6 +60,7 @@ public class SimilarityProcedureProvider {
     // Request scoped state and services
     private final AlgorithmMetaDataSetterService algorithmMetaDataSetterService;
     private final DatabaseIdAccessor databaseIdAccessor;
+    private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final KernelTransactionAccessor kernelTransactionAccessor;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final TerminationFlagService terminationFlagService;
@@ -72,6 +75,7 @@ public class SimilarityProcedureProvider {
         AlgorithmMetaDataSetterService algorithmMetaDataSetterService,
         DatabaseIdAccessor databaseIdAccessor,
         KernelTransactionAccessor kernelTransactionAccessor,
+        ExporterBuildersProviderService exporterBuildersProviderService,
         TaskRegistryFactoryService taskRegistryFactoryService,
         TerminationFlagService terminationFlagService, UserLogServices userLogServices,
         UserAccessor userAccessor
@@ -79,7 +83,7 @@ public class SimilarityProcedureProvider {
         this.log = log;
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.useMaxMemoryEstimation = useMaxMemoryEstimation;
-
+        this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.algorithmMetaDataSetterService = algorithmMetaDataSetterService;
         this.databaseIdAccessor = databaseIdAccessor;
         this.kernelTransactionAccessor = kernelTransactionAccessor;
@@ -92,6 +96,8 @@ public class SimilarityProcedureProvider {
     SimilarityProcedureFacade createSimilarityProcedureFacade(Context context) throws ProcedureException {
 
         // Neo4j's services
+        var graphDatabaseService = context.graphDatabaseAPI();
+
         var algorithmMemoryValidationService = new AlgorithmMemoryValidationService(log, useMaxMemoryEstimation);
         var databaseId = databaseIdAccessor.getDatabaseId(context.graphDatabaseAPI());
         var returnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
@@ -105,6 +111,11 @@ public class SimilarityProcedureProvider {
             user
         );
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
+
+        var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(graphDatabaseService);
+
+        var exporterContext = new ExporterContext.ProcedureContextWrapper(context);
+
 
         var similarityAlgorithmsFacade = new SimilarityAlgorithmsFacade(
             new AlgorithmRunner(
@@ -147,9 +158,15 @@ public class SimilarityProcedureProvider {
                 user
             )
         );
+
+        var relationshipExporterBuilder = exportBuildersProvider.relationshipExporterBuilder(exporterContext);
+
         var mutateBusinessFacade = new SimilarityAlgorithmsMutateBusinessFacade();
         var statsBusinessFacade = new SimilarityAlgorithmsStatsBusinessFacade(similarityAlgorithmsFacade);
-        var writeBusinessFacade = new SimilarityAlgorithmsWriteBusinessFacade();
+        var writeBusinessFacade = new SimilarityAlgorithmsWriteBusinessFacade(
+            similarityAlgorithmsFacade,
+            new WriteRelationshipService(relationshipExporterBuilder, log, taskRegistryFactory)
+        );
         return new SimilarityProcedureFacade(
             configurationParser,
             databaseId,

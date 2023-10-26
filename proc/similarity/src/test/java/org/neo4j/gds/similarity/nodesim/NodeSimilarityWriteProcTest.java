@@ -161,7 +161,7 @@ class NodeSimilarityWriteProcTest extends BaseProcTest {
 
             assertThat(
                 "Missing postProcessingMillis",
-                -1L,
+                0L,
                 equalTo(row.getNumber("postProcessingMillis").longValue())
             );
         });

@@ -198,7 +198,7 @@ public final class ExtensionBuilder {
         );
 
         var communityProcedureProvider = createCommunityProcedureProvider(exporterBuildersProviderService);
-        var similarityProcedureProvider = createSimilarityProcedureProvider();
+        var similarityProcedureProvider = createSimilarityProcedureProvider(exporterBuildersProviderService);
 
         return new GraphDataScienceProvider(log, catalogFacadeProvider, communityProcedureProvider,
             similarityProcedureProvider
@@ -244,7 +244,7 @@ public final class ExtensionBuilder {
         );
     }
 
-    private SimilarityProcedureProvider createSimilarityProcedureProvider() {
+    private SimilarityProcedureProvider createSimilarityProcedureProvider(ExporterBuildersProviderService exporterBuildersProviderService) {
         var algorithmMetaDataSetterService = new AlgorithmMetaDataSetterService();
 
         return new SimilarityProcedureProvider(
@@ -254,8 +254,10 @@ public final class ExtensionBuilder {
             algorithmMetaDataSetterService,
             databaseIdAccessor,
             kernelTransactionAccessor,
+            exporterBuildersProviderService,
             taskRegistryFactoryService,
-            terminationFlagService, userLogServices,
+            terminationFlagService,
+            userLogServices,
             userAccessor
         );
     }

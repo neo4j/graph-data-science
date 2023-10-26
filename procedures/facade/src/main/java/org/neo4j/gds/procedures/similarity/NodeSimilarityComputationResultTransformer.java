@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.similarity;
 
 import org.neo4j.gds.algorithms.SimilaritySpecificFieldsWithDistribution;
+import org.neo4j.gds.algorithms.RelationshipWriteResult;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.similarity.SimilarityResult;
@@ -58,6 +59,22 @@ final class NodeSimilarityComputationResultTransformer {
             statsResult.algorithmSpecificFields().relationshipsWritten(),
             statsResult.algorithmSpecificFields().similarityDistribution(),
             config.toMap()
+        );
+    }
+
+    static SimilarityWriteResult toWriteResult(
+        RelationshipWriteResult<SimilaritySpecificFieldsWithDistribution> writeResult
+    ) {
+
+        return new SimilarityWriteResult(
+            writeResult.preProcessingMillis(),
+            writeResult.computeMillis(),
+            writeResult.writeMillis(),
+            writeResult.postProcessingMillis(),
+            writeResult.algorithmSpecificFields().nodesCompared(),
+            writeResult.algorithmSpecificFields().relationshipsWritten(),
+            writeResult.algorithmSpecificFields().similarityDistribution(),
+            writeResult.configuration().toMap()
         );
     }
 

@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.similarity.filteredknn;
 
+import org.neo4j.gds.procedures.similarity.SimilarityWriteResult;
 import org.neo4j.gds.similarity.SimilarityResultBuilder;
-import org.neo4j.gds.similarity.SimilarityWriteResult;
 
 import java.util.Map;
 
