@@ -32,6 +32,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.procedures.community.ConfigurationParser;
 import org.neo4j.gds.procedures.similarity.knn.KnnStatsResult;
+import org.neo4j.gds.procedures.similarity.knn.KnnWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStatsConfig;
@@ -39,6 +40,7 @@ import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamConf
 import org.neo4j.gds.similarity.knn.KnnStatsConfig;
 import org.neo4j.gds.similarity.knn.KnnStreamConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
+import org.neo4j.gds.similarity.knn.KnnWriteConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteConfig;
@@ -268,6 +270,24 @@ public class SimilarityProcedureFacade {
         return Stream.of(KnnComputationResultTransformer.toStatsResult(computationResult, statsConfig));
     }
 
+    public Stream<KnnWriteResult> knnWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var writeConfig = createConfig(configuration, KnnWriteConfig::of);
+
+        var computationResult = writeBusinessFacade.knn(
+            graphName,
+            writeConfig,
+            user,
+            databaseId,
+            procedureReturnColumns.contains("similarityDistribution")
+        );
+
+        return Stream.of(KnnComputationResultTransformer.toWriteResult(computationResult, writeConfig));
+    }
+
+
     public Stream<MemoryEstimateResult> knnStreamEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
@@ -281,6 +301,14 @@ public class SimilarityProcedureFacade {
         Map<String, Object> algoConfiguration
     ) {
         var config = createConfig(algoConfiguration, KnnStatsConfig::of);
+        return Stream.of(estimateBusinessFacade.knn(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> knnWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, KnnWriteConfig::of);
         return Stream.of(estimateBusinessFacade.knn(graphNameOrConfiguration, config));
     }
 

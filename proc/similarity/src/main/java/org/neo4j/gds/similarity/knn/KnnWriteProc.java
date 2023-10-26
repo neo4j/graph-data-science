@@ -20,10 +20,8 @@
 package org.neo4j.gds.similarity.knn;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.RelationshipExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.similarity.knn.KnnWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -40,18 +38,15 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class KnnWriteProc extends BaseProc {
 
     @Context
-    public RelationshipExporterBuilder relationshipExporterBuilder;
+    public GraphDataScience facade;
 
     @Procedure(name = "gds.knn.write", mode = WRITE)
     @Description(KNN_DESCRIPTION)
-    public Stream<WriteResult> write(
+    public Stream<KnnWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new KnnWriteSpecification(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.similarity().knnWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.knn.write.estimate", mode = READ)
@@ -60,16 +55,8 @@ public class KnnWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new KnnWriteSpecification(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
+        return facade.similarity().knnWriteEstimate(graphNameOrConfiguration, algoConfiguration);
 
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withRelationshipExporterBuilder(relationshipExporterBuilder);
     }
 
 }

@@ -20,6 +20,7 @@
 package org.neo4j.gds.algorithms.similarity;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
+import org.neo4j.gds.algorithms.KnnSpecificFields;
 import org.neo4j.gds.algorithms.RelationshipWriteResult;
 import org.neo4j.gds.algorithms.SimilaritySpecificFields;
 import org.neo4j.gds.algorithms.SimilaritySpecificFieldsWithDistribution;
@@ -28,10 +29,13 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WriteConfig;
+import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
+import org.neo4j.gds.similarity.knn.KnnWriteConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteConfig;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -82,6 +86,48 @@ public class SimilarityAlgorithmsWriteBusinessFacade {
             configuration.arrowConnectionInfo()
         );
 
+    }
+
+    public RelationshipWriteResult knn(
+        String graphName,
+        KnnWriteConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        boolean computeSimilarityDistribution
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> similarityAlgorithmsFacade.knn(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return write(
+            algorithmResult,
+            configuration,
+            result -> SimilarityResultCompanion.computeToGraph(
+                algorithmResult.graph(),
+                algorithmResult.graph().nodeCount(),
+                configuration.concurrency(),
+                result
+            ),
+            (result, similarityDistribution) -> {
+                return new KnnSpecificFields(
+                    result.nodeCount(),
+                    result.nodePairsConsidered(),
+                    result.didConverge(),
+                    result.ranIterations(),
+                    result.totalSimilarityPairs(),
+                    similarityDistribution
+                );
+            },
+            intermediateResult.computeMilliseconds,
+            () -> KnnSpecificFields.EMPTY,
+            computeSimilarityDistribution,
+            "KnnWrite",
+            configuration.writeProperty(),
+            configuration.writeRelationshipType(),
+            configuration.arrowConnectionInfo()
+        );
 
     }
 
@@ -101,7 +147,13 @@ public class SimilarityAlgorithmsWriteBusinessFacade {
 
         return algorithmResult.result().map(result -> {
 
-            var similarityGraphResult = similarityGraphResultSupplier.apply(result);
+            SimilarityGraphResult similarityGraphResult;
+
+            var similarityGraphCreationMillis = new AtomicLong();
+            try (ProgressTimer ignored = ProgressTimer.start(similarityGraphCreationMillis::set)) {
+                similarityGraphResult = similarityGraphResultSupplier.apply(result);
+            }
+
             var similarityGraph = similarityGraphResult.similarityGraph();
 
             var rootIdMap = similarityGraphResult.isTopKGraph()
@@ -128,7 +180,7 @@ public class SimilarityAlgorithmsWriteBusinessFacade {
 
             return RelationshipWriteResult.<ASF>builder()
                 .computeMillis(computeMilliseconds)
-                .writeMillis(writeResult.writeMilliseconds())
+                .writeMillis(writeResult.writeMilliseconds() + similarityGraphCreationMillis.get())
                 .relationshipsWritten(writeResult.relationshipsWritten())
                 .postProcessingMillis(0) //everything seems to happen in write-millis time
                 .algorithmSpecificFields(specificFields)
