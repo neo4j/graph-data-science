@@ -127,7 +127,7 @@ class NodeSimilarityMutateProcTest extends BaseProcTest {
             assertThat(row.getNumber("postProcessingMillis"))
                 .asInstanceOf(LONG)
                 .as("Missing postProcessingMillis")
-                .isEqualTo(-1L);
+                .isEqualTo(0L);
 
             assertThat(row.get("configuration"))
                 .isNotNull()

@@ -38,6 +38,7 @@ import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStatsConfi
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamConfig;
 import org.neo4j.gds.similarity.knn.KnnStatsConfig;
 import org.neo4j.gds.similarity.knn.KnnStreamConfig;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteConfig;
@@ -134,6 +135,24 @@ public class SimilarityProcedureFacade {
         return Stream.of(NodeSimilarityComputationResultTransformer.toWriteResult(computationResult));
     }
 
+    public Stream<SimilarityMutateResult> nodeSimilarityMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var mutateConfig = createConfig(configuration, NodeSimilarityMutateConfig::of);
+
+        var computationResult = mutateBusinessFacade.nodeSimilarity(
+            graphName,
+            mutateConfig,
+            user,
+            databaseId,
+            procedureReturnColumns.contains("similarityDistribution")
+        );
+
+        return Stream.of(NodeSimilarityComputationResultTransformer.toMutateResult(computationResult));
+    }
+
+
     public Stream<MemoryEstimateResult> nodeSimilarityEstimateStream(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
@@ -147,6 +166,22 @@ public class SimilarityProcedureFacade {
         Map<String, Object> algoConfiguration
     ) {
         var config = createConfig(algoConfiguration, NodeSimilarityStatsConfig::of);
+        return Stream.of(estimateBusinessFacade.nodeSimilarity(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> nodeSimilarityEstimateMutate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, NodeSimilarityMutateConfig::of);
+        return Stream.of(estimateBusinessFacade.nodeSimilarity(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> nodeSimilarityEstimateWrite(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, NodeSimilarityWriteConfig::of);
         return Stream.of(estimateBusinessFacade.nodeSimilarity(graphNameOrConfiguration, config));
     }
 
@@ -197,14 +232,6 @@ public class SimilarityProcedureFacade {
         Map<String, Object> algoConfiguration
     ) {
         var config = createConfig(algoConfiguration, FilteredNodeSimilarityStatsConfig::of);
-        return Stream.of(estimateBusinessFacade.nodeSimilarity(graphNameOrConfiguration, config));
-    }
-
-    public Stream<MemoryEstimateResult> nodeSimilarityEstimateWrite(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = createConfig(algoConfiguration, NodeSimilarityWriteConfig::of);
         return Stream.of(estimateBusinessFacade.nodeSimilarity(graphNameOrConfiguration, config));
     }
 

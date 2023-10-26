@@ -19,6 +19,111 @@
  */
 package org.neo4j.gds.algorithms.similarity;
 
+import org.neo4j.gds.algorithms.AlgorithmComputationResult;
+import org.neo4j.gds.algorithms.RelationshipMutateResult;
+import org.neo4j.gds.algorithms.SimilaritySpecificFields;
+import org.neo4j.gds.algorithms.SimilaritySpecificFieldsWithDistribution;
+import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
+import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.User;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.similarity.SimilarityGraphResult;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
+
+import java.util.function.Function;
+import java.util.function.Supplier;
+
 public class SimilarityAlgorithmsMutateBusinessFacade {
-    
+
+    private final SimilarityAlgorithmsFacade similarityAlgorithmsFacade;
+    private final MutateRelationshipService mutateRelationshipService;
+
+    public SimilarityAlgorithmsMutateBusinessFacade(
+        SimilarityAlgorithmsFacade similarityAlgorithmsFacade,
+        MutateRelationshipService mutateRelationshipService
+    ) {
+        this.similarityAlgorithmsFacade = similarityAlgorithmsFacade;
+        this.mutateRelationshipService = mutateRelationshipService;
+    }
+
+    public RelationshipMutateResult nodeSimilarity(
+        String graphName,
+        NodeSimilarityMutateConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        boolean computeSimilarityDistribution
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> similarityAlgorithmsFacade.nodeSimilarity(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return mutate(
+            algorithmResult,
+            configuration,
+            result -> result.graphResult(),
+            ((result, similarityDistribution) -> {
+                var graphResult = result.graphResult();
+                return new SimilaritySpecificFieldsWithDistribution(
+                    graphResult.comparedNodes(),
+                    graphResult.similarityGraph().relationshipCount(),
+                    similarityDistribution
+                );
+            }),
+            intermediateResult.computeMilliseconds,
+            () -> SimilaritySpecificFieldsWithDistribution.EMPTY,
+            computeSimilarityDistribution,
+            configuration.mutateRelationshipType(),
+            configuration.mutateProperty()
+        );
+
+
+    }
+
+    <RESULT, ASF extends SimilaritySpecificFields, CONFIG extends AlgoBaseConfig> RelationshipMutateResult<ASF> mutate(
+        AlgorithmComputationResult<RESULT> algorithmResult,
+        CONFIG configuration,
+        Function<RESULT, SimilarityGraphResult> similarityGraphResultSupplier,
+        SpecificFieldsWithSimilarityStatisticsSupplier<RESULT, ASF> specificFieldsSupplier,
+        long computeMilliseconds,
+        Supplier<ASF> emptyASFSupplier,
+        boolean shouldComputeSimilarityDistribution,
+        String mutateRelationshipType,
+        String mutateProperty
+    ) {
+
+        return algorithmResult.result().map(result -> {
+            //TODO: Add a timer when porting KNN
+            var similarityGraphResult = similarityGraphResultSupplier.apply(result);
+
+            var similaritySingleTypeRelationshipsHandler = new SimilaritySingleTypeRelationshipsHandler(
+                algorithmResult.graph(),
+                similarityGraphResult,
+                shouldComputeSimilarityDistribution
+            );
+
+            var mutateResult = mutateRelationshipService.mutate(
+                algorithmResult.graphStore(),
+                mutateRelationshipType,
+                mutateProperty,
+                similaritySingleTypeRelationshipsHandler
+            );
+
+            var specificFields = specificFieldsSupplier.specificFields(
+                result,
+                similaritySingleTypeRelationshipsHandler.similaritySummary()
+            );
+
+            return RelationshipMutateResult.<ASF>builder()
+                .computeMillis(computeMilliseconds)
+                .mutateMillis(mutateResult.mutateMilliseconds())
+                .relationshipsWritten(mutateResult.relationshipsAdded())
+                .postProcessingMillis(0) //everything seems to happen in write-millis time
+                .algorithmSpecificFields(specificFields)
+                .configuration(configuration)
+                .build();
+        }).orElseGet(() -> RelationshipMutateResult.empty(emptyASFSupplier.get(), configuration));
+
+    }
 }
