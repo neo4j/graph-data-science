@@ -17,8 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms.similarity;
+package org.neo4j.gds.algorithms.graphstoreupdater;
 
-public class SimilarityAlgorithmsMutateBusinessFacade {
-    
+import org.neo4j.gds.core.loading.SingleTypeRelationships;
+
+/**
+ * Extracting some common code so that it is reusable; eventually this can probably move to where it is used
+ */
+public interface SingleTypeRelationshipsProducer {
+
+    SingleTypeRelationships getRelationships(String mutateRelationshipType, String mutateProperty);
+
+    long relationships();
 }

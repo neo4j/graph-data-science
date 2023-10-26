@@ -68,7 +68,7 @@ public final class SimilarityStatistics {
             .orElseGet(Collections::emptyMap);
     }
 
-    private static Optional<DoubleHistogram> computeHistogram(Graph similarityGraph) {
+    public static Optional<DoubleHistogram> computeHistogram(Graph similarityGraph) {
         
         DoubleHistogram histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
         similarityGraph.forEachNode(nodeId -> {

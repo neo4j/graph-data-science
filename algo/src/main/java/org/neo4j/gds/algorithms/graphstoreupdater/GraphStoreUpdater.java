@@ -67,4 +67,27 @@ public final class GraphStoreUpdater {
 
         return new AddNodePropertyResult(graph.nodeCount(), mutateMilliseconds.get());
     }
+
+    public static AddRelationshipResult addRelationship(
+        GraphStore graphStore,
+        String mutateRelationshipType,
+        String mutateProperty,
+        SingleTypeRelationshipsProducer singleTypeRelationshipsProducer,
+        Log log
+    ) {
+        var mutateMilliseconds = new AtomicLong();
+        try (ProgressTimer ignored = ProgressTimer.start(mutateMilliseconds::set)) {
+
+            var resultRelationships = singleTypeRelationshipsProducer.getRelationships(
+                mutateRelationshipType,
+                mutateProperty
+            );
+
+            log.info("Updating in-memory graph store");
+
+            graphStore.addRelationshipType(resultRelationships);
+        }
+        return new AddRelationshipResult(singleTypeRelationshipsProducer.relationships(), mutateMilliseconds.get());
+    }
+
 }

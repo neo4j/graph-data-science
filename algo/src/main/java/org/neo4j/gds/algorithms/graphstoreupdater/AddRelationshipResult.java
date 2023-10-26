@@ -17,8 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms.similarity;
+package org.neo4j.gds.algorithms.graphstoreupdater;
 
-public class SimilarityAlgorithmsMutateBusinessFacade {
-    
+public final class AddRelationshipResult {
+
+    private final long relationshipsAdded;
+    private final long mutateMilliseconds;
+
+    AddRelationshipResult(
+        long relationshipsAdded,
+        long mutateMilliseconds
+    ) {
+        this.relationshipsAdded = relationshipsAdded;
+        this.mutateMilliseconds = mutateMilliseconds;
+    }
+
+    public long relationshipsAdded() {
+        return relationshipsAdded;
+    }
+
+    public long mutateMilliseconds() {
+        return mutateMilliseconds;
+    }
 }

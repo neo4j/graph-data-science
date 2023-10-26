@@ -19,6 +19,24 @@
  */
 package org.neo4j.gds.algorithms.similarity;
 
-public class SimilarityAlgorithmsMutateBusinessFacade {
-    
+public final class MutateRelationshipResult {
+
+    private final long relationshipsWritten;
+    private final long mutateMilliseconds;
+
+    MutateRelationshipResult(
+        long relationshipsWritten,
+        long writeMilliseconds
+    ) {
+        this.relationshipsWritten = relationshipsWritten;
+        this.mutateMilliseconds = writeMilliseconds;
+    }
+
+    long relationshipsWritten() {
+        return relationshipsWritten;
+    }
+
+    long mutateMilliseconds() {
+        return mutateMilliseconds;
+    }
 }
