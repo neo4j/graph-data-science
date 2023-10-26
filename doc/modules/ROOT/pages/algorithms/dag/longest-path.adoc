@@ -16,10 +16,12 @@ include::partial$/operations-reference/alpha-note.adoc[]
 
 == Introduction
 
-Finding the longest path that leads to a node in a graph is possible to do in linear time for the special case of DAGs.
+Finding the longest path that leads to a node in a graph is possible to do in linear time for the special case of DAGs, that is graphs which do not contain cycles.
 
-GDS implementation for this algorithm is based on topological sort and takes linear time.
-If the graph is not a DAG, the runtime is still linear, but the results cannot be trusted.
+The GDS implementation for this problem is based on topological sort and  operates in linear time.
+When the graph is not a DAG, any node that belongs to  component containing at least one cycle will be excluded from the results.
+That is, the implementation will only give results for those components of the graph that form DAGs.
+
 You can use xref:algorithms/dag/topological-sort.adoc[topological sort] to make sure the graph is a DAG.
 
 The algorithm supports weighted and unweighted graphs.
