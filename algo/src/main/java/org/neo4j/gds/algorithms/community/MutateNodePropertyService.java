@@ -20,6 +20,8 @@
 package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.algorithms.graphstoreupdater.AddNodePropertyResult;
+import org.neo4j.gds.algorithms.graphstoreupdater.GraphStoreUpdater;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;

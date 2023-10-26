@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms.community;
+package org.neo4j.gds.algorithms.graphstoreupdater;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
@@ -34,10 +34,10 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Extracting some common code so that it is reusable; eventually this can probably move to where it is used
  */
-final class GraphStoreUpdater {
+public final class GraphStoreUpdater {
     private GraphStoreUpdater() {}
 
-    static AddNodePropertyResult addNodeProperty(
+    public static AddNodePropertyResult addNodeProperty(
         Graph graph,
         GraphStore graphStore,
         Collection<NodeLabel> labelsToUpdate,
