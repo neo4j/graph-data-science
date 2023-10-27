@@ -20,10 +20,10 @@
 package org.neo4j.gds.similarity.nodesim;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.similarity.SimilarityMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.similarity.SimilarityMutateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -36,16 +36,16 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class NodeSimilarityMutateProc extends BaseProc {
 
+    @Context
+    public GraphDataScience facade;
+
     @Procedure(name = "gds.nodeSimilarity.mutate", mode = READ)
     @Description(NODE_SIMILARITY_DESCRIPTION)
     public Stream<SimilarityMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new NodeSimilarityMutateSpecification(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.similarity().nodeSimilarityMutate(graphName, configuration);
     }
 
     @Procedure(value = "gds.nodeSimilarity.mutate.estimate", mode = READ)
@@ -54,10 +54,6 @@ public class NodeSimilarityMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new NodeSimilarityMutateSpecification(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.similarity().nodeSimilarityEstimateMutate(graphNameOrConfiguration, algoConfiguration);
     }
 }

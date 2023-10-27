@@ -39,12 +39,13 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.similarity.SimilarityMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
-import org.neo4j.gds.similarity.SimilarityMutateResult;
 import org.neo4j.gds.similarity.SimilarityProc;
 import org.neo4j.gds.similarity.SimilarityResultBuilder;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarity;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateResultBuilder;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.similarity.nodesim.TopKGraph;
 
@@ -87,7 +88,11 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
     ) {
 
         SimilarityResultBuilder<SimilarityMutateResult> resultBuilder =
-            SimilarityProc.withGraphsizeAndTimings(new SimilarityMutateResult.Builder(), computationResult, NodeSimilarityResult::graphResult);
+            SimilarityProc.withGraphsizeAndTimings(
+                new NodeSimilarityMutateResultBuilder(),
+                computationResult,
+                NodeSimilarityResult::graphResult
+            );
         return resultBuilder;
     }
 

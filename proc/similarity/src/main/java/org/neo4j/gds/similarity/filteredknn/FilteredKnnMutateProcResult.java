@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.similarity.filteredknn;
 
-import org.neo4j.gds.similarity.SimilarityMutateResult;
+import org.neo4j.gds.procedures.similarity.SimilarityMutateResult;
 import org.neo4j.gds.similarity.SimilarityResultBuilder;
 
 import java.util.Map;

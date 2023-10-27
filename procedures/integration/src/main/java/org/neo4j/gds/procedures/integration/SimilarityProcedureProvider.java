@@ -23,6 +23,7 @@ import org.neo4j.gds.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
+import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsMutateBusinessFacade;
@@ -161,7 +162,10 @@ public class SimilarityProcedureProvider {
 
         var relationshipExporterBuilder = exportBuildersProvider.relationshipExporterBuilder(exporterContext);
 
-        var mutateBusinessFacade = new SimilarityAlgorithmsMutateBusinessFacade();
+        var mutateBusinessFacade = new SimilarityAlgorithmsMutateBusinessFacade(
+            similarityAlgorithmsFacade,
+            new MutateRelationshipService(log)
+        );
         var statsBusinessFacade = new SimilarityAlgorithmsStatsBusinessFacade(similarityAlgorithmsFacade);
         var writeBusinessFacade = new SimilarityAlgorithmsWriteBusinessFacade(
             similarityAlgorithmsFacade,

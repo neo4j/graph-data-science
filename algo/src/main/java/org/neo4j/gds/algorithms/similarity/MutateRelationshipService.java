@@ -17,42 +17,37 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms.community;
+package org.neo4j.gds.algorithms.similarity;
 
-import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.algorithms.graphstoreupdater.AddNodePropertyResult;
+import org.neo4j.gds.algorithms.graphstoreupdater.AddRelationshipResult;
 import org.neo4j.gds.algorithms.graphstoreupdater.GraphStoreUpdater;
-import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.algorithms.graphstoreupdater.SingleTypeRelationshipsProducer;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.logging.Log;
 
-import java.util.Collection;
-
-public class MutateNodePropertyService {
+public class MutateRelationshipService {
 
     private final Log log;
 
-    public MutateNodePropertyService(Log log) {
+    public MutateRelationshipService(
+        Log log
+    ) {
         this.log = log;
     }
 
-    public AddNodePropertyResult mutate(
-        String nodePropertyToMutate,
-        NodePropertyValues nodePropertyValues,
-        Collection<NodeLabel> nodeLabelsToUpdate,
-        Graph graph,
-        GraphStore graphStore
-    ) {
-        return GraphStoreUpdater.addNodeProperty(
-            graph,
+    public AddRelationshipResult mutate(
+        GraphStore graphStore,
+        String mutateRelationshipType,
+        String mutateProperty,
+        SingleTypeRelationshipsProducer singleTypeRelationshipsProducer
+    ){
+        return GraphStoreUpdater.addRelationship(
             graphStore,
-            nodeLabelsToUpdate,
-            nodePropertyToMutate,
-            nodePropertyValues,
-            this.log
+            mutateRelationshipType,
+            mutateProperty,
+            singleTypeRelationshipsProducer,
+            log
         );
     }
-
 
 }

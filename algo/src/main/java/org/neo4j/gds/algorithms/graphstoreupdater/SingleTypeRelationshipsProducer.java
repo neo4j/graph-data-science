@@ -17,26 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms.community;
+package org.neo4j.gds.algorithms.graphstoreupdater;
 
-public final class AddNodePropertyResult {
+import org.neo4j.gds.core.loading.SingleTypeRelationships;
 
-    private final long nodePropertiesAdded;
-    private final long mutateMilliseconds;
+/**
+ * Extracting some common code so that it is reusable; eventually this can probably move to where it is used
+ */
+public interface SingleTypeRelationshipsProducer {
 
-    AddNodePropertyResult(
-        long nodePropertiesAdded,
-        long mutateMilliseconds
-    ) {
-        this.nodePropertiesAdded = nodePropertiesAdded;
-        this.mutateMilliseconds = mutateMilliseconds;
-    }
+    SingleTypeRelationships getRelationships(String mutateRelationshipType, String mutateProperty);
 
-    long nodePropertiesAdded() {
-        return nodePropertiesAdded;
-    }
-
-    long mutateMilliseconds() {
-        return mutateMilliseconds;
-    }
+    long relationshipsCount();
 }
