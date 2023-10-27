@@ -47,12 +47,12 @@ public class Node2VecAlgorithmFactory<CONFIG extends Node2VecBaseConfig> extends
         ProgressTracker progressTracker
     ) {
         validateConfig(configuration, graph);
-        return new Node2Vec(graph, configuration, progressTracker);
+        return Node2Vec.create(graph, configuration, progressTracker);
     }
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return Node2Vec.memoryEstimation(configuration);
+        return Node2Vec.memoryEstimation(configuration.walksPerNode(), configuration.walkLength(), configuration.embeddingDimension());
     }
 
     @Override

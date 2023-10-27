@@ -101,7 +101,7 @@ class Node2VecTest extends BaseTest {
             .graph();
 
         int embeddingDimension = 128;
-        HugeObjectArray<FloatVector> node2Vec = new Node2Vec(
+        HugeObjectArray<FloatVector> node2Vec = Node2Vec.create(
             graph,
             ImmutableNode2VecStreamConfig.builder().embeddingDimension(embeddingDimension).build(),
             ProgressTracker.NULL_TRACKER
@@ -135,7 +135,7 @@ class Node2VecTest extends BaseTest {
         var progressTask = new Node2VecAlgorithmFactory<>().progressTask(graph, config);
         var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, log, 4, EmptyTaskRegistryFactory.INSTANCE);
-        new Node2Vec(
+        Node2Vec.create(
             graph,
             config,
             progressTracker
@@ -172,7 +172,7 @@ class Node2VecTest extends BaseTest {
     void shouldEstimateMemory() {
         var nodeCount = 1000;
         var config = ImmutableNode2VecStreamConfig.builder().build();
-        var memoryEstimation = Node2Vec.memoryEstimation(config);
+        var memoryEstimation = Node2Vec.memoryEstimation(config.walksPerNode(), config.walkLength(), config.embeddingDimension());
 
         var numberOfRandomWalks = nodeCount * config.walksPerNode() * config.walkLength();
         var randomWalkMemoryUsageLowerBound = numberOfRandomWalks * Long.BYTES;
@@ -199,7 +199,7 @@ class Node2VecTest extends BaseTest {
             .relationshipWeightProperty("weight")
             .build();
 
-        var node2Vec = new Node2Vec(graph, config, ProgressTracker.NULL_TRACKER);
+        var node2Vec = Node2Vec.create(graph, config, ProgressTracker.NULL_TRACKER);
 
         assertThatThrownBy(node2Vec::compute)
             .isInstanceOf(RuntimeException.class)
@@ -228,13 +228,13 @@ class Node2VecTest extends BaseTest {
             .randomSeed(1337L)
             .build();
 
-        var embeddings = new Node2Vec(
+        var embeddings = Node2Vec.create(
             graph,
             config,
             ProgressTracker.NULL_TRACKER
         ).compute().embeddings();
 
-        var otherEmbeddings = new Node2Vec(
+        var otherEmbeddings = Node2Vec.create(
             graph,
             config,
             ProgressTracker.NULL_TRACKER
@@ -327,13 +327,13 @@ class Node2VecTest extends BaseTest {
             .concurrency(1)
             .build();
 
-        var firstEmbeddings = new Node2Vec(
+        var firstEmbeddings = Node2Vec.create(
             firstGraph,
             config,
             ProgressTracker.NULL_TRACKER
         ).compute().embeddings();
 
-        var secondEmbeddings = new Node2Vec(
+        var secondEmbeddings = Node2Vec.create(
             secondGraph,
             config,
             ProgressTracker.NULL_TRACKER

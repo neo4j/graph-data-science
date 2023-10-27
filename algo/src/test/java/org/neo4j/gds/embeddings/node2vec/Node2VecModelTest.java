@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.helper.FloatVectorTestUtils;
 
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.LongStream;
 
@@ -59,20 +60,22 @@ class Node2VecModelTest {
             random
         );
 
-        Node2VecStreamConfig config = ImmutableNode2VecStreamConfig.builder()
-            .embeddingDimension(10)
-            .initialLearningRate(0.05)
-            .negativeSamplingRate(1)
-            .iterations(5)
-            .concurrency(4)
-            .build();
+        Node2VecStreamConfig defaults = ImmutableNode2VecStreamConfig.builder().build();
 
         int nodeCount = numberOfClusters * clusterSize;
 
         var node2VecModel = new Node2VecModel(
             nodeId -> nodeId,
             nodeCount,
-            config,
+            0.05,
+            defaults.minLearningRate(),
+            5,
+            10,
+            defaults.windowSize(),
+            1,
+            defaults.embeddingInitializer(),
+            4,
+            defaults.randomSeed(),
             walks,
             probabilitiesBuilder.build(),
             ProgressTracker.NULL_TRACKER
@@ -82,7 +85,7 @@ class Node2VecModelTest {
 
         // as the order of the randomWalks is not deterministic, we also have non-fixed losses
         assertThat(trainResult.lossPerIteration())
-            .hasSize(config.iterations())
+            .hasSize(5)
             .allMatch(loss -> loss > 0 && Double.isFinite(loss));
 
         var embeddings = trainResult.embeddings();
@@ -162,21 +165,22 @@ class Node2VecModelTest {
 
         CompressedRandomWalks walks = generateRandomWalks(probabilitiesBuilder, numberOfClusters, clusterSize, numberOfWalks, walkLength, random);
 
-        Node2VecStreamConfig config = ImmutableNode2VecStreamConfig.builder()
-            .embeddingDimension(2)
-            .initialLearningRate(0.05)
-            .negativeSamplingRate(1)
-            .randomSeed(1337L)
-            .concurrency(4)
-            .iterations(iterations)
-            .build();
+        Node2VecStreamConfig defaults = ImmutableNode2VecStreamConfig.builder().build();
 
         int nodeCount = numberOfClusters * clusterSize;
 
         var node2VecModel = new Node2VecModel(
             nodeId -> nodeId,
             nodeCount,
-            config,
+            0.05,
+            defaults.minLearningRate(),
+            iterations,
+            2,
+            defaults.windowSize(),
+            1,
+            defaults.embeddingInitializer(),
+            4,
+            Optional.of(1337L),
             walks,
             probabilitiesBuilder.build(),
             ProgressTracker.NULL_TRACKER
@@ -185,7 +189,15 @@ class Node2VecModelTest {
         var otherNode2VecModel = new Node2VecModel(
             nodeId -> nodeId,
             nodeCount,
-            config,
+            0.05,
+            defaults.minLearningRate(),
+            iterations,
+            2,
+            defaults.windowSize(),
+            1,
+            defaults.embeddingInitializer(),
+            4,
+            Optional.of(1337L),
             walks,
             probabilitiesBuilder.build(),
             ProgressTracker.NULL_TRACKER
