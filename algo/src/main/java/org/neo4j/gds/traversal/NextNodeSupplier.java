@@ -20,7 +20,6 @@
 package org.neo4j.gds.traversal;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.config.SourceNodesConfig;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -53,8 +52,8 @@ public interface NextNodeSupplier {
         private final List<Long> nodes;
         private final AtomicInteger nextIndex;
 
-        static ListNodeSupplier of(SourceNodesConfig config, Graph graph) {
-            var mappedIds = config.sourceNodes().stream().map(graph::toMappedNodeId).collect(Collectors.toList());
+        static ListNodeSupplier of(List<Long> sourceNodes, Graph graph) {
+            var mappedIds = sourceNodes.stream().map(graph::toMappedNodeId).collect(Collectors.toList());
             return new ListNodeSupplier(mappedIds);
         }
 

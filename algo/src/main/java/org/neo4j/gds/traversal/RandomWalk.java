@@ -85,12 +85,12 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
 
         var cumulativeWeightSupplier = RandomWalkCompanion.cumulativeWeights(
             graph,
-            config,
+            config.concurrency(),
             executorService,
             progressTracker
         );
 
-        var nextNodeSupplier = RandomWalkCompanion.nextNodeSupplier(graph, config);
+        var nextNodeSupplier = RandomWalkCompanion.nextNodeSupplier(graph, config.sourceNodes());
 
         var terminationFlag = new ExternalTerminationFlag(this);
 
