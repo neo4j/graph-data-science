@@ -30,11 +30,11 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.core.EmbeddingUtils;
-import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 import org.neo4j.gds.traversal.RandomWalkCompanion;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
@@ -42,24 +42,99 @@ import java.util.concurrent.atomic.AtomicLong;
 public class Node2Vec extends Algorithm<Node2VecModel.Result> {
 
     private final Graph graph;
-    private final Node2VecBaseConfig config;
+    private final double positiveSamplingFactor;
+    private final double negativeSamplingExponent;
+    private final int concurrency;
+    private final int walksPerNode;
+    private final int walkLength;
+    private final double inOutFactor;
+    private final double returnFactor;
+    private final List<Long> sourceNodes;
+    private final Optional<Long> maybeRandomSeed;
+    private final double initialLearningRate;
+    private final double minLearningRate;
+    private final int iterations;
+    private final int embeddingDimension;
+    private final int windowSize;
+    private final int negativeSamplingRate;
+    private final Node2VecBaseConfig.EmbeddingInitializer embeddingInitializer;
 
-    public static MemoryEstimation memoryEstimation(Node2VecBaseConfig config) {
+
+    public static MemoryEstimation memoryEstimation(int walksPerNode, int walkLength, int embeddingDimension) {
         return MemoryEstimations.builder(Node2Vec.class.getSimpleName())
             .perNode("random walks", (nodeCount) -> {
-                var numberOfRandomWalks = nodeCount * config.walksPerNode();
-                var randomWalkMemoryUsage = MemoryUsage.sizeOfLongArray(config.walkLength());
+                var numberOfRandomWalks = nodeCount * walksPerNode;
+                var randomWalkMemoryUsage = MemoryUsage.sizeOfLongArray(walkLength);
                 return HugeObjectArray.memoryEstimation(numberOfRandomWalks, randomWalkMemoryUsage);
             })
             .add("probability cache", RandomWalkProbabilities.memoryEstimation())
-            .add("model", Node2VecModel.memoryEstimation(config))
+            .add("model", Node2VecModel.memoryEstimation(embeddingDimension))
             .build();
     }
 
-    public Node2Vec(Graph graph, Node2VecBaseConfig config, ProgressTracker progressTracker) {
+    static Node2Vec create(Graph graph, Node2VecBaseConfig config, ProgressTracker progressTracker) {
+        return new Node2Vec(
+            graph,
+            config.concurrency(),
+            config.positiveSamplingFactor(),
+            config.negativeSamplingExponent(),
+            config.walksPerNode(),
+            config.walkLength(),
+            config.inOutFactor(),
+            config.returnFactor(),
+            config.sourceNodes(),
+            config.randomSeed(),
+            progressTracker,
+            config.initialLearningRate(),
+            config.minLearningRate(),
+            config.iterations(),
+            config.embeddingDimension(),
+            config.windowSize(),
+            config.negativeSamplingRate(),
+            config.embeddingInitializer()
+        );
+    }
+
+    public Node2Vec(
+        Graph graph,
+        int concurrency,
+        double positiveSamplingFactor,
+        double negativeSamplingExponent,
+        int walksPerNode,
+        int walkLength,
+        double inOutFactor,
+        double returnFactor,
+        List<Long> sourceNodes,
+        Optional<Long> maybeRandomSeed,
+        ProgressTracker progressTracker,
+        // train params
+        double initialLearningRate,
+        double minLearningRate,
+        int iterations,
+        int embeddingDimension,
+        int windowSize,
+        int negativeSamplingRate,
+        Node2VecBaseConfig.EmbeddingInitializer embeddingInitializer
+
+    ) {
         super(progressTracker);
         this.graph = graph;
-        this.config = config;
+        this.positiveSamplingFactor = positiveSamplingFactor;
+        this.negativeSamplingExponent = negativeSamplingExponent;
+        this.concurrency = concurrency;
+        this.walksPerNode = walksPerNode;
+        this.walkLength = walkLength;
+        this.inOutFactor = inOutFactor;
+        this.returnFactor = returnFactor;
+        this.sourceNodes = sourceNodes;
+        this.maybeRandomSeed = maybeRandomSeed;
+        this.initialLearningRate = initialLearningRate;
+        this.minLearningRate = minLearningRate;
+        this.iterations = iterations;
+        this.embeddingDimension = embeddingDimension;
+        this.windowSize = windowSize;
+        this.negativeSamplingRate = negativeSamplingRate;
+        this.embeddingInitializer = embeddingInitializer;
     }
 
     @Override
@@ -69,7 +144,7 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
         if (graph.hasRelationshipProperty()) {
             EmbeddingUtils.validateRelationshipWeightPropertyValue(
                 graph,
-                config.concurrency(),
+                concurrency,
                 weight -> weight >= 0,
                 "Node2Vec only supports non-negative weights.",
                 DefaultPool.INSTANCE
@@ -78,11 +153,11 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
 
         var probabilitiesBuilder = new RandomWalkProbabilities.Builder(
             graph.nodeCount(),
-            config.positiveSamplingFactor(),
-            config.negativeSamplingExponent(),
-            config.concurrency()
+            positiveSamplingFactor,
+            negativeSamplingExponent,
+            concurrency
         );
-        var walks = new CompressedRandomWalks(graph.nodeCount() * config.walksPerNode());
+        var walks = new CompressedRandomWalks(graph.nodeCount() * walksPerNode);
 
         progressTracker.beginSubTask("RandomWalk");
 
@@ -90,14 +165,20 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
             walks,
             probabilitiesBuilder,
             graph,
-            config,
+            maybeRandomSeed,
+            concurrency,
+            sourceNodes,
+            walksPerNode,
+            walkLength,
+            inOutFactor,
+            returnFactor,
             DefaultPool.INSTANCE,
             progressTracker,
             terminationFlag
         );
 
         progressTracker.beginSubTask("create walks");
-        RunWithConcurrency.builder().concurrency(config.concurrency()).tasks(tasks).run();
+        RunWithConcurrency.builder().concurrency(concurrency).tasks(tasks).run();
         walks.setMaxWalkLength(tasks.stream()
             .map(Node2VecRandomWalkTask::maxWalkLength)
             .max(Integer::compareTo)
@@ -114,7 +195,15 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
         var node2VecModel = new Node2VecModel(
             graph::toOriginalNodeId,
             graph.nodeCount(),
-            config,
+            initialLearningRate,
+            minLearningRate,
+            iterations,
+            embeddingDimension,
+            windowSize,
+            negativeSamplingRate,
+            embeddingInitializer,
+            concurrency,
+            maybeRandomSeed,
             walks,
             probabilitiesBuilder.build(),
             progressTracker
@@ -130,18 +219,23 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
         CompressedRandomWalks compressedRandomWalks,
         RandomWalkProbabilities.Builder randomWalkPropabilitiesBuilder,
         Graph graph,
-        RandomWalkBaseConfig config,
+        Optional<Long> maybeRandomSeed,
+        int concurrency,
+        List<Long> sourceNodes,
+        int walksPerNode,
+        int walkLength,
+        double inOutFactor,
+        double returnFactor,
         ExecutorService executorService,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
         List<Node2VecRandomWalkTask> tasks = new ArrayList<>();
-        var randomSeed = config.randomSeed().orElseGet(() -> new Random().nextLong());
-        int concurrency = config.concurrency();
-        var nextNodeSupplier = RandomWalkCompanion.nextNodeSupplier(graph, config.sourceNodes());
+        var randomSeed = maybeRandomSeed.orElseGet(() -> new Random().nextLong());
+        var nextNodeSupplier = RandomWalkCompanion.nextNodeSupplier(graph, sourceNodes);
         var cumulativeWeightsSupplier = RandomWalkCompanion.cumulativeWeights(
             graph,
-            config.concurrency(),
+            concurrency,
             executorService,
             progressTracker
         );
@@ -150,15 +244,18 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
         for (int i = 0; i < concurrency; ++i) {
             tasks.add(new Node2VecRandomWalkTask(
                 graph.concurrentCopy(),
-                config,
                 nextNodeSupplier,
+                walksPerNode,
                 cumulativeWeightsSupplier,
-                randomSeed,
                 progressTracker,
                 terminationFlag,
                 index,
                 compressedRandomWalks,
-                randomWalkPropabilitiesBuilder
+                randomWalkPropabilitiesBuilder,
+                randomSeed,
+                walkLength,
+                returnFactor,
+                inOutFactor
             ));
         }
         return tasks;

@@ -24,7 +24,6 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.samplers.RandomWalkSampler;
 import org.neo4j.gds.traversal.NextNodeSupplier;
-import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -45,19 +44,22 @@ final class Node2VecRandomWalkTask implements Runnable {
 
     Node2VecRandomWalkTask(
         Graph graph,
-        RandomWalkBaseConfig config,
         NextNodeSupplier nextNodeSupplier,
+        int walksPerNode,
         RandomWalkSampler.CumulativeWeightSupplier cumulativeWeightSupplier,
-        long randomSeed,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag,
         AtomicLong walkIndex,
         CompressedRandomWalks compressedRandomWalks,
-        RandomWalkProbabilities.Builder randomWalkProbabilitiesBuilder
+        RandomWalkProbabilities.Builder randomWalkProbabilitiesBuilder,
+        long randomSeed,
+        int walkLength,
+        double returnFactor,
+        double inOutFactor
     ) {
         this.graph = graph;
         this.nextNodeSupplier = nextNodeSupplier;
-        this.walksPerNode = config.walksPerNode();
+        this.walksPerNode = walksPerNode;
         this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
         this.walkIndex = walkIndex;
@@ -67,9 +69,9 @@ final class Node2VecRandomWalkTask implements Runnable {
         this.sampler = RandomWalkSampler.create(
             graph,
             cumulativeWeightSupplier,
-            config.walkLength(),
-            config.returnFactor(),
-            config.inOutFactor(),
+            walkLength,
+            returnFactor,
+            inOutFactor,
             randomSeed
         );
         this.walks = 0;
