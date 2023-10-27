@@ -32,7 +32,7 @@ final class RandomWalkTask implements Runnable {
     private final Graph graph;
     private final NextNodeSupplier nextNodeSupplier;
     private final BlockingQueue<long[]> walks;
-    private final long walksPerNode;
+    private final int walksPerNode;
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
     private final RandomWalkSampler sampler;
@@ -42,11 +42,13 @@ final class RandomWalkTask implements Runnable {
 
     RandomWalkTask(
         Graph graph,
-        RandomWalkBaseConfig config,
         NextNodeSupplier nextNodeSupplier,
         RandomWalkSampler.CumulativeWeightSupplier cumulativeWeightSupplier,
         BlockingQueue<long[]> walks,
-        long walksPerNode,
+        int walksPerNode,
+        int walkLength,
+        double returnFactor,
+        double inOutFactor,
         long randomSeed,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
@@ -62,9 +64,9 @@ final class RandomWalkTask implements Runnable {
         this.sampler = RandomWalkSampler.create(
             graph,
             cumulativeWeightSupplier,
-            config.walkLength(),
-            config.returnFactor(),
-            config.inOutFactor(),
+            walkLength,
+            returnFactor,
+            inOutFactor,
             randomSeed
         );
     }
