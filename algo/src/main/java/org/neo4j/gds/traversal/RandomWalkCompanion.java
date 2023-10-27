@@ -25,22 +25,23 @@ import org.neo4j.gds.degree.DegreeCentrality;
 import org.neo4j.gds.degree.ImmutableDegreeCentralityConfig;
 import org.neo4j.gds.ml.core.samplers.RandomWalkSampler;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
-public class RandomWalkCompanion {
+public final class RandomWalkCompanion {
 
     public static RandomWalkSampler.CumulativeWeightSupplier cumulativeWeights(
         Graph graph,
-        RandomWalkBaseConfig config,
+        int concurrency,
         ExecutorService executorsService,
         ProgressTracker progressTracker
     ) {
         return graph.hasRelationshipProperty()
-            ? cumulativeWeights(graph, config.concurrency(), executorsService, progressTracker)::get
+            ? cumulativeWeightsFromProperty(graph, concurrency, executorsService, progressTracker)::get
             : graph::degree;
     }
 
-    private static DegreeCentrality.DegreeFunction cumulativeWeights(
+    private static DegreeCentrality.DegreeFunction cumulativeWeightsFromProperty(
         Graph graph,
         int concurrency,
         ExecutorService executorService,
@@ -61,9 +62,11 @@ public class RandomWalkCompanion {
 
     }
 
-    public static NextNodeSupplier nextNodeSupplier(Graph graph, RandomWalkBaseConfig config) {
-        return config.sourceNodes() == null || config.sourceNodes().isEmpty()
+    public static NextNodeSupplier nextNodeSupplier(Graph graph, List<Long> sourceNodes) {
+        return sourceNodes.isEmpty()
             ? new NextNodeSupplier.GraphNodeSupplier(graph.nodeCount())
-            : NextNodeSupplier.ListNodeSupplier.of(config, graph);
+            : NextNodeSupplier.ListNodeSupplier.of(sourceNodes, graph);
     }
+
+    private RandomWalkCompanion() {}
 }

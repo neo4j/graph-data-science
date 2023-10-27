@@ -138,10 +138,10 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
         List<Node2VecRandomWalkTask> tasks = new ArrayList<>();
         var randomSeed = config.randomSeed().orElseGet(() -> new Random().nextLong());
         int concurrency = config.concurrency();
-        var nextNodeSupplier = RandomWalkCompanion.nextNodeSupplier(graph, config);
+        var nextNodeSupplier = RandomWalkCompanion.nextNodeSupplier(graph, config.sourceNodes());
         var cumulativeWeightsSupplier = RandomWalkCompanion.cumulativeWeights(
             graph,
-            config,
+            config.concurrency(),
             executorService,
             progressTracker
         );
