@@ -49,20 +49,40 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
     private static final String RETURN_STATEMENT = "RETURN *";
 
     // taken from org.neo4j.test.extension.DbmsSupportController
-    private static final ExtensionContext.Namespace DBMS_NAMESPACE = ExtensionContext.Namespace.create(
+    private static final ExtensionContext.Namespace COMUNITY_NAMESPACE = ExtensionContext.Namespace.create(
         "org",
         "neo4j",
         "dbms"
     );
 
+    // taken from com.neo4j.test.extension.EnterpriseDbmsSupportExtension
+    private static final ExtensionContext.Namespace ENTERPRISE_NAMESPACE = ExtensionContext.Namespace.create(
+        "org",
+        "neo4j",
+        "dbms",
+        "support"
+    );
+
     // taken from org.neo4j.test.extension.DbmsSupportController
     private static final String DBMS_KEY = "service";
 
+    private static final String DATABASE_NAME_KEY = "database";
+
     @Override
     public void beforeEach(ExtensionContext context) {
-        GraphDatabaseService db = getDbms(context)
-            .map(dbms -> dbms.database(GraphDatabaseSettings.DEFAULT_DATABASE_NAME))
-            .orElseThrow(() -> new IllegalStateException("No database was found."));
+        GraphDatabaseService db;
+
+        var enterpriseStore = context.getStore(ENTERPRISE_NAMESPACE);
+        var communityStore = context.getStore(COMUNITY_NAMESPACE);
+
+        String databaseName = enterpriseStore.get(DATABASE_NAME_KEY) != null
+            ? enterpriseStore.get(
+                DATABASE_NAME_KEY,
+                String.class
+            )
+            : GraphDatabaseSettings.DEFAULT_DATABASE_NAME;
+        var dbms = communityStore.get(DBMS_KEY, DatabaseManagementService.class);
+        db = dbms.database(databaseName);
 
         Class<?> requiredTestClass = context.getRequiredTestClass();
         Optional<Pair<String, Boolean>> createQuery = createQueryAndIdOffset(requiredTestClass);
@@ -70,19 +90,17 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
         injectFields(context, db, idFunctions);
     }
 
-    private Optional<DatabaseManagementService> getDbms(ExtensionContext context) {
-        return Optional.ofNullable(context.getStore(DBMS_NAMESPACE).get(DBMS_KEY, DatabaseManagementService.class));
-    }
-
     private Optional<Pair<String, Boolean>> createQueryAndIdOffset(Class<?> testClass) {
         return Stream.<Class<?>>iterate(testClass, c -> c.getSuperclass() != null, Class::getSuperclass)
             .flatMap(clazz -> stream(clazz.getDeclaredFields()))
             .filter(field -> field.isAnnotationPresent(Neo4jGraph.class))
             .findFirst()
-            .map(field -> Pair.of(
-                ExtensionUtil.getStringValueOfField(field),
-                field.getAnnotation(Neo4jGraph.class).offsetIds()
-            ));
+            .map(
+                field -> Pair.of(
+                    ExtensionUtil.getStringValueOfField(field),
+                    field.getAnnotation(Neo4jGraph.class).offsetIds()
+                )
+            );
     }
 
     private IdFunctions neo4jGraphSetup(GraphDatabaseService db, Optional<Pair<String, Boolean>> createQueryAndOffset) {
@@ -122,7 +140,8 @@ public class Neo4jSupportExtension implements BeforeEachCallback {
 
         // try to convince the db that `idOffset` number of nodes have already been allocated
         var idGeneratorFactory = GraphDatabaseApiProxy.resolveDependency(db, IdGeneratorFactory.class);
-        TestSupport.fullAccessTransaction(db).accept((tx, ktx) -> Neo4jProxy.reserveNeo4jIds(idGeneratorFactory, 42, ktx.cursorContext()));
+        TestSupport.fullAccessTransaction(db)
+            .accept((tx, ktx) -> Neo4jProxy.reserveNeo4jIds(idGeneratorFactory, 42, ktx.cursorContext()));
     }
 
     private void injectFields(ExtensionContext context, GraphDatabaseService db, IdFunctions idFunctions) {
