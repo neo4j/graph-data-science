@@ -29,6 +29,8 @@ import org.neo4j.gds.core.utils.queue.QueueBasedSpliterator;
 import org.neo4j.gds.ml.core.EmbeddingUtils;
 import org.neo4j.gds.ml.core.samplers.RandomWalkSampler;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -43,18 +45,39 @@ import java.util.stream.StreamSupport;
 public final class RandomWalk extends Algorithm<Stream<long[]>> {
 
     private final Graph graph;
-    private final RandomWalkBaseConfig config;
+    private final int concurrency;
+    private final Optional<Long> maybeRandomSeed;
+    private final List<Long> sourceNodes;
+    private final int walkBufferSize;
+    private final int walksPerNode;
+    private final int walkLength;
+    private final double inOutFactor;
+    private final double returnFactor;
     private final ExecutorService executorService;
 
     private RandomWalk(
         Graph graph,
-        RandomWalkBaseConfig config,
+        int concurrency,
+        Optional<Long> maybeRandomSeed,
+        List<Long> sourceNodes,
+        int walkBufferSize,
+        int walksPerNode,
+        int walkLength,
+        double returnFactor,
+        double inOutFactor,
         ProgressTracker progressTracker,
         ExecutorService executorService
     ) {
         super(progressTracker);
         this.graph = graph;
-        this.config = config;
+        this.concurrency = concurrency;
+        this.maybeRandomSeed = maybeRandomSeed;
+        this.sourceNodes = sourceNodes;
+        this.walkBufferSize = walkBufferSize;
+        this.walksPerNode = walksPerNode;
+        this.walkLength = walkLength;
+        this.returnFactor = returnFactor;
+        this.inOutFactor = inOutFactor;
         this.executorService = executorService;
     }
 
@@ -74,27 +97,39 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
             );
         }
 
-        return new RandomWalk(graph, config, progressTracker, executorService);
+        return new RandomWalk(
+            graph,
+            config.concurrency(),
+            config.randomSeed(),
+            config.sourceNodes(),
+            config.walkBufferSize(),
+            config.walksPerNode(),
+            config.walkLength(),
+            config.returnFactor(),
+            config.inOutFactor(),
+            progressTracker,
+            executorService
+        );
     }
 
     @Override
     public Stream<long[]> compute() {
         progressTracker.beginSubTask("RandomWalk");
 
-        var randomSeed = config.randomSeed().orElseGet(() -> new Random().nextLong());
+        var randomSeed = maybeRandomSeed.orElseGet(() -> new Random().nextLong());
 
         var cumulativeWeightSupplier = RandomWalkCompanion.cumulativeWeights(
             graph,
-            config.concurrency(),
+            concurrency,
             executorService,
             progressTracker
         );
 
-        var nextNodeSupplier = RandomWalkCompanion.nextNodeSupplier(graph, config.sourceNodes());
+        var nextNodeSupplier = RandomWalkCompanion.nextNodeSupplier(graph, sourceNodes);
 
         var terminationFlag = new ExternalTerminationFlag(this);
 
-        BlockingQueue<long[]> walks = new ArrayBlockingQueue<>(config.walkBufferSize());
+        BlockingQueue<long[]> walks = new ArrayBlockingQueue<>(walkBufferSize);
         long[] TOMB = new long[0];
 
         startWalkers(terminationFlag, cumulativeWeightSupplier, randomSeed, nextNodeSupplier, walks, TOMB);
@@ -111,15 +146,17 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         long[] TOMB
     ) {
         var tasks = IntStream
-            .range(0, this.config.concurrency())
+            .range(0, this.concurrency)
             .mapToObj(i ->
                 new RandomWalkTask(
                     graph.concurrentCopy(),
-                    config,
                     nextNodeSupplier,
                     cumulativeWeightSupplier,
                     walks,
-                    config.walksPerNode(),
+                    walksPerNode,
+                    walkLength,
+                    returnFactor,
+                    inOutFactor,
                     randomSeed,
                     progressTracker,
                     terminationFlag
@@ -148,7 +185,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
 
         RunWithConcurrency.builder()
             .executor(this.executorService)
-            .concurrency(this.config.concurrency())
+            .concurrency(this.concurrency)
             .tasks(tasks)
             .terminationFlag(terminationFlag)
             .mayInterruptIfRunning(true)
