@@ -36,6 +36,7 @@ import org.neo4j.gds.procedures.similarity.knn.KnnStatsResult;
 import org.neo4j.gds.procedures.similarity.knn.KnnWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityMutateConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamConfig;
 import org.neo4j.gds.similarity.knn.KnnMutateConfig;
@@ -223,6 +224,24 @@ public class SimilarityProcedureFacade {
         return Stream.of(NodeSimilarityComputationResultTransformer.toStatsResult(computationResult, statsConfig));
     }
 
+    public Stream<SimilarityMutateResult> filteredNodeSimilarityMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var mutateConfig = createConfig(configuration, FilteredNodeSimilarityMutateConfig::of);
+
+        var computationResult = mutateBusinessFacade.filteredNodeSimilarity(
+            graphName,
+            mutateConfig,
+            user,
+            databaseId,
+            procedureReturnColumns.contains("similarityDistribution")
+        );
+
+        return Stream.of(NodeSimilarityComputationResultTransformer.toMutateResult(computationResult));
+    }
+
+
     public Stream<MemoryEstimateResult> filteredNodeSimilarityEstimateStream(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
@@ -236,6 +255,14 @@ public class SimilarityProcedureFacade {
         Map<String, Object> algoConfiguration
     ) {
         var config = createConfig(algoConfiguration, FilteredNodeSimilarityStatsConfig::of);
+        return Stream.of(estimateBusinessFacade.nodeSimilarity(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> filteredNodeSimilarityEstimateMutate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, FilteredNodeSimilarityMutateConfig::of);
         return Stream.of(estimateBusinessFacade.nodeSimilarity(graphNameOrConfiguration, config));
     }
 

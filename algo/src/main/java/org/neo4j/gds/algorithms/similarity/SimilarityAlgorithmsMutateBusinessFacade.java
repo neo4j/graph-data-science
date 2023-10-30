@@ -29,6 +29,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityMutateConfig;
 import org.neo4j.gds.similarity.knn.KnnMutateConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
 
@@ -80,7 +81,39 @@ public class SimilarityAlgorithmsMutateBusinessFacade {
             configuration.mutateProperty()
         );
 
+    }
 
+    public RelationshipMutateResult<SimilaritySpecificFieldsWithDistribution> filteredNodeSimilarity(
+        String graphName,
+        FilteredNodeSimilarityMutateConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        boolean computeSimilarityDistribution
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> similarityAlgorithmsFacade.filteredNodeSimilarity(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return mutate(
+            algorithmResult,
+            configuration,
+            result -> result.graphResult(),
+            ((result, similarityDistribution) -> {
+                var similarityGraphResult = result.graphResult();
+                return new SimilaritySpecificFieldsWithDistribution(
+                    similarityGraphResult.comparedNodes(),
+                    similarityGraphResult.similarityGraph().relationshipCount(),
+                    similarityDistribution
+                );
+            }),
+            intermediateResult.computeMilliseconds,
+            () -> SimilaritySpecificFieldsWithDistribution.EMPTY,
+            computeSimilarityDistribution,
+            configuration.mutateRelationshipType(),
+            configuration.mutateProperty()
+        );
     }
 
     public RelationshipMutateResult knn(
