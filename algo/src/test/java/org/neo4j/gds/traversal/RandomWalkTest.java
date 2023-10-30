@@ -21,14 +21,12 @@ package org.neo4j.gds.traversal;
 
 import org.assertj.core.data.Offset;
 import org.assertj.core.data.Percentage;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
@@ -40,8 +38,6 @@ import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.embeddings.node2vec.ImmutableNode2VecStreamConfig;
-import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -52,6 +48,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.TreeSet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
@@ -89,19 +86,21 @@ class RandomWalkTest {
 
     @Test
     void testWithDefaultConfig() {
-        Node2VecStreamConfig config = ImmutableNode2VecStreamConfig.builder().build();
-
+        var walkParameters = new WalkParameters(10, 80, 1.0, 1.0);
         var randomWalk = RandomWalk.create(
             graph,
-            config,
-            config.walkParameters(),
+            4,
+            walkParameters,
+            List.of(),
+            1000,
+            Optional.empty(),
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE
         );
 
         List<long[]> result = randomWalk.compute().collect(Collectors.toList());
 
-        int expectedNumberOfWalks = config.walksPerNode() * 3;
+        int expectedNumberOfWalks = walkParameters.walksPerNode * 3;
         assertEquals(expectedNumberOfWalks, result.size());
         long nodeZero = graph.toMappedNodeId("a");
         long[] walkForNodeZero = result
@@ -109,16 +108,39 @@ class RandomWalkTest {
             .filter(arr -> arr[0] == nodeZero)
             .findFirst()
             .orElse(new long[0]);
-        int expectedStepsInWalkForNode0 = config.walkLength();
+        int expectedStepsInWalkForNode0 = walkParameters.walkLength;
         assertEquals(expectedStepsInWalkForNode0, walkForNodeZero.length);
     }
 
     @Test
     void shouldBeDeterministic() {
-        var config = ImmutableNode2VecStreamConfig.builder().concurrency(4).randomSeed(42L).build();
+        var concurrency = 4;
+        var randomSeed = Optional.of(42L);
+        var walkParameters = new WalkParameters(10, 80, 1.0, 1.0);
+        var sourceNodes = List.<Long>of();
+        var walkBufferSize = 1000;
 
-        var firstResult = runRandomWalkSeeded(config, graph);
-        var secondResult = runRandomWalkSeeded(config, graph);
+        var firstResult = RandomWalk.create(
+            graph,
+            concurrency,
+            walkParameters,
+            sourceNodes,
+            walkBufferSize,
+            randomSeed,
+            ProgressTracker.NULL_TRACKER,
+            DefaultPool.INSTANCE
+        ).compute().collect(Collectors.toList());
+
+        var secondResult = RandomWalk.create(
+            graph,
+            concurrency,
+            walkParameters,
+            sourceNodes,
+            walkBufferSize,
+            randomSeed,
+            ProgressTracker.NULL_TRACKER,
+            DefaultPool.INSTANCE
+        ).compute().collect(Collectors.toList());
 
         var firstResultAsSet = new TreeSet<long[]>(Arrays::compare);
         firstResultAsSet.addAll(firstResult);
@@ -131,31 +153,21 @@ class RandomWalkTest {
         assertThat(firstResultAsSet).isEqualTo(secondResultAsSet);
     }
 
-    @NotNull
-    private List<long[]> runRandomWalkSeeded(Node2VecStreamConfig config, Graph graph) {
-        var randomWalk = RandomWalk.create(
-            graph,
-            config,
-            config.walkParameters(),
-            ProgressTracker.NULL_TRACKER,
-            DefaultPool.INSTANCE
-        );
-
-        return randomWalk.compute().collect(Collectors.toList());
-    }
-
     @Test
     void testSampleFromMultipleRelationshipTypes() {
-        Node2VecStreamConfig config = ImmutableNode2VecStreamConfig.builder().build();
+        WalkParameters walkParameters = new WalkParameters(10, 80, 1.0, 1.0);
         RandomWalk randomWalk = RandomWalk.create(
             graph,
-            config,
-            config.walkParameters(),
+            4,
+            walkParameters,
+            List.of(),
+            1000,
+            Optional.empty(),
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE
         );
 
-        int expectedNumberOfWalks = config.walksPerNode() * 3;
+        int expectedNumberOfWalks = walkParameters.walksPerNode * 3;
         List<long[]> result = randomWalk.compute().collect(Collectors.toList());
         assertEquals(expectedNumberOfWalks, result.size());
         long nodeZero = graph.toMappedNodeId("a");
@@ -164,7 +176,7 @@ class RandomWalkTest {
             .filter(arr -> arr[0] == nodeZero)
             .findFirst()
             .orElse(new long[0]);
-        int expectedStepsInWalkForNode0 = config.walkLength();
+        int expectedStepsInWalkForNode0 = walkParameters.walkLength;
         assertEquals(expectedStepsInWalkForNode0, walkForNodeZero.length);
     }
 
@@ -179,20 +191,15 @@ class RandomWalkTest {
                  ", (f)-[:REL]->(g:Node)-[:REL]->(a)" +
                  ", (g)-[:REL]->(h:Node)-[:REL]->(a)");
 
-        var config = ImmutableNode2VecStreamConfig.builder()
-            .walkLength(10)
-            .concurrency(4)
-            .walksPerNode(100)
-            .walkBufferSize(1000)
-            .returnFactor(0.01)
-            .inOutFactor(1)
-            .randomSeed(42L)
-            .build();
+        var walkParameters = new WalkParameters(100, 10, 0.01, 1.0);
 
         RandomWalk randomWalk = RandomWalk.create(
             graph,
-            config,
-            config.walkParameters(),
+            4,
+            walkParameters,
+            List.of(),
+            1000,
+            Optional.of(42L),
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE
         );
@@ -240,20 +247,15 @@ class RandomWalkTest {
                  ", (d)-[:REL]->(e)" +
                  ", (e)-[:REL]->(a)");
 
-        var config = ImmutableNode2VecStreamConfig.builder()
-            .walkLength(10)
-            .concurrency(4)
-            .walksPerNode(1000)
-            .walkBufferSize(1000)
-            .returnFactor(0.1)
-            .inOutFactor(100000)
-            .randomSeed(87L)
-            .build();
+        var walkParameters = new WalkParameters(1000, 10, 0.1, 100_000.0);
 
         RandomWalk randomWalk = RandomWalk.create(
             graph,
-            config,
-            config.walkParameters(),
+            4,
+            walkParameters,
+            List.of(),
+            1000,
+            Optional.of(87L),
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE
         );
@@ -290,20 +292,15 @@ class RandomWalkTest {
             ", (c)-[:REL {weight: 1.0}]->(a)"
         );
 
-        var config = ImmutableNode2VecStreamConfig.builder()
-            .walkLength(1000)
-            .concurrency(1)
-            .walksPerNode(1)
-            .walkBufferSize(100)
-            .returnFactor(1)
-            .inOutFactor(1)
-            .randomSeed(23L)
-            .build();
+        var walkParameters = new WalkParameters(1, 1000, 1.0, 1.0);
 
         RandomWalk randomWalk = RandomWalk.create(
             graph,
-            config,
-            config.walkParameters(),
+            1,
+            walkParameters,
+            List.of(),
+            100,
+            Optional.of(23L),
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE
         );
@@ -327,21 +324,16 @@ class RandomWalkTest {
     void failOnInvalidRelationshipWeights(double invalidWeight) {
         var graph = fromGdl(formatWithLocale("(a)-[:REL {weight: %f}]->(b)", invalidWeight));
 
-        var config = ImmutableNode2VecStreamConfig.builder()
-            .walkLength(1000)
-            .concurrency(1)
-            .walksPerNode(1)
-            .walkBufferSize(100)
-            .returnFactor(1)
-            .inOutFactor(1)
-            .randomSeed(23L)
-            .build();
+        var walkParameters = new WalkParameters(1, 1000, 1.0, 1.0);
 
         assertThatThrownBy(
             () -> RandomWalk.create(
                 graph,
-                config,
-                config.walkParameters(),
+                1,
+                walkParameters,
+                List.of(),
+                100,
+                Optional.of(23L),
                 ProgressTracker.NULL_TRACKER,
                 DefaultPool.INSTANCE
             )
@@ -364,27 +356,24 @@ class RandomWalkTest {
             .build()
             .generate();
 
-        var config = ImmutableNode2VecStreamConfig.builder()
-            .walkLength(10)
-            .concurrency(4)
-            .walksPerNode(1)
-            .walkBufferSize(100)
-            .returnFactor(1)
-            .inOutFactor(1)
-            .randomSeed(23L)
-            .build();
+        int walksPerNode = 1;
+        int walkLength = 10;
+        var walkParameters = new WalkParameters(walksPerNode, walkLength, 1.0, 1.0);
 
         var randomWalk = RandomWalk.create(
             graph,
-            config,
-            config.walkParameters(),
+            4,
+            walkParameters,
+            List.of(),
+            100,
+            Optional.of(23L),
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE
         );
 
         assertThat(randomWalk.compute().collect(Collectors.toList()))
-            .matches(walks -> walks.size() <= nodeCount * config.walksPerNode())
-            .allMatch(walk -> walk.length <= config.walkLength());
+            .matches(walks -> walks.size() <= nodeCount * walksPerNode)
+            .allMatch(walk -> walk.length <= walkLength);
     }
 
     @Test
@@ -397,17 +386,16 @@ class RandomWalkTest {
         var aInternalId = graph.toMappedNodeId(aOriginalId);
         var bInternalId = graph.toMappedNodeId(bOriginalId);
 
-        var config = ImmutableNode2VecStreamConfig.builder()
-            .sourceNodes(List.of(aOriginalId, bOriginalId))
-            .walkLength(3)
-            .concurrency(4)
-            .walksPerNode(1)
-            .build();
+        var sourceNodes = List.of(aOriginalId, bOriginalId);
+        var walkParameters = new WalkParameters(1, 3, 1.0, 1.0);
 
         var randomWalk = RandomWalk.create(
             graph,
-            config,
-            config.walkParameters(),
+            4,
+            walkParameters,
+            sourceNodes,
+            1000,
+            Optional.empty(),
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE
         );
@@ -424,14 +412,14 @@ class RandomWalkTest {
     @Test
     void testSetTerminationFlagAndMultipleRuns() {
         for (int i = 0; i < 3; i++) {
-            Node2VecStreamConfig config = ImmutableNode2VecStreamConfig.builder()
-                    .walkBufferSize(1)
-                    .build();
 
             var randomWalk = RandomWalk.create(
                     graph,
-                    config,
-                    config.walkParameters(),
+                    4,
+                    new WalkParameters(10, 80, 1.0, 1.0),
+                    List.of(),
+                    1,
+                    Optional.empty(),
                     ProgressTracker.NULL_TRACKER,
                     DefaultPool.INSTANCE
             );
@@ -540,7 +528,7 @@ class RandomWalkTest {
                     config
                 ),
                 Neo4jProxy.testLog(),
-                config.concurrency(),
+                4,
                 TaskRegistryFactory.local("rw", taskStore)
             );
 

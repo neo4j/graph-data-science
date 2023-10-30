@@ -32,10 +32,7 @@ class RandomWalkTaskSupplier implements Supplier<RandomWalkTask> {
     private final NextNodeSupplier nextNodeSupplier;
     private final RandomWalkSampler.CumulativeWeightSupplier cumulativeWeightSupplier;
     private final BlockingQueue<long[]> walks;
-    private final int walksPerNode;
-    private final int walkLength;
-    private final double returnFactor;
-    private final double inOutFactor;
+    private final WalkParameters walkParameters;
     private final long randomSeed;
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
@@ -45,10 +42,7 @@ class RandomWalkTaskSupplier implements Supplier<RandomWalkTask> {
         NextNodeSupplier nextNodeSupplier,
         RandomWalkSampler.CumulativeWeightSupplier cumulativeWeightSupplier,
         BlockingQueue<long[]> walks,
-        int walksPerNode,
-        int walkLength,
-        double returnFactor,
-        double inOutFactor,
+        WalkParameters walkParameters,
         long randomSeed,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
@@ -57,10 +51,7 @@ class RandomWalkTaskSupplier implements Supplier<RandomWalkTask> {
         this.nextNodeSupplier = nextNodeSupplier;
         this.cumulativeWeightSupplier = cumulativeWeightSupplier;
         this.walks = walks;
-        this.walksPerNode = walksPerNode;
-        this.walkLength = walkLength;
-        this.returnFactor = returnFactor;
-        this.inOutFactor = inOutFactor;
+        this.walkParameters = walkParameters;
         this.randomSeed = randomSeed;
         this.progressTracker = progressTracker;
         this.terminationFlag = terminationFlag;
@@ -73,10 +64,10 @@ class RandomWalkTaskSupplier implements Supplier<RandomWalkTask> {
             nextNodeSupplier,
             cumulativeWeightSupplier,
             walks,
-            walksPerNode,
-            walkLength,
-            returnFactor,
-            inOutFactor,
+            walkParameters.walksPerNode,
+            walkParameters.walkLength,
+            walkParameters.returnFactor,
+            walkParameters.inOutFactor,
             randomSeed,
             progressTracker,
             terminationFlag
