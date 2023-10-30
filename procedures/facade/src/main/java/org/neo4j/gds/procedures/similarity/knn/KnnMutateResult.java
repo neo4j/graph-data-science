@@ -17,20 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.knn;
+package org.neo4j.gds.procedures.similarity.knn;
 
 import org.neo4j.gds.procedures.similarity.SimilarityMutateResult;
-import org.neo4j.gds.similarity.SimilarityResultBuilder;
 
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public class MutateResult extends SimilarityMutateResult {
+public class KnnMutateResult extends SimilarityMutateResult {
     public final long ranIterations;
     public final long nodePairsConsidered;
     public final boolean didConverge;
 
-    public MutateResult(
+    public KnnMutateResult(
         long preProcessingMillis,
         long computeMillis,
         long mutateMillis,
@@ -59,41 +58,4 @@ public class MutateResult extends SimilarityMutateResult {
         this.nodePairsConsidered = nodePairsConsidered;
     }
 
-    public static class Builder extends SimilarityResultBuilder<SimilarityMutateResult> {
-        private long ranIterations;
-        private boolean didConverge;
-        private long nodePairsConsidered;
-
-        @Override
-        public MutateResult build() {
-            return new MutateResult(
-                preProcessingMillis,
-                computeMillis,
-                mutateMillis,
-                postProcessingMillis,
-                nodesCompared,
-                relationshipsWritten,
-                distribution(),
-                didConverge,
-                ranIterations,
-                nodePairsConsidered,
-                config.toMap()
-            );
-        }
-
-        public Builder didConverge(boolean didConverge) {
-            this.didConverge = didConverge;
-            return this;
-        }
-
-        public Builder ranIterations(long ranIterations) {
-            this.ranIterations = ranIterations;
-            return this;
-        }
-
-        Builder withNodePairsConsidered(long nodePairsConsidered) {
-            this.nodePairsConsidered = nodePairsConsidered;
-            return this;
-        }
-    }
 }

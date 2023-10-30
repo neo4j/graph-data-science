@@ -20,12 +20,15 @@
 package org.neo4j.gds.procedures.similarity;
 
 import org.neo4j.gds.algorithms.KnnSpecificFields;
+import org.neo4j.gds.algorithms.RelationshipMutateResult;
 import org.neo4j.gds.algorithms.RelationshipWriteResult;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
+import org.neo4j.gds.procedures.similarity.knn.KnnMutateResult;
 import org.neo4j.gds.procedures.similarity.knn.KnnStatsResult;
 import org.neo4j.gds.procedures.similarity.knn.KnnWriteResult;
 import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.similarity.knn.KnnMutateConfig;
 import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.knn.KnnStatsConfig;
 import org.neo4j.gds.similarity.knn.KnnWriteConfig;
@@ -76,7 +79,7 @@ final class KnnComputationResultTransformer {
         return new KnnWriteResult(
             writeResult.preProcessingMillis(),
             writeResult.computeMillis(),
-            writeResult.postProcessingMillis(),
+            writeResult.writeMillis(),
             writeResult.postProcessingMillis(),
             writeResult.algorithmSpecificFields().nodesCompared(),
             writeResult.algorithmSpecificFields().relationshipsWritten(),
@@ -84,6 +87,26 @@ final class KnnComputationResultTransformer {
             writeResult.algorithmSpecificFields().ranIterations(),
             writeResult.algorithmSpecificFields().nodePairsConsidered(),
             writeResult.algorithmSpecificFields().similarityDistribution(),
+            config.toMap()
+        );
+    }
+
+    static KnnMutateResult toMutateResult(
+        RelationshipMutateResult<KnnSpecificFields> writeResult,
+        KnnMutateConfig config
+    ) {
+
+        return new KnnMutateResult(
+            writeResult.preProcessingMillis(),
+            writeResult.computeMillis(),
+            writeResult.mutateMillis(),
+            writeResult.postProcessingMillis(),
+            writeResult.algorithmSpecificFields().nodesCompared(),
+            writeResult.algorithmSpecificFields().relationshipsWritten(),
+            writeResult.algorithmSpecificFields().similarityDistribution(),
+            writeResult.algorithmSpecificFields().didConverge(),
+            writeResult.algorithmSpecificFields().ranIterations(),
+            writeResult.algorithmSpecificFields().nodePairsConsidered(),
             config.toMap()
         );
     }

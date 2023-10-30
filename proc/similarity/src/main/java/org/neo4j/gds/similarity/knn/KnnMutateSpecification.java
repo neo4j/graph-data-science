@@ -30,6 +30,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.similarity.knn.KnnMutateResult;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityProc;
 
@@ -43,7 +44,7 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 import static org.neo4j.gds.similarity.knn.KnnProc.KNN_DESCRIPTION;
 
 @GdsCallable(name = "gds.knn.mutate", description = KNN_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
-public class KnnMutateSpecification implements AlgorithmSpec<Knn, KnnResult, KnnMutateConfig, Stream<MutateResult>, KnnFactory<KnnMutateConfig>> {
+public class KnnMutateSpecification implements AlgorithmSpec<Knn, KnnResult, KnnMutateConfig, Stream<KnnMutateResult>, KnnFactory<KnnMutateConfig>> {
     @Override
     public String name() {
         return "KnnMutate";
@@ -59,14 +60,14 @@ public class KnnMutateSpecification implements AlgorithmSpec<Knn, KnnResult, Knn
         return (__, userInput) -> KnnMutateConfig.of(userInput);
     }
 
-    public ComputationResultConsumer<Knn, KnnResult, KnnMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Knn, KnnResult, KnnMutateConfig, Stream<KnnMutateResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Graph mutation failed",
             executionContext.log(),
             () -> {
                 var config = computationResult.config();
 
-                var resultBuilder = new MutateResult.Builder();
+                var resultBuilder = new KnnMutateResultBuilder();
 
                 computationResult.result().ifPresent(result -> {
                     resultBuilder
