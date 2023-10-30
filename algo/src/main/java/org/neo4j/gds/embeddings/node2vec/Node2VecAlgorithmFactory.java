@@ -52,6 +52,7 @@ public class Node2VecAlgorithmFactory<CONFIG extends Node2VecBaseConfig> extends
             configuration.concurrency(),
             configuration.sourceNodes(),
             configuration.randomSeed(),
+            configuration.walkBufferSize(),
             configuration.walkParameters(),
             configuration.trainParameters(),
             progressTracker
