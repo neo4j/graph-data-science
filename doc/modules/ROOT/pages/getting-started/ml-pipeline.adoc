@@ -2,6 +2,7 @@
 = Machine learning pipeline
 :description: This chapter shows a complete example using machine learning pipelines from the Neo4j Graph Data Science library.
 :keywords: GDS, getting started, machine learning, pipeline
+:sectnums!:
 
 A GDS pipeline is:
 
@@ -20,8 +21,6 @@ Currently, the following types of pipelines are available:
 This example is a simplified version of the Link Prediction pipeline described in the xref:machine-learning/linkprediction-pipelines/config.adoc[configuration] and xref:machine-learning/linkprediction-pipelines/training.adoc[training] sections of the manual.
 As such, the model performance is not expected to be the best.
 ====
-
-:sectnums!:
 
 == Setup
 

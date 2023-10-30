@@ -9,7 +9,7 @@
 ** xref:installation/configure-apache-arrow-server.adoc[]
 ** xref:installation/System-requirements.adoc[]
 * xref:getting-started/index.adoc[]
-** xref:getting-started/single-algorithm.adoc[]
+** xref:getting-started/basic-workflow.adoc[]
 ** xref:getting-started/fastrp-knn-example.adoc[]
 ** xref:getting-started/ml-pipeline.adoc[]
 * xref:common-usage/index.adoc[]

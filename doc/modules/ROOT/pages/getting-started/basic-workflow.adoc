@@ -1,5 +1,5 @@
 [[getting-started-single-algorithm]]
-= Single algorithm
+= Basic workflow
 :description: This chapter shows a complete example using one algorithm from the Neo4j Graph Data Science library.
 :keywords: GDS, getting started, algorithm
 

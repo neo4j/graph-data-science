@@ -3,27 +3,28 @@
 :description: This chapter gives users the basic information to start using the Neo4j Graph Data Science library.
 :keywords: GDS, getting started
 
-The fastest way to understand how the GDS library works is by example.
+After xref:installation/index.adoc[installation], you can start using the GDS library in two main ways:
 
-The main modes of operation for GDS are the following:
-
-* Run one or more algorithms on a graph, inspecting its result of the computation and potentially persisting the result via write back to Neo4j.
-* Configure a machine learning pipeline, train a model based on the pipeline, and use the model for prediction.
+* To run one or more algorithms on an in-memory graph, inspect the result of the computation, and potentially write it back to Neo4j.
+* To configure a machine learning pipeline and use it to train a model, then use the model for prediction.
 
 :sectnums!:
 
 == Running algorithms
 
-Algorithm execution modes:
+The typical workflow with GDS algorithms is as follows:
 
-* stream: Returns the result of the algorithm as a stream of records.
-* stats: Returns a single record of summary statistics, but does not update any graph.
-* mutate: Updates the projected graph with the result and returns a single record of summary statistics.
-* write: Writes the results of the algorithm to the Neo4j database and returns a single record of summary statistics.
+. Project an in-memory graph from the Neo4j database.
+. Choose an appropriate algorithm.
+. Run the algorithm in one of the xref:algorithms/syntax.adoc[execution modes].
+  * Use the `stream` mode to retrieve the output of the algorithm as a query result.
+  * Use the `mutate` mode to update the in-memory graph with the output of the algorithm.
+  * Use the `write` mode to write the output of the algorithm back to the Neo4j database.
+. (Optional) Choose and run more algorithms.
 
 image::algorithm-modes.svg["Algorithms workflow.",400]
 
-These are examplified in xref:getting-started/single-algorithm.adoc[simple example] and xref:getting-started/fastrp-knn-example.adoc[chained-algorithms example].
+The xref:getting-started/basic-workflow.adoc[] and the xref:getting-started/fastrp-knn-example.adoc[] examples show this workflow with a single algorithm and an algorithm running on the result of a previous algorithm.
 
 == Machine learning pipelines
 
