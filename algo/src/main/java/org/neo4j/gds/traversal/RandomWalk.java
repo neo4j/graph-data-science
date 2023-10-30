@@ -44,42 +44,13 @@ import java.util.stream.StreamSupport;
 
 public final class RandomWalk extends Algorithm<Stream<long[]>> {
 
-    private final Graph graph;
-    private final int concurrency;
-    private final Optional<Long> maybeRandomSeed;
-    private final List<Long> sourceNodes;
-    private final int walkBufferSize;
-    private final int walksPerNode;
-    private final int walkLength;
-    private final double inOutFactor;
-    private final double returnFactor;
-    private final ExecutorService executorService;
+    private static final long[] TOMBSTONE = new long[0];
 
-    private RandomWalk(
-        Graph graph,
-        int concurrency,
-        Optional<Long> maybeRandomSeed,
-        List<Long> sourceNodes,
-        int walkBufferSize,
-        int walksPerNode,
-        int walkLength,
-        double returnFactor,
-        double inOutFactor,
-        ProgressTracker progressTracker,
-        ExecutorService executorService
-    ) {
-        super(progressTracker);
-        this.graph = graph;
-        this.concurrency = concurrency;
-        this.maybeRandomSeed = maybeRandomSeed;
-        this.sourceNodes = sourceNodes;
-        this.walkBufferSize = walkBufferSize;
-        this.walksPerNode = walksPerNode;
-        this.walkLength = walkLength;
-        this.returnFactor = returnFactor;
-        this.inOutFactor = inOutFactor;
-        this.executorService = executorService;
-    }
+    private final int concurrency;
+    private final ExecutorService executorService;
+    private final RandomWalkTaskSupplier taskSupplier;
+    private final ExternalTerminationFlag externalTerminationFlag;
+    private final BlockingQueue<long[]> walks;
 
     public static RandomWalk create(
         Graph graph,
@@ -92,7 +63,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
                 graph,
                 config.concurrency(),
                 weight -> weight >= 0,
-                "Node2Vec only supports non-negative weights.",
+                "RandomWalk only supports non-negative weights.",
                 executorService
             );
         }
@@ -100,94 +71,88 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         return new RandomWalk(
             graph,
             config.concurrency(),
-            config.randomSeed(),
-            config.sourceNodes(),
+            executorService,
             config.walkBufferSize(),
             config.walksPerNode(),
             config.walkLength(),
             config.returnFactor(),
             config.inOutFactor(),
+            config.sourceNodes(),
+            config.randomSeed(),
+            progressTracker
+        );
+    }
+
+    private RandomWalk(
+        Graph graph,
+        int concurrency,
+        ExecutorService executorService,
+        int walkBufferSize,
+        int walksPerNode,
+        int walkLength,
+        double returnFactor,
+        double inOutFactor,
+        List<Long> sourceNodes,
+        Optional<Long> maybeRandomSeed,
+        ProgressTracker progressTracker
+    ) {
+        super(progressTracker);
+        this.concurrency = concurrency;
+        this.executorService = executorService;
+        this.walks = new ArrayBlockingQueue<>(walkBufferSize);
+        this.externalTerminationFlag = new ExternalTerminationFlag(this);
+        long randomSeed = maybeRandomSeed.orElseGet(() -> new Random().nextLong());
+        RandomWalkSampler.CumulativeWeightSupplier cumulativeWeightSupplier = RandomWalkCompanion.cumulativeWeights(
+            graph,
+            concurrency,
+            executorService,
+            progressTracker
+        );
+        var nextNodeSupplier = RandomWalkCompanion.nextNodeSupplier(graph, sourceNodes);
+        this.taskSupplier = new RandomWalkTaskSupplier(
+            graph::concurrentCopy,
+            nextNodeSupplier,
+            cumulativeWeightSupplier,
+            walks,
+            walksPerNode,
+            walkLength,
+            returnFactor,
+            inOutFactor,
+            randomSeed,
             progressTracker,
-            executorService
+            externalTerminationFlag
         );
     }
 
     @Override
     public Stream<long[]> compute() {
         progressTracker.beginSubTask("RandomWalk");
-
-        var randomSeed = maybeRandomSeed.orElseGet(() -> new Random().nextLong());
-
-        var cumulativeWeightSupplier = RandomWalkCompanion.cumulativeWeights(
-            graph,
-            concurrency,
-            executorService,
-            progressTracker
+        startWalkers(
+            () -> progressTracker.endSubTask("RandomWalk")
         );
-
-        var nextNodeSupplier = RandomWalkCompanion.nextNodeSupplier(graph, sourceNodes);
-
-        var terminationFlag = new ExternalTerminationFlag(this);
-
-        BlockingQueue<long[]> walks = new ArrayBlockingQueue<>(walkBufferSize);
-        long[] TOMB = new long[0];
-
-        startWalkers(terminationFlag, cumulativeWeightSupplier, randomSeed, nextNodeSupplier, walks, TOMB);
-        return walksQueueConsumer(terminationFlag, TOMB, walks);
+        return streamWalks(walks);
     }
 
-
-    private void startWalkers(
-        TerminationFlag terminationFlag,
-        RandomWalkSampler.CumulativeWeightSupplier cumulativeWeightSupplier,
-        long randomSeed,
-        NextNodeSupplier nextNodeSupplier,
-        BlockingQueue<long[]> walks,
-        long[] TOMB
-    ) {
+    private void startWalkers(Runnable whenCompleteAction) {
         var tasks = IntStream
             .range(0, this.concurrency)
-            .mapToObj(i ->
-                new RandomWalkTask(
-                    graph.concurrentCopy(),
-                    nextNodeSupplier,
-                    cumulativeWeightSupplier,
-                    walks,
-                    walksPerNode,
-                    walkLength,
-                    returnFactor,
-                    inOutFactor,
-                    randomSeed,
-                    progressTracker,
-                    terminationFlag
-                )).collect(Collectors.toList());
+            .mapToObj(i -> taskSupplier.get())
+            .collect(Collectors.toList());
 
         CompletableFuture.runAsync(
-            () -> tasksRunner(
-                tasks,
-                walks,
-                TOMB,
-                terminationFlag
-            ),
+            () -> runTasks(tasks),
             ExecutorServiceUtil.DEFAULT_SINGLE_THREAD_POOL
-        ).whenComplete((__, ___) -> {
-            progressTracker.endSubTask("RandomWalk");
-        });
+        ).whenComplete((__, ___) -> whenCompleteAction.run());
     }
 
-    private void tasksRunner(
-        Iterable<? extends Runnable> tasks,
-        BlockingQueue<long[]> walks,
-        long[] tombstone,
-        TerminationFlag terminationFlag
-    ) {
+    private void runTasks(Iterable<? extends Runnable> tasks) {
         progressTracker.beginSubTask("create walks");
 
         RunWithConcurrency.builder()
             .executor(this.executorService)
             .concurrency(this.concurrency)
             .tasks(tasks)
-            .terminationFlag(terminationFlag)
+            .terminationFlag(this.externalTerminationFlag)
             .mayInterruptIfRunning(true)
             .run();
 
@@ -195,24 +160,20 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
 
         try {
             boolean finished = false;
-            while (!finished && terminationFlag.running()) {
-                finished = walks.offer(tombstone, 100, TimeUnit.MILLISECONDS);
+            while (!finished && externalTerminationFlag.running()) {
+                finished = walks.offer(TOMBSTONE, 100, TimeUnit.MILLISECONDS);
             }
         } catch (InterruptedException exception) {
             Thread.currentThread().interrupt();
         }
     }
 
-    private Stream<long[]> walksQueueConsumer(
-        ExternalTerminationFlag terminationFlag,
-        long[] tombstone,
-        BlockingQueue<long[]> walks
-    ) {
+    private Stream<long[]> streamWalks(BlockingQueue<long[]> walks) {
         int timeoutInSeconds = 100;
-        var queueConsumer = new QueueBasedSpliterator<>(walks, tombstone, terminationFlag, timeoutInSeconds);
+        var queueConsumer = new QueueBasedSpliterator<>(walks, TOMBSTONE, externalTerminationFlag, timeoutInSeconds);
         return StreamSupport
             .stream(queueConsumer, false)
-            .onClose(terminationFlag::stop);
+            .onClose(externalTerminationFlag::stop);
     }
 
     private static final class ExternalTerminationFlag implements TerminationFlag {
