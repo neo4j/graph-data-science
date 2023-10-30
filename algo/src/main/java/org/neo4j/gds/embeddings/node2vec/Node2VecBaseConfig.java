@@ -114,7 +114,8 @@ public interface Node2VecBaseConfig extends AlgoBaseConfig, EmbeddingDimensionCo
             iterations(),
             windowSize(),
             negativeSamplingRate(),
-            embeddingDimension()
+            embeddingDimension(),
+            embeddingInitializer()
         );
     }
 }
