@@ -3,104 +3,152 @@
 :description: This chapter shows a complete example using one algorithm from the Neo4j Graph Data Science library.
 :keywords: GDS, getting started, algorithm
 
-A common problem with graphs is the finding the shortest path between nodes.
+One of the most common problems on graphs is finding the shortest path between nodes.
 
-== Setup
+This example shows how to create data in Neo4j, project a graph, and run a path finding algorithm both in `stream` and in `write` mode.
+
+:sectnums!:
+
+== Add data to Neo4j
+
+The following Cypher queries create some `:Station` nodes and `:CONNECTION` relationships to model a small train network in the Neo4j database.
+Each relationship includes a `distance` numerical attribute representing the distance between two stations.
 
 [source, cypher, role=noplay setup-query]
 ----
-CREATE (a:Station {name: 'Kings Cross'}),
-       (b:Station {name: 'Euston'}),
-       (c:Station {name: 'Camden Town'}),
-       (d:Station {name: 'Mornington Crescent'}),
-       (e:Station {name: 'Kentish Town'}),
-       (a)-[:CONNECTION {distance: 0.7}]->(b),
-       (b)-[:CONNECTION {distance: 1.3}]->(c),
-       (b)-[:CONNECTION {distance: 0.7}]->(d),
-       (d)-[:CONNECTION {distance: 0.6}]->(c),
-       (c)-[:CONNECTION {distance: 1.3}]->(e)
+CREATE
+  // Add the stations
+  (a:Station {name: 'Kings Cross'}),
+  (b:Station {name: 'Euston'}),
+  (c:Station {name: 'Camden Town'}),
+  (d:Station {name: 'Mornington Crescent'}),
+  (e:Station {name: 'Kentish Town'}),
+
+  // Add the connections between stations
+  (a)-[:CONNECTION {distance: 0.7}]->(b),
+  (b)-[:CONNECTION {distance: 1.3}]->(c),
+  (b)-[:CONNECTION {distance: 0.7}]->(d),
+  (d)-[:CONNECTION {distance: 0.6}]->(c),
+  (c)-[:CONNECTION {distance: 1.3}]->(e);
 ----
+
+The graph looks as follows:
+
+image::quickstart-tube-graph.svg["Tube graph."]
+
+== Project the graph
+
+The following query creates an in-memory graph called `trainGraph` from the `Station` nodes and the `CONNECTION` relationships (including the `distance` relationship property).
 
 [source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project(
-    'myGraph',
-    'Station',
-    'CONNECTION',
-    {
-        relationshipProperties: 'distance'
-    }
+  'trainGraph',
+  'Station',
+  'CONNECTION',
+  {
+    relationshipProperties: 'distance'
+  }
 )
 ----
 
-== Query
+== Run the algorithm in `stream` mode
+
+A good first candidate algorithm to calculate the shortest path in a graph is the xref:algorithms/dijkstra-source-target.adoc[] algorithm.
+To try it out, use it with the `stream` mode to see the result in the query output.
 
 [role=query-example]
 --
-.Title?
 [source, cypher, role=noplay]
 ----
-MATCH (source:Station {name: 'Kings Cross'}), (target:Station {name: 'Kentish Town'})
-CALL gds.shortestPath.dijkstra.stream('myGraph', {
+MATCH  <1>
+  (source:Station {name: 'Kings Cross'}),
+  (target:Station {name: 'Kentish Town'})
+CALL gds.shortestPath.dijkstra.stream(  <2>
+  'trainGraph',  <3>
+  {  <4>
     sourceNode: source,
     targetNode: target,
     relationshipWeightProperty: 'distance'
-})
-YIELD index, sourceNode, targetNode, totalCost, path
-RETURN
-    index,
-    gds.util.asNode(sourceNode).name AS sourceNodeName,
-    gds.util.asNode(targetNode).name AS targetNodeName,
-    totalCost,
-    nodes(path) as path
+  }
+)
+YIELD  <5>
+  index,
+  sourceNode,
+  targetNode,
+  totalCost,
+  path
+RETURN  <6>
+  index,
+  gds.util.asNode(sourceNode).name AS sourceNodeName,
+  gds.util.asNode(targetNode).name AS targetNodeName,
+  totalCost,
+  nodes(path) AS path
 ORDER BY index
 ----
+<1> `MATCH` clause to define the source and target nodes.
+<2> `gds.shortestPath.dijkstra` algorithm running in `stream` mode.
+<3> Name of the projected graph to run the algorithm on.
+<4> Configuration parameters listed in the xref:algorithms/dijkstra-source-target.adoc#algorithms-dijkstra-source-target-syntax[Syntax section] of the algorithm (`Stream mode` panel).
+<5> Result fields listed in the xref:algorithms/dijkstra-source-target.adoc#algorithms-dijkstra-source-target-syntax[Syntax section] of the algorithm (`Stream mode` panel).
+Include only the ones you need.
+<6> Query result fields, typically the result fields from the `YIELD` clause wrapped in Cypher functions.
+The xref:management-ops/utility-functions.adoc#utility-functions-node-path[`gds.util.asNode()`] function retrieves the Neo4j node corresponding to a projected node.
+In the case of path finding algorithms, the link:https://neo4j.com/docs/cypher-manual/current/functions/list/#functions-nodes[`nodes()`] Cypher function is useful to return a node path as a list of nodes.
 
 .Results
-[opts="header"]
+[opts="header", caption=, title="Query result"]
 |===
 | index | sourceNodeName | targetNodeName | totalCost | path
 | 0     | "Kings Cross"  | "Kentish Town" | 3.3       | [Node[0], Node[1], Node[2], Node[4]]
 |===
 --
 
-* Skips nodeIds, costs
-* Only one index because one path
-* Explain `asNode` and `nodes`
+== Write the results
 
-== Write
+If the results of the algorithm are as expected, the next step can be to write them back to the Neo4j database.
+The following query is very similar to the `stream` query, except for the addition of some configuration parameters specific to the `write` mode and the different format of the result.
 
 [role=query-example]
 --
-.The following will run the algorithm in `write` mode:
 [source, cypher, role=noplay]
 ----
-MATCH (source:Station {name: 'Kings Cross'}), (target:Station {name: 'Kentish Town'})
-CALL gds.shortestPath.dijkstra.write('myGraph', {
+MATCH  <1>
+  (source:Station {name: 'Kings Cross'}),
+  (target:Station {name: 'Kentish Town'})
+CALL gds.shortestPath.dijkstra.write(  <2>
+  'trainGraph',  <3>
+  {  <4>
     sourceNode: source,
     targetNode: target,
     relationshipWeightProperty: 'distance',
     writeRelationshipType: 'PATH',
     writeNodeIds: true,
     writeCosts: true
-})
+  }
+)
 YIELD relationshipsWritten
 RETURN relationshipsWritten
 ----
+<1> `MATCH` clause to define the source and target nodes.
+<2> `gds.shortestPath.dijkstra` algorithm running in `write` mode.
+<3> Name of the projected graph.
+<4> Configuration parameters listed in the xref:algorithms/dijkstra-source-target.adoc#algorithms-dijkstra-source-target-syntax[Syntax section] of the algorithm (`Write mode` panel).
 
 .Results
-[opts="header"]
+[opts="header", caption=, title="Query result"]
 |===
 | relationshipsWritten
 | 1
 |===
 --
 
-== Check written data
+== Query the Neo4j database
+
+If you want to check that the results of the algorithm have been correctly written back to Neo4j, you can run a Cypher query that includes the new relationships and relationship properties written in the previous step (in this case, the `PATH` relationship with the `nodeIds`, `costs`, and `totalCost` relationship properties).
 
 [role=query-example]
 --
-.Check:
 [source, cypher, role=noplay]
 ----
 MATCH (source)-[r:PATH]->(target)
@@ -108,14 +156,9 @@ RETURN source.name, r.nodeIds, r.costs, r.totalCost, target.name
 ----
 
 .Results
-[opts="header"]
+[opts="header", caption=, title="Query result"]
 |===
 | source.name  | r.nodeIds | r.costs | r.totalCost | target.name
 |"Kings Cross" | [Node[0], Node[1], Node[2], Node[4] | [0.0, 0.7, 2.0, 3.3] | 3.3 | "Kentish Town"
 |===
 --
-
-== Further topics to explore
-
-- Other modes (estimation and stats)
-- xref:getting-started/fastrp-knn-example.adoc[Combination of algorithms]

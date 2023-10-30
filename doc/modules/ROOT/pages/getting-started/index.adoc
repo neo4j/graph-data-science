@@ -8,21 +8,23 @@ After xref:installation/index.adoc[installation], you can start using the GDS li
 * To run one or more algorithms on an in-memory graph, inspect the result of the computation, and potentially write it back to Neo4j.
 * To configure a machine learning pipeline and use it to train a model, then use the model for prediction.
 
+You can run all GDS Cypher procedures in the Neo4j Browser or via a link:https://neo4j.com/docs/create-applications/#_language_libraries[Neo4j driver].
+
 :sectnums!:
 
 == Running algorithms
 
 The typical workflow with GDS algorithms is as follows:
 
-. Project an in-memory graph from the Neo4j database.
-. Choose an appropriate algorithm.
+. xref:management-ops/graph-creation/index.adoc[Project] an in-memory graph from the Neo4j database.
+. Choose an appropriate xref:algorithms/index.adoc[algorithm].
 . Run the algorithm in one of the xref:algorithms/syntax.adoc[execution modes].
   * Use the `stream` mode to retrieve the output of the algorithm as a query result.
   * Use the `mutate` mode to update the in-memory graph with the output of the algorithm.
   * Use the `write` mode to write the output of the algorithm back to the Neo4j database.
 . (Optional) Choose and run more algorithms.
 
-image::algorithm-modes.svg["Algorithms workflow.",400]
+image::algorithm-modes.svg["Algorithms workflow.", 400]
 
 The xref:getting-started/basic-workflow.adoc[] and the xref:getting-started/fastrp-knn-example.adoc[] examples show this workflow with a single algorithm and an algorithm running on the result of a previous algorithm.
 
