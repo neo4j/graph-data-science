@@ -62,9 +62,9 @@ interface RandomWalkProbabilities {
 
         Builder(
             long nodeCount,
+            int concurrency,
             double positiveSamplingFactor,
-            double negativeSamplingExponent,
-            int concurrency
+            double negativeSamplingExponent
         ) {
             this.nodeCount = nodeCount;
             this.concurrency = concurrency;

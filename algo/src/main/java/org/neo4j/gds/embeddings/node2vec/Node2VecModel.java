@@ -79,12 +79,41 @@ public class Node2VecModel {
     Node2VecModel(
         LongUnaryOperator toOriginalId,
         long nodeCount,
+        TrainParameters trainParameters,
+        Node2VecBaseConfig.EmbeddingInitializer embeddingInitializer,
+        int concurrency,
+        Optional<Long> maybeRandomSeed,
+        CompressedRandomWalks walks,
+        RandomWalkProbabilities randomWalkProbabilities,
+        ProgressTracker progressTracker
+    ) {
+        this(
+            toOriginalId,
+            nodeCount,
+            trainParameters.initialLearningRate,
+            trainParameters.minLearningRate,
+            trainParameters.iterations,
+            trainParameters.windowSize,
+            trainParameters.negativeSamplingRate,
+            trainParameters.embeddingDimension,
+            embeddingInitializer,
+            concurrency,
+            maybeRandomSeed,
+            walks,
+            randomWalkProbabilities,
+            progressTracker
+        );
+    }
+
+    Node2VecModel(
+        LongUnaryOperator toOriginalId,
+        long nodeCount,
         double initialLearningRate,
         double minLearningRate,
         int iterations,
-        int embeddingDimension,
         int windowSize,
         int negativeSamplingRate,
+        int embeddingDimension,
         Node2VecBaseConfig.EmbeddingInitializer embeddingInitializer,
         int concurrency,
         Optional<Long> maybeRandomSeed,

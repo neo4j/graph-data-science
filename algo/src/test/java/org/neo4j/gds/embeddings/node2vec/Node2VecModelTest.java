@@ -46,9 +46,9 @@ class Node2VecModelTest {
 
         var probabilitiesBuilder = new RandomWalkProbabilities.Builder(
             numberOfClusters * clusterSize,
+            4,
             0.001,
-            0.75,
-            4
+            0.75
         );
 
         CompressedRandomWalks walks = generateRandomWalks(
@@ -158,9 +158,9 @@ class Node2VecModelTest {
 
         var probabilitiesBuilder = new RandomWalkProbabilities.Builder(
             numberOfClusters * clusterSize,
+            4,
             0.001,
-            0.75,
-            4
+            0.75
         );
 
         CompressedRandomWalks walks = generateRandomWalks(probabilitiesBuilder, numberOfClusters, clusterSize, numberOfWalks, walkLength, random);

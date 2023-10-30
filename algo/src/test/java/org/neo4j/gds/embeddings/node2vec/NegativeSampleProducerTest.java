@@ -34,9 +34,9 @@ class NegativeSampleProducerTest {
     void shouldProduceSamplesAccordingToNodeDistribution() {
         var builder = new RandomWalkProbabilities.Builder(
             2,
+            4,
             0.001,
-            0.75,
-            4
+            0.75
         );
 
         builder

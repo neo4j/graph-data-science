@@ -31,7 +31,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.core.EmbeddingUtils;
 import org.neo4j.gds.traversal.RandomWalkCompanion;
-import org.neo4j.gds.traversal.WalkParameters;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,18 +42,11 @@ import java.util.concurrent.atomic.AtomicLong;
 public class Node2Vec extends Algorithm<Node2VecModel.Result> {
 
     private final Graph graph;
-    private final double positiveSamplingFactor;
-    private final double negativeSamplingExponent;
     private final int concurrency;
     private final WalkParameters walkParameters;
     private final List<Long> sourceNodes;
     private final Optional<Long> maybeRandomSeed;
-    private final double initialLearningRate;
-    private final double minLearningRate;
-    private final int iterations;
-    private final int embeddingDimension;
-    private final int windowSize;
-    private final int negativeSamplingRate;
+    private final TrainParameters trainParameters;
     private final Node2VecBaseConfig.EmbeddingInitializer embeddingInitializer;
 
 
@@ -74,18 +66,11 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
         return new Node2Vec(
             graph,
             config.concurrency(),
-            config.positiveSamplingFactor(),
-            config.negativeSamplingExponent(),
             config.walkParameters(),
             config.sourceNodes(),
             config.randomSeed(),
             progressTracker,
-            config.initialLearningRate(),
-            config.minLearningRate(),
-            config.iterations(),
-            config.embeddingDimension(),
-            config.windowSize(),
-            config.negativeSamplingRate(),
+            config.trainParameters(),
             config.embeddingInitializer()
         );
     }
@@ -93,36 +78,20 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
     public Node2Vec(
         Graph graph,
         int concurrency,
-        double positiveSamplingFactor,
-        double negativeSamplingExponent,
         WalkParameters walkParameters,
         List<Long> sourceNodes,
         Optional<Long> maybeRandomSeed,
         ProgressTracker progressTracker,
-        // train params
-        double initialLearningRate,
-        double minLearningRate,
-        int iterations,
-        int embeddingDimension,
-        int windowSize,
-        int negativeSamplingRate,
+        TrainParameters trainParameters,
         Node2VecBaseConfig.EmbeddingInitializer embeddingInitializer
-
     ) {
         super(progressTracker);
         this.graph = graph;
-        this.positiveSamplingFactor = positiveSamplingFactor;
-        this.negativeSamplingExponent = negativeSamplingExponent;
         this.concurrency = concurrency;
         this.walkParameters = walkParameters;
         this.sourceNodes = sourceNodes;
         this.maybeRandomSeed = maybeRandomSeed;
-        this.initialLearningRate = initialLearningRate;
-        this.minLearningRate = minLearningRate;
-        this.iterations = iterations;
-        this.embeddingDimension = embeddingDimension;
-        this.windowSize = windowSize;
-        this.negativeSamplingRate = negativeSamplingRate;
+        this.trainParameters = trainParameters;
         this.embeddingInitializer = embeddingInitializer;
     }
 
@@ -142,15 +111,15 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
 
         var probabilitiesBuilder = new RandomWalkProbabilities.Builder(
             graph.nodeCount(),
-            positiveSamplingFactor,
-            negativeSamplingExponent,
-            concurrency
+            concurrency,
+            walkParameters.positiveSamplingFactor,
+            walkParameters.negativeSamplingExponent
         );
         var walks = new CompressedRandomWalks(graph.nodeCount() * walkParameters.walksPerNode);
 
         progressTracker.beginSubTask("RandomWalk");
 
-        var tasks = tasks(
+        var tasks = walkTasks(
             walks,
             probabilitiesBuilder,
             graph,
@@ -181,12 +150,7 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
         var node2VecModel = new Node2VecModel(
             graph::toOriginalNodeId,
             graph.nodeCount(),
-            initialLearningRate,
-            minLearningRate,
-            iterations,
-            embeddingDimension,
-            windowSize,
-            negativeSamplingRate,
+            trainParameters,
             embeddingInitializer,
             concurrency,
             maybeRandomSeed,
@@ -201,7 +165,7 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
         return result;
     }
 
-    private List<Node2VecRandomWalkTask> tasks(
+    private List<Node2VecRandomWalkTask> walkTasks(
         CompressedRandomWalks compressedRandomWalks,
         RandomWalkProbabilities.Builder randomWalkPropabilitiesBuilder,
         Graph graph,
