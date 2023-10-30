@@ -60,22 +60,16 @@ class Node2VecModelTest {
             random
         );
 
-        Node2VecStreamConfig defaults = ImmutableNode2VecStreamConfig.builder().build();
+        var trainParameters = new TrainParameters(0.05, 0.0001, 5, 10, 1, 10, EmbeddingInitializer.NORMALIZED);
 
         int nodeCount = numberOfClusters * clusterSize;
 
         var node2VecModel = new Node2VecModel(
             nodeId -> nodeId,
             nodeCount,
-            0.05,
-            defaults.minLearningRate(),
-            5,
-            10,
-            defaults.windowSize(),
-            1,
-            defaults.embeddingInitializer(),
+            trainParameters,
             4,
-            defaults.randomSeed(),
+            Optional.empty(),
             walks,
             probabilitiesBuilder.build(),
             ProgressTracker.NULL_TRACKER
@@ -165,20 +159,14 @@ class Node2VecModelTest {
 
         CompressedRandomWalks walks = generateRandomWalks(probabilitiesBuilder, numberOfClusters, clusterSize, numberOfWalks, walkLength, random);
 
-        Node2VecStreamConfig defaults = ImmutableNode2VecStreamConfig.builder().build();
+        var trainParameters = new TrainParameters(0.05, 0.0001, iterations, 10, 1, 2, EmbeddingInitializer.NORMALIZED);
 
         int nodeCount = numberOfClusters * clusterSize;
 
         var node2VecModel = new Node2VecModel(
             nodeId -> nodeId,
             nodeCount,
-            0.05,
-            defaults.minLearningRate(),
-            iterations,
-            2,
-            defaults.windowSize(),
-            1,
-            defaults.embeddingInitializer(),
+            trainParameters,
             4,
             Optional.of(1337L),
             walks,
@@ -189,13 +177,7 @@ class Node2VecModelTest {
         var otherNode2VecModel = new Node2VecModel(
             nodeId -> nodeId,
             nodeCount,
-            0.05,
-            defaults.minLearningRate(),
-            iterations,
-            2,
-            defaults.windowSize(),
-            1,
-            defaults.embeddingInitializer(),
+            trainParameters,
             4,
             Optional.of(1337L),
             walks,

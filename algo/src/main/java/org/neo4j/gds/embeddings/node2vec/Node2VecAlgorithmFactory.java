@@ -47,7 +47,15 @@ public class Node2VecAlgorithmFactory<CONFIG extends Node2VecBaseConfig> extends
         ProgressTracker progressTracker
     ) {
         validateConfig(configuration, graph);
-        return Node2Vec.create(graph, configuration, progressTracker);
+        return new Node2Vec(
+            graph,
+            configuration.concurrency(),
+            configuration.sourceNodes(),
+            configuration.randomSeed(),
+            configuration.walkParameters(),
+            configuration.trainParameters(),
+            progressTracker
+        );
     }
 
     @Override

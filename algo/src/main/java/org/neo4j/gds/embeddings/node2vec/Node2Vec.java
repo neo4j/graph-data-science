@@ -61,26 +61,43 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
             .build();
     }
 
-    static Node2Vec create(Graph graph, Node2VecBaseConfig config, ProgressTracker progressTracker) {
+    static Node2Vec create(
+        Graph graph,
+        int concurrency,
+        WalkParameters walkParameters,
+        TrainParameters trainParameters,
+        ProgressTracker progressTracker
+    ) {
+        return create(graph, concurrency, Optional.empty(), walkParameters, trainParameters, progressTracker);
+    }
+
+    static Node2Vec create(
+        Graph graph,
+        int concurrency,
+        Optional<Long> maybeRandomSeed,
+        WalkParameters walkParameters,
+        TrainParameters trainParameters,
+        ProgressTracker progressTracker
+    ) {
         return new Node2Vec(
             graph,
-            config.concurrency(),
-            config.walkParameters(),
-            config.sourceNodes(),
-            config.randomSeed(),
-            progressTracker,
-            config.trainParameters()
+            concurrency,
+            List.of(),
+            maybeRandomSeed,
+            walkParameters,
+            trainParameters,
+            progressTracker
         );
     }
 
     public Node2Vec(
         Graph graph,
         int concurrency,
-        WalkParameters walkParameters,
         List<Long> sourceNodes,
         Optional<Long> maybeRandomSeed,
-        ProgressTracker progressTracker,
-        TrainParameters trainParameters
+        WalkParameters walkParameters,
+        TrainParameters trainParameters,
+        ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;

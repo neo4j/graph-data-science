@@ -100,9 +100,20 @@ class Node2VecTest extends BaseTest {
             .graph();
 
         int embeddingDimension = 128;
+        var trainParameters = new TrainParameters(
+            0.025,
+            0.0001,
+            1,
+            10,
+            5,
+            embeddingDimension,
+            EmbeddingInitializer.NORMALIZED
+        );
         HugeObjectArray<FloatVector> node2Vec = Node2Vec.create(
             graph,
-            ImmutableNode2VecStreamConfig.builder().embeddingDimension(embeddingDimension).build(),
+            4,
+            new WalkParameters(10, 80, 1.0, 1.0, 0.001, 0.75),
+            trainParameters,
             ProgressTracker.NULL_TRACKER
         ).compute().embeddings();
 
@@ -132,11 +143,25 @@ class Node2VecTest extends BaseTest {
             .embeddingDimension(embeddingDimension)
             .build();
         var progressTask = new Node2VecAlgorithmFactory<>().progressTask(graph, config);
+
+        var walkParameters = new WalkParameters(10, 80, 1.0, 1.0, 0.001, 0.75);
+        var trainParameters = new TrainParameters(
+            0.025,
+            0.0001,
+            1,
+            10,
+            5,
+            embeddingDimension,
+            EmbeddingInitializer.NORMALIZED
+        );
         var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, log, 4, EmptyTaskRegistryFactory.INSTANCE);
         Node2Vec.create(
             graph,
-            config,
+            4,
+            Optional.empty(),
+            walkParameters,
+            trainParameters,
             progressTracker
         ).compute();
 
@@ -170,10 +195,12 @@ class Node2VecTest extends BaseTest {
     @Test
     void shouldEstimateMemory() {
         var nodeCount = 1000;
-        var config = ImmutableNode2VecStreamConfig.builder().build();
-        var memoryEstimation = Node2Vec.memoryEstimation(config.walksPerNode(), config.walkLength(), config.embeddingDimension());
+        var walksPerNode = 10;
+        var walkLength = 80;
+        var embeddingDimension = 128;
+        var memoryEstimation = Node2Vec.memoryEstimation(walksPerNode, walkLength, embeddingDimension);
 
-        var numberOfRandomWalks = nodeCount * config.walksPerNode() * config.walkLength();
+        var numberOfRandomWalks = nodeCount * walksPerNode * walkLength;
         var randomWalkMemoryUsageLowerBound = numberOfRandomWalks * Long.BYTES;
 
         var estimate = memoryEstimation.estimate(GraphDimensions.of(nodeCount), 1);
@@ -193,12 +220,16 @@ class Node2VecTest extends BaseTest {
     void failOnNegativeWeights() {
         var graph = GdlFactory.of("CREATE (a)-[:REL {weight: -1}]->(b)").build().getUnion();
 
-        var config = ImmutableNode2VecStreamConfig
-            .builder()
-            .relationshipWeightProperty("weight")
-            .build();
+        var walkParameters = new WalkParameters(10, 80, 1.0, 1.0, 0.001, 0.75);
+        var trainParameters = new TrainParameters(0.025, 0.0001, 1, 1, 1, 128, EmbeddingInitializer.NORMALIZED);
 
-        var node2Vec = Node2Vec.create(graph, config, ProgressTracker.NULL_TRACKER);
+        var node2Vec = Node2Vec.create(
+            graph,
+            4,
+            walkParameters,
+            trainParameters,
+            ProgressTracker.NULL_TRACKER
+        );
 
         assertThatThrownBy(node2Vec::compute)
             .isInstanceOf(RuntimeException.class)
@@ -214,30 +245,26 @@ class Node2VecTest extends BaseTest {
         Graph graph = new StoreLoaderBuilder().databaseService(db).build().graph();
 
         int embeddingDimension = 2;
-
-        var config = ImmutableNode2VecStreamConfig
-            .builder()
-            .embeddingDimension(embeddingDimension)
-            .iterations(1)
-            .negativeSamplingRate(1)
-            .windowSize(1)
-            .walksPerNode(1)
-            .walkLength(20)
-            .walkBufferSize(50)
-            .randomSeed(1337L)
-            .build();
+        var walkParameters = new WalkParameters(1, 20, 1.0, 1.0,  0.001, 0.75);
+        var trainParameters = new TrainParameters(0.025, 0.0001, 1, 1, 1, embeddingDimension, EmbeddingInitializer.NORMALIZED);
 
         var embeddings = Node2Vec.create(
             graph,
-            config,
+            4,
+            Optional.of(1337L),
+            walkParameters,
+            trainParameters,
             ProgressTracker.NULL_TRACKER
-        ).compute().embeddings();
+            ).compute().embeddings();
 
         var otherEmbeddings = Node2Vec.create(
             graph,
-            config,
+            4,
+            Optional.of(1337L),
+            walkParameters,
+            trainParameters,
             ProgressTracker.NULL_TRACKER
-        ).compute().embeddings();
+            ).compute().embeddings();
 
         for (long node = 0; node < graph.nodeCount(); node++) {
             softly.assertThat(otherEmbeddings.get(node)).isEqualTo(embeddings.get(node));
@@ -318,25 +345,26 @@ class Node2VecTest extends BaseTest {
         var firstGraph = GraphFactory.create(firstIdMap, firstRelationships);
         var secondGraph = GraphFactory.create(secondIdMap, secondRelationships);
 
-        var config = ImmutableNode2VecStreamConfig
-            .builder()
-            .embeddingInitializer(embeddingInitializer)
-            .embeddingDimension(embeddingDimension)
-            .randomSeed(1337L)
-            .concurrency(1)
-            .build();
+        var walkParameters = new WalkParameters(10, 80, 1.0, 1.0, 0.01, 0.75);
+        var trainParameters = new TrainParameters(0.025, 0.0001, 1, 10, 5, embeddingDimension, embeddingInitializer);
 
         var firstEmbeddings = Node2Vec.create(
             firstGraph,
-            config,
+            4,
+            Optional.of(1337L),
+            walkParameters,
+            trainParameters,
             ProgressTracker.NULL_TRACKER
-        ).compute().embeddings();
+            ).compute().embeddings();
 
         var secondEmbeddings = Node2Vec.create(
             secondGraph,
-            config,
+            4,
+            Optional.of(1337L),
+            walkParameters,
+            trainParameters,
             ProgressTracker.NULL_TRACKER
-        ).compute().embeddings();
+            ).compute().embeddings();
 
         double cosineSum = 0;
         for (long originalNodeId = 0; originalNodeId < nodeCount; originalNodeId++) {
