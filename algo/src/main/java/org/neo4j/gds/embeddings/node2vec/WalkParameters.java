@@ -23,7 +23,14 @@ public class WalkParameters extends org.neo4j.gds.traversal.WalkParameters {
     final double negativeSamplingExponent;
     final double positiveSamplingFactor;
 
-    WalkParameters(int walksPerNode, int walkLength, double returnFactor, double inOutFactor, double positiveSamplingFactor, double negativeSamplingExponent) {
+    public WalkParameters(
+        int walksPerNode,
+        int walkLength,
+        double returnFactor,
+        double inOutFactor,
+        double positiveSamplingFactor,
+        double negativeSamplingExponent
+    ) {
         super(walksPerNode, walkLength, returnFactor, inOutFactor);
         this.negativeSamplingExponent = negativeSamplingExponent;
         this.positiveSamplingFactor = positiveSamplingFactor;

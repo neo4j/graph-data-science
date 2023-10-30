@@ -28,7 +28,7 @@ public class TrainParameters {
     final int embeddingDimension;
     final EmbeddingInitializer embeddingInitializer;
 
-    TrainParameters(
+    public TrainParameters(
         double initialLearningRate,
         double minLearningRate,
         int iterations,
