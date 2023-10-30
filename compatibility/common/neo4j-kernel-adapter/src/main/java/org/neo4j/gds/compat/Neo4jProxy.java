@@ -508,6 +508,10 @@ public final class Neo4jProxy {
         return IMPL.emptyDependencyResolver();
     }
 
+    public static String neo4jArrowServerAddressHeader() {
+        return IMPL.neo4jArrowServerAddressHeader();
+    }
+
     private Neo4jProxy() {
         throw new UnsupportedOperationException("No instances");
     }

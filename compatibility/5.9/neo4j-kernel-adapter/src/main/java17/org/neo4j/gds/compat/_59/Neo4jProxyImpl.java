@@ -177,4 +177,9 @@ public final class Neo4jProxyImpl extends CommonNeo4jProxyImpl {
             }
         };
     }
+
+    @Override
+    public String neo4jArrowServerAddressHeader() {
+        throw new UnsupportedOperationException("Not implemented for Neo4j versions <5.14");
+    }
 }

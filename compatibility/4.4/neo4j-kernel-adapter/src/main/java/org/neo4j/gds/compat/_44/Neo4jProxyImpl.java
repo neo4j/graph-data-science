@@ -901,4 +901,9 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     public DependencyResolver emptyDependencyResolver() {
         return EMPTY_DEPENDENCY_RESOLVER;
     }
+
+    @Override
+    public String neo4jArrowServerAddressHeader() {
+        throw new UnsupportedOperationException("Not implemented for Neo4j versions <5.14");
+    }
 }
