@@ -47,7 +47,6 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
     private final List<Long> sourceNodes;
     private final Optional<Long> maybeRandomSeed;
     private final TrainParameters trainParameters;
-    private final EmbeddingInitializer embeddingInitializer;
 
 
     public static MemoryEstimation memoryEstimation(int walksPerNode, int walkLength, int embeddingDimension) {
@@ -70,8 +69,7 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
             config.sourceNodes(),
             config.randomSeed(),
             progressTracker,
-            config.trainParameters(),
-            config.embeddingInitializer()
+            config.trainParameters()
         );
     }
 
@@ -82,8 +80,7 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
         List<Long> sourceNodes,
         Optional<Long> maybeRandomSeed,
         ProgressTracker progressTracker,
-        TrainParameters trainParameters,
-        EmbeddingInitializer embeddingInitializer
+        TrainParameters trainParameters
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -92,7 +89,6 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
         this.sourceNodes = sourceNodes;
         this.maybeRandomSeed = maybeRandomSeed;
         this.trainParameters = trainParameters;
-        this.embeddingInitializer = embeddingInitializer;
     }
 
     @Override
@@ -151,7 +147,6 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
             graph::toOriginalNodeId,
             graph.nodeCount(),
             trainParameters,
-            embeddingInitializer,
             concurrency,
             maybeRandomSeed,
             walks,

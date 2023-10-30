@@ -26,6 +26,7 @@ public class TrainParameters {
     final int windowSize;
     final int negativeSamplingRate;
     final int embeddingDimension;
+    final EmbeddingInitializer embeddingInitializer;
 
     TrainParameters(
         double initialLearningRate,
@@ -33,7 +34,8 @@ public class TrainParameters {
         int iterations,
         int windowSize,
         int negativeSamplingRate,
-        int embeddingDimension
+        int embeddingDimension,
+        EmbeddingInitializer embeddingInitializer
     ) {
         this.initialLearningRate = initialLearningRate;
         this.minLearningRate = minLearningRate;
@@ -41,5 +43,6 @@ public class TrainParameters {
         this.windowSize = windowSize;
         this.negativeSamplingRate = negativeSamplingRate;
         this.embeddingDimension = embeddingDimension;
+        this.embeddingInitializer = embeddingInitializer;
     }
 }
