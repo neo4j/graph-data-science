@@ -47,7 +47,7 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
     private final List<Long> sourceNodes;
     private final Optional<Long> maybeRandomSeed;
     private final TrainParameters trainParameters;
-    private final Node2VecBaseConfig.EmbeddingInitializer embeddingInitializer;
+    private final EmbeddingInitializer embeddingInitializer;
 
 
     public static MemoryEstimation memoryEstimation(int walksPerNode, int walkLength, int embeddingDimension) {
@@ -83,7 +83,7 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
         Optional<Long> maybeRandomSeed,
         ProgressTracker progressTracker,
         TrainParameters trainParameters,
-        Node2VecBaseConfig.EmbeddingInitializer embeddingInitializer
+        EmbeddingInitializer embeddingInitializer
     ) {
         super(progressTracker);
         this.graph = graph;
