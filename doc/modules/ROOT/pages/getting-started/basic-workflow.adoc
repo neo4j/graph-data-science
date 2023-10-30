@@ -4,15 +4,15 @@
 :keywords: GDS, getting started, algorithm
 
 One of the most common problems on graphs is finding the shortest path between nodes.
-
-This example shows how to create data in Neo4j, project a graph, and run a path finding algorithm both in `stream` and in `write` mode.
+This example shows how to create a GDS graph from Neo4j data, run a path finding algorithm, and write the results back to Neo4j.
 
 :sectnums!:
 
-== Add data to Neo4j
 
-The following Cypher queries create some `:Station` nodes and `:CONNECTION` relationships to model a small train network in the Neo4j database.
-Each relationship includes a `distance` numerical attribute representing the distance between two stations.
+== Create the graph
+
+The following Cypher query creates the graph of a small train network in the Neo4j database.
+Each relationship includes a `distance` numerical property representing the distance between two stations.
 
 [source, cypher, role=noplay setup-query]
 ----
@@ -34,11 +34,9 @@ CREATE
 
 The graph looks as follows:
 
-image::quickstart-tube-graph.svg["Tube graph."]
+image::example-graphs/quickstart-tube-graph.svg["Tube graph."]
 
-== Project the graph
-
-The following query creates an in-memory graph called `trainGraph` from the `Station` nodes and the `CONNECTION` relationships (including the `distance` relationship property).
+The next query creates an in-memory graph called `trainGraph` from the `:Station` nodes and the `:CONNECTION` relationships with their `distance` property.
 
 [source, cypher, role=noplay graph-project-query]
 ----
@@ -51,6 +49,7 @@ CALL gds.graph.project(
   }
 )
 ----
+
 
 == Run the algorithm in `stream` mode
 
@@ -104,6 +103,7 @@ In the case of path finding algorithms, the link:https://neo4j.com/docs/cypher-m
 |===
 --
 
+
 == Write the results
 
 If the results of the algorithm are as expected, the next step can be to write them back to the Neo4j database.
@@ -142,6 +142,7 @@ RETURN relationshipsWritten
 | 1
 |===
 --
+
 
 == Query the Neo4j database
 
