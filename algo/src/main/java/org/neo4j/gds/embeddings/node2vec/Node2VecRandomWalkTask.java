@@ -38,6 +38,7 @@ final class Node2VecRandomWalkTask implements Runnable {
     private final CompressedRandomWalks compressedRandomWalks;
     private final RandomWalkProbabilities.Builder randomWalkProbabilitiesBuilder;
     private final RandomWalkSampler sampler;
+    private final int walkBufferSize;
     private int walks;
     private int maxWalkLength;
     private long maxIndex;
@@ -52,6 +53,7 @@ final class Node2VecRandomWalkTask implements Runnable {
         AtomicLong walkIndex,
         CompressedRandomWalks compressedRandomWalks,
         RandomWalkProbabilities.Builder randomWalkProbabilitiesBuilder,
+        int walkBufferSize,
         long randomSeed,
         int walkLength,
         double returnFactor,
@@ -65,6 +67,7 @@ final class Node2VecRandomWalkTask implements Runnable {
         this.walkIndex = walkIndex;
         this.compressedRandomWalks = compressedRandomWalks;
         this.randomWalkProbabilitiesBuilder = randomWalkProbabilitiesBuilder;
+        this.walkBufferSize = walkBufferSize;
 
         this.sampler = RandomWalkSampler.create(
             graph,
@@ -85,7 +88,7 @@ final class Node2VecRandomWalkTask implements Runnable {
         randomWalkProbabilitiesBuilder.registerWalk(path);
         compressedRandomWalks.add(index, path);
         maxWalkLength = Math.max(path.length, maxWalkLength);
-        if (walks++ == 1000) { //this is just to get the same
+        if (walks++ == walkBufferSize) {
             walks = 0;
             return this.terminationFlag.running();
         }

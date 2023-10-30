@@ -47,6 +47,7 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
     private final List<Long> sourceNodes;
     private final Optional<Long> maybeRandomSeed;
     private final TrainParameters trainParameters;
+    private final int walkBufferSize;
 
 
     public static MemoryEstimation memoryEstimation(int walksPerNode, int walkLength, int embeddingDimension) {
@@ -84,6 +85,7 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
             concurrency,
             List.of(),
             maybeRandomSeed,
+            1000,
             walkParameters,
             trainParameters,
             progressTracker
@@ -95,6 +97,7 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
         int concurrency,
         List<Long> sourceNodes,
         Optional<Long> maybeRandomSeed,
+        int walkBufferSize,
         WalkParameters walkParameters,
         TrainParameters trainParameters,
         ProgressTracker progressTracker
@@ -103,6 +106,7 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
         this.graph = graph;
         this.concurrency = concurrency;
         this.walkParameters = walkParameters;
+        this.walkBufferSize = walkBufferSize;
         this.sourceNodes = sourceNodes;
         this.maybeRandomSeed = maybeRandomSeed;
         this.trainParameters = trainParameters;
@@ -140,6 +144,7 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
             concurrency,
             sourceNodes,
             walkParameters,
+            walkBufferSize,
             DefaultPool.INSTANCE,
             progressTracker,
             terminationFlag
@@ -185,6 +190,7 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
         int concurrency,
         List<Long> sourceNodes,
         WalkParameters walkParameters,
+        int walkBufferSize,
         ExecutorService executorService,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
@@ -211,6 +217,7 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
                 index,
                 compressedRandomWalks,
                 randomWalkPropabilitiesBuilder,
+                walkBufferSize,
                 randomSeed,
                 walkParameters.walkLength,
                 walkParameters.returnFactor,
