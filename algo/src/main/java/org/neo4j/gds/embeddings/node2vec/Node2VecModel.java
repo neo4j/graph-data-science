@@ -54,7 +54,7 @@ public class Node2VecModel {
     private final int embeddingDimension;
     private final int windowSize;
     private final int negativeSamplingRate;
-    private final Node2VecBaseConfig.EmbeddingInitializer embeddingInitializer;
+    private final EmbeddingInitializer embeddingInitializer;
     private final int concurrency;
     private final CompressedRandomWalks walks;
     private final RandomWalkProbabilities randomWalkProbabilities;
@@ -80,7 +80,7 @@ public class Node2VecModel {
         LongUnaryOperator toOriginalId,
         long nodeCount,
         TrainParameters trainParameters,
-        Node2VecBaseConfig.EmbeddingInitializer embeddingInitializer,
+        EmbeddingInitializer embeddingInitializer,
         int concurrency,
         Optional<Long> maybeRandomSeed,
         CompressedRandomWalks walks,
@@ -114,7 +114,7 @@ public class Node2VecModel {
         int windowSize,
         int negativeSamplingRate,
         int embeddingDimension,
-        Node2VecBaseConfig.EmbeddingInitializer embeddingInitializer,
+        EmbeddingInitializer embeddingInitializer,
         int concurrency,
         Optional<Long> maybeRandomSeed,
         CompressedRandomWalks walks,
