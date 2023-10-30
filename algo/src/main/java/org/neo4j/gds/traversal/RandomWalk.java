@@ -54,15 +54,18 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
 
     public static RandomWalk create(
         Graph graph,
-        RandomWalkBaseConfig config,
+        int concurrency,
         WalkParameters walkParameters,
+        List<Long> sourceNodes,
+        int walkBufferSize,
+        Optional<Long> randomSeed,
         ProgressTracker progressTracker,
         ExecutorService executorService
     ) {
         if (graph.hasRelationshipProperty()) {
             EmbeddingUtils.validateRelationshipWeightPropertyValue(
                 graph,
-                config.concurrency(),
+                concurrency,
                 weight -> weight >= 0,
                 "RandomWalk only supports non-negative weights.",
                 executorService
@@ -71,15 +74,12 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
 
         return new RandomWalk(
             graph,
-            config.concurrency(),
+            concurrency,
             executorService,
-            config.walkBufferSize(),
-            walkParameters.walksPerNode,
-            walkParameters.walkLength,
-            walkParameters.returnFactor,
-            walkParameters.inOutFactor,
-            config.sourceNodes(),
-            config.randomSeed(),
+            walkParameters,
+            sourceNodes,
+            walkBufferSize,
+            randomSeed,
             progressTracker
         );
     }
@@ -88,12 +88,9 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         Graph graph,
         int concurrency,
         ExecutorService executorService,
-        int walkBufferSize,
-        int walksPerNode,
-        int walkLength,
-        double returnFactor,
-        double inOutFactor,
+        WalkParameters walkParameters,
         List<Long> sourceNodes,
+        int walkBufferSize,
         Optional<Long> maybeRandomSeed,
         ProgressTracker progressTracker
     ) {
@@ -115,10 +112,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
             nextNodeSupplier,
             cumulativeWeightSupplier,
             walks,
-            walksPerNode,
-            walkLength,
-            returnFactor,
-            inOutFactor,
+            walkParameters,
             randomSeed,
             progressTracker,
             externalTerminationFlag
