@@ -31,6 +31,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.core.EmbeddingUtils;
 import org.neo4j.gds.traversal.RandomWalkCompanion;
+import org.neo4j.gds.traversal.WalkParameters;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,10 +46,7 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
     private final double positiveSamplingFactor;
     private final double negativeSamplingExponent;
     private final int concurrency;
-    private final int walksPerNode;
-    private final int walkLength;
-    private final double inOutFactor;
-    private final double returnFactor;
+    private final WalkParameters walkParameters;
     private final List<Long> sourceNodes;
     private final Optional<Long> maybeRandomSeed;
     private final double initialLearningRate;
@@ -78,10 +76,7 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
             config.concurrency(),
             config.positiveSamplingFactor(),
             config.negativeSamplingExponent(),
-            config.walksPerNode(),
-            config.walkLength(),
-            config.inOutFactor(),
-            config.returnFactor(),
+            config.walkParameters(),
             config.sourceNodes(),
             config.randomSeed(),
             progressTracker,
@@ -100,10 +95,7 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
         int concurrency,
         double positiveSamplingFactor,
         double negativeSamplingExponent,
-        int walksPerNode,
-        int walkLength,
-        double inOutFactor,
-        double returnFactor,
+        WalkParameters walkParameters,
         List<Long> sourceNodes,
         Optional<Long> maybeRandomSeed,
         ProgressTracker progressTracker,
@@ -122,10 +114,7 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
         this.positiveSamplingFactor = positiveSamplingFactor;
         this.negativeSamplingExponent = negativeSamplingExponent;
         this.concurrency = concurrency;
-        this.walksPerNode = walksPerNode;
-        this.walkLength = walkLength;
-        this.inOutFactor = inOutFactor;
-        this.returnFactor = returnFactor;
+        this.walkParameters = walkParameters;
         this.sourceNodes = sourceNodes;
         this.maybeRandomSeed = maybeRandomSeed;
         this.initialLearningRate = initialLearningRate;
@@ -157,7 +146,7 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
             negativeSamplingExponent,
             concurrency
         );
-        var walks = new CompressedRandomWalks(graph.nodeCount() * walksPerNode);
+        var walks = new CompressedRandomWalks(graph.nodeCount() * walkParameters.walksPerNode);
 
         progressTracker.beginSubTask("RandomWalk");
 
@@ -168,10 +157,7 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
             maybeRandomSeed,
             concurrency,
             sourceNodes,
-            walksPerNode,
-            walkLength,
-            inOutFactor,
-            returnFactor,
+            walkParameters,
             DefaultPool.INSTANCE,
             progressTracker,
             terminationFlag
@@ -222,10 +208,7 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
         Optional<Long> maybeRandomSeed,
         int concurrency,
         List<Long> sourceNodes,
-        int walksPerNode,
-        int walkLength,
-        double inOutFactor,
-        double returnFactor,
+        WalkParameters walkParameters,
         ExecutorService executorService,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
@@ -245,7 +228,7 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
             tasks.add(new Node2VecRandomWalkTask(
                 graph.concurrentCopy(),
                 nextNodeSupplier,
-                walksPerNode,
+                walkParameters.walksPerNode,
                 cumulativeWeightsSupplier,
                 progressTracker,
                 terminationFlag,
@@ -253,9 +236,9 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
                 compressedRandomWalks,
                 randomWalkPropabilitiesBuilder,
                 randomSeed,
-                walkLength,
-                returnFactor,
-                inOutFactor
+                walkParameters.walkLength,
+                walkParameters.returnFactor,
+                walkParameters.inOutFactor
             ));
         }
         return tasks;
