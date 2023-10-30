@@ -20,6 +20,7 @@
 package org.neo4j.gds.algorithms.similarity;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
+import org.neo4j.gds.algorithms.KnnSpecificFields;
 import org.neo4j.gds.algorithms.RelationshipMutateResult;
 import org.neo4j.gds.algorithms.SimilaritySpecificFields;
 import org.neo4j.gds.algorithms.SimilaritySpecificFieldsWithDistribution;
@@ -28,6 +29,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
+import org.neo4j.gds.similarity.knn.KnnMutateConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
 
 import java.util.function.Function;
@@ -78,6 +80,47 @@ public class SimilarityAlgorithmsMutateBusinessFacade {
             configuration.mutateProperty()
         );
 
+
+    }
+
+    public RelationshipMutateResult knn(
+        String graphName,
+        KnnMutateConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        boolean computeSimilarityDistribution
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> similarityAlgorithmsFacade.knn(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return mutate(
+            algorithmResult,
+            configuration,
+            result -> SimilarityResultCompanion.computeToGraph(
+                algorithmResult.graph(),
+                algorithmResult.graph().nodeCount(),
+                configuration.concurrency(),
+                result
+            ),
+            (result, similarityDistribution) -> {
+                return new KnnSpecificFields(
+                    result.nodeCount(),
+                    result.nodePairsConsidered(),
+                    result.didConverge(),
+                    result.ranIterations(),
+                    result.totalSimilarityPairs(),
+                    similarityDistribution
+                );
+            },
+            intermediateResult.computeMilliseconds,
+            () -> KnnSpecificFields.EMPTY,
+            computeSimilarityDistribution,
+            configuration.mutateRelationshipType(),
+            configuration.mutateProperty()
+        );
 
     }
 
