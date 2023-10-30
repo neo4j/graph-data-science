@@ -94,6 +94,7 @@ class RandomWalkTest {
         var randomWalk = RandomWalk.create(
             graph,
             config,
+            config.walkParameters(),
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE
         );
@@ -135,6 +136,7 @@ class RandomWalkTest {
         var randomWalk = RandomWalk.create(
             graph,
             config,
+            config.walkParameters(),
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE
         );
@@ -148,6 +150,7 @@ class RandomWalkTest {
         RandomWalk randomWalk = RandomWalk.create(
             graph,
             config,
+            config.walkParameters(),
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE
         );
@@ -189,6 +192,7 @@ class RandomWalkTest {
         RandomWalk randomWalk = RandomWalk.create(
             graph,
             config,
+            config.walkParameters(),
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE
         );
@@ -249,6 +253,7 @@ class RandomWalkTest {
         RandomWalk randomWalk = RandomWalk.create(
             graph,
             config,
+            config.walkParameters(),
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE
         );
@@ -298,6 +303,7 @@ class RandomWalkTest {
         RandomWalk randomWalk = RandomWalk.create(
             graph,
             config,
+            config.walkParameters(),
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE
         );
@@ -335,6 +341,7 @@ class RandomWalkTest {
             () -> RandomWalk.create(
                 graph,
                 config,
+                config.walkParameters(),
                 ProgressTracker.NULL_TRACKER,
                 DefaultPool.INSTANCE
             )
@@ -370,6 +377,7 @@ class RandomWalkTest {
         var randomWalk = RandomWalk.create(
             graph,
             config,
+            config.walkParameters(),
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE
         );
@@ -399,6 +407,7 @@ class RandomWalkTest {
         var randomWalk = RandomWalk.create(
             graph,
             config,
+            config.walkParameters(),
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE
         );
@@ -422,6 +431,7 @@ class RandomWalkTest {
             var randomWalk = RandomWalk.create(
                     graph,
                     config,
+                    config.walkParameters(),
                     ProgressTracker.NULL_TRACKER,
                     DefaultPool.INSTANCE
             );

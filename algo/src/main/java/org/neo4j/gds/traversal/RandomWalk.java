@@ -55,6 +55,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
     public static RandomWalk create(
         Graph graph,
         RandomWalkBaseConfig config,
+        WalkParameters walkParameters,
         ProgressTracker progressTracker,
         ExecutorService executorService
     ) {
@@ -73,10 +74,10 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
             config.concurrency(),
             executorService,
             config.walkBufferSize(),
-            config.walksPerNode(),
-            config.walkLength(),
-            config.returnFactor(),
-            config.inOutFactor(),
+            walkParameters.walksPerNode,
+            walkParameters.walkLength,
+            walkParameters.returnFactor,
+            walkParameters.inOutFactor,
             config.sourceNodes(),
             config.randomSeed(),
             progressTracker
