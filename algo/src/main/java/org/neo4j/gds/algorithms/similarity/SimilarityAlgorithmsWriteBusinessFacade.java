@@ -31,6 +31,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityWriteConfig;
 import org.neo4j.gds.similarity.knn.KnnWriteConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteConfig;
 
@@ -87,6 +88,43 @@ public class SimilarityAlgorithmsWriteBusinessFacade {
         );
 
     }
+
+    public RelationshipWriteResult<SimilaritySpecificFieldsWithDistribution> filteredNodeSimilarity(
+        String graphName,
+        FilteredNodeSimilarityWriteConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        boolean computeSimilarityDistribution
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> similarityAlgorithmsFacade.filteredNodeSimilarity(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return write(
+            algorithmResult,
+            configuration,
+            result -> result.graphResult(),
+            ((result, similarityDistribution) -> {
+                var similarityGraphResult = result.graphResult();
+                return new SimilaritySpecificFieldsWithDistribution(
+                    similarityGraphResult.comparedNodes(),
+                    similarityGraphResult.similarityGraph().relationshipCount(),
+                    similarityDistribution
+                );
+            }),
+            intermediateResult.computeMilliseconds,
+            () -> SimilaritySpecificFieldsWithDistribution.EMPTY,
+            computeSimilarityDistribution,
+            "FilteredNodeSimilarityWrite",
+            configuration.writeProperty(),
+            configuration.writeRelationshipType(),
+            configuration.arrowConnectionInfo()
+
+        );
+    }
+
 
     public RelationshipWriteResult knn(
         String graphName,

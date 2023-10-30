@@ -39,6 +39,7 @@ import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityMutateConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamConfig;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityWriteConfig;
 import org.neo4j.gds.similarity.knn.KnnMutateConfig;
 import org.neo4j.gds.similarity.knn.KnnStatsConfig;
 import org.neo4j.gds.similarity.knn.KnnStreamConfig;
@@ -241,6 +242,23 @@ public class SimilarityProcedureFacade {
         return Stream.of(NodeSimilarityComputationResultTransformer.toMutateResult(computationResult));
     }
 
+    public Stream<SimilarityWriteResult> filteredNodeSimilarityWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var writeConfig = createConfig(configuration, FilteredNodeSimilarityWriteConfig::of);
+
+        var computationResult = writeBusinessFacade.filteredNodeSimilarity(
+            graphName,
+            writeConfig,
+            user,
+            databaseId,
+            procedureReturnColumns.contains("similarityDistribution")
+        );
+
+        return Stream.of(NodeSimilarityComputationResultTransformer.toWriteResult(computationResult));
+    }
+
 
     public Stream<MemoryEstimateResult> filteredNodeSimilarityEstimateStream(
         Object graphNameOrConfiguration,
@@ -263,6 +281,14 @@ public class SimilarityProcedureFacade {
         Map<String, Object> algoConfiguration
     ) {
         var config = createConfig(algoConfiguration, FilteredNodeSimilarityMutateConfig::of);
+        return Stream.of(estimateBusinessFacade.nodeSimilarity(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> filteredNodeSimilarityEstimateWrite(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, FilteredNodeSimilarityWriteConfig::of);
         return Stream.of(estimateBusinessFacade.nodeSimilarity(graphNameOrConfiguration, config));
     }
 
