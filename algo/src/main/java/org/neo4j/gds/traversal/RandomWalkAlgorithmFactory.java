@@ -45,7 +45,7 @@ public class RandomWalkAlgorithmFactory<CONFIG extends RandomWalkBaseConfig> ext
         RandomWalkBaseConfig configuration,
         ProgressTracker progressTracker
     ) {
-        return RandomWalk.create(graph, configuration, progressTracker, DefaultPool.INSTANCE);
+        return RandomWalk.create(graph, configuration, configuration.walkParameters(), progressTracker, DefaultPool.INSTANCE);
     }
 
     @Override
