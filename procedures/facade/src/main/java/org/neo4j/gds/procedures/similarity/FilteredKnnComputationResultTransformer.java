@@ -21,14 +21,17 @@ package org.neo4j.gds.procedures.similarity;
 
 import org.neo4j.gds.algorithms.KnnSpecificFields;
 import org.neo4j.gds.algorithms.RelationshipMutateResult;
+import org.neo4j.gds.algorithms.RelationshipWriteResult;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.procedures.similarity.knn.KnnMutateResult;
 import org.neo4j.gds.procedures.similarity.knn.KnnStatsResult;
+import org.neo4j.gds.procedures.similarity.knn.KnnWriteResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnMutateConfig;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnStatsConfig;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnWriteConfig;
 
 import java.util.stream.Stream;
 
@@ -89,7 +92,25 @@ final class FilteredKnnComputationResultTransformer {
         );
     }
 
+    static KnnWriteResult toWriteResult(
+        RelationshipWriteResult<KnnSpecificFields> writeResult,
+        FilteredKnnWriteConfig config
+    ) {
 
+        return new KnnWriteResult(
+            writeResult.preProcessingMillis(),
+            writeResult.computeMillis(),
+            writeResult.writeMillis(),
+            writeResult.postProcessingMillis(),
+            writeResult.algorithmSpecificFields().nodesCompared(),
+            writeResult.algorithmSpecificFields().relationshipsWritten(),
+            writeResult.algorithmSpecificFields().didConverge(),
+            writeResult.algorithmSpecificFields().ranIterations(),
+            writeResult.algorithmSpecificFields().nodePairsConsidered(),
+            writeResult.algorithmSpecificFields().similarityDistribution(),
+            config.toMap()
+        );
+    }
 
 
 }

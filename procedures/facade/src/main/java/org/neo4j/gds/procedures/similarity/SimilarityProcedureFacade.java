@@ -39,6 +39,7 @@ import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnMutateConfig;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnStatsConfig;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnStreamConfig;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnWriteConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityMutateConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamConfig;
@@ -445,6 +446,23 @@ public class SimilarityProcedureFacade {
         return Stream.of(FilteredKnnComputationResultTransformer.toMutateResult(computationResult, mutateConfig));
     }
 
+    public Stream<KnnWriteResult> filteredKnnWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var writeConfig = createConfig(configuration, FilteredKnnWriteConfig::of);
+
+        var computationResult = writeBusinessFacade.filteredKnn(
+            graphName,
+            writeConfig,
+            user,
+            databaseId,
+            procedureReturnColumns.contains("similarityDistribution")
+        );
+
+        return Stream.of(FilteredKnnComputationResultTransformer.toWriteResult(computationResult, writeConfig));
+    }
+
 
     public Stream<MemoryEstimateResult> filteredKnnStreamEstimate(
         Object graphNameOrConfiguration,
@@ -467,6 +485,14 @@ public class SimilarityProcedureFacade {
         Map<String, Object> algoConfiguration
     ) {
         var config = createConfig(algoConfiguration, FilteredKnnMutateConfig::of);
+        return Stream.of(estimateBusinessFacade.filteredKnn(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> filteredKnnWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = createConfig(algoConfiguration, FilteredKnnWriteConfig::of);
         return Stream.of(estimateBusinessFacade.filteredKnn(graphNameOrConfiguration, config));
     }
 

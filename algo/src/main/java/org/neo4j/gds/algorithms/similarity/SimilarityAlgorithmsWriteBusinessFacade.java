@@ -31,6 +31,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnWriteConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityWriteConfig;
 import org.neo4j.gds.similarity.knn.KnnWriteConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteConfig;
@@ -162,6 +163,49 @@ public class SimilarityAlgorithmsWriteBusinessFacade {
             () -> KnnSpecificFields.EMPTY,
             computeSimilarityDistribution,
             "KnnWrite",
+            configuration.writeProperty(),
+            configuration.writeRelationshipType(),
+            configuration.arrowConnectionInfo()
+        );
+
+    }
+
+    public RelationshipWriteResult filteredKnn(
+        String graphName,
+        FilteredKnnWriteConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        boolean computeSimilarityDistribution
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> similarityAlgorithmsFacade.filteredKnn(graphName, configuration, user, databaseId)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        return write(
+            algorithmResult,
+            configuration,
+            result -> SimilarityResultCompanion.computeToGraph(
+                algorithmResult.graph(),
+                algorithmResult.graph().nodeCount(),
+                configuration.concurrency(),
+                result.similarityResultStream()
+            ),
+            (result, similarityDistribution) -> {
+                return new KnnSpecificFields(
+                    result.nodesCompared(),
+                    result.nodePairsConsidered(),
+                    result.didConverge(),
+                    result.ranIterations(),
+                    result.numberOfSimilarityPairs(),
+                    similarityDistribution
+                );
+            },
+            intermediateResult.computeMilliseconds,
+            () -> KnnSpecificFields.EMPTY,
+            computeSimilarityDistribution,
+            "FilteredKnnWrite",
             configuration.writeProperty(),
             configuration.writeRelationshipType(),
             configuration.arrowConnectionInfo()
