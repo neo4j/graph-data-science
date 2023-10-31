@@ -95,9 +95,9 @@ Since the embeddings must be available to the kNN algorithm later on, the algori
 --
 [source, cypher, role=noplay]
 ----
-CALL gds.fastRP.mutate(  <1>
-  'purchases',  <2>
-  {  <3>
+CALL gds.fastRP.mutate(  // <1>
+  'purchases',  // <2>
+  {  // <3>
     embeddingDimension: 4,
     iterationWeights: [0.8, 1, 1, 1],
     relationshipWeightProperty: 'amount',
@@ -133,9 +133,9 @@ Since you will need to run Cypher queries for further analysis, you must run the
 --
 [source, cypher, role=noplay]
 ----
-CALL gds.knn.write(  <1>
-  'purchases',  <2>
-  {  <3>
+CALL gds.knn.write(  // <1>
+  'purchases',  // <2>
+  {  // <3>
     nodeProperties: ['embedding'],
     topK: 2,
     sampleRate: 1.0,
@@ -147,7 +147,7 @@ CALL gds.knn.write(  <1>
   }
 )
 YIELD similarityDistribution
-RETURN similarityDistribution.mean AS meanSimilarity  <4>
+RETURN similarityDistribution.mean AS meanSimilarity  // <4>
 ----
 <1> `gds.knn` algorithm running in `write` mode.
 <2> Name of the projected graph to run the algorithm on.
