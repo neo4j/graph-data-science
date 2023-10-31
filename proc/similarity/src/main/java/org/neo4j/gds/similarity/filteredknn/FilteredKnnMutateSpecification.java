@@ -30,8 +30,10 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.similarity.knn.KnnMutateResult;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityProc;
+import org.neo4j.gds.similarity.knn.KnnMutateResultBuilder;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -47,7 +49,7 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
     description = FilteredKnnConstants.PROCEDURE_DESCRIPTION,
     executionMode = MUTATE_RELATIONSHIP
 )
-public class FilteredKnnMutateSpecification implements AlgorithmSpec<FilteredKnn, FilteredKnnResult, FilteredKnnMutateConfig, Stream<FilteredKnnMutateProcResult>, FilteredKnnFactory<FilteredKnnMutateConfig>> {
+public class FilteredKnnMutateSpecification implements AlgorithmSpec<FilteredKnn, FilteredKnnResult, FilteredKnnMutateConfig, Stream<KnnMutateResult>, FilteredKnnFactory<FilteredKnnMutateConfig>> {
     @Override
     public String name() {
         return "FilteredKnnMutate";
@@ -64,13 +66,13 @@ public class FilteredKnnMutateSpecification implements AlgorithmSpec<FilteredKnn
     }
 
     @Override
-    public ComputationResultConsumer<FilteredKnn, FilteredKnnResult, FilteredKnnMutateConfig, Stream<FilteredKnnMutateProcResult>> computationResultConsumer() {
+    public ComputationResultConsumer<FilteredKnn, FilteredKnnResult, FilteredKnnMutateConfig, Stream<KnnMutateResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Graph mutation failed",
             executionContext.log(),
             () -> {
                 var config = computationResult.config();
-                var resultBuilder = new FilteredKnnMutateProcResult.Builder();
+                var resultBuilder = new KnnMutateResultBuilder();
 
                 computationResult.result()
                     .ifPresent(result -> {

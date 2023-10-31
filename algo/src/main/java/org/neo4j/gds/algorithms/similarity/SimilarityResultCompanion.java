@@ -24,21 +24,26 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
-import org.neo4j.gds.similarity.knn.KnnResult;
+import org.neo4j.gds.similarity.SimilarityResult;
 
- class SimilarityResultCompanion {
+import java.util.stream.Stream;
+
+class SimilarityResultCompanion {
 
     static SimilarityGraphResult computeToGraph(
         Graph graph,
         long nodeCount,
         int concurrency,
-        KnnResult result) {
+        Stream<SimilarityResult> similarityResultStream
+    ) {
+
         Graph similarityGraph = new SimilarityGraphBuilder(
             graph,
             concurrency,
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
-        ).build(result.streamSimilarityResult());
+        ).build(similarityResultStream);
+
         return new SimilarityGraphResult(similarityGraph, nodeCount, false);
     }
 }

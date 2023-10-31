@@ -40,7 +40,7 @@ public abstract class KnnResult {
 
     public abstract long nodePairsConsidered();
 
-    public abstract long nodeCount();
+    public abstract long nodesCompared();
 
 
     public LongStream neighborsOf(long nodeId) {

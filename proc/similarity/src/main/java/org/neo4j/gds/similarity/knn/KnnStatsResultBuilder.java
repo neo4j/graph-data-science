@@ -53,7 +53,7 @@ public class KnnStatsResultBuilder  extends SimilarityResultBuilder<KnnStatsResu
             return this;
         }
 
-    KnnStatsResultBuilder withNodePairsConsidered(long nodePairsConsidered) {
+    public KnnStatsResultBuilder withNodePairsConsidered(long nodePairsConsidered) {
             this.nodePairsConsidered = nodePairsConsidered;
             return this;
         }

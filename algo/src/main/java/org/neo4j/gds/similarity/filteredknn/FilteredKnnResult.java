@@ -33,6 +33,9 @@ public abstract class FilteredKnnResult {
 
     public abstract long nodePairsConsidered();
 
+    public abstract long nodesCompared();
+
+
     public Stream<SimilarityResult> similarityResultStream() {
         TargetNodeFiltering neighbourConsumers = neighbourConsumers();
         NodeFilter sourceNodeFilter = sourceNodeFilter();

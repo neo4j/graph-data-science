@@ -99,6 +99,7 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
             result.ranIterations(),
             result.didConverge(),
             result.nodePairsConsidered(),
+            result.nodesCompared(),
             targetNodeFiltering,
             sourceNodeFilter
         );

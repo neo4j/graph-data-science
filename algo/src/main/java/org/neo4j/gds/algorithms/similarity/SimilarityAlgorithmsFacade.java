@@ -23,6 +23,9 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnBaseConfig;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnFactory;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityBaseConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityFactory;
 import org.neo4j.gds.similarity.knn.KnnBaseConfig;
@@ -85,6 +88,22 @@ public class SimilarityAlgorithmsFacade {
             config,
             Optional.empty(),
             new KnnFactory<>(),
+            user,
+            databaseId
+        );
+    }
+
+    AlgorithmComputationResult<FilteredKnnResult> filteredKnn(
+        String graphName,
+        FilteredKnnBaseConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
+        return algorithmRunner.run(
+            graphName,
+            config,
+            Optional.empty(),
+            new FilteredKnnFactory<>(),
             user,
             databaseId
         );
