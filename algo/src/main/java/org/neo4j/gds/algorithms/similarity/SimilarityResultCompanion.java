@@ -19,12 +19,17 @@
  */
 package org.neo4j.gds.algorithms.similarity;
 
+import org.neo4j.gds.algorithms.KnnSpecificFields;
+import org.neo4j.gds.algorithms.SimilaritySpecificFieldsWithDistribution;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
+import org.neo4j.gds.similarity.knn.KnnResult;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
 import java.util.stream.Stream;
 
@@ -46,4 +51,35 @@ class SimilarityResultCompanion {
 
         return new SimilarityGraphResult(similarityGraph, nodeCount, false);
     }
+
+    static SpecificFieldsWithSimilarityStatisticsSupplier<KnnResult, KnnSpecificFields> KNN_SPECIFIC_FIELDS_SUPPLIER = (result, similarityDistribution) -> {
+        return new KnnSpecificFields(
+            result.nodesCompared(),
+            result.nodePairsConsidered(),
+            result.didConverge(),
+            result.ranIterations(),
+            result.totalSimilarityPairs(),
+            similarityDistribution
+        );
+    };
+
+    static SpecificFieldsWithSimilarityStatisticsSupplier<FilteredKnnResult, KnnSpecificFields> FILTERED_KNN_SPECIFIC_FIELDS_SUPPLIER = (result, similarityDistribution) -> {
+        return new KnnSpecificFields(
+            result.nodesCompared(),
+            result.nodePairsConsidered(),
+            result.didConverge(),
+            result.ranIterations(),
+            result.numberOfSimilarityPairs(),
+            similarityDistribution
+        );
+    };
+
+    static SpecificFieldsWithSimilarityStatisticsSupplier<NodeSimilarityResult, SimilaritySpecificFieldsWithDistribution> NODE_SIMILARITY_SPECIFIC_FIELDS_SUPPLIER = ((result, similarityDistribution) -> {
+        var graphResult = result.graphResult();
+        return new SimilaritySpecificFieldsWithDistribution(
+            graphResult.comparedNodes(),
+            graphResult.similarityGraph().relationshipCount(),
+            similarityDistribution
+        );
+    });
 }

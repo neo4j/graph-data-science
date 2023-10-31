@@ -78,4 +78,6 @@ public class KnnSpecificFields implements SimilaritySpecificFields {
     public Map<String, Object> similarityDistribution(){
         return similarityDistribution;
     }
+
+
 }

@@ -37,6 +37,10 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static org.neo4j.gds.algorithms.similarity.SimilarityResultCompanion.FILTERED_KNN_SPECIFIC_FIELDS_SUPPLIER;
+import static org.neo4j.gds.algorithms.similarity.SimilarityResultCompanion.KNN_SPECIFIC_FIELDS_SUPPLIER;
+import static org.neo4j.gds.algorithms.similarity.SimilarityResultCompanion.NODE_SIMILARITY_SPECIFIC_FIELDS_SUPPLIER;
+
 public class SimilarityAlgorithmsMutateBusinessFacade {
 
     private final SimilarityAlgorithmsFacade similarityAlgorithmsFacade;
@@ -67,14 +71,7 @@ public class SimilarityAlgorithmsMutateBusinessFacade {
             algorithmResult,
             configuration,
             result -> result.graphResult(),
-            ((result, similarityDistribution) -> {
-                var graphResult = result.graphResult();
-                return new SimilaritySpecificFieldsWithDistribution(
-                    graphResult.comparedNodes(),
-                    graphResult.similarityGraph().relationshipCount(),
-                    similarityDistribution
-                );
-            }),
+            NODE_SIMILARITY_SPECIFIC_FIELDS_SUPPLIER,
             intermediateResult.computeMilliseconds,
             () -> SimilaritySpecificFieldsWithDistribution.EMPTY,
             computeSimilarityDistribution,
@@ -101,14 +98,7 @@ public class SimilarityAlgorithmsMutateBusinessFacade {
             algorithmResult,
             configuration,
             result -> result.graphResult(),
-            ((result, similarityDistribution) -> {
-                var similarityGraphResult = result.graphResult();
-                return new SimilaritySpecificFieldsWithDistribution(
-                    similarityGraphResult.comparedNodes(),
-                    similarityGraphResult.similarityGraph().relationshipCount(),
-                    similarityDistribution
-                );
-            }),
+            NODE_SIMILARITY_SPECIFIC_FIELDS_SUPPLIER,
             intermediateResult.computeMilliseconds,
             () -> SimilaritySpecificFieldsWithDistribution.EMPTY,
             computeSimilarityDistribution,
@@ -139,16 +129,7 @@ public class SimilarityAlgorithmsMutateBusinessFacade {
                 configuration.concurrency(),
                 result.streamSimilarityResult()
             ),
-            (result, similarityDistribution) -> {
-                return new KnnSpecificFields(
-                    result.nodesCompared(),
-                    result.nodePairsConsidered(),
-                    result.didConverge(),
-                    result.ranIterations(),
-                    result.totalSimilarityPairs(),
-                    similarityDistribution
-                );
-            },
+            KNN_SPECIFIC_FIELDS_SUPPLIER,
             intermediateResult.computeMilliseconds,
             () -> KnnSpecificFields.EMPTY,
             computeSimilarityDistribution,
@@ -180,16 +161,7 @@ public class SimilarityAlgorithmsMutateBusinessFacade {
                 configuration.concurrency(),
                 result.similarityResultStream()
             ),
-            (result, similarityDistribution) -> {
-                return new KnnSpecificFields(
-                    result.nodesCompared(),
-                    result.nodePairsConsidered(),
-                    result.didConverge(),
-                    result.ranIterations(),
-                    result.numberOfSimilarityPairs(),
-                    similarityDistribution
-                );
-            },
+            FILTERED_KNN_SPECIFIC_FIELDS_SUPPLIER,
             intermediateResult.computeMilliseconds,
             () -> KnnSpecificFields.EMPTY,
             computeSimilarityDistribution,
