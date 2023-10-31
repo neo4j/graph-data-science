@@ -236,7 +236,6 @@ public class SimilarityAlgorithmsWriteBusinessFacade {
                 .computeMillis(computeMilliseconds)
                 .writeMillis(writeResult.writeMilliseconds() + similarityGraphCreationMillis.get())
                 .relationshipsWritten(writeResult.relationshipsWritten())
-                .postProcessingMillis(0) //everything seems to happen in write-millis time
                 .algorithmSpecificFields(specificFields)
                 .configuration(configuration)
                 .build();
