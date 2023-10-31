@@ -1,5 +1,5 @@
 [[getting-started-ml-pipeline]]
-= Machine learning pipelines
+= Machine learning pipeline
 :description: This chapter shows a complete example using machine learning pipelines from the Neo4j Graph Data Science library.
 :keywords: GDS, getting started, machine learning, pipeline
 :sectnums!:
