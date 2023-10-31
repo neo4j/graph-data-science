@@ -60,24 +60,24 @@ To try it out, use it with the xref:common-usage/running-algos.adoc#running-algo
 --
 [source, cypher, role=noplay]
 ----
-MATCH  <1>
+MATCH  // <1>
   (source:Station {name: 'Kings Cross'}),
   (target:Station {name: 'Kentish Town'})
-CALL gds.shortestPath.dijkstra.stream(  <2>
-  'trainGraph',  <3>
-  {  <4>
+CALL gds.shortestPath.dijkstra.stream(  // <2>
+  'trainGraph',  // <3>
+  {  // <4>
     sourceNode: source,
     targetNode: target,
     relationshipWeightProperty: 'distance'
   }
 )
-YIELD  <5>
+YIELD  // <5>
   index,
   sourceNode,
   targetNode,
   totalCost,
   path
-RETURN  <6>
+RETURN  // <6>
   index,
   gds.util.asNode(sourceNode).name AS sourceNodeName,
   gds.util.asNode(targetNode).name AS targetNodeName,
@@ -113,12 +113,12 @@ The following query is very similar to the `stream` query, except for the additi
 --
 [source, cypher, role=noplay]
 ----
-MATCH  <1>
+MATCH  // <1>
   (source:Station {name: 'Kings Cross'}),
   (target:Station {name: 'Kentish Town'})
-CALL gds.shortestPath.dijkstra.write(  <2>
-  'trainGraph',  <3>
-  {  <4>
+CALL gds.shortestPath.dijkstra.write(  // <2>
+  'trainGraph',  // <3>
+  {  // <4>
     sourceNode: source,
     targetNode: target,
     relationshipWeightProperty: 'distance',

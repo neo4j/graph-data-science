@@ -76,9 +76,9 @@ As such, the model performance is not expected to be the best.
 --
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.pipeline.linkPrediction.create('pipe');  <1>
+CALL gds.beta.pipeline.linkPrediction.create('pipe');  // <1>
 
-CALL gds.beta.pipeline.linkPrediction.addFeature(  <2>
+CALL gds.beta.pipeline.linkPrediction.addFeature(  // <2>
   'pipe', 
   'cosine',
   {
@@ -86,7 +86,7 @@ CALL gds.beta.pipeline.linkPrediction.addFeature(  <2>
   }
 );
 
-CALL gds.beta.pipeline.linkPrediction.configureSplit(  <3>
+CALL gds.beta.pipeline.linkPrediction.configureSplit(  // <3>
   'pipe',
   {
     testFraction: 0.25,
@@ -95,7 +95,7 @@ CALL gds.beta.pipeline.linkPrediction.configureSplit(  <3>
   }
 );
 
-CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe');  <4>
+CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe');  // <4>
 ----
 <1> Create the pipeline and add it to the pipeline catalog.
 <2> Add the xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-features[link features] (only `age` here) and a feature type (`cosine` here).
@@ -114,18 +114,18 @@ The training process returns the best performing model with the specified evalua
 [source, cypher, role=noplay]
 ----
 CALL gds.beta.pipeline.linkPrediction.train(
-  'friends',  <1>
+  'friends',  // <1>
   {
-    pipeline: 'pipe',  <2>
-    modelName: 'lp-pipeline-model',  <3>
-    targetRelationshipType: 'KNOWS',  <4>
-    metrics: ['AUCPR'],  <5>
+    pipeline: 'pipe',  // <2>
+    modelName: 'lp-pipeline-model',  // <3>
+    targetRelationshipType: 'KNOWS',  // <4>
+    metrics: ['AUCPR'],  // <5>
   }
 )
 YIELD modelInfo
 RETURN
-  modelInfo.bestParameters AS winningModel,  <6>
-  modelInfo.metrics.AUCPR.train.avg AS avgTrainScore,  <7>
+  modelInfo.bestParameters AS winningModel,  // <6>
+  modelInfo.metrics.AUCPR.train.avg AS avgTrainScore,  // <7>
   modelInfo.metrics.AUCPR.validation.avg AS avgValidationScore,
   modelInfo.metrics.AUCPR.outerTrain AS outerTrainScore,
   modelInfo.metrics.AUCPR.test AS testScore
@@ -148,11 +148,11 @@ You can use the trained model to predict the probability that a link exists betw
 --
 [source, cypher, role=noplay]
 ----
-CALL gds.beta.pipeline.linkPrediction.predict.stream(  <1>
-  'friends',  <2>
+CALL gds.beta.pipeline.linkPrediction.predict.stream(  // <1>
+  'friends',  // <2>
   {
-    modelName: 'lp-pipeline-model',  <3>
-    topN: 5  <4>
+    modelName: 'lp-pipeline-model',  // <3>
+    topN: 5  // <4>
   }
 )
 YIELD node1, node2, probability
