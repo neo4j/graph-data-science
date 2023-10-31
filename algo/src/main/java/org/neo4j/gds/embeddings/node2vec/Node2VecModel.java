@@ -33,6 +33,7 @@ import org.neo4j.gds.ml.core.tensor.FloatVector;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.SplittableRandom;
 import java.util.function.LongUnaryOperator;
@@ -47,14 +48,21 @@ public class Node2VecModel {
 
     private final HugeObjectArray<FloatVector> centerEmbeddings;
     private final HugeObjectArray<FloatVector> contextEmbeddings;
-    private final Node2VecBaseConfig config;
+    private final double initialLearningRate;
+    private final double minLearningRate;
+    private final int iterations;
+    private final int embeddingDimension;
+    private final int windowSize;
+    private final int negativeSamplingRate;
+    private final EmbeddingInitializer embeddingInitializer;
+    private final int concurrency;
     private final CompressedRandomWalks walks;
     private final RandomWalkProbabilities randomWalkProbabilities;
     private final ProgressTracker progressTracker;
     private final long randomSeed;
 
-    public static MemoryEstimation memoryEstimation(Node2VecBaseConfig config) {
-        var vectorMemoryEstimation = MemoryUsage.sizeOfFloatArray(config.embeddingDimension());
+    public static MemoryEstimation memoryEstimation(int embeddingDimension) {
+        var vectorMemoryEstimation = MemoryUsage.sizeOfFloatArray(embeddingDimension);
 
         return MemoryEstimations.builder(Node2Vec.class.getSimpleName())
             .perNode(
@@ -71,47 +79,90 @@ public class Node2VecModel {
     Node2VecModel(
         LongUnaryOperator toOriginalId,
         long nodeCount,
-        Node2VecBaseConfig config,
+        TrainParameters trainParameters,
+        int concurrency,
+        Optional<Long> maybeRandomSeed,
         CompressedRandomWalks walks,
         RandomWalkProbabilities randomWalkProbabilities,
         ProgressTracker progressTracker
     ) {
-        this.config = config;
+        this(
+            toOriginalId,
+            nodeCount,
+            trainParameters.initialLearningRate,
+            trainParameters.minLearningRate,
+            trainParameters.iterations,
+            trainParameters.windowSize,
+            trainParameters.negativeSamplingRate,
+            trainParameters.embeddingDimension,
+            trainParameters.embeddingInitializer,
+            concurrency,
+            maybeRandomSeed,
+            walks,
+            randomWalkProbabilities,
+            progressTracker
+        );
+    }
+
+    Node2VecModel(
+        LongUnaryOperator toOriginalId,
+        long nodeCount,
+        double initialLearningRate,
+        double minLearningRate,
+        int iterations,
+        int windowSize,
+        int negativeSamplingRate,
+        int embeddingDimension,
+        EmbeddingInitializer embeddingInitializer,
+        int concurrency,
+        Optional<Long> maybeRandomSeed,
+        CompressedRandomWalks walks,
+        RandomWalkProbabilities randomWalkProbabilities,
+        ProgressTracker progressTracker
+    ) {
+        this.initialLearningRate = initialLearningRate;
+        this.minLearningRate = minLearningRate;
+        this.iterations = iterations;
+        this.embeddingDimension = embeddingDimension;
+        this.windowSize = windowSize;
+        this.negativeSamplingRate = negativeSamplingRate;
+        this.embeddingInitializer = embeddingInitializer;
+        this.concurrency = concurrency;
         this.walks = walks;
         this.randomWalkProbabilities = randomWalkProbabilities;
         this.progressTracker = progressTracker;
         this.negativeSamples = new NegativeSampleProducer(randomWalkProbabilities.negativeSamplingDistribution());
-        this.randomSeed = config.randomSeed().orElseGet(() -> new SplittableRandom().nextLong());
+        this.randomSeed = maybeRandomSeed.orElseGet(() -> new SplittableRandom().nextLong());
 
         var random = new Random();
-        centerEmbeddings = initializeEmbeddings(toOriginalId, nodeCount, config.embeddingDimension(), random);
-        contextEmbeddings = initializeEmbeddings(toOriginalId, nodeCount, config.embeddingDimension(), random);
+        centerEmbeddings = initializeEmbeddings(toOriginalId, nodeCount, embeddingDimension, random);
+        contextEmbeddings = initializeEmbeddings(toOriginalId, nodeCount, embeddingDimension, random);
     }
 
     Result train() {
         progressTracker.beginSubTask();
-        var learningRateAlpha = (config.initialLearningRate() - config.minLearningRate()) / config.iterations();
+        var learningRateAlpha = (initialLearningRate - minLearningRate) / iterations;
 
         var lossPerIteration = new ArrayList<Double>();
 
-        for (int iteration = 0; iteration < config.iterations(); iteration++) {
+        for (int iteration = 0; iteration < iterations; iteration++) {
             progressTracker.beginSubTask();
             progressTracker.setVolume(walks.size());
 
             var learningRate = (float) Math.max(
-                config.minLearningRate(),
-                config.initialLearningRate() - iteration * learningRateAlpha
+                minLearningRate,
+                initialLearningRate - iteration * learningRateAlpha
             );
 
             var tasks = PartitionUtils.degreePartitionWithBatchSize(
                 walks.size(),
                 walks::walkLength,
-                BitUtil.ceilDiv(randomWalkProbabilities.sampleCount(), config.concurrency()),
+                BitUtil.ceilDiv(randomWalkProbabilities.sampleCount(), concurrency),
                 partition -> {
                     var positiveSampleProducer = new PositiveSampleProducer(
                         walks.iterator(partition.startNode(), partition.nodeCount()),
                         randomWalkProbabilities.positiveSamplingProbabilities(),
-                        config.windowSize(),
+                        windowSize,
                         progressTracker
                     );
 
@@ -121,14 +172,14 @@ public class Node2VecModel {
                         positiveSampleProducer,
                         negativeSamples,
                         learningRate,
-                        config.negativeSamplingRate(),
-                        config.embeddingDimension()
+                        negativeSamplingRate,
+                        embeddingDimension
                     );
                 }
             );
 
             RunWithConcurrency.builder()
-                .concurrency(config.concurrency())
+                .concurrency(concurrency)
                 .tasks(tasks)
                 .run();
 
@@ -149,7 +200,7 @@ public class Node2VecModel {
             nodeCount
         );
         double bound;
-        switch (config.embeddingInitializer()) {
+        switch (embeddingInitializer) {
             case UNIFORM:
                 bound = 1.0;
                 break;
@@ -157,7 +208,7 @@ public class Node2VecModel {
                 bound = 0.5 / embeddingDimensions;
                 break;
             default:
-                throw new IllegalStateException("Missing implementation for: " + config.embeddingInitializer());
+                throw new IllegalStateException("Missing implementation for: " + embeddingInitializer);
         }
 
         for (var i = 0L; i < nodeCount; i++) {

@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.helper.FloatVectorTestUtils;
 
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.LongStream;
 
@@ -45,9 +46,9 @@ class Node2VecModelTest {
 
         var probabilitiesBuilder = new RandomWalkProbabilities.Builder(
             numberOfClusters * clusterSize,
+            4,
             0.001,
-            0.75,
-            4
+            0.75
         );
 
         CompressedRandomWalks walks = generateRandomWalks(
@@ -59,20 +60,16 @@ class Node2VecModelTest {
             random
         );
 
-        Node2VecStreamConfig config = ImmutableNode2VecStreamConfig.builder()
-            .embeddingDimension(10)
-            .initialLearningRate(0.05)
-            .negativeSamplingRate(1)
-            .iterations(5)
-            .concurrency(4)
-            .build();
+        var trainParameters = new TrainParameters(0.05, 0.0001, 5, 10, 1, 10, EmbeddingInitializer.NORMALIZED);
 
         int nodeCount = numberOfClusters * clusterSize;
 
         var node2VecModel = new Node2VecModel(
             nodeId -> nodeId,
             nodeCount,
-            config,
+            trainParameters,
+            4,
+            Optional.empty(),
             walks,
             probabilitiesBuilder.build(),
             ProgressTracker.NULL_TRACKER
@@ -82,7 +79,7 @@ class Node2VecModelTest {
 
         // as the order of the randomWalks is not deterministic, we also have non-fixed losses
         assertThat(trainResult.lossPerIteration())
-            .hasSize(config.iterations())
+            .hasSize(5)
             .allMatch(loss -> loss > 0 && Double.isFinite(loss));
 
         var embeddings = trainResult.embeddings();
@@ -155,28 +152,23 @@ class Node2VecModelTest {
 
         var probabilitiesBuilder = new RandomWalkProbabilities.Builder(
             numberOfClusters * clusterSize,
+            4,
             0.001,
-            0.75,
-            4
+            0.75
         );
 
         CompressedRandomWalks walks = generateRandomWalks(probabilitiesBuilder, numberOfClusters, clusterSize, numberOfWalks, walkLength, random);
 
-        Node2VecStreamConfig config = ImmutableNode2VecStreamConfig.builder()
-            .embeddingDimension(2)
-            .initialLearningRate(0.05)
-            .negativeSamplingRate(1)
-            .randomSeed(1337L)
-            .concurrency(4)
-            .iterations(iterations)
-            .build();
+        var trainParameters = new TrainParameters(0.05, 0.0001, iterations, 10, 1, 2, EmbeddingInitializer.NORMALIZED);
 
         int nodeCount = numberOfClusters * clusterSize;
 
         var node2VecModel = new Node2VecModel(
             nodeId -> nodeId,
             nodeCount,
-            config,
+            trainParameters,
+            4,
+            Optional.of(1337L),
             walks,
             probabilitiesBuilder.build(),
             ProgressTracker.NULL_TRACKER
@@ -185,7 +177,9 @@ class Node2VecModelTest {
         var otherNode2VecModel = new Node2VecModel(
             nodeId -> nodeId,
             nodeCount,
-            config,
+            trainParameters,
+            4,
+            Optional.of(1337L),
             walks,
             probabilitiesBuilder.build(),
             ProgressTracker.NULL_TRACKER
@@ -210,7 +204,7 @@ class Node2VecModelTest {
         var walks = new CompressedRandomWalks(
             numberOfClusters * clusterSize * numberOfWalks
         );
-
+        int index = 0;
         for (long clusterId = 0; clusterId < numberOfClusters; clusterId++) {
             long finalClusterId = clusterId;
             long bound = clusterSize * (clusterId + 1);
@@ -221,10 +215,12 @@ class Node2VecModelTest {
                         .toArray();
 
                     probabilitiesBuilder.registerWalk(walk);
-                    walks.add(walk);
+                    walks.add(index++, walk);
                 }
             }
         }
+        walks.setSize(index);
+        walks.setMaxWalkLength((int) walkLength);
 
         return walks;
     }

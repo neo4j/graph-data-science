@@ -47,7 +47,7 @@ public class NodeSimilarityStreamProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
 
-        return facade.similarity().nodeSimilarity(graphName, configuration);
+        return facade.similarity().nodeSimilarityStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.nodeSimilarity.stream.estimate", mode = READ)

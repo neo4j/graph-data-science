@@ -21,9 +21,9 @@ package org.neo4j.gds.embeddings.node2vec;
 
 import com.carrotsearch.hppc.AbstractIterator;
 import org.neo4j.gds.collections.cursor.HugeCursor;
-import org.neo4j.gds.core.compression.common.ZigZagLongDecoding;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.compression.common.ZigZagLongDecoding;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -44,8 +44,15 @@ public class CompressedRandomWalks {
         this.compressedWalks = HugeObjectArray.newArray(byte[].class, maxWalkCount);
         this.walkLengths = HugeIntArray.newArray(maxWalkCount);
     }
+    public void setSize(long size) {
+        this.size = size;
+    }
 
-    public void add(long... walk) {
+    public void setMaxWalkLength(int maxWalkLength) {
+        this.maxWalkLength = maxWalkLength;
+    }
+
+    public void add(long currentIndex, long... walk) {
         long currentLastValue = 0L;
         int requiredBytes = 0;
 
@@ -60,12 +67,8 @@ public class CompressedRandomWalks {
         var compressedData = new byte[requiredBytes];
         encodeVLongs(walk, walk.length, compressedData, 0);
 
-        var currentIndex = size++;
         compressedWalks.set(currentIndex, compressedData);
         walkLengths.set(currentIndex, walk.length);
-        if (walk.length > maxWalkLength) {
-            maxWalkLength = walk.length;
-        }
     }
 
     public Iterator<long[]> iterator(long startIndex, long length) {

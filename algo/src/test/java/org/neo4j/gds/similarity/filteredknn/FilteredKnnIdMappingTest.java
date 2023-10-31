@@ -74,7 +74,8 @@ public class FilteredKnnIdMappingTest extends BaseTest {
         var sourceNodesInResult = result
             .similarityResultStream()
             .map(res -> res.node1)
+            .map(graph::toOriginalNodeId)
             .collect(Collectors.<Long>toSet());
-        assertThat(sourceNodesInResult).containsExactly(0L);
+        assertThat(sourceNodesInResult).containsExactly(lowestNeoId);
     }
 }

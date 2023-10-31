@@ -25,8 +25,9 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.traversal.RandomWalkAlgorithmFactory;
+import org.neo4j.gds.degree.DegreeCentralityFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.Math.multiplyExact;
@@ -46,19 +47,34 @@ public class Node2VecAlgorithmFactory<CONFIG extends Node2VecBaseConfig> extends
         ProgressTracker progressTracker
     ) {
         validateConfig(configuration, graph);
-        return new Node2Vec(graph, configuration, progressTracker);
+        return new Node2Vec(
+            graph,
+            configuration.concurrency(),
+            configuration.sourceNodes(),
+            configuration.randomSeed(),
+            configuration.walkBufferSize(),
+            configuration.walkParameters(),
+            configuration.trainParameters(),
+            progressTracker
+        );
     }
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return Node2Vec.memoryEstimation(configuration);
+        return Node2Vec.memoryEstimation(configuration.walksPerNode(), configuration.walkLength(), configuration.embeddingDimension());
     }
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
+        var randomWalkTasks = new ArrayList<Task>();
+        if (graph.hasRelationshipProperty()) {
+            randomWalkTasks.add(DegreeCentralityFactory.degreeCentralityProgressTask(graph));
+        }
+        randomWalkTasks.add(Tasks.leaf("create walks", graph.nodeCount()));
+
         return Tasks.task(
             taskName(),
-            new RandomWalkAlgorithmFactory<CONFIG>().progressTask(graph, config),
+            Tasks.task("RandomWalk", randomWalkTasks),
             Tasks.iterativeFixed(
                 "train",
                 () -> List.of(Tasks.leaf("iteration")),

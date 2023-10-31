@@ -30,10 +30,11 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.similarity.SimilarityWriteResult;
 import org.neo4j.gds.similarity.SimilarityProc;
-import org.neo4j.gds.similarity.SimilarityWriteResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarity;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteResultBuilder;
 
 import java.util.stream.Stream;
 
@@ -73,7 +74,7 @@ public class FilteredNodeSimilarityWriteSpec implements
             executionContext
         ) -> runWithExceptionLogging("Graph write failed", executionContext.log(), () -> {
             var config = computationResult.config();
-            var resultBuilder = new SimilarityWriteResult.Builder();
+            var resultBuilder = new NodeSimilarityWriteResultBuilder();
 
             if (computationResult.result().isEmpty()) {
                 return Stream.of(resultBuilder.withConfig(config).build());

@@ -39,7 +39,7 @@ final class KnnProc {
         Graph graph,
         long nodeCount,
         int concurrency,
-        Knn.Result result,
+        KnnResult result,
         ExecutorService executor
     ) {
         Graph similarityGraph = new SimilarityGraphBuilder(

@@ -94,18 +94,13 @@ class KnnMutateProcTest extends BaseProcTest {
             assertThat(row.getNumber("computeMillis")).asInstanceOf(LONG).isGreaterThanOrEqualTo(0);
             assertThat(row.getNumber("preProcessingMillis")).asInstanceOf(LONG).isGreaterThanOrEqualTo(0);
             assertThat(row.getNumber("mutateMillis")).asInstanceOf(LONG).isGreaterThanOrEqualTo(0);
-            assertThat(row.getNumber("postProcessingMillis")).asInstanceOf(LONG).isEqualTo(-1);
+            assertThat(row.getNumber("postProcessingMillis")).asInstanceOf(LONG).isEqualTo(0);
 
             assertThat(row.get("similarityDistribution"))
                 .asInstanceOf(MAP)
                 .containsOnlyKeys("min", "max", "mean", "stdDev", "p1", "p5", "p10", "p25", "p50", "p75", "p90", "p95", "p99", "p100")
                 .allSatisfy((key, value) -> assertThat(value).asInstanceOf(DOUBLE).isGreaterThanOrEqualTo(0d));
-
-            assertThat(row.getNumber("postProcessingMillis"))
-                .asInstanceOf(LONG)
-                .as("Missing postProcessingMillis")
-                .isEqualTo(-1L);
-
+            
             assertThat(row.get("configuration"))
                 .isNotNull()
                 .isInstanceOf(Map.class);

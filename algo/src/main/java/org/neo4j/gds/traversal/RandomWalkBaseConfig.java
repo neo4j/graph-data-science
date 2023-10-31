@@ -57,4 +57,12 @@ public interface RandomWalkBaseConfig extends AlgoBaseConfig, RelationshipWeight
     default double returnFactor() {
         return 1.0;
     }
+
+    @Value.Derived
+    @Configuration.Ignore
+    default WalkParameters walkParameters() {
+        return new WalkParameters(
+            walksPerNode(), walkLength(), returnFactor(), inOutFactor()
+        );
+    }
 }

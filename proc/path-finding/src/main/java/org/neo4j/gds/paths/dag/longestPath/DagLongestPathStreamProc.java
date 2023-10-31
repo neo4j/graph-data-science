@@ -21,6 +21,7 @@ package org.neo4j.gds.paths.dag.longestPath;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.paths.StreamResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -36,7 +37,7 @@ public class DagLongestPathStreamProc extends BaseProc {
 
     @Procedure(value = "gds.dag.longestPath.stream", mode = READ)
     @Description(LONGEST_PATH_DESCRIPTION)
-    public Stream<DagLongestPathStreamResult> stream(
+    public Stream<StreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

@@ -25,8 +25,10 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.similarity.knn.KnnWriteResult;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityWriteConsumer;
+import org.neo4j.gds.similarity.knn.KnnWriteResultBuilder;
 
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -39,7 +41,7 @@ import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
     description = FilteredKnnConstants.PROCEDURE_DESCRIPTION,
     executionMode = WRITE_RELATIONSHIP
 )
-public class FilteredKnnWriteSpecification implements AlgorithmSpec<FilteredKnn, FilteredKnnResult, FilteredKnnWriteConfig, Stream<FilteredKnnWriteProcResult>, FilteredKnnFactory<FilteredKnnWriteConfig>> {
+public class FilteredKnnWriteSpecification implements AlgorithmSpec<FilteredKnn, FilteredKnnResult, FilteredKnnWriteConfig, Stream<KnnWriteResult>, FilteredKnnFactory<FilteredKnnWriteConfig>> {
     @Override
     public String name() {
         return "FilteredKnnWrite";
@@ -56,7 +58,7 @@ public class FilteredKnnWriteSpecification implements AlgorithmSpec<FilteredKnn,
     }
 
     @Override
-    public ComputationResultConsumer<FilteredKnn, FilteredKnnResult, FilteredKnnWriteConfig, Stream<FilteredKnnWriteProcResult>> computationResultConsumer() {
+    public ComputationResultConsumer<FilteredKnn, FilteredKnnResult, FilteredKnnWriteConfig, Stream<KnnWriteResult>> computationResultConsumer() {
         return new SimilarityWriteConsumer<>(
             this::resultBuilderFunction,
             this::similarityGraphResult,
@@ -64,8 +66,8 @@ public class FilteredKnnWriteSpecification implements AlgorithmSpec<FilteredKnn,
         );
     }
 
-    private FilteredKnnWriteProcResult.Builder resultBuilderFunction(ComputationResult<FilteredKnn, FilteredKnnResult, FilteredKnnWriteConfig> computationResult) {
-        var builder = new FilteredKnnWriteProcResult.Builder();
+    private KnnWriteResultBuilder resultBuilderFunction(ComputationResult<FilteredKnn, FilteredKnnResult, FilteredKnnWriteConfig> computationResult) {
+        var builder = new KnnWriteResultBuilder();
 
         computationResult.result().ifPresent(result -> {
             builder

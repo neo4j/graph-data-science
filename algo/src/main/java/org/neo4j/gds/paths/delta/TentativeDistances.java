@@ -20,6 +20,7 @@
 package org.neo4j.gds.paths.delta;
 
 
+import com.carrotsearch.hppc.predicates.DoubleDoublePredicate;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
@@ -75,9 +76,18 @@ public interface TentativeDistances {
         long size,
         int concurrency
     ) {
+        return distanceAndPredecessors(size, concurrency, DIST_INF, (a, b) -> Double.compare(a, b) > 0);
+    }
+
+    static DistanceAndPredecessor distanceAndPredecessors(
+        long size,
+        int concurrency,
+        double distanceDefault,
+        DoubleDoublePredicate distanceComparator
+    ) {
         var distances = HugeAtomicDoubleArray.of(
             size,
-            ParallelDoublePageCreator.of(concurrency, index -> DIST_INF)
+            ParallelDoublePageCreator.of(concurrency, index -> distanceDefault)
         );
 
         var predecessors = HugeAtomicLongArray.of(
@@ -85,7 +95,7 @@ public interface TentativeDistances {
             ParalleLongPageCreator.of(concurrency, index -> NO_PREDECESSOR)
         );
 
-        return new DistanceAndPredecessor(predecessors, distances);
+        return new DistanceAndPredecessor(predecessors, distances, distanceComparator);
     }
 
     class DistanceOnly implements TentativeDistances {
@@ -130,10 +140,12 @@ public interface TentativeDistances {
         private final HugeAtomicLongArray predecessors;
         // Use atomic array since it get/set methods are volatile
         private final HugeAtomicDoubleArray distances;
+        private final DoubleDoublePredicate distanceComparator;
 
-        public DistanceAndPredecessor(HugeAtomicLongArray predecessors, HugeAtomicDoubleArray distances) {
+        public DistanceAndPredecessor(HugeAtomicLongArray predecessors, HugeAtomicDoubleArray distances, DoubleDoublePredicate distanceComparator) {
             this.predecessors = predecessors;
             this.distances = distances;
+            this.distanceComparator = distanceComparator;
         }
 
         @Override
@@ -171,7 +183,7 @@ public interface TentativeDistances {
                 //we  should signal failure
                 // for that we must be sure not to return the 'expectedDistance' by accident!
                 //we hence return its negation (or -1 if ==0)
-                return (Double.compare(expectedDistance, 0.0) == 0) ? -1.0 : -expectedDistance;
+                return Double.compare(expectedDistance, 0.0) == 0 ? -1.0 : -expectedDistance;
             }
 
             var witness = predecessors.compareAndExchange(nodeId, currentPredecessor, -predecessor - 1);
@@ -180,7 +192,7 @@ public interface TentativeDistances {
             if (witness != currentPredecessor) {
                 //we  should signal failure
                 // for that we must be sure not to return the 'expectedDistance' by accident!
-                return (Double.compare(expectedDistance, 0.0) == 0) ? -1.0 : -expectedDistance;
+                return Double.compare(expectedDistance, 0.0) == 0 ? -1.0 : -expectedDistance;
             }
 
             // we have the lock; no-one else can write on nodeId at the moment.
@@ -188,7 +200,7 @@ public interface TentativeDistances {
 
             double oldDistance = distances.get(nodeId);
 
-            if (oldDistance > newDistance) {
+            if (distanceComparator.apply(oldDistance, newDistance)) {
                 distances.set(nodeId, newDistance);
                 // unlock
                 predecessors.set(nodeId, predecessor);

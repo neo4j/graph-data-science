@@ -34,14 +34,15 @@ class NegativeSampleProducerTest {
     void shouldProduceSamplesAccordingToNodeDistribution() {
         var builder = new RandomWalkProbabilities.Builder(
             2,
+            4,
             0.001,
-            0.75,
-            4
+            0.75
         );
 
         builder
-            .registerWalk(new long[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0})
-            .registerWalk(new long[]{1});
+            .registerWalk(new long[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+
+        builder.registerWalk(new long[]{1});
 
         RandomWalkProbabilities probabilityComputer = builder.build();
 

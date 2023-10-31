@@ -24,13 +24,12 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -95,23 +94,21 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
 
     private void initializeInDegrees() {
         this.progressTracker.beginSubTask("Initialization");
-        try (var concurrentCopy = CloseableThreadLocal.withInitial(graph::concurrentCopy)) {
-            ParallelUtil.parallelForEachNode(
-                graph.nodeCount(),
-                concurrency,
-                terminationFlag,
-                nodeId -> {
-                    concurrentCopy.get().forEachRelationship(
-                            nodeId,
-                            (source, target) -> {
-                                inDegrees.getAndAdd(target, 1L);
-                                return true;
-                            }
-                        );
-                    progressTracker.logProgress();
-                }
-            );
-        }
+        ParallelUtil.parallelForEachNode(
+            graph.nodeCount(),
+            concurrency,
+            terminationFlag,
+            nodeId -> {
+                graph.concurrentCopy().forEachRelationship(
+                    nodeId,
+                    (source, target) -> {
+                        inDegrees.getAndAdd(target, 1L);
+                        return true;
+                    }
+                );
+                progressTracker.logProgress();
+            }
+        );
         this.progressTracker.endSubTask("Initialization");
     }
 

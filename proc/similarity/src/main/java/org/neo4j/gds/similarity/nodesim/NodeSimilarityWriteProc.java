@@ -20,12 +20,9 @@
 package org.neo4j.gds.similarity.nodesim;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.RelationshipExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.similarity.SimilarityWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.similarity.SimilarityWriteResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -41,7 +38,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class NodeSimilarityWriteProc extends BaseProc {
 
     @Context
-    public RelationshipExporterBuilder relationshipExporterBuilder;
+    public GraphDataScience facade;
 
     @Procedure(name = "gds.nodeSimilarity.write", mode = WRITE)
     @Description(NODE_SIMILARITY_DESCRIPTION)
@@ -49,10 +46,7 @@ public class NodeSimilarityWriteProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new NodeSimilarityWriteSpecification(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.similarity().nodeSimilarityWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.nodeSimilarity.write.estimate", mode = READ)
@@ -61,15 +55,8 @@ public class NodeSimilarityWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new NodeSimilarityWriteSpecification(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.similarity().nodeSimilarityEstimateWrite(graphNameOrConfiguration, algoConfiguration);
+
     }
 
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withRelationshipExporterBuilder(relationshipExporterBuilder);
-    }
 }

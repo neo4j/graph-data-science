@@ -33,6 +33,7 @@ import org.neo4j.gds.similarity.knn.ImmutableKnnContext;
 import org.neo4j.gds.similarity.knn.Knn;
 import org.neo4j.gds.similarity.knn.KnnBaseConfig;
 import org.neo4j.gds.similarity.knn.KnnFactory;
+import org.neo4j.gds.similarity.knn.KnnResult;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -97,10 +98,10 @@ public class ApproximateLinkPrediction extends LinkPrediction {
     }
 
     static class Result implements LinkPredictionResult {
-        private final Knn.Result predictions;
+        private final KnnResult predictions;
         private final Map<String, Object> samplingStats;
 
-        Result(Knn.Result knnResult) {
+        Result(KnnResult knnResult) {
             this.predictions = knnResult;
             this.samplingStats = Map.of(
                 "strategy", "approximate",

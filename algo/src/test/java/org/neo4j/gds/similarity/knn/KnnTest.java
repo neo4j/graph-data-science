@@ -29,11 +29,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.NullPropertyMap;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -151,7 +151,7 @@ class KnnTest {
         assertCorrectNeighborList(result, nodeCId, nodeAId, nodeBId);
     }
     private void assertCorrectNeighborList(
-        Knn.Result result,
+        KnnResult result,
         long nodeId,
         long... expectedNeighbors
     ) {
@@ -267,7 +267,7 @@ class KnnTest {
         assertCorrectNeighborList(result, nodeEveId, nodeBobId);
     }
 
-    private void assertEmptyNeighborList(Knn.Result result, long nodeId) {
+    private void assertEmptyNeighborList(KnnResult result, long nodeId) {
         var actualNeighbors = result.neighborsOf(nodeId).toArray();
         assertThat(actualNeighbors).isEmpty();
     }
@@ -290,7 +290,7 @@ class KnnTest {
         var result = knn.compute();
         assertThat(result)
             .isNotNull()
-            .extracting(Knn.Result::size)
+            .extracting(KnnResult::size)
             .isEqualTo(3L);
     }
 
@@ -326,7 +326,7 @@ class KnnTest {
 
         softly.assertThat(result)
             .isNotNull()
-            .extracting(Knn.Result::size)
+            .extracting(KnnResult::size)
             .isEqualTo(3L);
 
         long nodeAId = idFunction.of("a");

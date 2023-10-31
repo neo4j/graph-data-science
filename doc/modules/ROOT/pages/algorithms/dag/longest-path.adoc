@@ -16,16 +16,22 @@ include::partial$/operations-reference/alpha-note.adoc[]
 
 == Introduction
 
-Finding the longest path that leads to a node in a graph is possible to do in linear time for the special case of DAGs.
+Finding the longest path that leads to a node in a graph is possible to do in linear time for the special case of DAGs, that is graphs which do not contain cycles.
 
-GDS implementation for this algorithm is based on topological sort and takes linear time. If the graph is not a DAG, the runtime is still linear, but the results cannot be trusted. You can use xref:algorithms/dag/topological-sort.adoc[topological sort] to make sure the graph is a DAG.
+The GDS implementation for this problem is based on topological sort and  operates in linear time.
+When the graph is not a DAG, any node that belongs to  component containing at least one cycle will be excluded from the results.
+That is, the implementation will only give results for those components of the graph that form DAGs.
 
-The algorithm supports unweighted graphs and graphs with non negative weights.
+You can use xref:algorithms/dag/topological-sort.adoc[topological sort] to make sure the graph is a DAG.
+
+The algorithm supports weighted and unweighted graphs.
+Negative weights are currently unsupported.
 
 
 === Usage
 
-One example for usage of this algorithm is in the context of a supply chain graph. If edges indicate the time to supply, then the distance of the longest path to a target node is the time required to manufacture the node from decision to completion.
+One example for usage of this algorithm is in the context of a supply chain graph.
+If edges indicate the time to supply, then the distance of the longest path to a target node is the time required to manufacture the node from decision to completion.
 
 
 == Syntax
@@ -46,7 +52,13 @@ CALL gds.dag.longestPath.stream(
   graphName: String,
   configuration: Map
 ) YIELD
-  nodeId: Integer
+  index: Integer,
+  sourceNode: Integer,
+  targetNode: Integer,
+  totalCost: Float,
+  nodeIds: List of Integer,
+  costs: List of Float,
+  path: Path
 ----
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
@@ -62,9 +74,14 @@ include::partial$/algorithms/common-configuration/common-stream-stats-configurat
 .Results
 [opts="header"]
 |===
-| Name          | Type    | Description
-| targetNodeId  | Integer | The ID of the node for which the path is computed
-| distance      | Double  | The distance of the longest path that ends in the target node
+| Name        | Type            | Description
+| index       | Integer         | 0-based index of the found path.
+| sourceNode  | Integer         | Source node of the path.
+| targetNode  | Integer         | Target node of the path.
+| totalCost   | Float           | Total cost from source to target.
+| nodeIds     | List of Integer | Node ids on the path in traversal order.
+| costs       | List of Float   | Accumulated costs for each node on the path.
+| path        | Path            | The path represented as Cypher entity.
 |===
 
 // include-with-stream
@@ -72,9 +89,6 @@ include::partial$/algorithms/common-configuration/common-stream-stats-configurat
 
 // tabbed-example
 ====
-
-[NOTE]
-Current result does not contain the longest path itself, but only the distance of the path.
 
 
 == Examples
@@ -91,7 +105,7 @@ CREATE
        (n0:Goods {name: 'Timber'}),
        (n1:Goods {name: 'Lumber'}),
        (n2:Goods {name: 'Screws'}),
-       (n3:Workshop {name: 'Table Maker Inc.'}),
+       (n3:Workshop {name: 'Table Maker'}),
        (n4:Product {name: 'Table'}),
 
        (n0)-[:Processing {time: 1}]->(n1),
@@ -101,9 +115,13 @@ CREATE
 ----
 
 This graph describes a simple supply chain of constructing a table in the Table Maker workshop.
-In order to have lumber for the table, the workshop processes timber, which takes 1 day to complete. Once the lumber is ready, it is already in the workshop, therefor it takes zero time to ship it. However, the screws take 3 days to be shipped to the workshop. Only after the workshop has all the requirements met, the table can be constructed, a process that takes 1 day.
+In order to have lumber for the table, the workshop processes timber, which takes 1 day to complete.
+Once the lumber is ready, it is already in the workshop, therefor it takes zero time to ship it.
+However, the screws take 3 days to be shipped to the workshop.
+Only after the workshop has all the requirements met, the table can be constructed, a process that takes 1 day.
 
-The longest path to the table node starts with the screws, then the workshop and then the table, in total: 4 days. This is the bottleneck path, and total time that takes to manufacture the table.
+The longest path to the table node starts with the screws, then the workshop and then the table, in total: 4 days.
+This is the bottleneck path, and total time that takes to manufacture the table.
 
 .The following Cypher statement will project the graph to GDS:
 [source, cypher, role=noplay setup-query]
@@ -127,19 +145,28 @@ For more details on the stream mode in general, see xref:common-usage/running-al
 [source, cypher, role=noplay setup-query]
 ----
 CALL gds.dag.longestPath.stream("g", {relationshipWeightProperty: "time"})
-YIELD targetNodeId as target, distance
-RETURN gds.util.asNode(target).name, distance
+YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, path
+RETURN
+    index,
+    gds.util.asNode(sourceNode).name AS sourceNode,
+    gds.util.asNode(targetNode).name AS targetNode,
+    totalCost,
+    [nodeId IN nodeIds | gds.util.asNode(nodeId).name] AS nodeNames,
+    costs,
+    nodes(path) as path
+ORDER BY index
 ----
-We use the utility function asNode to return the name of node instead of its ID to make results more readable.
+
+We use the utility function `asNode` to return the name of node instead of its ID to make results more readable.
 
 .Results
 [opts="header"]
 |===
-| name           | distance
-|"Timber"        | 0.0
-|"Screws"        | 0.0
-|"Lumber"        | 1.0
-|"Table Maker"   | 3.0
-|"Table"         | 4.0
+| index | sourceNode | targetNode    | totalCost | nodeNames                    | costs           | path
+| 0     | "Timber"   | "Timber"      | 0.0       | [Timber]                     | [0.0]           | [Node[0]]
+| 1     | "Timber"   | "Lumber"      | 1.0       | [Timber, Lumber]             | [0.0, 1.0]      | [Node[0], Node[1]]
+| 2     | "Screws"   | "Table Maker" | 3.0       | [Screws, Table Maker]        | [0.0, 3.0]      | [Node[2], Node[3]]
+| 3     | "Screws"   | "Screws"      | 0.0       | [Screws]                     | [0.0]           | [Node[2]]
+| 4     | "Screws"   | "Table"       | 4.0       | [Screws, Table Maker, Table] | [0.0, 3.0, 4.0] | [Node[2], Node[3], Node[4]]
 |===
 --

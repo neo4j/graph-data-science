@@ -47,13 +47,28 @@ public class RandomWalkSampler {
 
     private final long randomSeed;
 
+    public static RandomWalkSampler create(
+        Graph graph,
+        CumulativeWeightSupplier cumulativeWeightSupplier,
+        int walkLength,
+        double returnFactor,
+        double inOutFactor,
+        long randomSeed
+    ) {
+        var maxProbability = Math.max(Math.max(1 / returnFactor, 1.0), 1 / inOutFactor);
+        var normalizedReturnProbability = (1 / returnFactor) / maxProbability;
+        var normalizedSameDistanceProbability = 1 / maxProbability;
+        var normalizedInOutProbability = (1 / inOutFactor) / maxProbability;
+        return new RandomWalkSampler(graph, cumulativeWeightSupplier, walkLength, normalizedReturnProbability, normalizedSameDistanceProbability, normalizedInOutProbability, randomSeed);
+    }
+
     public RandomWalkSampler(
+        Graph graph,
         CumulativeWeightSupplier cumulativeWeightSupplier,
         int walkLength,
         double normalizedReturnProbability,
         double normalizedSameDistanceProbability,
         double normalizedInOutProbability,
-        Graph graph,
         long randomSeed
     ) {
         this.randomSeed = randomSeed;

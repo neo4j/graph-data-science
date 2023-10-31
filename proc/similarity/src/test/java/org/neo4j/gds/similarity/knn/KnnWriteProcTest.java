@@ -92,7 +92,7 @@ class KnnWriteProcTest extends BaseProcTest {
             assertThat(row.getNumber("computeMillis")).asInstanceOf(LONG).isGreaterThanOrEqualTo(0);
             assertThat(row.getNumber("preProcessingMillis")).asInstanceOf(LONG).isGreaterThanOrEqualTo(0);
             assertThat(row.getNumber("writeMillis")).asInstanceOf(LONG).isGreaterThanOrEqualTo(0);
-            assertThat(row.getNumber("postProcessingMillis")).asInstanceOf(LONG).isEqualTo(-1);
+            assertThat(row.getNumber("postProcessingMillis")).asInstanceOf(LONG).isEqualTo(0);
 
             assertThat(row.get("similarityDistribution"))
                 .asInstanceOf(MAP)

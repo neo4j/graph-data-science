@@ -21,6 +21,9 @@ package org.neo4j.gds.algorithms.similarity;
 
 import java.util.Map;
 
-interface SpecificFieldsWithSimilarityStatisticsSupplier<R, ASF> {
-    ASF specificFields(R result,  Map<String, Object> similarityDistribution);
+public interface SpecificFieldsWithSimilarityStatisticsSupplier<R, ASF> {
+    ASF specificFields(
+        R result,
+        Map<String, Object> similarityDistribution
+    );
 }

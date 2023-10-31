@@ -25,6 +25,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.similarity.knn.KnnWriteResult;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityWriteConsumer;
 
@@ -35,7 +36,7 @@ import static org.neo4j.gds.similarity.knn.KnnProc.KNN_DESCRIPTION;
 import static org.neo4j.gds.similarity.knn.KnnProc.computeToGraph;
 
 @GdsCallable(name = "gds.knn.write", description = KNN_DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
-public class KnnWriteSpecification implements AlgorithmSpec<Knn, Knn.Result, KnnWriteConfig, Stream<WriteResult>, KnnFactory<KnnWriteConfig>> {
+public class KnnWriteSpecification implements AlgorithmSpec<Knn, KnnResult, KnnWriteConfig, Stream<KnnWriteResult>, KnnFactory<KnnWriteConfig>> {
     @Override
     public String name() {
         return "KnnWrite";
@@ -52,7 +53,7 @@ public class KnnWriteSpecification implements AlgorithmSpec<Knn, Knn.Result, Knn
     }
 
     @Override
-    public ComputationResultConsumer<Knn, Knn.Result, KnnWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Knn, KnnResult, KnnWriteConfig, Stream<KnnWriteResult>> computationResultConsumer() {
         return new SimilarityWriteConsumer<>(
             this::resultBuilderFunction,
             (computationResult) -> {
@@ -72,8 +73,8 @@ public class KnnWriteSpecification implements AlgorithmSpec<Knn, Knn.Result, Knn
         );
     }
 
-    private WriteResult.Builder resultBuilderFunction(ComputationResult<Knn, Knn.Result, KnnWriteConfig> computationResult) {
-        var builder = new WriteResult.Builder();
+    private KnnWriteResultBuilder resultBuilderFunction(ComputationResult<Knn, KnnResult, KnnWriteConfig> computationResult) {
+        var builder = new KnnWriteResultBuilder();
 
         computationResult.result().ifPresent(result -> {
             builder

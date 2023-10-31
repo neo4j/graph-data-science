@@ -21,8 +21,16 @@ package org.neo4j.gds.algorithms.similarity;
 
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnBaseConfig;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnFactory;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityBaseConfig;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityFactory;
+import org.neo4j.gds.similarity.knn.KnnBaseConfig;
+import org.neo4j.gds.similarity.knn.KnnFactory;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityFactory;
+
+import java.util.Optional;
 
 public class SimilarityAlgorithmsEstimateBusinessFacade {
 
@@ -40,6 +48,42 @@ public class SimilarityAlgorithmsEstimateBusinessFacade {
             configuration,
             configuration.relationshipWeightProperty(),
             new NodeSimilarityFactory<>()
+        );
+    }
+
+    public <C extends FilteredNodeSimilarityBaseConfig> MemoryEstimateResult filteredNodeSimilarity(
+        Object graphNameOrConfiguration,
+        C configuration
+    ) {
+        return algorithmEstimator.estimate(
+            graphNameOrConfiguration,
+            configuration,
+            configuration.relationshipWeightProperty(),
+            new FilteredNodeSimilarityFactory<>()
+        );
+    }
+
+    public <C extends KnnBaseConfig> MemoryEstimateResult knn(
+        Object graphNameOrConfiguration,
+        C configuration
+    ) {
+        return algorithmEstimator.estimate(
+            graphNameOrConfiguration,
+            configuration,
+            Optional.empty(),
+            new KnnFactory<>()
+        );
+    }
+
+    public <C extends FilteredKnnBaseConfig> MemoryEstimateResult filteredKnn(
+        Object graphNameOrConfiguration,
+        C configuration
+    ) {
+        return algorithmEstimator.estimate(
+            graphNameOrConfiguration,
+            configuration,
+            Optional.empty(),
+            new FilteredKnnFactory<>()
         );
     }
 }

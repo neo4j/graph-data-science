@@ -19,15 +19,17 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
-import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.collections.ha.HugeDoubleArray;
-import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 
+import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.LongStream;
 
 import static java.lang.Math.addExact;
@@ -35,7 +37,7 @@ import static java.lang.Math.addExact;
 @ValueClass
 interface RandomWalkProbabilities {
 
-    HugeLongArray nodeFrequencies();
+    HugeAtomicLongArray nodeFrequencies();
     HugeDoubleArray positiveSamplingProbabilities();
     HugeLongArray negativeSamplingDistribution();
     long sampleCount();
@@ -55,31 +57,31 @@ interface RandomWalkProbabilities {
         private final int concurrency;
         private final double positiveSamplingFactor;
         private final double negativeSamplingExponent;
-        private final HugeLongArray nodeFrequencies;
-        private final MutableLong sampleCount;
+        private final HugeAtomicLongArray nodeFrequencies;
+        private final LongAdder sampleCount;
 
         Builder(
             long nodeCount,
+            int concurrency,
             double positiveSamplingFactor,
-            double negativeSamplingExponent,
-            int concurrency
+            double negativeSamplingExponent
         ) {
             this.nodeCount = nodeCount;
             this.concurrency = concurrency;
             this.positiveSamplingFactor = positiveSamplingFactor;
             this.negativeSamplingExponent = negativeSamplingExponent;
 
-            this.nodeFrequencies = HugeLongArray.newArray(nodeCount);
-            this.sampleCount = new MutableLong(0);
+            this.nodeFrequencies = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(concurrency));
+            this.sampleCount = new LongAdder();
         }
 
-        RandomWalkProbabilities.Builder registerWalk(long[] walk) {
+        //wip to break for the day
+        void registerWalk(long[] walk) {
             for (long node : walk) {
-                nodeFrequencies.addTo(node, 1);
+                nodeFrequencies.getAndAdd(node, 1);
             }
             this.sampleCount.add(walk.length);
 
-            return this;
         }
 
         RandomWalkProbabilities build() {
@@ -91,13 +93,13 @@ interface RandomWalkProbabilities {
                 .nodeFrequencies(nodeFrequencies)
                 .positiveSamplingProbabilities(centerProbabilities)
                 .negativeSamplingDistribution(contextDistribution)
-                .sampleCount(sampleCount.getValue())
+                .sampleCount(sampleCount.longValue())
                 .build();
         }
 
         private HugeDoubleArray computePositiveSamplingProbabilities() {
             var centerProbabilities = HugeDoubleArray.newArray(nodeCount);
-            var sum = sampleCount.getValue();
+            var sum = sampleCount.longValue();
 
             ParallelUtil.parallelStreamConsume(
                 LongStream.range(0, nodeCount),

@@ -38,8 +38,8 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.similarity.SimilarityMutateResult;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
-import org.neo4j.gds.similarity.SimilarityMutateResult;
 import org.neo4j.gds.similarity.SimilarityProc;
 import org.neo4j.gds.similarity.SimilarityResultBuilder;
 
@@ -92,7 +92,11 @@ public class NodeSimilarityMutateSpecification implements AlgorithmSpec<NodeSimi
             }
 
             SimilarityResultBuilder<SimilarityMutateResult> resultBuilder =
-                SimilarityProc.withGraphsizeAndTimings(new SimilarityMutateResult.Builder(), computationResult, NodeSimilarityResult::graphResult);
+                SimilarityProc.withGraphsizeAndTimings(
+                    new NodeSimilarityMutateResultBuilder(),
+                    computationResult,
+                    NodeSimilarityResult::graphResult
+                );
 
             try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withMutateMillis)) {
                 RelationshipType relationshipType = RelationshipType.of(config.mutateRelationshipType());

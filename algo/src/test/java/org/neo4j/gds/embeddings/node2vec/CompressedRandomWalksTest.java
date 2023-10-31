@@ -45,8 +45,12 @@ class CompressedRandomWalksTest {
             return walk;
         }).collect(Collectors.toList());
 
-        walks.forEach(walk -> compressedRandomWalks.add(Arrays.copyOf(walk, walk.length)));
-
+        for (int i = 0; i < walks.size(); ++i) {
+            var walk = walks.get(i);
+            compressedRandomWalks.add(i, Arrays.copyOf(walk, walk.length));
+        }
+        compressedRandomWalks.setSize(7);
+        compressedRandomWalks.setMaxWalkLength(21);
         assertIteratorContent(compressedRandomWalks.iterator(0, 3), List.of(walks.get(0), walks.get(1), walks.get(2)));
         assertIteratorContent(compressedRandomWalks.iterator(3, 4), List.of(walks.get(3), walks.get(4), walks.get(5), walks.get(6)));
     }

@@ -372,6 +372,8 @@ public final class MemoryUsage {
          */
         @SuppressForbidden(reason = "we want to use system.out here")
         private static boolean isVmInfoAvailable() {
+            macWorkaround();
+
             var sysOut = System.out;
             try {
                 var swallowSysOut = new PrintStream(NullOutputStream.NULL_OUTPUT_STREAM, true, StandardCharsets.UTF_8);
@@ -383,6 +385,21 @@ public final class MemoryUsage {
                 return false;
             } finally {
                 System.setOut(sysOut);
+            }
+        }
+
+        /**
+         * JOL currently kills the JVM on Mac OS X when trying to attach to the Hotspot SA.
+         * This happens with several JVMs (Java.net, Azul) and on both platforms (x86, ARM).
+         * <p>
+         * We can work around this by skipping the Hotspot SA attach.
+         * See <a href="https://bugs.openjdk.org/browse/CODETOOLS-7903447">OpenJDK issue</a>
+         * </p>
+         */
+        @Deprecated(forRemoval = true)
+        private static void macWorkaround() {
+            if (System.getProperty("os.name").contains("Mac")) {
+                System.setProperty("jol.skipHotspotSAAttach", "true");
             }
         }
 

@@ -24,52 +24,11 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.EmbeddingDimensionConfig;
 import org.neo4j.gds.traversal.RandomWalkBaseConfig;
-import org.neo4j.gds.utils.StringJoining;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
 
 public interface Node2VecBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConfig, RandomWalkBaseConfig {
-
-    enum EmbeddingInitializer {
-        UNIFORM,
-        NORMALIZED;
-
-        private static final List<String> VALUES = Arrays
-            .stream(Node2VecBaseConfig.EmbeddingInitializer.values())
-            .map(Node2VecBaseConfig.EmbeddingInitializer::name)
-            .collect(Collectors.toList());
-        public static Node2VecBaseConfig.EmbeddingInitializer parse(Object input) {
-            if (input instanceof String) {
-                var inputString = toUpperCaseWithLocale((String) input);
-
-                if (!VALUES.contains(inputString)) {
-                    throw new IllegalArgumentException(formatWithLocale(
-                        "EmbeddingInitializer `%s` is not supported. Must be one of: %s.",
-                        input,
-                        StringJoining.join(VALUES)
-                    ));
-                }
-
-                return valueOf(toUpperCaseWithLocale(inputString));
-            } else if (input instanceof Node2VecBaseConfig.EmbeddingInitializer) {
-                return (Node2VecBaseConfig.EmbeddingInitializer) input;
-            }
-
-            throw new IllegalArgumentException(formatWithLocale(
-                "Expected EmbeddingInitializer or String. Got %s.",
-                input.getClass().getSimpleName()
-            ));
-        }
-
-        public static String toString(Node2VecBaseConfig.EmbeddingInitializer embeddingInitializer) {
-            return embeddingInitializer.toString();
-        }
-    }
 
     @Value.Default
     @Configuration.IntegerRange(min = 2)
@@ -103,8 +62,8 @@ public interface Node2VecBaseConfig extends AlgoBaseConfig, EmbeddingDimensionCo
     }
 
     @Value.Default
-    @Configuration.ConvertWith(method = "org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig.EmbeddingInitializer#parse", inverse = Configuration.ConvertWith.INVERSE_IS_TO_MAP)
-    @Configuration.ToMapValue("org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig.EmbeddingInitializer#toString")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.embeddings.node2vec.EmbeddingInitializer#parse", inverse = Configuration.ConvertWith.INVERSE_IS_TO_MAP)
+    @Configuration.ToMapValue("org.neo4j.gds.embeddings.node2vec.EmbeddingInitializer#toString")
     default EmbeddingInitializer embeddingInitializer() {
         return EmbeddingInitializer.NORMALIZED;
     }
@@ -131,5 +90,32 @@ public interface Node2VecBaseConfig extends AlgoBaseConfig, EmbeddingDimensionCo
     @Override
     default List<Long> sourceNodes() {
         return List.of();
+    }
+
+    @Configuration.Ignore
+    @Value.Derived
+    default WalkParameters walkParameters() {
+        return new WalkParameters(
+            walksPerNode(),
+            walkLength(),
+            returnFactor(),
+            inOutFactor(),
+            positiveSamplingFactor(),
+            negativeSamplingExponent()
+        );
+    }
+
+    @Configuration.Ignore
+    @Value.Derived
+    default TrainParameters trainParameters() {
+        return new TrainParameters(
+            initialLearningRate(),
+            minLearningRate(),
+            iterations(),
+            windowSize(),
+            negativeSamplingRate(),
+            embeddingDimension(),
+            embeddingInitializer()
+        );
     }
 }

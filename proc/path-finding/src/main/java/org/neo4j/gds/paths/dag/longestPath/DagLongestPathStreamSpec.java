@@ -19,26 +19,24 @@
  */
 package org.neo4j.gds.paths.dag.longestPath;
 
-import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.dag.longestPath.DagLongestPath;
 import org.neo4j.gds.dag.longestPath.DagLongestPathFactory;
 import org.neo4j.gds.dag.longestPath.DagLongestPathStreamConfig;
-import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.paths.ShortestPathStreamResultConsumer;
+import org.neo4j.gds.paths.StreamResult;
+import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
-import java.util.function.LongToDoubleFunction;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 @GdsCallable(name = "gds.dag.longestPath.stream", description = DagLongestPathStreamProc.LONGEST_PATH_DESCRIPTION, executionMode = STREAM)
-public class DagLongestPathStreamSpec implements AlgorithmSpec<DagLongestPath, TopologicalSortResult, DagLongestPathStreamConfig, Stream<DagLongestPathStreamResult>, DagLongestPathFactory<DagLongestPathStreamConfig>> {
+public class DagLongestPathStreamSpec implements AlgorithmSpec<DagLongestPath, PathFindingResult, DagLongestPathStreamConfig, Stream<StreamResult>, DagLongestPathFactory<DagLongestPathStreamConfig>> {
 
     @Override
     public String name() {
@@ -56,31 +54,12 @@ public class DagLongestPathStreamSpec implements AlgorithmSpec<DagLongestPath, T
     }
 
     @Override
-    public ComputationResultConsumer<DagLongestPath, TopologicalSortResult, DagLongestPathStreamConfig, Stream<DagLongestPathStreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging(
-            "Result streaming failed",
-            executionContext.log(),
-            () -> computationResult.result()
-                .map(result -> {
-                    var graph = computationResult.graph();
-                    var distances = result.maxSourceDistances().orElseGet(() -> {
-                        executionContext.log().error("maxSourceDistances must be true in DAG Longest Path");
-                        return null;
-                    });
-                    LongToDoubleFunction distanceFunction = distances != null
-                    ? (nodeId) -> distances.get(nodeId)
-                    : (nodeId) ->  0;
-                    var topologicallySortedNodes = result.sortedNodes();
+    public ComputationResultConsumer<DagLongestPath, PathFindingResult, DagLongestPathStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+        return new ShortestPathStreamResultConsumer<>();
+    }
 
-                    return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
-                        .mapToObj(index -> {
-                            var mappedNodeId = topologicallySortedNodes.get(index);
-                            return new DagLongestPathStreamResult(
-                                graph.toOriginalNodeId(mappedNodeId),
-                                distanceFunction.applyAsDouble(mappedNodeId)
-                            );
-                        });
-                }).orElseGet(Stream::empty)
-        );
+    @Override
+    public boolean releaseProgressTask() {
+        return false;
     }
 }

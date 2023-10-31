@@ -20,10 +20,8 @@
 package org.neo4j.gds.similarity.filteredknn;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.RelationshipExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.similarity.knn.KnnWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -40,18 +38,15 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class FilteredKnnWriteProc extends BaseProc {
 
     @Context
-    public RelationshipExporterBuilder relationshipExporterBuilder;
+    public GraphDataScience facade;
 
     @Procedure(name = "gds.knn.filtered.write", mode = WRITE)
     @Description(FilteredKnnConstants.PROCEDURE_DESCRIPTION)
-    public Stream<FilteredKnnWriteProcResult> write(
+    public Stream<KnnWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new FilteredKnnWriteSpecification(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.similarity().filteredKnnWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.knn.filtered.write.estimate", mode = READ)
@@ -60,26 +55,18 @@ public class FilteredKnnWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new FilteredKnnWriteSpecification(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.similarity().filteredKnnWriteEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(name = "gds.alpha.knn.filtered.write", mode = WRITE, deprecatedBy = "gds.knn.filtered.write")
     @Description(FilteredKnnConstants.PROCEDURE_DESCRIPTION)
     @Internal
     @Deprecated
-    public Stream<FilteredKnnWriteProcResult> alphaWrite(
+    public Stream<KnnWriteResult> alphaWrite(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return write(graphName, configuration);
     }
 
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withRelationshipExporterBuilder(relationshipExporterBuilder);
-    }
 }
