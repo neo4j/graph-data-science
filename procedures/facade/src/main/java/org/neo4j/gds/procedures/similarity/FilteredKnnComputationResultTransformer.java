@@ -20,10 +20,13 @@
 package org.neo4j.gds.procedures.similarity;
 
 import org.neo4j.gds.algorithms.KnnSpecificFields;
+import org.neo4j.gds.algorithms.RelationshipMutateResult;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
+import org.neo4j.gds.procedures.similarity.knn.KnnMutateResult;
 import org.neo4j.gds.procedures.similarity.knn.KnnStatsResult;
 import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnMutateConfig;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnStatsConfig;
 
@@ -63,7 +66,29 @@ final class FilteredKnnComputationResultTransformer {
             statsResult.algorithmSpecificFields().nodePairsConsidered(),
             config.toMap()
         );
+
     }
+
+    static KnnMutateResult toMutateResult(
+        RelationshipMutateResult<KnnSpecificFields> mutateResult,
+        FilteredKnnMutateConfig config
+    ) {
+
+        return new KnnMutateResult(
+            mutateResult.preProcessingMillis(),
+            mutateResult.computeMillis(),
+            mutateResult.mutateMillis(),
+            mutateResult.postProcessingMillis(),
+            mutateResult.algorithmSpecificFields().nodesCompared(),
+            mutateResult.algorithmSpecificFields().relationshipsWritten(),
+            mutateResult.algorithmSpecificFields().similarityDistribution(),
+            mutateResult.algorithmSpecificFields().didConverge(),
+            mutateResult.algorithmSpecificFields().ranIterations(),
+            mutateResult.algorithmSpecificFields().nodePairsConsidered(),
+            config.toMap()
+        );
+    }
+
 
 
 

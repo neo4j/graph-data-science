@@ -92,21 +92,21 @@ final class KnnComputationResultTransformer {
     }
 
     static KnnMutateResult toMutateResult(
-        RelationshipMutateResult<KnnSpecificFields> writeResult,
+        RelationshipMutateResult<KnnSpecificFields> mutateResult,
         KnnMutateConfig config
     ) {
 
         return new KnnMutateResult(
-            writeResult.preProcessingMillis(),
-            writeResult.computeMillis(),
-            writeResult.mutateMillis(),
-            writeResult.postProcessingMillis(),
-            writeResult.algorithmSpecificFields().nodesCompared(),
-            writeResult.algorithmSpecificFields().relationshipsWritten(),
-            writeResult.algorithmSpecificFields().similarityDistribution(),
-            writeResult.algorithmSpecificFields().didConverge(),
-            writeResult.algorithmSpecificFields().ranIterations(),
-            writeResult.algorithmSpecificFields().nodePairsConsidered(),
+            mutateResult.preProcessingMillis(),
+            mutateResult.computeMillis(),
+            mutateResult.mutateMillis(),
+            mutateResult.postProcessingMillis(),
+            mutateResult.algorithmSpecificFields().nodesCompared(),
+            mutateResult.algorithmSpecificFields().relationshipsWritten(),
+            mutateResult.algorithmSpecificFields().similarityDistribution(),
+            mutateResult.algorithmSpecificFields().didConverge(),
+            mutateResult.algorithmSpecificFields().ranIterations(),
+            mutateResult.algorithmSpecificFields().nodePairsConsidered(),
             config.toMap()
         );
     }
