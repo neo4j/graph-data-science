@@ -137,7 +137,7 @@ public class SimilarityAlgorithmsStatsBusinessFacade {
                 );
             }),
             intermediateResult.computeMilliseconds,
-            () -> KnnSpecificFields.EMPTY.EMPTY,
+            () -> KnnSpecificFields.EMPTY,
             computeSimilarityDistribution
         );
     }
