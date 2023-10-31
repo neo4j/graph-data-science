@@ -84,7 +84,7 @@ CALL gds.graph.project(
 Node embeddings are commonly used to capture topological information from the graph for further processing.
 The FastRP algorithm is a good default choice to compute embeddings.
 
-Since the embeddings must be available to the kNN algorithm later on, run the algorithm in xref:common-usage/running-algos.adoc#running-algos-mutate[`mutate` mode] to add them to the `purchases` graph.
+Since the embeddings must be available to the kNN algorithm later on, you must run the algorithm in xref:common-usage/running-algos.adoc#running-algos-mutate[`mutate` mode] to add them to the `purchases` graph.
 
 [role=query-example, group=fastrp-knn]
 --
@@ -100,27 +100,20 @@ CALL gds.fastRP.mutate(  <1>
     mutateProperty: 'embedding'
   }
 )
-YIELD nodePropertiesWritten
 ----
 <1> `gds.fastRP` algorithm running in `mutate` mode.
 <2> Name of the projected graph to run the algorithm on and add the new node property to.
 <3> Configuration parameters listed in the xref:machine-learning/node-embeddings/fastrp.adoc#algorithms-embeddings-fastrp-syntax[Syntax section] of the algorithm (`Mutate mode` panel).
 Here, the `embeddingDimension` is set to 4 because the graph is small, the `iterationWeights` are chosen empirically to yield sensible results, and the `relationshipWeightProperty` is set to compute weighted averages of the neighboring embeddings.
 The `randomSeed` is added to obtain the same results for every run, but is not necessary for the actual computation.
-
-.Results
-[opts="header", cols="1"]
-|===
-| nodePropertiesWritten
-| 13
-|===
+The  `mutateProperty` is the new node property that will contain the node embedding.
 --
 
 You can run the algorithm in `stream` mode as in the xref:getting-started/basic-workflow.adoc[] example by using the corresponding `gds.fastRP.stream` procedure and removing the `mutateProperty` from the configuration parameters.
 
 == Compute and write similarities
 
-With the embeddings available as the new `embedding` node property, you can run the kNN algorithm in xref:common-usage/running-algos.adoc#running-algos-write[`write` mode] to identify similar nodes and write the results back to Neo4j.
+With the embeddings available as the new `embedding` node property, you can run the kNN algorithm in xref:common-usage/running-algos.adoc#running-algos-write[`write` mode] to identify similar nodes and write the results back to Neo4j for further analysis.
 
 [role=query-example, group=fastrp-knn]
 --
@@ -135,44 +128,37 @@ CALL gds.knn.write(  <1>
     deltaThreshold: 0.0,
     randomSeed: 42,
     concurrency: 1,
-    writeRelationshipType: 'SIMILAR',
-    writeProperty: 'score'
+    writeProperty: 'score',
+    writeRelationshipType: 'SIMILAR'
   }
 )
-YIELD
-  nodesCompared,
-  relationshipsWritten,
-  similarityDistribution
-RETURN
-  nodesCompared,
-  relationshipsWritten,
-  similarityDistribution.mean AS meanSimilarity
+YIELD similarityDistribution
+RETURN similarityDistribution.mean AS meanSimilarity  <4>
 ----
 <1> `gds.knn` algorithm running in `write` mode.
 <2> Name of the projected graph to run the algorithm on.
 The `write` mode does not update the graph.
 <3> Configuration parameters listed in the xref:algorithms/knn.adoc#algorithms-knn-syntax[Syntax section] of the algorithm (`Write mode` panel).
-Here, `topK` is set to 2 to 
-The `sampleRate` is set to 1 and the `deltaThreshold` is set to 0 because the graph is small.
+Here, `topK` is set to 2 to select only the two closest neighbours of a node, while the `sampleRate` and the `deltaThreshold` are set to 1 and 0 respectively because the graph is small.
 The `concurrency` and the `randomSeed` are set to obtain the same results for every run, but are not necessary for the actual computation.
+The two `write` properties are used to write a new `:SIMILAR` relationship with a `score` property containing the similarity score between two nodes.
+<4> `mean` is one of the fields of the returned `similarityDistribution` map.
 
 .Results
-[opts="header", cols="1,1,1"]
+[opts="header", cols="1"]
 |===
-| nodesCompared | relationshipsWritten | meanSimilarity
-| 13            | 26                   | 0.917060998769907
+| meanSimilarity
+| 0.917060998769907
 |===
 --
 
-As we can see the mean similarity between nodes is quite high.
-This is due to the fact that we have a small example where there are no long paths between nodes leading to many similar FastRP node embeddings.
+The mean similarity between nodes is high.
+This is due to the fact that the graph is small and there are no long paths between nodes, which leads to many similar FastRP node embeddings.
 
 
 == Inspect the results
 
-Let us now inspect the results of our kNN call by using Cypher.
-We can use the `SIMILARITY` relationship type to filter out the relationships we are interested in.
-And since we just care about similarities between people for our product recommendation engine, we make sure to only match nodes with the `Person` label.
+Since the similarity relationships are available in Neo4j, you can use Cypher to find pairs of customers and rank them by their similarity score.
 
 [role=query-example, group=fastrp-knn]
 --
@@ -195,17 +181,15 @@ ORDER BY similarity DESCENDING, person1, person2
 |===
 --
 
-Our kNN results indicate among other things that the `Person` nodes named "Annie" and "Matt" are very similar.
-Looking at the `BUYS` relationships for these two nodes we can see that such a conclusion makes sense.
-They both buy three products, two of which are the same (`Product` nodes named "Cucumber" and "Tomatoes") for both people and with similar amounts.
-We therefore have high confidence in our approach.
+The query result shows that the nodes named "Annie" and "Matt" are very similar.
+In fact, they are both connected to three `:Product` nodes, two of which are the same (the nodes named "Cucumber" and "Tomatoes") and with similar amounts.
 
 
 == Make recommendations
 
-Using the information we derived that the `Person` nodes named "Annie" and "Matt" are similar, we can make product recommendations for each of them.
-Since they are similar, we can assume that products purchased by only one of the people may be of interest to buy also for the other person not already buying the product.
-By this principle we can derive product recommendations for the `Person` named "Matt" using a simple Cypher query.
+Knowing that "Annie" and "Matt" are similar, you can make product recommendations for each of them.
+The basic assumption is that products purchased by a customer may be of interest for another customer who is not already buying them.
+This can be captured with a Cypher query.
 
 [role=query-example, group=fastrp-knn]
 --
@@ -226,11 +210,4 @@ RETURN p2.name AS recommendation
 |===
 --
 
-Indeed, "Kale" is the one product that the `Person` named "Annie" buys that is also not purchased by the `Person` named "Matt".
-
-
-== Conclusion
-
-Using two GDS algorithms and some basic Cypher we were easily able to derive some sensible product recommendations for a customer in our small example.
-
-To make sure to get similarities to other customers for every customer in our graph with kNN, we could play around with increasing the `topK` parameter.
+The query returns the node "Kale" as the one product that "Annie" buys but "Matt" does not.
