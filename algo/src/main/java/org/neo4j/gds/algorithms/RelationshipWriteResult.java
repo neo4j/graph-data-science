@@ -38,6 +38,7 @@ public interface RelationshipWriteResult<ALGORITHM_SPECIFIC_FIELDS>  {
     default long postProcessingMillis() {
         return 0;
     }
+
     long relationshipsWritten();
     AlgoBaseConfig configuration();
 
