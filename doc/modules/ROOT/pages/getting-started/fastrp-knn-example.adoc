@@ -105,6 +105,7 @@ CALL gds.fastRP.mutate(  <1>
     mutateProperty: 'embedding'
   }
 )
+YIELD nodePropertiesWritten
 ----
 <1> `gds.fastRP` algorithm running in `mutate` mode.
 <2> Name of the projected graph to run the algorithm on and add the new node property to.
@@ -112,6 +113,13 @@ CALL gds.fastRP.mutate(  <1>
 Here, the `embeddingDimension` is set to 4 because the graph is small, the `iterationWeights` are chosen empirically to yield sensible results, and the `relationshipWeightProperty` is set to compute weighted averages of the neighboring embeddings.
 The `randomSeed` is added to obtain the same results for every run, but is not necessary for the actual computation.
 The  `mutateProperty` is the new node property that will contain the node embedding.
+
+.Results
+[opts="header", caption=, title="Query result", cols="1"]
+|===
+| nodePropertiesWritten
+| 13
+|===
 --
 
 You can run the algorithm in `stream` mode as in the xref:getting-started/basic-workflow.adoc[] example by using the corresponding `gds.fastRP.stream` procedure and removing the `mutateProperty` from the configuration parameters.
