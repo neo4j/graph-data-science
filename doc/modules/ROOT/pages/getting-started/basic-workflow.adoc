@@ -54,7 +54,7 @@ CALL gds.graph.project(
 == Run the algorithm in `stream` mode
 
 A good first candidate algorithm to calculate the shortest path in a graph is the xref:algorithms/dijkstra-source-target.adoc[] algorithm.
-To try it out, use it with the `stream` mode to see the result in the query output.
+To try it out, use it with the xref:common-usage/running-algos.adoc#running-algos-stream[`stream` mode] to see the result in the query output.
 
 [role=query-example]
 --
@@ -134,6 +134,7 @@ RETURN relationshipsWritten
 <2> `gds.shortestPath.dijkstra` algorithm running in `write` mode.
 <3> Name of the projected graph.
 <4> Configuration parameters listed in the xref:algorithms/dijkstra-source-target.adoc#algorithms-dijkstra-source-target-syntax[Syntax section] of the algorithm (`Write mode` panel).
+In this case, the three parameters `writeRelationshipType`, `writeNodeIds`, and `writeCosts` are used to create the new `:PATH` relationship with the `totalCost`, `nodeIds`, and `costs` relationship properties.
 
 .Results
 [opts="header", caption=, title="Query result"]
