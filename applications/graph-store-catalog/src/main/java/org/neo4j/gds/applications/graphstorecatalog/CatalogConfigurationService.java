@@ -31,7 +31,6 @@ import org.neo4j.gds.config.GraphStreamGraphPropertiesConfig;
 import org.neo4j.gds.config.GraphStreamRelationshipPropertiesConfig;
 import org.neo4j.gds.config.GraphStreamRelationshipsConfig;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
-import org.neo4j.gds.config.WriteRelationshipPropertiesConfig;
 import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
