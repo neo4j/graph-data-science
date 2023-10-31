@@ -216,3 +216,12 @@ RETURN p2.name AS recommendation
 --
 
 The query returns the node "Kale" as the one product that "Annie" is already buying but "Matt" does not.
+This is the recommended product for "Matt".
+
+
+== Next steps
+
+Although this is a simplified example, the general workflow is similar for many GDS use cases.
+
+Try a different embedding algorithm or a different configuration for the kNN algorithm.
+For example, you can try increasing the `topK` parameter to find more similar customers for each customer.

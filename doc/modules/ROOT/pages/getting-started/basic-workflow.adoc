@@ -134,7 +134,7 @@ RETURN relationshipsWritten
 <2> `gds.shortestPath.dijkstra` algorithm running in `write` mode.
 <3> Name of the projected graph.
 <4> Configuration parameters listed in the xref:algorithms/dijkstra-source-target.adoc#algorithms-dijkstra-source-target-syntax[Syntax section] of the algorithm (`Write mode` panel).
-In this case, the three parameters `writeRelationshipType`, `writeNodeIds`, and `writeCosts` are used to create the new `:PATH` relationship with the `totalCost`, `nodeIds`, and `costs` relationship properties.
+In this case, the three parameters `writeRelationshipType`, `writeNodeIds`, and `writeCosts` are used to create the new `:PATH` relationship with its `totalCost`, `nodeIds`, and `costs` properties.
 
 .Results
 [opts="header", caption=, title="Query result"]
@@ -147,7 +147,7 @@ In this case, the three parameters `writeRelationshipType`, `writeNodeIds`, and 
 
 == Query the Neo4j database
 
-If you want to check that the results of the algorithm have been correctly written back to Neo4j, you can run a Cypher query that includes the new relationships and relationship properties written in the previous step (in this case, the `PATH` relationship with the `nodeIds`, `costs`, and `totalCost` relationship properties).
+To check that the results of the algorithm have been correctly written back to Neo4j, you can run a Cypher query that includes the new relationships and relationship properties written in the previous step (in this case, the `PATH` relationship with its `nodeIds`, `costs`, and `totalCost` properties).
 
 [role=query-example]
 --
@@ -164,3 +164,9 @@ RETURN source.name, r.nodeIds, r.costs, r.totalCost, target.name
 |"Kings Cross" | [Node[0], Node[1], Node[2], Node[4] | [0.0, 0.7, 2.0, 3.3] | 3.3 | "Kentish Town"
 |===
 --
+
+
+== Next steps
+
+This example covers the basics of using a GDS algorithm.
+The xref:getting-started/fastrp-knn-example.adoc[next example] shows a complete end-to-end workflow, including the use of the output of an algorithm with another algorithm.
