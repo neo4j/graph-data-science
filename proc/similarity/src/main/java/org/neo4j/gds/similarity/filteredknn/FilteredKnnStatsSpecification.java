@@ -26,8 +26,10 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.similarity.knn.KnnStatsResult;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityProc;
+import org.neo4j.gds.similarity.knn.KnnStatsResultBuilder;
 
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -43,7 +45,7 @@ import static org.neo4j.gds.similarity.SimilarityProc.shouldComputeHistogram;
     description = FilteredKnnConstants.PROCEDURE_DESCRIPTION,
     executionMode = STATS
 )
-public class FilteredKnnStatsSpecification implements AlgorithmSpec<FilteredKnn, FilteredKnnResult, FilteredKnnStatsConfig, Stream<FilteredKnnStatsResult>, FilteredKnnFactory<FilteredKnnStatsConfig>> {
+public class FilteredKnnStatsSpecification implements AlgorithmSpec<FilteredKnn, FilteredKnnResult, FilteredKnnStatsConfig, Stream<KnnStatsResult>, FilteredKnnFactory<FilteredKnnStatsConfig>> {
     @Override
     public String name() {
         return "FilteredKnnStats";
@@ -60,13 +62,13 @@ public class FilteredKnnStatsSpecification implements AlgorithmSpec<FilteredKnn,
     }
 
     @Override
-    public ComputationResultConsumer<FilteredKnn, FilteredKnnResult, FilteredKnnStatsConfig, Stream<FilteredKnnStatsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<FilteredKnn, FilteredKnnResult, FilteredKnnStatsConfig, Stream<KnnStatsResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Graph stats failed",
             executionContext.log(),
             () -> {
                 var config = computationResult.config();
-                var resultBuilder = new FilteredKnnStatsResult.Builder();
+                var resultBuilder = new KnnStatsResultBuilder();
 
                 computationResult.result()
                     .ifPresent(result -> {

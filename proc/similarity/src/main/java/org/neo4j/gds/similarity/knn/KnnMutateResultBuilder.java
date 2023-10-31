@@ -55,7 +55,7 @@ public class KnnMutateResultBuilder extends SimilarityResultBuilder<SimilarityMu
         return this;
     }
 
-    KnnMutateResultBuilder withNodePairsConsidered(long nodePairsConsidered) {
+    public KnnMutateResultBuilder withNodePairsConsidered(long nodePairsConsidered) {
         this.nodePairsConsidered = nodePairsConsidered;
         return this;
     }

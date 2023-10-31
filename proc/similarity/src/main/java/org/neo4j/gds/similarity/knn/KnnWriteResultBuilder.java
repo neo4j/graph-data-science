@@ -54,7 +54,7 @@ public class KnnWriteResultBuilder extends SimilarityResultBuilder<KnnWriteResul
             return this;
         }
 
-    KnnWriteResultBuilder withNodePairsConsidered(long nodePairsConsidered) {
+    public KnnWriteResultBuilder withNodePairsConsidered(long nodePairsConsidered) {
             this.nodePairsConsidered = nodePairsConsidered;
             return this;
         }
