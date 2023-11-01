@@ -28,12 +28,15 @@ import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.procedures.configparser.ConfigurationParser;
+import org.neo4j.gds.results.MemoryEstimateResult;
 
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 public class CentralityProcedureFacade {
 
@@ -71,6 +74,32 @@ public class CentralityProcedureFacade {
         this.writeBusinessFacade = writeBusinessFacade;
         this.estimateBusinessFacade = estimateBusinessFacade;
         this.algorithmMetaDataSetter = algorithmMetaDataSetter;
+    }
+
+    public Stream<CentralityStreamResult> betweenessCentralityStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createStreamConfig(configuration, BetweennessCentralityStreamConfig::of);
+
+        var computationResult = streamBusinessFacade.betweennessCentrality(
+            graphName,
+            config,
+            user,
+            databaseId
+        );
+
+        return BetweenessCentralityComputationalResultTransformer.toStreamResult(computationResult);
+    }
+
+    public Stream<MemoryEstimateResult> betweenessCentralityStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, BetweennessCentralityStreamConfig::of);
+
+        return Stream.of(estimateBusinessFacade.betweennessCentrality(graphNameOrConfiguration, config));
+
     }
 
 

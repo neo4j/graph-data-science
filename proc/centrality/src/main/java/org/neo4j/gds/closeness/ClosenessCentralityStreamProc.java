@@ -20,8 +20,8 @@
 package org.neo4j.gds.closeness;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.common.CentralityStreamResult;
 import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.centrality.CentralityStreamResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;

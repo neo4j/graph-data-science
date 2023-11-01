@@ -17,9 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.common;
+package org.neo4j.gds.procedures.centrality;
 
-@SuppressWarnings("unused")
 public final class CentralityStreamResult {
     public final long nodeId;
     public final double score;

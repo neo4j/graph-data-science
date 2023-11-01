@@ -20,6 +20,9 @@
 package org.neo4j.gds.algorithms.centrality;
 
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
+import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
+import org.neo4j.gds.betweenness.BetweennessCentralityFactory;
+import org.neo4j.gds.results.MemoryEstimateResult;
 
 public class CentralityAlgorithmsEstimateBusinessFacade {
 
@@ -29,5 +32,17 @@ public class CentralityAlgorithmsEstimateBusinessFacade {
         AlgorithmEstimator algorithmEstimator
     ) {
         this.algorithmEstimator = algorithmEstimator;
+    }
+
+    public <C extends BetweennessCentralityBaseConfig> MemoryEstimateResult betweennessCentrality(
+        Object graphNameOrConfiguration,
+        C configuration
+    ) {
+        return algorithmEstimator.estimate(
+            graphNameOrConfiguration,
+            configuration,
+            configuration.relationshipWeightProperty(),
+            new BetweennessCentralityFactory<>()
+        );
     }
 }

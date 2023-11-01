@@ -21,6 +21,10 @@ package org.neo4j.gds.algorithms.centrality;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
+import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.User;
+import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
+import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 
 public class CentralityAlgorithmsStreamBusinessFacade {
 
@@ -30,8 +34,27 @@ public class CentralityAlgorithmsStreamBusinessFacade {
         this.centralityAlgorithmsFacade = centralityAlgorithmsFacade;
     }
 
+    public StreamComputationResult<HugeAtomicDoubleArray> betweennessCentrality(
+        String graphName,
+        BetweennessCentralityBaseConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
+
+        var result = this.centralityAlgorithmsFacade.betweennessCentrality(
+            graphName,
+            config,
+            user,
+            databaseId
+        );
+
+        return createStreamComputationResult(result);
+    }
+
     // FIXME: the following method is duplicate, find a good place for it.
-    private <RESULT> StreamComputationResult<RESULT> createStreamComputationResult(AlgorithmComputationResult<RESULT> result) {
+    private <RESULT> StreamComputationResult<RESULT> createStreamComputationResult(
+        AlgorithmComputationResult<RESULT> result
+    ) {
         return StreamComputationResult.of(
             result.result(),
             result.graph()
