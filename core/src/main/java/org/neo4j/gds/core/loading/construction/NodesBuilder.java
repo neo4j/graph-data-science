@@ -36,6 +36,7 @@ import org.neo4j.gds.core.loading.LabelInformation;
 import org.neo4j.gds.core.loading.LabelInformationBuilders;
 import org.neo4j.gds.core.loading.NodeImporter;
 import org.neo4j.gds.core.loading.NodeImporterBuilder;
+import org.neo4j.gds.core.loading.NodeLabelTokenSet;
 import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.NodesBatchBuffer;
 import org.neo4j.gds.core.loading.NodesBatchBufferBuilder;
@@ -319,7 +320,7 @@ public final class NodesBuilder {
 
         public void addNode(long originalId, NodeLabelToken nodeLabelToken) {
             if (!seenNodeIdPredicate.test(originalId)) {
-                long[] threadLocalTokens = threadLocalContext.addNodeLabelToken(nodeLabelToken);
+                var threadLocalTokens = threadLocalContext.addNodeLabelToken(nodeLabelToken);
 
                 buffer.add(originalId, LongPropertyReference.empty(), threadLocalTokens);
                 if (buffer.isFull()) {
@@ -331,7 +332,7 @@ public final class NodesBuilder {
 
         public void addNode(long originalId, NodeLabelToken nodeLabelToken, PropertyValues properties) {
             if (!seenNodeIdPredicate.test(originalId)) {
-                long[] threadLocalTokens = threadLocalContext.addNodeLabelTokenAndPropertyKeys(
+                var threadLocalTokens = threadLocalContext.addNodeLabelTokenAndPropertyKeys(
                     nodeLabelToken,
                     properties.propertyKeys()
                 );
@@ -366,7 +367,7 @@ public final class NodesBuilder {
             this.importedNodes.add(importedNodes);
         }
 
-        private int importProperties(long nodeReference, long[] labelIds, PropertyReference propertiesReference) {
+        private int importProperties(long nodeReference, NodeLabelTokenSet labelTokens, PropertyReference propertiesReference) {
             if (!propertiesReference.isEmpty()) {
                 var propertyValueIndex = (int) ((LongPropertyReference) propertiesReference).id;
                 var properties = this.batchNodeProperties.get(propertyValueIndex);

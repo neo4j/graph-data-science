@@ -24,6 +24,7 @@ import org.neo4j.gds.compat.CustomAccessMode;
 import org.neo4j.internal.kernel.api.RelTypeSupplier;
 import org.neo4j.internal.kernel.api.TokenSet;
 
+import java.util.Arrays;
 import java.util.function.Supplier;
 
 public class CompatAccessModeImpl extends CompatAccessMode {
@@ -40,5 +41,21 @@ public class CompatAccessModeImpl extends CompatAccessMode {
     @Override
     public boolean allowsReadRelationshipProperty(RelTypeSupplier relType, int propertyKey) {
         return custom.allowsReadRelationshipProperty(propertyKey);
+    }
+
+    public boolean allowsTraverseAllNodesWithLabel(long label) {
+        return custom.allowTraverseAllNodesWithLabel(label);
+    }
+
+    public boolean allowsTraverseNode(long... labels) {
+        return custom.allowsTraverseNode(labels);
+    }
+
+    public boolean allowsTraverseAllNodesWithLabel(int label) {
+        return custom.allowTraverseAllNodesWithLabel(label);
+    }
+
+    public boolean allowsTraverseNode(int... labels) {
+        return custom.allowsTraverseNode(Arrays.stream(labels).mapToLong(l -> l).toArray());
     }
 }

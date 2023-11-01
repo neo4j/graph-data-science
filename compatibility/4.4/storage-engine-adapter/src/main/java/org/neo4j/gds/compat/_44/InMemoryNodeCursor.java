@@ -69,4 +69,8 @@ public class InMemoryNodeCursor extends AbstractInMemoryNodeCursor {
     public void degrees(RelationshipSelection selection, Degrees.Mutator mutator) {
     }
 
+    @Override
+    public long[] labels() {
+        return longLabels();
+    }
 }

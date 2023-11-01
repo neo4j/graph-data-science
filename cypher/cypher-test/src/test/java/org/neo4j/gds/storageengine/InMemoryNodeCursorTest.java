@@ -94,7 +94,11 @@ class InMemoryNodeCursorTest extends CypherTest {
             var labelTokens = graphStore.nodes().nodeLabels(nodeId).stream()
                 .mapToLong(label -> tokenHolders.labelTokens().getIdByName(label.name))
                 .toArray();
-            assertThat(nodeCursor.labels()).containsExactlyInAnyOrder(labelTokens);
+            // we don't know if nodeCursor.labels() returns int[] or long[]
+            // therefore we need to this slightly awkward check
+            for (var label : nodeCursor.labels()) {
+                assertThat(labelTokens).contains((long) label);
+            }
             return true;
         });
     }

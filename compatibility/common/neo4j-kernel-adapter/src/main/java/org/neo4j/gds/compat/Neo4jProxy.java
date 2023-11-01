@@ -25,7 +25,6 @@ import org.neo4j.common.DependencyResolver;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.connectors.ConnectorPortRegister;
 import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -44,10 +43,8 @@ import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
 import org.neo4j.internal.helpers.HostnamePort;
 import org.neo4j.internal.id.IdGeneratorFactory;
-import org.neo4j.internal.kernel.api.IndexReadSession;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
-import org.neo4j.internal.kernel.api.NodeValueIndexCursor;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
@@ -61,7 +58,6 @@ import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.internal.schema.IndexCapability;
-import org.neo4j.internal.schema.IndexOrder;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.layout.Neo4jLayout;
@@ -77,9 +73,7 @@ import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.impl.query.TransactionalContext;
 import org.neo4j.kernel.impl.query.TransactionalContextFactory;
-import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
-import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
 import org.neo4j.procedure.Mode;
@@ -125,10 +119,6 @@ public final class Neo4jProxy {
         String databaseName
     ) {
         return IMPL.securityContext(username, authSubject, mode, databaseName);
-    }
-
-    public static long getHighId(RecordStore<? extends AbstractBaseRecord> recordStore) {
-        return IMPL.getHighId(recordStore);
     }
 
     public static List<StoreScan<NodeLabelIndexCursor>> entityCursorScan(
@@ -186,10 +176,6 @@ public final class Neo4jProxy {
         return IMPL.allocateNodeLabelIndexCursor(kernelTransaction);
     }
 
-    public static NodeValueIndexCursor allocateNodeValueIndexCursor(KernelTransaction kernelTransaction) {
-        return IMPL.allocateNodeValueIndexCursor(kernelTransaction);
-    }
-
     public static boolean hasNodeLabelIndex(KernelTransaction kernelTransaction) {
         return IMPL.hasNodeLabelIndex(kernelTransaction);
     }
@@ -217,31 +203,6 @@ public final class Neo4jProxy {
 
     public static CompatExecutionContext executionContext(KernelTransaction ktx) {
         return IMPL.executionContext(ktx);
-    }
-
-    public static CompatIndexQuery rangeIndexQuery(
-        int propertyKeyId,
-        double from,
-        boolean fromInclusive,
-        double to,
-        boolean toInclusive
-    ) {
-        return IMPL.rangeIndexQuery(propertyKeyId, from, fromInclusive, to, toInclusive);
-    }
-
-    public static CompatIndexQuery rangeAllIndexQuery(int propertyKeyId) {
-        return IMPL.rangeAllIndexQuery(propertyKeyId);
-    }
-
-    public static void nodeIndexSeek(
-        Read dataRead,
-        IndexReadSession index,
-        NodeValueIndexCursor cursor,
-        IndexOrder indexOrder,
-        boolean needsValues,
-        CompatIndexQuery query
-    ) throws KernelException {
-        IMPL.nodeIndexSeek(dataRead, index, cursor, indexOrder, needsValues, query);
     }
 
     public static CompositeNodeCursor compositeNodeCursor(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
