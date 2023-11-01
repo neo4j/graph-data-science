@@ -45,22 +45,12 @@ public class PageRankConfigTest {
 
     @Test
     void shouldNotAllowNegativeSourceNodes() {
-
-        var config = PageRankStreamConfigImpl.builder()
-            .sourceNodes(List.of(-1337)).build();
-
-        assertThatThrownBy(() -> config.graphStoreValidation(
-            graphStore,
-            config.nodeLabelIdentifiers(graphStore),
-            config.internalRelationshipTypes(graphStore)
-        ))
+        assertThatThrownBy(() -> PageRankStreamConfigImpl.builder().sourceNodes(List.of(-1337)).build())
             .hasMessageContaining("Negative node ids are not supported for the field `sourceNodes`");
-
     }
 
     @Test
     void shouldNotAllowNonExistantSourceNodes() {
-
         var config = PageRankStreamConfigImpl.builder()
             .sourceNodes(List.of(421337)).build();
 
@@ -68,8 +58,6 @@ public class PageRankConfigTest {
             graphStore,
             config.nodeLabelIdentifiers(graphStore),
             config.internalRelationshipTypes(graphStore)
-        ))
-            .hasMessageContaining("sourceNodes nodes do not exist in the in-memory graph: ['421337']");
-
+        )).hasMessageContaining("sourceNodes nodes do not exist in the in-memory graph: [421337]");
     }
 }

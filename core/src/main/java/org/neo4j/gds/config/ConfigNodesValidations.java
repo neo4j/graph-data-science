@@ -33,43 +33,50 @@ final class ConfigNodesValidations {
 
     private ConfigNodesValidations() {}
 
-    static void validateNodes(
+    /**
+     * When parsing nodes in a config we can validate the node ids are non-negative.
+     * @param nodes collection of nodes to validate
+     * @param parameterKey the parameter key under which the user submitted these nodes
+     */
+    static void nodesNotNegative(Collection<Long> nodes, String parameterKey) {
+        var negativeNodes = nodes.stream().filter(n -> n < 0).collect(Collectors.toList());
+        if (negativeNodes.isEmpty()) return;
+        throw new IllegalArgumentException(formatWithLocale(
+            "Negative node ids are not supported for the field `%s`. Negative node ids: %s",
+            parameterKey, negativeNodes
+        ));
+    }
+
+    /**
+     * Once we have a graph store and the filter labels we can validate that the nodes exist in the graph.
+     * @param graphStore
+     * @param nodes collection of nodes to validate
+     * @param filteredNodeLabels
+     * @param parameterKey the parameter key under which the user submitted these nodes
+     */
+    static void nodesExistInGraph(
         GraphStore graphStore,
-        Collection<Long> neoNodesToValidate,
         Collection<NodeLabel> filteredNodeLabels,
-        String nodeDescription
+        Collection<Long> nodes,
+        String parameterKey
     ) {
-        if (!neoNodesToValidate.isEmpty()) {
+        var missingNodes = nodes
+            .stream()
+            .filter(targetNode -> labelFilteredGraphNotContainsNode(
+                filteredNodeLabels,
+                graphStore.nodes(),
+                targetNode
+            ))
+            .map(Object::toString)
+            .collect(Collectors.toList());
 
-            for (var neoNode : neoNodesToValidate) {
-
-                if (neoNode < 0) {
-                    throw new IllegalArgumentException(formatWithLocale(
-                        "Negative node ids are not supported for the field `%s`",
-                        nodeDescription
-                    ));
-                }
-            }
-
-            var missingNodes = neoNodesToValidate
-                .stream()
-                .filter(targetNode -> labelFilteredGraphNotContainsNode(
-                    filteredNodeLabels,
-                    graphStore.nodes(),
-                    targetNode
-                ))
-                .map(Object::toString)
-                .collect(Collectors.toList());
-
-            if (!missingNodes.isEmpty()) {
-                throw new IllegalArgumentException(formatWithLocale(
-                    "%s nodes do not exist in the in-memory graph%s: %s",
-                    nodeDescription,
-                    nodeLabelFilterDescription(filteredNodeLabels, graphStore),
-                    StringJoining.join(missingNodes)
-                ));
-            }
-
+        if (!missingNodes.isEmpty()) {
+            throw new IllegalArgumentException(formatWithLocale(
+                "%s nodes do not exist in the in-memory graph%s: %s",
+                parameterKey,
+                nodeLabelFilterDescription(filteredNodeLabels, graphStore),
+                missingNodes
+            ));
         }
     }
 

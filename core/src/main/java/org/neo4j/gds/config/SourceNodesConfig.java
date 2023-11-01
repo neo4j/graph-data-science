@@ -29,14 +29,24 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import static org.neo4j.gds.config.ConfigNodesValidations.validateNodes;
+import static org.neo4j.gds.config.ConfigNodesValidations.nodesExistInGraph;
+import static org.neo4j.gds.config.ConfigNodesValidations.nodesNotNegative;
+import static org.neo4j.gds.config.NodeIdParser.parseToListOfNodeIds;
 
 public interface SourceNodesConfig {
 
+    String SOURCE_NODES_KEY = "sourceNodes";
+
     @Value.Default
-    @Configuration.ConvertWith(method = "org.neo4j.gds.config.NodeIdsParser#parseNodeIds")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.config.SourceNodesConfig#parseSourceNodes")
     default List<Long> sourceNodes() {
         return Collections.emptyList();
+    }
+
+    static List<Long> parseSourceNodes(Object input) {
+        var nodes = parseToListOfNodeIds(input, SOURCE_NODES_KEY);
+        nodesNotNegative(nodes, SOURCE_NODES_KEY);
+        return nodes;
     }
 
     @Configuration.GraphStoreValidationCheck
@@ -45,7 +55,7 @@ public interface SourceNodesConfig {
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        validateNodes(graphStore, sourceNodes(), selectedLabels, "sourceNodes");
+        nodesExistInGraph(graphStore, selectedLabels, sourceNodes(), SOURCE_NODES_KEY);
     }
 
 }

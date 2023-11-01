@@ -57,6 +57,7 @@ class AllShortestPathsBaseConfigTest {
             .withEntry("sourceNode", "42");
 
         assertThatThrownBy(() -> new ShortestPathDijkstraStreamConfigImpl(cypherMapWrapper))
-            .hasMessageContaining("Expected a node or a node id for `sourceNode`. Got String");
+            .hasMessageContaining("Failed to parse `sourceNode` as a single node ID")
+            .hasMessageContaining("`String` cannot");
     }
 }

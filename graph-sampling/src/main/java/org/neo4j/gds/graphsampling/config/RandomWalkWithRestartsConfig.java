@@ -22,6 +22,7 @@ package org.neo4j.gds.graphsampling.config;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.GraphSampleAlgoConfig;
+import org.neo4j.gds.config.NodeIdParser;
 import org.neo4j.gds.config.SingleThreadedRandomSeedConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
@@ -32,7 +33,7 @@ import java.util.List;
 public interface RandomWalkWithRestartsConfig extends GraphSampleAlgoConfig, SingleThreadedRandomSeedConfig {
 
     @Value.Default
-    @Configuration.ConvertWith(method = "org.neo4j.gds.config.NodeIdsParser#parseNodeIds")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig#parseStartNodes")
     default List<Long> startNodes() {
         return List.of();
     }
@@ -51,6 +52,10 @@ public interface RandomWalkWithRestartsConfig extends GraphSampleAlgoConfig, Sin
 
     default boolean nodeLabelStratification() {
         return false;
+    }
+
+    static List<Long> parseStartNodes(Object input) {
+        return NodeIdParser.parseToListOfNodeIds(input, "startNodes");
     }
 
     static RandomWalkWithRestartsConfig of(
