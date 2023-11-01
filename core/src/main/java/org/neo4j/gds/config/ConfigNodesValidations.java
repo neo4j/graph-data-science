@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.config;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
@@ -29,7 +30,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-final class ConfigNodesValidations {
+public final class ConfigNodesValidations {
 
     private ConfigNodesValidations() {}
 
@@ -78,6 +79,21 @@ final class ConfigNodesValidations {
                 missingNodes
             ));
         }
+    }
+
+    public static void validateNodePropertyExists(
+        GraphStore graphStore,
+        Collection<NodeLabel> nodeLabels,
+        String configKey,
+        @Nullable String propertyName
+    ) {
+        if (graphStore.hasNodeProperty(nodeLabels, propertyName)) return;
+        throw new IllegalArgumentException(formatWithLocale(
+            "%s `%s` not found in graph with node properties: %s",
+            configKey,
+            propertyName,
+            graphStore.nodePropertyKeys().stream().sorted().collect(Collectors.toList())
+        ));
     }
 
     static boolean labelFilteredGraphNotContainsNode(

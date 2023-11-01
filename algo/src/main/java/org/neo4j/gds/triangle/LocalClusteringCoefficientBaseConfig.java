@@ -27,7 +27,8 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.ConfigurableSeedConfig;
+import org.neo4j.gds.config.ConfigNodesValidations;
+import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.core.StringIdentifierValidations;
 
 import java.util.Collection;
@@ -39,24 +40,33 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface LocalClusteringCoefficientBaseConfig extends AlgoBaseConfig, ConfigurableSeedConfig {
+public interface LocalClusteringCoefficientBaseConfig extends AlgoBaseConfig, SeedConfig {
+
+    String SEED_PROPERTY_KEY = "triangleCountProperty";
 
     @Override
     @Value.Default
-    @Configuration.Key("triangleCountProperty")
     @Configuration.ConvertWith(method = "validateProperty")
+    @Configuration.Key(SEED_PROPERTY_KEY)
     default @Nullable String seedProperty() {
         return null;
     }
 
-    @Override
-    @Configuration.Ignore
-    default String propertyNameOverride() {
-        return "triangleCountProperty";
+    static @Nullable String validateProperty(String input) {
+        return StringIdentifierValidations.validateNoWhiteCharacter(input, SEED_PROPERTY_KEY);
     }
 
-    static @Nullable String validateProperty(String input) {
-        return StringIdentifierValidations.validateNoWhiteCharacter(input, "triangleCountProperty");
+    @Override
+    @Configuration.GraphStoreValidationCheck
+    default void validateSeedProperty(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        String seedProperty = seedProperty();
+        if (seedProperty != null) {
+            ConfigNodesValidations.validateNodePropertyExists(graphStore, selectedLabels, SEED_PROPERTY_KEY, seedProperty);
+        }
     }
 
     @Configuration.GraphStoreValidationCheck

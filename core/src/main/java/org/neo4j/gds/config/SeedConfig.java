@@ -27,11 +27,9 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
 
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
 import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteCharacter;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface SeedConfig {
     String SEED_PROPERTY_KEY = "seedProperty";
@@ -59,12 +57,8 @@ public interface SeedConfig {
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
         String seedProperty = seedProperty();
-        if (seedProperty != null && !graphStore.hasNodeProperty(selectedLabels, seedProperty)) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Seed property `%s` not found in graph with node properties: %s",
-                seedProperty,
-                graphStore.nodePropertyKeys().stream().sorted().collect(Collectors.toList())
-            ));
+        if (seedProperty != null) {
+            ConfigNodesValidations.validateNodePropertyExists(graphStore, selectedLabels, "Seed property", seedProperty);
         }
     }
 }
