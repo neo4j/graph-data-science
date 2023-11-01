@@ -25,7 +25,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.BatchSizeConfig;
 import org.neo4j.gds.config.EmbeddingDimensionConfig;
 import org.neo4j.gds.config.FeaturePropertiesConfig;
 import org.neo4j.gds.config.IterationsConfig;
