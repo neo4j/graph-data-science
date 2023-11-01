@@ -17,38 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.config;
+package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-import java.util.List;
 import java.util.Optional;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface GraphDropNodePropertiesConfig extends BaseConfig, ConcurrencyConfig {
-    @Configuration.Parameter
-    Optional<String> graphName();
+public interface GraphRemoveGraphPropertiesConfig extends GraphAccessGraphPropertiesConfig {
 
-    @Configuration.Parameter
-    @Configuration.ConvertWith(method = "org.neo4j.gds.config.GraphDropNodePropertiesConfig#parseNodeProperties")
-    List<String> nodeProperties();
-
-    static List<String> parseNodeProperties(Object userInput) {
-        return UserInputAsStringOrListOfString.parse(userInput, "nodeProperties");
-    }
-
-    static GraphDropNodePropertiesConfig of(
+    static GraphRemoveGraphPropertiesConfig of(
         String graphName,
-        Object nodeProperties,
+        String graphProperty,
         CypherMapWrapper config
     ) {
-        return new GraphDropNodePropertiesConfigImpl(
+        return new GraphRemoveGraphPropertiesConfigImpl(
             Optional.of(graphName),
-            nodeProperties,
+            graphProperty,
             config
         );
     }

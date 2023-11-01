@@ -28,7 +28,6 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.config.MutateLabelConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.extension.GdlExtension;

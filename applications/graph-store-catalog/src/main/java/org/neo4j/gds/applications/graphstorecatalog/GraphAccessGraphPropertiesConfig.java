@@ -17,10 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.config;
+package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.core.StringSimilarity;
 import org.neo4j.gds.utils.StringJoining;
 

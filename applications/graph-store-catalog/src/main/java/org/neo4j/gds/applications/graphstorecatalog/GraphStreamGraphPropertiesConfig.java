@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.config;
+package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
@@ -28,14 +28,14 @@ import java.util.Optional;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface GraphRemoveGraphPropertiesConfig extends GraphAccessGraphPropertiesConfig {
+public interface GraphStreamGraphPropertiesConfig extends GraphAccessGraphPropertiesConfig {
 
-    static GraphRemoveGraphPropertiesConfig of(
+    static GraphStreamGraphPropertiesConfig of(
         String graphName,
         String graphProperty,
         CypherMapWrapper config
     ) {
-        return new GraphRemoveGraphPropertiesConfigImpl(
+        return new GraphStreamGraphPropertiesConfigImpl(
             Optional.of(graphName),
             graphProperty,
             config
