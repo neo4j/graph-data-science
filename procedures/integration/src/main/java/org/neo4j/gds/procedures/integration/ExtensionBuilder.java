@@ -199,8 +199,13 @@ public final class ExtensionBuilder {
 
         var communityProcedureProvider = createCommunityProcedureProvider(exporterBuildersProviderService);
         var similarityProcedureProvider = createSimilarityProcedureProvider(exporterBuildersProviderService);
+        var centralityProcedureProvider = createCentralityProcedureProvider(exporterBuildersProviderService);
 
-        return new GraphDataScienceProvider(log, catalogFacadeProvider, communityProcedureProvider,
+        return new GraphDataScienceProvider(
+            log,
+            catalogFacadeProvider,
+            centralityProcedureProvider,
+            communityProcedureProvider,
             similarityProcedureProvider
         );
     }
@@ -248,6 +253,24 @@ public final class ExtensionBuilder {
         var algorithmMetaDataSetterService = new AlgorithmMetaDataSetterService();
 
         return new SimilarityProcedureProvider(
+            log,
+            graphStoreCatalogService,
+            useMaxMemoryEstimation,
+            algorithmMetaDataSetterService,
+            databaseIdAccessor,
+            kernelTransactionAccessor,
+            exporterBuildersProviderService,
+            taskRegistryFactoryService,
+            terminationFlagService,
+            userLogServices,
+            userAccessor
+        );
+    }
+
+    private CentralityProcedureProvider createCentralityProcedureProvider(ExporterBuildersProviderService exporterBuildersProviderService) {
+        var algorithmMetaDataSetterService = new AlgorithmMetaDataSetterService();
+
+        return new CentralityProcedureProvider(
             log,
             graphStoreCatalogService,
             useMaxMemoryEstimation,

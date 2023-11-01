@@ -41,8 +41,8 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
-import org.neo4j.gds.algorithms.community.WriteNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
+import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.api.ProcedureReturnColumns;
@@ -63,7 +63,7 @@ import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
-import org.neo4j.gds.procedures.community.ConfigurationParser;
+import org.neo4j.gds.procedures.configparser.ConfigurationParser;
 import org.neo4j.gds.projection.ImmutableGraphProjectFromStoreConfig;
 
 import java.lang.reflect.InvocationTargetException;
@@ -491,6 +491,7 @@ class WccWriteProcTest extends BaseProcTest {
 
 
                     wccWriteProc.facade = new GraphDataScience(
+                        null,
                         null,
                         null,
                         new CommunityProcedureFacade(

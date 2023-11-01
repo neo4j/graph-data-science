@@ -20,6 +20,7 @@
 package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
+import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.community.specificfields.AlphaSccSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.CommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.K1ColoringSpecificFields;
@@ -30,10 +31,10 @@ import org.neo4j.gds.algorithms.community.specificfields.LeidenSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LocalClusteringCoefficientSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.ModularityOptimizationSpecificFields;
-import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.community.specificfields.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.TriangleCountSpecificFields;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
+import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;

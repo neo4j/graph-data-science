@@ -17,26 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms.community;
+package org.neo4j.gds.algorithms.centrality;
 
-public final class WriteNodePropertyResult {
+import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 
-    private final long nodePropertiesWritten;
-    private final long writeMilliseconds;
+public class CentralityAlgorithmsMutateBusinessFacade {
 
-    WriteNodePropertyResult(
-        long nodePropertiesWritten,
-        long writeMilliseconds
+    private final CentralityAlgorithmsFacade centralityAlgorithmsFacade;
+    private final MutateNodePropertyService mutateNodePropertyService;
+
+    public CentralityAlgorithmsMutateBusinessFacade(
+        CentralityAlgorithmsFacade centralityAlgorithmsFacade,
+        MutateNodePropertyService mutateNodePropertyService
     ) {
-        this.nodePropertiesWritten = nodePropertiesWritten;
-        this.writeMilliseconds = writeMilliseconds;
+        this.centralityAlgorithmsFacade = centralityAlgorithmsFacade;
+        this.mutateNodePropertyService = mutateNodePropertyService;
     }
 
-    long nodePropertiesWritten() {
-        return nodePropertiesWritten;
-    }
-
-    long writeMilliseconds() {
-        return writeMilliseconds;
-    }
 }

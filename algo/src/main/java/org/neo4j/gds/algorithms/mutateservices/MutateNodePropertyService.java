@@ -17,11 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms.community;
+package org.neo4j.gds.algorithms.mutateservices;
 
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.algorithms.graphstoreupdater.AddNodePropertyResult;
-import org.neo4j.gds.algorithms.graphstoreupdater.GraphStoreUpdater;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;

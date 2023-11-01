@@ -49,7 +49,7 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStatsBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
-import org.neo4j.gds.algorithms.community.MutateNodePropertyService;
+import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
@@ -76,7 +76,7 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
-import org.neo4j.gds.procedures.community.ConfigurationParser;
+import org.neo4j.gds.procedures.configparser.ConfigurationParser;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
 import org.neo4j.gds.projection.ImmutableGraphProjectFromStoreConfig;
@@ -579,6 +579,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
         );
 
         return new GraphDataScience(
+            null,
             null,
             null,
             new CommunityProcedureFacade(

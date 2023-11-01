@@ -59,7 +59,7 @@ import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
-import org.neo4j.gds.procedures.community.ConfigurationParser;
+import org.neo4j.gds.procedures.configparser.ConfigurationParser;
 import org.neo4j.gds.projection.ImmutableGraphProjectFromStoreConfig;
 
 import java.lang.reflect.InvocationTargetException;
@@ -283,6 +283,7 @@ class WccStatsProcTest extends BaseProcTest {
         );
 
         return new GraphDataScience(
+            null,
             null,
             null,
             new CommunityProcedureFacade(

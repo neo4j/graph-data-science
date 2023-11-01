@@ -17,23 +17,23 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms.graphstoreupdater;
+package org.neo4j.gds.algorithms.mutateservices;
 
-public final class AddNodePropertyResult {
+public final class AddRelationshipResult {
 
-    private final long nodePropertiesAdded;
+    private final long relationshipsAdded;
     private final long mutateMilliseconds;
 
-    AddNodePropertyResult(
-        long nodePropertiesAdded,
+    AddRelationshipResult(
+        long relationshipsAdded,
         long mutateMilliseconds
     ) {
-        this.nodePropertiesAdded = nodePropertiesAdded;
+        this.relationshipsAdded = relationshipsAdded;
         this.mutateMilliseconds = mutateMilliseconds;
     }
 
-    public long nodePropertiesAdded() {
-        return nodePropertiesAdded;
+    public long relationshipsAdded() {
+        return relationshipsAdded;
     }
 
     public long mutateMilliseconds() {

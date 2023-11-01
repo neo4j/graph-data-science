@@ -54,7 +54,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
-import org.neo4j.gds.procedures.community.ConfigurationParser;
+import org.neo4j.gds.procedures.configparser.ConfigurationParser;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -206,6 +206,7 @@ class K1ColoringStreamProcTest extends BaseProcTest {
                     )
                 ));
             proc.facade = new GraphDataScience(
+                null,
                 null,
                 null,
                 new CommunityProcedureFacade(

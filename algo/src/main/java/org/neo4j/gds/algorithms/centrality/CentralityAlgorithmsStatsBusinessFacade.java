@@ -17,26 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms.graphstoreupdater;
+package org.neo4j.gds.algorithms.centrality;
 
-public final class AddRelationshipResult {
+public class CentralityAlgorithmsStatsBusinessFacade {
 
-    private final long relationshipsAdded;
-    private final long mutateMilliseconds;
+    private final CentralityAlgorithmsFacade centralityAlgorithmsFacade;
 
-    AddRelationshipResult(
-        long relationshipsAdded,
-        long mutateMilliseconds
-    ) {
-        this.relationshipsAdded = relationshipsAdded;
-        this.mutateMilliseconds = mutateMilliseconds;
+    public CentralityAlgorithmsStatsBusinessFacade(CentralityAlgorithmsFacade centralityAlgorithmsFacade) {
+        this.centralityAlgorithmsFacade = centralityAlgorithmsFacade;
     }
 
-    public long relationshipsAdded() {
-        return relationshipsAdded;
-    }
 
-    public long mutateMilliseconds() {
-        return mutateMilliseconds;
-    }
 }

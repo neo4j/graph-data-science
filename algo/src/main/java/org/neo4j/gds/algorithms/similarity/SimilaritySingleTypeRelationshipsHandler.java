@@ -21,7 +21,7 @@ package org.neo4j.gds.algorithms.similarity;
 
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.algorithms.graphstoreupdater.SingleTypeRelationshipsProducer;
+import org.neo4j.gds.algorithms.mutateservices.SingleTypeRelationshipsProducer;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;

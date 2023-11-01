@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.algorithms.similarity;
 
-import org.neo4j.gds.algorithms.graphstoreupdater.AddRelationshipResult;
-import org.neo4j.gds.algorithms.graphstoreupdater.GraphStoreUpdater;
-import org.neo4j.gds.algorithms.graphstoreupdater.SingleTypeRelationshipsProducer;
+import org.neo4j.gds.algorithms.mutateservices.AddRelationshipResult;
+import org.neo4j.gds.algorithms.mutateservices.GraphStoreUpdater;
+import org.neo4j.gds.algorithms.mutateservices.SingleTypeRelationshipsProducer;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.logging.Log;
 
