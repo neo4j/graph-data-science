@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.IntObjectMap;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.core.loading.NodeLabelTokenSet;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 
 import java.util.List;
@@ -116,9 +117,6 @@ final class NodesBuilderContext {
 
     static class ThreadLocalContext {
 
-        private static final long NOT_INITIALIZED = -42L;
-
-        private final long[] anyLabelArray = {NOT_INITIALIZED};
         private final TokenToNodeLabels tokenToNodeLabels;
         private final NodeLabelTokenToPropertyKeys nodeLabelTokenToPropertyKeys;
         private final Function<String, NodePropertiesFromStoreBuilder> propertyBuilderFn;
@@ -145,35 +143,32 @@ final class NodesBuilderContext {
             return this.tokenToNodeLabels.labelTokenNodeLabelMapping();
         }
 
-        long[] addNodeLabelToken(NodeLabelToken nodeLabelToken) {
+        NodeLabelTokenSet addNodeLabelToken(NodeLabelToken nodeLabelToken) {
             return getOrCreateLabelTokens(nodeLabelToken);
         }
 
-        long[] addNodeLabelTokenAndPropertyKeys(NodeLabelToken nodeLabelToken, Iterable<String> propertyKeys) {
-            long[] tokens = getOrCreateLabelTokens(nodeLabelToken);
+        NodeLabelTokenSet addNodeLabelTokenAndPropertyKeys(NodeLabelToken nodeLabelToken, Iterable<String> propertyKeys) {
+            NodeLabelTokenSet tokens = getOrCreateLabelTokens(nodeLabelToken);
             this.nodeLabelTokenToPropertyKeys.add(nodeLabelToken, propertyKeys);
             return tokens;
         }
 
-        private long[] getOrCreateLabelTokens(NodeLabelToken nodeLabelToken) {
+        private NodeLabelTokenSet getOrCreateLabelTokens(NodeLabelToken nodeLabelToken) {
             if (nodeLabelToken.isEmpty()) {
                 return anyLabelArray();
             }
 
-            long[] labelIds = new long[nodeLabelToken.size()];
+            int[] labelIds = new int[nodeLabelToken.size()];
             for (int i = 0; i < labelIds.length; i++) {
                 labelIds[i] = this.tokenToNodeLabels.getOrCreateToken(nodeLabelToken.get(i));
             }
 
-            return labelIds;
+            return NodeLabelTokenSet.from(labelIds);
         }
 
-        private long[] anyLabelArray() {
-            var anyLabelArray = this.anyLabelArray;
-            if (anyLabelArray[0] == NOT_INITIALIZED) {
-                anyLabelArray[0] = tokenToNodeLabels.getOrCreateToken(NodeLabel.ALL_NODES);
-            }
-            return anyLabelArray;
+        private NodeLabelTokenSet anyLabelArray() {
+            var token = tokenToNodeLabels.getOrCreateToken(NodeLabel.ALL_NODES);
+            return NodeLabelTokenSet.from(token);
         }
     }
 }

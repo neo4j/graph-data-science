@@ -42,16 +42,6 @@ public abstract class CompatAccessMode extends RestrictedAccessMode {
     }
 
     @Override
-    public boolean allowsTraverseAllNodesWithLabel(long label) {
-        return custom.allowTraverseAllNodesWithLabel(label);
-    }
-
-    @Override
-    public boolean allowsTraverseNode(long... labels) {
-        return custom.allowsTraverseNode(labels);
-    }
-
-    @Override
     public boolean allowsTraverseRelType(int relType) {
         return custom.allowsTraverseRelType(relType);
     }

@@ -41,4 +41,14 @@ final class CompatAccessModeImpl extends CompatAccessMode {
     public boolean allowsReadRelationshipProperty(RelTypeSupplier relType, int propertyKey) {
         return custom.allowsReadRelationshipProperty(propertyKey);
     }
+
+    @Override
+    public boolean allowsTraverseAllNodesWithLabel(long label) {
+        return custom.allowTraverseAllNodesWithLabel(label);
+    }
+
+    @Override
+    public boolean allowsTraverseNode(long... labels) {
+        return custom.allowsTraverseNode(labels);
+    }
 }

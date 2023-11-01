@@ -96,8 +96,8 @@ class NodesBatchBufferTest {
         }
 
         @Override
-        public long[] labels() {
-            return labels;
+        public NodeLabelTokenSet labels() {
+            return NodeLabelTokenSet.from(labels);
         }
 
         @Override

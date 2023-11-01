@@ -93,20 +93,20 @@ class NodeLabelIndexBasedScannerTest extends BaseTest {
                     var labels = nodeReference.labels();
 
                     if (neoId % 3 == 0) {
-                        assertThat(labels).contains(labelAToken);
-                        assertThat(labels).doesNotContain(labelBToken);
+                        assertThat(labels.asIntArray()).contains(labelAToken);
+                        assertThat(labels.asIntArray()).doesNotContain(labelBToken);
                         assertThat(labelABits.get(neoId)).isTrue();
                         assertThat(labelBBits.get(neoId)).isFalse();
                     }
                     if (neoId % 3 == 1) {
-                        assertThat(labels).doesNotContain(labelAToken);
-                        assertThat(labels).contains(labelBToken);
+                        assertThat(labels.asIntArray()).doesNotContain(labelAToken);
+                        assertThat(labels.asIntArray()).contains(labelBToken);
                         assertThat(labelABits.get(neoId)).isFalse();
                         assertThat(labelBBits.get(neoId)).isTrue();
                     }
                     if (neoId % 3 == 2) {
-                        assertThat(labels).contains(labelAToken);
-                        assertThat(labels).contains(labelBToken);
+                        assertThat(labels.asIntArray()).contains(labelAToken);
+                        assertThat(labels.asIntArray()).contains(labelBToken);
                         assertThat(labelABits.get(neoId)).isTrue();
                         assertThat(labelBBits.get(neoId)).isTrue();
                     }

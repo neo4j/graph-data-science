@@ -68,9 +68,7 @@ public abstract class TransactionContextTest extends BaseTest {
     }
 
     protected AccessMode forbiddenNodes() {
-        return
-
-            new FilterAccessMode() {
+        return new FilterAccessMode() {
                 @Override
                 public boolean allowsTraverseAllLabels() {
                     return false;
