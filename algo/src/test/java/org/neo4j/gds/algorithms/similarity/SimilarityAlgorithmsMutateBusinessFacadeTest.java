@@ -24,7 +24,7 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
-import org.neo4j.gds.algorithms.SimilaritySpecificFieldsWithDistribution;
+import org.neo4j.gds.algorithms.similarity.specificfields.SimilaritySpecificFieldsWithDistribution;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.TerminationFlag;

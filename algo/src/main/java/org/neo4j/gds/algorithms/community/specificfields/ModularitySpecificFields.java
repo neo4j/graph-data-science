@@ -17,26 +17,42 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms;
+package org.neo4j.gds.algorithms.community.specificfields;
 
-public class LocalClusteringCoefficientSpecificFields {
+public final class ModularitySpecificFields {
 
-    public static final LocalClusteringCoefficientSpecificFields EMPTY =
-        new LocalClusteringCoefficientSpecificFields(0L, 0d);
+
+    public static final ModularitySpecificFields EMPTY =
+        new ModularitySpecificFields(0,  0L, 0L, 0.0d);
 
     private final long nodeCount;
-    private final double averageClusteringCoefficient;
+    private final long relationshipCount;
+    private final long communityCount;
+    private final double modularity;
 
-    public LocalClusteringCoefficientSpecificFields(long nodeCount, double averageClusteringCoefficient) {
+    public ModularitySpecificFields(
+        long nodeCount,
+        long relationshipCount,
+        long communityCount,
+        double modularity
+    ) {
+        this.communityCount = communityCount;
         this.nodeCount = nodeCount;
-        this.averageClusteringCoefficient = averageClusteringCoefficient;
+        this.relationshipCount=relationshipCount;
+        this.modularity=modularity;
     }
 
-    public double averageClusteringCoefficient() {
-        return this.averageClusteringCoefficient;
+    public long communityCount() {
+        return communityCount;
     }
 
     public long nodeCount() {
-        return this.nodeCount;
+        return nodeCount;
     }
+
+    public long  relationshipCount() {
+        return relationshipCount;
+    }
+
+    public double modularity(){ return  modularity;}
 }

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.procedures.community;
 
-import org.neo4j.gds.algorithms.LouvainSpecificFields;
+import org.neo4j.gds.algorithms.community.specificfields.LouvainSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.StatsResult;

@@ -17,26 +17,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms;
+package org.neo4j.gds.algorithms.community.specificfields;
 
 import java.util.Map;
 
-public class StandardCommunityStatisticsSpecificFields implements CommunityStatisticsSpecificFields {
+public class AlphaSccSpecificFields implements CommunityStatisticsSpecificFields {
 
-    public static final StandardCommunityStatisticsSpecificFields EMPTY = new StandardCommunityStatisticsSpecificFields(
+    public static final AlphaSccSpecificFields EMPTY = new AlphaSccSpecificFields(
+        0,
         0,
         Map.of()
     );
-
+    private final long nodes;
     private final long communityCount;
     private final Map<String, Object> communityDistribution;
 
-    public StandardCommunityStatisticsSpecificFields(
+    public AlphaSccSpecificFields(
+        long nodes,
         long communityCount,
         Map<String, Object> communityDistribution
     ) {
+        this.nodes=nodes;
         this.communityCount = communityCount;
         this.communityDistribution = communityDistribution;
+    }
+
+    public long nodes() {
+        return nodes;
     }
 
     public long communityCount() {

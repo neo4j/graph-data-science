@@ -17,17 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms;
+package org.neo4j.gds.algorithms.similarity.specificfields;
 
 import java.util.Map;
 
-/**
- * Defines the structure of algorithm community statistics.
- * The implementations may add more methods specific for the particular algorithm.
- * @see org.neo4j.gds.algorithms.LouvainSpecificFields
- */
-public interface CommunityStatisticsSpecificFields {
-    long communityCount();
+public interface SimilaritySpecificFields  {
 
-    Map<String, Object> communityDistribution();
+
+    long nodesCompared();
+    long relationshipsWritten();
+
+    Map<String, Object> similarityDistribution();
 }

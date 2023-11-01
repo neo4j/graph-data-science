@@ -17,42 +17,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms;
+package org.neo4j.gds.algorithms.community.specificfields;
 
-public final class ModularitySpecificFields {
+import java.util.Map;
 
+public class StandardCommunityStatisticsSpecificFields implements CommunityStatisticsSpecificFields {
 
-    public static final ModularitySpecificFields EMPTY =
-        new ModularitySpecificFields(0,  0L, 0L, 0.0d);
+    public static final StandardCommunityStatisticsSpecificFields EMPTY = new StandardCommunityStatisticsSpecificFields(
+        0,
+        Map.of()
+    );
 
-    private final long nodeCount;
-    private final long relationshipCount;
     private final long communityCount;
-    private final double modularity;
+    private final Map<String, Object> communityDistribution;
 
-    public ModularitySpecificFields(
-        long nodeCount,
-        long relationshipCount,
+    public StandardCommunityStatisticsSpecificFields(
         long communityCount,
-        double modularity
+        Map<String, Object> communityDistribution
     ) {
         this.communityCount = communityCount;
-        this.nodeCount = nodeCount;
-        this.relationshipCount=relationshipCount;
-        this.modularity=modularity;
+        this.communityDistribution = communityDistribution;
     }
 
     public long communityCount() {
         return communityCount;
     }
 
-    public long nodeCount() {
-        return nodeCount;
+    public Map<String, Object> communityDistribution() {
+        return communityDistribution;
     }
-
-    public long  relationshipCount() {
-        return relationshipCount;
-    }
-
-    public double modularity(){ return  modularity;}
 }

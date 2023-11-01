@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.procedures.community;
 
-import org.neo4j.gds.algorithms.K1ColoringSpecificFields;
+import org.neo4j.gds.algorithms.community.specificfields.K1ColoringSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.StatsResult;

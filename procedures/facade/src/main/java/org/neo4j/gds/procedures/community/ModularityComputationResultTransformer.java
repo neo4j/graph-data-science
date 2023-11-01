@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.procedures.community;
 
-import org.neo4j.gds.algorithms.ModularitySpecificFields;
+import org.neo4j.gds.algorithms.community.specificfields.ModularitySpecificFields;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.modularity.ModularityResult;

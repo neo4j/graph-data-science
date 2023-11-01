@@ -17,22 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms;
+package org.neo4j.gds.algorithms.community.specificfields;
 
-public class ApproxMaxKCutSpecificFields {
-    private final double cutCost;
+public class TriangleCountSpecificFields {
+    private final long globalTriangleCount;
+    private final long nodeCount;
 
-    public final static  ApproxMaxKCutSpecificFields EMPTY = new ApproxMaxKCutSpecificFields(0);
-    public ApproxMaxKCutSpecificFields(
-        double cutCost
+    public static TriangleCountSpecificFields EMPTY = new TriangleCountSpecificFields(0, 0);
+    public TriangleCountSpecificFields(
+        long globalTriangleCount,
+        long nodeCount
     ) {
-
-        this.cutCost = cutCost;
+        this.globalTriangleCount = globalTriangleCount;
+        this.nodeCount=nodeCount;
     }
 
-    public double cutCost() {
+    public long  nodeCount() {
+        return nodeCount;
+    }
 
-        return cutCost;
+    public long  globalTriangleCount() {
+        return globalTriangleCount;
     }
 
 }

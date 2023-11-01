@@ -17,15 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms;
+package org.neo4j.gds.algorithms.community.specificfields;
 
-import java.util.Map;
+public class ApproxMaxKCutSpecificFields {
+    private final double cutCost;
 
-public interface SimilaritySpecificFields  {
+    public final static  ApproxMaxKCutSpecificFields EMPTY = new ApproxMaxKCutSpecificFields(0);
+    public ApproxMaxKCutSpecificFields(
+        double cutCost
+    ) {
 
+        this.cutCost = cutCost;
+    }
 
-    long nodesCompared();
-    long relationshipsWritten();
+    public double cutCost() {
 
-    Map<String, Object> similarityDistribution();
+        return cutCost;
+    }
+
 }
