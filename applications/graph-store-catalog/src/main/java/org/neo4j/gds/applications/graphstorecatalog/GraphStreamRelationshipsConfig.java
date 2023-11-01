@@ -17,13 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.config;
+package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.BaseConfig;
+import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.ArrayList;
@@ -36,7 +38,7 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
-public interface GraphStreamRelationshipsConfig extends BaseConfig, ConcurrencyConfig  {
+public interface GraphStreamRelationshipsConfig extends BaseConfig, ConcurrencyConfig {
 
     @Configuration.Parameter
     Optional<String> graphName();
