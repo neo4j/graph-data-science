@@ -20,6 +20,7 @@ dependencies {
     implementation project(':core-utils')
     implementation project(':core-write')
     implementation project(':cypher-aggregation')
+    implementation project(':legacy-cypher-projection')
     implementation project(':csv')
     implementation project(':executor')
     implementation project(':graph-store-catalog-applications')

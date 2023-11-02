@@ -48,6 +48,7 @@ dependencies {
     testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 
     testImplementation project(':executor')
+    testImplementation project(':legacy-cypher-projection')
     testImplementation project(':open-model-catalog')
     testImplementation project(':proc-test')
 

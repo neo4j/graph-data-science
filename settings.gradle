@@ -61,6 +61,9 @@ project(':csv').projectDir = file('io/csv')
 include('cypher-aggregation')
 project(':cypher-aggregation').projectDir = file('cypher-aggregation')
 
+include('legacy-cypher-projection')
+project(':legacy-cypher-projection').projectDir = file('legacy-cypher-projection')
+
 include('cypher-core')
 project(':cypher-core').projectDir = file('cypher/cypher-core')
 

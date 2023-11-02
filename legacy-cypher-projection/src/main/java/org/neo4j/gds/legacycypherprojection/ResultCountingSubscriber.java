@@ -17,27 +17,42 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.legacycypherprojection;
 
-class BatchLoadResult {
+import org.neo4j.gds.core.utils.ErrorCachingQuerySubscriber;
+import org.neo4j.graphdb.QueryStatistics;
+import org.neo4j.values.AnyValue;
 
-    private final long rows;
-    private final long maxId;
+class ResultCountingSubscriber extends ErrorCachingQuerySubscriber {
+    private long rows = 0;
 
-    BatchLoadResult(
-            long rows,
-            long maxId
-    ) {
-        this.rows = rows;
-        this.maxId = maxId;
-    }
-
-
-    long rows() {
+    public long rows() {
         return rows;
     }
 
-    long maxId() {
-        return maxId;
+
+    @Override
+    public void onResult(int numberOfFields) {
+
+    }
+
+    @Override
+    public void onRecord() {
+        rows++;
+    }
+
+    @Override
+    public void onField(int offset, AnyValue value) {
+
+    }
+
+    @Override
+    public void onRecordCompleted() {
+
+    }
+
+    @Override
+    public void onResultCompleted(QueryStatistics statistics) {
+
     }
 }

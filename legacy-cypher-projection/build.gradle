@@ -1,59 +1,52 @@
 apply plugin: 'java-library'
 
-description = 'Neo4j Graph Data Science :: Alpha Procedures'
-
+description = 'Neo4j Graph Data Science :: Cypher Projection'
 group = 'org.neo4j.gds'
 
 dependencies {
     annotationProcessor project(':annotations')
     annotationProcessor project(':config-generator')
-    annotationProcessor project(':pregel-proc-generator')
-    annotationProcessor project(':procedure-collector')
-
-    annotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
-
-    compileOnly project(':proc-common')
+    annotationProcessor group: 'org.immutables',  name: 'builder',     version: ver.'immutables'
+    annotationProcessor group: 'org.immutables',  name: 'value',       version: ver.'immutables'
+    annotationProcessor group: 'org.neo4j',       name: 'annotations', version: ver.'neo4j'
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
-    compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
+
     neodeps().each {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
             transitive = false
         }
     }
 
-    implementation project(':algo-common')
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
-    implementation project(':core-utils')
-    implementation project(':core-write')
-    implementation project(':legacy-cypher-projection')
-    implementation project(':executor')
+    implementation project(':graph-schema-api')
     implementation project(':memory-usage')
-    implementation project(':neo4j-api')
-    implementation project(':pregel')
-    implementation project(':proc-catalog')
-    implementation project(':proc-pregel')
-    implementation project(':opengds-procedure-facade')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':transaction')
 
-    implementation group: 'org.reflections',  name: 'reflections',  version: ver.doc.'reflections'
-    implementation group: 'org.hdrhistogram', name: 'HdrHistogram', version: ver.'HdrHistogram'
+
+    implementation group: 'org.openjdk.jol',   name: 'jol-core',                  version: ver.'jol'
+    implementation group: 'org.opencypher',    name: 'cypher-javacc-parser-9.0',  version: ver.'opencypher-front-end', transitive: false
+    implementation group: 'org.hdrhistogram',  name: 'HdrHistogram',              version: ver.'HdrHistogram'
+
+    testAnnotationProcessor project(':annotations')
 
     testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     testCompileOnly group: 'org.immutables', name: 'builder',           version: ver.'immutables'
     testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
     testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 
+    testImplementation project(':executor')
     testImplementation project(':test-utils')
-    testImplementation project(':proc-test')
+    testImplementation project(':proc-catalog')
     testImplementation project(':proc-community')
+    testImplementation project(':test-graph-loaders')
 
-    testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: ver.'mockito-junit-jupiter'
+    testImplementation group: 'org.neo4j',  name: 'neo4j-cypher-dsl',  version: ver.'cypher-dsl'
 
     testImplementation project(':opengds-extension')
 }

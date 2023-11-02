@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.config;
+package org.neo4j.gds.legacycypherprojection;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
@@ -25,9 +25,9 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.GraphStoreFactory;
+import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.loading.CypherFactory;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -66,7 +66,7 @@ public interface GraphProjectFromCypherConfig extends GraphProjectConfig {
     String relationshipQuery();
 
     @Value.Default
-    @Configuration.ToMapValue("org.neo4j.gds.config.GraphProjectFromCypherConfig#listParameterKeys")
+    @Configuration.ToMapValue("org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig#listParameterKeys")
     default Map<String, Object> parameters() {
         return Collections.emptyMap();
     }
@@ -105,8 +105,11 @@ public interface GraphProjectFromCypherConfig extends GraphProjectConfig {
 
     @Override
     @Configuration.Ignore
-    default <R> R accept(Cases<R> visitor) {
-        return visitor.cypher(this);
+    default <R> R accept(GraphProjectConfig.Cases<R> cases) {
+        if (cases instanceof Cases) {
+            return ((Cases<R>) cases).cypher(this);
+        }
+        return null;
     }
 
     @Value.Derived
@@ -156,5 +159,21 @@ public interface GraphProjectFromCypherConfig extends GraphProjectConfig {
 
     static Collection<String> listParameterKeys(Map<String, Object> parameters) {
         return parameters.keySet();
+    }
+
+    interface Cases<R> extends GraphProjectConfig.Cases<R> {
+
+        R cypher(GraphProjectFromCypherConfig graphProjectFromCypherConfig);
+    }
+
+    interface Visitor extends Cases<Void>, GraphProjectConfig.Visitor {
+
+        @Override
+        default Void cypher(GraphProjectFromCypherConfig graphProjectFromCypherConfig) {
+            visit(graphProjectFromCypherConfig);
+            return null;
+        }
+
+        default void visit(GraphProjectFromCypherConfig graphProjectFromCypherConfig) {}
     }
 }
