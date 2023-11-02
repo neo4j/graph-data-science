@@ -22,10 +22,10 @@ package org.neo4j.gds;
 import org.immutables.builder.Builder;
 import org.immutables.value.Value;
 import org.neo4j.gds.config.ConcurrencyConfig;
-import org.neo4j.gds.config.GraphProjectFromCypherConfig;
-import org.neo4j.gds.config.ImmutableGraphProjectFromCypherConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.cypherprojection.GraphProjectFromCypherConfig;
+import org.neo4j.gds.cypherprojection.ImmutableGraphProjectFromCypherConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.ImmutableGraphProjectFromStoreConfig;
 
@@ -38,8 +38,8 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
-import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_NODES_QUERY;
-import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
+import static org.neo4j.gds.cypherprojection.GraphProjectFromCypherConfig.ALL_NODES_QUERY;
+import static org.neo4j.gds.cypherprojection.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 
 @Value.Style(builderVisibility = Value.Style.BuilderVisibility.PUBLIC, depluralize = true, deepImmutablesDetection = true)
 public final class GraphProjectConfigBuilders {

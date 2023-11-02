@@ -118,8 +118,6 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
 
     interface Cases<R> {
 
-        R cypher(GraphProjectFromCypherConfig cypherConfig);
-
         R graph(GraphProjectFromGraphConfig graphConfig);
 
         R random(RandomGraphGeneratorConfig randomGraphConfig);
@@ -130,12 +128,6 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
     }
 
     interface Visitor extends Cases<Void> {
-
-        @Override
-        default Void cypher(GraphProjectFromCypherConfig cypherConfig) {
-            visit(cypherConfig);
-            return null;
-        }
 
         @Override
         default Void graph(GraphProjectFromGraphConfig graphConfig) {
@@ -160,8 +152,6 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
             visit(graphCatalogConfig);
             return null;
         }
-
-        default void visit(GraphProjectFromCypherConfig cypherConfig) {}
 
         default void visit(GraphProjectFromGraphConfig graphConfig) {}
 

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.cypherprojection;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.collections.api.block.function.Function;
@@ -29,6 +29,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.CypherLoaderBuilder;
+import org.neo4j.gds.GraphFactoryTestSupport.FactoryType;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
@@ -55,7 +56,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.GraphFactoryTestSupport.FactoryType.CYPHER;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
@@ -281,7 +281,7 @@ class CypherFactoryTest extends BaseTest {
         PropertyMapping prop2 = PropertyMapping.of("prop2", 0);
         PropertyMapping prop3 = PropertyMapping.of("prop3", 0);
 
-        Graph graph = TestGraphLoaderFactory.graphLoader(db, CYPHER)
+        Graph graph = TestGraphLoaderFactory.graphLoader(db, FactoryType.CYPHER)
             .withNodeProperties(PropertyMappings.of(prop1, prop2, prop3))
             .graph();
 
@@ -307,7 +307,7 @@ class CypherFactoryTest extends BaseTest {
         PropertyMapping prop2 = PropertyMapping.of("prop2", 0D);
         PropertyMapping prop3 = PropertyMapping.of("prop3", 42D);
 
-        GraphStore graphs = TestGraphLoaderFactory.graphLoader(db, CYPHER)
+        GraphStore graphs = TestGraphLoaderFactory.graphLoader(db, FactoryType.CYPHER)
             .withRelationshipProperties(PropertyMappings.of(prop1, prop2, prop3), false)
             .withDefaultAggregation(Aggregation.DEFAULT)
             .graphStore();

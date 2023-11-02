@@ -20,15 +20,15 @@
 package org.neo4j.gds.memest;
 
 import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.cypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.utils.StringFormatting;
 
 import java.util.Map;
 
-import static org.neo4j.gds.config.GraphProjectFromCypherConfig.NODE_QUERY_KEY;
-import static org.neo4j.gds.config.GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY;
+import static org.neo4j.gds.cypherprojection.GraphProjectFromCypherConfig.NODE_QUERY_KEY;
+import static org.neo4j.gds.cypherprojection.GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY;
 import static org.neo4j.gds.projection.GraphProjectFromStoreConfig.NODE_PROJECTION_KEY;
 import static org.neo4j.gds.projection.GraphProjectFromStoreConfig.RELATIONSHIP_PROJECTION_KEY;
 

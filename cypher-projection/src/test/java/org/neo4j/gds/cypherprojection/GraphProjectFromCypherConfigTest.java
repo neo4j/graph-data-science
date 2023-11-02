@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.config;
+package org.neo4j.gds.cypherprojection;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -35,11 +35,11 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_NODES_QUERY;
-import static org.neo4j.gds.config.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
-import static org.neo4j.gds.config.GraphProjectFromCypherConfig.NODE_QUERY_KEY;
-import static org.neo4j.gds.config.GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY;
-import static org.neo4j.gds.config.GraphProjectFromCypherConfig.fromProcedureConfig;
+import static org.neo4j.gds.cypherprojection.GraphProjectFromCypherConfig.ALL_NODES_QUERY;
+import static org.neo4j.gds.cypherprojection.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
+import static org.neo4j.gds.cypherprojection.GraphProjectFromCypherConfig.NODE_QUERY_KEY;
+import static org.neo4j.gds.cypherprojection.GraphProjectFromCypherConfig.RELATIONSHIP_QUERY_KEY;
+import static org.neo4j.gds.cypherprojection.GraphProjectFromCypherConfig.fromProcedureConfig;
 
 class GraphProjectFromCypherConfigTest {
 

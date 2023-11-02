@@ -22,11 +22,11 @@ package org.neo4j.gds.procedures.catalog;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphCatalogConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.config.GraphProjectFromGraphConfig;
 import org.neo4j.gds.config.GraphSampleProcConfig;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.loading.DegreeDistribution;
+import org.neo4j.gds.cypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.projection.GraphProjectFromCypherAggregationConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
@@ -142,7 +142,8 @@ public class GraphInfo {
     static final class Visitor implements
         GraphProjectConfig.Visitor,
         GraphProjectFromCypherAggregationConfig.Visitor,
-        GraphProjectFromStoreConfig.Visitor {
+        GraphProjectFromStoreConfig.Visitor,
+        GraphProjectFromCypherConfig.Visitor {
 
         Map<String, Object> configuration = null;
 

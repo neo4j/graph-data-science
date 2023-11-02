@@ -17,27 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.cypherprojection;
 
-class BatchLoadResult {
+import org.neo4j.kernel.impl.query.QueryExecutionKernelException;
+import org.neo4j.kernel.impl.query.QuerySubscription;
 
-    private final long rows;
-    private final long maxId;
+public final class CypherLoadingUtils {
 
-    BatchLoadResult(
-            long rows,
-            long maxId
-    ) {
-        this.rows = rows;
-        this.maxId = maxId;
+    public static void consume(QuerySubscription execution) {
+        try {
+            execution.consumeAll();
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (QueryExecutionKernelException e) {
+            throw e.asUserException();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
-
-    long rows() {
-        return rows;
-    }
-
-    long maxId() {
-        return maxId;
-    }
+    private CypherLoadingUtils() {}
 }

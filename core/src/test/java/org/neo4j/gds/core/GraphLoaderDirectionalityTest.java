@@ -24,7 +24,7 @@ import org.neo4j.gds.CypherLoaderBuilder;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.config.GraphProjectFromCypherConfig;
+import org.neo4j.gds.cypherprojection.GraphProjectFromCypherConfig;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.GraphFactoryTestSupport.AllGraphStoreFactoryTypesTest;
