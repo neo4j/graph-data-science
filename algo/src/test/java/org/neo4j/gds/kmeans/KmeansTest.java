@@ -516,9 +516,8 @@ class KmeansTest {
             .k(2)
             .build();
         var kmeansContext = ImmutableKmeansContext.builder().build();
-        var kmeans =
 
-            assertThatThrownBy(
+        assertThatThrownBy(
                 () -> Kmeans.createKmeans(
                     graph,
                     kmeansConfig,
