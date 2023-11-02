@@ -25,7 +25,6 @@ import org.neo4j.common.DependencyResolver;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.connectors.ConnectorPortRegister;
 import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -44,10 +43,8 @@ import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
 import org.neo4j.internal.helpers.HostnamePort;
 import org.neo4j.internal.id.IdGeneratorFactory;
-import org.neo4j.internal.kernel.api.IndexReadSession;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
-import org.neo4j.internal.kernel.api.NodeValueIndexCursor;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
@@ -61,7 +58,6 @@ import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.internal.schema.IndexCapability;
-import org.neo4j.internal.schema.IndexOrder;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.layout.Neo4jLayout;
@@ -153,8 +149,6 @@ public interface Neo4jProxyApi {
 
     NodeLabelIndexCursor allocateNodeLabelIndexCursor(KernelTransaction kernelTransaction);
 
-    NodeValueIndexCursor allocateNodeValueIndexCursor(KernelTransaction kernelTransaction);
-
     boolean hasNodeLabelIndex(KernelTransaction kernelTransaction);
 
     StoreScan<NodeLabelIndexCursor> nodeLabelIndexScan(
@@ -169,25 +163,6 @@ public interface Neo4jProxyApi {
     StoreScan<RelationshipScanCursor> relationshipsScan(KernelTransaction ktx, long relationshipCount, int batchSize);
 
     CompatExecutionContext executionContext(KernelTransaction ktx);
-
-    CompatIndexQuery rangeIndexQuery(
-        int propertyKeyId,
-        double from,
-        boolean fromInclusive,
-        double to,
-        boolean toInclusive
-    );
-
-    CompatIndexQuery rangeAllIndexQuery(int propertyKeyId);
-
-    void nodeIndexSeek(
-        Read dataRead,
-        IndexReadSession index,
-        NodeValueIndexCursor cursor,
-        IndexOrder indexOrder,
-        boolean needsValues,
-        CompatIndexQuery query
-    ) throws KernelException;
 
     CompositeNodeCursor compositeNodeCursor(List<NodeLabelIndexCursor> cursors, int[] labelIds);
 
