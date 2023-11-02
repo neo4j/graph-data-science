@@ -26,7 +26,7 @@ public interface NodeReference extends RecordReference<NodeRecord> {
 
     long nodeId();
 
-    long[] labels();
+    NodeLabelTokenSet labels();
 
     long relationshipReference();
 

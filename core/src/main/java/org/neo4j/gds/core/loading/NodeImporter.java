@@ -31,8 +31,22 @@ import java.util.Optional;
 
 public class NodeImporter {
 
-    public interface PropertyReader {
-        int readProperty(long nodeReference, long[] labelIds, PropertyReference propertiesReference);
+    private static int importProperties(
+        NodeImporter.PropertyReader reader,
+        long[] batch,
+        PropertyReference[] properties,
+        NodeLabelTokenSet[] labelTokens,
+        int length
+    ) {
+        int batchImportedProperties = 0;
+        for (int i = 0; i < length; i++) {
+            batchImportedProperties += reader.readProperty(
+                batch[i],
+                labelTokens[i],
+                properties[i]
+            );
+        }
+        return batchImportedProperties;
     }
 
     private final IdMapBuilder idMapBuilder;
@@ -83,7 +97,7 @@ public class NodeImporter {
 
         var batch = buffer.batch();
         var properties = buffer.properties();
-        var labelIds = buffer.labelIds();
+        var labelTokens = buffer.labelTokens();
 
         // Import node IDs
         idMapAllocator.insert(batch);
@@ -93,7 +107,7 @@ public class NodeImporter {
             setNodeLabelInformation(
                 batch,
                 batchLength,
-                labelIds,
+                labelTokens,
                 (nodeIds, pos) -> nodeIds[pos],
                 tokenToNodeLabelsMap
             );
@@ -101,7 +115,7 @@ public class NodeImporter {
 
         // Import node properties
         var importedProperties = importProperties
-            ? importProperties(reader, batch, properties, labelIds, batchLength)
+            ? importProperties(reader, batch, properties, labelTokens, batchLength)
             : 0;
 
         return RawValues.combineIntInt(batchLength, importedProperties);
@@ -110,17 +124,17 @@ public class NodeImporter {
     private void setNodeLabelInformation(
         long[] batch,
         int batchLength,
-        long[][] labelIds,
+        NodeLabelTokenSet[] labelIds,
         IdFunction idFunction,
         IntObjectMap<List<NodeLabel>> tokenToNodeLabelsMap
     ) {
         int cappedBatchLength = Math.min(labelIds.length, batchLength);
         for (int i = 0; i < cappedBatchLength; i++) {
             long nodeId = idFunction.apply(batch, i);
-            long[] labelTokensForNode = labelIds[i];
+            NodeLabelTokenSet labelTokensForNode = labelIds[i];
 
-            for (long token : labelTokensForNode) {
-                var nodeLabels = tokenToNodeLabelsMap.getOrDefault((int) token, Collections.emptyList());
+            for (int j = 0; j < labelTokensForNode.length(); j++) {
+                var nodeLabels = tokenToNodeLabelsMap.getOrDefault(labelTokensForNode.get(j), Collections.emptyList());
                 for (NodeLabel nodeLabel : nodeLabels) {
                     this.labelInformationBuilder.addNodeIdToLabel(nodeLabel, nodeId);
                 }
@@ -128,22 +142,8 @@ public class NodeImporter {
         }
     }
 
-    private static int importProperties(
-        NodeImporter.PropertyReader reader,
-        long[] batch,
-        PropertyReference[] properties,
-        long[][] labelIds,
-        int length
-    ) {
-        int batchImportedProperties = 0;
-        for (int i = 0; i < length; i++) {
-            batchImportedProperties += reader.readProperty(
-                batch[i],
-                labelIds[i],
-                properties[i]
-            );
-        }
-        return batchImportedProperties;
+    public interface PropertyReader {
+        int readProperty(long nodeReference, NodeLabelTokenSet labelTokens, PropertyReference propertiesReference);
     }
 
     @FunctionalInterface

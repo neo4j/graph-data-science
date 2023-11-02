@@ -37,8 +37,8 @@ public final class NodeCursorReference implements NodeReference {
     }
 
     @Override
-    public long[] labels() {
-        return nodeCursor.labels().all();
+    public NodeLabelTokenSet labels() {
+        return NodeLabelTokenSet.from(nodeCursor.labels().all());
     }
 
     @Override
