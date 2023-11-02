@@ -35,7 +35,7 @@ import org.neo4j.gds.config.WriteRelationshipPropertiesConfig;
 import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
-import org.neo4j.gds.cypherprojection.GraphProjectFromCypherConfig;
+import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 

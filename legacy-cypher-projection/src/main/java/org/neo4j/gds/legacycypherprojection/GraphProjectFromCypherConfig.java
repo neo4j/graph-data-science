@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.cypherprojection;
+package org.neo4j.gds.legacycypherprojection;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
@@ -66,7 +66,7 @@ public interface GraphProjectFromCypherConfig extends GraphProjectConfig {
     String relationshipQuery();
 
     @Value.Default
-    @Configuration.ToMapValue("org.neo4j.gds.cypherprojection.GraphProjectFromCypherConfig#listParameterKeys")
+    @Configuration.ToMapValue("org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig#listParameterKeys")
     default Map<String, Object> parameters() {
         return Collections.emptyMap();
     }

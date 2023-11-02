@@ -26,7 +26,7 @@ import org.neo4j.gds.config.GraphProjectFromGraphConfig;
 import org.neo4j.gds.config.GraphSampleProcConfig;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.loading.DegreeDistribution;
-import org.neo4j.gds.cypherprojection.GraphProjectFromCypherConfig;
+import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.projection.GraphProjectFromCypherAggregationConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;

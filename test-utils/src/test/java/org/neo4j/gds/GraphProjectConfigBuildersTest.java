@@ -23,8 +23,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.cypherprojection.GraphProjectFromCypherConfig;
-import org.neo4j.gds.cypherprojection.ImmutableGraphProjectFromCypherConfig;
+import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
+import org.neo4j.gds.legacycypherprojection.ImmutableGraphProjectFromCypherConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
@@ -36,8 +36,8 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.NodeLabel.ALL_NODES;
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
-import static org.neo4j.gds.cypherprojection.GraphProjectFromCypherConfig.ALL_NODES_QUERY;
-import static org.neo4j.gds.cypherprojection.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
+import static org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig.ALL_NODES_QUERY;
+import static org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 
 class GraphProjectConfigBuildersTest {
 

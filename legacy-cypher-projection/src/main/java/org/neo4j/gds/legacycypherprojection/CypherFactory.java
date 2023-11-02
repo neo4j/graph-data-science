@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.cypherprojection;
+package org.neo4j.gds.legacycypherprojection;
 
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
@@ -48,7 +48,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
-import static org.neo4j.gds.cypherprojection.CypherQueryEstimator.EstimationResult;
+import static org.neo4j.gds.legacycypherprojection.CypherQueryEstimator.EstimationResult;
 import static org.neo4j.internal.kernel.api.security.AccessMode.Static.READ;
 
 public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCypherConfig> {

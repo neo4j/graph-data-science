@@ -31,7 +31,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.neo4j.gds.cypherprojection.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
+import static org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig.ALL_RELATIONSHIPS_QUERY;
 
 class FilterOnCypherGraphIntegrationTest extends BaseProcTest {
 

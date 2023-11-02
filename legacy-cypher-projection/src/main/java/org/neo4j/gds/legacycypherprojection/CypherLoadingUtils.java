@@ -17,42 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.cypherprojection;
+package org.neo4j.gds.legacycypherprojection;
 
-import org.neo4j.gds.core.utils.ErrorCachingQuerySubscriber;
-import org.neo4j.graphdb.QueryStatistics;
-import org.neo4j.values.AnyValue;
+import org.neo4j.kernel.impl.query.QueryExecutionKernelException;
+import org.neo4j.kernel.impl.query.QuerySubscription;
 
-class ResultCountingSubscriber extends ErrorCachingQuerySubscriber {
-    private long rows = 0;
+public final class CypherLoadingUtils {
 
-    public long rows() {
-        return rows;
+    public static void consume(QuerySubscription execution) {
+        try {
+            execution.consumeAll();
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (QueryExecutionKernelException e) {
+            throw e.asUserException();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
-
-    @Override
-    public void onResult(int numberOfFields) {
-
-    }
-
-    @Override
-    public void onRecord() {
-        rows++;
-    }
-
-    @Override
-    public void onField(int offset, AnyValue value) {
-
-    }
-
-    @Override
-    public void onRecordCompleted() {
-
-    }
-
-    @Override
-    public void onResultCompleted(QueryStatistics statistics) {
-
-    }
+    private CypherLoadingUtils() {}
 }

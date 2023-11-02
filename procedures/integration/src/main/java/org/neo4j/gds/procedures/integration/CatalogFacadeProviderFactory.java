@@ -45,7 +45,7 @@ import org.neo4j.gds.applications.graphstorecatalog.WriteRelationshipPropertiesA
 import org.neo4j.gds.applications.graphstorecatalog.WriteRelationshipsApplication;
 import org.neo4j.gds.beta.filter.GraphStoreFilterService;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.cypherprojection.GraphProjectCypherResult;
+import org.neo4j.gds.legacycypherprojection.GraphProjectCypherResult;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.procedures.KernelTransactionAccessor;
 import org.neo4j.gds.procedures.ProcedureTransactionAccessor;
