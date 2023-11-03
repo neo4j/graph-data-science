@@ -21,10 +21,10 @@ package org.neo4j.gds.betweenness;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.utils.StringFormatting;
@@ -65,15 +65,13 @@ public interface BetweennessCentralityBaseConfig extends AlgoBaseConfig, Relatio
 
         var directionMap = graphStore.schema().relationshipSchema().directions();
 
-        var hasUndirected = selectedRelationshipTypes.stream()
+        var selectedDirectionsCount = selectedRelationshipTypes.stream()
             .map(directionMap::get)
-            .filter(direction -> direction.toOrientation().equals(Orientation.UNDIRECTED)).count() > 0;
-
-        var hasDirected = selectedRelationshipTypes.stream()
-            .map(directionMap::get)
-            .filter(direction -> (!direction.toOrientation().equals(Orientation.UNDIRECTED))).count() > 0;
-
-        if (hasUndirected && hasDirected) {
+            .map(Direction::toOrientation)
+            .distinct()
+            .count();
+            
+        if (selectedDirectionsCount > 1) {
             throw new IllegalArgumentException(StringFormatting.formatWithLocale(
                 "Combining UNDIRECTED orientation with NATURAL or REVERSE is not supported. Found projections: %s.",
                 StringJoining.join(directionMap.entrySet()
