@@ -20,8 +20,8 @@
 package org.neo4j.gds.harmonic;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.common.CentralityStreamResult;
 import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.centrality.CentralityStreamResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -41,6 +41,8 @@ public class HarmonicCentralityStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+
+
         return new ProcedureExecutor<>(
             new HarmonicCentralityStreamSpec(),
             executionContext()

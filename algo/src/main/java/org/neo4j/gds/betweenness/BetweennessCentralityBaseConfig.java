@@ -20,11 +20,21 @@
 package org.neo4j.gds.betweenness;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
+import org.neo4j.gds.utils.StringFormatting;
+import org.neo4j.gds.utils.StringJoining;
 
+import java.util.Collection;
 import java.util.Locale;
 import java.util.Optional;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface BetweennessCentralityBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig {
 
@@ -43,5 +53,37 @@ public interface BetweennessCentralityBaseConfig extends AlgoBaseConfig, Relatio
                 ));
             }
         });
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    @Value.Default
+    default void checkNoMixedOrientations(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+
+        var directionMap = graphStore.schema().relationshipSchema().directions();
+
+        var selectedDirectionsCount = selectedRelationshipTypes.stream()
+            .map(directionMap::get)
+            .map(Direction::toOrientation)
+            .distinct()
+            .count();
+            
+        if (selectedDirectionsCount > 1) {
+            throw new IllegalArgumentException(StringFormatting.formatWithLocale(
+                "Combining UNDIRECTED orientation with NATURAL or REVERSE is not supported. Found projections: %s.",
+                StringJoining.join(directionMap.entrySet()
+                    .stream()
+                    .map(entry -> formatWithLocale(
+                        "%s (%s)",
+                        entry.getKey().name(),
+                        entry.getValue().toOrientation().name()
+
+                    ))
+                    .sorted())
+            ));
+        }
     }
 }
