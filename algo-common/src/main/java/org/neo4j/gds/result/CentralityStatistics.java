@@ -20,13 +20,18 @@
 package org.neo4j.gds.result;
 
 import org.HdrHistogram.DoubleHistogram;
+import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.ProcedureConstants;
-import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongToDoubleFunction;
 
 public final class CentralityStatistics {
@@ -83,4 +88,44 @@ public final class CentralityStatistics {
             });
         }
     }
+
+    public static CentralityStats centralityStatistics(
+        long nodeCount,
+        LongToDoubleFunction centralityProvider,
+        ExecutorService executorService,
+        int concurrency,
+        boolean shouldCompute
+    ) {
+        Optional<DoubleHistogram> maybeHistogram = Optional.empty();
+        var computeMilliseconds = new AtomicLong(0);
+        try (var ignored = ProgressTimer.start(computeMilliseconds::set)) {
+            if (shouldCompute) {
+                maybeHistogram = Optional.of(histogram(
+                    nodeCount,
+                    centralityProvider,
+                    executorService,
+                    concurrency
+                ));
+            }
+        }
+
+        return ImmutableCentralityStats.of(maybeHistogram, computeMilliseconds.get());
+    }
+
+    public static Map<String, Object> centralitySummary(Optional<DoubleHistogram> histogram) {
+        return histogram
+            .map(HistogramUtils::centralitySummary)
+            .orElseGet(Collections::emptyMap);
+    }
+
+    @ValueClass
+    @SuppressWarnings("immutables:incompat")
+    public interface CentralityStats {
+
+        Optional<DoubleHistogram> histogram();
+
+        long computeMilliseconds();
+    }
+
+
 }

@@ -26,6 +26,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
+import org.neo4j.gds.procedures.centrality.CentralityStatsResult;
 
 import java.util.stream.Stream;
 
@@ -33,7 +34,7 @@ import static org.neo4j.gds.betweenness.BetweennessCentrality.BETWEENNESS_DESCRI
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
 
 @GdsCallable(name = "gds.betweenness.stats", description = BETWEENNESS_DESCRIPTION, executionMode = STATS)
-public class BetweennessCentralityStatsSpecification implements AlgorithmSpec<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStatsConfig, Stream<StatsResult>, BetweennessCentralityFactory<BetweennessCentralityStatsConfig>> {
+public class BetweennessCentralityStatsSpecification implements AlgorithmSpec<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStatsConfig, Stream<CentralityStatsResult>, BetweennessCentralityFactory<BetweennessCentralityStatsConfig>> {
     @Override
     public String name() {
         return "BetweennessCentralityStats";
@@ -50,9 +51,9 @@ public class BetweennessCentralityStatsSpecification implements AlgorithmSpec<Be
     }
 
     @Override
-    public ComputationResultConsumer<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStatsConfig, Stream<StatsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStatsConfig, Stream<CentralityStatsResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            var builder = new StatsResult.Builder(
+            var builder = new CentralityStatsResult.Builder(
                 executionContext.returnColumns(),
                 computationResult.config().concurrency()
             );

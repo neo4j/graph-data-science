@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.betweenness;
+package org.neo4j.gds.procedures.centrality;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
@@ -26,11 +26,11 @@ import org.neo4j.gds.results.StandardStatsResult;
 
 import java.util.Map;
 
-public class StatsResult extends StandardStatsResult {
+public class CentralityStatsResult extends StandardStatsResult {
 
     public final Map<String, Object> centralityDistribution;
 
-    StatsResult(
+    public CentralityStatsResult(
         @Nullable Map<String, Object> centralityDistribution,
         long preProcessingMillis,
         long computeMillis,
@@ -41,14 +41,14 @@ public class StatsResult extends StandardStatsResult {
         this.centralityDistribution = centralityDistribution;
     }
 
-    static final class Builder extends AbstractCentralityResultBuilder<StatsResult> {
-        protected Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+    public static final class Builder extends AbstractCentralityResultBuilder<CentralityStatsResult> {
+        public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 
         @Override
-        public StatsResult buildResult() {
-            return new StatsResult(
+        public CentralityStatsResult buildResult() {
+            return new CentralityStatsResult(
                 centralityHistogram,
                 preProcessingMillis,
                 computeMillis,

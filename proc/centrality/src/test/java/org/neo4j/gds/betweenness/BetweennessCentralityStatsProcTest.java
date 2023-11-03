@@ -28,12 +28,10 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
 class BetweennessCentralityStatsProcTest extends BaseProcTest {
@@ -41,15 +39,15 @@ class BetweennessCentralityStatsProcTest extends BaseProcTest {
     @Neo4jGraph
     private static final String DB_CYPHER =
         "CREATE" +
-        "  (a:Node {name: 'a'})" +
-        ", (b:Node {name: 'b'})" +
-        ", (c:Node {name: 'c'})" +
-        ", (d:Node {name: 'd'})" +
-        ", (e:Node {name: 'e'})" +
-        ", (a)-[:REL]->(b)" +
-        ", (b)-[:REL]->(c)" +
-        ", (c)-[:REL]->(d)" +
-        ", (d)-[:REL]->(e)";
+            "  (a:Node {name: 'a'})" +
+            ", (b:Node {name: 'b'})" +
+            ", (c:Node {name: 'c'})" +
+            ", (d:Node {name: 'd'})" +
+            ", (e:Node {name: 'e'})" +
+            ", (a)-[:REL]->(b)" +
+            ", (b)-[:REL]->(c)" +
+            ", (c)-[:REL]->(d)" +
+            ", (d)-[:REL]->(e)";
 
     @BeforeEach
     void setupGraph() throws Exception {
@@ -80,12 +78,14 @@ class BetweennessCentralityStatsProcTest extends BaseProcTest {
                 .isInstanceOf(Map.class)
                 .asInstanceOf(InstanceOfAssertFactories.MAP)
                 .containsEntry("min", 0.0)
-                .hasEntrySatisfying("max",
+                .hasEntrySatisfying(
+                    "max",
                     value -> assertThat(value)
                         .asInstanceOf(InstanceOfAssertFactories.DOUBLE)
                         .isEqualTo(4.0, Offset.offset(1e-4))
                 )
-                .hasEntrySatisfying("mean",
+                .hasEntrySatisfying(
+                    "mean",
                     value -> assertThat(value)
                         .asInstanceOf(InstanceOfAssertFactories.DOUBLE)
                         .isEqualTo(2.0, Offset.offset(1e-4))
@@ -109,22 +109,4 @@ class BetweennessCentralityStatsProcTest extends BaseProcTest {
             .isEqualTo(1);
     }
 
-    @Test
-    void shouldFailOnMixedProjections() {
-        runQuery(
-            "CALL gds.graph.project(" +
-            "   'mixedGraph', " +
-            "   '*', " +
-            "   {" +
-            "       N: {type: 'REL', orientation: 'NATURAL'}, " +
-            "       U: {type: 'REL', orientation: 'UNDIRECTED'}" +
-            "   }" +
-            ")"
-        );
-
-        assertThatExceptionOfType(QueryExecutionException.class)
-            .isThrownBy(() -> runQuery("CALL gds.betweenness.stats('mixedGraph', {})"))
-            .withRootCauseInstanceOf(IllegalArgumentException.class)
-            .withMessageContaining("Combining UNDIRECTED orientation with NATURAL or REVERSE is not supported.");
-    }
 }

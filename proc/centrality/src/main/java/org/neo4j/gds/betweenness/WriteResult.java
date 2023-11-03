@@ -21,11 +21,12 @@ package org.neo4j.gds.betweenness;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.procedures.centrality.CentralityStatsResult;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 
 import java.util.Map;
 
-public final class WriteResult extends StatsResult {
+public final class WriteResult extends CentralityStatsResult {
 
     public final long nodePropertiesWritten;
     public final long writeMillis;

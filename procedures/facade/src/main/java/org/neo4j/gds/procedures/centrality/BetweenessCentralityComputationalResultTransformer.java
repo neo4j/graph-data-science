@@ -19,9 +19,12 @@
  */
 package org.neo4j.gds.procedures.centrality;
 
+import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
+import org.neo4j.gds.algorithms.centrality.specificfields.StandardCentralityStatisticsSpecificFields;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 
 import java.util.stream.LongStream;
@@ -47,5 +50,18 @@ final class BetweenessCentralityComputationalResultTransformer {
                     ));
 
         }).orElseGet(Stream::empty);
+    }
+
+    static CentralityStatsResult toStatsResult(
+        StatsResult<StandardCentralityStatisticsSpecificFields> computationResult,
+        BetweennessCentralityStatsConfig configuration
+    ) {
+        return new CentralityStatsResult(
+            computationResult.algorithmSpecificFields().centralityDistribution(),
+            computationResult.preProcessingMillis(),
+            computationResult.computeMillis(),
+            computationResult.postProcessingMillis(),
+            configuration.toMap()
+        );
     }
 }
