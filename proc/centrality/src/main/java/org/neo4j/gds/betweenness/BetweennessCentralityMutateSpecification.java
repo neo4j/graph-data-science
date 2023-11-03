@@ -31,6 +31,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
+import org.neo4j.gds.procedures.centrality.CentralityMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -39,7 +40,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 
 @GdsCallable(name = "gds.betweenness.mutate", description = BetweennessCentrality.BETWEENNESS_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class BetweennessCentralityMutateSpecification implements AlgorithmSpec<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateConfig, Stream<MutateResult>, BetweennessCentralityFactory<BetweennessCentralityMutateConfig>> {
+public class BetweennessCentralityMutateSpecification implements AlgorithmSpec<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateConfig, Stream<CentralityMutateResult>, BetweennessCentralityFactory<BetweennessCentralityMutateConfig>> {
     @Override
     public String name() {
         return "BetweennessCentralityMutate";
@@ -56,7 +57,7 @@ public class BetweennessCentralityMutateSpecification implements AlgorithmSpec<B
     }
 
     @Override
-    public ComputationResultConsumer<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateConfig, Stream<CentralityMutateResult>> computationResultConsumer() {
         return new MutatePropertyComputationResultConsumer<>(
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),
@@ -74,11 +75,11 @@ public class BetweennessCentralityMutateSpecification implements AlgorithmSpec<B
         return new BetweennessCentralityConfigValidation<>();
     }
 
-    private AbstractResultBuilder<MutateResult> resultBuilder(
+    private AbstractResultBuilder<CentralityMutateResult> resultBuilder(
         ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new MutateResult.Builder(
+        var builder = new CentralityMutateResult.Builder(
             executionContext.returnColumns(),
             computationResult.config().concurrency()
         );
