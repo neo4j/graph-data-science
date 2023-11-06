@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.models;
 
-import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.models.linearregression.LinearRegressionTrainConfig;

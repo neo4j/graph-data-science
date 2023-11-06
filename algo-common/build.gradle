@@ -21,11 +21,12 @@ dependencies {
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
-    implementation project(':string-formatting')
     implementation project(':collections')
     implementation project(':memory-usage')
     implementation project(':neo4j-api')
     implementation project(':progress-tracking')
+    implementation project(':string-formatting')
+    implementation project(':termination')
 
     testImplementation group: 'org.assertj', name: 'assertj-core',          version: ver.'assertj'
 

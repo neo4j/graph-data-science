@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.api.TerminationMonitor;
+import org.neo4j.gds.termination.TerminationMonitor;
 import org.neo4j.kernel.api.KernelTransaction;
 
 public class TransactionTerminationMonitor implements TerminationMonitor {

@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.core.batch;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.graphdb.TransactionTerminatedException;
 
 import java.util.concurrent.atomic.AtomicLong;

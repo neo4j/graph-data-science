@@ -32,11 +32,11 @@ dependencies {
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-write')
-    implementation project(':legacy-cypher-projection')
     implementation project(':executor')
     implementation project(':graph-projection-api')
     implementation project(':graph-sampling')
     implementation project(':graph-schema-api')
+    implementation project(':legacy-cypher-projection')
     implementation project(':logging')
     implementation project(':memory-usage')
     implementation project(':native-projection')
@@ -44,6 +44,7 @@ dependencies {
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':subgraph-filtering')
+    implementation project(':termination')
     implementation project(':transaction')
 
     testImplementation group: 'org.assertj', name: 'assertj-core', version: ver.'assertj'

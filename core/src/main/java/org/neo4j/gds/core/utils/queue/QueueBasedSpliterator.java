@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.utils.queue;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Spliterator;
 import java.util.concurrent.BlockingQueue;

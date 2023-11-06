@@ -29,7 +29,6 @@ import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.TerminationMonitor;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.model.Model;
@@ -55,6 +54,7 @@ import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.CosineFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.model.catalog.TestTrainConfigImpl;
 import org.neo4j.gds.model.catalog.TestWeightedTrainConfigImpl;
+import org.neo4j.gds.termination.TerminationMonitor;
 import org.neo4j.logging.NullLog;
 
 import java.util.Collection;

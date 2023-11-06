@@ -292,6 +292,9 @@ project(':string-formatting').projectDir = file('string-formatting')
 include('subgraph-filtering')
 project(':subgraph-filtering').projectDir = file('subgraph-filtering')
 
+include 'termination'
+project(':termination').projectDir = file('termination')
+
 include('graph-sampling')
 project(':graph-sampling').projectDir = file('graph-sampling')
 

@@ -17,11 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils;
-
-import org.neo4j.gds.api.TerminationMonitor;
-import org.neo4j.graphdb.TransactionTerminatedException;
-import org.neo4j.kernel.api.exceptions.Status;
+package org.neo4j.gds.termination;
 
 public interface TerminationFlag {
 
@@ -44,7 +40,7 @@ public interface TerminationFlag {
      */
     default void assertRunning() {
         if (!running()) {
-            throw new TransactionTerminatedException(Status.Transaction.Terminated);
+//            throw new TransactionTerminatedException(Status.Transaction.Terminated);
         }
     }
 }

@@ -26,7 +26,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipConsumer;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -40,7 +40,7 @@ import java.util.function.Function;
 import java.util.function.LongConsumer;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.core.utils.TerminationFlag.RUN_CHECK_NODE_COUNT;
+import static org.neo4j.gds.termination.TerminationFlag.RUN_CHECK_NODE_COUNT;
 
 final class SampledStrategy {
 

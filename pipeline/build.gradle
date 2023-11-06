@@ -37,23 +37,24 @@ dependencies {
     implementation group: 'org.reflections',  name: 'reflections',       version: ver.doc.'reflections'
 
     implementation project(':algo-common')
-    // TODO remove this depenency
-    implementation project(':ml-core')
-    implementation project(':ml-algo')
-    implementation project(':ml-api')
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-utils')
+    implementation project(':defaults-and-limits-configuration')
     implementation project(':executor')
     implementation project(':graph-schema-api')
+    implementation project(':memory-usage')
+    implementation project(':ml-algo')
+    implementation project(':ml-api')
+    // TODO remove this depenency
+    implementation project(':ml-core')
     implementation project(':model-catalog-api')
     implementation project(':neo4j-api')
     implementation project(':neo4j-settings')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
-    implementation project(':memory-usage')
-    implementation project(':defaults-and-limits-configuration')
+    implementation project(':termination')
 
     neodeps().each {
         compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {

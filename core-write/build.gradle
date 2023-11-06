@@ -30,6 +30,7 @@ dependencies {
     implementation project(':progress-tracking')
     implementation project(':graph-schema-api')
     implementation project(':transaction')
+    implementation project(':termination')
 
 
     // TEST DEPENDENCIES

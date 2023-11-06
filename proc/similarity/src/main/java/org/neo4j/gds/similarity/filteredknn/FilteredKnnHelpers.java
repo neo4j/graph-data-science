@@ -20,7 +20,7 @@
 package org.neo4j.gds.similarity.filteredknn;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.procedures.similarity.SimilarityWriteResult;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.SimilarityGraphResult;

@@ -1,0 +1,9 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Termination'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+
+}

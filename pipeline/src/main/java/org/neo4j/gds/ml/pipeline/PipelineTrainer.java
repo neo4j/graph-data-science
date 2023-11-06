@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
-import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.termination.TerminationFlag;
 
 public interface PipelineTrainer<RESULT> {
     void setTerminationFlag(TerminationFlag terminationFlag);

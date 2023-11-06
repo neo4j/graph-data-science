@@ -39,8 +39,8 @@ import org.neo4j.gds.core.loading.NodeReference;
 import org.neo4j.gds.core.loading.NodeScannerFactory;
 import org.neo4j.gds.core.loading.Nodes;
 import org.neo4j.gds.core.loading.StoreScanner;
-import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.logging.Log;
 

@@ -22,7 +22,7 @@ package org.neo4j.gds.core.concurrency;
 import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Iterator;
 import java.util.concurrent.ExecutorService;

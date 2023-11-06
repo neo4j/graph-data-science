@@ -20,10 +20,10 @@
 package org.neo4j.gds.core.concurrency;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionConsumer;
 import org.neo4j.gds.mem.BitUtil;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 import org.neo4j.gds.utils.ExceptionUtil;
 

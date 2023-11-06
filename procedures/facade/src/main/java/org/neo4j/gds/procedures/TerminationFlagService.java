@@ -20,7 +20,7 @@
 package org.neo4j.gds.procedures;
 
 import org.neo4j.gds.TransactionTerminationMonitor;
-import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.kernel.api.KernelTransaction;
 
 public class TerminationFlagService {

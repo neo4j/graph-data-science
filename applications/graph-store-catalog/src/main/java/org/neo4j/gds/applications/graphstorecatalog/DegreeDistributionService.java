@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.loading.DegreeDistribution;
-import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 

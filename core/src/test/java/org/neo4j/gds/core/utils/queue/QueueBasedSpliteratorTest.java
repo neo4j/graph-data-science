@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.utils.queue;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;

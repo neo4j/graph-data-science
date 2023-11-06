@@ -30,7 +30,7 @@ package org.neo4j.gds.algorithms.centrality;
     import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
     import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
     import org.neo4j.gds.collections.ha.HugeDoubleArray;
-    import org.neo4j.gds.core.utils.TerminationFlag;
+    import org.neo4j.gds.termination.TerminationFlag;
 
     import java.util.Optional;
 

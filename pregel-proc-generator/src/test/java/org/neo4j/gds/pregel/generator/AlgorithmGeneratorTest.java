@@ -73,7 +73,7 @@ class AlgorithmGeneratorTest {
         var spec = generator.setTerminatonFlag();
         assertThat(spec.toString()).isEqualTo("" +
             "@java.lang.Override" + NL +
-            "public void setTerminationFlag(org.neo4j.gds.core.utils.TerminationFlag terminationFlag) {" + NL +
+            "public void setTerminationFlag(org.neo4j.gds.termination.TerminationFlag terminationFlag) {" + NL +
             "  super.setTerminationFlag(terminationFlag);" + NL +
             "  pregelJob.setTerminationFlag(terminationFlag);" + NL +
             "}" + NL

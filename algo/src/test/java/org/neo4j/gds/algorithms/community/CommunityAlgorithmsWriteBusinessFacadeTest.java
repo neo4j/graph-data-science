@@ -29,7 +29,7 @@ package org.neo4j.gds.algorithms.community;
     import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
     import org.neo4j.gds.collections.ha.HugeLongArray;
     import org.neo4j.gds.config.AlgoBaseConfig;
-    import org.neo4j.gds.core.utils.TerminationFlag;
+    import org.neo4j.gds.termination.TerminationFlag;
     import org.neo4j.gds.result.StatisticsComputationInstructions;
     import org.neo4j.gds.wcc.WccWriteConfig;
 

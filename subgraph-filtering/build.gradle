@@ -24,6 +24,7 @@ dependencies {
     implementation project(':graph-schema-api')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
+    implementation project(':termination')
 
     implementation group: 'org.opencypher', name: 'cypher-javacc-parser-9.0', version: ver.'opencypher-front-end', transitive: false
     implementation group: 'org.opencypher', name: 'cypher-ast-factory-9.0',   version: ver.'opencypher-front-end', transitive: false

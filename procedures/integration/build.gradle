@@ -16,10 +16,10 @@ dependencies {
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-write')
-    implementation project(':legacy-cypher-projection')
     implementation project(':defaults-and-limits-configuration')
     implementation project(':executor')
     implementation project(':graph-store-catalog-applications')
+    implementation project(':legacy-cypher-projection')
     implementation project(':logging')
     implementation project(':memory-estimation')
     implementation project(':native-projection')
@@ -30,5 +30,6 @@ dependencies {
     implementation project(':proc-community')
     implementation project(':progress-tracking')
     implementation project(':subgraph-filtering')
+    implementation project(':termination')
     implementation project(':transaction')
 }

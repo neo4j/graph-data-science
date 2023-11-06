@@ -23,15 +23,16 @@ dependencies {
 
     implementation project(':algo-common')
     implementation project(':annotations')
-    implementation project(':core')
-    implementation project(':progress-tracking')
-    implementation project(':memory-usage')
-    implementation project(':ml-core')
-    implementation project(':ml-api')
     implementation project(':config-api')
-    implementation project(':string-formatting')
+    implementation project(':core')
     implementation project(':graph-schema-api')
+    implementation project(':memory-usage')
+    implementation project(':ml-api')
+    implementation project(':ml-core')
     implementation project(':model-catalog-api')
+    implementation project(':progress-tracking')
+    implementation project(':string-formatting')
+    implementation project(':termination')
 
     // TEST DEPENDENCIES
     testAnnotationProcessor project(':annotations')

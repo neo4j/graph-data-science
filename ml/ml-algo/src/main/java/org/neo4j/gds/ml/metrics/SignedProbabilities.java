@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.metrics;
 
-import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;

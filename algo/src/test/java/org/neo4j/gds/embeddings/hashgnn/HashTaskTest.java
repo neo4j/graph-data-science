@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.hashgnn;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;

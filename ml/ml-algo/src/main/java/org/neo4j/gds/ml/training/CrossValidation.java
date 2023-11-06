@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.training;
 
 import org.eclipse.collections.api.block.function.primitive.LongToLongFunction;
-import org.neo4j.gds.core.utils.TerminationFlag;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;

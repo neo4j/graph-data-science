@@ -24,15 +24,15 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipConsumer;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
-import static org.neo4j.gds.core.utils.TerminationFlag.RUN_CHECK_NODE_COUNT;
+import static org.neo4j.gds.termination.TerminationFlag.RUN_CHECK_NODE_COUNT;
 
 final class UnsampledStrategy {
 

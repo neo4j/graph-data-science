@@ -32,15 +32,16 @@ dependencies {
     implementation project(':executor')
     implementation project(':graph-schema-api')
     implementation project(':memory-usage')
-    implementation project(':ml-core')
     implementation project(':ml-algo')
     implementation project(':ml-api')
+    implementation project(':ml-core')
     implementation project(':model-catalog-api')
     implementation project(':neo4j-api')
     implementation project(':pipeline')
     implementation project(':proc-common')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
+    implementation project(':termination')
     implementation project(':transaction')
 
     implementation group: 'org.hdrhistogram',   name: 'HdrHistogram',  version: ver.'HdrHistogram'
