@@ -17,21 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.betweenness;
+package org.neo4j.gds.procedures.centrality;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.procedures.centrality.CentralityStatsResult;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 
 import java.util.Map;
 
-public final class WriteResult extends CentralityStatsResult {
+public final class CentralityWriteResult extends CentralityStatsResult {
 
     public final long nodePropertiesWritten;
     public final long writeMillis;
 
-    private WriteResult(
+    public CentralityWriteResult(
         long nodePropertiesWritten,
         long preProcessingMillis,
         long computeMillis,
@@ -45,15 +44,15 @@ public final class WriteResult extends CentralityStatsResult {
         this.writeMillis = writeMillis;
     }
 
-    static final class Builder extends AbstractCentralityResultBuilder<WriteResult> {
+    public static final class Builder extends AbstractCentralityResultBuilder<CentralityWriteResult> {
 
-        Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+        public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 
         @Override
-        public WriteResult buildResult() {
-            return new WriteResult(
+        public CentralityWriteResult buildResult() {
+            return new CentralityWriteResult(
                 nodePropertiesWritten,
                 preProcessingMillis,
                 computeMillis,

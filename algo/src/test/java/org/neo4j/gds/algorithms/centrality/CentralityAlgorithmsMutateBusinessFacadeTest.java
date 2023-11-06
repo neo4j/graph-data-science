@@ -180,8 +180,8 @@ class CentralityAlgorithmsMutateBusinessFacadeTest {
         assertThat(mutateResult.computeMillis()).isEqualTo(50);
         assertThat(mutateResult.mutateMillis()).isGreaterThanOrEqualTo(0L);
         assertThat(mutateResult.postProcessingMillis()).isGreaterThanOrEqualTo(0L);
-        assertThat((double)mutateResult.algorithmSpecificFields().centralityDistribution().get("mean")).isCloseTo(0.25,
-            Offset.offset(1e-4));
+        assertThat((double) mutateResult.algorithmSpecificFields().centralityDistribution().get("mean"))
+            .isCloseTo(0.25, Offset.offset(1e-4));
 
         var nodeProperty = graphStore.nodeProperty("foo");
         assertThat(nodeProperty).isNotNull();

@@ -31,6 +31,7 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
+import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.procedures.configparser.ConfigurationParser;
@@ -128,6 +129,23 @@ public class CentralityProcedureFacade {
         return Stream.of(BetweenessCentralityComputationalResultTransformer.toMutateResult(computationResult));
     }
 
+    public Stream<CentralityWriteResult> betweenessCentralityWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, BetweennessCentralityWriteConfig::of);
+
+        var computationResult = writeBusinessFacade.betweennessCentrality(
+            graphName,
+            config,
+            user,
+            databaseId,
+            procedureReturnColumns.contains("centralityDistribution")
+        );
+
+        return Stream.of(BetweenessCentralityComputationalResultTransformer.toWriteResult(computationResult));
+    }
+
 
     public Stream<MemoryEstimateResult> betweenessCentralityStreamEstimate(
         Object graphNameOrConfiguration,
@@ -154,6 +172,16 @@ public class CentralityProcedureFacade {
         Map<String, Object> configuration
     ) {
         var config = createConfig(configuration, BetweennessCentralityMutateConfig::of);
+
+        return Stream.of(estimateBusinessFacade.betweennessCentrality(graphNameOrConfiguration, config));
+
+    }
+
+    public Stream<MemoryEstimateResult> betweenessCentralityWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, BetweennessCentralityWriteConfig::of);
 
         return Stream.of(estimateBusinessFacade.betweennessCentrality(graphNameOrConfiguration, config));
 
