@@ -22,11 +22,11 @@ package org.neo4j.gds.core.io.file;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.GraphStoreExportSettings;
 import org.neo4j.gds.core.io.GraphStoreExporter;
 import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.io.file.csv.GraphStoreToCsvExporter;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.settings.GraphStoreExportSettings;
 import org.neo4j.graphdb.config.Configuration;
 import org.neo4j.logging.Log;
 

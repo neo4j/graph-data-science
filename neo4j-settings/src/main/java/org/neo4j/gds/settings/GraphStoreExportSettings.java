@@ -17,19 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils;
+package org.neo4j.gds.settings;
 
-import org.neo4j.configuration.Config;
-import org.neo4j.gds.core.Settings;
+import org.neo4j.annotations.service.ServiceProvider;
+import org.neo4j.configuration.Description;
+import org.neo4j.configuration.SettingsDeclaration;
+import org.neo4j.graphdb.config.Setting;
 
-import java.time.Clock;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.nio.file.Path;
 
-public final class TimeUtil {
+import static org.neo4j.configuration.SettingValueParsers.PATH;
+import static org.neo4j.gds.compat.SettingProxy.newBuilder;
 
-    public static ZonedDateTime now() {
-        var zoneId = Config.EMPTY.get(Settings.dbTemporalTimezone());
-        return ZonedDateTime.now(Clock.system(zoneId != null ? zoneId : ZoneId.systemDefault()));
-    }
+@ServiceProvider
+public class GraphStoreExportSettings implements SettingsDeclaration {
+
+    @Description("Sets the export location for file based exports.")
+    public static final Setting<Path> export_location_setting = newBuilder(
+        "gds.export.location",
+        PATH,
+        null
+    ).build();
+
 }

@@ -24,6 +24,7 @@ dependencies {
     implementation project(':memory-estimation')
     implementation project(':native-projection')
     implementation project(':neo4j-api')
+    implementation project(':neo4j-settings')
     implementation project(':opengds-procedure-facade')
     implementation project(':proc-common')
     implementation project(':proc-community')

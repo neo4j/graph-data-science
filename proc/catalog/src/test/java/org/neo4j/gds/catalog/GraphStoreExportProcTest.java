@@ -32,7 +32,7 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.compat.DatabaseMode;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.SettingProxy;
-import org.neo4j.gds.core.GraphStoreExportSettings;
+import org.neo4j.gds.settings.GraphStoreExportSettings;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.io.fs.DefaultFileSystemAbstraction;

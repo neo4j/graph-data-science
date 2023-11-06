@@ -27,8 +27,8 @@ import org.neo4j.gds.core.utils.mem.GcListenerExtension;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
-import org.neo4j.gds.internal.MemoryEstimationSettings;
 import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.settings.MemoryEstimationSettings;
 import org.neo4j.logging.Log;
 
 import java.util.StringJoiner;

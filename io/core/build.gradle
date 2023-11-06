@@ -22,6 +22,7 @@ dependencies {
     implementation project(':graph-schema-api')
     implementation project(':memory-usage')
     implementation project(':neo4j-kernel-adapter')
+    implementation project(':neo4j-settings')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':subgraph-filtering')

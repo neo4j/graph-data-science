@@ -25,7 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.core.Settings;
+import org.neo4j.gds.settings.Settings;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.kernel.internal.Version;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;

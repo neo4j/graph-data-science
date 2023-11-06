@@ -26,7 +26,7 @@ import org.neo4j.gds.compat.Neo4jProxyFactory;
 import org.neo4j.gds.compat.ProxyFactory;
 import org.neo4j.gds.compat.ProxyUtil;
 import org.neo4j.gds.compat.SettingProxyFactory;
-import org.neo4j.gds.core.Settings;
+import org.neo4j.gds.settings.Settings;
 import org.neo4j.gds.core.utils.mem.GcListenerExtension;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.graphdb.GraphDatabaseService;
