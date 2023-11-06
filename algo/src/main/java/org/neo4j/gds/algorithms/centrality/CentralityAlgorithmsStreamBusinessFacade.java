@@ -22,7 +22,7 @@ package org.neo4j.gds.algorithms.centrality;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
-import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 
 public class CentralityAlgorithmsStreamBusinessFacade {
 
@@ -32,7 +32,7 @@ public class CentralityAlgorithmsStreamBusinessFacade {
         this.centralityAlgorithmsFacade = centralityAlgorithmsFacade;
     }
 
-    public StreamComputationResult<HugeAtomicDoubleArray> betweennessCentrality(
+    public StreamComputationResult<BetwennessCentralityResult> betweennessCentrality(
         String graphName,
         BetweennessCentralityBaseConfig config
     ) {

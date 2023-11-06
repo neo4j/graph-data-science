@@ -19,15 +19,9 @@
  */
 package org.neo4j.gds.procedures.centrality;
 
-import org.neo4j.gds.algorithms.NodePropertyMutateResult;
-import org.neo4j.gds.algorithms.NodePropertyWriteResult;
-import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.algorithms.centrality.specificfields.StandardCentralityStatisticsSpecificFields;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
-import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -37,10 +31,10 @@ final class BetweenessCentralityComputationalResultTransformer {
     private BetweenessCentralityComputationalResultTransformer() {}
 
     static Stream<CentralityStreamResult> toStreamResult(
-        StreamComputationResult<HugeAtomicDoubleArray> computationResult
+        StreamComputationResult<BetwennessCentralityResult> computationResult
     ) {
         return computationResult.result().map(bcResult -> {
-            var nodePropertyValues = NodePropertyValuesAdapter.adapt(bcResult);
+            var nodePropertyValues = bcResult.nodePropertyValues();
             var graph = computationResult.graph();
             return LongStream
                 .range(IdMap.START_NODE_ID, graph.nodeCount())
@@ -52,47 +46,6 @@ final class BetweenessCentralityComputationalResultTransformer {
                     ));
 
         }).orElseGet(Stream::empty);
-    }
-
-    static CentralityStatsResult toStatsResult(
-        StatsResult<StandardCentralityStatisticsSpecificFields> computationResult,
-        BetweennessCentralityStatsConfig configuration
-    ) {
-        return new CentralityStatsResult(
-            computationResult.algorithmSpecificFields().centralityDistribution(),
-            computationResult.preProcessingMillis(),
-            computationResult.computeMillis(),
-            computationResult.postProcessingMillis(),
-            configuration.toMap()
-        );
-    }
-
-    static CentralityMutateResult toMutateResult(
-        NodePropertyMutateResult<StandardCentralityStatisticsSpecificFields> computationResult
-    ) {
-        return new CentralityMutateResult(
-            computationResult.nodePropertiesWritten(),
-            computationResult.preProcessingMillis(),
-            computationResult.computeMillis(),
-            computationResult.postProcessingMillis(),
-            computationResult.mutateMillis(),
-            computationResult.algorithmSpecificFields().centralityDistribution(),
-            computationResult.configuration().toMap()
-        );
-    }
-
-    static CentralityWriteResult toWriteResult(
-        NodePropertyWriteResult<StandardCentralityStatisticsSpecificFields> computationResult
-    ) {
-        return new CentralityWriteResult(
-            computationResult.nodePropertiesWritten(),
-            computationResult.preProcessingMillis(),
-            computationResult.computeMillis(),
-            computationResult.postProcessingMillis(),
-            computationResult.writeMillis(),
-            computationResult.algorithmSpecificFields().centralityDistribution(),
-            computationResult.configuration().toMap()
-        );
     }
 
 }

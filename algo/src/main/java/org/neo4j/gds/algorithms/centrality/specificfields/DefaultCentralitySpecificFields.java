@@ -22,15 +22,15 @@ package org.neo4j.gds.algorithms.centrality.specificfields;
 import java.util.Map;
 
 
-public class StandardCentralityStatisticsSpecificFields implements  CentralityStatisticsSpecificFields {
+public class DefaultCentralitySpecificFields implements CentralityStatisticsSpecificFields {
 
-    public static final StandardCentralityStatisticsSpecificFields EMPTY = new StandardCentralityStatisticsSpecificFields(
+    public static final DefaultCentralitySpecificFields EMPTY = new DefaultCentralitySpecificFields(
         Map.of()
     );
 
     private final Map<String, Object> centralityDistribution;
 
-    public StandardCentralityStatisticsSpecificFields(
+    public DefaultCentralitySpecificFields(
         Map<String, Object> centralityDistribution
     ) {
         this.centralityDistribution = centralityDistribution;

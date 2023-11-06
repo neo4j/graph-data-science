@@ -23,7 +23,7 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityFactory;
-import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 
 public class CentralityAlgorithmsFacade {
 
@@ -33,7 +33,7 @@ public class CentralityAlgorithmsFacade {
         this.algorithmRunner = algorithmRunner;
     }
 
-    AlgorithmComputationResult<HugeAtomicDoubleArray> betweennessCentrality(
+    AlgorithmComputationResult<BetwennessCentralityResult> betweennessCentrality(
         String graphName,
         BetweennessCentralityBaseConfig config
     ) {

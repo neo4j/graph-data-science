@@ -22,7 +22,7 @@ package org.neo4j.gds.algorithms.centrality;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
-import org.neo4j.gds.algorithms.centrality.specificfields.StandardCentralityStatisticsSpecificFields;
+import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -115,10 +115,10 @@ class CentralityAlgorithmsMutateBusinessFacadeTest {
             configMock,
             ((r)->r::get),
             nodePropertyValuesMapper,
-            ((r,  cs) -> new StandardCentralityStatisticsSpecificFields(cs)),
+            ((r, cs) -> new DefaultCentralitySpecificFields(cs)),
             false,
             50L,
-            () -> StandardCentralityStatisticsSpecificFields.EMPTY
+            () -> DefaultCentralitySpecificFields.EMPTY
         );
 
 
@@ -167,10 +167,10 @@ class CentralityAlgorithmsMutateBusinessFacadeTest {
             configMock,
             ((r)->r::get),
             nodePropertyValuesMapper,
-            ((r,  cs) -> new StandardCentralityStatisticsSpecificFields(cs)),
+            ((r, cs) -> new DefaultCentralitySpecificFields(cs)),
             true,
             50L,
-            () -> StandardCentralityStatisticsSpecificFields.EMPTY
+            () -> DefaultCentralitySpecificFields.EMPTY
         );
 
 

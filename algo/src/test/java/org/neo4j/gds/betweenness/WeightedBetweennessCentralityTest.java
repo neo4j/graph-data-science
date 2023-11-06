@@ -98,12 +98,13 @@ class WeightedBetweennessCentralityTest {
             8,
             ProgressTracker.NULL_TRACKER
         );
-        var resultWeighted = algoWeighted.compute();
-        var resultUnweighted = algoUnweighted.compute();
+        var resultWeighted = algoWeighted.compute().centralities();
+        var resultUnweighted = algoUnweighted.compute().centralities();
 
         SoftAssertions softAssertions = new SoftAssertions();
         equallyWeightedGraph.forEachNode(nodeId -> {
-                softAssertions.assertThat(resultWeighted.get(nodeId)).isEqualTo(resultUnweighted.get(nodeId));
+            softAssertions.assertThat(resultWeighted.get(nodeId))
+                .isEqualTo(resultUnweighted.get(nodeId));
                 return true;
             }
         );
@@ -123,7 +124,7 @@ class WeightedBetweennessCentralityTest {
              8,
              ProgressTracker.NULL_TRACKER
          );
-        var result = bc.compute();
+        var result = bc.compute().centralities();
         var softAssertions = new SoftAssertions();
         softAssertions.assertThat(result.get(weightedIdFunction.of("a1"))).isEqualTo(0.0D);
         softAssertions.assertThat(result.get(weightedIdFunction.of("a2"))).isEqualTo(0.0D);

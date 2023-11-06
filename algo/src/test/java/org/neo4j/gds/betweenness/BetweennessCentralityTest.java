@@ -144,7 +144,7 @@ class BetweennessCentralityTest {
             DefaultPool.INSTANCE,
             concurrency,
             ProgressTracker.NULL_TRACKER
-        ).compute();
+        ).compute().centralities();
 
         assertEquals(expectedResult.size(), actualResult.size());
         expectedResult.forEach((variable, expectedCentrality) ->
@@ -163,7 +163,8 @@ class BetweennessCentralityTest {
             DefaultPool.INSTANCE,
             concurrency,
             ProgressTracker.NULL_TRACKER
-        ).compute();
+        ).compute().centralities();
+        
         assertEquals(5, actualResult.size(), "Expected 5 centrality values");
         assertEquals(0.0, actualResult.get((int) graph.toMappedNodeId("a")));
         assertEquals(3.0, actualResult.get((int) graph.toMappedNodeId("b")));

@@ -22,7 +22,7 @@ package org.neo4j.gds.algorithms.centrality;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.centrality.specificfields.CentralityStatisticsSpecificFields;
-import org.neo4j.gds.algorithms.centrality.specificfields.StandardCentralityStatisticsSpecificFields;
+import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
@@ -49,7 +49,7 @@ public class CentralityAlgorithmsWriteBusinessFacade {
         this.writeNodePropertyService = writeNodePropertyService;
     }
 
-    public NodePropertyWriteResult<StandardCentralityStatisticsSpecificFields> betweennessCentrality(
+    public NodePropertyWriteResult<DefaultCentralitySpecificFields> betweennessCentrality(
         String graphName,
         BetweennessCentralityWriteConfig configuration,
         boolean shouldComputeCentralityDistribution
@@ -58,21 +58,12 @@ public class CentralityAlgorithmsWriteBusinessFacade {
         var intermediateResult = runWithTiming(
             () -> centralityAlgorithmsFacade.betweennessCentrality(graphName, configuration)
         );
-        var algorithmResult = intermediateResult.algorithmResult;
 
         return writeToDatabase(
-            algorithmResult,
+            intermediateResult.algorithmResult,
             configuration,
-            (bcResult) -> bcResult::get,
-            ((bcResult) -> NodePropertyValuesAdapter.adapt(bcResult)),
-            (bcResult, centralityDistribution) -> {
-                return new StandardCentralityStatisticsSpecificFields(
-                    centralityDistribution
-                );
-            },
             shouldComputeCentralityDistribution,
             intermediateResult.computeMilliseconds,
-            () -> StandardCentralityStatisticsSpecificFields.EMPTY,
             "BetweennessCentralityWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
@@ -80,6 +71,39 @@ public class CentralityAlgorithmsWriteBusinessFacade {
         );
     }
 
+    <RESULT extends CentralityAlgorithmResult, CONFIG extends AlgoBaseConfig> NodePropertyWriteResult<DefaultCentralitySpecificFields> writeToDatabase(
+        AlgorithmComputationResult<RESULT> algorithmResult,
+        CONFIG configuration,
+        boolean shouldComputeCentralityDistribution,
+        long computeMilliseconds,
+        String procedureName,
+        int writeConcurrency,
+        String writeProperty,
+        Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo
+    ) {
+
+        CentralityFunctionSupplier<RESULT> centralityFunctionSupplier = (r) -> r.centralityScoreProvider();
+        SpecificFieldsWithCentralityDistributionSupplier<RESULT, DefaultCentralitySpecificFields> specificFieldsSupplier = (r, c) -> new DefaultCentralitySpecificFields(
+            c);
+        Supplier<DefaultCentralitySpecificFields> emptyASFSupplier = () -> DefaultCentralitySpecificFields.EMPTY;
+
+        NodePropertyValuesMapper<RESULT> nodePropertyValuesMapper = (r) -> r.nodePropertyValues();
+
+        return writeToDatabase(
+            algorithmResult,
+            configuration,
+            centralityFunctionSupplier,
+            nodePropertyValuesMapper,
+            specificFieldsSupplier,
+            shouldComputeCentralityDistribution,
+            computeMilliseconds,
+            emptyASFSupplier,
+            procedureName,
+            writeConcurrency,
+            writeProperty,
+            arrowConnectionInfo
+        );
+    }
 
     <RESULT, CONFIG extends AlgoBaseConfig, ASF extends CentralityStatisticsSpecificFields> NodePropertyWriteResult<ASF> writeToDatabase(
         AlgorithmComputationResult<RESULT> algorithmResult,

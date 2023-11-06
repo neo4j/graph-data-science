@@ -22,7 +22,7 @@ package org.neo4j.gds.algorithms.centrality;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.centrality.specificfields.CentralityStatisticsSpecificFields;
-import org.neo4j.gds.algorithms.centrality.specificfields.StandardCentralityStatisticsSpecificFields;
+import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -40,7 +40,7 @@ public class CentralityAlgorithmsStatsBusinessFacade {
     }
 
 
-    public StatsResult<StandardCentralityStatisticsSpecificFields> betweennessCentrality(
+    public StatsResult<DefaultCentralitySpecificFields> betweennessCentrality(
         String graphName,
         BetweennessCentralityStatsConfig configuration,
         boolean shouldComputeCentralityDistribution
@@ -49,20 +49,35 @@ public class CentralityAlgorithmsStatsBusinessFacade {
         var intermediateResult = AlgorithmRunner.runWithTiming(
             () -> centralityAlgorithmsFacade.betweennessCentrality(graphName, configuration)
         );
-        var algorithmResult = intermediateResult.algorithmResult;
+
+        return statsResult(
+            intermediateResult.algorithmResult,
+            configuration,
+            shouldComputeCentralityDistribution,
+            intermediateResult.computeMilliseconds
+        );
+    }
+
+
+    <RESULT extends CentralityAlgorithmResult, CONFIG extends AlgoBaseConfig> StatsResult<DefaultCentralitySpecificFields> statsResult(
+        AlgorithmComputationResult<RESULT> algorithmResult,
+        CONFIG configuration,
+        boolean shouldComputeCentralityDistribution,
+        long computeMilliseconds
+    ) {
+        CentralityFunctionSupplier<RESULT> centralityFunctionSupplier = (r) -> r.centralityScoreProvider();
+        SpecificFieldsWithCentralityDistributionSupplier<RESULT, DefaultCentralitySpecificFields> specificFieldsSupplier = (r, c) -> new DefaultCentralitySpecificFields(
+            c);
+        Supplier<DefaultCentralitySpecificFields> emptyASFSupplier = () -> DefaultCentralitySpecificFields.EMPTY;
 
         return statsResult(
             algorithmResult,
             configuration,
-            (result -> result::get),
-            (result, centralityDistribution) -> {
-                return new StandardCentralityStatisticsSpecificFields(
-                    centralityDistribution
-                );
-            },
+            centralityFunctionSupplier,
+            specificFieldsSupplier,
             shouldComputeCentralityDistribution,
-            intermediateResult.computeMilliseconds,
-            () -> StandardCentralityStatisticsSpecificFields.EMPTY
+            computeMilliseconds,
+            emptyASFSupplier
         );
     }
 

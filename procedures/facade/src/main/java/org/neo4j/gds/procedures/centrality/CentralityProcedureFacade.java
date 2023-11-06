@@ -101,7 +101,7 @@ public class CentralityProcedureFacade {
             procedureReturnColumns.contains("centralityDistribution")
         );
 
-        return Stream.of(BetweenessCentralityComputationalResultTransformer.toStatsResult(computationResult, config));
+        return Stream.of(CentralityComputationalResultTransformer.toStatsResult(computationResult, config));
     }
 
     public Stream<CentralityMutateResult> betweenessCentralityMutate(
@@ -116,7 +116,7 @@ public class CentralityProcedureFacade {
             procedureReturnColumns.contains("centralityDistribution")
         );
 
-        return Stream.of(BetweenessCentralityComputationalResultTransformer.toMutateResult(computationResult));
+        return Stream.of(CentralityComputationalResultTransformer.toMutateResult(computationResult));
     }
 
     public Stream<CentralityWriteResult> betweenessCentralityWrite(
@@ -131,7 +131,7 @@ public class CentralityProcedureFacade {
             procedureReturnColumns.contains("centralityDistribution")
         );
 
-        return Stream.of(BetweenessCentralityComputationalResultTransformer.toWriteResult(computationResult));
+        return Stream.of(CentralityComputationalResultTransformer.toWriteResult(computationResult));
     }
 
 
