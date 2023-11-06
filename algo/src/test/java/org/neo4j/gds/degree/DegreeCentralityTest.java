@@ -153,7 +153,7 @@ final class DegreeCentralityTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        var degreeFunction = degreeCentrality.compute();
+        var degreeFunction = degreeCentrality.compute().degreeFunction();
         expected.forEach((variable, expectedDegree) -> {
             long nodeId = graph.toMappedNodeId(variable);
             assertEquals(expectedDegree, degreeFunction.get(nodeId), 1E-6);

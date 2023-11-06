@@ -38,7 +38,7 @@ import java.util.function.LongToIntFunction;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class DegreeCentrality extends Algorithm<DegreeCentrality.DegreeFunction> {
+public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
 
     static final String DEGREE_CENTRALITY_DESCRIPTION = "Degree centrality measures the number of incoming and outgoing relationships from a node.";
     private static final double DEFAULT_WEIGHT = 0D;
@@ -46,10 +46,6 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality.DegreeFunction>
     private final Graph graph;
     private final ExecutorService executor;
     private final DegreeCentralityConfig config;
-
-    public interface DegreeFunction {
-        double get(long nodeId);
-    }
 
     public DegreeCentrality(
         Graph graph,
@@ -64,7 +60,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality.DegreeFunction>
     }
 
     @Override
-    public DegreeFunction compute() {
+    public DegreeCentralityResult compute() {
         progressTracker.beginSubTask();
 
         var result = config.hasRelationshipWeightProperty()
@@ -72,7 +68,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality.DegreeFunction>
             : computeUnweighted();
 
         progressTracker.endSubTask();
-        return result;
+        return new DegreeCentralityResult(graph.nodeCount(), result);
 
     }
 

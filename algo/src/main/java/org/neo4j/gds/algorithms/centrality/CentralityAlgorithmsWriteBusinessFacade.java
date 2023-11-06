@@ -29,6 +29,7 @@ import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
 import org.neo4j.gds.result.CentralityStatistics;
 
 import java.util.Optional;
@@ -70,6 +71,31 @@ public class CentralityAlgorithmsWriteBusinessFacade {
             configuration.arrowConnectionInfo()
         );
     }
+
+    public NodePropertyWriteResult<DefaultCentralitySpecificFields> degreeCentrality(
+        String graphName,
+        DegreeCentralityWriteConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        boolean shouldComputeCentralityDistribution
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = runWithTiming(
+            () -> centralityAlgorithmsFacade.degreeCentrality(graphName, configuration, user, databaseId)
+        );
+
+        return writeToDatabase(
+            intermediateResult.algorithmResult,
+            configuration,
+            shouldComputeCentralityDistribution,
+            intermediateResult.computeMilliseconds,
+            "DegreeCentralityWrite",
+            configuration.writeConcurrency(),
+            configuration.writeProperty(),
+            configuration.arrowConnectionInfo()
+        );
+    }
+
 
     <RESULT extends CentralityAlgorithmResult, CONFIG extends AlgoBaseConfig> NodePropertyWriteResult<DefaultCentralitySpecificFields> writeToDatabase(
         AlgorithmComputationResult<RESULT> algorithmResult,

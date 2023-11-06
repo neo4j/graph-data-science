@@ -22,14 +22,37 @@ package org.neo4j.gds.procedures.centrality;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.StatsResult;
+import org.neo4j.gds.algorithms.StreamComputationResult;
+import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.AlgoBaseConfig;
 
-final class CentralityComputationalResultTransformer {
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
-    private CentralityComputationalResultTransformer() {}
+final class DefaultCentralityComputationalResultTransformer {
+
+    private DefaultCentralityComputationalResultTransformer() {}
 
 
+    static <RESULT extends CentralityAlgorithmResult> Stream<CentralityStreamResult> toStreamResult(
+        StreamComputationResult<RESULT> computationResult
+    ) {
+        return computationResult.result().map(result -> {
+            var nodePropertyValues = result.nodePropertyValues();
+            var graph = computationResult.graph();
+            return LongStream
+                .range(IdMap.START_NODE_ID, graph.nodeCount())
+                .filter(nodePropertyValues::hasValue)
+                .mapToObj(nodeId ->
+                    new CentralityStreamResult(
+                        graph.toOriginalNodeId(nodeId),
+                        nodePropertyValues.doubleValue(nodeId)
+                    ));
+
+        }).orElseGet(Stream::empty);
+    }
 
     static CentralityStatsResult toStatsResult(
         StatsResult<DefaultCentralitySpecificFields> computationResult,

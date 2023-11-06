@@ -35,7 +35,7 @@ import static org.neo4j.gds.degree.DegreeCentrality.DEGREE_CENTRALITY_DESCRIPTIO
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 @GdsCallable(name = "gds.degree.stream", description = DEGREE_CENTRALITY_DESCRIPTION, executionMode = STREAM)
-public class DegreeCentralityStreamSpecification implements AlgorithmSpec<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityStreamConfig, Stream<CentralityStreamResult>, DegreeCentralityFactory<DegreeCentralityStreamConfig>> {
+public class DegreeCentralityStreamSpecification implements AlgorithmSpec<DegreeCentrality, DegreeCentralityResult, DegreeCentralityStreamConfig, Stream<CentralityStreamResult>, DegreeCentralityFactory<DegreeCentralityStreamConfig>> {
     @Override
     public String name() {
         return "DegreeCentralityStream";
@@ -52,14 +52,14 @@ public class DegreeCentralityStreamSpecification implements AlgorithmSpec<Degree
     }
 
     @Override
-    public ComputationResultConsumer<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityStreamConfig, Stream<CentralityStreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<DegreeCentrality, DegreeCentralityResult, DegreeCentralityStreamConfig, Stream<CentralityStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),
             () -> computationResult.result()
                 .map(result -> {
                     var graph = computationResult.graph();
-                    var nodePropertyValues = new DegreeCentralityNodePropertyValues(graph.nodeCount(), result);
+                    var nodePropertyValues = result.nodePropertyValues();
                     return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
                         .filter(nodePropertyValues::hasValue)
                         .mapToObj(nodeId ->

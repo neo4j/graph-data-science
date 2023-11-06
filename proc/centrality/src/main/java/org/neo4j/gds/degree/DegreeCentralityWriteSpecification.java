@@ -27,6 +27,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.centrality.CentralityWriteResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -36,7 +37,7 @@ import static org.neo4j.gds.degree.DegreeCentrality.DEGREE_CENTRALITY_DESCRIPTIO
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 
 @GdsCallable(name = "gds.degree.write", description = DEGREE_CENTRALITY_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class DegreeCentralityWriteSpecification implements AlgorithmSpec<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityWriteConfig, Stream<WriteResult>, DegreeCentralityFactory<DegreeCentralityWriteConfig>> {
+public class DegreeCentralityWriteSpecification implements AlgorithmSpec<DegreeCentrality, DegreeCentralityResult, DegreeCentralityWriteConfig, Stream<CentralityWriteResult>, DegreeCentralityFactory<DegreeCentralityWriteConfig>> {
     @Override
     public String name() {
         return "DegreeCentralityWrite";
@@ -53,27 +54,28 @@ public class DegreeCentralityWriteSpecification implements AlgorithmSpec<DegreeC
     }
 
     @Override
-    public ComputationResultConsumer<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<DegreeCentrality, DegreeCentralityResult, DegreeCentralityWriteConfig, Stream<CentralityWriteResult>> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>(
             this::resultBuilder,
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().writeProperty(),
-                DegreeCentralityNodePropertyValues.from(computationResult)
+                computationResult.result().orElse(DegreeCentralityResult.EMPTY).nodePropertyValues()
             )),
             name()
         );
     }
 
-    private AbstractResultBuilder<WriteResult> resultBuilder(
-        ComputationResult<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityWriteConfig> computationResult,
+    private AbstractResultBuilder<CentralityWriteResult> resultBuilder(
+        ComputationResult<DegreeCentrality, DegreeCentralityResult, DegreeCentralityWriteConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new WriteResult.Builder(
+        var builder = new CentralityWriteResult.Builder(
             executionContext.returnColumns(),
             computationResult.config().concurrency()
         );
 
-        computationResult.result().ifPresent(result -> builder.withCentralityFunction(result::get));
+        computationResult.result()
+            .ifPresent(result -> builder.withCentralityFunction(result.centralityScoreProvider()));
 
         return builder;
     }

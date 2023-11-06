@@ -20,9 +20,10 @@
 package org.neo4j.gds.degree;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.centrality.CentralityStatsResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -35,16 +36,17 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class DegreeCentralityStatsProc extends BaseProc {
 
+    @Context
+    public GraphDataScience facade;
+
+
     @Procedure(value = "gds.degree.stats", mode = READ)
     @Description(DEGREE_CENTRALITY_DESCRIPTION)
-    public Stream<StatsResult> stats(
+    public Stream<CentralityStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new DegreeCentralityStatsSpecification(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.centrality().degreeCentralityStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.degree.stats.estimate", mode = READ)
@@ -53,11 +55,7 @@ public class DegreeCentralityStatsProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new DegreeCentralityStatsSpecification(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.centrality().degreeCentralityStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
 }

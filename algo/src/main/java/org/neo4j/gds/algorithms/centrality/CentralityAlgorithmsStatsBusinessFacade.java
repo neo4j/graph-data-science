@@ -27,6 +27,7 @@ import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
 import org.neo4j.gds.result.CentralityStatistics;
 
 import java.util.function.Supplier;
@@ -48,6 +49,26 @@ public class CentralityAlgorithmsStatsBusinessFacade {
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
             () -> centralityAlgorithmsFacade.betweennessCentrality(graphName, configuration)
+        );
+
+        return statsResult(
+            intermediateResult.algorithmResult,
+            configuration,
+            shouldComputeCentralityDistribution,
+            intermediateResult.computeMilliseconds
+        );
+    }
+
+    public StatsResult<DefaultCentralitySpecificFields> degreeCentrality(
+        String graphName,
+        DegreeCentralityStatsConfig configuration,
+        User user,
+        DatabaseId databaseId,
+        boolean shouldComputeCentralityDistribution
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> centralityAlgorithmsFacade.degreeCentrality(graphName, configuration, user, databaseId)
         );
 
         return statsResult(

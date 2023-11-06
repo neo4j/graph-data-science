@@ -24,6 +24,9 @@ import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityFactory;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
+import org.neo4j.gds.degree.DegreeCentralityConfig;
+import org.neo4j.gds.degree.DegreeCentralityFactory;
+import org.neo4j.gds.degree.DegreeCentralityResult;
 
 public class CentralityAlgorithmsFacade {
 
@@ -44,6 +47,23 @@ public class CentralityAlgorithmsFacade {
             new BetweennessCentralityFactory<>()
         );
     }
+
+    AlgorithmComputationResult<DegreeCentralityResult> degreeCentrality(
+        String graphName,
+        DegreeCentralityConfig config,
+        User user,
+        DatabaseId databaseId
+    ) {
+        return algorithmRunner.run(
+            graphName,
+            config,
+            config.relationshipWeightProperty(),
+            new DegreeCentralityFactory<>(),
+            user,
+            databaseId
+        );
+    }
+
 
 
 }

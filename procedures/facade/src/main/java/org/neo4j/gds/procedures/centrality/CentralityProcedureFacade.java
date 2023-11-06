@@ -33,6 +33,10 @@ import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
+import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
+import org.neo4j.gds.degree.DegreeCentralityStreamConfig;
+import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
 import org.neo4j.gds.procedures.configparser.ConfigurationParser;
 import org.neo4j.gds.results.MemoryEstimateResult;
 
@@ -86,7 +90,7 @@ public class CentralityProcedureFacade {
             config
         );
 
-        return BetweenessCentralityComputationalResultTransformer.toStreamResult(computationResult);
+        return DefaultCentralityComputationalResultTransformer.toStreamResult(computationResult);
     }
 
     public Stream<CentralityStatsResult> betweenessCentralityStats(
@@ -101,7 +105,7 @@ public class CentralityProcedureFacade {
             procedureReturnColumns.contains("centralityDistribution")
         );
 
-        return Stream.of(CentralityComputationalResultTransformer.toStatsResult(computationResult, config));
+        return Stream.of(DefaultCentralityComputationalResultTransformer.toStatsResult(computationResult, config));
     }
 
     public Stream<CentralityMutateResult> betweenessCentralityMutate(
@@ -116,7 +120,7 @@ public class CentralityProcedureFacade {
             procedureReturnColumns.contains("centralityDistribution")
         );
 
-        return Stream.of(CentralityComputationalResultTransformer.toMutateResult(computationResult));
+        return Stream.of(DefaultCentralityComputationalResultTransformer.toMutateResult(computationResult));
     }
 
     public Stream<CentralityWriteResult> betweenessCentralityWrite(
@@ -131,8 +135,9 @@ public class CentralityProcedureFacade {
             procedureReturnColumns.contains("centralityDistribution")
         );
 
-        return Stream.of(CentralityComputationalResultTransformer.toWriteResult(computationResult));
+        return Stream.of(DefaultCentralityComputationalResultTransformer.toWriteResult(computationResult));
     }
+
 
 
     public Stream<MemoryEstimateResult> betweenessCentralityStreamEstimate(
@@ -172,6 +177,115 @@ public class CentralityProcedureFacade {
         var config = createConfig(configuration, BetweennessCentralityWriteConfig::of);
 
         return Stream.of(estimateBusinessFacade.betweennessCentrality(graphNameOrConfiguration, config));
+
+    }
+
+    public Stream<CentralityStreamResult> degreeCentralityStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createStreamConfig(configuration, DegreeCentralityStreamConfig::of);
+
+        var computationResult = streamBusinessFacade.degreeCentrality(
+            graphName,
+            config,
+            user,
+            databaseId
+        );
+
+        return DefaultCentralityComputationalResultTransformer.toStreamResult(computationResult);
+    }
+
+    public Stream<CentralityStatsResult> degreeCentralityStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, DegreeCentralityStatsConfig::of);
+
+        var computationResult = statsBusinessFacade.degreeCentrality(
+            graphName,
+            config,
+            user,
+            databaseId,
+            procedureReturnColumns.contains("centralityDistribution")
+        );
+
+        return Stream.of(DefaultCentralityComputationalResultTransformer.toStatsResult(computationResult, config));
+    }
+
+    public Stream<CentralityMutateResult> degreeCentralityMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, DegreeCentralityMutateConfig::of);
+
+        var computationResult = mutateBusinessFacade.degreeCentrality(
+            graphName,
+            config,
+            user,
+            databaseId,
+            procedureReturnColumns.contains("centralityDistribution")
+        );
+
+        return Stream.of(DefaultCentralityComputationalResultTransformer.toMutateResult(computationResult));
+    }
+
+
+    public Stream<CentralityWriteResult> degreeCentralityWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, DegreeCentralityWriteConfig::of);
+
+        var computationResult = writeBusinessFacade.degreeCentrality(
+            graphName,
+            config,
+            user,
+            databaseId,
+            procedureReturnColumns.contains("centralityDistribution")
+        );
+
+        return Stream.of(DefaultCentralityComputationalResultTransformer.toWriteResult(computationResult));
+    }
+
+
+    public Stream<MemoryEstimateResult> degreeCentralityStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, DegreeCentralityStreamConfig::of);
+
+        return Stream.of(estimateBusinessFacade.degreeCentrality(graphNameOrConfiguration, config));
+
+    }
+
+    public Stream<MemoryEstimateResult> degreeCentralityStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, DegreeCentralityStatsConfig::of);
+
+        return Stream.of(estimateBusinessFacade.degreeCentrality(graphNameOrConfiguration, config));
+
+    }
+
+    public Stream<MemoryEstimateResult> degreeCentralityMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, DegreeCentralityMutateConfig::of);
+
+        return Stream.of(estimateBusinessFacade.degreeCentrality(graphNameOrConfiguration, config));
+
+    }
+
+    public Stream<MemoryEstimateResult> degreeCentralityWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, DegreeCentralityWriteConfig::of);
+
+        return Stream.of(estimateBusinessFacade.degreeCentrality(graphNameOrConfiguration, config));
 
     }
 
