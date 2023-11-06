@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.centrality;
 
+import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.centrality.specificfields.StandardCentralityStatisticsSpecificFields;
@@ -64,4 +65,19 @@ final class BetweenessCentralityComputationalResultTransformer {
             configuration.toMap()
         );
     }
+
+    static CentralityMutateResult toMutateResult(
+        NodePropertyMutateResult<StandardCentralityStatisticsSpecificFields> computationResult
+    ) {
+        return new CentralityMutateResult(
+            computationResult.nodePropertiesWritten(),
+            computationResult.preProcessingMillis(),
+            computationResult.computeMillis(),
+            computationResult.postProcessingMillis(),
+            computationResult.mutateMillis(),
+            computationResult.algorithmSpecificFields().centralityDistribution(),
+            computationResult.configuration().toMap()
+        );
+    }
+
 }
