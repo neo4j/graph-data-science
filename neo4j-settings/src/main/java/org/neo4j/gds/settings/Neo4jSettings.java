@@ -32,7 +32,7 @@ import java.nio.file.Path;
 import java.time.ZoneId;
 import java.util.List;
 
-public final class Settings {
+public final class Neo4jSettings {
 
     public static Setting<Boolean> authEnabled() {
         return GraphDatabaseSettings.auth_enabled;
@@ -126,15 +126,7 @@ public final class Settings {
         return Neo4jProxy.additionalJvm();
     }
 
-    public static Setting<Path> exportLocation() {
-        return GraphStoreExportSettings.export_location_setting;
-    }
-
-    public static Setting<Boolean> validateUsingMaxMemoryEstimation() {
-        return MemoryEstimationSettings.validate_using_max_memory_estimation;
-    }
-
-    private Settings() {
+    private Neo4jSettings() {
         throw new UnsupportedOperationException();
     }
 }

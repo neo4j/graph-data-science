@@ -19,16 +19,17 @@
  */
 package org.neo4j.gds.settings;
 
-import org.neo4j.configuration.Config;
+import org.neo4j.graphdb.config.Setting;
 
-import java.time.Clock;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.nio.file.Path;
 
-public final class TimeUtil {
+public class GdsSettings {
 
-    public static ZonedDateTime now() {
-        var zoneId = Config.EMPTY.get(Settings.dbTemporalTimezone());
-        return ZonedDateTime.now(Clock.system(zoneId != null ? zoneId : ZoneId.systemDefault()));
+    public static Setting<Path> exportLocation() {
+        return GraphStoreExportSettings.export_location_setting;
+    }
+
+    public static Setting<Boolean> validateUsingMaxMemoryEstimation() {
+        return MemoryEstimationSettings.validate_using_max_memory_estimation;
     }
 }

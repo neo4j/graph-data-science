@@ -53,7 +53,7 @@ import org.neo4j.gds.core.huge.CSRCompositeRelationshipIterator;
 import org.neo4j.gds.core.huge.HugeGraphBuilder;
 import org.neo4j.gds.core.huge.NodeFilteredGraph;
 import org.neo4j.gds.core.huge.UnionGraph;
-import org.neo4j.gds.settings.TimeUtil;
+import org.neo4j.gds.core.utils.TimeUtil;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.time.ZonedDateTime;

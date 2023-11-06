@@ -26,7 +26,7 @@ import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
 import org.neo4j.gds.core.StringIdentifierValidations;
 import org.neo4j.gds.core.Username;
-import org.neo4j.gds.settings.TimeUtil;
+import org.neo4j.gds.core.utils.TimeUtil;
 
 import java.time.ZonedDateTime;
 

@@ -25,7 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.settings.Settings;
+import org.neo4j.gds.settings.Neo4jSettings;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.kernel.internal.Version;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
@@ -99,13 +99,13 @@ class SysInfoProcTest extends BaseProcTest {
         super.configuration(builder);
         builder
             // add another unrestricted to test string concatenation in debug output
-            .setConfig(Settings.procedureUnrestricted(), List.of("gds.*", "foo.bar"))
-            .setConfig(Settings.pageCacheMemory(), Settings.pageCacheMemoryValue("42M"))
+            .setConfig(Neo4jSettings.procedureUnrestricted(), List.of("gds.*", "foo.bar"))
+            .setConfig(Neo4jSettings.pageCacheMemory(), Neo4jSettings.pageCacheMemoryValue("42M"))
             .setConfig(
-                Settings.transactionStateAllocation(),
+                Neo4jSettings.transactionStateAllocation(),
                 GraphDatabaseSettings.TransactionStateMemoryAllocation.ON_HEAP
             )
-            .setConfig(Settings.transactionStateMaxOffHeapMemory(), 1337L);
+            .setConfig(Neo4jSettings.transactionStateMaxOffHeapMemory(), 1337L);
     }
 
     @Test
@@ -276,9 +276,9 @@ class SysInfoProcTest extends BaseProcTest {
             .hasEntrySatisfying("vmCompiler", isNotNull)
             .hasEntrySatisfying("containerized", anyOf(isTrue, isFalse))
             .containsEntry("dbms.security.procedures.unrestricted", "gds.*,foo.bar")
-            .containsEntry(Settings.pageCacheMemory().name(), Settings.pageCacheMemoryValue("42M"))
-            .containsEntry(Settings.transactionStateAllocation().name(), "ON_HEAP")
-            .containsEntry(Settings.transactionStateMaxOffHeapMemory().name(), 1337L)
+            .containsEntry(Neo4jSettings.pageCacheMemory().name(), Neo4jSettings.pageCacheMemoryValue("42M"))
+            .containsEntry(Neo4jSettings.transactionStateAllocation().name(), "ON_HEAP")
+            .containsEntry(Neo4jSettings.transactionStateMaxOffHeapMemory().name(), 1337L)
             .containsEntry("featureSkipOrphanNodes", GdsFeatureToggles.SKIP_ORPHANS.isEnabled())
             .containsEntry("featurePartitionedScan", GdsFeatureToggles.USE_PARTITIONED_SCAN.isEnabled())
             .containsEntry("featureBitIdMap", GdsFeatureToggles.USE_BIT_ID_MAP.isEnabled())

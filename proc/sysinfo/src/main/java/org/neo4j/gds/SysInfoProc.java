@@ -26,7 +26,7 @@ import org.neo4j.gds.compat.Neo4jProxyFactory;
 import org.neo4j.gds.compat.ProxyFactory;
 import org.neo4j.gds.compat.ProxyUtil;
 import org.neo4j.gds.compat.SettingProxyFactory;
-import org.neo4j.gds.settings.Settings;
+import org.neo4j.gds.settings.Neo4jSettings;
 import org.neo4j.gds.core.utils.mem.GcListenerExtension;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -297,8 +297,8 @@ public class SysInfoProc {
     }
 
     private static void configInfo(Config config, Consumer<DebugValue> builder) {
-        builder.accept(configVal(config, Settings.procedureUnrestricted(), s -> String.join(",", s)));
-        builder.accept(configVal(config, Settings.transactionStateAllocation(), Enum::name));
+        builder.accept(configVal(config, Neo4jSettings.procedureUnrestricted(), s -> String.join(",", s)));
+        builder.accept(configVal(config, Neo4jSettings.transactionStateAllocation(), Enum::name));
 
         // the following keys are different on different Neo4j versions, we add those that are available
 
