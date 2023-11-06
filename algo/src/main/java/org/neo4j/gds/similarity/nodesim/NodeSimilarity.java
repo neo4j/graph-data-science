@@ -257,12 +257,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         WccStreamConfig wccConfig = ImmutableWccStreamConfig
             .builder()
             .concurrency(concurrency)
-            .addAllRelationshipTypes(graph.schema().relationshipSchema().availableTypes().stream()
-                .map(rt -> rt.name)
-                .toList())
-            .addAllNodeLabels(graph.schema().nodeSchema().availableLabels().stream()
-                .map(nl -> nl.name)
-                .toList())
+            .addAllRelationshipTypes(config.relationshipTypes())
+            .addAllNodeLabels(config.nodeLabels())
             .build();
 
         Wcc wcc = new WccAlgorithmFactory<>().build(graph, wccConfig, ProgressTracker.NULL_TRACKER);
