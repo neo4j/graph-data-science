@@ -413,6 +413,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         double similarity = 0;
         if (components.setIdOf(sourceNodeId) != components.setIdOf(targetNodeId)) {
             consumer.accept(sourceNodeId, targetNodeId, similarity);
+            return;
         }
 
         var sourceNodeNeighbors = neighbors.get(sourceNodeId);
