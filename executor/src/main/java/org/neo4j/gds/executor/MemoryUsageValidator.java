@@ -29,6 +29,7 @@ import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.settings.MemoryEstimationSettings;
+import org.neo4j.gds.settings.Settings;
 import org.neo4j.logging.Log;
 
 import java.util.StringJoiner;
@@ -75,7 +76,7 @@ public class MemoryUsageValidator {
             log.debug("Sudo mode: Won't check for available memory.");
         } else {
             var neo4jConfig = dependencyResolver.resolveDependency(Config.class);
-            var useMaxMemoryEstimation = neo4jConfig.get(MemoryEstimationSettings.validate_using_max_memory_estimation);
+            var useMaxMemoryEstimation = neo4jConfig.get(Settings.validateUsingMaxMemoryEstimation());
             validateMemoryUsage(memoryTreeWithDimensions, inspector.freeMemory(), useMaxMemoryEstimation, log);
         }
 

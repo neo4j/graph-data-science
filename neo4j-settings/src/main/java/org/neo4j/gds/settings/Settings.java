@@ -24,7 +24,6 @@ import org.neo4j.configuration.connectors.BoltConnector;
 import org.neo4j.configuration.connectors.HttpConnector;
 import org.neo4j.configuration.connectors.HttpsConnector;
 import org.neo4j.configuration.helpers.SocketAddress;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.SettingsUtil;
 import org.neo4j.graphdb.config.Setting;
@@ -69,13 +68,6 @@ public final class Settings {
 
     public static Setting<Path> neo4jHome() {
         return GraphDatabaseSettings.neo4j_home;
-    }
-
-    @ValueClass
-    public interface PageCacheMemorySetting<T> {
-        Setting<T> setting();
-
-        T value();
     }
 
     public static <T> Setting<T> pageCacheMemory() {
@@ -134,12 +126,12 @@ public final class Settings {
         return Neo4jProxy.additionalJvm();
     }
 
-    public static Setting<Path> loadCsvFileUrlRoot() {
-        return GraphDatabaseSettings.load_csv_file_url_root;
+    public static Setting<Path> exportLocation() {
+        return GraphStoreExportSettings.export_location_setting;
     }
 
-    public static Setting<Long> memoryTransactionMaxSize() {
-        return GraphDatabaseSettings.memory_transaction_max_size;
+    public static Setting<Boolean> validateUsingMaxMemoryEstimation() {
+        return MemoryEstimationSettings.validate_using_max_memory_estimation;
     }
 
     private Settings() {

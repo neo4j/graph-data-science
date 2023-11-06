@@ -34,6 +34,7 @@ import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.SettingProxy;
 import org.neo4j.gds.settings.GraphStoreExportSettings;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.settings.Settings;
 import org.neo4j.graphdb.QueryExecutionException;
 import org.neo4j.io.fs.DefaultFileSystemAbstraction;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
@@ -75,7 +76,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         super.configuration(builder);
         builder.setFileSystem(new DefaultFileSystemAbstraction());
-        builder.setConfig(GraphStoreExportSettings.export_location_setting, tempDir);
+        builder.setConfig(Settings.exportLocation(), tempDir);
     }
 
     @BeforeEach
@@ -270,7 +271,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
 
         GraphDatabaseApiProxy
             .resolveDependency(db, Config.class)
-            .set(GraphStoreExportSettings.export_location_setting, null);
+            .set(Settings.exportLocation(), null);
 
         var exportQuery =
             "CALL gds.graph.export.csv('test-graph', {" +

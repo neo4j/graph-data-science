@@ -36,6 +36,7 @@ import org.neo4j.gds.services.DatabaseIdAccessor;
 import org.neo4j.gds.services.UserAccessor;
 import org.neo4j.gds.services.UserLogServices;
 import org.neo4j.gds.settings.MemoryEstimationSettings;
+import org.neo4j.gds.settings.Settings;
 import org.neo4j.graphdb.config.Configuration;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
@@ -103,7 +104,7 @@ public final class ExtensionBuilder {
         // Read some configuration used to select behaviour
         var progressTrackingEnabled = neo4jConfiguration.get(ProgressFeatureSettings.progress_tracking_enabled);
         log.info("Progress tracking: " + (progressTrackingEnabled ? "enabled" : "disabled"));
-        var useMaxMemoryEstimation = neo4jConfiguration.get(MemoryEstimationSettings.validate_using_max_memory_estimation);
+        var useMaxMemoryEstimation = neo4jConfiguration.get(Settings.validateUsingMaxMemoryEstimation());
         log.info("Memory usage guard: " + (useMaxMemoryEstimation ? "maximum" : "minimum") + " estimate");
 
         // Task business is initialised from Neo4j configuration

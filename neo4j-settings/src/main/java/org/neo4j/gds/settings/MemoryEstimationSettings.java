@@ -33,6 +33,7 @@ public class MemoryEstimationSettings implements SettingsDeclaration {
 
     @Description("Use maximum memory estimation in procedure memory guard.")
     @DocumentedDefaultValue("false")
+    @SuppressWarnings("WeakerAccess")
     public static final Setting<Boolean> validate_using_max_memory_estimation = newBuilder(
         "gds.validate_using_max_memory_estimation",
         BOOL,

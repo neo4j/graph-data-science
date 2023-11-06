@@ -33,6 +33,7 @@ import static org.neo4j.gds.compat.SettingProxy.newBuilder;
 public class GraphStoreExportSettings implements SettingsDeclaration {
 
     @Description("Sets the export location for file based exports.")
+    @SuppressWarnings("WeakerAccess")
     public static final Setting<Path> export_location_setting = newBuilder(
         "gds.export.location",
         PATH,
