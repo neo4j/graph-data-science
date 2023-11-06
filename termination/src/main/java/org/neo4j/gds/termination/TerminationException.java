@@ -19,29 +19,9 @@
  */
 package org.neo4j.gds.termination;
 
-@FunctionalInterface
-public interface TerminationFlag {
+class TerminationException extends RuntimeException {
 
-    TerminationFlag RUNNING_TRUE = () -> true;
-
-    int RUN_CHECK_NODE_COUNT = 10_000;
-
-    static TerminationFlag wrap(TerminationMonitor terminationMonitor) {
-        return new TerminationFlagImpl(terminationMonitor, 10_000);
-    }
-
-    static TerminationFlag wrap(TerminationMonitor terminationMonitor, long interval) {
-        return new TerminationFlagImpl(terminationMonitor, interval);
-    }
-
-    boolean running();
-
-    /**
-     * @throws RuntimeException if the transaction has been terminated
-     */
-    default void assertRunning() {
-        if (!running()) {
-            throw new TerminationException();
-        }
+    TerminationException() {
+        super("The execution has been terminated.");
     }
 }

@@ -22,19 +22,14 @@ package org.neo4j.gds.termination;
 public class TerminationFlagImpl implements TerminationFlag {
 
     private final TerminationMonitor terminationMonitor;
-
-    private long interval = 10_000;
+    private final long interval;
 
     private volatile long lastCheck = 0;
     private volatile boolean running = true;
 
-    public TerminationFlagImpl(TerminationMonitor terminationMonitor) {
+    TerminationFlagImpl(TerminationMonitor terminationMonitor, long interval) {
         this.terminationMonitor = terminationMonitor;
-    }
-
-    TerminationFlagImpl withCheckInterval(long interval) {
         this.interval = interval;
-        return this;
     }
 
     @Override
