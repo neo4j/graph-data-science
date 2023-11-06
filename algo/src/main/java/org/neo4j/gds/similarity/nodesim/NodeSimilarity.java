@@ -26,12 +26,17 @@ import org.neo4j.gds.api.RelationshipConsumer;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.SetBitsIterable;
+import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
+import org.neo4j.gds.wcc.ImmutableWccStreamConfig;
+import org.neo4j.gds.wcc.Wcc;
+import org.neo4j.gds.wcc.WccAlgorithmFactory;
+import org.neo4j.gds.wcc.WccStreamConfig;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -55,6 +60,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     private final MetricSimilarityComputer similarityComputer;
     private HugeObjectArray<long[]> neighbors;
     private HugeObjectArray<double[]> weights;
+    private DisjointSetStruct components;
 
     private final boolean weighted;
 
@@ -188,6 +194,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     private void prepare() {
         progressTracker.beginSubTask();
 
+        computeComponents();
+
         neighbors = HugeObjectArray.newArray(long[].class, graph.nodeCount());
         if (weighted) {
             weights = HugeObjectArray.newArray(double[].class, graph.nodeCount());
@@ -243,6 +251,22 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         } else {
             return computeAllParallel();
         }
+    }
+
+    private void computeComponents() {
+        WccStreamConfig wccConfig = ImmutableWccStreamConfig
+            .builder()
+            .concurrency(concurrency)
+            .addAllRelationshipTypes(graph.schema().relationshipSchema().availableTypes().stream()
+                .map(rt -> rt.name)
+                .toList())
+            .addAllNodeLabels(graph.schema().nodeSchema().availableLabels().stream()
+                .map(nl -> nl.name)
+                .toList())
+            .build();
+
+        Wcc wcc = new WccAlgorithmFactory<>().build(graph, wccConfig, ProgressTracker.NULL_TRACKER);
+        components = wcc.compute();
     }
 
     private Stream<SimilarityResult> computeAll() {
@@ -386,9 +410,13 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     }
 
     private void computeSimilarityFor(long sourceNodeId, long targetNodeId, SimilarityConsumer consumer) {
+        double similarity = 0;
+        if (components.setIdOf(sourceNodeId) != components.setIdOf(targetNodeId)) {
+            consumer.accept(sourceNodeId, targetNodeId, similarity);
+        }
+
         var sourceNodeNeighbors = neighbors.get(sourceNodeId);
         var targetNodeNeighbors = neighbors.get(targetNodeId);
-        double similarity;
         if (weighted) {
             similarity = computeWeightedSimilarity(
                 sourceNodeNeighbors, targetNodeNeighbors, weights.get(sourceNodeId), weights.get(targetNodeId)
