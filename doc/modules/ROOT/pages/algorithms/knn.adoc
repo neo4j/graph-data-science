@@ -23,7 +23,7 @@ kNN is featured in the end-to-end example Jupyter notebooks:
 The K-Nearest Neighbors algorithm computes a distance value for all node pairs in the graph and creates new relationships between each node and its k nearest neighbors.
 The distance is calculated based on node properties.
 
-The input of this algorithm is a homogeneous graph.
+The input of this algorithm is a homogeneous graph; any node label or relationships type information in the graph is ignored.
 The graph does not need to be connected, in fact, existing relationships between nodes will be ignored - apart from random walk sampling if that that initial sampling option is used.
 New relationships are created between each node and its k nearest neighbors.
 
