@@ -20,6 +20,7 @@
 package org.neo4j.gds.graphbuilder;
 
 import org.neo4j.gds.TestSupport;
+import org.neo4j.gds.termination.TerminatedException;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.graphdb.TransactionTerminatedException;
 
@@ -40,7 +41,7 @@ public final class TransactionTerminationTestUtils {
         TestTerminationFlag terminationFlag = new TestTerminationFlag();
 
         AtomicLong terminationTime = new AtomicLong();
-        assertThrows(TransactionTerminatedException.class, () -> {
+        assertThrows(TerminatedException.class, () -> {
             new java.util.Timer(true).schedule(
                 new java.util.TimerTask() {
                     @Override

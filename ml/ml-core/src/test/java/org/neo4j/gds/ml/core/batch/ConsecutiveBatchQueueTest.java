@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.core.batch;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.termination.TerminatedException;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.graphdb.TransactionTerminatedException;
 
@@ -82,7 +83,7 @@ class ConsecutiveBatchQueueTest {
         var batchQueue = BatchQueue.consecutive(101, 1, 4);
 
         assertThatThrownBy(() -> batchQueue.parallelConsume(Batch::elementIds, 4, flag))
-            .isInstanceOf(TransactionTerminatedException.class)
-            .hasMessageContaining("The transaction has been terminated.");
+            .isInstanceOf(TerminatedException.class)
+            .hasMessageContaining("The execution has been terminated.");
     }
 }

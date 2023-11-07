@@ -22,7 +22,7 @@ package org.neo4j.gds.ml.pipeline;
 import org.junit.jupiter.api.DynamicTest;
 import org.neo4j.gds.core.model.CatalogModelContainer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyTrainingPipeline;
-import org.neo4j.graphdb.TransactionTerminatedException;
+import org.neo4j.gds.termination.TerminatedException;
 
 import java.util.List;
 import java.util.function.Function;
@@ -41,8 +41,8 @@ public interface PipelineTrainAlgorithmTest {
                 algorithm.setTerminationFlag(() -> false);
                 algorithm.compute();
             })
-                .isInstanceOf(TransactionTerminatedException.class)
-                .hasMessageContaining("The transaction has been terminated.")
+                .isInstanceOf(TerminatedException.class)
+                .hasMessageContaining("The execution has been terminated.")
         );
     }
 

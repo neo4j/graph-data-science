@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.gradientdescent;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.termination.TerminatedException;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -82,8 +83,8 @@ class TrainingTest {
         var objective = new TestTrainingObjective();
 
         assertThatThrownBy(() -> training.train(objective, () -> BatchQueue.consecutive(100, 10), 4))
-            .isInstanceOf(TransactionTerminatedException.class)
-            .hasMessageContaining("The transaction has been terminated.");
+            .isInstanceOf(TerminatedException.class)
+            .hasMessageContaining("The execution has been terminated.");
     }
 
     public static class TestTrainingObjective implements Objective<Long> {

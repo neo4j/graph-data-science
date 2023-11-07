@@ -41,7 +41,7 @@ public interface TerminationFlag {
      */
     default void assertRunning() {
         if (!running()) {
-            throw new TerminationException();
+            throw new TerminatedException();
         }
     }
 }

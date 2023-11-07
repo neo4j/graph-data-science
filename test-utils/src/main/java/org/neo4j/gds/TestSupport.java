@@ -45,6 +45,7 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
+import org.neo4j.gds.termination.TerminatedException;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -358,14 +359,11 @@ public final class TestSupport {
             .isEqualTo(MemoryRange.of(expectedMin, expectedMax));
     }
 
-
     public static void assertTransactionTermination(Executable executable) {
-        TransactionTerminatedException exception = assertThrows(
-            TransactionTerminatedException.class,
+        assertThrows(
+            TerminatedException.class,
             executable
         );
-
-        assertEquals(Status.Transaction.Terminated, exception.status());
     }
 
     public static void assertCypherResult(
