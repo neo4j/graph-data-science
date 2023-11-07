@@ -19,28 +19,38 @@
  */
 package org.neo4j.gds.termination;
 
+import java.util.Optional;
+import java.util.function.Supplier;
+
 public class TerminationFlagImpl implements TerminationFlag {
 
+    private static final long INTERVAL_MS = 10_000;
+
     private final TerminationMonitor terminationMonitor;
-    private final long interval;
+    private final Optional<Supplier<RuntimeException>> terminationCause;
 
     private volatile long lastCheck = 0;
     private volatile boolean running = true;
 
-    TerminationFlagImpl(TerminationMonitor terminationMonitor, long interval) {
+    TerminationFlagImpl(TerminationMonitor terminationMonitor, Optional<Supplier<RuntimeException>> terminationCause) {
         this.terminationMonitor = terminationMonitor;
-        this.interval = interval;
+        this.terminationCause = terminationCause;
     }
 
     @Override
     public boolean running() {
         final long currentTime = System.currentTimeMillis();
-        if (currentTime > lastCheck + interval) {
+        if (currentTime > lastCheck + INTERVAL_MS) {
             if (terminationMonitor.isTerminated()) {
                 running = false;
             }
             lastCheck = currentTime;
         }
         return running;
+    }
+
+    @Override
+    public void terminate() {
+        throw this.terminationCause.map(Supplier::get).orElseGet(TerminatedException::new);
     }
 }

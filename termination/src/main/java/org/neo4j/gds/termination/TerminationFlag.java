@@ -19,6 +19,9 @@
  */
 package org.neo4j.gds.termination;
 
+import java.util.Optional;
+import java.util.function.Supplier;
+
 @FunctionalInterface
 public interface TerminationFlag {
 
@@ -26,12 +29,23 @@ public interface TerminationFlag {
 
     int RUN_CHECK_NODE_COUNT = 10_000;
 
+    /**
+     * Creates a new termination flag.
+     *
+     * @param terminationMonitor used to signal that the execution stopped running
+     */
     static TerminationFlag wrap(TerminationMonitor terminationMonitor) {
-        return new TerminationFlagImpl(terminationMonitor, 10_000);
+        return new TerminationFlagImpl(terminationMonitor, Optional.empty());
     }
 
-    static TerminationFlag wrap(TerminationMonitor terminationMonitor, long interval) {
-        return new TerminationFlagImpl(terminationMonitor, interval);
+    /**
+     * Creates a new termination flag.
+     *
+     * @param terminationMonitor used to signal that the execution stopped running
+     * @param terminationCause returns a {@link RuntimeException} that is thrown when the execution is terminated
+     */
+    static TerminationFlag wrap(TerminationMonitor terminationMonitor, Supplier<RuntimeException> terminationCause) {
+        return new TerminationFlagImpl(terminationMonitor, Optional.of(terminationCause));
     }
 
     boolean running();
@@ -41,7 +55,11 @@ public interface TerminationFlag {
      */
     default void assertRunning() {
         if (!running()) {
-            throw new TerminatedException();
+            terminate();
         }
+    }
+
+    default void terminate() {
+        throw new TerminatedException();
     }
 }

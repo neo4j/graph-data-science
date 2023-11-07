@@ -28,6 +28,8 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.graphdb.TransactionTerminatedException;
+import org.neo4j.kernel.api.exceptions.Status;
 
 import java.util.Map;
 import java.util.Optional;
@@ -149,7 +151,10 @@ public class ProcedureExecutor<
         GraphStore graphStore,
         CONFIG config
     ) {
-        TerminationFlag terminationFlag = TerminationFlag.wrap(executionContext.terminationMonitor());
+        TerminationFlag terminationFlag = TerminationFlag.wrap(
+            executionContext.terminationMonitor(),
+            () -> new TransactionTerminatedException(Status.Transaction.Terminated)
+        );
         ALGO algorithm = algoSpec.algorithmFactory(executionContext)
             .accept(new AlgorithmFactory.Visitor<>() {
                 @Override
