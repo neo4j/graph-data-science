@@ -41,7 +41,7 @@ import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
 import org.neo4j.gds.procedures.KernelTransactionAccessor;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.TerminationFlagService;
-import org.neo4j.gds.procedures.community.ConfigurationParser;
+import org.neo4j.gds.procedures.configparser.ConfigurationParser;
 import org.neo4j.gds.procedures.similarity.SimilarityProcedureFacade;
 import org.neo4j.gds.services.DatabaseIdAccessor;
 import org.neo4j.gds.services.UserAccessor;

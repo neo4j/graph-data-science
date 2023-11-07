@@ -20,10 +20,10 @@
 package org.neo4j.gds.algorithms.similarity;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
-import org.neo4j.gds.algorithms.KnnSpecificFields;
+import org.neo4j.gds.algorithms.similarity.specificfields.KnnSpecificFields;
 import org.neo4j.gds.algorithms.RelationshipMutateResult;
-import org.neo4j.gds.algorithms.SimilaritySpecificFields;
-import org.neo4j.gds.algorithms.SimilaritySpecificFieldsWithDistribution;
+import org.neo4j.gds.algorithms.similarity.specificfields.SimilaritySpecificFields;
+import org.neo4j.gds.algorithms.similarity.specificfields.SimilaritySpecificFieldsWithDistribution;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;

@@ -25,20 +25,23 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
 
 import java.util.Collection;
+import java.util.Set;
 
-import static org.neo4j.gds.config.ConfigNodesValidations.labelFilteredGraphNotContainsNode;
-import static org.neo4j.gds.config.ConfigNodesValidations.nodeLabelFilterDescription;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.config.ConfigNodesValidations.nodesExistInGraph;
+import static org.neo4j.gds.config.ConfigNodesValidations.nodesNotNegative;
+import static org.neo4j.gds.config.NodeIdParser.parseToSingleNodeId;
 
-public interface TargetNodeConfig extends NodeConfig {
+public interface TargetNodeConfig {
 
     String TARGET_NODE_KEY = "targetNode";
 
-    @Configuration.ConvertWith(method = "org.neo4j.gds.config.TargetNodeConfig#parseTargetNodeId")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.config.TargetNodeConfig#parseTargetNode")
     long targetNode();
 
-    static long parseTargetNodeId(Object input) {
-        return NodeConfig.parseNodeId(input, TARGET_NODE_KEY);
+    static long parseTargetNode(Object input) {
+        var node = parseToSingleNodeId(input, TARGET_NODE_KEY);
+        nodesNotNegative(Set.of(node), TARGET_NODE_KEY);
+        return node;
     }
 
     @Configuration.GraphStoreValidationCheck
@@ -47,14 +50,6 @@ public interface TargetNodeConfig extends NodeConfig {
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        var targetNodeId = targetNode();
-
-        if (labelFilteredGraphNotContainsNode(selectedLabels, graphStore.nodes(), targetNodeId)) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Target node does not exist in the in-memory graph%s: `%d`",
-                nodeLabelFilterDescription(selectedLabels, graphStore),
-                targetNodeId
-            ));
-        }
+        nodesExistInGraph(graphStore, selectedLabels, Set.of(targetNode()), TARGET_NODE_KEY);
     }
 }

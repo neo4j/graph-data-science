@@ -27,7 +27,6 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
-import org.neo4j.gds.internal.MemoryEstimationSettings;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.KernelTransactionAccessor;
@@ -36,6 +35,7 @@ import org.neo4j.gds.procedures.TerminationFlagService;
 import org.neo4j.gds.services.DatabaseIdAccessor;
 import org.neo4j.gds.services.UserAccessor;
 import org.neo4j.gds.services.UserLogServices;
+import org.neo4j.gds.settings.GdsSettings;
 import org.neo4j.graphdb.config.Configuration;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
@@ -103,7 +103,7 @@ public final class ExtensionBuilder {
         // Read some configuration used to select behaviour
         var progressTrackingEnabled = neo4jConfiguration.get(ProgressFeatureSettings.progress_tracking_enabled);
         log.info("Progress tracking: " + (progressTrackingEnabled ? "enabled" : "disabled"));
-        var useMaxMemoryEstimation = neo4jConfiguration.get(MemoryEstimationSettings.validate_using_max_memory_estimation);
+        var useMaxMemoryEstimation = neo4jConfiguration.get(GdsSettings.validateUsingMaxMemoryEstimation());
         log.info("Memory usage guard: " + (useMaxMemoryEstimation ? "maximum" : "minimum") + " estimate");
 
         // Task business is initialised from Neo4j configuration
@@ -199,8 +199,13 @@ public final class ExtensionBuilder {
 
         var communityProcedureProvider = createCommunityProcedureProvider(exporterBuildersProviderService);
         var similarityProcedureProvider = createSimilarityProcedureProvider(exporterBuildersProviderService);
+        var centralityProcedureProvider = createCentralityProcedureProvider(exporterBuildersProviderService);
 
-        return new GraphDataScienceProvider(log, catalogFacadeProvider, communityProcedureProvider,
+        return new GraphDataScienceProvider(
+            log,
+            catalogFacadeProvider,
+            centralityProcedureProvider,
+            communityProcedureProvider,
             similarityProcedureProvider
         );
     }
@@ -248,6 +253,24 @@ public final class ExtensionBuilder {
         var algorithmMetaDataSetterService = new AlgorithmMetaDataSetterService();
 
         return new SimilarityProcedureProvider(
+            log,
+            graphStoreCatalogService,
+            useMaxMemoryEstimation,
+            algorithmMetaDataSetterService,
+            databaseIdAccessor,
+            kernelTransactionAccessor,
+            exporterBuildersProviderService,
+            taskRegistryFactoryService,
+            terminationFlagService,
+            userLogServices,
+            userAccessor
+        );
+    }
+
+    private CentralityProcedureProvider createCentralityProcedureProvider(ExporterBuildersProviderService exporterBuildersProviderService) {
+        var algorithmMetaDataSetterService = new AlgorithmMetaDataSetterService();
+
+        return new CentralityProcedureProvider(
             log,
             graphStoreCatalogService,
             useMaxMemoryEstimation,

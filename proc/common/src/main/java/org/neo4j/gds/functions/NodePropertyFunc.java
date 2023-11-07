@@ -23,7 +23,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.NodeConfig;
+import org.neo4j.gds.config.NodeIdParser;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -90,7 +90,7 @@ public class NodePropertyFunc {
             }
         }
 
-        long neoNodeId = NodeConfig.parseNodeId(nodeId, "nodeId");
+        long neoNodeId = NodeIdParser.parseToSingleNodeId(nodeId, "nodeId");
 
         long internalId = graphStore.nodes().safeToMappedNodeId(neoNodeId);
 

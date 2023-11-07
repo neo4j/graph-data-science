@@ -44,7 +44,8 @@ public abstract class AbstractInMemoryNodeCursor extends NodeRecord implements S
     private final GraphStore graphStore;
     private final TokenHolders tokenHolders;
     private final boolean hasProperties;
-    private final long[] nodeLabelReadBuffer;
+    private final long[] longNodeLabelReadBuffer;
+    private final int[] intNodeLabelReadBuffer;
     private final MutableInt nodeLabelCounter;
 
     public AbstractInMemoryNodeCursor(GraphStore graphStore, TokenHolders tokenHolders) {
@@ -52,24 +53,37 @@ public abstract class AbstractInMemoryNodeCursor extends NodeRecord implements S
         this.graphStore = graphStore;
         this.tokenHolders = tokenHolders;
         this.hasProperties = !graphStore.nodePropertyKeys().isEmpty();
-        nodeLabelReadBuffer = new long[graphStore.nodeLabels().size()];
-        nodeLabelCounter = new MutableInt();
+        this.longNodeLabelReadBuffer = new long[graphStore.nodeLabels().size()];
+        this.intNodeLabelReadBuffer = new int[graphStore.nodeLabels().size()];
+        this.nodeLabelCounter = new MutableInt();
     }
 
     public abstract void properties(StoragePropertyCursor propertyCursor);
 
-    @Override
-    public long[] labels() {
+    protected long[] longLabels() {
         nodeLabelCounter.setValue(0);
 
         graphStore.nodes().forEachNodeLabel(getId(), nodeLabel -> {
-            nodeLabelReadBuffer[nodeLabelCounter.getAndIncrement()] = tokenHolders
+            longNodeLabelReadBuffer[nodeLabelCounter.getAndIncrement()] = tokenHolders
                 .labelTokens()
                 .getIdByName(nodeLabel.name());
             return true;
         });
 
-        return Arrays.copyOf(nodeLabelReadBuffer, nodeLabelCounter.getValue());
+        return Arrays.copyOf(longNodeLabelReadBuffer, nodeLabelCounter.getValue());
+    }
+
+    protected int[] intLabels() {
+        nodeLabelCounter.setValue(0);
+
+        graphStore.nodes().forEachNodeLabel(getId(), nodeLabel -> {
+            intNodeLabelReadBuffer[nodeLabelCounter.getAndIncrement()] = tokenHolders
+                .labelTokens()
+                .getIdByName(nodeLabel.name());
+            return true;
+        });
+
+        return Arrays.copyOf(intNodeLabelReadBuffer, nodeLabelCounter.getValue());
     }
 
     public boolean hasAtLeastOneLabelForCurrentNode() {

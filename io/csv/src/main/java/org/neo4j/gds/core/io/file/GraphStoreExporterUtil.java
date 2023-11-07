@@ -22,11 +22,11 @@ package org.neo4j.gds.core.io.file;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.GraphStoreExportSettings;
 import org.neo4j.gds.core.io.GraphStoreExporter;
 import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.io.file.csv.GraphStoreToCsvExporter;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.settings.GdsSettings;
 import org.neo4j.graphdb.config.Configuration;
 import org.neo4j.logging.Log;
 
@@ -73,7 +73,7 @@ public final class GraphStoreExporterUtil {
     }
 
     public static Path exportLocation(Configuration neo4jConfig, GraphStoreToFileExporterConfig config) {
-        var rootPath = neo4jConfig.get(GraphStoreExportSettings.export_location_setting);
+        var rootPath = neo4jConfig.get(GdsSettings.exportLocation());
         var exportPath = rootPath != null ? rootPath.resolve(EXPORT_DIR) : null;
         return exportPath(exportPath, config);
     }
@@ -82,7 +82,7 @@ public final class GraphStoreExporterUtil {
         if (rootPath == null) {
             throw new RuntimeException(formatWithLocale(
                 "The configuration option '%s' must be set.",
-                GraphStoreExportSettings.export_location_setting.name()
+                GdsSettings.exportLocation().name()
             ));
         }
 

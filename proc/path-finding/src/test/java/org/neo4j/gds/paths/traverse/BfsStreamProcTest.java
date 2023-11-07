@@ -233,9 +233,9 @@ class BfsStreamProcTest extends BaseProcTest {
             .addParameter("sourceNode", 4242)
             .yields();
 
-        Assertions.setMaxStackTraceElementsDisplayed(100);
+        Assertions.setMaxStackTraceElementsDisplayed(150);
 
-        assertError(query, "Source node does not exist in the in-memory graph: `4242`");
+        assertError(query, "sourceNode nodes do not exist in the in-memory graph: [4242]");
     }
     
 }

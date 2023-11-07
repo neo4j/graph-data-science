@@ -37,10 +37,11 @@ import static org.neo4j.gds.api.AdjacencyCursor.NOT_FOUND;
 
 public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements RelationshipIntersect {
 
-    private CURSOR cache;
-    private CURSOR cacheA;
-    private CURSOR cacheB;
     private final IntPredicate degreeFilter;
+    private CURSOR origNeighborsOfa;
+    private CURSOR helpingCursorOfa;
+    private CURSOR helpingCursorOfb;
+
 
     protected GraphIntersect(long maxDegree) {
         this.degreeFilter = maxDegree < Long.MAX_VALUE
@@ -49,130 +50,108 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
     }
 
     @Override
-    public void intersectAll(long nodeA, IntersectionConsumer consumer) {
+    public void intersectAll(long a, IntersectionConsumer consumer) {
         // check the first node's degree
-        int degreeA = degree(nodeA);
-        if (!degreeFilter.test(degreeA)) {
+        int degreeOfa = degree(a);
+        if (!degreeFilter.test(degreeOfa)) {
             return;
         }
 
-        CURSOR neighboursAMain = cursorForNode(cache, nodeA, degreeA);
-        cache = neighboursAMain;
+        origNeighborsOfa = cursorForNode(origNeighborsOfa, a, degreeOfa);
 
-        // find first neighbour B of A with id > A
-        long nodeB = neighboursAMain.skipUntil(nodeA);
-        // if there is no such neighbour -> no triangle (or we already found it)
-        if (nodeB == NOT_FOUND) {
-            return;
-        }
-
-        // iterates over neighbours of A
-        CURSOR neighboursA = cacheA;
-
-        // iterates over neighbours of B
-        CURSOR neighboursB = cacheB;
-        // current neighbour of B
-        long nodeCFromB;
-
-        // last node where Ca = Cb
-        // prevents counting a new triangle for parallel relationships
-        long triangleC;
-
-        // for all neighbors of A
-        while (neighboursAMain.hasNextVLong()) {
-            // we have not yet seen a triangle
-            triangleC = NOT_FOUND;
-            // check the second node's degree
-            int degreeB = degree(nodeB);
-            if (degreeFilter.test(degreeB)) {
-                neighboursB = cursorForNode(
-                    neighboursB,
-                    nodeB,
-                    degreeB
-                );
-
-                // find first neighbour Cb of B with id > B
-                nodeCFromB = neighboursB.skipUntil(nodeB);
-
-                // if B had no neighbors, find a new B
-                if (nodeCFromB != NOT_FOUND) {
-                    // copy the state of A's cursor
-                    neighboursA = copyCursor(neighboursAMain, neighboursA);
-
-                    var nodeCFromA = NOT_FOUND; //current neighbor from a
-
-                    if (degreeFilter.test(degree(nodeCFromB))) {
-                        // find the first neighbour Ca of A with id >= Cb
-                        nodeCFromA = neighboursA.advance(nodeCFromB);
-                        triangleC = checkForAndEmitTriangle(consumer, nodeA, nodeB, nodeCFromA, nodeCFromB, triangleC);
-                    }
-
-                    // while both A and B have more neighbours
-                    while (neighboursA.hasNextVLong() && neighboursB.hasNextVLong()) {
-                        // take the next neighbour Cb of B
-                        nodeCFromB = neighboursB.nextVLong();
-                        if (degreeFilter.test(degree(nodeCFromB))) {
-                            if (nodeCFromB > nodeCFromA) {
-                                // if Cb > Ca, take the next neighbour Ca of A with id >= Cb
-                                nodeCFromA = neighboursA.advance(nodeCFromB);
-                            }
-                            triangleC = checkForAndEmitTriangle(
-                                consumer,
-                                nodeA,
-                                nodeB,
-                                nodeCFromA,
-                                nodeCFromB,
-                                triangleC
-                            );
-                        }
-                    }
-
-                    // it is possible that the last Ca > Cb, but there are no more neighbours Ca of A
-                    // so if there are more neighbours Cb of B
-                    if (neighboursB.hasNextVLong()) {
-                        // we take the next neighbour Cb of B with id >= Ca
-                        nodeCFromB = neighboursB.advance(nodeCFromA);
-                        // B had some more nodes, but none of them were >= Ca, so we skip it
-                        if (nodeCFromB != NOT_FOUND) {
-                            var degreeCFromB = degree(nodeCFromB);
-
-                            if (degreeFilter.test(degreeCFromB)) {
-                                checkForAndEmitTriangle(consumer, nodeA, nodeB, nodeCFromA, nodeCFromB, triangleC);
-                            }
-                        }
-                    }
-                }
-            }
-
-            // skip until the next neighbour B of A with id > (current) B
-            nodeB = neighboursAMain.skipUntil(nodeB);
-
-            // There are no more neighbors that are relevant to us
-            if (nodeB == NOT_FOUND) {
-                return;
-            }
-        }
-
-        cacheA = neighboursA;
-        cacheB = neighboursB;
+        triangles(a, degreeOfa, origNeighborsOfa, consumer);
     }
 
-    private long checkForAndEmitTriangle(
+    private void triangles(
+        long a,
+        int degreeOfa,
+        CURSOR neighborsOfa,
+        IntersectionConsumer consumer
+    ) {
+        long b = next(neighborsOfa);
+        while (b != NOT_FOUND && b < a) {
+            var degreeOfb = degree(b);
+            if (degreeFilter.test(degreeOfb)) {
+                helpingCursorOfb = cursorForNode(
+                    helpingCursorOfb,
+                    b,
+                    degreeOfb
+                );
+
+                helpingCursorOfa = cursorForNode(helpingCursorOfa, a, degreeOfa);
+
+                triangles(
+                    a,
+                    b,
+                    helpingCursorOfa,
+                    helpingCursorOfb,
+                    consumer
+                ); //find all triangles involving the edge (a-b)
+            }
+
+            b = next(neighborsOfa);
+        }
+
+    }
+
+    private void triangles(long a, long b, CURSOR neighborsOfa, CURSOR neighborsOfb, IntersectionConsumer consumer) {
+        long c = next(neighborsOfb);
+        long currentOfa = next(neighborsOfa);
+        while (c != NOT_FOUND && currentOfa != NOT_FOUND && c < b) {
+            var degreeOfc = degree(c);
+            if (degreeFilter.test(degreeOfc)) {
+                currentOfa = advance(neighborsOfa, currentOfa, c);
+                //now print all triangles a-b-c  (taking into consideration the parallel edges of c)
+                checkForAndEmitTriangle(consumer, a, b, currentOfa, c);
+
+            }
+            c = next(neighborsOfb);
+        }
+    }
+
+    private void checkForAndEmitTriangle(
         IntersectionConsumer consumer,
-        long nodeA,
-        long nodeB,
-        long nodeCa,
-        long nodeCb,
-        long triangleC
+        long a,
+        long b,
+        long currentOfa,
+        long c
     ) {
         // if Ca = Cb there exists a triangle
-        // if Ca = triangleC we have already counted it
         // Ca might also be NOT_FOUND, we ignore those as well
-        if (nodeCa == nodeCb && nodeCa > triangleC) {
-            consumer.accept(nodeA, nodeB, nodeCa);
-            return nodeCa;
+
+        if (currentOfa == c) {
+            consumer.accept(c, b, a); // triangle is s.t that c < b < a
         }
-        return triangleC;
+    }
+
+    private long advance(CURSOR adjacencyList, long start, long target) {
+        long current = start;
+        while (current != NOT_FOUND && current < target) {
+            current = next(adjacencyList);
+        }
+        return current;
+    }
+    private long next(CURSOR adjacencyList) {
+
+        if (!adjacencyList.hasNextVLong()) {
+            return NOT_FOUND;
+        }
+        var value = adjacencyList.nextVLong();
+
+        while (peek(adjacencyList) == value) {
+            adjacencyList.nextVLong();
+        }
+
+        return value;
+    }
+
+    private long peek(CURSOR adjacencyList) {
+
+        if (!adjacencyList.hasNextVLong()) {
+            return NOT_FOUND;
+        }
+
+        return adjacencyList.peekVLong();
     }
 
     private @NotNull CURSOR copyCursor(@NotNull CURSOR source, @Nullable CURSOR destination) {

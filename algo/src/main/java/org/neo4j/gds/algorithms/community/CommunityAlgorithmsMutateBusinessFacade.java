@@ -20,19 +20,20 @@
 package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
-import org.neo4j.gds.algorithms.ApproxMaxKCutSpecificFields;
-import org.neo4j.gds.algorithms.CommunityStatisticsSpecificFields;
-import org.neo4j.gds.algorithms.K1ColoringSpecificFields;
-import org.neo4j.gds.algorithms.KCoreSpecificFields;
-import org.neo4j.gds.algorithms.KmeansSpecificFields;
-import org.neo4j.gds.algorithms.LabelPropagationSpecificFields;
-import org.neo4j.gds.algorithms.LeidenSpecificFields;
-import org.neo4j.gds.algorithms.LocalClusteringCoefficientSpecificFields;
-import org.neo4j.gds.algorithms.LouvainSpecificFields;
-import org.neo4j.gds.algorithms.ModularityOptimizationSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
-import org.neo4j.gds.algorithms.StandardCommunityStatisticsSpecificFields;
-import org.neo4j.gds.algorithms.TriangleCountSpecificFields;
+import org.neo4j.gds.algorithms.community.specificfields.ApproxMaxKCutSpecificFields;
+import org.neo4j.gds.algorithms.community.specificfields.CommunityStatisticsSpecificFields;
+import org.neo4j.gds.algorithms.community.specificfields.K1ColoringSpecificFields;
+import org.neo4j.gds.algorithms.community.specificfields.KCoreSpecificFields;
+import org.neo4j.gds.algorithms.community.specificfields.KmeansSpecificFields;
+import org.neo4j.gds.algorithms.community.specificfields.LabelPropagationSpecificFields;
+import org.neo4j.gds.algorithms.community.specificfields.LeidenSpecificFields;
+import org.neo4j.gds.algorithms.community.specificfields.LocalClusteringCoefficientSpecificFields;
+import org.neo4j.gds.algorithms.community.specificfields.LouvainSpecificFields;
+import org.neo4j.gds.algorithms.community.specificfields.ModularityOptimizationSpecificFields;
+import org.neo4j.gds.algorithms.community.specificfields.StandardCommunityStatisticsSpecificFields;
+import org.neo4j.gds.algorithms.community.specificfields.TriangleCountSpecificFields;
+import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
@@ -61,8 +62,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static org.neo4j.gds.algorithms.runner.AlgorithmRunner.runWithTiming;
 import static org.neo4j.gds.algorithms.community.CommunityResultCompanion.createIntermediateCommunitiesNodePropertyValues;
+import static org.neo4j.gds.algorithms.runner.AlgorithmRunner.runWithTiming;
 
 public class CommunityAlgorithmsMutateBusinessFacade {
 

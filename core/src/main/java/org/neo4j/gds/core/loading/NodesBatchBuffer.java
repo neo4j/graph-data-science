@@ -28,18 +28,15 @@ import org.neo4j.token.api.TokenConstants;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.core.GraphDimensions.IGNORE;
 import static org.neo4j.gds.utils.GdsFeatureToggles.SKIP_ORPHANS;
 import static org.neo4j.kernel.impl.store.record.AbstractBaseRecord.NO_ID;
 
 public class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
 
-    private static final long[] ANY_LABEL_LABELS = {TokenConstants.ANY_LABEL};
-
     private final long highestPossibleNodeCount;
     private final LongSet nodeLabelIds;
     private final boolean hasLabelInformation;
-    private final long[][] labelIds;
+    private final NodeLabelTokenSet[] labelTokens;
     private final boolean skipOrphans;
 
     // property ids, consecutive
@@ -79,7 +76,7 @@ public class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
         this.nodeLabelIds = nodeLabelIds;
         this.hasLabelInformation = hasLabelInformation;
         this.properties = readProperty ? new PropertyReference[capacity] : null;
-        this.labelIds = new long[capacity][];
+        this.labelTokens = new NodeLabelTokenSet[capacity];
         this.skipOrphans = SKIP_ORPHANS.isEnabled();
     }
 
@@ -99,14 +96,14 @@ public class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
 
         if (nodeLabelIds.isEmpty()) {
             var propertiesReference = properties == null ? Neo4jProxy.noPropertyReference() : record.propertiesReference();
-            add(record.nodeId(), propertiesReference, ANY_LABEL_LABELS);
+            add(record.nodeId(), propertiesReference, NodeLabelTokenSet.ANY_LABEL);
         } else {
             boolean atLeastOneLabelFound = false;
             var labels = record.labels();
-            for (int i = 0; i < labels.length; i++) {
-                long l = labels[i];
+            for (int i = 0; i < labels.length(); i++) {
+                long l = labels.get(i);
                 if (!nodeLabelIds.contains(l) && !nodeLabelIds.contains(TokenConstants.ANY_LABEL)) {
-                    labels[i] = IGNORE;
+                    labels.ignore(i);
                 } else {
                     atLeastOneLabelFound = true;
                 }
@@ -119,14 +116,14 @@ public class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
         return !this.isFull();
     }
 
-    public void add(long nodeId, PropertyReference propertyReference, long[] labels) {
+    public void add(long nodeId, PropertyReference propertyReference, NodeLabelTokenSet labelTokens) {
         int len = length++;
         buffer[len] = nodeId;
         if (properties != null) {
             properties[len] = propertyReference;
         }
-        if (labelIds != null) {
-            labelIds[len] = labels;
+        if (this.labelTokens != null) {
+            this.labelTokens[len] = labelTokens;
         }
     }
 
@@ -138,7 +135,7 @@ public class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
         return hasLabelInformation;
     }
 
-    public long[][] labelIds() {
-        return this.labelIds;
+    public NodeLabelTokenSet[] labelTokens() {
+        return this.labelTokens;
     }
 }

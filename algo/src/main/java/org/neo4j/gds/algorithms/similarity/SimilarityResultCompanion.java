@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.algorithms.similarity;
 
-import org.neo4j.gds.algorithms.KnnSpecificFields;
-import org.neo4j.gds.algorithms.SimilaritySpecificFieldsWithDistribution;
+import org.neo4j.gds.algorithms.similarity.specificfields.KnnSpecificFields;
+import org.neo4j.gds.algorithms.similarity.specificfields.SimilaritySpecificFieldsWithDistribution;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.TerminationFlag;

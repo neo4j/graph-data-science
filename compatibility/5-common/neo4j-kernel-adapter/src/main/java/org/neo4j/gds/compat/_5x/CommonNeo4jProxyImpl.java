@@ -23,7 +23,6 @@ import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.compat.BoltTransactionRunner;
 import org.neo4j.gds.compat.CompatCallableProcedure;
 import org.neo4j.gds.compat.CompatExecutionMonitor;
-import org.neo4j.gds.compat.CompatIndexQuery;
 import org.neo4j.gds.compat.CompatInput;
 import org.neo4j.gds.compat.CompatUserAggregationFunction;
 import org.neo4j.gds.compat.CompositeNodeCursor;
@@ -153,11 +152,6 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    public org.neo4j.internal.kernel.api.NodeValueIndexCursor allocateNodeValueIndexCursor(org.neo4j.kernel.api.KernelTransaction kernelTransaction) {
-        throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
-    }
-
-    @Override
     public boolean hasNodeLabelIndex(org.neo4j.kernel.api.KernelTransaction kernelTransaction) {
         throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
     }
@@ -196,34 +190,6 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
         int batchSize,
         int... labelIds
     ) {
-        throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
-    }
-
-    @Override
-    public CompatIndexQuery rangeIndexQuery(
-        int propertyKeyId,
-        double from,
-        boolean fromInclusive,
-        double to,
-        boolean toInclusive
-    ) {
-        throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
-    }
-
-    @Override
-    public CompatIndexQuery rangeAllIndexQuery(int propertyKeyId) {
-        throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
-    }
-
-    @Override
-    public void nodeIndexSeek(
-        org.neo4j.internal.kernel.api.Read dataRead,
-        org.neo4j.internal.kernel.api.IndexReadSession index,
-        org.neo4j.internal.kernel.api.NodeValueIndexCursor cursor,
-        org.neo4j.internal.schema.IndexOrder indexOrder,
-        boolean needsValues,
-        CompatIndexQuery query
-    ) throws org.neo4j.exceptions.KernelException {
         throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
     }
 

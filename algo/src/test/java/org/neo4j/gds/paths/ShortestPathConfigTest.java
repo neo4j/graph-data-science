@@ -91,8 +91,10 @@ class ShortestPathConfigTest {
             .withEntry("targetNode", false);
 
         assertThatThrownBy(() -> new ShortestPathDijkstraStreamConfigImpl(cypherMapWrapper))
-            .hasMessageContaining("Expected a node or a node id for `sourceNode`. Got String")
-            .hasMessageContaining("Expected a node or a node id for `targetNode`. Got Boolean");
+            .hasMessageContaining("Failed to parse `sourceNode` as a single node ID")
+            .hasMessageContaining("`String` cannot")
+            .hasMessageContaining("Failed to parse `targetNode` as a single node ID")
+            .hasMessageContaining("`Boolean` cannot");
     }
 
     static final class TestNode extends NodeEntity {

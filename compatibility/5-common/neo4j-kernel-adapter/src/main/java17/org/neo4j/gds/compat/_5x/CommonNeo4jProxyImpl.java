@@ -29,12 +29,10 @@ import org.neo4j.configuration.connectors.ConnectorPortRegister;
 import org.neo4j.configuration.connectors.ConnectorType;
 import org.neo4j.configuration.helpers.DatabaseNameValidator;
 import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.exceptions.KernelException;
 import org.neo4j.fabric.FabricDatabaseManager;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.compat.CompatCallableProcedure;
 import org.neo4j.gds.compat.CompatExecutionMonitor;
-import org.neo4j.gds.compat.CompatIndexQuery;
 import org.neo4j.gds.compat.CompatInput;
 import org.neo4j.gds.compat.CompatUserAggregationFunction;
 import org.neo4j.gds.compat.CompositeNodeCursor;
@@ -71,14 +69,9 @@ import org.neo4j.internal.batchimport.staging.StageExecution;
 import org.neo4j.internal.helpers.HostnamePort;
 import org.neo4j.internal.id.IdGenerator;
 import org.neo4j.internal.id.IdGeneratorFactory;
-import org.neo4j.internal.kernel.api.IndexQueryConstraints;
-import org.neo4j.internal.kernel.api.IndexReadSession;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
-import org.neo4j.internal.kernel.api.NodeValueIndexCursor;
 import org.neo4j.internal.kernel.api.PropertyCursor;
-import org.neo4j.internal.kernel.api.PropertyIndexQuery;
-import org.neo4j.internal.kernel.api.QueryContext;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
@@ -91,7 +84,6 @@ import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.internal.recordstorage.RecordIdType;
 import org.neo4j.internal.schema.IndexCapability;
-import org.neo4j.internal.schema.IndexOrder;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.layout.Neo4jLayout;
@@ -123,7 +115,6 @@ import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.storageengine.api.StorageEngineFactory;
 import org.neo4j.values.storable.TextArray;
 import org.neo4j.values.storable.ValueCategory;
-import org.neo4j.values.storable.Values;
 import org.neo4j.values.virtual.MapValue;
 import org.neo4j.values.virtual.NodeValue;
 import org.neo4j.values.virtual.VirtualValues;
@@ -263,13 +254,6 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    public NodeValueIndexCursor allocateNodeValueIndexCursor(KernelTransaction kernelTransaction) {
-        return kernelTransaction
-            .cursors()
-            .allocateNodeValueIndexCursor(kernelTransaction.cursorContext(), kernelTransaction.memoryTracker());
-    }
-
-    @Override
     public boolean hasNodeLabelIndex(KernelTransaction kernelTransaction) {
         return NodeLabelIndexLookupImpl.hasNodeLabelIndex(kernelTransaction);
     }
@@ -298,51 +282,6 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
     ) {
         int numberOfPartitions = PartitionedStoreScan.getNumberOfPartitions(relationshipCount, batchSize);
         return new PartitionedStoreScan<>(ktx.dataRead().allRelationshipsScan(numberOfPartitions, ktx.cursorContext()));
-    }
-
-    @Override
-    public CompatIndexQuery rangeIndexQuery(
-        int propertyKeyId,
-        double from,
-        boolean fromInclusive,
-        double to,
-        boolean toInclusive
-    ) {
-        return new CompatIndexQueryImpl(PropertyIndexQuery.range(propertyKeyId, from, fromInclusive, to, toInclusive));
-    }
-
-    @Override
-    public CompatIndexQuery rangeAllIndexQuery(int propertyKeyId) {
-        var rangePredicate = PropertyIndexQuery.range(
-            propertyKeyId,
-            Values.doubleValue(Double.NEGATIVE_INFINITY),
-            true,
-            Values.doubleValue(Double.POSITIVE_INFINITY),
-            true
-        );
-        return new CompatIndexQueryImpl(rangePredicate);
-    }
-
-    @Override
-    public void nodeIndexSeek(
-        Read dataRead,
-        IndexReadSession index,
-        NodeValueIndexCursor cursor,
-        IndexOrder indexOrder,
-        boolean needsValues,
-        CompatIndexQuery query
-    ) throws KernelException {
-        var indexQueryConstraints = indexOrder == IndexOrder.NONE
-            ? IndexQueryConstraints.unordered(needsValues)
-            : IndexQueryConstraints.constrained(indexOrder, needsValues);
-
-        dataRead.nodeIndexSeek(
-            (QueryContext) dataRead,
-            index,
-            cursor,
-            indexQueryConstraints,
-            ((CompatIndexQueryImpl) query).indexQuery
-        );
     }
 
     @Override

@@ -16,6 +16,7 @@ dependencies {
     implementation     project(':core')
     implementation     project(':executor')
     implementation     project(':model-catalog-api')
+    implementation     project(':neo4j-settings')
     implementation     project(':open-model-catalog')
     implementation     project(':proc-pregel')
     implementation     project(':string-formatting')

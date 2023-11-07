@@ -79,4 +79,9 @@ public class InMemoryNodeCursor extends AbstractInMemoryNodeCursor {
     public boolean scanBatch(AllNodeScan allNodeScan, long sizeHint) {
         return super.scanBatch(allNodeScan, (int) sizeHint);
     }
+
+    @Override
+    public long[] labels() {
+        return longLabels();
+    }
 }

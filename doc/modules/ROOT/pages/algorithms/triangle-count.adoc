@@ -336,7 +336,7 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 CALL gds.triangleCount.stream('myGraph')
 YIELD nodeId, triangleCount
 RETURN gds.util.asNode(nodeId).name AS name, triangleCount
-ORDER BY triangleCount DESC
+ORDER BY triangleCount DESC, name ASC
 ----
 
 .Results
@@ -504,14 +504,15 @@ RETURN
   gds.util.asNode(nodeA).name AS nodeA,
   gds.util.asNode(nodeB).name AS nodeB,
   gds.util.asNode(nodeC).name AS nodeC
+ORDER BY nodeA, nodeB, nodeC ASC
 ----
 
 .Results
 [opts="header"]
 |===
 | nodeA     | nodeB   | nodeC
-| "Michael" | "Karin" | "Chris"
 | "Michael" | "Chris" | "Will"
+| "Michael" | "Karin" | "Chris"
 | "Michael" | "Will"  | "Mark"
 |===
 --

@@ -21,7 +21,7 @@ package org.neo4j.gds.catalog;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.loading.GraphFilterResult;
-import org.neo4j.gds.core.loading.GraphProjectCypherResult;
+import org.neo4j.gds.legacycypherprojection.GraphProjectCypherResult;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.projection.GraphProjectNativeResult;
 import org.neo4j.gds.results.MemoryEstimateResult;

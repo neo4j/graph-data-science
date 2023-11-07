@@ -26,8 +26,8 @@ import org.neo4j.gds.compat.CompatInput;
 import org.neo4j.gds.compat.GdsDatabaseLayout;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.Settings;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.settings.Neo4jSettings;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.batchimport.AdditionalInitialIds;
 import org.neo4j.internal.batchimport.BatchImporter;
@@ -129,7 +129,7 @@ public final class GdsParallelBatchImporter {
         var configBuilder = Config
             .newBuilder()
             .fromConfig(databaseConfig)
-            .set(Settings.neo4jHome(), databaseConfig.get(Settings.neo4jHome()))
+            .set(Neo4jSettings.neo4jHome(), databaseConfig.get(Neo4jSettings.neo4jHome()))
             .set(GraphDatabaseSettings.data_directory, databaseConfig.get(GraphDatabaseSettings.data_directory));
 
         Neo4jProxy.setAllowUpgrades(configBuilder, true);

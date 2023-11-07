@@ -47,8 +47,8 @@ public class MultipleNodeLabelIndexReference implements NodeReference {
     }
 
     @Override
-    public long[] labels() {
-        return compositeNodeCursor.currentLabels();
+    public NodeLabelTokenSet labels() {
+        return NodeLabelTokenSet.from(compositeNodeCursor.currentLabels());
     }
 
     @Override

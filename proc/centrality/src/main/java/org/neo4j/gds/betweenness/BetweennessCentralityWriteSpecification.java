@@ -31,6 +31,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
+import org.neo4j.gds.procedures.centrality.CentralityWriteResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -40,7 +41,7 @@ import static org.neo4j.gds.betweenness.BetweennessCentrality.BETWEENNESS_DESCRI
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 
 @GdsCallable(name = "gds.betweenness.write", description = BETWEENNESS_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class BetweennessCentralityWriteSpecification implements AlgorithmSpec<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteConfig, Stream<WriteResult>, BetweennessCentralityFactory<BetweennessCentralityWriteConfig>> {
+public class BetweennessCentralityWriteSpecification implements AlgorithmSpec<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteConfig, Stream<CentralityWriteResult>, BetweennessCentralityFactory<BetweennessCentralityWriteConfig>> {
     @Override
     public String name() {
         return "BetweennessCentralityWrite";
@@ -57,7 +58,7 @@ public class BetweennessCentralityWriteSpecification implements AlgorithmSpec<Be
     }
 
     @Override
-    public ComputationResultConsumer<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteConfig, Stream<CentralityWriteResult>> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>(
             this::resultBuilder,
             computationResult -> List.of(ImmutableNodeProperty.of(
@@ -76,11 +77,11 @@ public class BetweennessCentralityWriteSpecification implements AlgorithmSpec<Be
         return new BetweennessCentralityConfigValidation<>();
     }
 
-    private AbstractResultBuilder<WriteResult> resultBuilder(
+    private AbstractResultBuilder<CentralityWriteResult> resultBuilder(
         ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new WriteResult.Builder(
+        var builder = new CentralityWriteResult.Builder(
             executionContext.returnColumns(),
             computationResult.config().concurrency()
         );

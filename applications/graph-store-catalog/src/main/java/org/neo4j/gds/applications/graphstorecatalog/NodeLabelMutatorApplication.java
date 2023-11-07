@@ -24,7 +24,6 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.filter.NodesFilter;
 import org.neo4j.gds.beta.filter.expression.Expression;
-import org.neo4j.gds.config.MutateLabelConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;

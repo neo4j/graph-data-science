@@ -51,20 +51,14 @@ public class BfsConfigTest {
     void shouldNotAllowNegativeTargetNodes() {
         var config = BfsStreamConfigImpl.builder()
             .sourceNode(0L)
-            .targetNodes(List.of(idFunction.of("a"), -1337)).build();
+            .targetNodes(List.of(idFunction.of("a"), -1337));
 
-        assertThatThrownBy(() -> config.graphStoreValidation(
-            graphStore,
-            config.nodeLabelIdentifiers(graphStore),
-            config.internalRelationshipTypes(graphStore)
-        ))
+        assertThatThrownBy(() -> config.build())
             .hasMessageContaining("Negative node ids are not supported for the field `targetNodes`");
-
     }
 
     @Test
     void failOnInvalidEndNodes() {
-
         var config = BfsStreamConfigImpl.builder()
             .sourceNode(idFunction.of("a"))
             .targetNodes(List.of(idFunction.of("b"), 421337)).build();
@@ -73,7 +67,6 @@ public class BfsConfigTest {
             graphStore,
             config.nodeLabelIdentifiers(graphStore),
             config.internalRelationshipTypes(graphStore)
-        ))
-            .hasMessageContaining("targetNodes nodes do not exist in the in-memory graph: ['421337']");
+        )).hasMessageContaining("targetNodes nodes do not exist in the in-memory graph: [421337]");
     }
 }

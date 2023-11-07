@@ -28,12 +28,10 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.graphdb.QueryExecutionException;
 
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
 
@@ -113,25 +111,6 @@ class BetweennessCentralityWriteProcTest extends BaseProcTest {
         assertThat(rowCount)
             .as("`write` mode should always return one row")
             .isEqualTo(1);
-    }
-
-    @Test
-    void shouldFailOnMixedProjections() {
-        runQuery(
-            "CALL gds.graph.project(" +
-            "   'mixedGraph', " +
-            "   '*', " +
-            "   {" +
-            "       N: {type: 'REL', orientation: 'NATURAL'}, " +
-            "       U: {type: 'REL', orientation: 'UNDIRECTED'}" +
-            "   }" +
-            ")"
-        );
-
-        assertThatExceptionOfType(QueryExecutionException.class)
-            .isThrownBy(() -> runQuery("CALL gds.betweenness.write('mixedGraph', {writeProperty: 'foo'})"))
-            .withRootCauseInstanceOf(IllegalArgumentException.class)
-            .withMessageContaining("Combining UNDIRECTED orientation with NATURAL or REVERSE is not supported.");
     }
 
 }

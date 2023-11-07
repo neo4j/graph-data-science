@@ -26,7 +26,6 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.config.GraphProjectFromCypherConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
@@ -35,6 +34,7 @@ import org.neo4j.gds.core.utils.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
+import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -137,7 +137,7 @@ public final class GraphLoaderBuilders {
 
     /**
      * Factory method that defines the generation of a {@link GraphLoader}
-     * using a {@link org.neo4j.gds.config.GraphProjectFromCypherConfig}. Use {@link CypherLoaderBuilder}
+     * using a {@link org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig}. Use {@link CypherLoaderBuilder}
      * to create the input for that method in a convenient way.
      */
     @Builder.Factory

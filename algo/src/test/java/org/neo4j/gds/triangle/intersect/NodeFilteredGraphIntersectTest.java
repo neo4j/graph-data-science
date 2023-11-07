@@ -61,8 +61,8 @@ class NodeFilteredGraphIntersectTest {
         var intersect = new NodeFilteredGraphIntersect.NodeFilteredGraphIntersectFactory().load(graph, config);
 
         var triangleCount = new MutableInt(0);
-        intersect.intersectAll(
-            graph.toMappedNodeId(idFunction.of("a")),
+        intersect.intersectAll(                 //triangles are found in reverse, so must change from 'a' to 'c'
+            graph.toMappedNodeId(idFunction.of("c")),
             (nodeA, nodeB, nodeC) -> triangleCount.increment()
         );
 

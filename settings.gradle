@@ -61,6 +61,9 @@ project(':csv').projectDir = file('io/csv')
 include('cypher-aggregation')
 project(':cypher-aggregation').projectDir = file('cypher-aggregation')
 
+include('legacy-cypher-projection')
+project(':legacy-cypher-projection').projectDir = file('legacy-cypher-projection')
+
 include('cypher-core')
 project(':cypher-core').projectDir = file('cypher/cypher-core')
 
@@ -174,6 +177,9 @@ project(':neo4j-kernel-adapter-api').projectDir = file('compatibility/api/neo4j-
 
 include('neo4j-api')
 project(':neo4j-api').projectDir = file('neo4j-api')
+
+include('neo4j-settings')
+project(':neo4j-settings').projectDir = file('neo4j-settings')
 
 include('open-licensing')
 project(':open-licensing').projectDir = file('open-licensing')

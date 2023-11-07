@@ -70,7 +70,7 @@ public final class NativeNodePropertyImporter {
 
     public int importProperties(
         long neoNodeId,
-        long[] labelIds,
+        NodeLabelTokenSet labelTokens,
         PropertyReference propertiesReference,
         KernelTransaction kernelTransaction
     ) {
@@ -78,7 +78,7 @@ public final class NativeNodePropertyImporter {
             Neo4jProxy.nodeProperties(kernelTransaction, neoNodeId, propertiesReference, pc);
             int nodePropertiesRead = 0;
             while (pc.next()) {
-                nodePropertiesRead += importProperty(neoNodeId, labelIds, pc);
+                nodePropertiesRead += importProperty(neoNodeId, labelTokens, pc);
             }
             return nodePropertiesRead;
         }
@@ -88,11 +88,12 @@ public final class NativeNodePropertyImporter {
         return buildersByLabel.build(idMap);
     }
 
-    private int importProperty(long neoNodeId, long[] labelIds, PropertyCursor propertyCursor) {
+    private int importProperty(long neoNodeId, NodeLabelTokenSet labelTokens, PropertyCursor propertyCursor) {
         int propertiesImported = 0;
         int propertyKey = propertyCursor.propertyKey();
 
-        for (long labelId : labelIds) {
+        for (int i = 0; i < labelTokens.length(); i++) {
+            var labelId = labelTokens.get(i);
             if (labelId == IGNORE || labelId == ANY_LABEL) {
                 continue;
             }

@@ -25,20 +25,23 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
 
 import java.util.Collection;
+import java.util.Set;
 
-import static org.neo4j.gds.config.ConfigNodesValidations.labelFilteredGraphNotContainsNode;
-import static org.neo4j.gds.config.ConfigNodesValidations.nodeLabelFilterDescription;
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+import static org.neo4j.gds.config.ConfigNodesValidations.nodesExistInGraph;
+import static org.neo4j.gds.config.ConfigNodesValidations.nodesNotNegative;
+import static org.neo4j.gds.config.NodeIdParser.parseToSingleNodeId;
 
-public interface SourceNodeConfig extends NodeConfig {
+public interface SourceNodeConfig {
 
     String SOURCE_NODE_KEY = "sourceNode";
 
-    @Configuration.ConvertWith(method = "org.neo4j.gds.config.SourceNodeConfig#parseSourceNodeId")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.config.SourceNodeConfig#parseSourceNode")
     long sourceNode();
 
-    static long parseSourceNodeId(Object input) {
-        return NodeConfig.parseNodeId(input, SOURCE_NODE_KEY);
+    static long parseSourceNode(Object input) {
+        var node = parseToSingleNodeId(input, SOURCE_NODE_KEY);
+        nodesNotNegative(Set.of(node), SOURCE_NODE_KEY);
+        return node;
     }
 
     @Configuration.GraphStoreValidationCheck
@@ -47,14 +50,6 @@ public interface SourceNodeConfig extends NodeConfig {
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        var sourceNodeId = sourceNode();
-
-        if (labelFilteredGraphNotContainsNode(selectedLabels, graphStore.nodes(), sourceNodeId)) {
-            throw new IllegalArgumentException(formatWithLocale(
-                "Source node does not exist in the in-memory graph%s: `%d`",
-                nodeLabelFilterDescription(selectedLabels, graphStore),
-                sourceNodeId
-            ));
-        }
+        nodesExistInGraph(graphStore, selectedLabels, Set.of(sourceNode()), SOURCE_NODE_KEY);
     }
 }

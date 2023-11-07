@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.procedures.similarity;
 
-import org.neo4j.gds.algorithms.KnnSpecificFields;
+import org.neo4j.gds.algorithms.similarity.specificfields.KnnSpecificFields;
 import org.neo4j.gds.algorithms.RelationshipMutateResult;
 import org.neo4j.gds.algorithms.RelationshipWriteResult;
 import org.neo4j.gds.algorithms.StatsResult;

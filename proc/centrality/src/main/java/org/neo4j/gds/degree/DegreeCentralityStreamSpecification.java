@@ -20,12 +20,12 @@
 package org.neo4j.gds.degree;
 
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.common.CentralityStreamResult;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.centrality.CentralityStreamResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;

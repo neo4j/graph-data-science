@@ -22,7 +22,6 @@ package org.neo4j.gds.applications.graphstorecatalog;
 import org.eclipse.collections.impl.tuple.Tuples;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.GraphStreamRelationshipsConfig;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 
 import java.util.stream.Collectors;

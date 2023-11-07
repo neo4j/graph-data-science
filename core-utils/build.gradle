@@ -17,6 +17,8 @@ dependencies {
         }
     }
 
+    implementation project(':neo4j-settings')
+
     implementation group: 'org.apache.commons',      name: 'commons-text',             version: ver.'commons-text'
 
 

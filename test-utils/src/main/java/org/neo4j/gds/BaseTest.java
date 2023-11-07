@@ -25,12 +25,12 @@ import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Timeout;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.Settings;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.IdToVariable;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraphExtension;
 import org.neo4j.gds.extension.NodeFunction;
+import org.neo4j.gds.settings.Neo4jSettings;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
@@ -76,7 +76,7 @@ public abstract class BaseTest {
     @ExtensionCallback
     protected void configuration(TestDatabaseManagementServiceBuilder builder) {
         builder.noOpSystemGraphInitializer();
-        builder.setConfig(Settings.procedureUnrestricted(), singletonList("gds.*"));
+        builder.setConfig(Neo4jSettings.procedureUnrestricted(), singletonList("gds.*"));
         // A change in 4.3.0-drop02.0 is enabling the feature to track cursor.close() events by default
         // for test databases. We would like to additionally enable the feature to trace cursors,
         // so that when we leak cursors, we can get a stacktrace of who was creating them.

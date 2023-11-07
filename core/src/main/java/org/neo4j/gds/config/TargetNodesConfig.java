@@ -29,12 +29,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import static org.neo4j.gds.config.ConfigNodesValidations.validateNodes;
+import static org.neo4j.gds.config.ConfigNodesValidations.nodesExistInGraph;
+import static org.neo4j.gds.config.ConfigNodesValidations.nodesNotNegative;
 
 public interface TargetNodesConfig {
 
+    String TARGET_NODES_KEY = "targetNodes";
+
     @Value.Default
-    @Configuration.ConvertWith(method = "org.neo4j.gds.config.NodeIdsParser#parseNodeIds")
+    @Configuration.ConvertWith(method = "org.neo4j.gds.config.TargetNodesConfig#parseTargetNodes")
     default List<Long> targetNodes() {
         return Collections.emptyList();
     }
@@ -45,12 +48,18 @@ public interface TargetNodesConfig {
         return !targetNodes().isEmpty();
     }
 
+    static List<Long> parseTargetNodes(Object input) {
+        var nodes = NodeIdParser.parseToListOfNodeIds(input, TARGET_NODES_KEY);
+        nodesNotNegative(nodes, TARGET_NODES_KEY);
+        return nodes;
+    }
+
     @Configuration.GraphStoreValidationCheck
     default void validateTargetNodes(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        validateNodes(graphStore, targetNodes(), selectedLabels, "targetNodes");
+        nodesExistInGraph(graphStore, selectedLabels, targetNodes(), TARGET_NODES_KEY);
     }
 }
