@@ -241,7 +241,7 @@ abstract class SingleTypeRelationshipsBuilder {
 
         @Override
         ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder() {
-            return new ThreadLocalRelationshipsBuilder.NonIndexed(idMap, importer, bufferSize, propertyConfigs.size());
+            return new ThreadLocalRelationshipsBuilder.NonIndexed(importer, bufferSize, propertyConfigs.size());
         }
 
         @Override
@@ -315,8 +315,8 @@ abstract class SingleTypeRelationshipsBuilder {
         @Override
         ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder() {
             return new ThreadLocalRelationshipsBuilder.Indexed(
-                new ThreadLocalRelationshipsBuilder.NonIndexed(idMap, forwardImporter, bufferSize, propertyConfigs.size()),
-                new ThreadLocalRelationshipsBuilder.NonIndexed(idMap, inverseImporter, bufferSize, propertyConfigs.size())
+                new ThreadLocalRelationshipsBuilder.NonIndexed(forwardImporter, bufferSize, propertyConfigs.size()),
+                new ThreadLocalRelationshipsBuilder.NonIndexed(inverseImporter, bufferSize, propertyConfigs.size())
             );
         }
 

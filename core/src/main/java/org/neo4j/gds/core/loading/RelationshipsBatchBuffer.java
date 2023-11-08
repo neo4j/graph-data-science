@@ -19,16 +19,9 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.immutables.builder.Builder;
-import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.compat.PropertyReference;
-
-import java.util.Optional;
-
-import static org.neo4j.gds.api.IdMap.NOT_FOUND;
-import static org.neo4j.gds.core.loading.LoadingExceptions.validateSourceNodeIsLoaded;
-import static org.neo4j.gds.core.loading.LoadingExceptions.validateTargetNodeIsLoaded;
-import static org.neo4j.token.api.TokenConstants.ANY_RELATIONSHIP_TYPE;
 
 
 public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipReference> {
@@ -38,9 +31,6 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
     // property references are stored individually.
     static final int ENTRIES_PER_RELATIONSHIP = 2;
 
-    private final PartialIdMap idMap;
-    private final int type;
-    private final boolean skipDanglingRelationships;
 
     private final long[] relationshipReferences;
     private final PropertyReference[] propertyReferences;
@@ -51,26 +41,12 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
     private final int[] histogram;
 
     @Builder.Factory
-    static RelationshipsBatchBuffer relationshipsBatchBuffer(
-        PartialIdMap idMap,
-        int type,
-        int capacity,
-        Optional<Boolean> skipDanglingRelationships
-    ) {
-        boolean skipDangling = skipDanglingRelationships.orElse(true);
-        return new RelationshipsBatchBuffer(idMap, type, capacity, skipDangling);
+    static RelationshipsBatchBuffer relationshipsBatchBuffer(int capacity) {
+        return new RelationshipsBatchBuffer(capacity);
     }
 
-    private RelationshipsBatchBuffer(
-        final PartialIdMap idMap,
-        final int type,
-        int capacity,
-        boolean skipDanglingRelationships
-    ) {
+    private RelationshipsBatchBuffer(int capacity) {
         super(Math.multiplyExact(ENTRIES_PER_RELATIONSHIP, capacity));
-        this.idMap = idMap;
-        this.type = type;
-        this.skipDanglingRelationships = skipDanglingRelationships;
         this.relationshipReferences = new long[capacity];
         this.propertyReferences = new PropertyReference[capacity];
         bufferCopy = RadixSort.newCopy(buffer);
@@ -81,24 +57,7 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
 
     @Override
     public boolean offer(final RelationshipReference record) {
-        if (this.isFull()) {
-            return false;
-        }
-        if ((type == ANY_RELATIONSHIP_TYPE) || (type == record.typeTokenId())) {
-            long source = idMap.toMappedNodeId(record.sourceNodeReference());
-            long target = idMap.toMappedNodeId(record.targetNodeReference());
-
-            if (source == NOT_FOUND || target == NOT_FOUND) {
-                if (skipDanglingRelationships) {
-                    return true;
-                }
-                validateSourceNodeIsLoaded(source, record.sourceNodeReference());
-                validateTargetNodeIsLoaded(target, record.targetNodeReference());
-            }
-
-            add(source, target, record.relationshipId(), record.propertiesReference());
-        }
-        return !this.isFull();
+        throw new NotImplementedException();
     }
 
     public void add(long sourceId, long targetId) {

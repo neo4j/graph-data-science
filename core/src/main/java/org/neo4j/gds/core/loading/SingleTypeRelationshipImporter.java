@@ -85,6 +85,10 @@ public final class SingleTypeRelationshipImporter {
         this.adjacencyBuffer = adjacencyBuffer;
     }
 
+    public int typeId() {
+        return this.typeId;
+    }
+
     public Collection<AdjacencyBuffer.AdjacencyListBuilderTask> adjacencyListBuilderTasks(Optional<AdjacencyCompressor.ValueMapper> mapper) {
         return adjacencyBuffer.adjacencyListBuilderTasks(mapper, Optional.empty());
     }
@@ -97,21 +101,19 @@ public final class SingleTypeRelationshipImporter {
     }
 
     public ThreadLocalSingleTypeRelationshipImporter threadLocalImporter(
-        PartialIdMap idMap,
-        int bulkSize,
+        RelationshipsBatchBuffer relationshipsBatchBuffer,
         PropertyReader propertyReader
     ) {
         return new ThreadLocalSingleTypeRelationshipImporterBuilder()
             .adjacencyBuffer(adjacencyBuffer)
-            .relationshipsBatchBuffer(createBuffer(idMap, bulkSize))
+            .relationshipsBatchBuffer(relationshipsBatchBuffer)
             .importMetaData(importMetaData)
             .propertyReader(propertyReader)
             .build();
     }
 
     public ThreadLocalSingleTypeRelationshipImporter threadLocalImporter(
-        PartialIdMap idMap,
-        int bulkSize,
+        RelationshipsBatchBuffer relationshipsBatchBuffer,
         KernelTransaction kernelTransaction
     ) {
         var loadProperties = importMetaData.projection().properties().hasMappings();
@@ -122,19 +124,9 @@ public final class SingleTypeRelationshipImporter {
 
         return new ThreadLocalSingleTypeRelationshipImporterBuilder()
             .adjacencyBuffer(adjacencyBuffer)
-            .relationshipsBatchBuffer(createBuffer(idMap, bulkSize))
+            .relationshipsBatchBuffer(relationshipsBatchBuffer)
             .importMetaData(importMetaData)
             .propertyReader(propertyReader)
-            .build();
-    }
-
-    @NotNull
-    private RelationshipsBatchBuffer createBuffer(PartialIdMap idMap, int bulkSize) {
-        return new RelationshipsBatchBufferBuilder()
-            .idMap(idMap)
-            .type(typeId)
-            .capacity(bulkSize)
-            .skipDanglingRelationships(importMetaData.skipDanglingRelationships())
             .build();
     }
 

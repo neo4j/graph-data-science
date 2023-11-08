@@ -17,34 +17,35 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.projection;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.huge.DirectIdMap;
+import org.neo4j.gds.core.loading.RelationshipReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class RelationshipsBatchBufferTest {
+class BufferedRelationshipConsumerTest {
 
     @Test
     void flushBufferWhenFull() {
-        var buffer = new RelationshipsBatchBufferBuilder()
+        var buffer = new BufferedRelationshipConsumerBuilder()
             .idMap(new DirectIdMap(2))
             .type(-1)
             .capacity(1)
             .build();
 
-        buffer.add(0, 1, -1, Neo4jProxy.noPropertyReference());
-        assertTrue(buffer.isFull());
+        buffer.relationshipsBatchBuffer().add(0, 1, -1, Neo4jProxy.noPropertyReference());
+        assertTrue(buffer.relationshipsBatchBuffer().isFull());
     }
 
     @Test
     void shouldNotThrowWhenFull() {
-        var relationshipsBatchBuffer = new RelationshipsBatchBufferBuilder()
+        var relationshipsBatchBuffer = new BufferedRelationshipConsumerBuilder()
             .idMap(new DirectIdMap(2))
             .type(-1)
             .capacity(2)
@@ -60,7 +61,7 @@ class RelationshipsBatchBufferTest {
         assertThat(relationshipsBatchBuffer.offer(testRelationship)).isTrue();
         assertThat(relationshipsBatchBuffer.offer(testRelationship)).isFalse();
         assertThat(relationshipsBatchBuffer.offer(testRelationship)).isFalse();
-        assertThat(relationshipsBatchBuffer.isFull()).isTrue();
+        assertThat(relationshipsBatchBuffer.relationshipsBatchBuffer().isFull()).isTrue();
     }
 
     @ValueClass

@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.core.loading.construction;
 
-import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.PropertyReader;
+import org.neo4j.gds.core.loading.RelationshipsBatchBufferBuilder;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
 import org.neo4j.gds.core.loading.ThreadLocalSingleTypeRelationshipImporter;
 
@@ -41,25 +41,26 @@ abstract class ThreadLocalRelationshipsBuilder implements AutoCloseable {
         private int localRelationshipId;
 
         NonIndexed(
-            PartialIdMap idMap,
             SingleTypeRelationshipImporter singleTypeRelationshipImporter,
             int bufferSize,
             int propertyCount
         ) {
             this.propertyCount = propertyCount;
 
+            var relationshipsBatchBuffer = new RelationshipsBatchBufferBuilder()
+                .capacity(bufferSize)
+                .build();
+
             if (propertyCount > 1) {
                 this.bufferedPropertyReader = PropertyReader.buffered(bufferSize, propertyCount);
                 this.importer = singleTypeRelationshipImporter.threadLocalImporter(
-                    idMap,
-                    bufferSize,
+                    relationshipsBatchBuffer,
                     bufferedPropertyReader
                 );
             } else {
                 this.bufferedPropertyReader = null;
                 this.importer = singleTypeRelationshipImporter.threadLocalImporter(
-                    idMap,
-                    bufferSize,
+                    relationshipsBatchBuffer,
                     PropertyReader.preLoaded()
                 );
             }

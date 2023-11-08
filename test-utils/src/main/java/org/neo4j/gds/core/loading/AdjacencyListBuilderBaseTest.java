@@ -181,8 +181,6 @@ public abstract class AdjacencyListBuilderBaseTest {
         DirectIdMap idMap = new DirectIdMap(nodeCount);
 
         var relationshipsBatchBuffer = new RelationshipsBatchBufferBuilder()
-            .idMap(idMap)
-            .type(-1)
             .capacity(relationshipCount)
             .build();
 

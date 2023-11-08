@@ -17,10 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.projection;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.huge.DirectIdMap;
+import org.neo4j.gds.core.loading.CompositeRelationshipsBatchBufferBuilder;
+import org.neo4j.gds.core.loading.RecordsBatchBuffer;
+import org.neo4j.gds.core.loading.RelationshipReference;
+import org.neo4j.gds.core.loading.RelationshipsBatchBuffer;
+import org.neo4j.gds.core.loading.RelationshipsBatchBufferBuilder;
 
 import java.util.stream.IntStream;
 
@@ -46,20 +52,20 @@ class CompositeRelationshipsBatchBufferTest {
             .targetNodeReference(1)
             .build();
 
-        assertThat(compositeBatchBuffer.offer(type0Rel)).isTrue();
-        assertThat(compositeBatchBuffer.offer(type1Rel)).isTrue();
-        assertThat(compositeBatchBuffer.offer(type0Rel)).isFalse();
-        assertThat(compositeBatchBuffer.offer(type1Rel)).isFalse();
-        assertThat(compositeBatchBuffer.offer(type0Rel)).isFalse();
-        assertThat(compositeBatchBuffer.offer(type1Rel)).isFalse();
-        assertThat(compositeBatchBuffer.isFull()).isTrue();
+        Assertions.assertThat(compositeBatchBuffer.offer(type0Rel)).isTrue();
+        Assertions.assertThat(compositeBatchBuffer.offer(type1Rel)).isTrue();
+        Assertions.assertThat(compositeBatchBuffer.offer(type0Rel)).isFalse();
+        Assertions.assertThat(compositeBatchBuffer.offer(type1Rel)).isFalse();
+        Assertions.assertThat(compositeBatchBuffer.offer(type0Rel)).isFalse();
+        Assertions.assertThat(compositeBatchBuffer.offer(type1Rel)).isFalse();
+        Assertions.assertThat(compositeBatchBuffer.isFull()).isTrue();
     }
 
     private static RecordsBatchBuffer<RelationshipReference> createCompositeBuffer(int typeCount, int capacity) {
         var buffers = IntStream.range(0, typeCount)
             .mapToObj(type -> new RelationshipsBatchBufferBuilder()
-                .idMap(new DirectIdMap(2))
-                .type(type)
+//                .idMap(new DirectIdMap(2))
+//                .type(type)
                 .capacity(capacity)
                 .build())
             .toArray(RelationshipsBatchBuffer[]::new);
