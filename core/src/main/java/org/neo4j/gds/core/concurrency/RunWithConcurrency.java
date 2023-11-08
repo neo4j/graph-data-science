@@ -144,7 +144,7 @@ public interface RunWithConcurrency {
     }
 
     /**
-     * Provide a {@link org.neo4j.gds.core.utils.TerminationFlag} to support graceful early termination.
+     * Provide a {@link org.neo4j.gds.termination.TerminationFlag} to support graceful early termination.
      * <p>
      * After the initial number of {@link #concurrency()} tasks have been submitted,
      * the termination flag is checked before submitting any further tasks.
