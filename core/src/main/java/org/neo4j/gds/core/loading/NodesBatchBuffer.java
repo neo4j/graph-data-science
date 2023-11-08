@@ -19,101 +19,48 @@
  */
 package org.neo4j.gds.core.loading;
 
-import com.carrotsearch.hppc.LongHashSet;
-import com.carrotsearch.hppc.LongSet;
+import org.apache.commons.lang3.NotImplementedException;
 import org.immutables.builder.Builder;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.PropertyReference;
-import org.neo4j.token.api.TokenConstants;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.utils.GdsFeatureToggles.SKIP_ORPHANS;
-import static org.neo4j.kernel.impl.store.record.AbstractBaseRecord.NO_ID;
-
 public class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
 
-    private final long highestPossibleNodeCount;
-    private final LongSet nodeLabelIds;
     private final boolean hasLabelInformation;
-    private final NodeLabelTokenSet[] labelTokens;
-    private final boolean skipOrphans;
 
+    private final NodeLabelTokenSet[] labelTokens;
     // property ids, consecutive
     private final PropertyReference[] properties;
 
     @Builder.Factory
     static NodesBatchBuffer nodesBatchBuffer(
         int capacity,
-        long highestPossibleNodeCount,
-        Optional<LongSet> nodeLabelIds,
         Optional<Boolean> hasLabelInformation,
         Optional<Boolean> readProperty
     ) {
-        LongSet labelIds = nodeLabelIds.orElseGet(LongHashSet::new);
-        boolean hasLabelInfo = hasLabelInformation.orElse(false);
-        boolean readProps = readProperty.orElse(false);
-
         return new NodesBatchBuffer(
             // TODO: we probably wanna adjust the capacity here
             capacity,
-            highestPossibleNodeCount,
-            labelIds,
-            hasLabelInfo,
-            readProps
+            hasLabelInformation.orElse(false),
+            readProperty.orElse(false)
         );
     }
 
-    NodesBatchBuffer(
+    private NodesBatchBuffer(
         int capacity,
-        long highestPossibleNodeCount,
-        LongSet nodeLabelIds,
         boolean hasLabelInformation,
         boolean readProperty
     ) {
         super(capacity);
-        this.highestPossibleNodeCount = highestPossibleNodeCount;
-        this.nodeLabelIds = nodeLabelIds;
         this.hasLabelInformation = hasLabelInformation;
         this.properties = readProperty ? new PropertyReference[capacity] : null;
         this.labelTokens = new NodeLabelTokenSet[capacity];
-        this.skipOrphans = SKIP_ORPHANS.isEnabled();
     }
 
     @Override
     public boolean offer(final NodeReference record) {
-        if (this.isFull()) {
-            return false;
-        }
-
-        if (skipOrphans && record.relationshipReference() == NO_ID) {
-            return true;
-        }
-
-        if (record.nodeId() >= this.highestPossibleNodeCount) {
-            return true;
-        }
-
-        if (nodeLabelIds.isEmpty()) {
-            var propertiesReference = properties == null ? Neo4jProxy.noPropertyReference() : record.propertiesReference();
-            add(record.nodeId(), propertiesReference, NodeLabelTokenSet.ANY_LABEL);
-        } else {
-            boolean atLeastOneLabelFound = false;
-            var labels = record.labels();
-            for (int i = 0; i < labels.length(); i++) {
-                long l = labels.get(i);
-                if (!nodeLabelIds.contains(l) && !nodeLabelIds.contains(TokenConstants.ANY_LABEL)) {
-                    labels.ignore(i);
-                } else {
-                    atLeastOneLabelFound = true;
-                }
-            }
-            if (atLeastOneLabelFound) {
-                var propertiesReference = properties == null ? Neo4jProxy.noPropertyReference() : record.propertiesReference();
-                add(record.nodeId(), propertiesReference, labels);
-            }
-        }
-        return !this.isFull();
+        throw new NotImplementedException();
     }
 
     public void add(long nodeId, PropertyReference propertyReference, NodeLabelTokenSet labelTokens) {

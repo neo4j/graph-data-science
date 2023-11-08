@@ -83,7 +83,7 @@ public final class NodesScannerTask extends StatementAction implements RecordSca
     @Override
     public void accept(KernelTransaction transaction) {
         try (StoreScanner.ScanCursor<NodeReference> cursor = scanner.createCursor(transaction)) {
-            NodesBatchBuffer nodesBatchBuffer = new NodesBatchBufferBuilder()
+            var nodesBatchBuffer = new BufferedNodeConsumerBuilder()
                 .highestPossibleNodeCount(highestPossibleNodeCount)
                 .nodeLabelIds(labels)
                 .capacity(scanner.bufferSize())
@@ -120,22 +120,25 @@ public final class NodesScannerTask extends StatementAction implements RecordSca
     }
 
     private long importNodes(
-        NodesBatchBuffer buffer,
+        BufferedNodeConsumer bufferedNodeConsumer,
         KernelTransaction kernelTransaction,
         @Nullable NativeNodePropertyImporter propertyImporter
     ) {
-        return importer.importNodes(buffer, (nodeReference, labelIds, propertiesReference) -> {
-            if (propertyImporter != null) {
-                return propertyImporter.importProperties(
-                    nodeReference,
-                    labelIds,
-                    propertiesReference,
-                    kernelTransaction
-                );
-            } else {
-                return 0;
+        return importer.importNodes(
+            bufferedNodeConsumer.nodesBatchBuffer(),
+            (nodeReference, labelIds, propertiesReference) -> {
+                if (propertyImporter != null) {
+                    return propertyImporter.importProperties(
+                        nodeReference,
+                        labelIds,
+                        propertiesReference,
+                        kernelTransaction
+                    );
+                } else {
+                    return 0;
+                }
             }
-        });
+        );
     }
 
     public static RecordScannerTaskRunner.RecordScannerTaskFactory factory(

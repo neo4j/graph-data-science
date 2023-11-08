@@ -17,39 +17,49 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.projection;
 
 import com.carrotsearch.hppc.LongHashSet;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.PropertyReference;
+import org.neo4j.gds.core.loading.NodeLabelTokenSet;
+import org.neo4j.gds.core.loading.NodeReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class NodesBatchBufferTest {
+class BufferedNodeConsumerTest {
+
+    static int bufferLength(BufferedNodeConsumer b) {
+        return b.nodesBatchBuffer().length();
+    }
+
+    static long[] bufferBatch(BufferedNodeConsumer b) {
+        return b.nodesBatchBuffer().batch();
+    }
 
     @Test
     void shouldIgnoreNodesThatAreOutOfBoundsOnOffer() {
-        var nodesBatchBuffer = new NodesBatchBufferBuilder()
+        var buffer = new BufferedNodeConsumerBuilder()
             .capacity(3)
             .highestPossibleNodeCount(43)
             .build();
 
         // within range
-        nodesBatchBuffer.offer(new TestNode(21));
+        buffer.offer(new TestNode(21));
         // end of range
-        nodesBatchBuffer.offer(new TestNode(42));
+        buffer.offer(new TestNode(42));
         // out of range
-        nodesBatchBuffer.offer(new TestNode(84));
+        buffer.offer(new TestNode(84));
 
-        assertThat(nodesBatchBuffer)
-            .returns(2, RecordsBatchBuffer::length)
-            .returns(new long[]{21, 42, 0}, RecordsBatchBuffer::batch);
+        assertThat(buffer)
+            .returns(2, BufferedNodeConsumerTest::bufferLength)
+            .returns(new long[]{21, 42, 0}, BufferedNodeConsumerTest::bufferBatch);
     }
 
     @Test
     void shouldIgnoreNodesThatAreOutOfBoundsOnOfferWithLabelInformation() {
-        var nodesBatchBuffer = new NodesBatchBufferBuilder()
+        var nodesBatchBuffer = new BufferedNodeConsumerBuilder()
             .capacity(3)
             .highestPossibleNodeCount(43)
             .hasLabelInformation(true)
@@ -64,13 +74,13 @@ class NodesBatchBufferTest {
         nodesBatchBuffer.offer(new TestNode(84, 0));
 
         assertThat(nodesBatchBuffer)
-            .returns(2, RecordsBatchBuffer::length)
-            .returns(new long[]{21, 42, 0}, RecordsBatchBuffer::batch);
+            .returns(2, BufferedNodeConsumerTest::bufferLength)
+            .returns(new long[]{21, 42, 0}, BufferedNodeConsumerTest::bufferBatch);
     }
 
     @Test
     void shouldNotThrowWhenFull() {
-        var nodesBatchBuffer = new NodesBatchBufferBuilder()
+        var nodesBatchBuffer = new BufferedNodeConsumerBuilder()
             .capacity(2)
             .highestPossibleNodeCount(42)
             .build();
@@ -78,7 +88,7 @@ class NodesBatchBufferTest {
         assertThat(nodesBatchBuffer.offer(new TestNode(0))).isTrue();
         assertThat(nodesBatchBuffer.offer(new TestNode(1))).isFalse();
         assertThat(nodesBatchBuffer.offer(new TestNode(2))).isFalse();
-        assertThat(nodesBatchBuffer.isFull()).isTrue();
+        assertThat(nodesBatchBuffer.nodesBatchBuffer().isFull()).isTrue();
     }
 
     private static final class TestNode implements NodeReference {

@@ -105,15 +105,11 @@ public final class NodesBuilder {
             .build();
 
         LongPredicate seenNodeIdPredicate = seenNodesPredicate(deduplicateIds, maxOriginalId);
-        long highestPossibleNodeCount = maxOriginalId == UNKNOWN_MAX_ID
-            ? Long.MAX_VALUE
-            : maxOriginalId + 1;
 
         this.threadLocalBuilders = AutoCloseableThreadLocal.withInitial(
             () -> new NodesBuilder.ThreadLocalBuilder(
                 importedNodes,
                 nodeImporter,
-                highestPossibleNodeCount,
                 seenNodeIdPredicate,
                 hasLabelInformation,
                 hasProperties,
@@ -297,7 +293,6 @@ public final class NodesBuilder {
         ThreadLocalBuilder(
             LongAdder importedNodes,
             NodeImporter nodeImporter,
-            long highestPossibleNodeCount,
             LongPredicate seenNodeIdPredicate,
             boolean hasLabelInformation,
             boolean hasProperties,
@@ -309,7 +304,6 @@ public final class NodesBuilder {
 
             this.buffer = new NodesBatchBufferBuilder()
                 .capacity(ParallelUtil.DEFAULT_BATCH_SIZE)
-                .highestPossibleNodeCount(highestPossibleNodeCount)
                 .hasLabelInformation(hasLabelInformation)
                 .readProperty(hasProperties)
                 .build();
