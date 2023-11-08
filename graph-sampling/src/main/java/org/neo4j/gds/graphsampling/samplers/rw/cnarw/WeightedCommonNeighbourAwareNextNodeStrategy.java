@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.graphsampling.samplers.rw.cnarw;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.compress.DoubleArrayBuffer;
 import org.neo4j.gds.api.compress.LongArrayBuffer;
@@ -27,7 +28,6 @@ import org.neo4j.gds.functions.similarity.OverlapSimilarity;
 import org.neo4j.gds.graphsampling.samplers.rw.NextNodeStrategy;
 
 import java.util.SplittableRandom;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStrategy {
 
@@ -132,7 +132,7 @@ public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStr
         weights.ensureCapacity(neighsCount);
         weights.length = neighsCount;
 
-        var idx = new AtomicInteger(0);
+        var idx = new MutableInt(0);
         graph.forEachRelationship(nodeId, 0.0, (src, dst, w) -> {
             var localIdx = idx.getAndIncrement();
             neighs.buffer[localIdx] = dst;
