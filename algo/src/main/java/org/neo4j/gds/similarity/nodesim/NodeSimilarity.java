@@ -194,7 +194,9 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     private void prepare() {
         progressTracker.beginSubTask();
 
-        computeComponents();
+        if (config.isEnableComponentOptimization() && config.componentProperty() == null) {
+            computeComponents();
+        }
 
         neighbors = HugeObjectArray.newArray(long[].class, graph.nodeCount());
         if (weighted) {
@@ -407,7 +409,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
     private void computeSimilarityFor(long sourceNodeId, long targetNodeId, SimilarityConsumer consumer) {
         double similarity = 0;
-        if (components.setIdOf(sourceNodeId) != components.setIdOf(targetNodeId)) {
+        if (config.isEnableComponentOptimization() && isInDistinctComponent(sourceNodeId, targetNodeId)) {
             consumer.accept(sourceNodeId, targetNodeId, similarity);
             return;
         }
@@ -424,6 +426,21 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         if (!Double.isNaN(similarity)) {
             consumer.accept(sourceNodeId, targetNodeId, similarity);
         }
+    }
+
+    private boolean isInDistinctComponent(long sourceNodeId, long targetNodeId) {
+        if (config.componentProperty() == null &&
+            components.setIdOf(sourceNodeId) != components.setIdOf(targetNodeId)) {
+
+            return true;
+        } else if (config.componentProperty() != null &&
+            graph.nodeProperties(config.componentProperty()).longValue(sourceNodeId) !=
+                graph.nodeProperties(config.componentProperty()).longValue(targetNodeId)) {
+
+            return true;
+        }
+
+        return false;
     }
 
     private double computeWeightedSimilarity(

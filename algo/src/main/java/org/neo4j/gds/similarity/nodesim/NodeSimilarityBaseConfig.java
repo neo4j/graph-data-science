@@ -20,10 +20,19 @@
 package org.neo4j.gds.similarity.nodesim;
 
 import org.immutables.value.Value;
+import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.ConfigNodesValidations;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 
+import java.util.Collection;
+
+import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
+import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteCharacter;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
@@ -40,6 +49,11 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
 
     String BOTTOM_N_KEY = "bottomN";
     int BOTTOM_N_DEFAULT = TOP_N_DEFAULT;
+
+    String COMPONENT_PROPERTY_KEY = "componentProperty";
+
+    String ENABLE_COMPONENT_OPTIMIZATION_KEY = "enableComponentOptimization";
+    boolean ENABLE_COMPONENT_OPTIMIZATION = true;
 
     @Value.Default
     @Configuration.DoubleRange(min = 0, max = 1)
@@ -93,6 +107,15 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
     default int bottomN() {
         return BOTTOM_N_DEFAULT;
     }
+
+    @Value.Default
+    @Configuration.ConvertWith(method = "validatePropertyName")
+    @Configuration.Key(COMPONENT_PROPERTY_KEY)
+    default @Nullable String componentProperty() { return null; }
+
+    @Value.Default
+    @Configuration.Key(ENABLE_COMPONENT_OPTIMIZATION_KEY)
+    default boolean isEnableComponentOptimization() { return ENABLE_COMPONENT_OPTIMIZATION; }
 
     @Configuration.Ignore
     @Value.Derived
@@ -159,6 +182,22 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
             throw new IllegalArgumentException(formatWithLocale(
                 "The value of upperDegreeCutoff cannot be smaller than degreeCutoff"
             ));
+        }
+    }
+
+    static @Nullable String validatePropertyName(String input) {
+        return validateNoWhiteCharacter(emptyToNull(input), COMPONENT_PROPERTY_KEY);
+    }
+
+    @Configuration.GraphStoreValidationCheck
+    default void validateComponentProperty(
+        GraphStore graphStore,
+        Collection<NodeLabel> selectedLabels,
+        Collection<RelationshipType> selectedRelationshipTypes
+    ) {
+        String componentProperty = componentProperty();
+        if (componentProperty != null) {
+            ConfigNodesValidations.validateNodePropertyExists(graphStore, selectedLabels, "Component property", componentProperty);
         }
     }
 
