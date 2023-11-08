@@ -48,15 +48,21 @@ public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStr
 
     @Override
     public long getNextNode(long currentNode) {
+
         double q, chanceOutOfNeighbours;
         long candidateNode;
+
         sortNeighsWithWeights(inputGraph, currentNode, uSortedNeighsIds, uSortedNeighsWeights);
+        var sumWeights = sumWeights(uSortedNeighsIds, uSortedNeighsWeights.buffer);
+
         do {
-            candidateNode = getCandidateNode(uSortedNeighsIds, uSortedNeighsWeights.buffer);
+            candidateNode = getCandidateNode(uSortedNeighsIds, uSortedNeighsWeights.buffer, sumWeights);
             sortNeighsWithWeights(inputGraph, candidateNode, vSortedNeighsIds, vSortedNeighsWeights);
             var overlap = computeOverlapSimilarity(
-                uSortedNeighsIds, uSortedNeighsWeights,
-                vSortedNeighsIds, vSortedNeighsWeights
+                uSortedNeighsIds,
+                uSortedNeighsWeights,
+                vSortedNeighsIds,
+                vSortedNeighsWeights
             );
 
             chanceOutOfNeighbours = 1.0D - overlap;
@@ -67,14 +73,19 @@ public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStr
     }
 
     private double computeOverlapSimilarity(
-        LongArrayBuffer neighsU, DoubleArrayBuffer weightsU,
-        LongArrayBuffer neighsV, DoubleArrayBuffer weightsV
+        LongArrayBuffer neighsU,
+        DoubleArrayBuffer weightsU,
+        LongArrayBuffer neighsV,
+        DoubleArrayBuffer weightsV
     ) {
         double similarityCutoff = 0.0d;
         double similarity = OverlapSimilarity.computeWeightedSimilarity(
-            neighsU.buffer, neighsU.length,
-            neighsV.buffer, neighsV.length,
-            weightsU.buffer, weightsV.buffer,
+            neighsU.buffer,
+            neighsU.length,
+            neighsV.buffer,
+            neighsV.length,
+            weightsU.buffer,
+            weightsV.buffer,
             similarityCutoff
         );
         if (Double.isNaN(similarity)) {
@@ -83,10 +94,19 @@ public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStr
         return similarity;
     }
 
-    private long getCandidateNode(LongArrayBuffer neighs, double[] weights) {
+    private double sumWeights(LongArrayBuffer neighs, double[] weights) {
+
         double sumWeights = 0;
-        for (int i = 0; i < neighs.length; i++)
+
+        for (int i = 0; i < neighs.length; i++) {
             sumWeights += weights[i];
+        }
+
+        return sumWeights;
+    }
+
+    private long getCandidateNode(LongArrayBuffer neighs, double[] weights, double sumWeights) {
+
 
         var remainingMass = rng.nextDouble(0, sumWeights);
 
@@ -99,8 +119,10 @@ public class WeightedCommonNeighbourAwareNextNodeStrategy implements NextNodeStr
     }
 
     private static void sortNeighsWithWeights(
-        Graph graph, long nodeId,
-        LongArrayBuffer neighs, DoubleArrayBuffer weights
+        Graph graph,
+        long nodeId,
+        LongArrayBuffer neighs,
+        DoubleArrayBuffer weights
     ) {
         var neighsCount = graph.degree(nodeId);
 
