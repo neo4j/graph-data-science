@@ -23,5 +23,6 @@ If your version of GDS or Neo4j is not listed in the matrix, you should upgrade.
 | `5.3`             | `2.4`
 | `5.2`             | `2.4`
 | `5.1`             | `2.4`
-| `4.4.9` or later  | `2.5`, `2.4`
+| `4.4.27` or later  | `2.5.3` or later
+| `4.4.9` - `4.4.26`  | `2.5`, `2.4`
 |===
