@@ -1,0 +1,172 @@
+[[getting-started-single-algorithm]]
+= Basic workflow
+:description: This chapter shows a complete example using one algorithm from the Neo4j Graph Data Science library.
+:keywords: GDS, getting started, algorithm
+
+One of the most common problems on graphs is finding the shortest path between nodes.
+This example shows how to create a GDS graph from Neo4j data, run a path finding algorithm, and write the results back to Neo4j.
+
+
+:sectnums!:
+
+== Create the graph
+
+The following Cypher query creates the graph of a small train network in the Neo4j database.
+Each relationship includes a `distance` numerical property representing the distance between two stations.
+
+[source, cypher, role=noplay setup-query]
+----
+CREATE
+  // Add the stations
+  (a:Station {name: 'Kings Cross'}),
+  (b:Station {name: 'Euston'}),
+  (c:Station {name: 'Camden Town'}),
+  (d:Station {name: 'Mornington Crescent'}),
+  (e:Station {name: 'Kentish Town'}),
+
+  // Add the connections between stations
+  (a)-[:CONNECTION {distance: 0.7}]->(b),
+  (b)-[:CONNECTION {distance: 1.3}]->(c),
+  (b)-[:CONNECTION {distance: 0.7}]->(d),
+  (d)-[:CONNECTION {distance: 0.6}]->(c),
+  (c)-[:CONNECTION {distance: 1.3}]->(e);
+----
+
+The graph looks as follows:
+
+image::example-graphs/quickstart-tube-graph.svg["Tube graph."]
+
+The next query creates an in-memory graph called `trainGraph` from the `:Station` nodes and the `:CONNECTION` relationships with their `distance` property.
+
+[source, cypher, role=noplay graph-project-query]
+----
+CALL gds.graph.project(
+  'trainGraph',
+  'Station',
+  'CONNECTION',
+  {
+    relationshipProperties: 'distance'
+  }
+)
+----
+
+
+== Run the algorithm in `stream` mode
+
+A good first candidate algorithm to calculate the shortest path in a graph is the xref:algorithms/dijkstra-source-target.adoc[] algorithm.
+To try it out, use it with the xref:common-usage/running-algos.adoc#running-algos-stream[`stream` mode] to see the result in the query output.
+
+[role=query-example]
+--
+[source, cypher, role=noplay]
+----
+MATCH  // <1>
+  (source:Station {name: 'Kings Cross'}),
+  (target:Station {name: 'Kentish Town'})
+CALL gds.shortestPath.dijkstra.stream(  // <2>
+  'trainGraph',  // <3>
+  {  // <4>
+    sourceNode: source,
+    targetNode: target,
+    relationshipWeightProperty: 'distance'
+  }
+)
+YIELD  // <5>
+  index,
+  sourceNode,
+  targetNode,
+  totalCost,
+  path
+RETURN  // <6>
+  index,
+  gds.util.asNode(sourceNode).name AS sourceNodeName,
+  gds.util.asNode(targetNode).name AS targetNodeName,
+  totalCost,
+  nodes(path) AS path
+ORDER BY index
+----
+<1> `MATCH` clause to define the source and target nodes.
+<2> `gds.shortestPath.dijkstra` algorithm running in `stream` mode.
+<3> Name of the projected graph to run the algorithm on.
+<4> Configuration parameters listed in the xref:algorithms/dijkstra-source-target.adoc#algorithms-dijkstra-source-target-syntax[Syntax section] of the algorithm (`Stream mode` panel).
+<5> Result fields listed in the xref:algorithms/dijkstra-source-target.adoc#algorithms-dijkstra-source-target-syntax[Syntax section] of the algorithm (`Stream mode` panel).
+Include only the ones you need.
+<6> Query result fields, typically the result fields from the `YIELD` clause wrapped in Cypher functions.
+The xref:management-ops/utility-functions.adoc#utility-functions-node-path[`gds.util.asNode()`] function retrieves the Neo4j node corresponding to a projected node.
+In the case of path finding algorithms, the link:https://neo4j.com/docs/cypher-manual/current/functions/list/#functions-nodes[`nodes()`] Cypher function is useful to return a node path as a list of nodes.
+
+.Results
+[opts="header", caption=, title="Query result"]
+|===
+| index | sourceNodeName | targetNodeName | totalCost | path
+| 0     | "Kings Cross"  | "Kentish Town" | 3.3       | [Node[0], Node[1], Node[2], Node[4]]
+|===
+--
+
+
+== Write the results
+
+If the results of the algorithm are as expected, the next step can be to write them back to the Neo4j database.
+The following query is very similar to the `stream` query, except for the addition of some configuration parameters specific to the `write` mode and the different format of the result.
+
+[role=query-example]
+--
+[source, cypher, role=noplay]
+----
+MATCH  // <1>
+  (source:Station {name: 'Kings Cross'}),
+  (target:Station {name: 'Kentish Town'})
+CALL gds.shortestPath.dijkstra.write(  // <2>
+  'trainGraph',  // <3>
+  {  // <4>
+    sourceNode: source,
+    targetNode: target,
+    relationshipWeightProperty: 'distance',
+    writeRelationshipType: 'PATH',
+    writeNodeIds: true,
+    writeCosts: true
+  }
+)
+YIELD relationshipsWritten
+RETURN relationshipsWritten
+----
+<1> `MATCH` clause to define the source and target nodes.
+<2> `gds.shortestPath.dijkstra` algorithm running in `write` mode.
+<3> Name of the projected graph.
+<4> Configuration parameters listed in the xref:algorithms/dijkstra-source-target.adoc#algorithms-dijkstra-source-target-syntax[Syntax section] of the algorithm (`Write mode` panel).
+In this case, the three parameters `writeRelationshipType`, `writeNodeIds`, and `writeCosts` are used to create the new `:PATH` relationship with its `totalCost`, `nodeIds`, and `costs` properties.
+
+.Results
+[opts="header", caption=, title="Query result"]
+|===
+| relationshipsWritten
+| 1
+|===
+--
+
+
+== Query the Neo4j database
+
+To check that the results of the algorithm have been correctly written back to Neo4j, you can run a Cypher query that includes the new relationships and relationship properties written in the previous step (in this case, the `PATH` relationship with its `nodeIds`, `costs`, and `totalCost` properties).
+
+[role=query-example]
+--
+[source, cypher, role=noplay]
+----
+MATCH (source)-[r:PATH]->(target)
+RETURN source.name, r.nodeIds, r.costs, r.totalCost, target.name
+----
+
+.Results
+[opts="header", caption=, title="Query result"]
+|===
+| source.name  | r.nodeIds | r.costs | r.totalCost | target.name
+|"Kings Cross" | [Node[0], Node[1], Node[2], Node[4] | [0.0, 0.7, 2.0, 3.3] | 3.3 | "Kentish Town"
+|===
+--
+
+
+== Next steps
+
+This example covers the basics of using a GDS algorithm.
+The xref:getting-started/fastrp-knn-example.adoc[next example] shows a complete end-to-end workflow, including the use of the output of an algorithm with another algorithm.

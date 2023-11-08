@@ -1,0 +1,174 @@
+[[getting-started-ml-pipeline]]
+= Machine learning pipeline
+:description: This chapter shows a complete example using machine learning pipelines from the Neo4j Graph Data Science library.
+:keywords: GDS, getting started, machine learning, pipeline
+:sectnums!:
+
+This example is a simplified version of the Link Prediction pipeline described in the xref:machine-learning/linkprediction-pipelines/config.adoc[Machine learning] section.
+
+
+:sectnums!:
+
+== Create the graph
+
+The following Cypher query creates the graph of a small social network in the Neo4j database.
+
+----
+CREATE
+  (alice:Person {name: 'Alice', age: 38}),
+  (michael:Person {name: 'Michael', age: 67}),
+  (karin:Person {name: 'Karin', age: 30}),
+  (chris:Person {name: 'Chris', age: 52}),
+  (will:Person {name: 'Will', age: 6}),
+  (mark:Person {name: 'Mark', age: 32}),
+  (greg:Person {name: 'Greg', age: 29}),
+  (veselin:Person {name: 'Veselin', age: 3}),
+
+  (alice)-[:KNOWS]->(michael),
+  (michael)-[:KNOWS]->(karin),
+  (michael)-[:KNOWS]->(chris),
+  (michael)-[:KNOWS]->(greg),
+  (will)-[:KNOWS]->(michael),
+  (will)-[:KNOWS]->(chris),
+  (mark)-[:KNOWS]->(michael),
+  (mark)-[:KNOWS]->(will),
+  (greg)-[:KNOWS]->(chris),
+  (veselin)-[:KNOWS]->(chris),
+  (karin)-[:KNOWS]->(veselin),
+  (chris)-[:KNOWS]->(karin)
+----
+
+The graph looks as follows:
+
+image::lp-graph.svg["LP example data."]
+
+The next query creates an in-memory graph called `friends` from the Neo4j graph.
+Since the Link Prediction model requires the graph to be undirected, the orientation of the `:KNOWS` relationship is discarded.
+
+----
+CALL gds.graph.project(
+  'friends',
+  {
+    Person: {
+      properties: ['age']
+    }
+  },
+  {
+    KNOWS: {
+      orientation: 'UNDIRECTED'
+    }
+  }
+)
+----
+
+
+== Configure the pipeline
+
+You can configure a machine learning pipeline with a sequence of Cypher queries.
+
+[NOTE]
+====
+The following configuration is simplified for convenience.
+As such, the model performance is not expected to be the best.
+====
+
+[role=query-example]
+--
+[source, cypher, role=noplay]
+----
+CALL gds.beta.pipeline.linkPrediction.create('pipe');  // <1>
+
+CALL gds.beta.pipeline.linkPrediction.addFeature(  // <2>
+  'pipe', 
+  'cosine',
+  {
+    nodeProperties: ['age']
+  }
+);
+
+CALL gds.beta.pipeline.linkPrediction.configureSplit(  // <3>
+  'pipe',
+  {
+    testFraction: 0.25,
+    trainFraction: 0.6,
+    validationFolds: 3
+  }
+);
+
+CALL gds.beta.pipeline.linkPrediction.addLogisticRegression('pipe');  // <4>
+----
+<1> Create the pipeline and add it to the pipeline catalog.
+<2> Add the xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-features[link features] (only `age` here) and a feature type (`cosine` here).
+<3> Configure the xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-configure-splits[train-test split] and the number of folds for cross-validation.
+<4> Add a xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-model-candidates[model candidate] (a logistic regression with no further configuration here).
+--
+
+
+== Train a model
+
+Once configured, the pipeline is ready to train a model.
+The training process returns the best performing model with the specified evaluation metrics.
+
+[role=query-example]
+--
+[source, cypher, role=noplay]
+----
+CALL gds.beta.pipeline.linkPrediction.train(
+  'friends',  // <1>
+  {
+    pipeline: 'pipe',  // <2>
+    modelName: 'lp-pipeline-model',  // <3>
+    targetRelationshipType: 'KNOWS',  // <4>
+    metrics: ['AUCPR'],  // <5>
+  }
+)
+YIELD modelInfo
+RETURN
+  modelInfo.bestParameters AS winningModel,  // <6>
+  modelInfo.metrics.AUCPR.train.avg AS avgTrainScore,  // <7>
+  modelInfo.metrics.AUCPR.validation.avg AS avgValidationScore,
+  modelInfo.metrics.AUCPR.outerTrain AS outerTrainScore,
+  modelInfo.metrics.AUCPR.test AS testScore
+----
+<1> Name of the projected graph to use for training.
+<2> Name of the configured pipeline.
+<3> Name of the model to train.
+<4> Name of the relationship to train the model on.
+<5> Metrics used to evaluate the models (`AUCPR` here).
+<6> Parameters of the best performing model returned by the training process.
+<7> Evaluated metrics (here for `AUCPR`) of the best performing model returned by the training process.
+--
+
+
+== Use the model for prediction
+
+You can use the trained model to predict the probability that a link exists between two nodes in a projected graph.
+
+[role=query-example]
+--
+[source, cypher, role=noplay]
+----
+CALL gds.beta.pipeline.linkPrediction.predict.stream(  // <1>
+  'friends',  // <2>
+  {
+    modelName: 'lp-pipeline-model',  // <3>
+    topN: 5  // <4>
+  }
+)
+YIELD node1, node2, probability
+RETURN
+  gds.util.asNode(node1).name AS person1,
+  gds.util.asNode(node2).name AS person2,
+  probability
+ORDER BY probability DESC, person1
+----
+<1> Run the prediction in `stream` mode (return the predicted links as query results).
+<2> Name of the projected graph to run the prediction on.
+<3> Name of the model to use for prediction.
+<4> Maximum number of predicted relationships to output.
+--
+
+
+== Next steps
+
+Try to improve the performance of the training by using different model candidates, adding xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-adding-node-properties[node properties] to the features, or configuring xref:machine-learning/linkprediction-pipelines/config.adoc#linkprediction-configure-auto-tuning[autotuning].

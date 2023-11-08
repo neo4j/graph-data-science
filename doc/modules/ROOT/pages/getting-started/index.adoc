@@ -1,0 +1,47 @@
+[[getting-started]]
+= Getting started
+:description: This chapter gives users the basic information to start using the Neo4j Graph Data Science library.
+:keywords: GDS, getting started
+
+After xref:installation/index.adoc[installation], you can start using the GDS library in two main ways:
+
+* To run one or more algorithms on an in-memory graph, inspect the result of the computation, and potentially write it back to Neo4j.
+* To configure a machine learning pipeline and use it to train a model, then use the model for prediction.
+
+You can run all GDS Cypher procedures in the Neo4j Browser or via a link:https://neo4j.com/docs/create-applications/#_language_libraries[Neo4j driver].
+
+:sectnums!:
+
+== Algorithms
+
+The typical workflow with GDS algorithms is as follows:
+
+. xref:management-ops/graph-creation/index.adoc[Project] an in-memory graph from the Neo4j database.
+. Choose an appropriate xref:algorithms/index.adoc[algorithm].
+. Run the algorithm in one of the xref:algorithms/syntax.adoc[execution modes].
+  * Use the `stream` mode to retrieve the output of the algorithm as a query result.
+  * Use the `mutate` mode to update the in-memory graph with the output of the algorithm.
+  * Use the `write` mode to write the output of the algorithm back to the Neo4j database.
+. (Optional) Choose and run more algorithms.
+
+image::algorithm-modes.svg["Algorithms workflow.", 400]
+
+The xref:getting-started/basic-workflow.adoc[] and the xref:getting-started/fastrp-knn-example.adoc[] examples show this workflow with a single algorithm and a sequence of algorithms.
+
+== Machine learning pipelines
+
+Machine learning xref:machine-learning/machine-learning.adoc[pipelines] streamline the common phases of graph machine learning workflows such as xref:machine-learning/node-property-prediction/nodeclassification-pipelines/node-classification.adoc[node classification], xref:machine-learning/linkprediction-pipelines/link-prediction.adoc[link prediction],
+and xref:machine-learning/node-property-prediction/noderegression-pipelines/node-regression.adoc[node regression], making it convenient to train models and use them for prediction.
+
+The typical workflow with a machine learning pipeline in GDS is as follows:
+
+. Configure a pipeline.
+. Use the pipeline to train a model.
+. Used the trained model for prediction.
+  * Use the `stream` mode to retrieve the predicted values as a query result.
+  * Use the `mutate` mode to update the in-memory graph with the predicted values.
+  * Use the `write` mode to write the predicted values back to the Neo4j database.
+
+image::pipeline-model.svg["Workflow of pipelines and models.", 400]
+
+The xref:getting-started/ml-pipeline.adoc[] example shows how to configure and use a basic Link Prediction pipeline.
