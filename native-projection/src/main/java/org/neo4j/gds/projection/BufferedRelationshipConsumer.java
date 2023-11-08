@@ -69,7 +69,7 @@ public class BufferedRelationshipConsumer implements StoreScanner.RecordConsumer
         this.skipDanglingRelationships = skipDanglingRelationships;
     }
 
-    RelationshipsBatchBuffer relationshipsBatchBuffer() {
+    public RelationshipsBatchBuffer relationshipsBatchBuffer() {
         return this.buffer;
     }
 

@@ -17,25 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.projection;
 
 import org.immutables.builder.Builder;
+import org.neo4j.gds.core.loading.RecordsBatchBuffer;
+import org.neo4j.gds.core.loading.RelationshipReference;
+import org.neo4j.gds.core.loading.StoreScanner;
 
-public final class CompositeRelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipReference> {
+public final class BufferedCompositeRelationshipConsumer extends RecordsBatchBuffer<RelationshipReference> implements StoreScanner.RecordConsumer<RelationshipReference> {
 
-    private final RelationshipsBatchBuffer[] buffers;
+    private final BufferedRelationshipConsumer[] buffers;
 
     @Builder.Factory
-    static RecordsBatchBuffer<RelationshipReference> compositeRelationshipsBatchBuffer(
-        RelationshipsBatchBuffer[] buffers
+    static StoreScanner.RecordConsumer<RelationshipReference> bufferedCompositeRelationshipConsumer(
+        BufferedRelationshipConsumer[] buffers
     ) {
         if (buffers.length == 1) {
             return buffers[0];
         }
-        return new CompositeRelationshipsBatchBuffer(buffers);
+        return new BufferedCompositeRelationshipConsumer(buffers);
     }
 
-    private CompositeRelationshipsBatchBuffer(RelationshipsBatchBuffer... buffers) {
+    private BufferedCompositeRelationshipConsumer(BufferedRelationshipConsumer... buffers) {
         super(0);
         this.buffers = buffers;
     }
@@ -43,7 +46,7 @@ public final class CompositeRelationshipsBatchBuffer extends RecordsBatchBuffer<
     @Override
     public boolean offer(RelationshipReference record) {
         boolean offered = true;
-        for (RelationshipsBatchBuffer buffer : buffers) {
+        for (BufferedRelationshipConsumer buffer : buffers) {
             offered = buffer.offer(record) && offered;
         }
         return offered;
@@ -51,7 +54,7 @@ public final class CompositeRelationshipsBatchBuffer extends RecordsBatchBuffer<
 
     @Override
     public void reset() {
-        for (RelationshipsBatchBuffer buffer : buffers) {
+        for (BufferedRelationshipConsumer buffer : buffers) {
             buffer.reset();
         }
     }

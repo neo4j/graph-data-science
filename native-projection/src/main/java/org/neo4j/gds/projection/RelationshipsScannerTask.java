@@ -23,22 +23,19 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.loading.AdjacencyBuffer;
-import org.neo4j.gds.core.loading.CompositeRelationshipsBatchBufferBuilder;
 import org.neo4j.gds.core.loading.RecordScannerTask;
 import org.neo4j.gds.core.loading.RelationshipReference;
-import org.neo4j.gds.core.loading.RelationshipsBatchBuffer;
 import org.neo4j.gds.core.loading.ScanState;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
 import org.neo4j.gds.core.loading.StoreScanner;
 import org.neo4j.gds.core.loading.ThreadLocalSingleTypeRelationshipImporter;
 import org.neo4j.gds.core.utils.RawValues;
 import org.neo4j.gds.core.utils.StatementAction;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.kernel.api.KernelTransaction;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -145,7 +142,6 @@ public final class RelationshipsScannerTask extends StatementAction implements R
         try (StoreScanner.ScanCursor<RelationshipReference> cursor = scanner.createCursor(transaction)) {
             // create an importer including a dedicated batch buffer for each relationship type that we load
             var buffers = new BufferedRelationshipConsumer[this.singleTypeRelationshipImporters.size()];
-
             var idx = new MutableInt(0);
             var importers = this.singleTypeRelationshipImporters.stream()
                 .map(importer -> {
@@ -164,12 +160,8 @@ public final class RelationshipsScannerTask extends StatementAction implements R
                     }
                 ).collect(Collectors.toList());
 
-            var relationshipBatchBuffers = Arrays.stream(buffers)
-                .map(BufferedRelationshipConsumer::relationshipsBatchBuffer)
-                .toArray(RelationshipsBatchBuffer[]::new);
-
-            var compositeBuffer = new CompositeRelationshipsBatchBufferBuilder()
-                .buffers(relationshipBatchBuffers)
+            var compositeBuffer = new BufferedCompositeRelationshipConsumerBuilder()
+                .buffers(buffers)
                 .build();
 
             long allImportedRels = 0L;

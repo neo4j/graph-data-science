@@ -17,38 +17,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.projection;
 
-public abstract class RecordsBatchBuffer<Reference> implements StoreScanner.RecordConsumer<Reference> {
+import org.neo4j.gds.core.loading.RecordsBatchBuffer;
+import org.neo4j.gds.core.loading.StoreScanner;
 
-    public static final int DEFAULT_BUFFER_SIZE = 100_000;
+public abstract class BufferedRecordConsumer<Reference> implements StoreScanner.RecordConsumer<Reference> {
 
-    final long[] buffer;
-    int length;
+    private final RecordsBatchBuffer<Reference> buffer;
 
-    protected RecordsBatchBuffer(int capacity) {
-        this.buffer = new long[capacity];
+    protected BufferedRecordConsumer(RecordsBatchBuffer<Reference> buffer) {this.buffer = buffer;}
+
+    public RecordsBatchBuffer<Reference> buffer() {
+        return this.buffer;
     }
 
     public int length() {
-        return length;
+        return this.buffer.length();
     }
 
     public int capacity() {
-        return buffer.length;
+        return this.buffer.capacity();
     }
 
     public boolean isFull() {
-        return length >= buffer.length;
+        return this.buffer.isFull();
     }
 
     @Override
     public void reset() {
-        this.length = 0;
+        this.buffer.reset();
     }
 
     public long[] batch() {
-        return buffer;
+        return this.buffer.batch();
     }
-
 }

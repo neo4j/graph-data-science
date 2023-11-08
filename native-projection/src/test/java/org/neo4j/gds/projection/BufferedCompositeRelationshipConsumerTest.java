@@ -22,17 +22,13 @@ package org.neo4j.gds.projection;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.huge.DirectIdMap;
-import org.neo4j.gds.core.loading.CompositeRelationshipsBatchBufferBuilder;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
 import org.neo4j.gds.core.loading.RelationshipReference;
-import org.neo4j.gds.core.loading.RelationshipsBatchBuffer;
-import org.neo4j.gds.core.loading.RelationshipsBatchBufferBuilder;
+import org.neo4j.gds.core.loading.StoreScanner;
 
 import java.util.stream.IntStream;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-class CompositeRelationshipsBatchBufferTest {
+class BufferedCompositeRelationshipConsumerTest {
 
     @Test
     void shouldNotThrowWhenFull() {
@@ -61,16 +57,16 @@ class CompositeRelationshipsBatchBufferTest {
         Assertions.assertThat(compositeBatchBuffer.isFull()).isTrue();
     }
 
-    private static RecordsBatchBuffer<RelationshipReference> createCompositeBuffer(int typeCount, int capacity) {
+    private static BufferedCompositeRelationshipConsumer createCompositeBuffer(int typeCount, int capacity) {
         var buffers = IntStream.range(0, typeCount)
-            .mapToObj(type -> new RelationshipsBatchBufferBuilder()
-//                .idMap(new DirectIdMap(2))
-//                .type(type)
+            .mapToObj(type -> new BufferedRelationshipConsumerBuilder()
+                .idMap(new DirectIdMap(2))
+                .type(type)
                 .capacity(capacity)
                 .build())
-            .toArray(RelationshipsBatchBuffer[]::new);
+            .toArray(BufferedRelationshipConsumer[]::new);
 
-        return new CompositeRelationshipsBatchBufferBuilder()
+        return (BufferedCompositeRelationshipConsumer) new BufferedCompositeRelationshipConsumerBuilder()
             .buffers(buffers)
             .build();
     }
