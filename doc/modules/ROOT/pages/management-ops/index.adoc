@@ -1,4 +1,5 @@
 [[graph-catalog-ops]]
+:page-aliases: management-ops/graph-catalog-ops.adoc
 = Graph management
 :description: This section details the graph catalog operations available to manage graphs within the Neo4j Graph Data Science library.
 // aliases for old pages which were split into multiple and have no 1:1 redirect
