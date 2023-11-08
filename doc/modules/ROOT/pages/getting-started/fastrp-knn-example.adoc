@@ -151,7 +151,7 @@ RETURN similarityDistribution.mean AS meanSimilarity  // <4>
 ----
 <1> `gds.knn` algorithm running in `write` mode.
 <2> Name of the projected graph to run the algorithm on.
-The `write` mode does not update the graph.
+The `write` mode does not update the in-memory graph.
 <3> Configuration parameters listed in the xref:algorithms/knn.adoc#algorithms-knn-syntax[Syntax section] of the algorithm (`Write mode` panel).
 Here, `topK` is set to 2 to select only the two closest neighbours of a node, while the `sampleRate` and the `deltaThreshold` are set to 1 and 0 respectively because the graph is small.
 The `concurrency` and the `randomSeed` are set to obtain the same results for every run, but are not necessary for the actual computation.
