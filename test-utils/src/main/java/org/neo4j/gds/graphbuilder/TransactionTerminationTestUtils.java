@@ -22,7 +22,6 @@ package org.neo4j.gds.graphbuilder;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.termination.TerminatedException;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.graphdb.TransactionTerminatedException;
 
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
