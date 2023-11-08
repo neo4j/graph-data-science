@@ -127,7 +127,7 @@ You can run the algorithm in `stream` mode as in the xref:getting-started/basic-
 == Compute and write similarities
 
 With the embeddings available as the new `embedding` node property, you can run the kNN algorithm to compute a similarity score between each pair of nodes.
-Since you will need to run Cypher queries for further analysis, you must run the kNN algorithm in xref:common-usage/running-algos.adoc#running-algos-write[`write` mode].
+Run the kNN algorithm in xref:common-usage/running-algos.adoc#running-algos-write[`write` mode] to add the `score` relationship to the Neo4j database and use it in Cypher queries.
 
 [role=query-example, group=fastrp-knn]
 --
