@@ -195,4 +195,8 @@ public class InMemoryMetaDataProviderImpl implements MetadataProvider {
     public void setDatabaseIdUuid(UUID uuid, CursorContext cursorContext) {
         throw new IllegalStateException("Not supported");
     }
+
+    public String getStoreFormat() {
+        return InMemoryStoreVersion.STORE_VERSION;
+    }
 }
