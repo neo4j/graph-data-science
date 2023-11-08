@@ -2,7 +2,7 @@
 = Graph management
 :description: This section details the graph catalog operations available to manage graphs within the Neo4j Graph Data Science library.
 // aliases for old pages which were split into multiple and have no 1:1 redirect
-:page-aliases: graph-catalog-node-ops,graph-catalog-relationship-ops, graph-catalog-export-ops, management-ops/graph-catalog-export-ops, management-ops/graph-catalog-ops.adoc
+:page-aliases: graph-catalog-node-ops, graph-catalog-relationship-ops, graph-catalog-export-ops, management-ops/graph-catalog-export-ops, management-ops/graph-catalog-ops/index.adoc
 
 A _graph_ in GDS is an in-memory structure containing _nodes_ connected by _relationships_. Both nodes and relationships can hold numerical attributes (_properties_).
 Graphs are stored using compressed data structures optimized for topology and property lookup operations.
