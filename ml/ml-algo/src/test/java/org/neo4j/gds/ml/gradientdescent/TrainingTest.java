@@ -21,8 +21,6 @@ package org.neo4j.gds.ml.gradientdescent;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.termination.TerminatedException;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.Variable;
@@ -35,7 +33,8 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Scalar;
 import org.neo4j.gds.ml.core.tensor.Tensor;
 import org.neo4j.gds.ml.core.tensor.Vector;
-import org.neo4j.graphdb.TransactionTerminatedException;
+import org.neo4j.gds.termination.TerminatedException;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.PrimitiveIterator;
