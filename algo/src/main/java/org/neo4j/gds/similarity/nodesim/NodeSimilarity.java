@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipConsumer;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.SetBitsIterable;
@@ -60,7 +61,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     private final MetricSimilarityComputer similarityComputer;
     private HugeObjectArray<long[]> neighbors;
     private HugeObjectArray<double[]> weights;
-    private DisjointSetStruct components;
+    private HugeLongArray components;
 
     private final boolean weighted;
 
@@ -194,9 +195,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     private void prepare() {
         progressTracker.beginSubTask();
 
-        if (config.isEnableComponentOptimization() && config.componentProperty() == null) {
-            computeComponents();
-        }
+        initComponents();
 
         neighbors = HugeObjectArray.newArray(long[].class, graph.nodeCount());
         if (weighted) {
@@ -255,7 +254,23 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         }
     }
 
-    private void computeComponents() {
+    private void initComponents() {
+        components = HugeLongArray.newArray(graph.nodeCount());
+        if (!config.isEnableComponentOptimization()) {
+            // considering everything as within the same component
+            return;
+        }
+
+        if (config.componentProperty() != null) {
+            // extract component info from property
+            graph.forEachNode(n -> {
+                components.set(n, graph.nodeProperties(config.componentProperty()).longValue(n));
+                return true;
+            });
+            return;
+        }
+
+        // run WCC to determine components
         WccStreamConfig wccConfig = ImmutableWccStreamConfig
             .builder()
             .concurrency(concurrency)
@@ -264,7 +279,11 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             .build();
 
         Wcc wcc = new WccAlgorithmFactory<>().build(graph, wccConfig, ProgressTracker.NULL_TRACKER);
-        components = wcc.compute();
+        DisjointSetStruct disjointSets = wcc.compute();
+        graph.forEachNode(n -> {
+            components.set(n, disjointSets.setIdOf(n));
+            return true;
+        });
     }
 
     private Stream<SimilarityResult> computeAll() {
@@ -409,7 +428,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
     private void computeSimilarityFor(long sourceNodeId, long targetNodeId, SimilarityConsumer consumer) {
         double similarity = 0;
-        if (config.isEnableComponentOptimization() && isInDistinctComponent(sourceNodeId, targetNodeId)) {
+        if (components.get(sourceNodeId) != components.get(targetNodeId)) {
             consumer.accept(sourceNodeId, targetNodeId, similarity);
             return;
         }
@@ -426,21 +445,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         if (!Double.isNaN(similarity)) {
             consumer.accept(sourceNodeId, targetNodeId, similarity);
         }
-    }
-
-    private boolean isInDistinctComponent(long sourceNodeId, long targetNodeId) {
-        if (config.componentProperty() == null &&
-            components.setIdOf(sourceNodeId) != components.setIdOf(targetNodeId)) {
-
-            return true;
-        } else if (config.componentProperty() != null &&
-            graph.nodeProperties(config.componentProperty()).longValue(sourceNodeId) !=
-                graph.nodeProperties(config.componentProperty()).longValue(targetNodeId)) {
-
-            return true;
-        }
-
-        return false;
     }
 
     private double computeWeightedSimilarity(
