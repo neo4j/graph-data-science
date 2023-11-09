@@ -5,7 +5,7 @@ description = 'Neo4j Graph Data Science :: OpenGDS Procedure Facade'
 group = 'org.neo4j.gds'
 
 dependencies {
-    implementation 'org.jetbrains:annotations:24.0.0'
+
 
     // the necessary Neo4j things
     neodeps().each {
@@ -38,6 +38,8 @@ dependencies {
     implementation project(':string-formatting')
     implementation project(':termination')
     implementation project(':transaction')
+
+    compileOnly group: 'org.jetbrains', name: 'annotations', version: ver.'jetbrains-annotations'
 
     // test infrastructure
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: ver.'junit5bom'
