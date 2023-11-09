@@ -26,16 +26,17 @@ group = 'org.neo4j.gds'
 
 dependencies {
     // We depend on the proc artifact of the GDS library
-    compileOnly "org.neo4j.gds:proc:$gdsVersion"
-    compileOnly "org.neo4j.gds:core:$gdsVersion"
-    compileOnly "org.neo4j.gds:core-write:$gdsVersion"
     compileOnly "org.neo4j.gds:algo-common:$gdsVersion"
+    compileOnly "org.neo4j.gds:annotations:$gdsVersion"
+    compileOnly "org.neo4j.gds:config-api:$gdsVersion"
+    compileOnly "org.neo4j.gds:core-write:$gdsVersion"
+    compileOnly "org.neo4j.gds:core:$gdsVersion"
     compileOnly "org.neo4j.gds:executor:$gdsVersion"
     compileOnly "org.neo4j.gds:memory-usage:$gdsVersion"
-    compileOnly "org.neo4j.gds:annotations:$gdsVersion"
     compileOnly "org.neo4j.gds:proc-pregel:$gdsVersion"
-    compileOnly "org.neo4j.gds:config-api:$gdsVersion"
+    compileOnly "org.neo4j.gds:proc:$gdsVersion"
     compileOnly "org.neo4j.gds:progress-tracking:$gdsVersion"
+    compileOnly "org.neo4j.gds:termination:$gdsVersion"
     compileOnly "org.neo4j.gds:transaction:$gdsVersion"
 
     // We also need to depend on Neo4j itself for our tests.
