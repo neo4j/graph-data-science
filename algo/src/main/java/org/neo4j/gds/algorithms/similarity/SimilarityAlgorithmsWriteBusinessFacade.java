@@ -28,7 +28,7 @@ import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.WriteConfig;
+import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnWriteConfig;
@@ -196,7 +196,7 @@ public class SimilarityAlgorithmsWriteBusinessFacade {
         String taskName,
         String writeProperty,
         String writeRelationshipType,
-        Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo
+        Optional<ArrowConnectionInfo> arrowConnectionInfo
     ) {
 
         return algorithmResult.result().map(result -> {

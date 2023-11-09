@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.WriteConfig;
+import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.values.storable.Values;
@@ -40,7 +40,7 @@ public abstract class RelationshipPropertiesExporterBuilder {
     protected Stream<ExportedRelationship> relationships;
     protected LongUnaryOperator toOriginalId;
     protected long relationshipCount = -1L;
-    protected Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo;
+    protected Optional<ArrowConnectionInfo> arrowConnectionInfo;
     protected String databaseName; // coupled with arrowConnectionInfo, but should not appear in external API
 
 
@@ -94,7 +94,7 @@ public abstract class RelationshipPropertiesExporterBuilder {
         return this;
     }
 
-    public RelationshipPropertiesExporterBuilder withArrowConnectionInfo(Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo, String databaseName) {
+    public RelationshipPropertiesExporterBuilder withArrowConnectionInfo(Optional<ArrowConnectionInfo> arrowConnectionInfo, String databaseName) {
         this.arrowConnectionInfo = arrowConnectionInfo;
         this.databaseName = databaseName;
         return this;

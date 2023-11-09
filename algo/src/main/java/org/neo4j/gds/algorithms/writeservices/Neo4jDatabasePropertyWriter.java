@@ -25,7 +25,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.PropertySchema;
-import org.neo4j.gds.config.WriteConfig;
+import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -66,7 +66,7 @@ final class Neo4jDatabasePropertyWriter {
         int writeConcurrency,
         String writeProperty,
         String procedureName,
-        Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo,
+        Optional<ArrowConnectionInfo> arrowConnectionInfo,
         TerminationFlag terminationFlag,
         Log log
     ) {
