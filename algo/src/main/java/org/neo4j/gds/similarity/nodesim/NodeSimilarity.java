@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipConsumer;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -262,9 +263,10 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         }
 
         if (config.componentProperty() != null) {
+            NodePropertyValues nodeProperties = graph.nodeProperties(config.componentProperty());
             // extract component info from property
             graph.forEachNode(n -> {
-                components.set(n, graph.nodeProperties(config.componentProperty()).longValue(n));
+                components.set(n, nodeProperties.longValue(n));
                 return true;
             });
             return;
