@@ -10,17 +10,12 @@ dependencies {
     compileOnly         group: 'org.jetbrains',            name: 'annotations',        version: ver.'jetbrains-annotations'
     compileOnly         group: 'com.github.spotbugs',      name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 
-    // using Clocks from Neo4j
-    neodeps().each {
-        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
-            transitive = false
-        }
-    }
+    compileOnly group: 'org.neo4j', name: 'neo4j-configuration',    version: ver.'neo4j'
+    compileOnly group: 'org.neo4j', name: 'neo4j-logging',          version: ver.'neo4j'
 
     implementation project(':neo4j-settings')
 
-    implementation group: 'org.apache.commons',      name: 'commons-text',             version: ver.'commons-text'
-
+    implementation group: 'org.apache.commons', name: 'commons-text', version: ver.'commons-text'
 
     // TEST DEPENDENCIES
     testImplementation project(':test-utils')

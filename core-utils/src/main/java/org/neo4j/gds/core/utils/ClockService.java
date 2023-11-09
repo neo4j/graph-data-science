@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.core.utils;
 
-import org.neo4j.time.Clocks;
-
 import java.time.Clock;
 
 public final class ClockService {
 
-    private static Clock CLOCK = Clocks.systemClock();
+    private static final Clock SYSTEM_CLOCK = Clock.systemUTC();
+
+    private static Clock CLOCK = SYSTEM_CLOCK;
 
     public static void setClock(Clock clock) {
         CLOCK = clock;
