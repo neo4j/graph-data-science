@@ -59,10 +59,14 @@ public class SyncBarrier {
 
     public void sync() {
         this.isSyncing.set(true);
-        this.idleStrategy.reset();
         // wait for import processes to finish
         while (workerCount.get() > 0) {
             idleStrategy.idle();
         }
+    }
+
+    public void reset() {
+        this.isSyncing.set(false);
+        this.idleStrategy.reset();
     }
 }
