@@ -44,13 +44,14 @@ dependencies {
             project(':graph-projection-api'),
             project(':graph-dimensions'),
             project(':collections'),
+
+            [group: 'org.agrona',              name: 'agrona',                   version: ver.'agrona'],
             [group: 'org.apache.commons',      name: 'commons-text',             version: ver.'commons-text'],
             [group: 'org.eclipse.collections', name: 'eclipse-collections-api',  version: ver.'eclipse-collections'],
             [group: 'org.eclipse.collections', name: 'eclipse-collections',      version: ver.'eclipse-collections'],
             [group: 'com.carrotsearch',        name: 'hppc',                     version: ver.'hppc'],
             [group: 'org.hdrhistogram',        name: 'HdrHistogram',             version: ver.'HdrHistogram'],
     )
-
 
     // TEST DEPENDENCIES
 
