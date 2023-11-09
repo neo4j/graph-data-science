@@ -53,6 +53,7 @@ ext {
             'asciidoctorj'        : '2.5.10',
             'reflections'         : '0.10.2'
         ],
+        'agrona'               : '1.4.0',
         'assertj'              : '3.24.2',
         'auto-common'          : '1.2.2',
         'auto-service'         : '1.1.1',
