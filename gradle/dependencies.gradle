@@ -76,7 +76,7 @@ ext {
         'jackson'              : '2.15.3',
         'javapoet'             : '1.13.0',
         'jetbrains-annotations': '24.0.1',
-        'jjwt'                 : '0.11.5',
+        'jjwt'                 : '0.12.3',
         'jol'                  : '0.17',
         'jqwik'                : '1.8.0',
         'junit-pioneer'        : '2.0.1',
