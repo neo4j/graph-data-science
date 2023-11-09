@@ -38,7 +38,7 @@ class SyncBarrierTest {
             throw new IllegalStateException();
         });
         barrier.sync();
-        
+
         Assertions
             .assertThatThrownBy(barrier::startWorker)
             .isInstanceOf(IllegalStateException.class);
