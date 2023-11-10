@@ -35,6 +35,16 @@ import java.util.Map;
 @SuppressWarnings("immutables:subtype")
 public interface GraphProjectFromGraphConfig extends GraphProjectConfig {
 
+    @Configuration.Ignore
+    @Value.Parameter(false)
+    default Map<String, Object> asProcedureResultConfigurationField() {
+        var result = originalConfig().asProcedureResultConfigurationField();
+        result.putAll(toMap());
+        result.put("nodeFilter", nodeFilter());
+        result.put("relationshipFilter", relationshipFilter());
+        return result;
+    }
+
     @Configuration.Parameter
     String graphName();
 

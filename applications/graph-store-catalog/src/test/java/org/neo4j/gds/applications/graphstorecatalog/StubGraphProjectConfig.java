@@ -24,6 +24,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.config.GraphProjectConfig;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -51,6 +52,11 @@ class StubGraphProjectConfig implements GraphProjectConfig {
     @Override
     public String graphName() {
         return graphName;
+    }
+
+    @Override
+    public Map<String, Object> asProcedureResultConfigurationField() {
+        throw new UnsupportedOperationException("TODO");
     }
 
     @Override

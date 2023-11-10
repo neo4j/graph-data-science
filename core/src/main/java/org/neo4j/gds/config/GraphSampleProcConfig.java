@@ -23,8 +23,23 @@ import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStoreFactory;
 
+import java.util.Map;
+
 @Configuration
 public interface GraphSampleProcConfig extends GraphProjectConfig, GraphNameConfig {
+
+    @Configuration.Ignore
+    @Value.Parameter(false)
+    default Map<String, Object> asProcedureResultConfigurationField() {
+        var result = originalConfig().asProcedureResultConfigurationField();
+        var cleansedSampleAlgoConfig = cleansed(
+            sampleAlgoConfig().toMap(),
+            sampleAlgoConfig().outputFieldDenylist()
+        );
+        result.putAll(cleansedSampleAlgoConfig);
+        return result;
+    }
+
     @Configuration.Parameter
     GraphProjectConfig originalConfig();
 

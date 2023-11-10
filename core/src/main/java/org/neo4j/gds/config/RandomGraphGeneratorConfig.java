@@ -46,6 +46,12 @@ import java.util.Set;
 @SuppressWarnings("immutables:subtype")
 public interface RandomGraphGeneratorConfig extends GraphProjectConfig {
 
+    @Configuration.Ignore
+    @Value.Parameter(false)
+    default Map<String, Object> asProcedureResultConfigurationField() {
+        return cleansed(toMap(), outputFieldDenylist());
+    }
+
     String RELATIONSHIP_SEED_KEY = "relationshipSeed";
     String RELATIONSHIP_PROPERTY_KEY = "relationshipProperty";
     String RELATIONSHIP_DISTRIBUTION_KEY = "relationshipDistribution";

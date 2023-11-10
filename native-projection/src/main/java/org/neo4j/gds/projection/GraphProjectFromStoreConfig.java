@@ -37,6 +37,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -46,6 +47,12 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
+
+    @Configuration.Ignore
+    @Value.Parameter(false)
+    default Map<String, Object> asProcedureResultConfigurationField() {
+        return cleansed(toMap(), outputFieldDenylist());
+    }
 
     String NODE_PROJECTION_KEY = "nodeProjection";
     String RELATIONSHIP_PROJECTION_KEY = "relationshipProjection";

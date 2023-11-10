@@ -32,8 +32,6 @@ import org.neo4j.gds.projection.GraphProjectFromCypherAggregationConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 
 import java.time.ZonedDateTime;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -149,57 +147,37 @@ public class GraphInfo {
 
         @Override
         public void visit(GraphProjectFromStoreConfig storeConfig) {
-            configuration = cleansed(storeConfig.toMap(), storeConfig.outputFieldDenylist());
+            configuration = storeConfig.asProcedureResultConfigurationField();
         }
 
         @Override
         public void visit(GraphProjectFromCypherConfig cypherConfig) {
-            configuration = cleansed(cypherConfig.toMap(), cypherConfig.outputFieldDenylist());
+            configuration = cypherConfig.asProcedureResultConfigurationField();
         }
 
         @Override
         public void visit(GraphProjectFromCypherAggregationConfig cypherAggregationConfig) {
-            configuration = cleansed(cypherAggregationConfig.toMap(), cypherAggregationConfig.outputFieldDenylist());
-            configuration.put("query", cypherAggregationConfig.query());
+            configuration = cypherAggregationConfig.asProcedureResultConfigurationField();
         }
 
         @Override
         public void visit(GraphProjectFromGraphConfig graphConfig) {
-            graphConfig.originalConfig().accept(this);
-            configuration.putAll(graphConfig.toMap());
-            configuration.put("nodeFilter", graphConfig.nodeFilter());
-            configuration.put("relationshipFilter", graphConfig.relationshipFilter());
+            configuration = graphConfig.asProcedureResultConfigurationField();
         }
 
         @Override
         public void visit(RandomGraphGeneratorConfig randomGraphConfig) {
-            configuration = cleansed(randomGraphConfig.toMap(), randomGraphConfig.outputFieldDenylist());
+            configuration = randomGraphConfig.asProcedureResultConfigurationField();
         }
 
         @Override
         public void visit(GraphSampleProcConfig sampleProcConfig) {
-            sampleProcConfig.originalConfig().accept(this);
-
-            var cleansedSampleAlgoConfig = cleansed(
-                sampleProcConfig.sampleAlgoConfig().toMap(),
-                sampleProcConfig.sampleAlgoConfig().outputFieldDenylist()
-            );
-            configuration.putAll(cleansedSampleAlgoConfig);
+            configuration = sampleProcConfig.asProcedureResultConfigurationField();
         }
 
         @Override
         public void visit(GraphCatalogConfig catalogConfig) {
-            configuration = cleansed(catalogConfig.toMap(), catalogConfig.outputFieldDenylist());
-        }
-
-        private Map<String, Object> cleansed(Map<String, Object> map, Collection<String> keysToIgnore) {
-            Map<String, Object> result = new HashMap<>(map);
-            map.forEach((key, value) -> {
-                if (keysToIgnore.contains(key)) {
-                    result.remove(key);
-                }
-            });
-            return result;
+            configuration = catalogConfig.asProcedureResultConfigurationField();
         }
     }
 }

@@ -43,6 +43,12 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @SuppressWarnings("immutables:subtype")
 public interface GraphProjectFromCypherConfig extends GraphProjectConfig {
 
+    @Configuration.Ignore
+    @Value.Parameter(false)
+    default Map<String, Object> asProcedureResultConfigurationField() {
+        return cleansed(toMap(), outputFieldDenylist());
+    }
+
     List<String> FORBIDDEN_KEYS = Arrays.asList(
 //        GraphProjectFromStoreConfig.NODE_PROJECTION_KEY,
         "nodeProjection",
