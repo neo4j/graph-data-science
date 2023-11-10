@@ -30,7 +30,6 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.procedures.centrality.CentralityMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
@@ -68,11 +67,6 @@ public class BetweennessCentralityMutateSpecification implements AlgorithmSpec<B
             ),
             this::resultBuilder
         );
-    }
-
-    @Override
-    public ValidationConfiguration<BetweennessCentralityMutateConfig> validationConfig(ExecutionContext executionContext) {
-        return new BetweennessCentralityConfigValidation<>();
     }
 
     private AbstractResultBuilder<CentralityMutateResult> resultBuilder(

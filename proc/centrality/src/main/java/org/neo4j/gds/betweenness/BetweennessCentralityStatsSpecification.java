@@ -25,7 +25,6 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.procedures.centrality.CentralityStatsResult;
 
 import java.util.stream.Stream;
@@ -69,10 +68,4 @@ public class BetweennessCentralityStatsSpecification implements AlgorithmSpec<Be
             );
         };
     }
-
-    @Override
-    public ValidationConfiguration<BetweennessCentralityStatsConfig> validationConfig(ExecutionContext executionContext) {
-        return new BetweennessCentralityConfigValidation<>();
-    }
-
 }
