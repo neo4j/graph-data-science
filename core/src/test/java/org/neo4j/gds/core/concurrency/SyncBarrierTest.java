@@ -26,7 +26,7 @@ class SyncBarrierTest {
 
     @Test
     void shouldSync() {
-        var barrier = SyncBarrier.of();
+        var barrier = SyncBarrier.create();
         barrier.startWorker();
         barrier.stopWorker();;
         barrier.sync();
@@ -34,7 +34,7 @@ class SyncBarrierTest {
 
     @Test
     void shouldReject() {
-        var barrier = SyncBarrier.of(() -> {
+        var barrier = SyncBarrier.create(() -> {
             throw new IllegalStateException();
         });
         barrier.sync();

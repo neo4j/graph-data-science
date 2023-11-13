@@ -31,11 +31,11 @@ public class SyncBarrier {
     private final BackoffIdleStrategy idleStrategy;
     private final Runnable rejectAction;
 
-    public static SyncBarrier of() {
+    public static SyncBarrier create() {
         return new SyncBarrier(() -> {});
     }
 
-    public static SyncBarrier of(Runnable rejectAction) {
+    public static SyncBarrier create(Runnable rejectAction) {
         return new SyncBarrier(rejectAction);
     }
 
