@@ -37,6 +37,7 @@ import org.neo4j.gds.graphsampling.samplers.SeenNodes;
 import org.neo4j.gds.graphsampling.samplers.rw.InitialStartQualities;
 import org.neo4j.gds.graphsampling.samplers.rw.WalkQualities;
 import org.neo4j.gds.graphsampling.samplers.rw.Walker;
+import org.neo4j.gds.graphsampling.samplers.rw.WalkerProducer;
 
 import java.util.Optional;
 import java.util.SplittableRandom;
@@ -50,9 +51,11 @@ public class RandomWalkWithRestarts implements RandomWalkBasedNodesSampler {
 
     private final RandomWalkWithRestartsConfig config;
     private LongHashSet startNodesUsed;
+    private final WalkerProducer walkerProducer;
 
     public RandomWalkWithRestarts(RandomWalkWithRestartsConfig config) {
         this.config = config;
+        this.walkerProducer = WalkerProducer.RWRWalkerProducer();
     }
 
     @Override
@@ -78,7 +81,7 @@ public class RandomWalkWithRestarts implements RandomWalkBasedNodesSampler {
         Optional<HugeAtomicDoubleArray> totalWeights = initializeTotalWeights(inputGraph.nodeCount());
 
         var tasks = ParallelUtil.tasks(config.concurrency(), () ->
-            getWalker(
+            walkerProducer.getWalker(
                 seenNodes,
                 totalWeights,
                 QUALITY_THRESHOLD_BASE / (config.concurrency() * config.concurrency()),
@@ -144,26 +147,4 @@ public class RandomWalkWithRestarts implements RandomWalkBasedNodesSampler {
         return startNodesUsed.size();
     }
 
-    protected Runnable getWalker(
-        SeenNodes seenNodes,
-        Optional<HugeAtomicDoubleArray> totalWeights,
-        double qualityThreshold,
-        WalkQualities walkQualities,
-        SplittableRandom split,
-        Graph concurrentCopy,
-        RandomWalkWithRestartsConfig config,
-        ProgressTracker progressTracker
-    ) {
-        return new Walker(seenNodes,
-            totalWeights,
-            qualityThreshold,
-            walkQualities,
-            split,
-            concurrentCopy,
-            config.restartProbability(),
-            progressTracker,
-            new UniformNextNodeStrategy(split, concurrentCopy, totalWeights)
-        );
-    }
-    
 }

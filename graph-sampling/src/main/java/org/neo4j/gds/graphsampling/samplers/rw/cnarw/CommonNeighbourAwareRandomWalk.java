@@ -38,9 +38,9 @@ import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfig;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 import org.neo4j.gds.graphsampling.samplers.SeenNodes;
 import org.neo4j.gds.graphsampling.samplers.rw.InitialStartQualities;
-import org.neo4j.gds.graphsampling.samplers.rw.NextNodeStrategy;
 import org.neo4j.gds.graphsampling.samplers.rw.WalkQualities;
 import org.neo4j.gds.graphsampling.samplers.rw.Walker;
+import org.neo4j.gds.graphsampling.samplers.rw.WalkerProducer;
 
 import java.util.Optional;
 import java.util.SplittableRandom;
@@ -53,9 +53,12 @@ public class CommonNeighbourAwareRandomWalk implements RandomWalkBasedNodesSampl
 
 
     private final CommonNeighbourAwareRandomWalkConfig config;
+    private final WalkerProducer walkerProducer;
 
     public CommonNeighbourAwareRandomWalk(CommonNeighbourAwareRandomWalkConfig config) {
+
         this.config = config;
+        this.walkerProducer = WalkerProducer.CNARWWalkerProducer();
     }
 
     @Override
@@ -81,7 +84,7 @@ public class CommonNeighbourAwareRandomWalk implements RandomWalkBasedNodesSampl
         Optional<HugeAtomicDoubleArray> totalWeights = initializeTotalWeights(inputGraph.nodeCount());
 
         var tasks = ParallelUtil.tasks(config.concurrency(), () ->
-            getWalker(
+            walkerProducer.getWalker(
                 seenNodes,
                 totalWeights,
                 QUALITY_THRESHOLD_BASE / (config.concurrency() * config.concurrency()),
@@ -171,32 +174,5 @@ public class CommonNeighbourAwareRandomWalk implements RandomWalkBasedNodesSampl
         return "Common neighbour aware random walks sampling";
     }
 
-    private Runnable getWalker(
-        SeenNodes seenNodes,
-        Optional<HugeAtomicDoubleArray> totalWeights,
-        double qualityThreshold,
-        WalkQualities walkQualities,
-        SplittableRandom split,
-        Graph concurrentCopy,
-        RandomWalkWithRestartsConfig config,
-        ProgressTracker progressTracker
-    ) {
-        NextNodeStrategy strategy;
-        if (totalWeights.isPresent()) {
-            strategy = new WeightedCommonNeighbourAwareNextNodeStrategy(concurrentCopy, split);
-        } else {
-            strategy = new CommonNeighbourAwareNextNodeStrategy(concurrentCopy, split);
-        }
-        return new Walker(
-            seenNodes,
-            totalWeights,
-            qualityThreshold,
-            walkQualities,
-            split,
-            concurrentCopy,
-            config.restartProbability(),
-            progressTracker,
-            strategy
-        );
-    }
+
 }
