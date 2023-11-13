@@ -327,7 +327,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             .forEach(sourceNodeId -> {
                 if (sourceNodeFilter.equals(NodeFilter.noOp)) {
                     targetNodesStream(sourceNodeId + 1)
-                        .forEach(targetNodeId -> computeSimilarityForSingleComponent(sourceNodeId, targetNodeId,
+                        .forEach(targetNodeId -> similarityConsumer.accept(sourceNodeId, targetNodeId,
                             (source, target, similarity) -> {
                                 topKMap.put(source, target, similarity);
                                 topKMap.put(target, source, similarity);
@@ -336,7 +336,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
                 } else {
                     targetNodesStream()
                         .filter(targetNodeId -> sourceNodeId != targetNodeId)
-                        .forEach(targetNodeId -> computeSimilarityForSingleComponent(sourceNodeId, targetNodeId, topKMap::put));
+                        .forEach(targetNodeId -> similarityConsumer.accept(sourceNodeId, targetNodeId, topKMap::put));
                 }
             });
         progressTracker.endSubTask();
@@ -365,7 +365,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
                     // within the TopKMap processes all pairs for a single node.
                     targetNodesStream()
                         .filter(targetNodeId -> sourceNodeId != targetNodeId)
-                        .forEach(targetNodeId -> computeSimilarityForSingleComponent(sourceNodeId, targetNodeId, topKMap::put))
+                        .forEach(targetNodeId -> similarityConsumer.accept(sourceNodeId, targetNodeId, topKMap::put))
                 )
         );
 
@@ -381,11 +381,11 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             .forEach(sourceNodeId -> {
                 if (sourceNodeFilter.equals(NodeFilter.noOp)) {
                     targetNodesStream(sourceNodeId + 1)
-                        .forEach(targetNodeId -> computeSimilarityForSingleComponent(sourceNodeId, targetNodeId, topNList::add));
+                        .forEach(targetNodeId -> similarityConsumer.accept(sourceNodeId, targetNodeId, topNList::add));
                 } else {
                     targetNodesStream()
                         .filter(targetNodeId -> sourceNodeId != targetNodeId)
-                        .forEach(targetNodeId -> computeSimilarityForSingleComponent(sourceNodeId, targetNodeId, topNList::add));
+                        .forEach(targetNodeId -> similarityConsumer.accept(sourceNodeId, targetNodeId, topNList::add));
                 }
             });
 
