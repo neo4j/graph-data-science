@@ -229,29 +229,4 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
             config
         );
     }
-
-    @Override
-    @Configuration.Ignore
-    default <R> R accept(GraphProjectConfig.Cases<R> cases) {
-        if (cases instanceof Cases) {
-            return ((Cases<R>) cases).store(this);
-        }
-        return null;
-    }
-
-    interface Cases<R> extends GraphProjectConfig.Cases<R> {
-
-        R store(GraphProjectFromStoreConfig graphProjectFromStoreConfig);
-    }
-
-    interface Visitor extends Cases<Void>, GraphProjectConfig.Visitor {
-
-        @Override
-        default Void store(GraphProjectFromStoreConfig graphProjectFromStoreConfig) {
-            visit(graphProjectFromStoreConfig);
-            return null;
-        }
-
-        default void visit(GraphProjectFromStoreConfig graphProjectFromStoreConfig) {}
-    }
 }

@@ -35,11 +35,6 @@ public interface GraphCatalogConfig extends GraphProjectConfig {
         return cleansed(toMap(), outputFieldDenylist());
     }
 
-    @Override
-    default <R> R accept(Cases<R> visitor) {
-        return visitor.catalog(this);
-    }
-
     @Value.Derived
     @Configuration.Ignore
     default Set<String> outputFieldDenylist() {

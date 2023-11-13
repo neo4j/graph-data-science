@@ -114,29 +114,4 @@ public interface GraphProjectFromCypherAggregationConfig extends GraphProjectCon
             CypherMapWrapper.create(config)
         );
     }
-
-    @Override
-    @Configuration.Ignore
-    default <R> R accept(GraphProjectConfig.Cases<R> cases) {
-        if (cases instanceof Cases) {
-            return ((Cases<R>) cases).cypherAggregation(this);
-        }
-        return null;
-    }
-
-    interface Cases<R> extends GraphProjectConfig.Cases<R> {
-
-        R cypherAggregation(GraphProjectFromCypherAggregationConfig cypherAggregationConfig);
-    }
-
-    interface Visitor extends Cases<Void> {
-
-        @Override
-        default Void cypherAggregation(GraphProjectFromCypherAggregationConfig cypherAggregationConfig) {
-            visit(cypherAggregationConfig);
-            return null;
-        }
-
-        default void visit(GraphProjectFromCypherAggregationConfig cypherAggregationConfig) {}
-    }
 }

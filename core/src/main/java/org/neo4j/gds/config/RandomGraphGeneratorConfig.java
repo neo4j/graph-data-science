@@ -137,12 +137,6 @@ public interface RandomGraphGeneratorConfig extends GraphProjectConfig {
         throw new UnsupportedOperationException("RandomGraphGeneratorConfig requires explicit graph generation.");
     }
 
-    @Override
-    @Configuration.Ignore
-    default <R> R accept(Cases<R> visitor) {
-        return visitor.random(this);
-    }
-
     @Value.Derived
     @Configuration.Ignore
     default Set<String> outputFieldDenylist() {

@@ -56,9 +56,4 @@ public interface GraphSampleProcConfig extends GraphProjectConfig, GraphNameConf
         return originalConfig().graphStoreFactory();
     }
 
-    @Override
-    @Configuration.Ignore
-    default <R> R accept(Cases<R> visitor) {
-        return visitor.sample(this);
-    }
 }

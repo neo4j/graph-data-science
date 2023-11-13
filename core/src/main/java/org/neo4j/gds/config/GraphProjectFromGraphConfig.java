@@ -84,12 +84,6 @@ public interface GraphProjectFromGraphConfig extends GraphProjectConfig {
         return originalConfig().graphStoreFactory();
     }
 
-    @Override
-    @Configuration.Ignore
-    default <R> R accept(Cases<R> visitor) {
-        return visitor.graph(this);
-    }
-
     // Inherited, but ignored config keys
 
     @Override

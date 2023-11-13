@@ -127,57 +127,7 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
             .validate(readConcurrency(), READ_CONCURRENCY_KEY, ConcurrencyConfig.CONCURRENCY_LIMITATION);
     }
 
-    @Value.Auxiliary
-    @Configuration.Ignore
-    <R> R accept(Cases<R> visitor);
-
     static @Nullable String validateName(String input) {
         return StringIdentifierValidations.validateNoWhiteCharacter(input, "graphName");
-    }
-
-    interface Cases<R> {
-
-        R graph(GraphProjectFromGraphConfig graphConfig);
-
-        R random(RandomGraphGeneratorConfig randomGraphConfig);
-
-        R sample(GraphSampleProcConfig graphSampleProcConfig);
-
-        R catalog(GraphCatalogConfig graphCatalogConfig);
-    }
-
-    interface Visitor extends Cases<Void> {
-
-        @Override
-        default Void graph(GraphProjectFromGraphConfig graphConfig) {
-            visit(graphConfig);
-            return null;
-        }
-
-        @Override
-        default Void random(RandomGraphGeneratorConfig randomGraphConfig) {
-            visit(randomGraphConfig);
-            return null;
-        }
-
-        @Override
-        default Void sample(GraphSampleProcConfig sampleProcConfig) {
-            visit(sampleProcConfig);
-            return null;
-        }
-
-        @Override
-        default Void catalog(GraphCatalogConfig graphCatalogConfig) {
-            visit(graphCatalogConfig);
-            return null;
-        }
-
-        default void visit(GraphProjectFromGraphConfig graphConfig) {}
-
-        default void visit(RandomGraphGeneratorConfig randomGraphConfig) {}
-
-        default void visit(GraphSampleProcConfig sampleProcConfig) {}
-
-        default void visit(GraphCatalogConfig graphCatalogConfig) {}
     }
 }

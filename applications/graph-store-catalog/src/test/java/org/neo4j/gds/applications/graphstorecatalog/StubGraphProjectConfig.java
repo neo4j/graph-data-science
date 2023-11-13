@@ -65,11 +65,6 @@ class StubGraphProjectConfig implements GraphProjectConfig {
     }
 
     @Override
-    public <R> R accept(Cases<R> visitor) {
-        throw new UnsupportedOperationException("TODO");
-    }
-
-    @Override
     public Optional<String> usernameOverride() {
         throw new UnsupportedOperationException("TODO");
     }
