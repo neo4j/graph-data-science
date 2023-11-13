@@ -54,7 +54,8 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         var log = new LogAccessor().getLog(dependencies.logService(), getClass());
 
         var extensionBuilder = ExtensionBuilder.create(
-            log, dependencies.config(),
+            log,
+            dependencies.config(),
             dependencies.globalProcedures()
         );
 
