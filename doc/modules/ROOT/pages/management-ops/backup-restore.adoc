@@ -14,6 +14,9 @@ This is necessary mainly for performance reasons but has the disadvantage that d
 There are already concepts to circumvent this limitation, such as running algorithms in xref:common-usage/running-algos.adoc#running-algos-write[write mode], xref:management-ops/graph-export/graph-export-csv.adoc#catalog-graph-export-csv[exporting graphs to csv] or xref:model-catalog/store.adoc#model-catalog-store-ops[storing models].
 The back-up and restore procedures described in this section will provide a simple and uniform way of saving graphs and models in order to load them back into memory after a database restart.
 
+Note, that there exists only one backup at the same time. Calling backup will override the previous backup.
+For multiple users, it is recommended that an admin user performs the backup and restore operations, as they have access to all graphs and models.
+
 [NOTE]
 ====
 The `gds.export.location` parameter must be configured for this feature.
