@@ -25,6 +25,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.termination.TerminationFlag;
 
 public class CentralityAlgorithmsStreamBusinessFacade {
 
@@ -38,14 +39,16 @@ public class CentralityAlgorithmsStreamBusinessFacade {
         String graphName,
         BetweennessCentralityBaseConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
 
         var result = this.centralityAlgorithmsFacade.betweennessCentrality(
             graphName,
             config,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return createStreamComputationResult(result);

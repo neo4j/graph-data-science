@@ -497,9 +497,10 @@ class WccWriteProcTest extends BaseProcTest {
                         new CommunityProcedureFacade(
                             ConfigurationParser.EMPTY,
                             null,
+                            new User(getUsername(), false),
                             DatabaseId.of(db.databaseName()),
                             ProcedureReturnColumns.EMPTY,
-                            new User(getUsername(), false),
+                            null,
                             null,
                             null,
                             null,

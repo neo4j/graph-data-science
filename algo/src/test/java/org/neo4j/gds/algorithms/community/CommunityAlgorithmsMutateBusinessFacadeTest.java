@@ -28,7 +28,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -102,8 +101,7 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
         var algorithmResultMock = AlgorithmComputationResult.of(
             result,
             graph,
-            graphStore,
-            TerminationFlag.RUNNING_TRUE
+            graphStore
         );
 
         var statisticsComputationInstructionsMock = mock(StatisticsComputationInstructions.class);
@@ -159,8 +157,7 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
         var algorithmResultMock = AlgorithmComputationResult.of(
             result,
             graph,
-            graphStore,
-            TerminationFlag.RUNNING_TRUE
+            graphStore
         );
 
         NodePropertyValuesMapper<HugeLongArray, MutateNodePropertyConfig> nodePropertyValuesMapper =

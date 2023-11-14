@@ -67,7 +67,8 @@ package org.neo4j.gds.algorithms.centrality;
             "FOO",
             4,
             "foo",
-            Optional.empty()
+            Optional.empty(),
+            null
         );
 
         verifyNoInteractions(nodePropertyServiceMock);
@@ -96,8 +97,7 @@ package org.neo4j.gds.algorithms.centrality;
             var algorithmResultMock = AlgorithmComputationResult.of(
                 result,
                 graph,
-                graphStore,
-                TerminationFlag.RUNNING_TRUE
+                graphStore
             );
 
             when(graph.nodeCount()).thenReturn(4l);
@@ -133,7 +133,8 @@ package org.neo4j.gds.algorithms.centrality;
                 "FooWrite",
                 4,
                 "foo",
-                Optional.empty()
+                Optional.empty(),
+                TerminationFlag.RUNNING_TRUE
             );
 
 
@@ -165,8 +166,7 @@ package org.neo4j.gds.algorithms.centrality;
             var algorithmResultMock = AlgorithmComputationResult.of(
                 result,
                 graph,
-                graphStore,
-                TerminationFlag.RUNNING_TRUE
+                graphStore
             );
 
             when(graph.nodeCount()).thenReturn(4l);
@@ -202,7 +202,8 @@ package org.neo4j.gds.algorithms.centrality;
                 "FooWrite",
                 4,
                 "foo",
-                Optional.empty()
+                Optional.empty(),
+                TerminationFlag.RUNNING_TRUE
             );
 
 

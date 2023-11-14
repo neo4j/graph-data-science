@@ -177,9 +177,10 @@ public class CommunityProcedureProvider {
         return new CommunityProcedureFacade(
             configurationParser,
             algorithmMetaDataSetter,
+            user,
             databaseId,
             returnColumns,
-            user,
+            terminationFlag,
             estimateBusinessFacade,
             mutateBusinessFacade,
             statsBusinessFacade,

@@ -32,6 +32,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.result.CentralityStatistics;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -56,11 +57,12 @@ public class CentralityAlgorithmsWriteBusinessFacade {
         BetweennessCentralityWriteConfig configuration,
         User user,
         DatabaseId databaseId,
+        TerminationFlag terminationFlag,
         boolean shouldComputeCentralityDistribution
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
-            () -> centralityAlgorithmsFacade.betweennessCentrality(graphName, configuration, user, databaseId)
+            () -> centralityAlgorithmsFacade.betweennessCentrality(graphName, configuration, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -80,8 +82,8 @@ public class CentralityAlgorithmsWriteBusinessFacade {
             "BetweennessCentralityWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
-            configuration.arrowConnectionInfo()
-
+            configuration.arrowConnectionInfo(),
+            terminationFlag
         );
     }
 
@@ -98,7 +100,8 @@ public class CentralityAlgorithmsWriteBusinessFacade {
         String procedureName,
         int writeConcurrency,
         String writeProperty,
-        Optional<ArrowConnectionInfo> arrowConnectionInfo
+        Optional<ArrowConnectionInfo> arrowConnectionInfo,
+        TerminationFlag terminationFlag
     ) {
 
         return algorithmResult.result().map(result -> {
@@ -117,7 +120,7 @@ public class CentralityAlgorithmsWriteBusinessFacade {
                 writeProperty,
                 procedureName,
                 arrowConnectionInfo,
-                algorithmResult.algorithmTerminationFlag().get()
+                terminationFlag
             );
 
             // Compute result statistics

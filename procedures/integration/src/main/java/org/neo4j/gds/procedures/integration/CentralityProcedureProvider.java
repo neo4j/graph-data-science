@@ -176,15 +176,16 @@ public class CentralityProcedureProvider {
         // procedure facade
         return new CentralityProcedureFacade(
             configurationParser,
-            databaseId,
             user,
+            databaseId,
             returnColumns,
+            terminationFlag,
             mutateBusinessFacade,
             statsBusinessFacade,
             streamBusinessFacade,
             writeBusinessFacade,
             estimateBusinessFacade,
             algorithmMetaDataSetter
-            );
+        );
     }
 }

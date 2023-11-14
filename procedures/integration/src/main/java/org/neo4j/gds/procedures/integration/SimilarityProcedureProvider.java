@@ -173,9 +173,10 @@ public class SimilarityProcedureProvider {
         );
         return new SimilarityProcedureFacade(
             configurationParser,
-            databaseId,
             user,
+            databaseId,
             returnColumns,
+            terminationFlag,
             mutateBusinessFacade,
             statsBusinessFacade,
             streamBusinessFacade,

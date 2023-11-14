@@ -35,6 +35,7 @@ import org.neo4j.gds.similarity.filteredknn.FilteredKnnWriteConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityWriteConfig;
 import org.neo4j.gds.similarity.knn.KnnWriteConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
@@ -63,11 +64,12 @@ public class SimilarityAlgorithmsWriteBusinessFacade {
         NodeSimilarityWriteConfig configuration,
         User user,
         DatabaseId databaseId,
+        TerminationFlag terminationFlag,
         boolean computeSimilarityDistribution
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> similarityAlgorithmsFacade.nodeSimilarity(graphName, configuration, user, databaseId)
+            () -> similarityAlgorithmsFacade.nodeSimilarity(graphName, configuration, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -82,7 +84,8 @@ public class SimilarityAlgorithmsWriteBusinessFacade {
             "NodeSimilarityWrite",
             configuration.writeProperty(),
             configuration.writeRelationshipType(),
-            configuration.arrowConnectionInfo()
+            configuration.arrowConnectionInfo(),
+            terminationFlag
         );
 
     }
@@ -92,11 +95,12 @@ public class SimilarityAlgorithmsWriteBusinessFacade {
         FilteredNodeSimilarityWriteConfig configuration,
         User user,
         DatabaseId databaseId,
+        TerminationFlag terminationFlag,
         boolean computeSimilarityDistribution
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> similarityAlgorithmsFacade.filteredNodeSimilarity(graphName, configuration, user, databaseId)
+            () -> similarityAlgorithmsFacade.filteredNodeSimilarity(graphName, configuration, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -111,8 +115,8 @@ public class SimilarityAlgorithmsWriteBusinessFacade {
             "FilteredNodeSimilarityWrite",
             configuration.writeProperty(),
             configuration.writeRelationshipType(),
-            configuration.arrowConnectionInfo()
-
+            configuration.arrowConnectionInfo(),
+            terminationFlag
         );
     }
 
@@ -122,11 +126,12 @@ public class SimilarityAlgorithmsWriteBusinessFacade {
         KnnWriteConfig configuration,
         User user,
         DatabaseId databaseId,
+        TerminationFlag terminationFlag,
         boolean computeSimilarityDistribution
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> similarityAlgorithmsFacade.knn(graphName, configuration, user, databaseId)
+            () -> similarityAlgorithmsFacade.knn(graphName, configuration, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -146,7 +151,8 @@ public class SimilarityAlgorithmsWriteBusinessFacade {
             "KnnWrite",
             configuration.writeProperty(),
             configuration.writeRelationshipType(),
-            configuration.arrowConnectionInfo()
+            configuration.arrowConnectionInfo(),
+            terminationFlag
         );
 
     }
@@ -156,11 +162,12 @@ public class SimilarityAlgorithmsWriteBusinessFacade {
         FilteredKnnWriteConfig configuration,
         User user,
         DatabaseId databaseId,
+        TerminationFlag terminationFlag,
         boolean computeSimilarityDistribution
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> similarityAlgorithmsFacade.filteredKnn(graphName, configuration, user, databaseId)
+            () -> similarityAlgorithmsFacade.filteredKnn(graphName, configuration, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -180,7 +187,8 @@ public class SimilarityAlgorithmsWriteBusinessFacade {
             "FilteredKnnWrite",
             configuration.writeProperty(),
             configuration.writeRelationshipType(),
-            configuration.arrowConnectionInfo()
+            configuration.arrowConnectionInfo(),
+            terminationFlag
         );
 
     }
@@ -196,7 +204,8 @@ public class SimilarityAlgorithmsWriteBusinessFacade {
         String taskName,
         String writeProperty,
         String writeRelationshipType,
-        Optional<ArrowConnectionInfo> arrowConnectionInfo
+        Optional<ArrowConnectionInfo> arrowConnectionInfo,
+        TerminationFlag terminationFlag
     ) {
 
         return algorithmResult.result().map(result -> {
@@ -223,7 +232,7 @@ public class SimilarityAlgorithmsWriteBusinessFacade {
                 algorithmResult.graphStore(),
                 rootIdMap,
                 taskName,
-                algorithmResult.algorithmTerminationFlag().get(),
+                terminationFlag,
                 arrowConnectionInfo,
                 similarityDistributionBuilder.similarityConsumer()
             );

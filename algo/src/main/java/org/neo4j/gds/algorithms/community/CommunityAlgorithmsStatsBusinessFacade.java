@@ -49,6 +49,7 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.scc.SccStatsConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
 import org.neo4j.gds.triangle.TriangleCountStatsConfig;
 import org.neo4j.gds.wcc.WccStatsConfig;
@@ -71,11 +72,12 @@ public class CommunityAlgorithmsStatsBusinessFacade {
         WccStatsConfig configuration,
         User user,
         DatabaseId databaseId,
+        TerminationFlag terminationFlag,
         StatisticsComputationInstructions statisticsComputationInstructions
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.wcc(graphName, configuration, user, databaseId)
+            () -> communityAlgorithmsFacade.wcc(graphName, configuration, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -100,11 +102,12 @@ public class CommunityAlgorithmsStatsBusinessFacade {
         LabelPropagationStatsConfig configuration,
         User user,
         DatabaseId databaseId,
+        TerminationFlag terminationFlag,
         StatisticsComputationInstructions statisticsComputationInstructions
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.labelPropagation(graphName, configuration, user, databaseId)
+            () -> communityAlgorithmsFacade.labelPropagation(graphName, configuration, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -130,11 +133,12 @@ public class CommunityAlgorithmsStatsBusinessFacade {
         String graphName,
         LocalClusteringCoefficientStatsConfig configuration,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.localClusteringCoefficient(graphName, configuration, user, databaseId)
+            () -> communityAlgorithmsFacade.localClusteringCoefficient(graphName, configuration, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -154,11 +158,12 @@ public class CommunityAlgorithmsStatsBusinessFacade {
         SccStatsConfig configuration,
         User user,
         DatabaseId databaseId,
+        TerminationFlag terminationFlag,
         StatisticsComputationInstructions statisticsComputationInstructions
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.scc(graphName, configuration, user, databaseId)
+            () -> communityAlgorithmsFacade.scc(graphName, configuration, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -183,12 +188,13 @@ public class CommunityAlgorithmsStatsBusinessFacade {
         K1ColoringStatsConfig config,
         User user,
         DatabaseId databaseId,
+        TerminationFlag terminationFlag,
         boolean computeUsedColors
     ) {
 
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.k1Coloring(graphName, config, user, databaseId)
+            () -> communityAlgorithmsFacade.k1Coloring(graphName, config, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -214,11 +220,12 @@ public class CommunityAlgorithmsStatsBusinessFacade {
         String graphName,
         KCoreDecompositionStatsConfig configuration,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.kCore(graphName, configuration, user, databaseId)
+            () -> communityAlgorithmsFacade.kCore(graphName, configuration, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -235,12 +242,13 @@ public class CommunityAlgorithmsStatsBusinessFacade {
         KmeansStatsConfig configuration,
         User user,
         DatabaseId databaseId,
+        TerminationFlag terminationFlag,
         StatisticsComputationInstructions statisticsComputationInstructions,
         boolean computeListOfCentroids
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.kmeans(graphName, configuration, user, databaseId)
+            () -> communityAlgorithmsFacade.kmeans(graphName, configuration, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -267,11 +275,12 @@ public class CommunityAlgorithmsStatsBusinessFacade {
         LeidenStatsConfig configuration,
         User user,
         DatabaseId databaseId,
+        TerminationFlag terminationFlag,
         StatisticsComputationInstructions statisticsComputationInstructions
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.leiden(graphName, configuration, user, databaseId)
+            () -> communityAlgorithmsFacade.leiden(graphName, configuration, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -302,11 +311,12 @@ public class CommunityAlgorithmsStatsBusinessFacade {
         LouvainStatsConfig configuration,
         User user,
         DatabaseId databaseId,
+        TerminationFlag terminationFlag,
         StatisticsComputationInstructions statisticsComputationInstructions
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.louvain(graphName, configuration, user, databaseId)
+            () -> communityAlgorithmsFacade.louvain(graphName, configuration, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -333,12 +343,13 @@ public class CommunityAlgorithmsStatsBusinessFacade {
         String graphName,
         TriangleCountStatsConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
 
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.triangleCount(graphName, config, user, databaseId)
+            () -> communityAlgorithmsFacade.triangleCount(graphName, config, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -354,12 +365,13 @@ public class CommunityAlgorithmsStatsBusinessFacade {
         String graphName,
         ModularityStatsConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
 
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.modularity(graphName, config, user, databaseId)
+            () -> communityAlgorithmsFacade.modularity(graphName, config, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -381,11 +393,12 @@ public class CommunityAlgorithmsStatsBusinessFacade {
         ModularityOptimizationStatsConfig configuration,
         User user,
         DatabaseId databaseId,
+        TerminationFlag terminationFlag,
         StatisticsComputationInstructions statisticsComputationInstructions
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.modularityOptimization(graphName, configuration, user, databaseId)
+            () -> communityAlgorithmsFacade.modularityOptimization(graphName, configuration, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 

@@ -66,7 +66,8 @@ package org.neo4j.gds.algorithms.community;
             "FOO",
             4,
             "foo",
-            Optional.empty()
+            Optional.empty(),
+            null
         );
 
         verifyNoInteractions(nodePropertyServiceMock);
@@ -97,8 +98,7 @@ package org.neo4j.gds.algorithms.community;
             var algorithmResultMock = AlgorithmComputationResult.of(
                 algoResult,
                 graph,
-                graphStore,
-                TerminationFlag.RUNNING_TRUE
+                graphStore
             );
 
             when(graph.nodeCount()).thenReturn(4l);
@@ -131,7 +131,8 @@ package org.neo4j.gds.algorithms.community;
                 "FooWrite",
                 4,
                 "foo",
-                Optional.empty()
+                Optional.empty(),
+                TerminationFlag.RUNNING_TRUE
             );
 
 
@@ -165,8 +166,7 @@ package org.neo4j.gds.algorithms.community;
             var algorithmResultMock = AlgorithmComputationResult.of(
                 algoResult,
                 graph,
-                graphStore,
-                TerminationFlag.RUNNING_TRUE
+                graphStore
             );
 
             when(graph.nodeCount()).thenReturn(4l);
@@ -207,7 +207,8 @@ package org.neo4j.gds.algorithms.community;
                 "FooWrite",
                 4,
                 "foo",
-                Optional.empty()
+                Optional.empty(),
+                TerminationFlag.RUNNING_TRUE
             );
 
 

@@ -120,6 +120,7 @@ import org.neo4j.gds.scc.SccMutateConfig;
 import org.neo4j.gds.scc.SccStatsConfig;
 import org.neo4j.gds.scc.SccStreamConfig;
 import org.neo4j.gds.scc.SccWriteConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
@@ -139,11 +140,12 @@ import java.util.stream.Stream;
 
 public class CommunityProcedureFacade {
     // services
+    private final ConfigurationParser configurationParser;
     private final AlgorithmMetaDataSetter algorithmMetaDataSetter;
+    private final User user;
     private final DatabaseId databaseId;
     private final ProcedureReturnColumns procedureReturnColumns;
-    private final User user;
-    private final ConfigurationParser configurationParser;
+    private final TerminationFlag terminationFlag;
 
     // business logic
     private final CommunityAlgorithmsEstimateBusinessFacade estimateBusinessFacade;
@@ -156,9 +158,10 @@ public class CommunityProcedureFacade {
     public CommunityProcedureFacade(
         ConfigurationParser configurationParser,
         AlgorithmMetaDataSetter algorithmMetaDataSetter,
+        User user,
         DatabaseId databaseId,
         ProcedureReturnColumns procedureReturnColumns,
-        User user,
+        TerminationFlag terminationFlag,
         CommunityAlgorithmsEstimateBusinessFacade estimateBusinessFacade,
         CommunityAlgorithmsMutateBusinessFacade mutateBusinessFacade,
         CommunityAlgorithmsStatsBusinessFacade statsBusinessFacade,
@@ -170,6 +173,7 @@ public class CommunityProcedureFacade {
         this.databaseId = databaseId;
         this.procedureReturnColumns = procedureReturnColumns;
         this.user = user;
+        this.terminationFlag = terminationFlag;
         this.estimateBusinessFacade = estimateBusinessFacade;
         this.mutateBusinessFacade = mutateBusinessFacade;
         this.statsBusinessFacade = statsBusinessFacade;
@@ -189,7 +193,8 @@ public class CommunityProcedureFacade {
             graphName,
             streamConfig,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return WccComputationResultTransformer.toStreamResult(computationResult, streamConfig);
@@ -206,6 +211,7 @@ public class CommunityProcedureFacade {
             config,
             user,
             databaseId,
+            terminationFlag,
             ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns)
         );
 
@@ -223,6 +229,7 @@ public class CommunityProcedureFacade {
             config,
             user,
             databaseId,
+            terminationFlag,
             ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns)
         );
 
@@ -240,6 +247,7 @@ public class CommunityProcedureFacade {
             writeConfig,
             user,
             databaseId,
+            terminationFlag,
             ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns)
         );
 
@@ -294,7 +302,8 @@ public class CommunityProcedureFacade {
             graphName,
             streamConfig,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return KCoreComputationalResultTransformer.toStreamResult(computationResult);
@@ -310,7 +319,8 @@ public class CommunityProcedureFacade {
             graphName,
             config,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return Stream.of(KCoreComputationalResultTransformer.toMutateResult(computationResult));
@@ -326,7 +336,8 @@ public class CommunityProcedureFacade {
             graphName,
             config,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return Stream.of(KCoreComputationalResultTransformer.toStatsResult(computationResult, config));
@@ -342,7 +353,8 @@ public class CommunityProcedureFacade {
             graphName,
             config,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return Stream.of(KCoreComputationalResultTransformer.toWriteResult(computationResult));
@@ -386,6 +398,7 @@ public class CommunityProcedureFacade {
             config,
             user,
             databaseId,
+            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
         );
 
@@ -411,7 +424,8 @@ public class CommunityProcedureFacade {
             graphName,
             streamConfig,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return LouvainComputationResultTransformer.toStreamResult(computationResult, streamConfig);
@@ -436,6 +450,7 @@ public class CommunityProcedureFacade {
             config,
             user,
             databaseId,
+            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
         );
 
@@ -461,6 +476,7 @@ public class CommunityProcedureFacade {
             config,
             user,
             databaseId,
+            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
         );
 
@@ -486,7 +502,8 @@ public class CommunityProcedureFacade {
             graphName,
             streamConfig,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return LeidenComputationResultTransformer.toStreamResult(computationResult, streamConfig);
@@ -503,6 +520,7 @@ public class CommunityProcedureFacade {
             config,
             user,
             databaseId,
+            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
         );
 
@@ -520,6 +538,7 @@ public class CommunityProcedureFacade {
             config,
             user,
             databaseId,
+            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
         );
 
@@ -534,6 +553,7 @@ public class CommunityProcedureFacade {
             config,
             user,
             databaseId,
+            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
         );
 
@@ -583,7 +603,8 @@ public class CommunityProcedureFacade {
             graphName,
             streamConfig,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return SccComputationResultTransformer.toStreamResult(computationResult, streamConfig);
@@ -600,6 +621,7 @@ public class CommunityProcedureFacade {
             config,
             user,
             databaseId,
+            terminationFlag,
             ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns)
         );
 
@@ -617,6 +639,7 @@ public class CommunityProcedureFacade {
             config,
             user,
             databaseId,
+            terminationFlag,
             ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns)
         );
 
@@ -634,6 +657,7 @@ public class CommunityProcedureFacade {
             config,
             user,
             databaseId,
+            terminationFlag,
             ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns)
         );
 
@@ -684,7 +708,8 @@ public class CommunityProcedureFacade {
             graphName,
             streamConfig,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return TriangleCountComputationResultTransformer.toStreamResult(computationResult);
@@ -700,7 +725,8 @@ public class CommunityProcedureFacade {
             graphName,
             config,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return Stream.of(TriangleCountComputationResultTransformer.toMutateResult(computationResult));
@@ -716,7 +742,8 @@ public class CommunityProcedureFacade {
             graphName,
             config,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return Stream.of(TriangleCountComputationResultTransformer.toStatsResult(computationResult, config));
@@ -732,7 +759,8 @@ public class CommunityProcedureFacade {
             graphName,
             config,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return Stream.of(TriangleCountComputationResultTransformer.toWriteResult(computationResult));
@@ -780,7 +808,8 @@ public class CommunityProcedureFacade {
             graphName,
             streamConfig,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return LabelPropagationComputationResultTransformer.toStreamResult(computationResult, streamConfig);
@@ -797,6 +826,7 @@ public class CommunityProcedureFacade {
             mutateConfig,
             user,
             databaseId,
+            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
         );
 
@@ -814,6 +844,7 @@ public class CommunityProcedureFacade {
             config,
             user,
             databaseId,
+            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
         );
 
@@ -831,6 +862,7 @@ public class CommunityProcedureFacade {
             config,
             user,
             databaseId,
+            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
         );
 
@@ -879,7 +911,8 @@ public class CommunityProcedureFacade {
             graphName,
             streamConfig,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return ModularityComputationResultTransformer.toStreamResult(computationResult);
@@ -895,7 +928,8 @@ public class CommunityProcedureFacade {
             graphName,
             config,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return Stream.of(ModularityComputationResultTransformer.toStatsResult(computationResult, config));
@@ -927,7 +961,8 @@ public class CommunityProcedureFacade {
             graphName,
             streamConfig,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return KmeansComputationResultTransformer.toStreamResult(computationResult);
@@ -944,6 +979,7 @@ public class CommunityProcedureFacade {
             mutateConfig,
             user,
             databaseId,
+            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns),
             procedureReturnColumns.contains("centroids")
         );
@@ -962,6 +998,7 @@ public class CommunityProcedureFacade {
             writeConfig,
             user,
             databaseId,
+            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns),
             procedureReturnColumns.contains("centroids")
         );
@@ -980,6 +1017,7 @@ public class CommunityProcedureFacade {
             statsConfig,
             user,
             databaseId,
+            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns),
             procedureReturnColumns.contains("centroids")
         );
@@ -1032,7 +1070,8 @@ public class CommunityProcedureFacade {
             graphName,
             streamConfig,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return LCCComputationResultTransformer.toStreamResult(computationResult);
@@ -1049,7 +1088,8 @@ public class CommunityProcedureFacade {
             graphName,
             mutateConfig,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return Stream.of(LCCComputationResultTransformer.toMutateResult(computationResult, mutateConfig));
@@ -1065,7 +1105,8 @@ public class CommunityProcedureFacade {
             graphName,
             statsConfig,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return Stream.of(LCCComputationResultTransformer.toStatsResult(computationResult, statsConfig));
@@ -1081,7 +1122,8 @@ public class CommunityProcedureFacade {
             graphName,
             writeConfig,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return Stream.of(LCCComputationResultTransformer.toWriteResult(computationResult));
@@ -1133,7 +1175,8 @@ public class CommunityProcedureFacade {
             graphName,
             streamConfig,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return K1ColoringComputationResultTransformer.toStreamResult(computationResult, streamConfig);
@@ -1153,6 +1196,7 @@ public class CommunityProcedureFacade {
             mutateConfig,
             user,
             databaseId,
+            terminationFlag,
             procedureReturnColumns.contains("colorCount")
         );
 
@@ -1173,6 +1217,7 @@ public class CommunityProcedureFacade {
             writeConfig,
             user,
             databaseId,
+            terminationFlag,
             procedureReturnColumns.contains("colorCount")
         );
 
@@ -1192,7 +1237,8 @@ public class CommunityProcedureFacade {
             graphName,
             streamConfig,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return ModularityOptimisationComputationResultTransformer.toStreamResult(computationResult, streamConfig);
@@ -1209,6 +1255,7 @@ public class CommunityProcedureFacade {
             mutateConfig,
             user,
             databaseId,
+            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
         );
 
@@ -1229,6 +1276,7 @@ public class CommunityProcedureFacade {
             statsConfig,
             user,
             databaseId,
+            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
         );
 
@@ -1249,6 +1297,7 @@ public class CommunityProcedureFacade {
             writeConfig,
             user,
             databaseId,
+            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
         );
 
@@ -1303,6 +1352,7 @@ public class CommunityProcedureFacade {
             statsConfig,
             user,
             databaseId,
+            terminationFlag,
             procedureReturnColumns.contains("colorCount")
         );
 
@@ -1354,7 +1404,8 @@ public class CommunityProcedureFacade {
             graphName,
             streamConfig,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return ConductanceComputationResultTransformer.toStreamResult(computationResult);
@@ -1370,7 +1421,8 @@ public class CommunityProcedureFacade {
             graphName,
             streamConfig,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return ApproxMaxKCutComputationResultTransformer.toStreamResult(computationResult, streamConfig);
@@ -1386,7 +1438,8 @@ public class CommunityProcedureFacade {
             graphName,
             streamConfig,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return Stream.of(ApproxMaxKCutComputationResultTransformer.toMutateResult(computationResult));
@@ -1419,6 +1472,7 @@ public class CommunityProcedureFacade {
             config,
             user,
             databaseId,
+            terminationFlag,
             new ProcedureStatisticsComputationInstructions(true, true)
         );
 

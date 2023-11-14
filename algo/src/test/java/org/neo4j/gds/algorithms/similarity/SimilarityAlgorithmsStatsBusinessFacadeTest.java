@@ -26,7 +26,6 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.similarity.specificfields.SimilaritySpecificFieldsWithDistribution;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -93,7 +92,7 @@ false
 
         var similarityResultStream = Pair.of(1,Stream.of(new SimilarityResult(0,1,1), new SimilarityResult(0,2,0.25) ));
 
-        var algorithmResult = AlgorithmComputationResult.of(similarityResultStream,graph,graphStore, TerminationFlag.RUNNING_TRUE);
+        var algorithmResult = AlgorithmComputationResult.of(similarityResultStream,graph,graphStore);
 
         var businessFacade = new SimilarityAlgorithmsStatsBusinessFacade(null);
 
@@ -121,7 +120,7 @@ false
 
         var similarityResultStream = Pair.of(1,Stream.of(new SimilarityResult(0,1,1), new SimilarityResult(0,2,0.25) ));
 
-        var algorithmResult = AlgorithmComputationResult.of(similarityResultStream,graph,graphStore, TerminationFlag.RUNNING_TRUE);
+        var algorithmResult = AlgorithmComputationResult.of(similarityResultStream,graph,graphStore);
 
         var businessFacade = new SimilarityAlgorithmsStatsBusinessFacade(null);
 

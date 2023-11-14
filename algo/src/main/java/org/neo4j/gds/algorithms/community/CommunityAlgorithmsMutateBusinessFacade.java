@@ -53,6 +53,7 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
 import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.scc.SccMutateConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.TriangleCountMutateConfig;
@@ -83,11 +84,12 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         WccMutateConfig configuration,
         User user,
         DatabaseId databaseId,
+        TerminationFlag terminationFlag,
         StatisticsComputationInstructions statisticsComputationInstructions
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.wcc(graphName, configuration, user, databaseId)
+            () -> communityAlgorithmsFacade.wcc(graphName, configuration, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -120,12 +122,13 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         String graphName,
         KCoreDecompositionMutateConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
 
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.kCore(graphName, config, user, databaseId)
+            () -> communityAlgorithmsFacade.kCore(graphName, config, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -144,11 +147,12 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         LouvainMutateConfig configuration,
         User user,
         DatabaseId databaseId,
+        TerminationFlag terminationFlag,
         StatisticsComputationInstructions statisticsComputationInstructions
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.louvain(graphName, configuration, user, databaseId)
+            () -> communityAlgorithmsFacade.louvain(graphName, configuration, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -190,11 +194,12 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         LeidenMutateConfig configuration,
         User user,
         DatabaseId databaseId,
+        TerminationFlag terminationFlag,
         StatisticsComputationInstructions statisticsComputationInstructions
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.leiden(graphName, configuration, user, databaseId)
+            () -> communityAlgorithmsFacade.leiden(graphName, configuration, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -241,11 +246,12 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         SccMutateConfig configuration,
         User user,
         DatabaseId databaseId,
+        TerminationFlag terminationFlag,
         StatisticsComputationInstructions statisticsComputationInstructions
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.scc(graphName, configuration, user, databaseId)
+            () -> communityAlgorithmsFacade.scc(graphName, configuration, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -275,11 +281,12 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         LabelPropagationMutateConfig configuration,
         User user,
         DatabaseId databaseId,
+        TerminationFlag terminationFlag,
         StatisticsComputationInstructions statisticsComputationInstructions
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.labelPropagation(graphName, configuration, user, databaseId)
+            () -> communityAlgorithmsFacade.labelPropagation(graphName, configuration, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -315,12 +322,13 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         String graphName,
         TriangleCountMutateConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
 
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.triangleCount(graphName, config, user, databaseId)
+            () -> communityAlgorithmsFacade.triangleCount(graphName, config, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -339,12 +347,13 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         K1ColoringMutateConfig config,
         User user,
         DatabaseId databaseId,
+        TerminationFlag terminationFlag,
         boolean computeUsedColors
     ) {
 
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.k1Coloring(graphName, config, user, databaseId)
+            () -> communityAlgorithmsFacade.k1Coloring(graphName, config, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -429,12 +438,13 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         KmeansMutateConfig configuration,
         User user,
         DatabaseId databaseId,
+        TerminationFlag terminationFlag,
         StatisticsComputationInstructions statisticsComputationInstructions,
         boolean computeListOfCentroids
         ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.kmeans(graphName, configuration, user, databaseId)
+            () -> communityAlgorithmsFacade.kmeans(graphName, configuration, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -464,11 +474,12 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         String graphName,
         LocalClusteringCoefficientMutateConfig configuration,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.localClusteringCoefficient(graphName, configuration, user, databaseId)
+            () -> communityAlgorithmsFacade.localClusteringCoefficient(graphName, configuration, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -493,11 +504,12 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         String graphName,
         ApproxMaxKCutMutateConfig configuration,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.approxMaxKCut(graphName, configuration, user, databaseId)
+            () -> communityAlgorithmsFacade.approxMaxKCut(graphName, configuration, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -525,11 +537,12 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         ModularityOptimizationMutateConfig configuration,
         User user,
         DatabaseId databaseId,
+        TerminationFlag terminationFlag,
         StatisticsComputationInstructions statisticsComputationInstructions
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.modularityOptimization(graphName, configuration, user, databaseId)
+            () -> communityAlgorithmsFacade.modularityOptimization(graphName, configuration, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 

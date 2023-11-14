@@ -28,7 +28,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -92,8 +91,7 @@ class CentralityAlgorithmsStatsBusinessFacadeTest {
         var algorithmResultMock = AlgorithmComputationResult.of(
             result,
             graph,
-            graphStore,
-            TerminationFlag.RUNNING_TRUE
+            graphStore
         );
 
         var statsResult = businessFacade.statsResult(
@@ -125,8 +123,7 @@ class CentralityAlgorithmsStatsBusinessFacadeTest {
         var algorithmResultMock = AlgorithmComputationResult.of(
             result,
             graph,
-            graphStore,
-            TerminationFlag.RUNNING_TRUE
+            graphStore
         );
 
         var statsResult = businessFacade.statsResult(

@@ -35,6 +35,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
@@ -68,7 +69,8 @@ public final class AlgorithmRunner {
         Optional<String> relationshipProperty,
         GraphAlgorithmFactory<A, C> algorithmFactory,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
         // TODO: Is this the best place to check for preconditions???
         PreconditionsProvider.preconditions().check();
@@ -112,11 +114,14 @@ public final class AlgorithmRunner {
             userLogRegistryFactory
         );
 
+        // this really belongs in the factory build thing
+        algorithm.setTerminationFlag(terminationFlag);
+
         // run the algorithm
         try {
             var algorithmResult = algorithm.compute();
 
-            return AlgorithmComputationResult.of(algorithmResult, graph, graphStore, algorithm.getTerminationFlag());
+            return AlgorithmComputationResult.of(algorithmResult, graph, graphStore);
         } catch (Exception e) {
             log.warn("Computation failed", e);
             algorithm.getProgressTracker().endSubTaskWithFailure();

@@ -52,6 +52,7 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -60,22 +61,23 @@ import java.util.stream.Stream;
 public class SimilarityProcedureFacade {
 
     private final ConfigurationParser configurationParser;
-    private final DatabaseId databaseId;
     private final User user;
+    private final DatabaseId databaseId;
+    private final ProcedureReturnColumns procedureReturnColumns;
+    private final TerminationFlag terminationFlag;
     private final SimilarityAlgorithmsMutateBusinessFacade mutateBusinessFacade;
     private final SimilarityAlgorithmsStatsBusinessFacade statsBusinessFacade;
     private final SimilarityAlgorithmsStreamBusinessFacade streamBusinessFacade;
     private final SimilarityAlgorithmsWriteBusinessFacade writeBusinessFacade;
-    private final ProcedureReturnColumns procedureReturnColumns;
-
     private final SimilarityAlgorithmsEstimateBusinessFacade estimateBusinessFacade;
     private final AlgorithmMetaDataSetter algorithmMetaDataSetter;
 
     public SimilarityProcedureFacade(
         ConfigurationParser configurationParser,
-        DatabaseId databaseId,
         User user,
+        DatabaseId databaseId,
         ProcedureReturnColumns procedureReturnColumns,
+        TerminationFlag terminationFlag,
         SimilarityAlgorithmsMutateBusinessFacade mutateBusinessFacade,
         SimilarityAlgorithmsStatsBusinessFacade statsBusinessFacade,
         SimilarityAlgorithmsStreamBusinessFacade streamBusinessFacade,
@@ -87,6 +89,7 @@ public class SimilarityProcedureFacade {
         this.databaseId = databaseId;
         this.user = user;
         this.procedureReturnColumns = procedureReturnColumns;
+        this.terminationFlag = terminationFlag;
         this.mutateBusinessFacade = mutateBusinessFacade;
         this.statsBusinessFacade = statsBusinessFacade;
         this.streamBusinessFacade = streamBusinessFacade;
@@ -105,7 +108,8 @@ public class SimilarityProcedureFacade {
             graphName,
             streamConfig,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return NodeSimilarityComputationResultTransformer.toStreamResult(computationResult);
@@ -122,6 +126,7 @@ public class SimilarityProcedureFacade {
             statsConfig,
             user,
             databaseId,
+            terminationFlag,
             procedureReturnColumns.contains("similarityDistribution")
         );
 
@@ -139,6 +144,7 @@ public class SimilarityProcedureFacade {
             statsConfig,
             user,
             databaseId,
+            terminationFlag,
             procedureReturnColumns.contains("similarityDistribution")
         );
 
@@ -156,6 +162,7 @@ public class SimilarityProcedureFacade {
             mutateConfig,
             user,
             databaseId,
+            terminationFlag,
             procedureReturnColumns.contains("similarityDistribution")
         );
 
@@ -206,7 +213,8 @@ public class SimilarityProcedureFacade {
             graphName,
             streamConfig,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return NodeSimilarityComputationResultTransformer.toStreamResult(computationResult);
@@ -223,6 +231,7 @@ public class SimilarityProcedureFacade {
             statsConfig,
             user,
             databaseId,
+            terminationFlag,
             procedureReturnColumns.contains("similarityDistribution")
         );
 
@@ -240,6 +249,7 @@ public class SimilarityProcedureFacade {
             mutateConfig,
             user,
             databaseId,
+            terminationFlag,
             procedureReturnColumns.contains("similarityDistribution")
         );
 
@@ -257,6 +267,7 @@ public class SimilarityProcedureFacade {
             writeConfig,
             user,
             databaseId,
+            terminationFlag,
             procedureReturnColumns.contains("similarityDistribution")
         );
 
@@ -306,7 +317,8 @@ public class SimilarityProcedureFacade {
             graphName,
             streamConfig,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return KnnComputationResultTransformer.toStreamResult(computationResult);
@@ -323,6 +335,7 @@ public class SimilarityProcedureFacade {
             statsConfig,
             user,
             databaseId,
+            terminationFlag,
             procedureReturnColumns.contains("similarityDistribution")
         );
 
@@ -340,6 +353,7 @@ public class SimilarityProcedureFacade {
             writeConfig,
             user,
             databaseId,
+            terminationFlag,
             procedureReturnColumns.contains("similarityDistribution")
         );
 
@@ -357,6 +371,7 @@ public class SimilarityProcedureFacade {
             mutateConfig,
             user,
             databaseId,
+            terminationFlag,
             procedureReturnColumns.contains("similarityDistribution")
         );
 
@@ -406,7 +421,8 @@ public class SimilarityProcedureFacade {
             graphName,
             streamConfig,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return FilteredKnnComputationResultTransformer.toStreamResult(computationResult);
@@ -423,6 +439,7 @@ public class SimilarityProcedureFacade {
             statsConfig,
             user,
             databaseId,
+            terminationFlag,
             procedureReturnColumns.contains("similarityDistribution")
         );
 
@@ -440,6 +457,7 @@ public class SimilarityProcedureFacade {
             mutateConfig,
             user,
             databaseId,
+            terminationFlag,
             procedureReturnColumns.contains("similarityDistribution")
         );
 
@@ -457,6 +475,7 @@ public class SimilarityProcedureFacade {
             writeConfig,
             user,
             databaseId,
+            terminationFlag,
             procedureReturnColumns.contains("similarityDistribution")
         );
 

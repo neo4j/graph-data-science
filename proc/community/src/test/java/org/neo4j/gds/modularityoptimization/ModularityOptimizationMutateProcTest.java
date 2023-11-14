@@ -585,9 +585,10 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             new CommunityProcedureFacade(
                 ConfigurationParser.EMPTY,
                 null,
+                new User(getUsername(), false),
                 DatabaseId.of(db.databaseName()),
                 ProcedureReturnColumns.EMPTY,
-                new User(getUsername(), false),
+                null,
                 mock(CommunityAlgorithmsEstimateBusinessFacade.class),
                 algorithmsMutateBusinessFacade,
                 mock(CommunityAlgorithmsStatsBusinessFacade.class),

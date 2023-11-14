@@ -26,6 +26,7 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityFactory;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.termination.TerminationFlag;
 
 public class CentralityAlgorithmsFacade {
 
@@ -39,7 +40,8 @@ public class CentralityAlgorithmsFacade {
         String graphName,
         BetweennessCentralityBaseConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
         return algorithmRunner.run(
             graphName,
@@ -47,7 +49,8 @@ public class CentralityAlgorithmsFacade {
             config.relationshipWeightProperty(),
             new BetweennessCentralityFactory<>(),
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
     }
 

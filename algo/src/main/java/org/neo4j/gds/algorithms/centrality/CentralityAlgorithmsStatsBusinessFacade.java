@@ -30,6 +30,7 @@ import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.result.CentralityStatistics;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.function.Supplier;
 
@@ -47,11 +48,12 @@ public class CentralityAlgorithmsStatsBusinessFacade {
         BetweennessCentralityStatsConfig configuration,
         User user,
         DatabaseId databaseId,
+        TerminationFlag terminationFlag,
         boolean shouldComputeCentralityDistribution
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> centralityAlgorithmsFacade.betweennessCentrality(graphName, configuration, user, databaseId)
+            () -> centralityAlgorithmsFacade.betweennessCentrality(graphName, configuration, user, databaseId, terminationFlag)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 

@@ -46,6 +46,7 @@ import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.scc.SccBaseConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
@@ -63,14 +64,16 @@ public class CommunityAlgorithmsStreamBusinessFacade {
         String graphName,
         WccBaseConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
 
         var result = this.communityAlgorithmsFacade.wcc(
             graphName,
             config,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return createStreamComputationResult(result);
@@ -81,14 +84,16 @@ public class CommunityAlgorithmsStreamBusinessFacade {
         String graphName,
         KCoreDecompositionBaseConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
 
         var result = this.communityAlgorithmsFacade.kCore(
             graphName,
             config,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
         
         return createStreamComputationResult(result);
@@ -99,14 +104,16 @@ public class CommunityAlgorithmsStreamBusinessFacade {
         String graphName,
         LouvainBaseConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
 
         var result = this.communityAlgorithmsFacade.louvain(
             graphName,
             config,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return createStreamComputationResult(result);
@@ -116,14 +123,16 @@ public class CommunityAlgorithmsStreamBusinessFacade {
         String graphName,
         LeidenBaseConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
 
         var result = this.communityAlgorithmsFacade.leiden(
             graphName,
             config,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return createStreamComputationResult(result);
@@ -133,14 +142,16 @@ public class CommunityAlgorithmsStreamBusinessFacade {
         String graphName,
         SccBaseConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
 
         var result = this.communityAlgorithmsFacade.scc(
             graphName,
             config,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return createStreamComputationResult(result);
@@ -150,14 +161,16 @@ public class CommunityAlgorithmsStreamBusinessFacade {
         String graphName,
         TriangleCountBaseConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
 
         var result = this.communityAlgorithmsFacade.triangleCount(
             graphName,
             config,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return createStreamComputationResult(result);
@@ -167,14 +180,16 @@ public class CommunityAlgorithmsStreamBusinessFacade {
         String graphName,
         ModularityBaseConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
 
         var result = this.communityAlgorithmsFacade.modularity(
             graphName,
             config,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return createStreamComputationResult(result);
@@ -185,14 +200,16 @@ public class CommunityAlgorithmsStreamBusinessFacade {
         String graphName,
         LabelPropagationBaseConfig configuration,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
 
         var result = this.communityAlgorithmsFacade.labelPropagation(
             graphName,
             configuration,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return createStreamComputationResult(result);
@@ -202,14 +219,16 @@ public class CommunityAlgorithmsStreamBusinessFacade {
         String graphName,
         KmeansBaseConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
 
         var result = this.communityAlgorithmsFacade.kmeans(
             graphName,
             config,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return createStreamComputationResult(result);
@@ -219,13 +238,15 @@ public class CommunityAlgorithmsStreamBusinessFacade {
         String graphName,
         LocalClusteringCoefficientStreamConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
         var result = this.communityAlgorithmsFacade.localClusteringCoefficient(
             graphName,
             config,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return createStreamComputationResult(result);
@@ -235,14 +256,16 @@ public class CommunityAlgorithmsStreamBusinessFacade {
         String graphName,
         K1ColoringStreamConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
 
         var result = this.communityAlgorithmsFacade.k1Coloring(
             graphName,
             config,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return createStreamComputationResult(result);
@@ -252,14 +275,16 @@ public class CommunityAlgorithmsStreamBusinessFacade {
         String graphName,
         ConductanceStreamConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
 
         var result = this.communityAlgorithmsFacade.conductance(
             graphName,
             config,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return createStreamComputationResult(result);
@@ -270,14 +295,16 @@ public class CommunityAlgorithmsStreamBusinessFacade {
         String graphName,
         ApproxMaxKCutBaseConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
 
         var result = this.communityAlgorithmsFacade.approxMaxKCut(
             graphName,
             config,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return createStreamComputationResult(result);
@@ -287,13 +314,15 @@ public class CommunityAlgorithmsStreamBusinessFacade {
         String graphName,
         ModularityOptimizationStreamConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
         var result = this.communityAlgorithmsFacade.modularityOptimization(
             graphName,
             config,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return createStreamComputationResult(result);

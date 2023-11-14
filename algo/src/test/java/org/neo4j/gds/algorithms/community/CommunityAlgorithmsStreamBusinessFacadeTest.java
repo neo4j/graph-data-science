@@ -36,6 +36,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.wcc.WccBaseConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -112,7 +113,8 @@ class CommunityAlgorithmsStreamBusinessFacadeTest {
                 "meh",
                 config,
                 null,
-                null
+                null,
+                TerminationFlag.RUNNING_TRUE
             );
 
             //then
@@ -147,7 +149,7 @@ class CommunityAlgorithmsStreamBusinessFacadeTest {
             );
 
             // when
-            var wccComputationResult = algorithmsBusinessFacade.wcc("meh", mock(WccBaseConfig.class), null, null);
+            var wccComputationResult = algorithmsBusinessFacade.wcc("meh", mock(WccBaseConfig.class), null, null, null);
 
             //then
             assertThat(wccComputationResult.result()).isEmpty();

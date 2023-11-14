@@ -36,6 +36,7 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.nodesim.ImmutableNodeSimilarityStreamConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -127,7 +128,8 @@ class NodeSimilarityAlgorithmsFacadeTest {
             "foo",
             config,
             null,
-            null
+            null,
+            TerminationFlag.RUNNING_TRUE
         );
 
         assertThat(nodeSimilarity.result()).isPresent();

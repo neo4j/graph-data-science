@@ -36,6 +36,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.procedures.configparser.ConfigurationParser;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -44,22 +45,24 @@ import java.util.stream.Stream;
 public class CentralityProcedureFacade {
 
     private final ConfigurationParser configurationParser;
-    private final DatabaseId databaseId;
     private final User user;
+    private final DatabaseId databaseId;
+    private final ProcedureReturnColumns procedureReturnColumns;
+    private final TerminationFlag terminationFlag;
     private final CentralityAlgorithmsMutateBusinessFacade mutateBusinessFacade;
     private final CentralityAlgorithmsStatsBusinessFacade statsBusinessFacade;
     private final CentralityAlgorithmsStreamBusinessFacade streamBusinessFacade;
     private final CentralityAlgorithmsWriteBusinessFacade writeBusinessFacade;
-    private final ProcedureReturnColumns procedureReturnColumns;
 
     private final CentralityAlgorithmsEstimateBusinessFacade estimateBusinessFacade;
     private final AlgorithmMetaDataSetter algorithmMetaDataSetter;
 
     public CentralityProcedureFacade(
         ConfigurationParser configurationParser,
-        DatabaseId databaseId,
         User user,
+        DatabaseId databaseId,
         ProcedureReturnColumns procedureReturnColumns,
+        TerminationFlag terminationFlag,
         CentralityAlgorithmsMutateBusinessFacade mutateBusinessFacade,
         CentralityAlgorithmsStatsBusinessFacade statsBusinessFacade,
         CentralityAlgorithmsStreamBusinessFacade streamBusinessFacade,
@@ -71,6 +74,7 @@ public class CentralityProcedureFacade {
         this.databaseId = databaseId;
         this.user = user;
         this.procedureReturnColumns = procedureReturnColumns;
+        this.terminationFlag = terminationFlag;
         this.mutateBusinessFacade = mutateBusinessFacade;
         this.statsBusinessFacade = statsBusinessFacade;
         this.streamBusinessFacade = streamBusinessFacade;
@@ -89,7 +93,8 @@ public class CentralityProcedureFacade {
             graphName,
             config,
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
 
         return BetweenessCentralityComputationalResultTransformer.toStreamResult(computationResult);
@@ -106,6 +111,7 @@ public class CentralityProcedureFacade {
             config,
             user,
             databaseId,
+            terminationFlag,
             procedureReturnColumns.contains("centralityDistribution")
         );
 
@@ -123,6 +129,7 @@ public class CentralityProcedureFacade {
             config,
             user,
             databaseId,
+            terminationFlag,
             procedureReturnColumns.contains("centralityDistribution")
         );
 
@@ -140,6 +147,7 @@ public class CentralityProcedureFacade {
             config,
             user,
             databaseId,
+            terminationFlag,
             procedureReturnColumns.contains("centralityDistribution")
         );
 

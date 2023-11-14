@@ -30,6 +30,7 @@ import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.knn.KnnStreamConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 
 public class SimilarityAlgorithmsStreamBusinessFacade {
 
@@ -43,9 +44,10 @@ public class SimilarityAlgorithmsStreamBusinessFacade {
         String graphName,
         NodeSimilarityStreamConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
-        var result = similarityAlgorithmsFacade.nodeSimilarity(graphName, config, user, databaseId);
+        var result = similarityAlgorithmsFacade.nodeSimilarity(graphName, config, user, databaseId, terminationFlag);
 
         return createStreamComputationResult(result);
     }
@@ -54,9 +56,10 @@ public class SimilarityAlgorithmsStreamBusinessFacade {
         String graphName,
         KnnStreamConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
-        var result = similarityAlgorithmsFacade.knn(graphName, config, user, databaseId);
+        var result = similarityAlgorithmsFacade.knn(graphName, config, user, databaseId, terminationFlag);
 
         return createStreamComputationResult(result);
     }
@@ -65,9 +68,10 @@ public class SimilarityAlgorithmsStreamBusinessFacade {
         String graphName,
         FilteredNodeSimilarityStreamConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
-        var result = similarityAlgorithmsFacade.filteredNodeSimilarity(graphName, config, user, databaseId);
+        var result = similarityAlgorithmsFacade.filteredNodeSimilarity(graphName, config, user, databaseId, terminationFlag);
 
         return createStreamComputationResult(result);
     }
@@ -76,10 +80,10 @@ public class SimilarityAlgorithmsStreamBusinessFacade {
         String graphName,
         FilteredKnnStreamConfig config,
         User user,
-        DatabaseId databaseId
-
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
-        var result = similarityAlgorithmsFacade.filteredKnn(graphName, config, user, databaseId);
+        var result = similarityAlgorithmsFacade.filteredKnn(graphName, config, user, databaseId, terminationFlag);
 
         return createStreamComputationResult(result);
     }

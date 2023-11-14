@@ -212,9 +212,10 @@ class K1ColoringStreamProcTest extends BaseProcTest {
                 new CommunityProcedureFacade(
                     ConfigurationParser.EMPTY,
                     mock(AlgorithmMetaDataSetter.class),
+                    new User(getUsername(), false),
                     DatabaseId.of(db.databaseName()),
                     ProcedureReturnColumns.EMPTY,
-                    new User(getUsername(), false),
+                    null,
                     null,
                     null,
                     null,

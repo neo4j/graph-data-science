@@ -57,6 +57,7 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationFactory;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.scc.SccAlgorithmFactory;
 import org.neo4j.gds.scc.SccCommonBaseConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.IntersectingTriangleCountFactory;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientFactory;
@@ -82,7 +83,8 @@ public class CommunityAlgorithmsFacade {
         String graphName,
         WccBaseConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
         return algorithmRunner.run(
             graphName,
@@ -90,7 +92,8 @@ public class CommunityAlgorithmsFacade {
             config.relationshipWeightProperty(),
             new WccAlgorithmFactory<>(),
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
     }
 
@@ -98,7 +101,8 @@ public class CommunityAlgorithmsFacade {
         String graphName,
         TriangleCountBaseConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
         return algorithmRunner.run(
             graphName,
@@ -106,7 +110,8 @@ public class CommunityAlgorithmsFacade {
             Optional.empty(),
             new IntersectingTriangleCountFactory<>(),
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
     }
 
@@ -114,7 +119,8 @@ public class CommunityAlgorithmsFacade {
         String graphName,
         KCoreDecompositionBaseConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
         return algorithmRunner.run(
             graphName,
@@ -122,7 +128,8 @@ public class CommunityAlgorithmsFacade {
             Optional.empty(),
             new KCoreDecompositionAlgorithmFactory<>(),
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
     }
 
@@ -130,7 +137,8 @@ public class CommunityAlgorithmsFacade {
         String graphName,
         LouvainBaseConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
         return algorithmRunner.run(
             graphName,
@@ -138,7 +146,8 @@ public class CommunityAlgorithmsFacade {
             config.relationshipWeightProperty(),
             new LouvainAlgorithmFactory<>(),
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
     }
 
@@ -146,7 +155,8 @@ public class CommunityAlgorithmsFacade {
         String graphName,
         LeidenBaseConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
         return algorithmRunner.run(
             graphName,
@@ -154,7 +164,8 @@ public class CommunityAlgorithmsFacade {
             config.relationshipWeightProperty(),
             new LeidenAlgorithmFactory<>(),
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
     }
 
@@ -162,7 +173,8 @@ public class CommunityAlgorithmsFacade {
         String graphName,
         LabelPropagationBaseConfig configuration,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
         return algorithmRunner.run(
             graphName,
@@ -170,7 +182,8 @@ public class CommunityAlgorithmsFacade {
             configuration.relationshipWeightProperty(),
             new LabelPropagationFactory<>(),
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
     }
 
@@ -178,7 +191,8 @@ public class CommunityAlgorithmsFacade {
         String graphName,
         SccCommonBaseConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
         return algorithmRunner.run(
             graphName,
@@ -186,7 +200,8 @@ public class CommunityAlgorithmsFacade {
             Optional.empty(),
             new SccAlgorithmFactory<>(),
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
     }
 
@@ -194,7 +209,8 @@ public class CommunityAlgorithmsFacade {
         String graphName,
         ModularityBaseConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
         return algorithmRunner.run(
             graphName,
@@ -202,7 +218,8 @@ public class CommunityAlgorithmsFacade {
             config.relationshipWeightProperty(),
             new ModularityCalculatorFactory<>(),
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
     }
 
@@ -210,7 +227,8 @@ public class CommunityAlgorithmsFacade {
         String graphName,
         KmeansBaseConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
         return algorithmRunner.run(
             graphName,
@@ -218,7 +236,8 @@ public class CommunityAlgorithmsFacade {
             Optional.empty(),
             new KmeansAlgorithmFactory<>(),
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
     }
 
@@ -226,7 +245,8 @@ public class CommunityAlgorithmsFacade {
         String graphName,
         LocalClusteringCoefficientBaseConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
         return algorithmRunner.run(
             graphName,
@@ -234,7 +254,8 @@ public class CommunityAlgorithmsFacade {
             Optional.empty(),
             new LocalClusteringCoefficientFactory<>(),
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
     }
 
@@ -242,7 +263,8 @@ public class CommunityAlgorithmsFacade {
         String graphName,
         K1ColoringBaseConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
         return algorithmRunner.run(
             graphName,
@@ -250,7 +272,8 @@ public class CommunityAlgorithmsFacade {
             Optional.empty(),
             new K1ColoringAlgorithmFactory<>(),
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
     }
 
@@ -258,7 +281,8 @@ public class CommunityAlgorithmsFacade {
         String graphName,
         ConductanceBaseConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
         return algorithmRunner.run(
             graphName,
@@ -266,7 +290,8 @@ public class CommunityAlgorithmsFacade {
             config.relationshipWeightProperty(),
             new ConductanceAlgorithmFactory<>(),
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
     }
 
@@ -274,7 +299,8 @@ public class CommunityAlgorithmsFacade {
         String graphName,
         ApproxMaxKCutBaseConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
         return algorithmRunner.run(
             graphName,
@@ -282,7 +308,8 @@ public class CommunityAlgorithmsFacade {
             config.relationshipWeightProperty(),
             new ApproxMaxKCutAlgorithmFactory<>(),
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
     }
 
@@ -291,7 +318,8 @@ public class CommunityAlgorithmsFacade {
         String graphName,
         ModularityOptimizationBaseConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
         return algorithmRunner.run(
             graphName,
@@ -299,7 +327,8 @@ public class CommunityAlgorithmsFacade {
             config.relationshipWeightProperty(),
             new ModularityOptimizationFactory<>(),
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
     }
 }

@@ -34,6 +34,7 @@ import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityFactory;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 
@@ -49,7 +50,8 @@ public class SimilarityAlgorithmsFacade {
         String graphName,
         NodeSimilarityBaseConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
         return algorithmRunner.run(
             graphName,
@@ -57,7 +59,8 @@ public class SimilarityAlgorithmsFacade {
             config.relationshipWeightProperty(),
             new NodeSimilarityFactory<>(),
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
     }
 
@@ -65,7 +68,8 @@ public class SimilarityAlgorithmsFacade {
         String graphName,
         FilteredNodeSimilarityBaseConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
         return algorithmRunner.run(
             graphName,
@@ -73,7 +77,8 @@ public class SimilarityAlgorithmsFacade {
             config.relationshipWeightProperty(),
             new FilteredNodeSimilarityFactory<>(),
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
     }
 
@@ -81,7 +86,8 @@ public class SimilarityAlgorithmsFacade {
         String graphName,
         KnnBaseConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
         return algorithmRunner.run(
             graphName,
@@ -89,7 +95,8 @@ public class SimilarityAlgorithmsFacade {
             Optional.empty(),
             new KnnFactory<>(),
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
     }
 
@@ -97,7 +104,8 @@ public class SimilarityAlgorithmsFacade {
         String graphName,
         FilteredKnnBaseConfig config,
         User user,
-        DatabaseId databaseId
+        DatabaseId databaseId,
+        TerminationFlag terminationFlag
     ) {
         return algorithmRunner.run(
             graphName,
@@ -105,7 +113,8 @@ public class SimilarityAlgorithmsFacade {
             Optional.empty(),
             new FilteredKnnFactory<>(),
             user,
-            databaseId
+            databaseId,
+            terminationFlag
         );
     }
 }
