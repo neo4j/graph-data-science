@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
+import org.neo4j.gds.algorithms.metrics.AlgorithmMetric;
 import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
@@ -40,6 +41,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThatException;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -58,7 +60,9 @@ class BasicAlgorithmRunnerTest {
         when(graphStoreCatalogServiceMock.getGraphWithGraphStore(any(), any(), any(), any(), any()))
             .thenReturn(Pair.of(graphMock, mock(GraphStore.class)));
 
+        var algorithmMetricMock = mock(AlgorithmMetric.class);
         var algorithmMetricsServiceMock = mock(AlgorithmMetricsService.class);
+        when(algorithmMetricsServiceMock.create(anyString())).thenReturn(algorithmMetricMock);
 
         var logMock = mock(Log.class);
         when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
@@ -87,9 +91,14 @@ class BasicAlgorithmRunnerTest {
             DatabaseId.EMPTY
         );
 
-        verify(algorithmMetricsServiceMock, times(1)).started("TestingMetrics");
-        verify(algorithmMetricsServiceMock, times(0)).failed("TestingMetrics");
-        verifyNoMoreInteractions(algorithmMetricsServiceMock);
+        verify(algorithmMetricsServiceMock, times(1)).create("TestingMetrics");
+        verify(algorithmMetricMock, times(1)).start();
+        verify(algorithmMetricMock, times(1)).close();
+        verify(algorithmMetricMock, times(0)).failed();
+        verifyNoMoreInteractions(
+            algorithmMetricsServiceMock,
+            algorithmMetricMock
+        );
     }
 
 
@@ -102,7 +111,9 @@ class BasicAlgorithmRunnerTest {
         when(graphStoreCatalogServiceMock.getGraphWithGraphStore(any(), any(), any(), any(), any()))
             .thenReturn(Pair.of(graphMock, mock(GraphStore.class)));
 
+        var algorithmMetricMock = mock(AlgorithmMetric.class);
         var algorithmMetricsServiceMock = mock(AlgorithmMetricsService.class);
+        when(algorithmMetricsServiceMock.create(anyString())).thenReturn(algorithmMetricMock);
 
         var logMock = mock(Log.class);
         when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
@@ -134,9 +145,14 @@ class BasicAlgorithmRunnerTest {
             )
         ).withMessage("Ooops");
 
-        verify(algorithmMetricsServiceMock, times(1)).started("TestingMetrics");
-        verify(algorithmMetricsServiceMock, times(1)).failed("TestingMetrics");
-        verifyNoMoreInteractions(algorithmMetricsServiceMock);
+        verify(algorithmMetricsServiceMock, times(1)).create("TestingMetrics");
+        verify(algorithmMetricMock, times(1)).start();
+        verify(algorithmMetricMock, times(1)).close();
+        verify(algorithmMetricMock, times(1)).failed();
+        verifyNoMoreInteractions(
+            algorithmMetricsServiceMock,
+            algorithmMetricMock
+        );
     }
 
 }

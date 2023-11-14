@@ -19,8 +19,18 @@
  */
 package org.neo4j.gds.algorithms.metrics;
 
-public interface AlgorithmMetricRegistrar {
+public final class PassthroughAlgorithmMetric extends AlgorithmMetric {
 
-    AlgorithmMetric create(String algorithm);
+    PassthroughAlgorithmMetric(String algorithm) {
+        super(algorithm);
+    }
 
+    @Override
+    public void start() {}
+
+    @Override
+    public void failed() {}
+
+    @Override
+    public void close() {}
 }

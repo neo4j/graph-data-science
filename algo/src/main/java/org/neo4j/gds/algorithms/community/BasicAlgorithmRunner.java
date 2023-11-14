@@ -115,15 +115,16 @@ public class BasicAlgorithmRunner {
         );
 
         // run the algorithm
-        try {
-            algorithmMetricsService.started(algorithmFactory.taskName());
+        var algorithmMetric = algorithmMetricsService.create(algorithmFactory.taskName());
+        try(algorithmMetric) {
+            algorithmMetric.start();
             var algorithmResult = algorithm.compute();
 
             return AlgorithmComputationResult.of(algorithmResult, graph, graphStore, algorithm.getTerminationFlag());
         } catch (Exception e) {
             log.warn("Computation failed", e);
             algorithm.getProgressTracker().endSubTaskWithFailure();
-            algorithmMetricsService.failed(algorithmFactory.taskName());
+            algorithmMetric.failed();
             throw e;
         }
     }

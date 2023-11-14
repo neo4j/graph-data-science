@@ -29,30 +29,17 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 class AlgorithmMetricsServiceTest {
 
     @Test
-    void shouldRegisterStarted() {
+    void shouldCreateAlgorithmMetric() {
         // given
         var registrarMock = mock(AlgorithmMetricRegistrar.class);
         var metricsService = new AlgorithmMetricsService(registrarMock);
 
         // when
-        metricsService.started("foo");
+        metricsService.create("foo");
 
         // then
-        verify(registrarMock, times(1)).started("foo");
+        verify(registrarMock, times(1)).create("foo");
         verifyNoMoreInteractions(registrarMock);
     }
 
-    @Test
-    void shouldRegisterFailed() {
-        // given
-        var registrarMock = mock(AlgorithmMetricRegistrar.class);
-        var metricsService = new AlgorithmMetricsService(registrarMock);
-
-        // when
-        metricsService.failed("foo");
-
-        // then
-        verify(registrarMock, times(1)).failed("foo");
-        verifyNoMoreInteractions(registrarMock);
-    }
 }
