@@ -29,7 +29,6 @@ import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -38,6 +37,7 @@ import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Collection;
 import java.util.List;
@@ -52,9 +52,9 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 /**
  * Extracting some common code so that it is reusable; eventually this can probably move to where it is used
  */
-final class Neo4jDatabasePropertyWriter {
+final class Neo4jDatabaseNodePropertyWriter {
 
-    private Neo4jDatabasePropertyWriter() {
+    private Neo4jDatabaseNodePropertyWriter() {
     }
 
     static WriteNodePropertyResult writeNodeProperty(

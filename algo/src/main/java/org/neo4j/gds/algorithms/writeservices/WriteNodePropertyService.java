@@ -23,10 +23,10 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.config.ArrowConnectionInfo;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 
@@ -56,7 +56,7 @@ public class WriteNodePropertyService {
         Optional<ArrowConnectionInfo> arrowConnectionInfo,
         TerminationFlag terminationFlag
     ) {
-        return Neo4jDatabasePropertyWriter.writeNodeProperty(
+        return Neo4jDatabaseNodePropertyWriter.writeNodeProperty(
             nodePropertyExporterBuilder,
             taskRegistryFactory,
             graph,
