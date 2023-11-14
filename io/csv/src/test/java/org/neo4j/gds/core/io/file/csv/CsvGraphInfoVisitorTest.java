@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
 import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.core.io.file.ImmutableGraphInfo;
@@ -43,7 +44,7 @@ class CsvGraphInfoVisitorTest extends CsvVisitorTest {
         var relationshipTypeCounts = Map.of(RelationshipType.of("REL1"), 42L, RelationshipType.of("REL2"), 1337L);
         var inverseIndexedRelTypes = List.of(RelationshipType.of("REL1"), RelationshipType.of("REL2"));
         var graphInfo = ImmutableGraphInfo.builder()
-            .databaseInfo(ImmutableDatabaseInfo.of(databaseId, DatabaseLocation.LOCAL))
+            .databaseInfo(DatabaseInfo.of(databaseId, DatabaseLocation.LOCAL))
             .idMapBuilderType(idMapBuilderType)
             .nodeCount(1337L)
             .maxOriginalId(19L)
@@ -61,6 +62,44 @@ class CsvGraphInfoVisitorTest extends CsvVisitorTest {
                 List.of(
                     databaseId.databaseName(),
                     DatabaseLocation.LOCAL.name(),
+                    "",
+                    idMapBuilderType,
+                    Long.toString(1337L),
+                    Long.toString(19L),
+                    CsvMapUtil.relationshipCountsToString(relationshipTypeCounts),
+                    inverseIndexedRelTypes.stream().map(ElementIdentifier::name).collect(Collectors.joining(";"))
+                )
+            )
+        );
+    }
+
+    @Test
+    void shouldExportGraphInfoRemoteDatabase() {
+        DatabaseId databaseId = DatabaseId.random();
+        String idMapBuilderType = "custom";
+        CsvGraphInfoVisitor graphInfoVisitor = new CsvGraphInfoVisitor(tempDir);
+        var relationshipTypeCounts = Map.of(RelationshipType.of("REL1"), 42L, RelationshipType.of("REL2"), 1337L);
+        var inverseIndexedRelTypes = List.of(RelationshipType.of("REL1"), RelationshipType.of("REL2"));
+        var graphInfo = ImmutableGraphInfo.builder()
+            .databaseInfo(ImmutableDatabaseInfo.of(databaseId, DatabaseLocation.REMOTE, DatabaseId.of("remote-db")))
+            .idMapBuilderType(idMapBuilderType)
+            .nodeCount(1337L)
+            .maxOriginalId(19L)
+            .relationshipTypeCounts(relationshipTypeCounts)
+            .inverseIndexedRelationshipTypes(inverseIndexedRelTypes)
+            .build();
+        graphInfoVisitor.export(graphInfo);
+        graphInfoVisitor.close();
+
+        assertCsvFiles(List.of(GRAPH_INFO_FILE_NAME));
+        assertDataContent(
+            GRAPH_INFO_FILE_NAME,
+            List.of(
+                defaultHeaderColumns(),
+                List.of(
+                    databaseId.databaseName(),
+                    DatabaseLocation.REMOTE.name(),
+                    "remote-db",
                     idMapBuilderType,
                     Long.toString(1337L),
                     Long.toString(19L),
@@ -76,6 +115,7 @@ class CsvGraphInfoVisitorTest extends CsvVisitorTest {
         return List.of(
             CsvGraphInfoVisitor.DATABASE_NAME_COLUMN_NAME,
             CsvGraphInfoVisitor.DATABASE_LOCATION_COLUMN_NAME,
+            CsvGraphInfoVisitor.REMOTE_DATABASE_ID_COLUMN_NAME,
             CsvGraphInfoVisitor.ID_MAP_BUILDER_TYPE_COLUMN_NAME,
             CsvGraphInfoVisitor.NODE_COUNT_COLUMN_NAME,
             CsvGraphInfoVisitor.MAX_ORIGINAL_ID_COLUMN_NAME,

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.paths.spanningtree;
 
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.AlgorithmSpec;
@@ -97,7 +98,7 @@ public class SpanningTreeWriteSpec implements
                     )
                     .withArrowConnectionInfo(
                         config.arrowConnectionInfo(),
-                        computationResult.graphStore().databaseInfo().databaseId().databaseName()
+                        computationResult.graphStore().databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                     )
                     .build()
                     .write(config.writeRelationshipType(), config.writeProperty());

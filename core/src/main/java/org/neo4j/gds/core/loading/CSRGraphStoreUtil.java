@@ -106,8 +106,12 @@ public final class CSRGraphStoreUtil {
                 .build();
         }
 
+        var databaseInfo = ImmutableDatabaseInfo.builder()
+            .databaseId(databaseId)
+            .databaseLocation(DatabaseLocation.LOCAL)
+            .build();
         return new GraphStoreBuilder()
-            .databaseInfo(ImmutableDatabaseInfo.of(databaseId, DatabaseLocation.LOCAL))
+            .databaseInfo(databaseInfo)
             // TODO: is it correct that we only use this for generated graphs?
             .capabilities(ImmutableStaticCapabilities.of(WriteMode.NONE))
             .schema(schema)

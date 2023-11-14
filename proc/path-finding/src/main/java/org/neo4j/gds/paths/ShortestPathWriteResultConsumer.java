@@ -20,6 +20,7 @@
 package org.neo4j.gds.paths;
 
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -110,7 +111,7 @@ public class ShortestPathWriteResultConsumer<ALGO extends Algorithm<PathFindingR
                     .withProgressTracker(progressTracker)
                     .withArrowConnectionInfo(
                         config.arrowConnectionInfo(),
-                        computationResult.graphStore().databaseInfo().databaseId().databaseName()
+                        computationResult.graphStore().databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                     )
                     .build();
 

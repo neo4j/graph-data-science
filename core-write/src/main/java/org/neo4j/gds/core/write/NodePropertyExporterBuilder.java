@@ -20,10 +20,10 @@
 package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.ArrowConnectionInfo;
-import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -39,7 +39,7 @@ public abstract class NodePropertyExporterBuilder {
     protected int writeConcurrency = ConcurrencyConfig.DEFAULT_CONCURRENCY;
     protected ProgressTracker progressTracker = ProgressTracker.NULL_TRACKER;
     protected Optional<ArrowConnectionInfo> arrowConnectionInfo = Optional.empty();
-    protected String databaseName; // coupled with arrowConnectionInfo, but should not appear in external API
+    protected Optional<String> databaseName; // coupled with arrowConnectionInfo, but should not appear in external API
 
     public abstract NodePropertyExporter build();
 
@@ -69,7 +69,7 @@ public abstract class NodePropertyExporterBuilder {
         return this;
     }
 
-    public NodePropertyExporterBuilder withArrowConnectionInfo(Optional<ArrowConnectionInfo> arrowConnectionInfo, String databaseName) {
+    public NodePropertyExporterBuilder withArrowConnectionInfo(Optional<ArrowConnectionInfo> arrowConnectionInfo, Optional<String> databaseName) {
         this.arrowConnectionInfo = arrowConnectionInfo;
         this.databaseName = databaseName;
         return this;

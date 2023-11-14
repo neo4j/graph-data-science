@@ -26,7 +26,11 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.GraphStoreAdapter;
+import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.properties.graph.DoubleArrayGraphPropertyValues;
 import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -204,6 +208,21 @@ class CsvToGraphStoreImporterIntegrationTest {
         assertThat(userGraphStore.graphStore().nodes().typeId()).startsWith(idMapBuilderType);
     }
 
+    @Test
+    void shouldImportRemoteGraphStore() {
+        var graphStore = new RemoteDatabaseGraphStoreWrapper(GdlFactory.builder()
+            .gdlGraph("()-[]->()")
+            .build()
+            .build());
+
+        GraphStoreToCsvExporter.create(graphStore, exportConfig(1, false), graphLocation).run();
+
+        var importer = new CsvToGraphStoreImporter(1, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
+        var userGraphStore = importer.run();
+
+        assertThat(userGraphStore.graphStore().databaseInfo()).isEqualTo(graphStore.databaseInfo());
+    }
+
     private GraphStoreToFileExporterConfig exportConfig(int concurrency, boolean useLabelMapping) {
         return GraphStoreToFileExporterConfigImpl.builder()
             .exportName("my-export")
@@ -254,5 +273,21 @@ class CsvToGraphStoreImporterIntegrationTest {
                 return 10_000;
             }
         });
+    }
+
+    private static class RemoteDatabaseGraphStoreWrapper extends GraphStoreAdapter {
+
+        protected RemoteDatabaseGraphStoreWrapper(GraphStore graphStore) {
+            super(graphStore);
+        }
+
+        @Override
+        public DatabaseInfo databaseInfo() {
+            return ImmutableDatabaseInfo.of(
+                super.databaseInfo().databaseId(),
+                DatabaseInfo.DatabaseLocation.REMOTE,
+                DatabaseId.of("remote-db")
+            );
+        }
     }
 }

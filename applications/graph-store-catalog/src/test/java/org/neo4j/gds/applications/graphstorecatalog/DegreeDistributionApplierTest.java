@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
@@ -75,13 +74,13 @@ class DegreeDistributionApplierTest {
         var config1 = new StubGraphProjectConfig("Alice", "g1");
         var config2 = new StubGraphProjectConfig("Bob", "g2");
         var graphStore1 = new StubGraphStore(
-            ImmutableDatabaseInfo.of(
+            DatabaseInfo.of(
                 DatabaseId.of("db1"),
                 DatabaseInfo.DatabaseLocation.LOCAL
             )
         );
         var graphStore2 = new StubGraphStore(
-            ImmutableDatabaseInfo.of(
+            DatabaseInfo.of(
                 DatabaseId.of("db2"),
                 DatabaseInfo.DatabaseLocation.LOCAL
             )
@@ -125,10 +124,10 @@ class DegreeDistributionApplierTest {
         var config1 = new StubGraphProjectConfig("Alice", "g1");
         var config2 = new StubGraphProjectConfig("Bob", "g2");
         var graphStore1 = new StubGraphStore(
-            ImmutableDatabaseInfo.of(DatabaseId.of("db1"), DatabaseInfo.DatabaseLocation.LOCAL)
+            DatabaseInfo.of(DatabaseId.of("db1"), DatabaseInfo.DatabaseLocation.LOCAL)
         );
         var graphStore2 = new StubGraphStore(
-            ImmutableDatabaseInfo.of(DatabaseId.of("db2"), DatabaseInfo.DatabaseLocation.LOCAL)
+            DatabaseInfo.of(DatabaseId.of("db2"), DatabaseInfo.DatabaseLocation.LOCAL)
         );
         when(
             graphStoreCatalogService.getDegreeDistribution(

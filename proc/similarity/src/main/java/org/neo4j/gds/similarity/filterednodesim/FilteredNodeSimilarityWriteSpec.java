@@ -20,6 +20,7 @@
 package org.neo4j.gds.similarity.filterednodesim;
 
 import org.HdrHistogram.DoubleHistogram;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.RelationshipExporter;
@@ -118,7 +119,7 @@ public class FilteredNodeSimilarityWriteSpec implements
                                 .withProgressTracker(progressTracker)
                                 .withArrowConnectionInfo(
                                     config.arrowConnectionInfo(),
-                                    computationResult.graphStore().databaseInfo().databaseId().databaseName()
+                                    computationResult.graphStore().databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                                 )
                                 .build();
 

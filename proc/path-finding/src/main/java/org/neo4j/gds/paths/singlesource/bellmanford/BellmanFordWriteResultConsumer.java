@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.paths.singlesource.bellmanford;
 
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -115,7 +116,7 @@ public class BellmanFordWriteResultConsumer implements
                     .withProgressTracker(progressTracker)
                     .withArrowConnectionInfo(
                         config.arrowConnectionInfo(),
-                        computationResult.graphStore().databaseInfo().databaseId().databaseName()
+                        computationResult.graphStore().databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                     )
                     .build();
 

@@ -20,6 +20,7 @@
 package org.neo4j.gds.algorithms.writeservices;
 
 import org.apache.commons.lang3.mutable.MutableLong;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.PropertyState;
@@ -99,7 +100,7 @@ final class Neo4jDatabaseNodePropertyWriter {
                 .withProgressTracker(progressTracker)
                 .withArrowConnectionInfo(
                     arrowConnectionInfo,
-                    graphStore.databaseInfo().databaseId().databaseName()
+                    graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                 )
                 .parallel(DefaultPool.INSTANCE, writeConcurrency)
                 .build();

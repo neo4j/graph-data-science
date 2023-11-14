@@ -232,8 +232,12 @@ abstract class GraphAggregator implements CompatUserAggregator {
             return this.result;
         }
 
+        var databaseInfo = ImmutableDatabaseInfo.builder()
+            .databaseId(this.databaseId)
+            .databaseLocation(DatabaseLocation.LOCAL)
+            .build();
         this.result = importer.result(
-            ImmutableDatabaseInfo.of(this.databaseId, DatabaseLocation.LOCAL),
+            databaseInfo,
             this.progressTimer,
             extractNodeId.hasSeenArbitraryIds()
         );

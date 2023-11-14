@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -195,7 +196,7 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
                 .withProgressTracker(progressTracker)
                 .withArrowConnectionInfo(
                     config.arrowConnectionInfo(),
-                    computationResult.graphStore().databaseInfo().databaseId().databaseName()
+                    computationResult.graphStore().databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                 )
                 .parallel(DefaultPool.INSTANCE, config.writeConcurrency())
                 .build();

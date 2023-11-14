@@ -70,8 +70,13 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
             Map.of()
         );
 
+        var databaseInfo = ImmutableDatabaseInfo.builder()
+            .databaseId(loadingContext.databaseId())
+            .databaseLocation(DatabaseLocation.LOCAL)
+            .build();
+
         return new GraphStoreBuilder()
-            .databaseInfo(ImmutableDatabaseInfo.of(loadingContext.databaseId(), DatabaseLocation.LOCAL))
+            .databaseInfo(databaseInfo)
             .capabilities(capabilities)
             .schema(schema)
             .nodes(nodes)
