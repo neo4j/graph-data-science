@@ -11,11 +11,11 @@ dependencies {
     annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
 
     api(project(':algo'))
+    api project(':algorithm-metrics-api')
     api(project(':model-catalog-api'))
 
     implementation project(':annotations')
     implementation project(':algo-common')
-    implementation project(':algorithm-metrics-api')
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-write')

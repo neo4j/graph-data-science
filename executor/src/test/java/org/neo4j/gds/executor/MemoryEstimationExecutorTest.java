@@ -27,6 +27,8 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.RelationshipProjections;
+import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
+import org.neo4j.gds.algorithms.metrics.PassthroughAlgorithmMetricRegistrar;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
@@ -85,6 +87,7 @@ class MemoryEstimationExecutorTest extends BaseTest {
             .nodeLookup(NodeLookup.EMPTY)
             .modelCatalog(ModelCatalog.EMPTY)
             .isGdsAdmin(false)
+            .algorithmMetricsService(new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()))
             .build();
 
         memoryEstimationExecutor = new MemoryEstimationExecutor<>(
