@@ -27,7 +27,6 @@ import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -35,8 +34,10 @@ import org.neo4j.gds.graphsampling.RandomWalkBasedNodesSampler;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 import org.neo4j.gds.graphsampling.samplers.SeenNodes;
 import org.neo4j.gds.graphsampling.samplers.rw.InitialStartQualities;
+import org.neo4j.gds.graphsampling.samplers.rw.RandomWalkCompanion;
 import org.neo4j.gds.graphsampling.samplers.rw.WalkQualities;
 import org.neo4j.gds.graphsampling.samplers.rw.Walker;
+import org.neo4j.gds.graphsampling.samplers.rw.WalkerProducer;
 
 import java.util.Optional;
 import java.util.SplittableRandom;
@@ -45,14 +46,15 @@ public class RandomWalkWithRestarts implements RandomWalkBasedNodesSampler {
     public static final double QUALITY_MOMENTUM = 0.9;
     private static final double QUALITY_THRESHOLD_BASE = 0.05;
     public static final int MAX_WALKS_PER_START = 100;
-    public static final double TOTAL_WEIGHT_MISSING = -1.0;
     protected static final long INVALID_NODE_ID = -1;
 
     private final RandomWalkWithRestartsConfig config;
     private LongHashSet startNodesUsed;
+    private final WalkerProducer walkerProducer;
 
     public RandomWalkWithRestarts(RandomWalkWithRestartsConfig config) {
         this.config = config;
+        this.walkerProducer = WalkerProducer.RWRWalkerProducer();
     }
 
     @Override
@@ -75,10 +77,13 @@ public class RandomWalkWithRestarts implements RandomWalkBasedNodesSampler {
         startNodesUsed = new LongHashSet();
         var rng = new SplittableRandom(config.randomSeed().orElseGet(() -> new SplittableRandom().nextLong()));
         var initialStartQualities = InitialStartQualities.init(inputGraph, rng, config.startNodes());
-        Optional<HugeAtomicDoubleArray> totalWeights = initializeTotalWeights(inputGraph.nodeCount());
+        Optional<HugeAtomicDoubleArray> totalWeights = RandomWalkCompanion.initializeTotalWeights(
+            config,
+            inputGraph.nodeCount()
+        );
 
         var tasks = ParallelUtil.tasks(config.concurrency(), () ->
-            getWalker(
+            walkerProducer.getWalker(
                 seenNodes,
                 totalWeights,
                 QUALITY_THRESHOLD_BASE / (config.concurrency() * config.concurrency()),
@@ -89,10 +94,12 @@ public class RandomWalkWithRestarts implements RandomWalkBasedNodesSampler {
                 progressTracker
             )
         );
+
         RunWithConcurrency.builder()
             .concurrency(config.concurrency())
             .tasks(tasks)
             .run();
+
         tasks.forEach(task -> startNodesUsed.addAll(((Walker) task).startNodesUsed()));
 
         progressTracker.endSubTask("Do random walks");
@@ -123,17 +130,6 @@ public class RandomWalkWithRestarts implements RandomWalkBasedNodesSampler {
         return "Random walk with restarts sampling";
     }
 
-    private Optional<HugeAtomicDoubleArray> initializeTotalWeights(long nodeCount) {
-        if (config.hasRelationshipWeightProperty()) {
-            var totalWeights = HugeAtomicDoubleArray.of(
-                nodeCount,
-                ParallelDoublePageCreator.passThrough(config.concurrency())
-            );
-            totalWeights.setAll(TOTAL_WEIGHT_MISSING);
-            return Optional.of(totalWeights);
-        }
-        return Optional.empty();
-    }
 
     public LongSet startNodesUsed() {
         return startNodesUsed;
@@ -144,26 +140,4 @@ public class RandomWalkWithRestarts implements RandomWalkBasedNodesSampler {
         return startNodesUsed.size();
     }
 
-    protected Runnable getWalker(
-        SeenNodes seenNodes,
-        Optional<HugeAtomicDoubleArray> totalWeights,
-        double qualityThreshold,
-        WalkQualities walkQualities,
-        SplittableRandom split,
-        Graph concurrentCopy,
-        RandomWalkWithRestartsConfig config,
-        ProgressTracker progressTracker
-    ) {
-        return new Walker(seenNodes,
-            totalWeights,
-            qualityThreshold,
-            walkQualities,
-            split,
-            concurrentCopy,
-            config.restartProbability(),
-            progressTracker,
-            new UniformNextNodeStrategy(split, concurrentCopy, totalWeights)
-        );
-    }
-    
 }

@@ -25,6 +25,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.graphsampling.samplers.rw.NextNodeStrategy;
+import org.neo4j.gds.graphsampling.samplers.rw.RandomWalkCompanion;
 
 import java.util.Optional;
 import java.util.SplittableRandom;
@@ -81,7 +82,7 @@ public class UniformNextNodeStrategy implements NextNodeStrategy {
         }
 
         var presentTotalWeights = totalWeights.get();
-        if (presentTotalWeights.get(currentNode) == RandomWalkWithRestarts.TOTAL_WEIGHT_MISSING) {
+        if (presentTotalWeights.get(currentNode) == RandomWalkCompanion.TOTAL_WEIGHT_MISSING) {
             var degree = new MutableDouble(0.0);
             inputGraph.forEachRelationship(currentNode, 0.0, (src, trg, weight) -> {
                 degree.add(weight);
