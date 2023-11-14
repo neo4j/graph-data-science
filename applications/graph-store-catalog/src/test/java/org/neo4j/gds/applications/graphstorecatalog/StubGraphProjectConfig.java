@@ -24,6 +24,7 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.config.GraphProjectConfig;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -54,12 +55,12 @@ class StubGraphProjectConfig implements GraphProjectConfig {
     }
 
     @Override
-    public GraphStoreFactory.Supplier graphStoreFactory() {
+    public Map<String, Object> asProcedureResultConfigurationField() {
         throw new UnsupportedOperationException("TODO");
     }
 
     @Override
-    public <R> R accept(Cases<R> visitor) {
+    public GraphStoreFactory.Supplier graphStoreFactory() {
         throw new UnsupportedOperationException("TODO");
     }
 

@@ -37,6 +37,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -46,6 +47,12 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @Configuration
 @SuppressWarnings("immutables:subtype")
 public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
+
+    @Configuration.Ignore
+    @Value.Parameter(false)
+    default Map<String, Object> asProcedureResultConfigurationField() {
+        return cleansed(toMap(), outputFieldDenylist());
+    }
 
     String NODE_PROJECTION_KEY = "nodeProjection";
     String RELATIONSHIP_PROJECTION_KEY = "relationshipProjection";
@@ -221,30 +228,5 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
             IMPLICIT_GRAPH_NAME,
             config
         );
-    }
-
-    @Override
-    @Configuration.Ignore
-    default <R> R accept(GraphProjectConfig.Cases<R> cases) {
-        if (cases instanceof Cases) {
-            return ((Cases<R>) cases).store(this);
-        }
-        return null;
-    }
-
-    interface Cases<R> extends GraphProjectConfig.Cases<R> {
-
-        R store(GraphProjectFromStoreConfig graphProjectFromStoreConfig);
-    }
-
-    interface Visitor extends Cases<Void>, GraphProjectConfig.Visitor {
-
-        @Override
-        default Void store(GraphProjectFromStoreConfig graphProjectFromStoreConfig) {
-            visit(graphProjectFromStoreConfig);
-            return null;
-        }
-
-        default void visit(GraphProjectFromStoreConfig graphProjectFromStoreConfig) {}
     }
 }

@@ -20,20 +20,11 @@
 package org.neo4j.gds.procedures.catalog;
 
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.config.GraphCatalogConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.config.GraphProjectFromGraphConfig;
-import org.neo4j.gds.config.GraphSampleProcConfig;
-import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.loading.DegreeDistribution;
-import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.gds.mem.MemoryUsage;
-import org.neo4j.gds.projection.GraphProjectFromCypherAggregationConfig;
-import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 
 import java.time.ZonedDateTime;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
@@ -120,14 +111,13 @@ public class GraphInfo {
         String memoryUsage,
         long sizeInBytes
     ) {
-        var configVisitor = new Visitor();
-        graphProjectConfig.accept(configVisitor);
+        var configurationMap = graphProjectConfig.asProcedureResultConfigurationField();
 
         return new GraphInfo(
             graphProjectConfig.graphName(),
             graphStore.databaseInfo().databaseId().databaseName(),
             graphStore.databaseInfo().databaseLocation().name().toLowerCase(Locale.ROOT),
-            configVisitor.configuration,
+            configurationMap,
             memoryUsage,
             sizeInBytes,
             graphStore.nodeCount(),
@@ -137,69 +127,5 @@ public class GraphInfo {
             graphStore.schema().toMapOld(),
             graphStore.schema().toMap()
         );
-    }
-
-    static final class Visitor implements
-        GraphProjectConfig.Visitor,
-        GraphProjectFromCypherAggregationConfig.Visitor,
-        GraphProjectFromStoreConfig.Visitor,
-        GraphProjectFromCypherConfig.Visitor {
-
-        Map<String, Object> configuration = null;
-
-        @Override
-        public void visit(GraphProjectFromStoreConfig storeConfig) {
-            configuration = cleansed(storeConfig.toMap(), storeConfig.outputFieldDenylist());
-        }
-
-        @Override
-        public void visit(GraphProjectFromCypherConfig cypherConfig) {
-            configuration = cleansed(cypherConfig.toMap(), cypherConfig.outputFieldDenylist());
-        }
-
-        @Override
-        public void visit(GraphProjectFromCypherAggregationConfig cypherAggregationConfig) {
-            configuration = cleansed(cypherAggregationConfig.toMap(), cypherAggregationConfig.outputFieldDenylist());
-            configuration.put("query", cypherAggregationConfig.query());
-        }
-
-        @Override
-        public void visit(GraphProjectFromGraphConfig graphConfig) {
-            graphConfig.originalConfig().accept(this);
-            configuration.putAll(graphConfig.toMap());
-            configuration.put("nodeFilter", graphConfig.nodeFilter());
-            configuration.put("relationshipFilter", graphConfig.relationshipFilter());
-        }
-
-        @Override
-        public void visit(RandomGraphGeneratorConfig randomGraphConfig) {
-            configuration = cleansed(randomGraphConfig.toMap(), randomGraphConfig.outputFieldDenylist());
-        }
-
-        @Override
-        public void visit(GraphSampleProcConfig sampleProcConfig) {
-            sampleProcConfig.originalConfig().accept(this);
-
-            var cleansedSampleAlgoConfig = cleansed(
-                sampleProcConfig.sampleAlgoConfig().toMap(),
-                sampleProcConfig.sampleAlgoConfig().outputFieldDenylist()
-            );
-            configuration.putAll(cleansedSampleAlgoConfig);
-        }
-
-        @Override
-        public void visit(GraphCatalogConfig catalogConfig) {
-            configuration = cleansed(catalogConfig.toMap(), catalogConfig.outputFieldDenylist());
-        }
-
-        private Map<String, Object> cleansed(Map<String, Object> map, Collection<String> keysToIgnore) {
-            Map<String, Object> result = new HashMap<>(map);
-            map.forEach((key, value) -> {
-                if (keysToIgnore.contains(key)) {
-                    result.remove(key);
-                }
-            });
-            return result;
-        }
     }
 }

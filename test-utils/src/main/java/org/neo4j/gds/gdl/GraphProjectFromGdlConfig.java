@@ -21,7 +21,6 @@ package org.neo4j.gds.gdl;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.api.PropertyState;
@@ -59,19 +58,5 @@ public interface GraphProjectFromGdlConfig extends GraphProjectConfig {
             .graphProjectConfig(this)
             .databaseId(loaderContext.databaseId())
             .build();
-    }
-
-    @Override
-    @Configuration.Ignore
-    default <R> R accept(GraphProjectConfig.Cases<R> cases) {
-        if (cases instanceof Cases) {
-            return ((Cases<R>) cases).gdl(this);
-        }
-        throw new IllegalArgumentException("Expected Visitor of type " + Cases.class.getName());
-    }
-
-    interface Cases<R> extends GraphProjectConfig.Cases<R> {
-
-        R gdl(GraphProjectFromGdlConfig gdlConfig);
     }
 }
