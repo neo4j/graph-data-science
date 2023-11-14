@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.leiden.LeidenStreamProc.DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
@@ -51,7 +52,7 @@ public class LeidenWriteProc extends BaseProc {
     }
 
     @Procedure(value = "gds.leiden.write.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
@@ -77,7 +78,7 @@ public class LeidenWriteProc extends BaseProc {
     @Deprecated(forRemoval = true)
     @Internal
     @Procedure(value = "gds.beta.leiden.write.estimate", mode = READ, deprecatedBy = "gds.leiden.write.estimate")
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateBeta(
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration

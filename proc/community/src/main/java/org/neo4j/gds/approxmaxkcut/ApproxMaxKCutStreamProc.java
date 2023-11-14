@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.approxmaxkcut;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -33,12 +32,13 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.approxmaxkcut.ApproxMaxKCut.APPROX_MAX_K_CUT_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class ApproxMaxKCutStreamProc extends BaseProc {
-
+public class ApproxMaxKCutStreamProc {
     @Context
     public GraphDataScience facade;
+
     @Procedure(value = "gds.maxkcut.stream", mode = READ)
     @Description(APPROX_MAX_K_CUT_DESCRIPTION)
     public Stream<ApproxMaxKCutStreamResult> stream(
@@ -49,7 +49,7 @@ public class ApproxMaxKCutStreamProc extends BaseProc {
     }
 
     @Procedure(value = "gds.maxkcut.stream.estimate", mode = READ)
-    @Description(APPROX_MAX_K_CUT_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
@@ -75,7 +75,7 @@ public class ApproxMaxKCutStreamProc extends BaseProc {
     @Deprecated
     @Internal
     @Procedure(value = "gds.alpha.maxkcut.stream.estimate", mode = READ, deprecatedBy = "gds.maxcut.stream.estimate")
-    @Description(APPROX_MAX_K_CUT_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateAlpha(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
@@ -85,5 +85,4 @@ public class ApproxMaxKCutStreamProc extends BaseProc {
             .warn("Procedure `gds.alpha.maxkcut.stream.estimate` has been deprecated, please use `gds.maxkcut.stream.estimate`.");
         return estimate(graphNameOrConfiguration, algoConfiguration);
     }
-
 }

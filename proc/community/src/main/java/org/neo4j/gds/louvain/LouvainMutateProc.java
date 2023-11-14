@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.louvain;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.louvain.LouvainMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -32,9 +31,10 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.louvain.LouvainConstants.DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class LouvainMutateProc extends BaseProc {
+public class LouvainMutateProc {
     @Context
     public GraphDataScience facade;
 
@@ -48,7 +48,7 @@ public class LouvainMutateProc extends BaseProc {
     }
 
     @Procedure(value = "gds.louvain.mutate.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration

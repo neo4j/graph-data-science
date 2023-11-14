@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -31,11 +30,11 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.gds.triangle.TriangleCountCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class TriangleCountMutateProc extends BaseProc {
-
+public class TriangleCountMutateProc {
     @Context
     public GraphDataScience facade;
 
@@ -49,13 +48,11 @@ public class TriangleCountMutateProc extends BaseProc {
     }
 
     @Procedure(value = "gds.triangleCount.mutate.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         return facade.community().triangleCountEstimateMutate(graphNameOrConfiguration, algoConfiguration);
     }
-
-
 }

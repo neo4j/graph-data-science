@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.kcore;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStatsResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -34,9 +33,10 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.kcore.KCoreDecomposition.KCORE_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class KCoreDecompositionStatsProc extends BaseProc {
+public class KCoreDecompositionStatsProc {
     @Context
     public GraphDataScience facade;
+
     @Procedure(value = "gds.kcore.stats", mode = READ)
     @Description(KCORE_DESCRIPTION)
     public Stream<KCoreDecompositionStatsResult> mutate(
@@ -46,7 +46,6 @@ public class KCoreDecompositionStatsProc extends BaseProc {
         return facade.community().kCoreStats(graphName, configuration);
     }
 
-
     @Procedure(value = "gds.kcore.stats.estimate", mode = READ)
     @Description(KCORE_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
@@ -54,7 +53,5 @@ public class KCoreDecompositionStatsProc extends BaseProc {
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         return facade.community().kCoreEstimateStats(graphNameOrConfiguration, algoConfiguration);
-
     }
-
 }

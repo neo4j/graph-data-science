@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.triangle;
 
-
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientStatsResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -32,15 +30,16 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.STATS_MODE_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class LocalClusteringCoefficientStatsProc extends BaseProc {
-
+public class LocalClusteringCoefficientStatsProc {
     @Context
     public GraphDataScience facade;
 
     @Procedure(value = "gds.localClusteringCoefficient.stats", mode = READ)
-    @Description(STATS_DESCRIPTION)
+    @Description(STATS_MODE_DESCRIPTION)
     public Stream<LocalClusteringCoefficientStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -49,13 +48,11 @@ public class LocalClusteringCoefficientStatsProc extends BaseProc {
     }
 
     @Procedure(value = "gds.localClusteringCoefficient.stats.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         return facade.community().localClusteringCoefficientEstimateStats(graphNameOrConfiguration, algoConfiguration);
     }
-
-
 }

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.betweenness;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.centrality.CentralityStatsResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -31,16 +30,16 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.betweenness.BetweennessCentrality.BETWEENNESS_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.STATS_MODE_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class BetweennessCentralityStatsProc extends BaseProc {
-
+public class BetweennessCentralityStatsProc {
     @Context
     public GraphDataScience facade;
 
     @Procedure(value = "gds.betweenness.stats", mode = READ)
-    @Description(BETWEENNESS_DESCRIPTION)
+    @Description(STATS_MODE_DESCRIPTION)
     public Stream<CentralityStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -49,12 +48,11 @@ public class BetweennessCentralityStatsProc extends BaseProc {
     }
 
     @Procedure(value = "gds.betweenness.stats.estimate", mode = READ)
-    @Description(BETWEENNESS_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         return facade.centrality().betweenessCentralityStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
-
 }

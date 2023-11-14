@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.scc;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.scc.SccMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -31,11 +30,11 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.gds.scc.Scc.SCC_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class SccMutateProc extends BaseProc {
-
+public class SccMutateProc {
     @Context
     public GraphDataScience facade;
 
@@ -49,14 +48,11 @@ public class SccMutateProc extends BaseProc {
     }
 
     @Procedure(value = "gds.scc.mutate.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         return facade.community().sccEstimateMutate(graphNameOrConfiguration, algoConfiguration);
     }
-
-
 }
-

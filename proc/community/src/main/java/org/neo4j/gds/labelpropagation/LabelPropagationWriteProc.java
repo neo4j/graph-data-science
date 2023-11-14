@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.labelpropagation;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -32,11 +31,11 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.labelpropagation.LabelPropagation.LABEL_PROPAGATION_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class LabelPropagationWriteProc extends BaseProc {
-
+public class LabelPropagationWriteProc {
     @Context
     public GraphDataScience facade;
 
@@ -50,7 +49,7 @@ public class LabelPropagationWriteProc extends BaseProc {
     }
 
     @Procedure(value = "gds.labelPropagation.write.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
