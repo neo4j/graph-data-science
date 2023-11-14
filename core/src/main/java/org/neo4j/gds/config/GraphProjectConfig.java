@@ -29,8 +29,27 @@ import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.utils.TimeUtil;
 
 import java.time.ZonedDateTime;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
+
+    @Configuration.Ignore
+    @Value.Parameter(false)
+    Map<String, Object> asProcedureResultConfigurationField();
+
+    @Configuration.Ignore
+    @Value.Parameter(false)
+    default Map<String, Object> cleansed(Map<String, Object> map, Collection<String> keysToIgnore) {
+        Map<String, Object> result = new HashMap<>(map);
+        map.forEach((key, value) -> {
+            if (keysToIgnore.contains(key)) {
+                result.remove(key);
+            }
+        });
+        return result;
+    }
 
     String IMPLICIT_GRAPH_NAME = "";
     String NODE_COUNT_KEY = "nodeCount";
@@ -108,57 +127,7 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
             .validate(readConcurrency(), READ_CONCURRENCY_KEY, ConcurrencyConfig.CONCURRENCY_LIMITATION);
     }
 
-    @Value.Auxiliary
-    @Configuration.Ignore
-    <R> R accept(Cases<R> visitor);
-
     static @Nullable String validateName(String input) {
         return StringIdentifierValidations.validateNoWhiteCharacter(input, "graphName");
-    }
-
-    interface Cases<R> {
-
-        R graph(GraphProjectFromGraphConfig graphConfig);
-
-        R random(RandomGraphGeneratorConfig randomGraphConfig);
-
-        R sample(GraphSampleProcConfig graphSampleProcConfig);
-
-        R catalog(GraphCatalogConfig graphCatalogConfig);
-    }
-
-    interface Visitor extends Cases<Void> {
-
-        @Override
-        default Void graph(GraphProjectFromGraphConfig graphConfig) {
-            visit(graphConfig);
-            return null;
-        }
-
-        @Override
-        default Void random(RandomGraphGeneratorConfig randomGraphConfig) {
-            visit(randomGraphConfig);
-            return null;
-        }
-
-        @Override
-        default Void sample(GraphSampleProcConfig sampleProcConfig) {
-            visit(sampleProcConfig);
-            return null;
-        }
-
-        @Override
-        default Void catalog(GraphCatalogConfig graphCatalogConfig) {
-            visit(graphCatalogConfig);
-            return null;
-        }
-
-        default void visit(GraphProjectFromGraphConfig graphConfig) {}
-
-        default void visit(RandomGraphGeneratorConfig randomGraphConfig) {}
-
-        default void visit(GraphSampleProcConfig sampleProcConfig) {}
-
-        default void visit(GraphCatalogConfig graphCatalogConfig) {}
     }
 }

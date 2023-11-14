@@ -35,6 +35,16 @@ import java.util.Map;
 @SuppressWarnings("immutables:subtype")
 public interface GraphProjectFromGraphConfig extends GraphProjectConfig {
 
+    @Configuration.Ignore
+    @Value.Parameter(false)
+    default Map<String, Object> asProcedureResultConfigurationField() {
+        var result = originalConfig().asProcedureResultConfigurationField();
+        result.putAll(toMap());
+        result.put("nodeFilter", nodeFilter());
+        result.put("relationshipFilter", relationshipFilter());
+        return result;
+    }
+
     @Configuration.Parameter
     String graphName();
 
@@ -72,12 +82,6 @@ public interface GraphProjectFromGraphConfig extends GraphProjectConfig {
     @Override
     default GraphStoreFactory.Supplier graphStoreFactory() {
         return originalConfig().graphStoreFactory();
-    }
-
-    @Override
-    @Configuration.Ignore
-    default <R> R accept(Cases<R> visitor) {
-        return visitor.graph(this);
     }
 
     // Inherited, but ignored config keys

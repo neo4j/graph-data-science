@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.projection;
 
+import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.annotation.Configuration;
@@ -36,6 +37,14 @@ import static org.neo4j.gds.Orientation.NATURAL;
 
 @Configuration
 public interface GraphProjectFromCypherAggregationConfig extends GraphProjectConfig {
+
+    @Configuration.Ignore
+    @Value.Parameter(false)
+    default Map<String, Object> asProcedureResultConfigurationField() {
+        var result = cleansed(toMap(), outputFieldDenylist());
+        result.put("query", query());
+        return result;
+    }
 
     @Configuration.Ignore
     default Orientation orientation() {
@@ -104,30 +113,5 @@ public interface GraphProjectFromCypherAggregationConfig extends GraphProjectCon
             graphName,
             CypherMapWrapper.create(config)
         );
-    }
-
-    @Override
-    @Configuration.Ignore
-    default <R> R accept(GraphProjectConfig.Cases<R> cases) {
-        if (cases instanceof Cases) {
-            return ((Cases<R>) cases).cypherAggregation(this);
-        }
-        return null;
-    }
-
-    interface Cases<R> extends GraphProjectConfig.Cases<R> {
-
-        R cypherAggregation(GraphProjectFromCypherAggregationConfig cypherAggregationConfig);
-    }
-
-    interface Visitor extends Cases<Void> {
-
-        @Override
-        default Void cypherAggregation(GraphProjectFromCypherAggregationConfig cypherAggregationConfig) {
-            visit(cypherAggregationConfig);
-            return null;
-        }
-
-        default void visit(GraphProjectFromCypherAggregationConfig cypherAggregationConfig) {}
     }
 }

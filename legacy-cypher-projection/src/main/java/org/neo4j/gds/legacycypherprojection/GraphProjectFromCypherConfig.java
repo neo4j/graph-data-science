@@ -43,6 +43,12 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @SuppressWarnings("immutables:subtype")
 public interface GraphProjectFromCypherConfig extends GraphProjectConfig {
 
+    @Configuration.Ignore
+    @Value.Parameter(false)
+    default Map<String, Object> asProcedureResultConfigurationField() {
+        return cleansed(toMap(), outputFieldDenylist());
+    }
+
     List<String> FORBIDDEN_KEYS = Arrays.asList(
 //        GraphProjectFromStoreConfig.NODE_PROJECTION_KEY,
         "nodeProjection",
@@ -103,15 +109,6 @@ public interface GraphProjectFromCypherConfig extends GraphProjectConfig {
         return true;
     }
 
-    @Override
-    @Configuration.Ignore
-    default <R> R accept(GraphProjectConfig.Cases<R> cases) {
-        if (cases instanceof Cases) {
-            return ((Cases<R>) cases).cypher(this);
-        }
-        return null;
-    }
-
     @Value.Derived
     @Configuration.Ignore
     default Set<String> outputFieldDenylist() {
@@ -161,19 +158,4 @@ public interface GraphProjectFromCypherConfig extends GraphProjectConfig {
         return parameters.keySet();
     }
 
-    interface Cases<R> extends GraphProjectConfig.Cases<R> {
-
-        R cypher(GraphProjectFromCypherConfig graphProjectFromCypherConfig);
-    }
-
-    interface Visitor extends Cases<Void>, GraphProjectConfig.Visitor {
-
-        @Override
-        default Void cypher(GraphProjectFromCypherConfig graphProjectFromCypherConfig) {
-            visit(graphProjectFromCypherConfig);
-            return null;
-        }
-
-        default void visit(GraphProjectFromCypherConfig graphProjectFromCypherConfig) {}
-    }
 }
