@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.kmeans.Kmeans.KMEANS_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class KmeansStatsProc extends BaseProc {
@@ -64,7 +65,7 @@ public class KmeansStatsProc extends BaseProc {
     }
 
     @Procedure(value = "gds.kmeans.stats.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
@@ -75,7 +76,7 @@ public class KmeansStatsProc extends BaseProc {
     @Deprecated(forRemoval = true)
     @Internal
     @Procedure(value = "gds.beta.kmeans.stats.estimate", mode = READ, deprecatedBy = "gds.kmeans.stats.estimate")
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> betaEstimate(
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration

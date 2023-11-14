@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.modularityoptimization.ModularityOptimizationSpecificationHelper.MODULARITY_OPTIMIZATION_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class ModularityOptimizationStreamProc extends BaseProc {
@@ -54,7 +55,7 @@ public class ModularityOptimizationStreamProc extends BaseProc {
     }
 
     @Procedure(value = "gds.modularityOptimization.stream.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
@@ -80,7 +81,7 @@ public class ModularityOptimizationStreamProc extends BaseProc {
     @Deprecated(forRemoval = true)
     @Internal
     @Procedure(value = "gds.beta.modularityOptimization.stream.estimate", mode = READ, deprecatedBy = "gds.modularityOptimization.stream.estimate")
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateBeta(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration

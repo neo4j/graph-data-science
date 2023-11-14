@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.modularity;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.modularity.ModularityStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -32,10 +31,10 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class ModularityStreamProc extends BaseProc {
-
+public class ModularityStreamProc {
     static final String DESCRIPTION = "The Modularity procedure computes the modularity scores for a given set of communities/";
 
     @Context
@@ -51,7 +50,7 @@ public class ModularityStreamProc extends BaseProc {
     }
 
     @Procedure(value = "gds.modularity.stream.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
@@ -72,7 +71,5 @@ public class ModularityStreamProc extends BaseProc {
             .warn("Procedure `gds.alpha.modularity.stream` has been deprecated, please use `gds.modularity.stream`.");
 
         return stream(graphName, configuration);
-
     }
-
 }

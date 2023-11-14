@@ -32,6 +32,8 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.STATS_MODE_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class LeidenStatsProc extends BaseProc {
@@ -39,7 +41,7 @@ public class LeidenStatsProc extends BaseProc {
     @Context
     public GraphDataScience facade;
     @Procedure(value = "gds.leiden.stats", mode = READ)
-    @Description(STATS_DESCRIPTION)
+    @Description(STATS_MODE_DESCRIPTION)
     public Stream<LeidenStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -48,7 +50,7 @@ public class LeidenStatsProc extends BaseProc {
     }
 
     @Procedure(value = "gds.leiden.stats.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
@@ -61,7 +63,7 @@ public class LeidenStatsProc extends BaseProc {
     @Deprecated(forRemoval = true)
     @Internal
     @Procedure(value = "gds.beta.leiden.stats", mode = READ, deprecatedBy = "gds.leiden.stats")
-    @Description(STATS_DESCRIPTION)
+    @Description(STATS_MODE_DESCRIPTION)
     public Stream<LeidenStatsResult> statsBeta(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -76,7 +78,7 @@ public class LeidenStatsProc extends BaseProc {
     @Deprecated(forRemoval = true)
     @Internal
     @Procedure(value = "gds.beta.leiden.stats.estimate", mode = READ, deprecatedBy = "gds.leiden.stats.estimate")
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateBeta(
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.betweenness;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.centrality.CentralityMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -31,16 +30,16 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.betweenness.BetweennessCentrality.BETWEENNESS_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class BetweennessCentralityMutateProc extends BaseProc {
-
+public class BetweennessCentralityMutateProc {
     @Context
     public GraphDataScience facade;
 
-    
     @Procedure(value = "gds.betweenness.mutate", mode = READ)
-    @Description(BetweennessCentrality.BETWEENNESS_DESCRIPTION)
+    @Description(BETWEENNESS_DESCRIPTION)
     public Stream<CentralityMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -49,12 +48,11 @@ public class BetweennessCentralityMutateProc extends BaseProc {
     }
 
     @Procedure(value = "gds.betweenness.mutate.estimate", mode = READ)
-    @Description(BetweennessCentrality.BETWEENNESS_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         return facade.centrality().betweenessCentralityMutateEstimate(graphNameOrConfiguration, algoConfiguration);
-
     }
 }

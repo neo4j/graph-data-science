@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.labelpropagation.LabelPropagation.LABEL_PROPAGATION_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class LabelPropagationMutateProc extends BaseProc {
@@ -49,12 +50,11 @@ public class LabelPropagationMutateProc extends BaseProc {
     }
 
     @Procedure(value = "gds.labelPropagation.mutate.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         return facade.community().labelPropagationEstimateMutate(graphNameOrConfiguration, algoConfiguration);
-
     }
 }
