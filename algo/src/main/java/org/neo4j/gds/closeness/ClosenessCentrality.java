@@ -21,9 +21,10 @@ package org.neo4j.gds.closeness;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
-import org.neo4j.gds.core.utils.paged.PagedAtomicIntegerArray;
+import org.neo4j.gds.collections.haa.HugeAtomicIntArray;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
+import org.neo4j.gds.core.utils.paged.ParallelIntPageCreator;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.msbfs.BfsConsumer;
@@ -48,8 +49,8 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
     private final long nodeCount;
     private final int concurrency;
     private final ExecutorService executorService;
-    private final PagedAtomicIntegerArray farness;
-    private final PagedAtomicIntegerArray component;
+    private final HugeAtomicIntArray farness;
+    private final HugeAtomicIntArray component;
     private final CentralityComputer centralityComputer;
 
     public static ClosenessCentrality of(
@@ -67,8 +68,8 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
             nodeCount,
             config.concurrency(),
             centralityComputer,
-            PagedAtomicIntegerArray.newArray(nodeCount),
-            PagedAtomicIntegerArray.newArray(nodeCount),
+            HugeAtomicIntArray.of(nodeCount, ParallelIntPageCreator.of(config.concurrency())),
+            HugeAtomicIntArray.of(nodeCount, ParallelIntPageCreator.of(config.concurrency())),
             executorService,
             progressTracker
         );
@@ -79,8 +80,8 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
         long nodeCount,
         int concurrency,
         CentralityComputer centralityComputer,
-        PagedAtomicIntegerArray farness,
-        PagedAtomicIntegerArray component,
+        HugeAtomicIntArray farness,
+        HugeAtomicIntArray component,
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
@@ -108,8 +109,8 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
         progressTracker.beginSubTask();
         final BfsConsumer consumer = (nodeId, depth, sourceNodeIds) -> {
             int len = sourceNodeIds.size();
-            farness.add(nodeId, len * depth);
-            component.add(nodeId, len);
+            farness.getAndAdd(nodeId, len * depth);
+            component.getAndAdd(nodeId, len);
             progressTracker.logProgress();
         };
         MultiSourceBFSAccessMethods
