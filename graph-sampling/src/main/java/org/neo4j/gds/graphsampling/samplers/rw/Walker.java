@@ -126,7 +126,7 @@ public class Walker implements Runnable {
         }
 
         var presentTotalWeights = totalWeights.get();
-        if (presentTotalWeights.get(currentNode) == RandomWalkWithRestarts.TOTAL_WEIGHT_MISSING) {
+        if (presentTotalWeights.get(currentNode) == RandomWalkCompanion.TOTAL_WEIGHT_MISSING) {
             var degree = new MutableDouble(0.0);
             inputGraph.forEachRelationship(currentNode, 0.0, (src, trg, weight) -> {
                 degree.add(weight);
