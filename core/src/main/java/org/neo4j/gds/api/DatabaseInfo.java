@@ -51,6 +51,6 @@ public interface DatabaseInfo {
     }
 
     enum DatabaseLocation {
-        LOCAL, REMOTE, NONE;
+        LOCAL, REMOTE, NONE
     }
 }

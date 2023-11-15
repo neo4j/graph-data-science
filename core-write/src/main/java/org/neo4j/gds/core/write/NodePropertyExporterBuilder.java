@@ -39,7 +39,7 @@ public abstract class NodePropertyExporterBuilder {
     protected int writeConcurrency = ConcurrencyConfig.DEFAULT_CONCURRENCY;
     protected ProgressTracker progressTracker = ProgressTracker.NULL_TRACKER;
     protected Optional<ArrowConnectionInfo> arrowConnectionInfo = Optional.empty();
-    protected Optional<String> databaseName; // coupled with arrowConnectionInfo, but should not appear in external API
+    protected Optional<String> remoteDatabaseName; // coupled with arrowConnectionInfo, but should not appear in external API
 
     public abstract NodePropertyExporter build();
 
@@ -69,9 +69,9 @@ public abstract class NodePropertyExporterBuilder {
         return this;
     }
 
-    public NodePropertyExporterBuilder withArrowConnectionInfo(Optional<ArrowConnectionInfo> arrowConnectionInfo, Optional<String> databaseName) {
+    public NodePropertyExporterBuilder withArrowConnectionInfo(Optional<ArrowConnectionInfo> arrowConnectionInfo, Optional<String> remoteDatabaseName) {
         this.arrowConnectionInfo = arrowConnectionInfo;
-        this.databaseName = databaseName;
+        this.remoteDatabaseName = remoteDatabaseName;
         return this;
     }
 

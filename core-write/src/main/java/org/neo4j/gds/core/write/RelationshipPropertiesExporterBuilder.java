@@ -41,7 +41,7 @@ public abstract class RelationshipPropertiesExporterBuilder {
     protected LongUnaryOperator toOriginalId;
     protected long relationshipCount = -1L;
     protected Optional<ArrowConnectionInfo> arrowConnectionInfo;
-    protected Optional<String> databaseName; // coupled with arrowConnectionInfo, but should not appear in external API
+    protected Optional<String> remoteDatabaseName; // coupled with arrowConnectionInfo, but should not appear in external API
 
 
     public abstract RelationshipPropertiesExporter build();
@@ -94,9 +94,9 @@ public abstract class RelationshipPropertiesExporterBuilder {
         return this;
     }
 
-    public RelationshipPropertiesExporterBuilder withArrowConnectionInfo(Optional<ArrowConnectionInfo> arrowConnectionInfo, Optional<String> databaseName) {
+    public RelationshipPropertiesExporterBuilder withArrowConnectionInfo(Optional<ArrowConnectionInfo> arrowConnectionInfo, Optional<String> remoteDatabaseName) {
         this.arrowConnectionInfo = arrowConnectionInfo;
-        this.databaseName = databaseName;
+        this.remoteDatabaseName = remoteDatabaseName;
         return this;
     }
 
