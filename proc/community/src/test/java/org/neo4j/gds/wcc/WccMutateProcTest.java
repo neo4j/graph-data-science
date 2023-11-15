@@ -75,6 +75,7 @@ import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.configparser.ConfigurationParser;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.ImmutableGraphProjectFromStoreConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -369,7 +370,7 @@ class WccMutateProcTest extends BaseProcTest {
                     new User(getUsername(), false),
                     DatabaseId.of(db.databaseName()),
                     ProcedureReturnColumns.EMPTY,
-                    null,
+                    TerminationFlag.RUNNING_TRUE,
                     null,
                     algorithmsMutateBusinessFacade,
                     null,
@@ -499,7 +500,7 @@ class WccMutateProcTest extends BaseProcTest {
                     new User(getUsername(), false),
                     DatabaseId.of(db.databaseName()),
                     ProcedureReturnColumns.EMPTY,
-                    null,
+                    TerminationFlag.RUNNING_TRUE,
                     null,
                     algorithmsBusinessFacade,
                     null,
@@ -663,7 +664,7 @@ class WccMutateProcTest extends BaseProcTest {
                             new User(getUsername(), false),
                             DatabaseId.of(db.databaseName()),
                             ProcedureReturnColumns.EMPTY,
-                            null,
+                            TerminationFlag.RUNNING_TRUE,
                             null,
                             algorithmsBusinessFacade,
                             null,

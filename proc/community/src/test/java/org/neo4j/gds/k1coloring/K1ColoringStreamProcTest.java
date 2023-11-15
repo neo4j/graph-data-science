@@ -55,6 +55,7 @@ import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.configparser.ConfigurationParser;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -215,7 +216,7 @@ class K1ColoringStreamProcTest extends BaseProcTest {
                     new User(getUsername(), false),
                     DatabaseId.of(db.databaseName()),
                     ProcedureReturnColumns.EMPTY,
-                    null,
+                    TerminationFlag.RUNNING_TRUE,
                     null,
                     null,
                     null,

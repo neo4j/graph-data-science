@@ -77,6 +77,7 @@ import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.configparser.ConfigurationParser;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.ImmutableGraphProjectFromStoreConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -339,7 +340,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     new User(getUsername(), false),
                     DatabaseId.of(db.databaseName()),
                     ProcedureReturnColumns.EMPTY,
-                    null,
+                    TerminationFlag.RUNNING_TRUE,
                     null,
                     algorithmsMutateBusinessFacade,
                     null,
@@ -465,7 +466,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     new User(getUsername(), false),
                     DatabaseId.of(db.databaseName()),
                     ProcedureReturnColumns.EMPTY,
-                    null,
+                    TerminationFlag.RUNNING_TRUE,
                     null,
                     algorithmsMutateBusinessFacade,
                     null,
@@ -630,7 +631,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     new User(getUsername(), false),
                     DatabaseId.of(db.databaseName()),
                     ProcedureReturnColumns.EMPTY,
-                    null,
+                    TerminationFlag.RUNNING_TRUE,
                     null,
                     algorithmsMutateBusinessFacade,
                     null,
