@@ -1,0 +1,16 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Algorithm Metrics API'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+
+    testImplementation(
+        platform(dep.junit5bom),
+        dep.junit5jupiter,
+    )
+
+    testImplementation group: 'org.assertj', name: 'assertj-core',          version: ver.'assertj'
+    testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: ver.'mockito-junit-jupiter'
+}

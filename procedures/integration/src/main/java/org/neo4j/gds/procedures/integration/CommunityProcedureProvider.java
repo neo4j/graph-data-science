@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.gds.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
+import org.neo4j.gds.algorithms.community.BasicAlgorithmRunner;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
@@ -29,6 +30,7 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.algorithms.community.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.community.WriteNodePropertyService;
+import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
@@ -72,6 +74,7 @@ public class CommunityProcedureProvider {
     private final TerminationFlagService terminationFlagService;
     private final UserLogServices userLogServices;
     private final UserAccessor userAccessor;
+    private final AlgorithmMetricsService algorithmMetricsService;
 
     public CommunityProcedureProvider(
         Log log,
@@ -84,7 +87,8 @@ public class CommunityProcedureProvider {
         TaskRegistryFactoryService taskRegistryFactoryService,
         TerminationFlagService terminationFlagService,
         UserLogServices userLogServices,
-        UserAccessor userAccessor
+        UserAccessor userAccessor,
+        AlgorithmMetricsService algorithmMetricsService
     ) {
         this.log = log;
         this.graphStoreCatalogService = graphStoreCatalogService;
@@ -98,6 +102,7 @@ public class CommunityProcedureProvider {
         this.terminationFlagService = terminationFlagService;
         this.userLogServices = userLogServices;
         this.userAccessor = userAccessor;
+        this.algorithmMetricsService = algorithmMetricsService;
     }
 
     public CommunityProcedureFacade createCommunityProcedureFacade(Context context) throws ProcedureException {
@@ -121,14 +126,17 @@ public class CommunityProcedureProvider {
 
         var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(graphDatabaseService);
 
-        // algorithm facade
-        var communityAlgorithmsFacade = new CommunityAlgorithmsFacade(
+        var algorithmRunner = new BasicAlgorithmRunner(
             graphStoreCatalogService,
             taskRegistryFactory,
             userLogRegistryFactory,
             algorithmMemoryValidationService,
+            algorithmMetricsService,
             log
         );
+
+        // algorithm facade
+        var communityAlgorithmsFacade = new CommunityAlgorithmsFacade(algorithmRunner);
 
         // moar services
         var fictitiousGraphStoreEstimationService = new FictitiousGraphStoreEstimationService();

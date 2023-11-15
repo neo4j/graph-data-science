@@ -33,8 +33,11 @@ import org.neo4j.gds.InvocationCountingTaskStore;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
+import org.neo4j.gds.algorithms.community.BasicAlgorithmRunner;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
+import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
+import org.neo4j.gds.algorithms.metrics.PassthroughAlgorithmMetricRegistrar;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ProcedureReturnColumns;
@@ -195,10 +198,15 @@ class K1ColoringStreamProcTest extends BaseProcTest {
             proc.taskRegistryFactory = taskRegistryFactory;
 
             var algorithmsStreamBusinessFacade = new CommunityAlgorithmsStreamBusinessFacade(
-                new CommunityAlgorithmsFacade(graphStoreCatalogService,
-                    taskRegistryFactory,
-                    EmptyUserLogRegistryFactory.INSTANCE,
-                    memoryUsageValidator, logMock
+                new CommunityAlgorithmsFacade(
+                    new BasicAlgorithmRunner(
+                        graphStoreCatalogService,
+                        taskRegistryFactory,
+                        EmptyUserLogRegistryFactory.INSTANCE,
+                        memoryUsageValidator,
+                        new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
+                        logMock
+                    )
                 ));
             proc.facade = new GraphDataScience(
                 null,

@@ -39,9 +39,12 @@ import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
+import org.neo4j.gds.algorithms.community.BasicAlgorithmRunner;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.algorithms.community.WriteNodePropertyService;
+import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
+import org.neo4j.gds.algorithms.metrics.PassthroughAlgorithmMetricRegistrar;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.api.ProcedureReturnColumns;
@@ -471,10 +474,15 @@ class WccWriteProcTest extends BaseProcTest {
 
                     var taskRegistry = EmptyTaskRegistryFactory.INSTANCE;
                     var algorithmsBusinessFacade = new CommunityAlgorithmsWriteBusinessFacade(
-                        new CommunityAlgorithmsFacade(graphStoreCatalogService,
-                            taskRegistry,
-                            EmptyUserLogRegistryFactory.INSTANCE,
-                            memoryUsageValidator, logMock
+                        new CommunityAlgorithmsFacade(
+                            new BasicAlgorithmRunner(
+                                graphStoreCatalogService,
+                                taskRegistry,
+                                EmptyUserLogRegistryFactory.INSTANCE,
+                                memoryUsageValidator,
+                                new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
+                                logMock
+                            )
                         ),
                         new WriteNodePropertyService(
                             wccWriteProc.executionContext().nodePropertyExporterBuilder(),

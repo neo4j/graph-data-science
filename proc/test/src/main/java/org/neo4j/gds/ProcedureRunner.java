@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
+import org.neo4j.gds.algorithms.metrics.PassthroughAlgorithmMetricRegistrar;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -43,7 +45,8 @@ public final class ProcedureRunner {
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory,
         Transaction tx,
-        Username username
+        Username username,
+        AlgorithmMetricsService algorithmMetricsService
     ) {
         P proc;
         try {
@@ -60,6 +63,8 @@ public final class ProcedureRunner {
         proc.taskRegistryFactory = taskRegistryFactory;
         proc.userLogRegistryFactory = userLogRegistryFactory;
         proc.username = username;
+
+        proc.algorithmMetricsService = algorithmMetricsService;
 
         return proc;
     }
@@ -82,7 +87,8 @@ public final class ProcedureRunner {
             taskRegistryFactory,
             EmptyUserLogRegistryFactory.INSTANCE,
             tx,
-            username
+            username,
+            new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar())
         );
         func.accept(proc);
         return proc;

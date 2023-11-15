@@ -40,9 +40,12 @@ import org.neo4j.gds.TestNativeGraphLoader;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
+import org.neo4j.gds.algorithms.community.BasicAlgorithmRunner;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
 import org.neo4j.gds.algorithms.community.MutateNodePropertyService;
+import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
+import org.neo4j.gds.algorithms.metrics.PassthroughAlgorithmMetricRegistrar;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
@@ -336,21 +339,7 @@ class WccMutateProcTest extends BaseProcTest {
         GraphLoader loader = storeLoaderBuilder.build();
         GraphStoreCatalog.set(loader.projectConfig(), loader.graphStore());
 
-        var logMock = mock(org.neo4j.gds.logging.Log.class);
-        when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
-
-        final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
-        final AlgorithmMemoryValidationService memoryUsageValidator = new AlgorithmMemoryValidationService(
-            logMock,
-            false
-        );
-        var algorithmsMutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
-            new CommunityAlgorithmsFacade(graphStoreCatalogService,
-                TaskRegistryFactory.empty(),
-                EmptyUserLogRegistryFactory.INSTANCE,
-                memoryUsageValidator, logMock),
-            new MutateNodePropertyService(logMock)
-        );
+        var algorithmsMutateBusinessFacade = communityAlgorithmsMutateBusinessFacade();
 
         applyOnProcedure(procedure -> {
             procedure.facade = new GraphDataScience(
@@ -408,6 +397,32 @@ class WccMutateProcTest extends BaseProcTest {
         );
     }
 
+    @NotNull
+    private static CommunityAlgorithmsMutateBusinessFacade communityAlgorithmsMutateBusinessFacade() {
+        var logMock = mock(org.neo4j.gds.logging.Log.class);
+        when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
+
+        final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
+        final AlgorithmMemoryValidationService memoryUsageValidator = new AlgorithmMemoryValidationService(
+            logMock,
+            false
+        );
+        var algorithmsMutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
+            new CommunityAlgorithmsFacade(
+                new BasicAlgorithmRunner(
+                    graphStoreCatalogService,
+                    TaskRegistryFactory.empty(),
+                    EmptyUserLogRegistryFactory.INSTANCE,
+                    memoryUsageValidator,
+                    new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
+                    logMock
+                )
+            ),
+            new MutateNodePropertyService(logMock)
+        );
+        return algorithmsMutateBusinessFacade;
+    }
+
     @Test
     void testGraphMutation() {
         GraphStore graphStore = runMutation(ensureGraphExists(), Map.of());
@@ -460,20 +475,7 @@ class WccMutateProcTest extends BaseProcTest {
         String graphName = ensureGraphExists();
 
         applyOnProcedure(procedure -> {
-            var logMock = mock(org.neo4j.gds.logging.Log.class);
-            when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
-            final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
-            final AlgorithmMemoryValidationService memoryUsageValidator = new AlgorithmMemoryValidationService(
-                logMock,
-                false
-            );
-            var algorithmsBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
-                new CommunityAlgorithmsFacade(graphStoreCatalogService,
-                    TaskRegistryFactory.empty(),
-                    EmptyUserLogRegistryFactory.INSTANCE,
-                    memoryUsageValidator, logMock),
-                new MutateNodePropertyService(logMock)
-            );
+            var algorithmsBusinessFacade = communityAlgorithmsMutateBusinessFacade();
 
             procedure.facade = new GraphDataScience(
                 null,
@@ -532,20 +534,8 @@ class WccMutateProcTest extends BaseProcTest {
 
     @Test
     void testRunOnEmptyGraph() {
+        var algorithmsBusinessFacade = communityAlgorithmsMutateBusinessFacade();
         applyOnProcedure((proc) -> {
-            var logMock = mock(org.neo4j.gds.logging.Log.class);
-            final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
-            final AlgorithmMemoryValidationService memoryUsageValidator = new AlgorithmMemoryValidationService(
-                logMock,
-                false
-            );
-            var algorithmsBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
-                new CommunityAlgorithmsFacade(graphStoreCatalogService,
-                    TaskRegistryFactory.empty(),
-                    EmptyUserLogRegistryFactory.INSTANCE,
-                    memoryUsageValidator, null),
-                new MutateNodePropertyService(logMock)
-            );
             proc.facade = new GraphDataScience(
                 null,
                 null,
@@ -613,10 +603,16 @@ class WccMutateProcTest extends BaseProcTest {
             false
         );
         var algorithmsBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
-            new CommunityAlgorithmsFacade(graphStoreCatalogService,
-                TaskRegistryFactory.empty(),
-                EmptyUserLogRegistryFactory.INSTANCE,
-                memoryUsageValidator, logMock),
+            new CommunityAlgorithmsFacade(
+                new BasicAlgorithmRunner(
+                    graphStoreCatalogService,
+                    TaskRegistryFactory.empty(),
+                    EmptyUserLogRegistryFactory.INSTANCE,
+                    memoryUsageValidator,
+                    new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
+                    logMock
+                )
+            ),
             new MutateNodePropertyService(logMock)
         );
 
