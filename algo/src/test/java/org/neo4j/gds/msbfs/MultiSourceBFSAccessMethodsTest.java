@@ -19,21 +19,17 @@
  */
 package org.neo4j.gds.msbfs;
 
-import org.eclipse.collections.api.tuple.Pair;
-import org.eclipse.collections.impl.tuple.Tuples;
+import org.apache.commons.lang3.tuple.Pair;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipConsumer;
-import org.neo4j.gds.api.RelationshipCursor;
-import org.neo4j.gds.api.RelationshipIterator;
-import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.graphbuilder.DefaultBuilder;
-import org.neo4j.gds.graphbuilder.GraphBuilder;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,83 +37,89 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.LongUnaryOperator;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-final class MultiSourceBFSAccessMethodsTest extends BaseTest {
+final class MultiSourceBFSAccessMethodsTest {
 
-    private static final String DB_CYPHER =
+    @GdlExtension
+    @Nested
+    class sampleTest {
+
+        @GdlGraph(orientation = Orientation.UNDIRECTED)
+        public static final String DB_CYPHER =
             "CREATE" +
-            "  (a:Foo {id: '1'})" +
-            ", (b:Foo {id: '2'})" +
-            ", (c:Foo {id: '3'})" +
-            ", (d:Foo {id: '4'})" +
-            ", (e:Foo {id: '5'})" +
-            ", (f:Foo {id: '6'})" +
+                "  (a:Foo {id: 1})" +
+                ", (b:Foo {id: 2})" +
+                ", (c:Foo {id: 3})" +
+                ", (d:Foo {id: 4})" +
+                ", (e:Foo {id: 5})" +
+                ", (f:Foo {id: 6})" +
 
-            ", (a)-[:BAR]->(c)" +
-            ", (a)-[:BAR]->(d)" +
-            ", (b)-[:BAR]->(c)" +
-            ", (b)-[:BAR]->(d)" +
-            ", (c)-[:BAR]->(e)" +
-            ", (d)-[:BAR]->(f)";
+                ", (a)-[:BAR]->(c)" +
+                ", (a)-[:BAR]->(d)" +
+                ", (b)-[:BAR]->(c)" +
+                ", (b)-[:BAR]->(d)" +
+                ", (c)-[:BAR]->(e)" +
+                ", (d)-[:BAR]->(f)";
 
-    @Test
-    void testWithPredecessor() {
-        withGraph(
-            DB_CYPHER,
-            graph -> {
-                BfsConsumer bfsConsumerMock = mock(BfsConsumer.class);
-                BfsWithPredecessorConsumer bfsWithPredecessorConsumerMock = mock(BfsWithPredecessorConsumer.class);
-                MultiSourceBFSAccessMethods msbfs = MultiSourceBFSAccessMethods.predecessorProcessing(
-                    graph,
-                    (i, d, s) -> bfsConsumerMock.accept(i + 1, d, toList(s, x -> x + 1)),
-                    (i, p, d, s) -> bfsWithPredecessorConsumerMock.accept(i + 1, p + 1, d, toList(s, x -> x + 1)),
-                    new long[]{0, 1}
-                );
+        @Inject
+        Graph graph;
 
-                msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, DefaultPool.INSTANCE);
+        @Test
+        void testWithPredecessor() {
 
-                verify(bfsConsumerMock).accept(1, 0, toList(1));
-                verify(bfsConsumerMock).accept(2, 0, toList(2));
-                verify(bfsConsumerMock).accept(3, 1, toList(1, 2));
-                verify(bfsConsumerMock).accept(4, 1, toList(1, 2));
-                verify(bfsConsumerMock).accept(1, 2, toList(2));
-                verify(bfsConsumerMock).accept(2, 2, toList(1));
-                verify(bfsConsumerMock).accept(5, 2, toList(1, 2));
-                verify(bfsConsumerMock).accept(6, 2, toList(1, 2));
+            BfsConsumer bfsConsumerMock = mock(BfsConsumer.class);
+            BfsWithPredecessorConsumer bfsWithPredecessorConsumerMock = mock(BfsWithPredecessorConsumer.class);
+            MultiSourceBFSAccessMethods msbfs = MultiSourceBFSAccessMethods.predecessorProcessing(
+                graph,
+                (i, d, s) -> bfsConsumerMock.accept(i + 1, d, toList(s, x -> x + 1)),
+                (i, p, d, s) -> bfsWithPredecessorConsumerMock.accept(i + 1, p + 1, d, toList(s, x -> x + 1)),
+                new long[]{0, 1}
+            );
 
-                verify(bfsWithPredecessorConsumerMock).accept(3, 1, 1, toList(1));
-                verify(bfsWithPredecessorConsumerMock).accept(3, 2, 1, toList(2));
-                verify(bfsWithPredecessorConsumerMock).accept(4, 1, 1, toList(1));
-                verify(bfsWithPredecessorConsumerMock).accept(4, 2, 1, toList(2));
+            msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, DefaultPool.INSTANCE);
 
-                verify(bfsWithPredecessorConsumerMock).accept(5, 3, 2, toList(1, 2));
-                verify(bfsWithPredecessorConsumerMock).accept(6, 4, 2, toList(1, 2));
+            verify(bfsConsumerMock).accept(1, 0, toList(1));
+            verify(bfsConsumerMock).accept(2, 0, toList(2));
+            verify(bfsConsumerMock).accept(3, 1, toList(1, 2));
+            verify(bfsConsumerMock).accept(4, 1, toList(1, 2));
+            verify(bfsConsumerMock).accept(1, 2, toList(2));
+            verify(bfsConsumerMock).accept(2, 2, toList(1));
+            verify(bfsConsumerMock).accept(5, 2, toList(1, 2));
+            verify(bfsConsumerMock).accept(6, 2, toList(1, 2));
 
-                verify(bfsWithPredecessorConsumerMock).accept(2, 3, 2, toList(1));
-                verify(bfsWithPredecessorConsumerMock).accept(2, 4, 2, toList(1));
+            verify(bfsWithPredecessorConsumerMock).accept(3, 1, 1, toList(1));
+            verify(bfsWithPredecessorConsumerMock).accept(3, 2, 1, toList(2));
+            verify(bfsWithPredecessorConsumerMock).accept(4, 1, 1, toList(1));
+            verify(bfsWithPredecessorConsumerMock).accept(4, 2, 1, toList(2));
 
-                verify(bfsWithPredecessorConsumerMock).accept(1, 3, 2, toList(2));
-                verify(bfsWithPredecessorConsumerMock).accept(1, 4, 2, toList(2));
+            verify(bfsWithPredecessorConsumerMock).accept(5, 3, 2, toList(1, 2));
+            verify(bfsWithPredecessorConsumerMock).accept(6, 4, 2, toList(1, 2));
 
-                verifyNoMoreInteractions(bfsWithPredecessorConsumerMock);
-            }
-        );
-    }
+            verify(bfsWithPredecessorConsumerMock).accept(2, 3, 2, toList(1));
+            verify(bfsWithPredecessorConsumerMock).accept(2, 4, 2, toList(1));
 
-    @Test
-    void testWithANP() {
-        withGraph(DB_CYPHER, graph -> {
+            verify(bfsWithPredecessorConsumerMock).accept(1, 3, 2, toList(2));
+            verify(bfsWithPredecessorConsumerMock).accept(1, 4, 2, toList(2));
+
+            verifyNoMoreInteractions(bfsWithPredecessorConsumerMock);
+
+        }
+
+        @Test
+        void testWithANP() {
             BfsConsumer mock = mock(BfsConsumer.class);
             MultiSourceBFSAccessMethods msbfs = MultiSourceBFSAccessMethods.aggregatedNeighborProcessing(
                 graph.nodeCount(),
@@ -135,12 +137,11 @@ final class MultiSourceBFSAccessMethodsTest extends BaseTest {
             verify(mock).accept(1, 2, toList(2));
             verify(mock).accept(2, 2, toList(1));
             verifyNoMoreInteractions(mock);
-        });
-    }
 
-    @Test
-    void testPredecessorWithAllSources() {
-        withGraph(DB_CYPHER, graph -> {
+        }
+
+        @Test
+        void testPredecessorWithAllSources() {
             BfsWithPredecessorConsumer mock = mock(BfsWithPredecessorConsumer.class);
             MultiSourceBFSAccessMethods msbfs = MultiSourceBFSAccessMethods.predecessorProcessingWithoutSourceNodes(
                 graph,
@@ -185,13 +186,13 @@ final class MultiSourceBFSAccessMethodsTest extends BaseTest {
             verify(mock).accept(6, 4, 4, toList(5));
 
             verifyNoMoreInteractions(mock);
-        });
-    }
+
+        }
 
 
-    @Test
-    void testANPWithAllSources() {
-        withGraph(DB_CYPHER, graph -> {
+        @Test
+        void testANPWithAllSources() {
+
             BfsConsumer mock = mock(BfsConsumer.class);
             MultiSourceBFSAccessMethods msbfs = MultiSourceBFSAccessMethods.aggregatedNeighborProcessingWithoutSourceNodes(
                 graph.nodeCount(),
@@ -224,198 +225,212 @@ final class MultiSourceBFSAccessMethodsTest extends BaseTest {
             verify(mock).accept(6, 4, toList(5));
 
             verifyNoMoreInteractions(mock);
-        });
-    }
 
-    @Test
-    void testSequentialInvariant() {
-        // for a single run with < ω nodes, the same node may only be traversed once at a given depth
-        withGrid(
-                gb -> gb.newGridBuilder().createGrid(8, 4),
-                graph -> {
-                    Set<Pair<Long, Integer>> seen = new HashSet<>();
-                    MultiSourceBFSAccessMethods msbfs = MultiSourceBFSAccessMethods.aggregatedNeighborProcessingWithoutSourceNodes(
-                            graph.nodeCount(),
-                            graph,
-                            (i, d, s) -> {
-                                String message = formatWithLocale(
-                                        "The node(%d) was traversed multiple times at depth %d",
-                                        i,
-                                        d
-                                );
-                                assertTrue(seen.add(Tuples.pair(i, d)), message);
-                            }
-                    );
-                    msbfs.run(1, null);
-                });
-    }
-
-    @Test
-    void testParallel() {
-        // each node should only be traversed once for every source node
-        int maxNodes = 256;
-        int[][] seen = new int[maxNodes][maxNodes];
-        withGrid(
-                gb -> gb.newCompleteGraphBuilder().createCompleteGraph(maxNodes),
-                graph -> {
-                    MultiSourceBFSAccessMethods msbfs = MultiSourceBFSAccessMethods.aggregatedNeighborProcessingWithoutSourceNodes(
-                            graph.nodeCount(),
-                            graph,
-                            (i, d, s) -> {
-                                assertEquals(1, d);
-                                synchronized (seen) {
-                                    while (s.hasNext()) {
-                                        seen[(int) s.nextLong()][(int) i] += 1;
-                                    }
-                                }
-                            }
-                    );
-                    msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, DefaultPool.INSTANCE);
-                });
-
-        for (int i = 0; i < maxNodes; i++) {
-            final int[] ints = seen[i];
-            int[] expected = new int[maxNodes];
-            Arrays.fill(expected, 1);
-            expected[i] = 0; // MS-BFS does not call fn for start nodes
-            assertArrayEquals(expected, ints);
         }
     }
 
-    @Test
-    void testSize() {
-        int maxNodes = 100;
-        // [ last i, expected source from, expected source to ]
-        int[] state = {-1, 0, MSBFSConstants.OMEGA};
-        withGrid(
-                gb -> gb.newCompleteGraphBuilder().createCompleteGraph(maxNodes),
-                graph -> {
-                    MultiSourceBFSAccessMethods msbfs = MultiSourceBFSAccessMethods.aggregatedNeighborProcessingWithoutSourceNodes(
-                            graph.nodeCount(),
-                            graph,
-                            (i, d, s) -> {
-                                int prev = state[0];
-                                if (i < prev) {
-                                    // we complete a source chunk and start again for the next one
-                                    state[1] = state[2];
-                                    state[2] = Math.min(
-                                        state[2] + MSBFSConstants.OMEGA,
-                                            maxNodes);
-                                }
-                                state[0] = (int) i;
-                                int sourceFrom = state[1];
-                                int sourceTo = state[2];
 
-                                int expectedSize = sourceTo - sourceFrom;
-                                if (i >= sourceFrom && i < sourceTo) {
-                                    // if the current node is in the sources
-                                    // if will not be traversed
-                                    expectedSize -= 1;
-                                }
+    @Nested
+    class GridTest {
 
-                                assertEquals(expectedSize, s.size());
-                            }
+        Graph grid(long n, long m) {
+
+            var graph = mock(Graph.class);
+
+            doAnswer(invocation -> {
+                var nodeId = (Long) invocation.getArgument(0);
+                var relationshipConsumer = (RelationshipConsumer) invocation.getArgument(1);
+                long i = nodeId / m;
+                long j = nodeId % m;
+                if (j - 1 >= 0) {
+                    relationshipConsumer.accept(nodeId, nodeId - 1);
+                }
+                if (j + 1 < m) {
+                    relationshipConsumer.accept(nodeId, nodeId + 1);
+                }
+                if (i - 1 >= 0) {
+                    relationshipConsumer.accept(nodeId, nodeId - m);
+                }
+                if (i + 1 < n) {
+                    relationshipConsumer.accept(nodeId, nodeId + m);
+                }
+                return null;
+            }).when(graph).forEachRelationship(
+                anyLong(),
+                any(RelationshipConsumer.class)
+            );
+
+            doAnswer(invocation -> graph).when(graph).concurrentCopy();
+
+            when(graph.nodeCount()).thenReturn(n * m);
+
+            return graph;
+        }
+
+
+        @Test
+        void testSequentialInvariant() {
+            // for a single run with < ω nodes, the same node may only be traversed once at a given depth
+            //gb -> gb.newGridBuilder().createGrid(8, 4);
+            var graph = grid(8, 4);
+            Set<Pair<Long, Integer>> seen = new HashSet<>();
+            MultiSourceBFSAccessMethods msbfs = MultiSourceBFSAccessMethods.aggregatedNeighborProcessingWithoutSourceNodes(
+                graph.nodeCount(),
+                graph,
+                (i, d, s) -> {
+                    String message = formatWithLocale(
+                        "The node(%d) was traversed multiple times at depth %d",
+                        i,
+                        d
                     );
-                    // run sequentially to guarantee order
-                    msbfs.run(1, null);
-                });
+                    assertTrue(seen.add(Pair.of(i, d)), message);
+                }
+            );
+            msbfs.run(1, null);
+
+        }
     }
 
-    @Test
-    void testLarger() {
-        final int nodeCount = 8192;
-        final int sourceCount = 1024;
+    @Nested
+    class CompleteGraph {
 
-        RelationshipIterator iter = new RelationshipIterator() {
-            @Override
-            public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
-                for (long i = 0; i < nodeCount; i++) {
-                    if (i != nodeId) {
-                        consumer.accept(nodeId, i);
+        Graph completeGraph(long nodeCount) {
+
+            var graph = mock(Graph.class);
+
+            doAnswer(invocation -> {
+                var nodeId = (Long) invocation.getArgument(0);
+                var relationshipConsumer = (RelationshipConsumer) invocation.getArgument(1);
+                for (long j = 0; j < nodeCount; ++j) {
+                    if (nodeId != j) {
+                        relationshipConsumer.accept(nodeId, j);
                     }
                 }
-            }
+                return null;
+            }).when(graph).forEachRelationship(
+                anyLong(),
+                any(RelationshipConsumer.class)
+            );
 
-            @Override
-            public void forEachRelationship(long nodeId, double fallbackValue, RelationshipWithPropertyConsumer consumer) {
-                throw new UnsupportedOperationException("forEachRelationship with properties is not implemented");
-            }
+            doAnswer(invocation -> graph).when(graph).concurrentCopy();
 
-            @Override
-            public void forEachInverseRelationship(long nodeId, RelationshipConsumer consumer) {
-                throw new UnsupportedOperationException("forEachInverseRelationship is not implemented.");
-            }
+            when(graph.nodeCount()).thenReturn(nodeCount);
 
-            @Override
-            public void forEachInverseRelationship(
-                long nodeId,
-                double fallbackValue,
-                RelationshipWithPropertyConsumer consumer
-            ) {
-                throw new UnsupportedOperationException("forEachInverseRelationship with properties is not implemented.");
-            }
+            return graph;
+        }
 
-            @Override
-            public boolean exists(final long sourceNodeId, final long targetNodeId) {
-                return false;
-            }
+        @Test
+        void testParallel() {
+            // each node should only be traversed once for every source node
+            int maxNodes = 256;
+            int[][] seen = new int[maxNodes][maxNodes];
+            var graph = completeGraph(maxNodes);
 
-            @Override
-            public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
-                throw new UnsupportedOperationException("streamRelationships is not implemented.");
-            }
-        };
-
-        final long[] sources = new long[sourceCount];
-        Arrays.setAll(sources, i -> i);
-        final int[][] seen = new int[nodeCount][sourceCount];
-        MultiSourceBFSAccessMethods msbfs = MultiSourceBFSAccessMethods.aggregatedNeighborProcessing(
-                nodeCount,
-                iter,
-                (nodeId, depth, sourceNodeIds) -> {
-                    assertEquals(1, depth);
+            var msbfs = MultiSourceBFSAccessMethods.aggregatedNeighborProcessingWithoutSourceNodes(
+                graph.nodeCount(),
+                graph,
+                (i, d, s) -> {
+                    assertEquals(1, d);
                     synchronized (seen) {
-                        final int[] nodeSeen = seen[(int) nodeId];
-                        while (sourceNodeIds.hasNext()) {
-                            nodeSeen[(int) sourceNodeIds.nextLong()] += 1;
+                        while (s.hasNext()) {
+                            seen[(int) s.nextLong()][(int) i] += 1;
                         }
                     }
-                },
-            sources);
-        msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, DefaultPool.INSTANCE);
+                }
+            );
+            msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, DefaultPool.INSTANCE);
 
-        for (int i = 0; i < seen.length; i++) {
-            final int[] nodeSeen = seen[i];
-            final int[] expected = new int[sourceCount];
-            Arrays.fill(expected, 1);
-            if (i < sourceCount) {
-                expected[i] = 0;
+
+            for (int i = 0; i < maxNodes; i++) {
+                final int[] ints = seen[i];
+                int[] expected = new int[maxNodes];
+                Arrays.fill(expected, 1);
+                expected[i] = 0; // MS-BFS does not call fn for start nodes
+                assertArrayEquals(expected, ints);
             }
-            assertArrayEquals(expected, nodeSeen);
+        }
+
+        @Test
+        void testSize() {
+            int maxNodes = 100;
+            // [ last i, expected source from, expected source to ]
+            int[] state = {-1, 0, MSBFSConstants.OMEGA};
+
+            var graph = completeGraph(maxNodes);
+
+            var msbfs = MultiSourceBFSAccessMethods.aggregatedNeighborProcessingWithoutSourceNodes(
+                graph.nodeCount(),
+                graph,
+                (i, d, s) -> {
+                    int prev = state[0];
+                    if (i < prev) {
+                        // we complete a source chunk and start again for the next one
+                        state[1] = state[2];
+                        state[2] = Math.min(
+                            state[2] + MSBFSConstants.OMEGA,
+                            maxNodes
+                        );
+                    }
+                    state[0] = (int) i;
+                    int sourceFrom = state[1];
+                    int sourceTo = state[2];
+
+                    int expectedSize = sourceTo - sourceFrom;
+                    if (i >= sourceFrom && i < sourceTo) {
+                        // if the current node is in the sources
+                        // if will not be traversed
+                        expectedSize -= 1;
+                    }
+
+                    assertEquals(expectedSize, s.size());
+                }
+            );
+            // run sequentially to guarantee order
+            msbfs.run(1, null);
+
+        }
+
+
+        @Test
+        void testLarger() {
+            final int nodeCount = 8192;
+            final int sourceCount = 1024;
+
+            final long[] sources = new long[sourceCount];
+            Arrays.setAll(sources, i -> i);
+            final int[][] seen = new int[nodeCount][sourceCount];
+
+            BfsConsumer bfsConsumer = (nodeId, depth, sourceNodeIds) -> {
+                assertEquals(1, depth);
+                synchronized (seen) {
+                    final int[] nodeSeen = seen[(int) nodeId];
+                    while (sourceNodeIds.hasNext()) {
+                        nodeSeen[(int) sourceNodeIds.nextLong()] += 1;
+                    }
+                }
+            };
+
+            var iter = completeGraph(nodeCount);
+            MultiSourceBFSAccessMethods msbfs = MultiSourceBFSAccessMethods.aggregatedNeighborProcessing(
+                nodeCount,
+                iter,
+                bfsConsumer,
+                sources
+            );
+            msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, DefaultPool.INSTANCE);
+
+            for (int i = 0; i < seen.length; i++) {
+                final int[] nodeSeen = seen[i];
+                final int[] expected = new int[sourceCount];
+                Arrays.fill(expected, 1);
+                if (i < sourceCount) {
+                    expected[i] = 0;
+                }
+                assertArrayEquals(expected, nodeSeen);
+            }
         }
     }
 
-    private void withGraph(String cypher, Consumer<? super Graph> block) {
-        runQuery(cypher);
-        block.accept(new StoreLoaderBuilder()
-            .databaseService(db)
-            .globalOrientation(Orientation.UNDIRECTED)
-            .build()
-            .graph());
-    }
-
-    private void withGrid(Consumer<? super GraphBuilder<?>> build, Consumer<? super Graph> block) {
-        DefaultBuilder graphBuilder = GraphBuilder.create(db)
-            .setLabel("Foo")
-            .setRelationship("BAR");
-        build.accept(graphBuilder);
-        graphBuilder.close();
-        Graph graph = new StoreLoaderBuilder()
-            .databaseService(db)
-            .build()
-            .graph();
-        block.accept(graph);
-    }
 
     private static BfsSources toList(BfsSources sources, LongUnaryOperator modify) {
         List<Long> longs = new ArrayList<>();
@@ -472,4 +487,5 @@ final class MultiSourceBFSAccessMethodsTest extends BaseTest {
             return longs.toString();
         }
     }
+
 }
