@@ -115,12 +115,15 @@ public class BasicAlgorithmRunner {
         );
 
         // run the algorithm
-        var algorithmMetric = algorithmMetricsService.create(algorithmFactory.taskName());
+        var algorithmResult  = runAlgorithm(algorithm, algorithmFactory.taskName());
+        return AlgorithmComputationResult.of(algorithmResult, graph, graphStore, algorithm.getTerminationFlag());
+    }
+
+    <R> R runAlgorithm(Algorithm<R> algorithm, String algorithmName) {
+        var algorithmMetric = algorithmMetricsService.create(algorithmName);
         try(algorithmMetric) {
             algorithmMetric.start();
-            var algorithmResult = algorithm.compute();
-
-            return AlgorithmComputationResult.of(algorithmResult, graph, graphStore, algorithm.getTerminationFlag());
+            return algorithm.compute();
         } catch (Exception e) {
             log.warn("Computation failed", e);
             algorithm.getProgressTracker().endSubTaskWithFailure();
