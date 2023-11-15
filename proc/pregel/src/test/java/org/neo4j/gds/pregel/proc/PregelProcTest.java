@@ -139,7 +139,7 @@ public class PregelProcTest extends BaseProcTest {
         assertThatThrownBy(() -> {
             runQuery(query);
         })
-            .getRootCause()
+            .rootCause()
             .hasMessageContaining("Partitioning with name `PERFECT` does not exist. Available options are ['AUTO', 'DEGREE', 'RANGE'].");
     }
 

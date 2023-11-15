@@ -20,12 +20,12 @@
 package org.neo4j.gds.doc;
 
 import org.asciidoctor.Asciidoctor;
+import org.asciidoctor.Options;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ResourceUtil;
 import org.neo4j.gds.doc.syntax.DocQuery;
 
-import java.util.Collections;
 import java.util.List;
 
 import static org.asciidoctor.Asciidoctor.Factory.create;
@@ -45,7 +45,7 @@ class QueryCollectingTreeProcessorTest {
         var file = ResourceUtil.path("query-collecting-tree-processor-test.adoc").toFile();
         assertThat(file).exists().canRead();
 
-        asciidoctor.loadFile(file, Collections.emptyMap());
+        asciidoctor.loadFile(file, Options.builder().build());
     }
 
     @Test
@@ -133,7 +133,7 @@ class QueryCollectingTreeProcessorTest {
         var file = ResourceUtil.path("query-collecting-tree-processor-test_database.adoc").toFile();
         assertThat(file).exists().canRead();
 
-        asciidoctor.loadFile(file, Collections.emptyMap());
+        asciidoctor.loadFile(file, Options.builder().build());
 
         assertThat(processor.getQueryExampleGroups()).hasSize(1);
         assertThat(processor.getQueryExampleGroups().get(0).queryExamples()).containsExactly(
@@ -146,7 +146,7 @@ class QueryCollectingTreeProcessorTest {
         var file = ResourceUtil.path("query-collecting-tree-processor-test_part2.adoc").toFile();
         assertThat(file).exists().canRead();
 
-        asciidoctor.loadFile(file, Collections.emptyMap());
+        asciidoctor.loadFile(file, Options.builder().build());
 
         assertThat(processor.getQueryExampleGroups())
             .containsExactlyInAnyOrder(

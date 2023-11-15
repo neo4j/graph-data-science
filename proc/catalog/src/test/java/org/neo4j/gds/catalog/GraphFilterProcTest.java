@@ -127,7 +127,7 @@ class GraphFilterProcTest extends BaseProcTest {
         var subGraphQuery = "CALL gds.graph.filter('subgraph', 'graph', 'GIMME NODES, JOANNA, GIMME NODES', 'true')";
 
         assertThatThrownBy(() -> runQuery(subGraphQuery))
-            .getRootCause()
+            .rootCause()
             .isInstanceOf(ParseException.class)
             .hasMessageContaining("GIMME NODES, JOANNA, GIMME NODES");
     }
@@ -135,13 +135,13 @@ class GraphFilterProcTest extends BaseProcTest {
     @Test
     void throwsOnSemanticNodeError() {
         assertThatThrownBy(() -> runQuery("CALL gds.graph.filter('subgraph', 'graph', 'r:Foo', 'true')"))
-            .getRootCause()
+            .rootCause()
             .isInstanceOf(SemanticErrors.class)
             .hasMessageContaining("Only `n` is allowed for nodes");
 
         assertThatThrownBy(() -> runQuery(
             "CALL gds.graph.filter('subgraph', 'graph', 'n:Foo AND n.foobar > 42', 'true')"))
-            .getRootCause()
+            .rootCause()
             .isInstanceOf(SemanticErrors.class)
             .hasMessageContaining("Unknown property `foobar`.")
             .hasMessageContaining("Unknown label `Foo`.");
@@ -151,13 +151,13 @@ class GraphFilterProcTest extends BaseProcTest {
     void throwsOnSemanticRelationshipError() {
         assertThatThrownBy(() -> runQuery(
             "CALL gds.graph.filter('subgraph', 'graph', 'true', 'n:BAR')"))
-            .getRootCause()
+            .rootCause()
             .isInstanceOf(SemanticErrors.class)
             .hasMessageContaining("Only `r` is allowed for relationships");
 
         assertThatThrownBy(() -> runQuery(
             "CALL gds.graph.filter('subgraph', 'graph', 'true', 'r:BAR AND r.prop > 42')"))
-            .getRootCause()
+            .rootCause()
             .isInstanceOf(SemanticErrors.class)
             .hasMessageContaining("Unknown property `prop`.")
             .hasMessageContaining("Unknown relationship type `BAR`.");

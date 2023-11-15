@@ -171,7 +171,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
                           ")";
 
         assertThatCode(() -> runQuery(exportQuery))
-            .getRootCause()
+            .rootCause()
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage(
                 "The following provided additional node properties are already present in the in-memory graph: prop1 and prop2");
@@ -303,7 +303,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
                           ")";
 
         assertThatCode(() -> runQuery(exportQuery))
-            .getRootCause()
+            .rootCause()
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage(
                 "The following provided additional node properties are already present in the in-memory graph: prop1 and prop2");

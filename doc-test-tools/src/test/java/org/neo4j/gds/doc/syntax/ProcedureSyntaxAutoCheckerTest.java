@@ -20,7 +20,7 @@
 package org.neo4j.gds.doc.syntax;
 
 import org.asciidoctor.Asciidoctor;
-import org.asciidoctor.OptionsBuilder;
+import org.asciidoctor.Options;
 import org.asciidoctor.SafeMode;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.InjectSoftAssertions;
@@ -47,7 +47,7 @@ class ProcedureSyntaxAutoCheckerTest {
 
     @TempDir
     private File outputDirectory;
-    private OptionsBuilder options;
+    private Options options;
 
     private static final String newLine = System.lineSeparator();
 
@@ -57,9 +57,10 @@ class ProcedureSyntaxAutoCheckerTest {
     @BeforeEach
     void setUp() {
         // By default we are forced to use relative path which we don't want.
-        options = OptionsBuilder.options()
+        options = Options.builder()
             .toDir(outputDirectory) // Make sure we don't write anything in the project.
-            .safe(SafeMode.UNSAFE);
+            .safe(SafeMode.UNSAFE)
+            .build();
 
     }
 

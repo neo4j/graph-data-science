@@ -20,7 +20,7 @@
 package org.neo4j.gds.doc.syntax;
 
 import org.asciidoctor.Asciidoctor;
-import org.asciidoctor.OptionsBuilder;
+import org.asciidoctor.Options;
 import org.asciidoctor.SafeMode;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
@@ -65,10 +65,11 @@ public abstract class SyntaxTestBase {
         var docFile = adocPath().toFile();
         assertThat(docFile).exists().canRead();
 
-        var options = OptionsBuilder.options()
+        var options = Options.builder()
             .baseDir(ASCIIDOC_PATH.toFile()) // Make sure to set the `baseDir` it is read in `PartialsIncludeProcessor`
             .toDir(outputDirectory) // Make sure we don't write anything in the project.
-            .safe(SafeMode.UNSAFE); // By default we are forced to use relative path which we don't want.
+            .safe(SafeMode.UNSAFE) // By default we are forced to use relative path which we don't want.
+            .build();
 
         asciidoctor.convertFile(docFile, options);
     }

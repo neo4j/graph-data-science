@@ -111,7 +111,7 @@ class LinkPredictionPipelineAddStepProcsTest extends BaseProcTest {
             "CALL gds.beta.pipeline.linkPrediction.addNodeProperty('myPipeline', 'fastRP', {})"
         ))
             .hasRootCauseInstanceOf(IllegalArgumentException.class)
-            .getRootCause()
+            .rootCause()
             .hasMessageContaining("Multiple errors in configuration arguments:")
             .hasMessageContaining("No value specified for the mandatory configuration parameter `embeddingDimension`")
             .hasMessageContaining("No value specified for the mandatory configuration parameter `mutateProperty`");

@@ -41,7 +41,7 @@ public class ProcedureFailTest extends BaseProcTest {
     void shouldFailWithIllegalStateException() {
         loadCompleteGraph(DEFAULT_GRAPH_NAME);
         assertThatThrownBy(() -> runQuery("CALL very.strange.procedure('" + DEFAULT_GRAPH_NAME + "', {})"))
-            .getRootCause()
+            .rootCause()
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("Oops");
     }

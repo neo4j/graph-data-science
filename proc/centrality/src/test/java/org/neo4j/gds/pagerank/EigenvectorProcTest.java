@@ -110,7 +110,7 @@ class EigenvectorProcTest extends BaseProcTest {
             .addParameter("scaler", "SUPERDUPERSCALARSCALERVARIANT")
             .yields())
         )
-            .getRootCause()
+            .rootCause()
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Unrecognised scaler type specified: `SUPERDUPERSCALARSCALERVARIANT`.");
     }

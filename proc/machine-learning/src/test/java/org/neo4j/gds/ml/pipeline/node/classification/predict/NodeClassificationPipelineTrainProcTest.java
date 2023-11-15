@@ -160,7 +160,7 @@ class NodeClassificationPipelineTrainProcTest extends BaseProcTest {
             "})",
             params
         ))
-            .getRootCause()
+            .rootCause()
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Target property `INVALID_PROPERTY` not found in graph with node properties:");
     }
