@@ -19,16 +19,18 @@
  */
 package org.neo4j.gds.allshortestpaths;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.apache.logging.log4j.util.TriConsumer;
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.BaseTest;
-import org.neo4j.gds.PropertyMapping;
-import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.graphbuilder.GraphBuilder;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.gdl.GdlFactory;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -54,75 +56,78 @@ import static org.mockito.Mockito.verify;
  *   v    v
  *  (8)->(9)
  */
-class WeightedAllShortestPathsTest extends BaseTest {
 
-    private static final int width = 2, height = 5;
+@GdlExtension
+class WeightedAllShortestPathsTest {
 
-    private static final String PROPERTY = "property";
-    private static final String LABEL = "Node";
-    private static final String RELATIONSHIP = "REL";
+    @GdlGraph
+    private static final String DB_CYPHER =
+        "CREATE " +
+            "  (a0:Node)" +
+            ", (a1:Node)" +
+            ", (a2:Node)" +
+            ", (a3:Node)" +
+            ", (a4:Node)" +
+            "  (a5:Node)" +
+            ", (a6:Node)" +
+            ", (a7:Node)" +
+            ", (a8:Node)" +
+            ", (a9:Node)" +
 
+            ", (a0)-[:R {w:1}]->(a1)" +
+            ", (a0)-[:R {w:1}]->(a2)" +
+            ", (a1)-[:R {w:1}]->(a3)" +
+            ", (a2)-[:R {w:1}]->(a3)" +
+            ", (a2)-[:R {w:1}]->(a4)" +
+            ", (a3)-[:R {w:1}]->(a5)" +
+            ", (a4)-[:R {w:1}]->(a5)" +
+            ", (a4)-[:R {w:1}]->(a6)" +
+            ", (a5)-[:R {w:1}]->(a7)" +
+            ", (a6)-[:R {w:1}]->(a7)" +
+            ", (a6)-[:R {w:1}]->(a8)" +
+            ", (a7)-[:R {w:1}]->(a9)" +
+            ", (a8)-[:R {w:1}]->(a9)";
+
+    @Inject
     private Graph graph;
 
-    @BeforeEach
-    void setup() {
-        GraphBuilder.create(db)
-            .setLabel(LABEL)
-            .setRelationship(RELATIONSHIP)
-            .newGridBuilder()
-            .createGrid(width, height)
-            .forEachRelInTx(rel -> rel.setProperty(PROPERTY, 1.0))
-            .close();
-
-        graph = new StoreLoaderBuilder()
-            .databaseService(db)
-            .addNodeLabel(LABEL)
-            .addRelationshipType(RELATIONSHIP)
-            .addRelationshipProperty(PropertyMapping.of(PROPERTY, 1.0))
-            .build()
-            .graph();
-    }
+    @Inject
+    private IdFunction idFunction;
 
     @Test
     void testResults() {
 
-        final ResultConsumer mock = mock(ResultConsumer.class);
+        TriConsumer<Long, Long, Double> mock = mock(TriConsumer.class);
 
         new WeightedAllShortestPaths(graph, DefaultPool.INSTANCE, 4)
                 .compute()
                 .forEach(r -> {
                     assertNotEquals(Double.POSITIVE_INFINITY, r.distance);
                     if (r.sourceNodeId == r.targetNodeId) {
-                        assertEquals(0.0, r.distance, 0.1);
+                        assertThat(r.distance).isCloseTo(0.0, Offset.offset(1e-1));
                     }
-                    mock.test(r.sourceNodeId, r.targetNodeId, r.distance);
+                    mock.accept(r.sourceNodeId, r.targetNodeId, r.distance);
                 });
 
-        verify(mock, times(45)).test(anyLong(), anyLong(), anyDouble());
+        verify(mock, times(45)).accept(anyLong(), anyLong(), anyDouble());
 
-        verify(mock, times(1)).test(0, 9, 5.0);
-        verify(mock, times(1)).test(0, 0, 0.0);
+        long a0 = idFunction.of("a0");
+        long a9 = idFunction.of("a9");
+
+        verify(mock, times(1)).accept(a0, a9, 5.0);
+        verify(mock, times(1)).accept(a0, a0, 0.0);
 
     }
 
     @Test
     void shouldThrowIfGraphHasNoRelationshipProperty() {
-        Graph graph = new StoreLoaderBuilder()
-            .databaseService(db)
-            .addNodeLabel(LABEL)
-            .addRelationshipType(RELATIONSHIP)
-            .build()
-            .graph();
+        var gdlGraph = GdlFactory.of("(a)-[:r]->(b)").build().getUnion();
 
         UnsupportedOperationException exception = assertThrows(UnsupportedOperationException.class, () -> {
-            new WeightedAllShortestPaths(graph, DefaultPool.INSTANCE, 4);
+            new WeightedAllShortestPaths(gdlGraph, DefaultPool.INSTANCE, 4);
         });
 
         assertTrue(exception.getMessage().contains("not supported"));
     }
 
-    interface ResultConsumer {
-
-        void test(long source, long target, double distance);
-    }
 }
