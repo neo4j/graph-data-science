@@ -23,4 +23,6 @@ public final class TestGdsVersion {
 
     //Used by models for de/serialization. In most tests this doesn't matter.
     public static String testGdsVersion = "testGdsVersion";
+
+    private TestGdsVersion() {}
 }

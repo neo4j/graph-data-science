@@ -34,9 +34,6 @@ import static org.neo4j.gds.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 
 public final class SimilarityStatistics {
 
-
-
-
     @ValueClass
     @SuppressWarnings("immutables:incompat")
     public interface SimilarityStats {
@@ -82,5 +79,5 @@ public final class SimilarityStatistics {
 
     }
 
-
+    private SimilarityStatistics() {}
 }

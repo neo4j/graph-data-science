@@ -31,4 +31,6 @@ public final class TimeUtil {
         var zoneId = Neo4jSettings.dbTemporalTimezone().defaultValue();
         return ZonedDateTime.now(Clock.system(zoneId != null ? zoneId : ZoneId.systemDefault()));
     }
+
+    private TimeUtil() {}
 }
