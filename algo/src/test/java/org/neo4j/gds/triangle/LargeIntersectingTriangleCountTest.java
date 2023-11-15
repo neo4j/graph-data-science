@@ -19,113 +19,86 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.neo4j.gds.BaseTest;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.StoreLoaderBuilder;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.paged.PagedAtomicIntegerArray;
-import org.neo4j.gds.graphbuilder.DefaultBuilder;
-import org.neo4j.gds.graphbuilder.GraphBuilder;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 
-import java.util.concurrent.atomic.AtomicIntegerArray;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+class LargeIntersectingTriangleCountTest {
 
-class LargeIntersectingTriangleCountTest extends BaseTest {
-
-    private static final String LABEL = "Node";
-    private static final String RELATIONSHIP = "REL";
-    private static final long TRIANGLE_COUNT = 1000L;
-
-    private static long centerId;
+    private static final long TRIANGLE_COUNT = 4;
 
     ImmutableTriangleCountBaseConfig.Builder defaultConfigBuilder() {
       return ImmutableTriangleCountBaseConfig.builder();
     }
 
-    @BeforeEach
-    void setup() {
-        RelationshipType type = RelationshipType.withName(RELATIONSHIP);
-        DefaultBuilder builder = GraphBuilder.create(db)
-            .setLabel(LABEL)
-            .setRelationship(RELATIONSHIP)
-            .newDefaultBuilder();
-        Node center = builder.createNode();
-        builder.newRingBuilder()
-            .createRing((int) TRIANGLE_COUNT)
-            .forEachNodeInTx(node -> center.createRelationshipTo(node, type))
-            .close();
-        centerId = center.getId();
-    }
+    @ParameterizedTest
+    @ValueSource(ints = {1, 4})
+    void testQueue(int concurrency) {
 
-    private Graph graph;
+        long centerId = TRIANGLE_COUNT;
 
-    @Test
-    void testQueue() {
-        loadGraph();
+        var graph = produceRingStar(TRIANGLE_COUNT + 1l);
+
+        var mappedCenterId = graph.toMappedNodeId(centerId);
         var result = IntersectingTriangleCount.create(
             graph,
-            defaultConfigBuilder().build(),
+            defaultConfigBuilder().concurrency(concurrency).build(),
             DefaultPool.INSTANCE
         ).compute();
-        assertEquals(TRIANGLE_COUNT, result.globalTriangles());
-        assertTriangles(result.globalTriangles());
-    }
 
-    @Test
-    void testQueueParallel() {
-        loadGraph();
-        var result = IntersectingTriangleCount.create(
-            graph,
-            defaultConfigBuilder().concurrency(4).build(),
-            DefaultPool.INSTANCE
-        ).compute();
-        assertEquals(TRIANGLE_COUNT, result.globalTriangles());
-        assertTriangles(result.globalTriangles());
-    }
+        assertThat(result.globalTriangles()).isEqualTo(TRIANGLE_COUNT);
 
-    private void assertTriangles(Object triangles) {
-        if (triangles instanceof PagedAtomicIntegerArray) {
-            assertTriangle((PagedAtomicIntegerArray) triangles);
-        } else if (triangles instanceof AtomicIntegerArray) {
-            assertTriangle((AtomicIntegerArray) triangles);
-        }
-    }
+        var localTriangles = result.localTriangles();
+        assertThat(localTriangles.get(mappedCenterId)).isEqualTo(TRIANGLE_COUNT);
 
-    private void assertTriangle(AtomicIntegerArray triangles) {
-        final int centerMapped = Math.toIntExact(graph.toMappedNodeId(centerId));
-        assertEquals(TRIANGLE_COUNT, triangles.get(centerMapped));
-        for (int i = 0; i < triangles.length(); i++) {
-            if (i == centerMapped) {
+        for (int u = 0; u < localTriangles.size(); u++) {
+            if (u == mappedCenterId) {
                 continue;
             }
-            assertEquals(2, triangles.get(i));
+            assertThat(localTriangles.get(u)).isEqualTo(2L);
         }
+
     }
 
-    private void assertTriangle(PagedAtomicIntegerArray triangles) {
-        final int centerMapped = Math.toIntExact(graph.toMappedNodeId(centerId));
-        assertEquals(TRIANGLE_COUNT, triangles.get(centerMapped));
-        for (int i = 0; i < triangles.size(); i++) {
-            if (i == centerMapped) {
-                continue;
-            }
-            assertEquals(2, triangles.get(i));
-        }
-    }
+    private Graph produceRingStar(long nodeCount) {
+        long centerOriginalId = nodeCount - 1;
 
-    private void loadGraph() {
-        graph = new StoreLoaderBuilder()
-            .databaseService(db)
-            .addNodeLabel(LABEL)
-            .addRelationshipType(RELATIONSHIP)
-            .globalOrientation(Orientation.UNDIRECTED)
-            .build()
-            .graph();
+        var nodesBuilder = GraphFactory.initNodesBuilder()
+            .maxOriginalId(nodeCount)
+            .concurrency(1)
+            .build();
+
+        for (var nodeId = 0; nodeId < nodeCount; ++nodeId) {
+            nodesBuilder.addNode(nodeId);
+        }
+
+        var idMap = nodesBuilder.build().idMap();
+
+        RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
+            .nodes(idMap)
+            .relationshipType(RelationshipType.of("FOO"))
+            .orientation(Orientation.UNDIRECTED)
+            .executorService(DefaultPool.INSTANCE)
+            .build();
+
+        for (long u = 0; u < nodeCount - 1; ++u) {
+            long v = (u + 1) % (nodeCount - 1);
+            relationshipsBuilder.add(u, v);
+        }
+
+        for (long u = 0; u < nodeCount - 1; ++u) {
+            relationshipsBuilder.add(u, centerOriginalId);
+        }
+
+        var relationships = relationshipsBuilder.build();
+
+        return GraphFactory.create(idMap, relationships);
     }
 }
