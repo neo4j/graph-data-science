@@ -53,7 +53,6 @@ public class Leiden extends Algorithm<LeidenResult> {
     private final ExecutorService executorService;
     private final int concurrency;
     private final long randomSeed;
-    private SeedCommunityManager seedCommunityManager;
 
     private final double tolerance;
 
@@ -99,7 +98,10 @@ public class Leiden extends Algorithm<LeidenResult> {
         var nodeCount = workingGraph.nodeCount();
         var localMoveCommunities = LeidenUtils.createStartingCommunities(nodeCount, seedValues.orElse(null));
 
-        seedCommunityManager = SeedCommunityManager.create(seedValues.isPresent(), localMoveCommunities);
+        SeedCommunityManager seedCommunityManager = SeedCommunityManager.create(
+            seedValues.isPresent(),
+            localMoveCommunities
+        );
 
         // volume -> the sum of the weights of a nodes outgoing relationships
         var localMoveNodeVolumes = HugeDoubleArray.newArray(nodeCount);

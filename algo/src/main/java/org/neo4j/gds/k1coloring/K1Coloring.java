@@ -76,7 +76,6 @@ public class K1Coloring extends Algorithm<K1ColoringResult> {
     private int bitSetId;
     private HugeLongArray colors;
     private long ranIterations;
-    private boolean didConverge;
 
     public K1Coloring(
         Graph graph,
@@ -130,7 +129,7 @@ public class K1Coloring extends Algorithm<K1ColoringResult> {
 
         }
 
-        this.didConverge = ranIterations < maxIterations;
+        boolean didConverge = ranIterations < maxIterations;
 
         progressTracker.endSubTask();
 
