@@ -199,7 +199,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     private void prepare() {
         progressTracker.beginSubTask();
 
-        initComponents();
+        components = initComponents();
 
         if (config.runWCC()) {
             progressTracker.beginSubTask();
@@ -264,12 +264,11 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         }
     }
 
-    private void initComponents() {
+    private LongUnaryOperator initComponents() {
         if (!config.isEnableComponentOptimization()) {
             // considering everything as within the same component
-            components = n -> 0;
             similarityConsumer = this::computeSimilarityForSingleComponent;
-            return;
+            return n -> 0;
         }
 
         similarityConsumer = this::computeSimilarityForComponents;
@@ -277,8 +276,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         if (config.componentProperty() != null) {
             // extract component info from property
             NodePropertyValues nodeProperties = graph.nodeProperties(config.componentProperty());
-            components = initComponentIdMapping(graph, nodeProperties::longValue);
-            return;
+            return initComponentIdMapping(graph, nodeProperties::longValue);
+
         }
 
         // run WCC to determine components
@@ -292,8 +291,9 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
         Wcc wcc = new WccAlgorithmFactory<>().build(graph, wccConfig, ProgressTracker.NULL_TRACKER);
         DisjointSetStruct disjointSets = wcc.compute();
-        components = initComponentIdMapping(graph, disjointSets::setIdOf);
+        var components = initComponentIdMapping(graph, disjointSets::setIdOf);
         progressTracker.endSubTask();
+        return components;
     }
 
     private Stream<SimilarityResult> computeAll() {
