@@ -19,16 +19,17 @@
  */
 package org.neo4j.gds.allshortestpaths;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.apache.logging.log4j.util.TriConsumer;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.BaseTest;
-import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.graphbuilder.GraphBuilder;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
@@ -51,52 +52,68 @@ import static org.mockito.Mockito.verify;
  * v    v
  * (8)->(9)
  */
-class MSBFSAllShortestPathsTest extends BaseTest {
+@GdlExtension
+class MSBFSAllShortestPathsTest {
 
-    private static final int width = 2, height = 5;
+    @GdlGraph
+    private static final String DB_CYPHER =
+        "CREATE " +
+            "  (a0:Node)" +
+            ", (a1:Node)" +
+            ", (a2:Node)" +
+            ", (a3:Node)" +
+            ", (a4:Node)" +
+            "  (a5:Node)" +
+            ", (a6:Node)" +
+            ", (a7:Node)" +
+            ", (a8:Node)" +
+            ", (a9:Node)" +
 
-    private static final String LABEL = "Node";
-    private static final String RELATIONSHIP = "REL";
+            ", (a0)-[:R {w:1}]->(a1)" +
+            ", (a0)-[:R {w:1}]->(a2)" +
+            ", (a1)-[:R {w:1}]->(a3)" +
+            ", (a2)-[:R {w:1}]->(a3)" +
+            ", (a2)-[:R {w:1}]->(a4)" +
+            ", (a3)-[:R {w:1}]->(a5)" +
+            ", (a4)-[:R {w:1}]->(a5)" +
+            ", (a4)-[:R {w:1}]->(a6)" +
+            ", (a5)-[:R {w:1}]->(a7)" +
+            ", (a6)-[:R {w:1}]->(a7)" +
+            ", (a6)-[:R {w:1}]->(a8)" +
+            ", (a7)-[:R {w:1}]->(a9)" +
+            ", (a8)-[:R {w:1}]->(a9)";
 
-    @BeforeEach
-    void setup() {
-        GraphBuilder.create(db)
-            .setLabel(LABEL)
-            .setRelationship(RELATIONSHIP)
-            .newGridBuilder()
-            .createGrid(width, height)
-            .close();
-    }
+    @Inject
+    private Graph graph;
+
+    @Inject
+    private IdFunction idFunction;
+
 
     @Test
     void testResults() {
-        Graph graph = new StoreLoaderBuilder()
-            .databaseService(db)
-            .addNodeLabel(LABEL)
-            .addRelationshipType(RELATIONSHIP)
-            .build()
-            .graph();
-        testASP(new MSBFSAllShortestPaths(graph, ConcurrencyConfig.DEFAULT_CONCURRENCY, DefaultPool.INSTANCE));
-    }
 
-    private void testASP(final MSBFSASPAlgorithm hugeMSBFSAllShortestPaths) {
-        final ResultConsumer mock = mock(ResultConsumer.class);
+        var hugeMSBFSAllShortestPaths = new MSBFSAllShortestPaths(
+            graph,
+            ConcurrencyConfig.DEFAULT_CONCURRENCY,
+            DefaultPool.INSTANCE
+        );
+
+        TriConsumer<Long, Long, Double> mock = mock(TriConsumer.class);
+
         hugeMSBFSAllShortestPaths
                 .compute()
                 .forEach(r -> {
-                    if (r.sourceNodeId > r.targetNodeId) {
-                        fail("should not happen");
-                    } else if (r.sourceNodeId == r.targetNodeId) {
-                        fail("should not happen");
-                    }
-                    mock.test(r.sourceNodeId, r.targetNodeId, r.distance);
+                    assertThat(r.sourceNodeId).isLessThan(r.targetNodeId);
+                    mock.accept(r.sourceNodeId, r.targetNodeId, r.distance);
                 });
 
-        verify(mock, times(35)).test(anyLong(), anyLong(), anyDouble());
-        verify(mock, times(1)).test(0, 9, 5.0);
+        verify(mock, times(35)).accept(anyLong(), anyLong(), anyDouble());
+
+        long a0 = idFunction.of("a0");
+        long a9 = idFunction.of("a9");
+
+        verify(mock, times(1)).accept(a0, a9, 5.0);
     }
 
-    interface ResultConsumer {
-        void test(long source, long target, double distance);
-    }
 }
