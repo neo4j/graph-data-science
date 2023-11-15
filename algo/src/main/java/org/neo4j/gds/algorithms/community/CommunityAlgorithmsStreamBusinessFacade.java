@@ -20,6 +20,7 @@
 package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
@@ -61,19 +62,14 @@ public class CommunityAlgorithmsStreamBusinessFacade {
     }
 
     public StreamComputationResult<DisjointSetStruct> wcc(
+        RequestScopedDependencies requestScopedDependencies,
         String graphName,
-        WccBaseConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        WccBaseConfig config
     ) {
-
         var result = this.communityAlgorithmsFacade.wcc(
+            requestScopedDependencies,
             graphName,
-            config,
-            user,
-            databaseId,
-            terminationFlag
+            config
         );
 
         return createStreamComputationResult(result);

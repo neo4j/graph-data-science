@@ -23,6 +23,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -110,11 +111,9 @@ class CommunityAlgorithmsStreamBusinessFacadeTest {
 
             // when
             var wccComputationResult = algorithmsBusinessFacade.wcc(
+                RequestScopedDependencies.builder().with(TerminationFlag.RUNNING_TRUE).build(),
                 "meh",
-                config,
-                null,
-                null,
-                TerminationFlag.RUNNING_TRUE
+                config
             );
 
             //then
@@ -149,7 +148,9 @@ class CommunityAlgorithmsStreamBusinessFacadeTest {
             );
 
             // when
-            var wccComputationResult = algorithmsBusinessFacade.wcc("meh", mock(WccBaseConfig.class), null, null, null);
+            var wccComputationResult = algorithmsBusinessFacade.wcc(
+                RequestScopedDependencies.builder().build(), "meh", mock(WccBaseConfig.class)
+            );
 
             //then
             assertThat(wccComputationResult.result()).isEmpty();

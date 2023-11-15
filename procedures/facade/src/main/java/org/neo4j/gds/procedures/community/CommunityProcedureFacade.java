@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.community;
 
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStatsBusinessFacade;
@@ -142,9 +143,25 @@ public class CommunityProcedureFacade {
     // services
     private final ConfigurationParser configurationParser;
     private final AlgorithmMetaDataSetter algorithmMetaDataSetter;
+    private final RequestScopedDependencies requestScopedDependencies;
+
+    /**
+     * @deprecated Strangle.
+     */
+    @Deprecated
     private final User user;
+
+    /**
+     * @deprecated Strangle.
+     */
+    @Deprecated
     private final DatabaseId databaseId;
     private final ProcedureReturnColumns procedureReturnColumns;
+
+    /**
+     * @deprecated Strangle.
+     */
+    @Deprecated
     private final TerminationFlag terminationFlag;
 
     // business logic
@@ -154,14 +171,11 @@ public class CommunityProcedureFacade {
     private final CommunityAlgorithmsStreamBusinessFacade streamBusinessFacade;
     private final CommunityAlgorithmsWriteBusinessFacade writeBusinessFacade;
 
-
     public CommunityProcedureFacade(
         ConfigurationParser configurationParser,
         AlgorithmMetaDataSetter algorithmMetaDataSetter,
-        User user,
-        DatabaseId databaseId,
+        RequestScopedDependencies requestScopedDependencies,
         ProcedureReturnColumns procedureReturnColumns,
-        TerminationFlag terminationFlag,
         CommunityAlgorithmsEstimateBusinessFacade estimateBusinessFacade,
         CommunityAlgorithmsMutateBusinessFacade mutateBusinessFacade,
         CommunityAlgorithmsStatsBusinessFacade statsBusinessFacade,
@@ -170,15 +184,17 @@ public class CommunityProcedureFacade {
     ) {
         this.configurationParser = configurationParser;
         this.algorithmMetaDataSetter = algorithmMetaDataSetter;
-        this.databaseId = databaseId;
         this.procedureReturnColumns = procedureReturnColumns;
-        this.user = user;
-        this.terminationFlag = terminationFlag;
         this.estimateBusinessFacade = estimateBusinessFacade;
         this.mutateBusinessFacade = mutateBusinessFacade;
         this.statsBusinessFacade = statsBusinessFacade;
         this.streamBusinessFacade = streamBusinessFacade;
         this.writeBusinessFacade = writeBusinessFacade;
+        this.requestScopedDependencies = requestScopedDependencies;
+
+        this.databaseId = requestScopedDependencies.getDatabaseId();
+        this.terminationFlag = requestScopedDependencies.getTerminationFlag();
+        this.user = requestScopedDependencies.getUser();
     }
 
     // WCC
@@ -190,11 +206,9 @@ public class CommunityProcedureFacade {
         var streamConfig = createStreamConfig(configuration, WccStreamConfig::of);
 
         var computationResult = streamBusinessFacade.wcc(
+            requestScopedDependencies,
             graphName,
-            streamConfig,
-            user,
-            databaseId,
-            terminationFlag
+            streamConfig
         );
 
         return WccComputationResultTransformer.toStreamResult(computationResult, streamConfig);
@@ -207,11 +221,9 @@ public class CommunityProcedureFacade {
         var config = createConfig(configuration, WccMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.wcc(
+            requestScopedDependencies,
             graphName,
             config,
-            user,
-            databaseId,
-            terminationFlag,
             ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns)
         );
 
@@ -225,11 +237,9 @@ public class CommunityProcedureFacade {
         var config = createConfig(configuration, WccStatsConfig::of);
 
         var computationResult = statsBusinessFacade.wcc(
+            requestScopedDependencies,
             graphName,
             config,
-            user,
-            databaseId,
-            terminationFlag,
             ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns)
         );
 
@@ -243,10 +253,9 @@ public class CommunityProcedureFacade {
         var writeConfig = createConfig(configuration, WccWriteConfig::of);
 
         var computationResult = writeBusinessFacade.wcc(
+            requestScopedDependencies,
             graphName,
             writeConfig,
-            user,
-            databaseId,
             terminationFlag,
             ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns)
         );

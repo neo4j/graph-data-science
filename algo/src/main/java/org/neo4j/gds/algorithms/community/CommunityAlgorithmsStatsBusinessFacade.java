@@ -20,6 +20,7 @@
 package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.algorithms.community.specificfields.CommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.K1ColoringSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.KCoreSpecificFields;
@@ -68,16 +69,14 @@ public class CommunityAlgorithmsStatsBusinessFacade {
     }
 
     public StatsResult<StandardCommunityStatisticsSpecificFields> wcc(
+        RequestScopedDependencies requestScopedDependencies,
         String graphName,
         WccStatsConfig configuration,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag,
         StatisticsComputationInstructions statisticsComputationInstructions
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.wcc(graphName, configuration, user, databaseId, terminationFlag)
+            () -> communityAlgorithmsFacade.wcc(requestScopedDependencies, graphName, configuration)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 

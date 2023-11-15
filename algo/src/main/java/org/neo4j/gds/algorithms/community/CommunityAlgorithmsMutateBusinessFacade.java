@@ -21,6 +21,7 @@ package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.algorithms.community.specificfields.ApproxMaxKCutSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.CommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.K1ColoringSpecificFields;
@@ -80,16 +81,14 @@ public class CommunityAlgorithmsMutateBusinessFacade {
     }
 
     public NodePropertyMutateResult<StandardCommunityStatisticsSpecificFields> wcc(
+        RequestScopedDependencies requestScopedDependencies,
         String graphName,
         WccMutateConfig configuration,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag,
         StatisticsComputationInstructions statisticsComputationInstructions
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.wcc(graphName, configuration, user, databaseId, terminationFlag)
+            () -> communityAlgorithmsFacade.wcc(requestScopedDependencies, graphName, configuration)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 

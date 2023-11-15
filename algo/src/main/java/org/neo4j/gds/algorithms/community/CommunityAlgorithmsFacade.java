@@ -20,6 +20,7 @@
 package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
@@ -80,20 +81,16 @@ public class CommunityAlgorithmsFacade {
     }
 
     AlgorithmComputationResult<DisjointSetStruct> wcc(
+        RequestScopedDependencies requestScopedDependencies,
         String graphName,
-        WccBaseConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        WccBaseConfig config
     ) {
         return algorithmRunner.run(
+            requestScopedDependencies,
             graphName,
             config,
             config.relationshipWeightProperty(),
-            new WccAlgorithmFactory<>(),
-            user,
-            databaseId,
-            terminationFlag
+            new WccAlgorithmFactory<>()
         );
     }
 

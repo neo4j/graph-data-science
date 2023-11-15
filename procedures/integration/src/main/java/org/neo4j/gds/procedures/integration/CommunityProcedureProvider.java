@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.gds.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
@@ -173,14 +174,18 @@ public class CommunityProcedureProvider {
             DefaultsConfiguration.Instance,
             LimitsConfiguration.Instance
         );
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(databaseId)
+            .with(terminationFlag)
+            .with(user)
+            .build();
+
         // procedure facade
         return new CommunityProcedureFacade(
             configurationParser,
             algorithmMetaDataSetter,
-            user,
-            databaseId,
+            requestScopedDependencies,
             returnColumns,
-            terminationFlag,
             estimateBusinessFacade,
             mutateBusinessFacade,
             statsBusinessFacade,

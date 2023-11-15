@@ -33,6 +33,7 @@ import org.neo4j.gds.InvocationCountingTaskStore;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
@@ -213,10 +214,12 @@ class K1ColoringStreamProcTest extends BaseProcTest {
                 new CommunityProcedureFacade(
                     ConfigurationParser.EMPTY,
                     mock(AlgorithmMetaDataSetter.class),
-                    new User(getUsername(), false),
-                    DatabaseId.of(db.databaseName()),
+                    RequestScopedDependencies.builder()
+                        .with(DatabaseId.of(db.databaseName()))
+                        .with(TerminationFlag.RUNNING_TRUE)
+                        .with(new User(getUsername(), false))
+                        .build(),
                     ProcedureReturnColumns.EMPTY,
-                    TerminationFlag.RUNNING_TRUE,
                     null,
                     null,
                     null,

@@ -43,6 +43,7 @@ import org.neo4j.gds.TestNativeGraphLoader;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
@@ -337,10 +338,12 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                 new CommunityProcedureFacade(
                     ConfigurationParser.EMPTY,
                     null,
-                    new User(getUsername(), false),
-                    DatabaseId.of(db.databaseName()),
+                    RequestScopedDependencies.builder()
+                        .with(DatabaseId.of(db.databaseName()))
+                        .with(TerminationFlag.RUNNING_TRUE)
+                        .with(new User(getUsername(), false))
+                        .build(),
                     ProcedureReturnColumns.EMPTY,
-                    TerminationFlag.RUNNING_TRUE,
                     null,
                     algorithmsMutateBusinessFacade,
                     null,
@@ -463,10 +466,12 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                 new CommunityProcedureFacade(
                     ConfigurationParser.EMPTY,
                     null,
-                    new User(getUsername(), false),
-                    DatabaseId.of(db.databaseName()),
+                    RequestScopedDependencies.builder()
+                        .with(DatabaseId.of(db.databaseName()))
+                        .with(TerminationFlag.RUNNING_TRUE)
+                        .with(new User(getUsername(), false))
+                        .build(),
                     ProcedureReturnColumns.EMPTY,
-                    TerminationFlag.RUNNING_TRUE,
                     null,
                     algorithmsMutateBusinessFacade,
                     null,
@@ -544,10 +549,11 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                 new CommunityProcedureFacade(
                     ConfigurationParser.EMPTY,
                     null,
-                    new User(getUsername(), false),
-                    DatabaseId.of(db.databaseName()),
+                    RequestScopedDependencies.builder()
+                        .with(DatabaseId.of(db.databaseName()))
+                        .with(new User(getUsername(), false))
+                        .build(),
                     ProcedureReturnColumns.EMPTY,
-                    null,
                     null,
                     algorithmsMutateBusinessFacade,
                     null,
@@ -628,10 +634,12 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                 new CommunityProcedureFacade(
                     ConfigurationParser.EMPTY,
                     null,
-                    new User(getUsername(), false),
-                    DatabaseId.of(db.databaseName()),
+                    RequestScopedDependencies.builder()
+                        .with(DatabaseId.of(db.databaseName()))
+                        .with(TerminationFlag.RUNNING_TRUE)
+                        .with(new User(getUsername(), false))
+                        .build(),
                     ProcedureReturnColumns.EMPTY,
-                    TerminationFlag.RUNNING_TRUE,
                     null,
                     algorithmsMutateBusinessFacade,
                     null,

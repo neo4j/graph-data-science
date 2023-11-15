@@ -36,6 +36,7 @@ import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStatsBusinessFacade;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
@@ -289,10 +290,11 @@ class WccStatsProcTest extends BaseProcTest {
             new CommunityProcedureFacade(
                 ConfigurationParser.EMPTY,
                 null,
-                new User(getUsername(), false),
-                DatabaseId.of(db.databaseName()),
+                RequestScopedDependencies.builder()
+                    .with(DatabaseId.of(db.databaseName()))
+                    .with(new User(getUsername(), false))
+                    .build(),
                 ProcedureReturnColumns.EMPTY,
-                null,
                 null,
                 null,
                 statsBusinessFacade,
