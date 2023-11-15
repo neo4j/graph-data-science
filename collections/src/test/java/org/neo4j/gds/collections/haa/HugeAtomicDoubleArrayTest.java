@@ -491,7 +491,7 @@ final class HugeAtomicDoubleArrayTest {
         }
     }
 
-    private static class PassThroughPageCreator implements PageCreator.DoublePageCreator {
+    private static final class PassThroughPageCreator implements PageCreator.DoublePageCreator {
 
         static PassThroughPageCreator INSTANCE = new PassThroughPageCreator();
 

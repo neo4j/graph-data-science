@@ -22,7 +22,7 @@ package org.neo4j.gds.api;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-public class GraphName {
+public final class GraphName {
     private final String value;
 
     private GraphName(String value) {

@@ -27,7 +27,7 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 
 import java.util.SplittableRandom;
 
-public class HashGNNCompanion {
+public final class HashGNNCompanion {
     private HashGNNCompanion() {}
 
     static void hashArgMin(

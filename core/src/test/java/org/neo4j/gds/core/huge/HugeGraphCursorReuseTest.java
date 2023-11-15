@@ -71,8 +71,8 @@ class HugeGraphCursorReuseTest {
     }
 
 
-    private static class TestAdjacencyList implements AdjacencyList {
-        private LongAdder cursorInstanceCounter;
+    private static final class TestAdjacencyList implements AdjacencyList {
+        private final LongAdder cursorInstanceCounter;
 
         private TestAdjacencyList() {this.cursorInstanceCounter = new LongAdder();}
 

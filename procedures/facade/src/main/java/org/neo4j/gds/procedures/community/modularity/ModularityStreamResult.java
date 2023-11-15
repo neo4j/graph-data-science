@@ -21,7 +21,7 @@ package org.neo4j.gds.procedures.community.modularity;
 
 import org.neo4j.gds.modularity.CommunityModularity;
 
-public class ModularityStreamResult {
+public final class ModularityStreamResult {
 
     public final long communityId;
     public final double modularity;

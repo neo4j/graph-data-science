@@ -33,7 +33,7 @@ import java.util.function.Function;
 import java.util.function.LongFunction;
 import java.util.stream.Collectors;
 
-public class NodeStore {
+public final class NodeStore {
 
     private static final String[] EMPTY_LABELS = new String[0];
 

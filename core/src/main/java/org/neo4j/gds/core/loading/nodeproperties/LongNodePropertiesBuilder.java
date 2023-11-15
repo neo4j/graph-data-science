@@ -36,7 +36,7 @@ import java.util.OptionalLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class LongNodePropertiesBuilder implements InnerNodePropertiesBuilder {
+public final class LongNodePropertiesBuilder implements InnerNodePropertiesBuilder {
 
     // Value is changed with a VarHandle and needs to be non final for that
     // even though our favourite IDE/OS doesn't pick that up

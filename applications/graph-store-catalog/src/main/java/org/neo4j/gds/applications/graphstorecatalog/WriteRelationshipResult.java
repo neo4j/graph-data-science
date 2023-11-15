@@ -21,7 +21,7 @@ package org.neo4j.gds.applications.graphstorecatalog;
 
 import java.util.Optional;
 
-public class WriteRelationshipResult {
+public final class WriteRelationshipResult {
     public final long writeMillis;
     public final String graphName;
     public final String relationshipType;
