@@ -19,18 +19,15 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.extension.GdlExtension;
+import org.neo4j.gds.extension.GdlGraph;
+import org.neo4j.gds.extension.Inject;
 
 import java.util.Collections;
 import java.util.List;
@@ -38,9 +35,10 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class IntersectingTriangleCountFilteredGraphTest extends BaseTest {
+@GdlExtension
+class IntersectingTriangleCountFilteredGraphTest {
 
-    @Neo4jGraph
+    @GdlGraph(orientation = Orientation.UNDIRECTED)
     static final String DB_CYPHER = "CREATE " +
                                     "  (a1:A)" +
                                     ", (a2:A)" +
@@ -57,24 +55,18 @@ class IntersectingTriangleCountFilteredGraphTest extends BaseTest {
                                     ", (b2)-[:R2]->(b3)" +
                                     ", (b1)-[:R1]->(b3)";
 
+    @Inject
     GraphStore graphStore;
-
-    @BeforeEach
-    void setup() {
-        this.graphStore = new StoreLoaderBuilder()
-            .databaseService(db)
-            .addAllNodeLabels(List.of("A", "B"))
-            .addRelationshipProjection(RelationshipProjection.of("R1", Orientation.UNDIRECTED, Aggregation.NONE))
-            .addRelationshipProjection(RelationshipProjection.of("R2", Orientation.UNDIRECTED, Aggregation.NONE))
-            .build()
-            .graphStore();
-    }
+    
 
     @Test
     void testUnionGraphWithNodeFilter() {
         var graph = graphStore.getGraph(
             Collections.singletonList(NodeLabel.of("B")),
-            List.of(RelationshipType.of("R1"), RelationshipType.of("R2")),
+            List.of(
+                RelationshipType.of("R1"),
+                RelationshipType.of("R2")
+            ),
             Optional.empty()
         );
 
