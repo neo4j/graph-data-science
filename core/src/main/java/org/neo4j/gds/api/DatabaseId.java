@@ -25,7 +25,8 @@ import static java.util.Objects.requireNonNull;
 import static org.neo4j.gds.utils.StringFormatting.toLowerCaseWithLocale;
 
 public final class DatabaseId {
-
+    // defaults to something that you will never find in the wild
+    public static final DatabaseId DEFAULT = DatabaseId.of("non-existent/" + UUID.randomUUID());
     public static final DatabaseId EMPTY = new DatabaseId("");
 
     public static DatabaseId of(String databaseName) {

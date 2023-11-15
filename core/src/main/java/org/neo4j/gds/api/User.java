@@ -23,8 +23,12 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public class User {
+    // defaults to something that you will never find in the wild
+    public static final User DEFAULT = new User("anonymous/" + UUID.randomUUID(), false);
+
     private final String username;
     private final boolean isAdmin;
 

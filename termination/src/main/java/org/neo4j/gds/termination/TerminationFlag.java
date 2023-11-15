@@ -26,6 +26,8 @@ import java.util.function.Supplier;
 public interface TerminationFlag {
 
     TerminationFlag RUNNING_TRUE = () -> true;
+    TerminationFlag DEFAULT = () -> true;
+    TerminationFlag STOP_RUNNING = () -> false;
 
     int RUN_CHECK_NODE_COUNT = 10_000;
 

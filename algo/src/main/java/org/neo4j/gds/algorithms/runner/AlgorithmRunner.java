@@ -25,6 +25,7 @@ import org.neo4j.gds.PreconditionsProvider;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.AlgorithmMemoryEstimation;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
@@ -63,6 +64,10 @@ public final class AlgorithmRunner {
         this.log = log;
     }
 
+    /**
+     * @deprecated Strangle this one, use the other one
+     */
+    @Deprecated
     public <A extends Algorithm<R>, R, C extends AlgoBaseConfig> AlgorithmComputationResult<R> run(
         String graphName,
         C config,
@@ -72,6 +77,28 @@ public final class AlgorithmRunner {
         DatabaseId databaseId,
         TerminationFlag terminationFlag
     ) {
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(databaseId)
+            .with(terminationFlag)
+            .with(user)
+            .build();
+
+        return run(
+            requestScopedDependencies,
+            graphName,
+            config,
+            relationshipProperty,
+            algorithmFactory
+        );
+    }
+
+    public <A extends Algorithm<R>, R, C extends AlgoBaseConfig> AlgorithmComputationResult<R> run(
+        RequestScopedDependencies requestScopedDependencies,
+        String graphName,
+        C config,
+        Optional<String> relationshipProperty,
+        GraphAlgorithmFactory<A, C> algorithmFactory
+    ) {
         // TODO: Is this the best place to check for preconditions???
         PreconditionsProvider.preconditions().check();
 
@@ -80,8 +107,8 @@ public final class AlgorithmRunner {
             GraphName.parse(graphName),
             config,
             relationshipProperty,
-            user,
-            databaseId
+            requestScopedDependencies.getUser(),
+            requestScopedDependencies.getDatabaseId()
         );
 
         var graph = graphWithGraphStore.getLeft();
@@ -115,7 +142,7 @@ public final class AlgorithmRunner {
         );
 
         // this really belongs in the factory build thing
-        algorithm.setTerminationFlag(terminationFlag);
+        algorithm.setTerminationFlag(requestScopedDependencies.getTerminationFlag());
 
         // run the algorithm
         try {
