@@ -75,6 +75,6 @@ public class FilteredKnnFactory<CONFIG extends FilteredKnnBaseConfig> extends Gr
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return KnnFactory.knnTaskTree(graph, config);
+        return KnnFactory.knnTaskTree(graph.nodeCount(), config.maxIterations());
     }
 }

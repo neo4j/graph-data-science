@@ -44,6 +44,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class Knn extends Algorithm<KnnResult> {
     private final Graph graph;
     private final KnnBaseConfig config;
+    private final int concurrency;
     private final NeighborFilterFactory neighborFilterFactory;
     private final ExecutorService executorService;
     private final SplittableRandom splittableRandom;
@@ -123,6 +124,7 @@ public class Knn extends Algorithm<KnnResult> {
         super(progressTracker);
         this.graph = graph;
         this.config = config;
+        this.concurrency = config.concurrency();
         this.similarityFunction = similarityFunction;
         this.neighborFilterFactory = neighborFilterFactory;
         this.executorService = executorService;
@@ -171,7 +173,7 @@ public class Knn extends Algorithm<KnnResult> {
             if (config.similarityCutoff() > 0) {
                 var similarityCutoff = config.similarityCutoff();
                 var neighborFilterTasks = PartitionUtils.rangePartition(
-                    config.concurrency(),
+                    concurrency,
                     neighbors.size(),
                     partition -> (Runnable) () -> partition.consume(
                         nodeId -> neighbors.get(nodeId).filterHighSimilarityResults(similarityCutoff)
@@ -179,7 +181,7 @@ public class Knn extends Algorithm<KnnResult> {
                     Optional.of(config.minBatchSize())
                 );
                 RunWithConcurrency.builder()
-                    .concurrency(config.concurrency())
+                    .concurrency(concurrency)
                     .tasks(neighborFilterTasks)
                     .terminationFlag(terminationFlag)
                     .executor(this.executorService)
@@ -212,7 +214,7 @@ public class Knn extends Algorithm<KnnResult> {
         var neighbors = HugeObjectArray.newArray(NeighborList.class, graph.nodeCount());
 
         var randomNeighborGenerators = PartitionUtils.rangePartition(
-            config.concurrency(),
+            concurrency,
             graph.nodeCount(),
             partition -> {
                 var localRandom = splittableRandom.split();
@@ -232,7 +234,7 @@ public class Knn extends Algorithm<KnnResult> {
         );
 
         RunWithConcurrency.builder()
-            .concurrency(config.concurrency())
+            .concurrency(concurrency)
             .tasks(randomNeighborGenerators)
             .terminationFlag(terminationFlag)
             .executor(this.executorService)
@@ -270,7 +272,7 @@ public class Knn extends Algorithm<KnnResult> {
             return NeighborList.NOT_INSERTED;
         }
 
-        var concurrency = this.config.concurrency();
+        var minBatchSize = this.config.minBatchSize();
 
         var sampledK = this.config.sampledK(nodeCount);
 
@@ -299,7 +301,8 @@ public class Knn extends Algorithm<KnnResult> {
             allNewNeighbors,
             reverseOldNeighbors,
             reverseNewNeighbors,
-            config,
+            concurrency,
+            minBatchSize,
             progressTracker
         );
         progressTracker.endSubTask();
@@ -322,7 +325,7 @@ public class Knn extends Algorithm<KnnResult> {
                 partition,
                 progressTracker
             ),
-            Optional.of(config.minBatchSize())
+            Optional.of(minBatchSize)
         );
 
         progressTracker.beginSubTask();
@@ -344,11 +347,12 @@ public class Knn extends Algorithm<KnnResult> {
         HugeObjectArray<LongArrayList> allNewNeighbors,
         HugeObjectArray<LongArrayList> reverseOldNeighbors,
         HugeObjectArray<LongArrayList> reverseNewNeighbors,
-        KnnBaseConfig config,
+        int concurrency,
+        int minBatchSize,
         ProgressTracker progressTracker
     ) {
         long nodeCount = allNewNeighbors.size();
-        long logBatchSize = ParallelUtil.adjustedBatchSize(nodeCount, config.concurrency(), config.minBatchSize());
+        long logBatchSize = ParallelUtil.adjustedBatchSize(nodeCount, concurrency, minBatchSize);
 
         // TODO: cursors
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {
