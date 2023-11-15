@@ -25,7 +25,7 @@ import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 
 import java.util.Optional;
 
-public class RandomWalkCompanion {
+public final class RandomWalkCompanion {
     public static final double TOTAL_WEIGHT_MISSING = -1.0;
 
     public static Optional<HugeAtomicDoubleArray> initializeTotalWeights(RandomWalkWithRestartsConfig config,long nodeCount) {
@@ -40,4 +40,5 @@ public class RandomWalkCompanion {
         return Optional.empty();
     }
 
+    private RandomWalkCompanion() {}
 }

@@ -26,7 +26,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-class LeidenUtils {
+final class LeidenUtils {
 
     static HugeLongArray createSingleNodeCommunities(long nodeCount) {
         var array = HugeLongArray.newArray(nodeCount);
@@ -34,7 +34,7 @@ class LeidenUtils {
         return array;
     }
 
-    static HugeLongArray createSeedCommunities(long nodeCount, NodePropertyValues seedValues) {
+    private static HugeLongArray createSeedCommunities(long nodeCount, NodePropertyValues seedValues) {
         var array = HugeLongArray.newArray(nodeCount);
         long longMaxId = seedValues.getMaxLongPropertyValue().getAsLong();
         if (longMaxId < 0) {
@@ -58,4 +58,6 @@ class LeidenUtils {
             seedValues
         );
     }
+
+    private LeidenUtils() {}
 }

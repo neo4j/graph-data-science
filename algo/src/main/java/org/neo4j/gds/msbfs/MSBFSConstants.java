@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.msbfs;
 
-public class MSBFSConstants {
+public final class MSBFSConstants {
     // the number of sources that can be traversed simultaneously by a single thread
     public static final int OMEGA = 64;
+
+    private MSBFSConstants() {}
 }

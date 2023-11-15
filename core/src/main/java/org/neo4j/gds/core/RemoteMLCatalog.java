@@ -25,10 +25,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class RemoteMLCatalog {
+public final class RemoteMLCatalog {
 
     @ValueClass
     public interface ModelMetricIdentifier {
+
         String databaseName();
         String userName();
         String modelName();
@@ -37,4 +38,5 @@ public class RemoteMLCatalog {
     public static final Map<ModelMetricIdentifier, Map<String, Object>> modelMetrics = new HashMap<>();
     public static final Map<String, List<String>> logs = new HashMap<>();
 
+    private RemoteMLCatalog() {}
 }

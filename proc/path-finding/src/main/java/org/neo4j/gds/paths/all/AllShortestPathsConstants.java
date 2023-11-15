@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.paths.all;
 
-public class AllShortestPathsConstants {
+public final class AllShortestPathsConstants {
     public static final String DESCRIPTION = "The All Pairs Shortest Path (APSP) calculates the shortest (weighted) path between all pairs of nodes.";
+
+    private AllShortestPathsConstants() {}
 }

@@ -21,10 +21,12 @@ package org.neo4j.gds.similarity.knn.metrics;
 
 import org.neo4j.gds.core.utils.Intersections;
 
-public class Overlap {
+public final class Overlap {
     public static double metric(long[] left, long[] right) {
         long intersection = Intersections.intersection3(left, right);
         long denominator = Math.min(left.length, right.length);
         return denominator == 0 ? 0 : intersection / (double) denominator;
     }
+
+    private Overlap() {}
 }

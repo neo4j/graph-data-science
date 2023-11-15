@@ -24,7 +24,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.ml.kge.ScoreFunction;
 
-public class LinkScorerFactory {
+public final class LinkScorerFactory {
 
     public static LinkScorer create(
         ScoreFunction scoreFunction,
@@ -52,4 +52,6 @@ public class LinkScorerFactory {
                 throw new IllegalArgumentException("Unknown score function:" + scoreFunction);
         }
     }
+
+    private LinkScorerFactory() {}
 }

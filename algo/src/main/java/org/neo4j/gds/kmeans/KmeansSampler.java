@@ -90,8 +90,8 @@ public abstract class KmeansSampler {
     public enum SamplerType {
         UNIFORM("UNIFORM", "UNIFORM"), KMEANSPP("KMEANS++", "KMEANSPP");
 
-        private String samplerName;
-        private String samplerType;
+        private final String samplerName;
+        private final String samplerType;
 
         SamplerType(String samplerName, String samplerType) {
             this.samplerName = samplerName;
