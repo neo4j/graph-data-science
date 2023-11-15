@@ -23,16 +23,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipConsumer;
-import org.neo4j.gds.api.RelationshipCursor;
-import org.neo4j.gds.api.RelationshipIterator;
-import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -44,14 +38,17 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.LongUnaryOperator;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 final class MultiSourceBFSAccessMethodsTest {
@@ -238,39 +235,36 @@ final class MultiSourceBFSAccessMethodsTest {
 
         Graph grid(long n, long m) {
 
-            var nodesBuilder = GraphFactory.initNodesBuilder()
-                .maxOriginalId(n * m)
-                .concurrency(1)
-                .build();
+            var graph = mock(Graph.class);
 
-            for (var nodeId = 0; nodeId < n * m; ++nodeId) {
-                nodesBuilder.addNode(nodeId);
-            }
-
-            var idMap = nodesBuilder.build().idMap();
-
-            RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
-                .nodes(idMap)
-                .relationshipType(RelationshipType.of("FOO"))
-                .orientation(Orientation.UNDIRECTED)
-                .executorService(DefaultPool.INSTANCE)
-                .build();
-
-            for (long i = 0; i < n; ++i) {
-                for (long j = 0; j < (m - 1); ++j) {
-                    relationshipsBuilder.add(i * n + j, i * n + (j + 1));
+            doAnswer(invocation -> {
+                var nodeId = (Long) invocation.getArgument(0);
+                var relationshipConsumer = (RelationshipConsumer) invocation.getArgument(1);
+                long i = nodeId / m;
+                long j = nodeId % m;
+                if (j - 1 >= 0) {
+                    relationshipConsumer.accept(nodeId, nodeId - 1);
                 }
-            }
-
-            for (long j = 0; j < m; ++j) {
-                for (long i = 0; i < (n - 1); ++i) {
-                    relationshipsBuilder.add(i + j * m, i + (j + 1) * m);
+                if (j + 1 < m) {
+                    relationshipConsumer.accept(nodeId, nodeId + 1);
                 }
-            }
+                if (i - 1 >= 0) {
+                    relationshipConsumer.accept(nodeId, nodeId - m);
+                }
+                if (i + 1 < n) {
+                    relationshipConsumer.accept(nodeId, nodeId + m);
+                }
+                return null;
+            }).when(graph).forEachRelationship(
+                anyLong(),
+                any(RelationshipConsumer.class)
+            );
 
+            doAnswer(invocation -> graph).when(graph).concurrentCopy();
 
-            var relationships = relationshipsBuilder.build();
-            return GraphFactory.create(idMap, relationships);
+            when(graph.nodeCount()).thenReturn(n * m);
+
+            return graph;
         }
 
 
@@ -302,32 +296,27 @@ final class MultiSourceBFSAccessMethodsTest {
 
         Graph completeGraph(long nodeCount) {
 
-            var nodesBuilder = GraphFactory.initNodesBuilder()
-                .maxOriginalId(nodeCount)
-                .concurrency(1)
-                .build();
+            var graph = mock(Graph.class);
 
-            for (var nodeId = 0; nodeId < nodeCount; ++nodeId) {
-                nodesBuilder.addNode(nodeId);
-            }
-
-            var idMap = nodesBuilder.build().idMap();
-
-            RelationshipsBuilder relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
-                .nodes(idMap)
-                .relationshipType(RelationshipType.of("FOO"))
-                .orientation(Orientation.UNDIRECTED)
-                .executorService(DefaultPool.INSTANCE)
-                .build();
-
-            for (long u = 0; u < nodeCount; ++u) {
-                for (long v = u + 1; v < nodeCount; ++v) {
-                    relationshipsBuilder.add(u, v);
+            doAnswer(invocation -> {
+                var nodeId = (Long) invocation.getArgument(0);
+                var relationshipConsumer = (RelationshipConsumer) invocation.getArgument(1);
+                for (long j = 0; j < nodeCount; ++j) {
+                    if (nodeId != j) {
+                        relationshipConsumer.accept(nodeId, j);
+                    }
                 }
-            }
+                return null;
+            }).when(graph).forEachRelationship(
+                anyLong(),
+                any(RelationshipConsumer.class)
+            );
 
-            var relationships = relationshipsBuilder.build();
-            return GraphFactory.create(idMap, relationships);
+            doAnswer(invocation -> graph).when(graph).concurrentCopy();
+
+            when(graph.nodeCount()).thenReturn(nodeCount);
+
+            return graph;
         }
 
         @Test
@@ -400,75 +389,32 @@ final class MultiSourceBFSAccessMethodsTest {
             msbfs.run(1, null);
 
         }
-    }
 
-    @Nested
-    class LargeTest {
+
         @Test
         void testLarger() {
             final int nodeCount = 8192;
             final int sourceCount = 1024;
 
-            RelationshipIterator iter = new RelationshipIterator() {
-                @Override
-                public void forEachRelationship(long nodeId, RelationshipConsumer consumer) {
-                    for (long i = 0; i < nodeCount; i++) {
-                        if (i != nodeId) {
-                            consumer.accept(nodeId, i);
-                        }
-                    }
-                }
-
-                @Override
-                public void forEachRelationship(
-                    long nodeId,
-                    double fallbackValue,
-                    RelationshipWithPropertyConsumer consumer
-                ) {
-                    throw new UnsupportedOperationException("forEachRelationship with properties is not implemented");
-                }
-
-                @Override
-                public void forEachInverseRelationship(long nodeId, RelationshipConsumer consumer) {
-                    throw new UnsupportedOperationException("forEachInverseRelationship is not implemented.");
-                }
-
-                @Override
-                public void forEachInverseRelationship(
-                    long nodeId,
-                    double fallbackValue,
-                    RelationshipWithPropertyConsumer consumer
-                ) {
-                    throw new UnsupportedOperationException(
-                        "forEachInverseRelationship with properties is not implemented.");
-                }
-
-                @Override
-                public boolean exists(final long sourceNodeId, final long targetNodeId) {
-                    return false;
-                }
-
-                @Override
-                public Stream<RelationshipCursor> streamRelationships(long nodeId, double fallbackValue) {
-                    throw new UnsupportedOperationException("streamRelationships is not implemented.");
-                }
-            };
-
             final long[] sources = new long[sourceCount];
             Arrays.setAll(sources, i -> i);
             final int[][] seen = new int[nodeCount][sourceCount];
+
+            BfsConsumer bfsConsumer = (nodeId, depth, sourceNodeIds) -> {
+                assertEquals(1, depth);
+                synchronized (seen) {
+                    final int[] nodeSeen = seen[(int) nodeId];
+                    while (sourceNodeIds.hasNext()) {
+                        nodeSeen[(int) sourceNodeIds.nextLong()] += 1;
+                    }
+                }
+            };
+
+            var iter = completeGraph(nodeCount);
             MultiSourceBFSAccessMethods msbfs = MultiSourceBFSAccessMethods.aggregatedNeighborProcessing(
                 nodeCount,
                 iter,
-                (nodeId, depth, sourceNodeIds) -> {
-                    assertEquals(1, depth);
-                    synchronized (seen) {
-                        final int[] nodeSeen = seen[(int) nodeId];
-                        while (sourceNodeIds.hasNext()) {
-                            nodeSeen[(int) sourceNodeIds.nextLong()] += 1;
-                        }
-                    }
-                },
+                bfsConsumer,
                 sources
             );
             msbfs.run(ConcurrencyConfig.DEFAULT_CONCURRENCY, DefaultPool.INSTANCE);
@@ -541,4 +487,5 @@ final class MultiSourceBFSAccessMethodsTest {
             return longs.toString();
         }
     }
+
 }
