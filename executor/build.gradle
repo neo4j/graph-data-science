@@ -10,7 +10,6 @@ dependencies {
     annotationProcessor group: 'org.immutables',           name: 'builder',            version: ver.'immutables'
     annotationProcessor group: 'org.immutables',           name: 'value',              version: ver.'immutables'
 
-    implementation project(':algorithm-metrics-api')
     implementation project(':annotations')
     implementation project(':algo')
     implementation project(':algo-common')
@@ -21,6 +20,7 @@ dependencies {
     implementation project(':native-projection')
     implementation project(':memory-estimation')
     implementation project(':memory-usage')
+    implementation project(':metrics-api')
     implementation project(':model-catalog-api')
     implementation project(':neo4j-api')
     implementation project(':progress-tracking')

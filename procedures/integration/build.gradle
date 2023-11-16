@@ -13,7 +13,6 @@ dependencies {
         testImplementation(group: 'org.neo4j', name: it, version: ver.'neo4j')
     }
 
-    implementation project(':algorithm-metrics-api')
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-write')
@@ -22,6 +21,7 @@ dependencies {
     implementation project(':graph-store-catalog-applications')
     implementation project(':logging')
     implementation project(':memory-estimation')
+    implementation project(':metrics-api')
     implementation project(':native-projection')
     implementation project(':neo4j-api')
     implementation project(':opengds-procedure-facade')
