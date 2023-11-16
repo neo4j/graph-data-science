@@ -65,6 +65,8 @@ public class LeidenMutateProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        facade.deprecatedProcedures().called("gds.beta.leiden.mutate");
+
         executionContext()
             .log()
             .warn("Procedure `gds.beta.leiden.mutate` has been deprecated, please use `gds.leiden.mutate`.");
@@ -80,6 +82,8 @@ public class LeidenMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
+        facade.deprecatedProcedures().called("gds.beta.leiden.mutate.estimate");
+
         executionContext()
             .log()
             .warn("Procedure `gds.beta.leiden.mutate.estimate` has been deprecated, please use `gds.leiden.mutate.estimate`.");
