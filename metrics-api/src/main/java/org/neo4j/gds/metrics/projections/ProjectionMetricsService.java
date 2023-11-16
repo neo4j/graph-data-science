@@ -17,20 +17,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.projections;
+package org.neo4j.gds.metrics.projections;
 
-public abstract class ProjectionMetric implements AutoCloseable {
+import org.neo4j.gds.metrics.ExecutionMetric;
+import org.neo4j.gds.metrics.ExecutionMetricRegistrar;
 
-    protected final String projectionMode;
+public class ProjectionMetricsService {
 
-    protected ProjectionMetric(String projectionMode) {
-        this.projectionMode = projectionMode;
+    private final ExecutionMetricRegistrar metricRegistrar;
+
+    public ProjectionMetricsService(ExecutionMetricRegistrar metricRegistrar) {
+        this.metricRegistrar = metricRegistrar;
     }
 
-    public abstract void start();
+    public ExecutionMetric createNative() {
+        return metricRegistrar.create("native");
+    }
 
-    public abstract void failed();
+    public ExecutionMetric createCypher() {
+        return metricRegistrar.create("cypher");
+    }
 
-    @Override
-    public abstract void close();
+    public ExecutionMetric createCypherV2() {
+        return metricRegistrar.create("cypherV2");
+    }
+
 }

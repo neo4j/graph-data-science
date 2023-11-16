@@ -17,12 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.projections;
+package org.neo4j.gds.metrics;
 
-public final class PassthroughProjectionMetric extends ProjectionMetric {
+public final class PassthroughExecutionMetric extends ExecutionMetric {
 
-    PassthroughProjectionMetric(String projectionMode) {
-        super(projectionMode);
+    PassthroughExecutionMetric(String operation) {
+        super(operation);
     }
 
     @Override

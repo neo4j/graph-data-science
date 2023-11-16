@@ -17,20 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms.metrics;
+package org.neo4j.gds.metrics;
 
-public final class PassthroughAlgorithmMetric extends AlgorithmMetric {
+/**
+ * No-op metrics registrar; to be used when metrics are not enabled in Neo4j.
+ */
+public class PassthroughExecutionMetricRegistrar implements ExecutionMetricRegistrar {
 
-    PassthroughAlgorithmMetric(String algorithm) {
-        super(algorithm);
+    @Override
+    public ExecutionMetric create(String operation) {
+        return new PassthroughExecutionMetric(operation);
     }
-
-    @Override
-    public void start() {}
-
-    @Override
-    public void failed() {}
-
-    @Override
-    public void close() {}
 }

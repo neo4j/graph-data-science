@@ -21,10 +21,10 @@ package org.neo4j.gds.algorithms.community;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.algorithms.metrics.AlgorithmMetric;
-import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.metrics.ExecutionMetric;
+import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 
 import static org.assertj.core.api.Assertions.assertThatException;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -39,7 +39,7 @@ class BasicAlgorithmRunnerTest {
 
     @Test
     void shouldRegisterAlgorithmMetricCountForSuccess() {
-        var algorithmMetricMock = mock(AlgorithmMetric.class);
+        var algorithmMetricMock = mock(ExecutionMetric.class);
         var algorithmMetricsServiceMock = mock(AlgorithmMetricsService.class);
         when(algorithmMetricsServiceMock.create(anyString())).thenReturn(algorithmMetricMock);
 
@@ -71,7 +71,7 @@ class BasicAlgorithmRunnerTest {
 
     @Test
     void shouldRegisterAlgorithmMetricCountForFailure() {
-        var algorithmMetricMock = mock(AlgorithmMetric.class);
+        var algorithmMetricMock = mock(ExecutionMetric.class);
         var algorithmMetricsServiceMock = mock(AlgorithmMetricsService.class);
         when(algorithmMetricsServiceMock.create(anyString())).thenReturn(algorithmMetricMock);
 

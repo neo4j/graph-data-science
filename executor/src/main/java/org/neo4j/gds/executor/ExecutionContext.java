@@ -21,8 +21,6 @@ package org.neo4j.gds.executor;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.common.DependencyResolver;
-import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
-import org.neo4j.gds.algorithms.metrics.PassthroughAlgorithmMetricRegistrar;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
@@ -39,6 +37,8 @@ import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
+import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
+import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
 
@@ -179,7 +179,7 @@ public interface ExecutionContext {
 
         @Override
         public AlgorithmMetricsService algorithmMetricsService() {
-            return new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar());
+            return new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar());
         }
 
         @Override

@@ -17,29 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms.metrics;
+package org.neo4j.gds.metrics;
 
-import org.junit.jupiter.api.Test;
+public abstract class ExecutionMetric implements AutoCloseable {
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+    protected final String operation;
 
-class AlgorithmMetricsServiceTest {
-
-    @Test
-    void shouldCreateAlgorithmMetric() {
-        // given
-        var registrarMock = mock(AlgorithmMetricRegistrar.class);
-        var metricsService = new AlgorithmMetricsService(registrarMock);
-
-        // when
-        metricsService.create("foo");
-
-        // then
-        verify(registrarMock, times(1)).create("foo");
-        verifyNoMoreInteractions(registrarMock);
+    protected ExecutionMetric(String operation) {
+        this.operation = operation;
     }
 
+    public abstract void start();
+
+    public abstract void failed();
+
+    @Override
+    public abstract void close();
 }

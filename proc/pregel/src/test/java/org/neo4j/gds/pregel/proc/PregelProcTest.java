@@ -29,8 +29,6 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.TestTaskStore;
-import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
-import org.neo4j.gds.algorithms.metrics.PassthroughAlgorithmMetricRegistrar;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.assertj.ConditionFactory;
@@ -58,6 +56,8 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
+import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.NullLog;
 import org.neo4j.procedure.Context;
@@ -212,7 +212,7 @@ public class PregelProcTest extends BaseProcTest {
             proc.log = NullLog.getInstance();
             proc.callContext = ProcedureCallContext.EMPTY;
 
-            proc.algorithmMetricsService = new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar());
+            proc.algorithmMetricsService = new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar());
 
             Map<String, Object> config = Map.of(
                 "maxIterations", 20,
@@ -240,7 +240,7 @@ public class PregelProcTest extends BaseProcTest {
             proc.log = NullLog.getInstance();
             proc.callContext = ProcedureCallContext.EMPTY;
 
-            proc.algorithmMetricsService = new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar());
+            proc.algorithmMetricsService = new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar());
 
             Map<String, Object> config = Map.of(
                 "maxIterations", 20,
@@ -267,7 +267,7 @@ public class PregelProcTest extends BaseProcTest {
             proc.log = NullLog.getInstance();
             proc.callContext = ProcedureCallContext.EMPTY;
 
-            proc.algorithmMetricsService = new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar());
+            proc.algorithmMetricsService = new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar());
 
             Map<String, Object> config = Map.of(
                 "maxIterations", 20,

@@ -23,8 +23,6 @@ package org.neo4j.gds;
 import org.assertj.core.api.Assertions;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Timeout;
-import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
-import org.neo4j.gds.algorithms.metrics.PassthroughAlgorithmMetricRegistrar;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.Settings;
@@ -33,6 +31,8 @@ import org.neo4j.gds.extension.IdToVariable;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraphExtension;
 import org.neo4j.gds.extension.NodeFunction;
+import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
+import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
@@ -100,7 +100,7 @@ public abstract class BaseTest {
             public Lifecycle newInstance(ExtensionContext context, Dependencies dependencies) {
                 dependencies.globalProcedures().registerComponent(
                     AlgorithmMetricsService.class,
-                    ctx -> new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
+                    ctx -> new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
                     false
                 );
                 return new LifecycleAdapter();
