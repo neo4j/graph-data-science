@@ -61,6 +61,7 @@ class DefaultCatalogBusinessFacadeTest {
             null,
             null,
             null,
+            null,
             null
         );
 
@@ -82,6 +83,7 @@ class DefaultCatalogBusinessFacadeTest {
             null,
             mock(GraphNameValidationService.class),
             service,
+            null,
             null,
             null,
             null,
@@ -145,6 +147,7 @@ class DefaultCatalogBusinessFacadeTest {
             null,
             null,
             null,
+            null,
             null
         );
 
@@ -160,6 +163,7 @@ class DefaultCatalogBusinessFacadeTest {
             null,
             null,
             validationService,
+            null,
             null,
             null,
             null,
@@ -231,6 +235,7 @@ class DefaultCatalogBusinessFacadeTest {
             new CatalogConfigurationService(),
             new GraphNameValidationService(),
             mock(GraphStoreCatalogService.class),
+            null,
             null,
             null,
             null,
@@ -345,6 +350,7 @@ class DefaultCatalogBusinessFacadeTest {
             null,
             null,
             null,
+            null,
             null
         );
 
@@ -438,6 +444,7 @@ class DefaultCatalogBusinessFacadeTest {
             null,
             null,
             null,
+            null,
             null
         );
 
@@ -500,6 +507,7 @@ class DefaultCatalogBusinessFacadeTest {
             null,
             new GraphNameValidationService(),
             graphStoreCatalogService,
+            null,
             null,
             null,
             null,

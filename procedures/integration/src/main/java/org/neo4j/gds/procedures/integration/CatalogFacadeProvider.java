@@ -48,6 +48,7 @@ import org.neo4j.gds.applications.graphstorecatalog.WriteRelationshipsApplicatio
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.procedures.KernelTransactionAccessor;
 import org.neo4j.gds.procedures.ProcedureTransactionAccessor;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
@@ -114,6 +115,8 @@ public class CatalogFacadeProvider {
     // Business logic
     private final Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator;
 
+    private final ProjectionMetricsService projectionMetricsService;
+
     /**
      * We inject services here so that we may control and isolate access to dependencies.
      * Take {@link org.neo4j.gds.services.UserAccessor} for example.
@@ -154,7 +157,8 @@ public class CatalogFacadeProvider {
         WriteNodePropertiesApplication writeNodePropertiesApplication,
         WriteRelationshipPropertiesApplication writeRelationshipPropertiesApplication,
         WriteRelationshipsApplication writeRelationshipsApplication,
-        Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator
+        Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator,
+        ProjectionMetricsService projectionMetricsService
     ) {
         this.catalogConfigurationService = catalogConfigurationService;
         this.graphNameValidationService = graphNameValidationService;
@@ -193,6 +197,8 @@ public class CatalogFacadeProvider {
         this.writeRelationshipsApplication = writeRelationshipsApplication;
 
         this.businessFacadeDecorator = businessFacadeDecorator;
+
+        this.projectionMetricsService = projectionMetricsService;
     }
 
     /**
@@ -262,7 +268,8 @@ public class CatalogFacadeProvider {
             writeNodePropertiesApplication,
             writeRelationshipPropertiesApplication,
             writeNodeLabelApplication,
-            writeRelationshipsApplication
+            writeRelationshipsApplication,
+            projectionMetricsService
         );
 
         // wrap in decorator to inject conditional behaviour

@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.values.storable.NoValue;
 import org.neo4j.values.storable.Values;
 import org.neo4j.values.virtual.MapValue;
@@ -41,7 +42,8 @@ class ProductGraphAggregatorTest {
             databaseId,
             userName,
             WriteMode.LOCAL,
-            ExecutingQueryProvider.empty()
+            ExecutingQueryProvider.empty(),
+            MetricsFacade.PASSTHROUGH_METRICS_FACADE.projectionMetrics()
         );
 
         long source = 1L << 50;

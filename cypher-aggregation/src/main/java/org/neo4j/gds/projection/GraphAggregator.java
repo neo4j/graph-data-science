@@ -34,6 +34,7 @@ import org.neo4j.gds.core.loading.construction.NodeLabelToken;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.loading.construction.PropertyValues;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.impl.util.ValueUtils;
@@ -69,6 +70,7 @@ abstract class GraphAggregator implements CompatUserAggregator {
     private final String username;
     private final WriteMode writeMode;
     private final ExecutingQueryProvider queryProvider;
+    private final ProjectionMetricsService projectionMetricsService;
 
     private final ProgressTimer progressTimer;
     private final ConfigValidator configValidator;
@@ -85,12 +87,14 @@ abstract class GraphAggregator implements CompatUserAggregator {
         DatabaseId databaseId,
         String username,
         WriteMode writeMode,
-        ExecutingQueryProvider queryProvider
+        ExecutingQueryProvider queryProvider,
+        ProjectionMetricsService projectionMetricsService
     ) {
         this.databaseId = databaseId;
         this.username = username;
         this.writeMode = writeMode;
         this.queryProvider = queryProvider;
+        this.projectionMetricsService = projectionMetricsService;
         this.progressTimer = ProgressTimer.start();
         this.lock = new ReentrantLock();
         this.configValidator = new ConfigValidator();
@@ -193,10 +197,13 @@ abstract class GraphAggregator implements CompatUserAggregator {
 
     @Override
     public AnyValue result() throws ProcedureException {
+        var projectionMetric = projectionMetricsService.createCypherV2();
         AggregationResult result;
-        try {
+        try(projectionMetric) {
+            projectionMetric.start();
             result = buildGraph();
         } catch (Exception e) {
+            projectionMetric.failed();
             throw new ProcedureException(
                 Status.Procedure.ProcedureCallFailed,
                 e,

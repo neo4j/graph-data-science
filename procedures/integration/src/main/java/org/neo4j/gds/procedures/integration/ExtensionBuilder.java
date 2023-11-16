@@ -31,7 +31,9 @@ import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
+import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.KernelTransactionAccessor;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
@@ -200,26 +202,28 @@ public final class ExtensionBuilder {
      *
      * @param exporterBuildersProviderService The catalog of writers
      * @param businessFacadeDecorator         Any checks added across requests
+     * @param metricsFacade
      */
     public ThrowingFunction<Context, GraphDataScience, ProcedureException> gdsProvider(
-        AlgorithmMetricsService algorithmMetricsService,
         ExporterBuildersProviderService exporterBuildersProviderService,
-        Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator
+        Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator,
+        MetricsFacade metricsFacade
     ) {
         var catalogFacadeProvider = createCatalogFacadeProvider(
             exporterBuildersProviderService,
-            businessFacadeDecorator
+            businessFacadeDecorator,
+            metricsFacade.projectionMetrics()
         );
 
         var centralityProcedureProvider = createCentralityProcedureProvider(
-            algorithmMetricsService, exporterBuildersProviderService
+            metricsFacade.algorithmMetrics(), exporterBuildersProviderService
         );
         var communityProcedureProvider = createCommunityProcedureProvider(
-            algorithmMetricsService,
+            metricsFacade.algorithmMetrics(),
             exporterBuildersProviderService
         );
         var similarityProcedureProvider = createSimilarityProcedureProvider(
-            algorithmMetricsService, exporterBuildersProviderService
+            metricsFacade.algorithmMetrics(), exporterBuildersProviderService
         );
 
         return new GraphDataScienceProvider(
@@ -233,7 +237,8 @@ public final class ExtensionBuilder {
 
     private CatalogFacadeProvider createCatalogFacadeProvider(
         ExporterBuildersProviderService exporterBuildersProviderService,
-        Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator
+        Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator,
+        ProjectionMetricsService projectionMetricsService
     ) {
         var catalogFacadeProviderFactory = new CatalogFacadeProviderFactory(
             log,
@@ -246,6 +251,7 @@ public final class ExtensionBuilder {
             databaseIdAccessor,
             kernelTransactionAccessor,
             taskRegistryFactoryService,
+            projectionMetricsService,
             terminationFlagService,
             userLogServices,
             userAccessor

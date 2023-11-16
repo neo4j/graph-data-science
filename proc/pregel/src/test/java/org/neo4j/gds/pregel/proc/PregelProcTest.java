@@ -56,8 +56,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
-import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
+import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.NullLog;
 import org.neo4j.procedure.Context;
@@ -212,7 +211,7 @@ public class PregelProcTest extends BaseProcTest {
             proc.log = NullLog.getInstance();
             proc.callContext = ProcedureCallContext.EMPTY;
 
-            proc.algorithmMetricsService = new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar());
+            proc.metricsFacade = MetricsFacade.PASSTHROUGH_METRICS_FACADE;
 
             Map<String, Object> config = Map.of(
                 "maxIterations", 20,
@@ -240,7 +239,7 @@ public class PregelProcTest extends BaseProcTest {
             proc.log = NullLog.getInstance();
             proc.callContext = ProcedureCallContext.EMPTY;
 
-            proc.algorithmMetricsService = new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar());
+            proc.metricsFacade = MetricsFacade.PASSTHROUGH_METRICS_FACADE;
 
             Map<String, Object> config = Map.of(
                 "maxIterations", 20,
@@ -267,7 +266,7 @@ public class PregelProcTest extends BaseProcTest {
             proc.log = NullLog.getInstance();
             proc.callContext = ProcedureCallContext.EMPTY;
 
-            proc.algorithmMetricsService = new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar());
+            proc.metricsFacade = MetricsFacade.PASSTHROUGH_METRICS_FACADE;
 
             Map<String, Object> config = Map.of(
                 "maxIterations", 20,

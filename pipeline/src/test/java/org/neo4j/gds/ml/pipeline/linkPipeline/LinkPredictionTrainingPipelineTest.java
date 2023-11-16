@@ -41,8 +41,7 @@ import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
-import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
-import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
+import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
@@ -197,7 +196,7 @@ class LinkPredictionTrainingPipelineTest {
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .isGdsAdmin(false)
-            .algorithmMetricsService(new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()))
+            .metricsFacade(MetricsFacade.PASSTHROUGH_METRICS_FACADE)
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
@@ -242,7 +241,7 @@ class LinkPredictionTrainingPipelineTest {
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .isGdsAdmin(false)
-            .algorithmMetricsService(new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()))
+            .metricsFacade(MetricsFacade.PASSTHROUGH_METRICS_FACADE)
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
@@ -287,7 +286,7 @@ class LinkPredictionTrainingPipelineTest {
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .isGdsAdmin(false)
-            .algorithmMetricsService(new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()))
+            .metricsFacade(MetricsFacade.PASSTHROUGH_METRICS_FACADE)
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();

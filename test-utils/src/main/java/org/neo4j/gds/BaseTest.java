@@ -30,8 +30,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraphExtension;
 import org.neo4j.gds.extension.NodeFunction;
 import org.neo4j.gds.settings.Neo4jSettings;
-import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
-import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
+import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
@@ -95,8 +94,8 @@ public abstract class BaseTest {
             @Override
             public Lifecycle newInstance(ExtensionContext context, Dependencies dependencies) {
                 dependencies.globalProcedures().registerComponent(
-                    AlgorithmMetricsService.class,
-                    ctx -> new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
+                    MetricsFacade.class,
+                    ctx -> MetricsFacade.PASSTHROUGH_METRICS_FACADE,
                     false
                 );
                 return new LifecycleAdapter();

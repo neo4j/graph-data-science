@@ -41,6 +41,7 @@ import org.neo4j.gds.legacycypherprojection.GraphProjectCypherResult;
 import org.neo4j.gds.graphsampling.RandomWalkBasedNodesSampler;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.projection.GraphProjectNativeResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -105,6 +106,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
     private final GraphSamplingApplication graphSamplingApplication;
     private final EstimateCommonNeighbourAwareRandomWalkApplication estimateCommonNeighbourAwareRandomWalkApplication;
     private final GenerateGraphApplication generateGraphApplication;
+    private final ProjectionMetricsService projectionMetricsService;
 
     public DefaultCatalogBusinessFacade(
         Log log,
@@ -130,7 +132,8 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         WriteNodePropertiesApplication writeNodePropertiesApplication,
         WriteRelationshipPropertiesApplication writeRelationshipPropertiesApplication,
         WriteNodeLabelApplication writeNodeLabelApplication,
-        WriteRelationshipsApplication writeRelationshipsApplication
+        WriteRelationshipsApplication writeRelationshipsApplication,
+        ProjectionMetricsService projectionMetricsService
     ) {
         this.log = log;
 
@@ -158,6 +161,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         this.graphSamplingApplication = graphSamplingApplication;
         this.estimateCommonNeighbourAwareRandomWalkApplication = estimateCommonNeighbourAwareRandomWalkApplication;
         this.generateGraphApplication = generateGraphApplication;
+        this.projectionMetricsService = projectionMetricsService;
     }
 
     @Override
@@ -228,16 +232,23 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
             rawConfiguration
         );
 
-        return nativeProjectApplication.project(
-            databaseId,
-            graphDatabaseService,
-            graphProjectMemoryUsageService,
-            taskRegistryFactory,
-            terminationFlag,
-            transactionContext,
-            userLogRegistryFactory,
-            configuration
-        );
+        var projectMetric = projectionMetricsService.createNative();
+        try(projectMetric) {
+            projectMetric.start();
+            return nativeProjectApplication.project(
+                databaseId,
+                graphDatabaseService,
+                graphProjectMemoryUsageService,
+                taskRegistryFactory,
+                terminationFlag,
+                transactionContext,
+                userLogRegistryFactory,
+                configuration
+            );
+        } catch (Exception e) {
+            projectMetric.failed();
+            throw e;
+        }
     }
 
     @Override
@@ -294,16 +305,23 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
             rawConfiguration
         );
 
-        return cypherProjectApplication.project(
-            databaseId,
-            graphDatabaseService,
-            graphProjectMemoryUsageService,
-            taskRegistryFactory,
-            terminationFlag,
-            transactionContext,
-            userLogRegistryFactory,
-            configuration
-        );
+        var projectMetric = projectionMetricsService.createCypher();
+        try(projectMetric) {
+            projectMetric.start();
+            return cypherProjectApplication.project(
+                databaseId,
+                graphDatabaseService,
+                graphProjectMemoryUsageService,
+                taskRegistryFactory,
+                terminationFlag,
+                transactionContext,
+                userLogRegistryFactory,
+                configuration
+            );
+        } catch (Exception e) {
+            projectMetric.failed();
+            throw e;
+        }
     }
 
     @Override
