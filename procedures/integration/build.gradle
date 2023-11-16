@@ -13,6 +13,7 @@ dependencies {
         testImplementation(group: 'org.neo4j', name: it, version: ver.'neo4j')
     }
 
+    implementation project(':algorithm-metrics-api')
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-write')

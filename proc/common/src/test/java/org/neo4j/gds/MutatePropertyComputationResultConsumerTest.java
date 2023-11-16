@@ -22,6 +22,8 @@ package org.neo4j.gds;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
+import org.neo4j.gds.algorithms.metrics.PassthroughAlgorithmMetricRegistrar;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.CloseableResourceRegistry;
@@ -88,6 +90,7 @@ class MutatePropertyComputationResultConsumerTest {
         .nodeLookup(NodeLookup.EMPTY)
         .modelCatalog(ModelCatalog.EMPTY)
         .isGdsAdmin(false)
+        .algorithmMetricsService(new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()))
         .build();
 
     @BeforeEach

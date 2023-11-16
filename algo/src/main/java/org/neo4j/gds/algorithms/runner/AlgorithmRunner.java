@@ -26,6 +26,7 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.AlgorithmMemoryEstimation;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.RequestScopedDependencies;
+import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
@@ -48,6 +49,7 @@ public final class AlgorithmRunner {
     private final AlgorithmMemoryValidationService memoryUsageValidator;
     private final TaskRegistryFactory taskRegistryFactory;
     private final UserLogRegistryFactory userLogRegistryFactory;
+    private final AlgorithmMetricsService algorithmMetricsService;
     private final Log log;
 
     public AlgorithmRunner(
@@ -55,12 +57,14 @@ public final class AlgorithmRunner {
         AlgorithmMemoryValidationService memoryUsageValidator,
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory,
+        AlgorithmMetricsService algorithmMetricsService,
         Log log
     ) {
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.memoryUsageValidator = memoryUsageValidator;
         this.taskRegistryFactory = taskRegistryFactory;
         this.userLogRegistryFactory = userLogRegistryFactory;
+        this.algorithmMetricsService = algorithmMetricsService;
         this.log = log;
     }
 
@@ -145,13 +149,20 @@ public final class AlgorithmRunner {
         algorithm.setTerminationFlag(requestScopedDependencies.getTerminationFlag());
 
         // run the algorithm
-        try {
-            var algorithmResult = algorithm.compute();
+        var algorithmResult = runAlgorithm(algorithm, algorithmFactory.taskName());
 
-            return AlgorithmComputationResult.of(algorithmResult, graph, graphStore);
+        return AlgorithmComputationResult.of(algorithmResult, graph, graphStore);
+    }
+
+    <R> R runAlgorithm(Algorithm<R> algorithm, String algorithmName) {
+        var algorithmMetric = algorithmMetricsService.create(algorithmName);
+        try(algorithmMetric) {
+            algorithmMetric.start();
+            return algorithm.compute();
         } catch (Exception e) {
             log.warn("Computation failed", e);
             algorithm.getProgressTracker().endSubTaskWithFailure();
+            algorithmMetric.failed();
             throw e;
         }
     }

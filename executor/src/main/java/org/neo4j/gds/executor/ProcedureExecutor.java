@@ -23,6 +23,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
+import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -112,7 +113,8 @@ public class ProcedureExecutor<
 
         algo.getProgressTracker().setEstimatedResourceFootprint(memoryEstimationInBytes, config.concurrency());
 
-        ALGO_RESULT result = executeAlgorithm(builder, algo);
+
+        ALGO_RESULT result = executeAlgorithm(builder, algo, executionContext.algorithmMetricsService());
 
         var computationResult = builder
             .graph(graph)
@@ -127,15 +129,26 @@ public class ProcedureExecutor<
 
     private ALGO_RESULT executeAlgorithm(
         ImmutableComputationResult.Builder<ALGO, ALGO_RESULT, CONFIG> builder,
-        ALGO algo
+        ALGO algo,
+        AlgorithmMetricsService algorithmMetricsService
     ) {
         return runWithExceptionLogging(
             "Computation failed",
             () -> {
-                try (ProgressTimer ignored = ProgressTimer.start(builder::computeMillis)) {
+                var algorithmMetric = algorithmMetricsService.create(
+                    // we don't want to use `spec.name()` because it's different for the different procedure modes;
+                    // we want to capture the algorithm name as defined by the algorithm factory `taskName()`
+                    algoSpec.algorithmFactory(executionContext).taskName()
+                );
+                try (
+                    ProgressTimer ignored = ProgressTimer.start(builder::computeMillis);
+                    algorithmMetric;
+                ) {
+                    algorithmMetric.start();
                     return algo.compute();
                 } catch (Throwable e) {
                     algo.getProgressTracker().endSubTaskWithFailure();
+                    algorithmMetric.failed();
                     throw e;
                 } finally {
                     if (algoSpec.releaseProgressTask()) {

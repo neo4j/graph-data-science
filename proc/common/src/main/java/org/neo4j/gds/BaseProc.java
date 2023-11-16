@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.BaseConfig;
@@ -74,6 +75,9 @@ public abstract class BaseProc {
 
     @Context
     public Username username = Username.EMPTY_USERNAME;
+
+    @Context
+    public AlgorithmMetricsService algorithmMetricsService;
 
     protected String username() {
         return username.username();
@@ -157,6 +161,7 @@ public abstract class BaseProc {
                 .algorithmMetaDataSetter(new TransactionAlgorithmMetaDataSetter(transaction))
                 .nodeLookup(new TransactionNodeLookup(transaction))
                 .isGdsAdmin(transactionContext().isGdsAdmin())
+                .algorithmMetricsService(algorithmMetricsService)
                 .build();
     }
 

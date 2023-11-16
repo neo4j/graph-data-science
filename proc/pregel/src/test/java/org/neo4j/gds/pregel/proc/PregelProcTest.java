@@ -29,6 +29,8 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.TestTaskStore;
+import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
+import org.neo4j.gds.algorithms.metrics.PassthroughAlgorithmMetricRegistrar;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.assertj.ConditionFactory;
@@ -209,6 +211,9 @@ public class PregelProcTest extends BaseProcTest {
             proc.procedureTransaction = transactions.tx();
             proc.log = NullLog.getInstance();
             proc.callContext = ProcedureCallContext.EMPTY;
+
+            proc.algorithmMetricsService = new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar());
+
             Map<String, Object> config = Map.of(
                 "maxIterations", 20,
                 "throwInCompute", true
@@ -234,6 +239,9 @@ public class PregelProcTest extends BaseProcTest {
             proc.procedureTransaction = transactions.tx();
             proc.log = NullLog.getInstance();
             proc.callContext = ProcedureCallContext.EMPTY;
+
+            proc.algorithmMetricsService = new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar());
+
             Map<String, Object> config = Map.of(
                 "maxIterations", 20,
                 "throwInCompute", true
@@ -258,6 +266,9 @@ public class PregelProcTest extends BaseProcTest {
             proc.procedureTransaction = transactions.tx();
             proc.log = NullLog.getInstance();
             proc.callContext = ProcedureCallContext.EMPTY;
+
+            proc.algorithmMetricsService = new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar());
+
             Map<String, Object> config = Map.of(
                 "maxIterations", 20,
                 "throwInCompute", true

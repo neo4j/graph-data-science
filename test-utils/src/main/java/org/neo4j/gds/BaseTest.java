@@ -23,6 +23,8 @@ package org.neo4j.gds;
 import org.assertj.core.api.Assertions;
 import org.intellij.lang.annotations.Language;
 import org.junit.jupiter.api.Timeout;
+import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
+import org.neo4j.gds.algorithms.metrics.PassthroughAlgorithmMetricRegistrar;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.extension.IdFunction;
@@ -35,6 +37,11 @@ import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.kernel.api.procedure.GlobalProcedures;
+import org.neo4j.kernel.extension.ExtensionFactory;
+import org.neo4j.kernel.extension.context.ExtensionContext;
+import org.neo4j.kernel.lifecycle.Lifecycle;
+import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
 import org.neo4j.test.extension.ImpermanentDbmsExtension;
@@ -86,6 +93,24 @@ public abstract class BaseTest {
         builder.setConfigRaw(Map.of("unsupported.dbms.debug.trace_cursors", "true"));
         testLog = Neo4jProxy.testLog();
         builder.setUserLogProvider(new TestLogProvider(testLog));
+
+        // Hacky as hell but will have to do until we make this BaseTest obsolete
+        builder.addExtension(new ExtensionFactory<Dependencies>("AlgorithmMetricsServiceExtensionFactory") {
+            @Override
+            public Lifecycle newInstance(ExtensionContext context, Dependencies dependencies) {
+                dependencies.globalProcedures().registerComponent(
+                    AlgorithmMetricsService.class,
+                    ctx -> new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
+                    false
+                );
+                return new LifecycleAdapter();
+            }
+
+        });
+    }
+
+    interface Dependencies {
+        GlobalProcedures globalProcedures();
     }
 
     protected long clearDb() {
