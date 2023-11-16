@@ -25,12 +25,7 @@ package org.neo4j.gds.algorithms.metrics;
 public class PassthroughAlgorithmMetricRegistrar implements AlgorithmMetricRegistrar {
 
     @Override
-    public void started(String algorithm) {
-
-    }
-
-    @Override
-    public void failed(String algorithm) {
-
+    public AlgorithmMetric create(String algorithm) {
+        return new PassthroughAlgorithmMetric(algorithm);
     }
 }

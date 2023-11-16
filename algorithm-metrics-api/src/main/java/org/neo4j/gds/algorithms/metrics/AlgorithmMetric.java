@@ -19,8 +19,18 @@
  */
 package org.neo4j.gds.algorithms.metrics;
 
-public interface AlgorithmMetricRegistrar {
+public abstract class AlgorithmMetric implements AutoCloseable {
 
-    AlgorithmMetric create(String algorithm);
+    protected final String algorithm;
 
+    protected AlgorithmMetric(String algorithm) {
+        this.algorithm = algorithm;
+    }
+
+    public abstract void start();
+
+    public abstract void failed();
+
+    @Override
+    public abstract void close();
 }

@@ -27,12 +27,7 @@ public class AlgorithmMetricsService {
         this.metricRegistrar = metricRegistrar;
     }
 
-    public void started(String algorithm) {
-        metricRegistrar.started(algorithm);
+    public AlgorithmMetric create(String algorithm) {
+        return metricRegistrar.create(algorithm);
     }
-
-    public void failed(String algorithm) {
-        metricRegistrar.failed(algorithm);
-    }
-
 }
