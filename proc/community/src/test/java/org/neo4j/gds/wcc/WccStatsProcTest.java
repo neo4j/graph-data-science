@@ -40,6 +40,7 @@ import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStatsBusinessFacade;
 import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
+import org.neo4j.gds.algorithms.metrics.PassthroughAlgorithmMetricRegistrar;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
@@ -279,7 +280,7 @@ class WccStatsProcTest extends BaseProcTest {
                     memoryUsageValidator,
                     TaskRegistryFactory.empty(),
                     EmptyUserLogRegistryFactory.INSTANCE,
-                    mock(AlgorithmMetricsService.class),
+                    new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
                     logMock
                 )
             )

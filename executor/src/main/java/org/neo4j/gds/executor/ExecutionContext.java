@@ -21,6 +21,8 @@ package org.neo4j.gds.executor;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.common.DependencyResolver;
+import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
+import org.neo4j.gds.algorithms.metrics.PassthroughAlgorithmMetricRegistrar;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
@@ -69,6 +71,8 @@ public interface ExecutionContext {
     String username();
 
     boolean isGdsAdmin();
+
+    AlgorithmMetricsService algorithmMetricsService();
 
     @Nullable
     RelationshipStreamExporterBuilder relationshipStreamExporterBuilder();
@@ -171,6 +175,11 @@ public interface ExecutionContext {
         @Override
         public boolean isGdsAdmin() {
             return false;
+        }
+
+        @Override
+        public AlgorithmMetricsService algorithmMetricsService() {
+            return new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar());
         }
 
         @Override

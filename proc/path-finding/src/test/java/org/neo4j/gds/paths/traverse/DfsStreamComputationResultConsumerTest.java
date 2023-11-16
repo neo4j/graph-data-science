@@ -55,6 +55,7 @@ class DfsStreamComputationResultConsumerTest {
     void shouldNotComputePath() {
         when(graphMock.toOriginalNodeId(anyLong())).then(returnsFirstArg());
 
+
         when(computationResultMock.graph()).thenReturn(graphMock);
         when(computationResultMock.result()).thenReturn(Optional.of(HugeLongArray.of(1L, 2L)));
 
