@@ -387,12 +387,19 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
             rawConfiguration
         );
 
-        return subGraphProjectApplication.project(
-            taskRegistryFactory,
-            userLogRegistryFactory,
-            configuration,
-            originGraphConfiguration.graphStore()
-        );
+        var subGraphMetric = projectionMetricsService.createSubGraph();
+        try(subGraphMetric) {
+            subGraphMetric.start();
+            return subGraphProjectApplication.project(
+                taskRegistryFactory,
+                userLogRegistryFactory,
+                configuration,
+                originGraphConfiguration.graphStore()
+            );
+        } catch (Exception e) {
+            subGraphMetric.failed();
+            throw e;
+        }
     }
 
     @Override

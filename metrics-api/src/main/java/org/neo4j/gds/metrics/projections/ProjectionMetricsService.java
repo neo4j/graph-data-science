@@ -42,4 +42,8 @@ public class ProjectionMetricsService {
         return metricRegistrar.create("cypherV2");
     }
 
+    public ExecutionMetric createSubGraph() {
+        return metricRegistrar.create("subGraph");
+    }
+
 }
