@@ -231,7 +231,8 @@ public final class ExtensionBuilder {
             catalogFacadeProvider,
             centralityProcedureProvider,
             communityProcedureProvider,
-            similarityProcedureProvider
+            similarityProcedureProvider,
+            metricsFacade.deprecatedProcedures()
         );
     }
 

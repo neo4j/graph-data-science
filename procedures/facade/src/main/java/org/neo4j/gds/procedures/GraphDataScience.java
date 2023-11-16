@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures;
 
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.catalog.CatalogFacade;
 import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
@@ -31,18 +32,22 @@ public class GraphDataScience {
     private final CommunityProcedureFacade communityProcedureFacade;
     private final CentralityProcedureFacade centralityProcedureFacade;
     private final SimilarityProcedureFacade similarityProcedureFacade;
+    private final DeprecatedProceduresMetricService deprecatedProceduresMetricService;
 
     public GraphDataScience(
         Log log, CatalogFacade catalogFacade,
         CentralityProcedureFacade centralityProcedureFacade,
         CommunityProcedureFacade communityProcedureFacade,
-        SimilarityProcedureFacade similarityProcedureFacade
+        SimilarityProcedureFacade similarityProcedureFacade,
+        DeprecatedProceduresMetricService deprecatedProceduresMetricService
     ) {
         this.log = log;
         this.catalogFacade = catalogFacade;
         this.centralityProcedureFacade = centralityProcedureFacade;
         this.communityProcedureFacade = communityProcedureFacade;
         this.similarityProcedureFacade = similarityProcedureFacade;
+        this.deprecatedProceduresMetricService = deprecatedProceduresMetricService;
+
     }
 
     public Log log() {
@@ -63,5 +68,9 @@ public class GraphDataScience {
 
     public SimilarityProcedureFacade similarity() {
         return similarityProcedureFacade;
+    }
+
+    public DeprecatedProceduresMetricService deprecatedProcedures() {
+        return deprecatedProceduresMetricService;
     }
 }
