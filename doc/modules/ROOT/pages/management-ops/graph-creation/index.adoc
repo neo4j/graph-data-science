@@ -103,4 +103,24 @@ Note that `Long` will be converted to `Double` during the projection.
 
 If an algorithm supports relationship properties can be seen by the xref:introduction.adoc#introduction-algorithms-weighted[Weighted relationships trait] in its documentation.
 
+==== Relationship IDs
 
+Relationships within a projected GDS graph are only identified by their source and target nodes.
+The Neo4j relationship ID is not projected and accessible by GDS.
+In order to access the ID of an relationship, it can be added as a property to the relationship projection.
+
+.The following statement will use Cypher projection to project a graph with the relationship id as a property.
+[source, cypher, role=noplay]
+----
+MATCH (source)-[r]->(target)
+RETURN gds.graph.project(
+    'graph', source, target,
+    {
+         sourceNodeLabels: labels(source),
+         targetNodeLabels: labels(target),
+         relationshipType: type(r),
+         relationshipProperties: { relationship_id: id(r) }  //  <1>
+    }
+)
+----
+<1> The relationship id is added as a property to the projected graph.
