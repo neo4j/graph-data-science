@@ -45,8 +45,8 @@ public final class HugeLongLongDoubleMap {
     private long mask;
     private long resizeAt;
 
-    private final static long DEFAULT_EXPECTED_ELEMENTS = 4L;
-    private final static double LOAD_FACTOR = 0.75;
+    private static final long DEFAULT_EXPECTED_ELEMENTS = 4L;
+    private static final double LOAD_FACTOR = 0.75;
 
     /**
      * New instance with sane defaults.
@@ -362,7 +362,7 @@ public final class HugeLongLongDoubleMap {
     }
 
 
-    private final static int MIN_HASH_ARRAY_LENGTH = 4;
+    private static final int MIN_HASH_ARRAY_LENGTH = 4;
 
     private static long minBufferSize(long elements) {
         if (elements < 0L) {

@@ -45,7 +45,7 @@ public abstract class LazyDegreePartitionIterator extends AbstractIterator<Degre
         return new MultiDegreePartitionIterator(nodeCount, numRelationshipsInPartition, degrees);
     }
 
-    private final static class MultiDegreePartitionIterator extends LazyDegreePartitionIterator {
+    private static final class MultiDegreePartitionIterator extends LazyDegreePartitionIterator {
 
         private final long nodeCount;
         private final PartitionUtils.DegreeFunction degrees;

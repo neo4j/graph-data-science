@@ -22,7 +22,7 @@ package org.neo4j.gds.algorithms.community.specificfields;
 public class KCoreSpecificFields {
     private final long degeneracy;
 
-    public final static KCoreSpecificFields EMPTY = new KCoreSpecificFields(0);
+    public static final KCoreSpecificFields EMPTY = new KCoreSpecificFields(0);
     public KCoreSpecificFields(
         long degeneracy
     ) {

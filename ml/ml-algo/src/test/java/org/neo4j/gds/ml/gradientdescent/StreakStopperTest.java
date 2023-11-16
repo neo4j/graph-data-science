@@ -28,10 +28,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class StreakStopperTest {
 
     private StreakStopper stopper;
-    private final static int MIN_EPOCHS = 10;
-    private final static int PATIENCE = 3;
-    private final static int MAX_EPOCHS = 1000;
-    private final static double TOLERANCE = 1e-4;
+    private static final int MIN_EPOCHS = 10;
+    private static final int PATIENCE = 3;
+    private static final int MAX_EPOCHS = 1000;
+    private static final double TOLERANCE = 1e-4;
 
     @BeforeEach
     void setup() {

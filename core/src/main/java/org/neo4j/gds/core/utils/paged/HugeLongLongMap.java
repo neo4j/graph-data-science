@@ -336,7 +336,7 @@ public final class HugeLongLongMap implements Iterable<LongLongCursor> {
     }
 
 
-    private final static int MIN_HASH_ARRAY_LENGTH = 4;
+    private static final int MIN_HASH_ARRAY_LENGTH = 4;
 
     private static long minBufferSize(long elements) {
         if (elements < 0L) {

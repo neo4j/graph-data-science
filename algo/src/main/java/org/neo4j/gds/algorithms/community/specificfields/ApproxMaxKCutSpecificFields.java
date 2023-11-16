@@ -22,7 +22,7 @@ package org.neo4j.gds.algorithms.community.specificfields;
 public class ApproxMaxKCutSpecificFields {
     private final double cutCost;
 
-    public final static  ApproxMaxKCutSpecificFields EMPTY = new ApproxMaxKCutSpecificFields(0);
+    public static final ApproxMaxKCutSpecificFields EMPTY = new ApproxMaxKCutSpecificFields(0);
     public ApproxMaxKCutSpecificFields(
         double cutCost
     ) {
