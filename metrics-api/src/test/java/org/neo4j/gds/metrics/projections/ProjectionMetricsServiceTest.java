@@ -71,6 +71,18 @@ class ProjectionMetricsServiceTest {
         verifyNoMoreInteractions(registrarMock);
     }
 
+    @Test
+    void shouldCreateSubGraphProjectionMetric() {
+        // given
+        var registrarMock = Mockito.mock(ExecutionMetricRegistrar.class);
+        var metricsService = new ProjectionMetricsService(registrarMock);
 
+        // when
+        metricsService.createSubGraph();
+
+        // then
+        verify(registrarMock, times(1)).create("subGraph");
+        verifyNoMoreInteractions(registrarMock);
+    }
 
 }
