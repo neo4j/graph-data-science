@@ -68,6 +68,7 @@ public class LeidenWriteProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        facade.deprecatedProcedures().called("gds.beta.leiden.write");
         executionContext()
             .log()
             .warn("Procedure `gds.beta.leiden.write` has been deprecated, please use `gds.leiden.write`.");
@@ -83,6 +84,7 @@ public class LeidenWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
+        facade.deprecatedProcedures().called("gds.beta.leiden.write.estimate");
         executionContext()
             .log()
             .warn("Procedure `gds.beta.leiden.write.estimate` has been deprecated, please use `gds.leiden.write.estimate`.");

@@ -27,7 +27,7 @@ public final class DeprecatedProceduresMetricService {
         this.registrar = registrar;
     }
 
-    void called(String deprecatedProcedure) {
+    public void called(String deprecatedProcedure) {
         registrar.called(deprecatedProcedure);
     }
 
