@@ -133,7 +133,7 @@ public class ExecutableNodePropertyStepTestUtil {
     public static class NodeIdPropertyStep implements ExecutableNodePropertyStep {
         private final GraphStore graphStore;
         private final String propertyName;
-        private String procName;
+        private final String procName;
 
         public NodeIdPropertyStep(GraphStore graphStore, String propertyName) {
             this(graphStore, "AddBogusNodePropertyStep", propertyName);
@@ -193,9 +193,9 @@ public class ExecutableNodePropertyStepTestUtil {
 
     public static class TestNodePropertyStepWithFixedEstimation implements ExecutableNodePropertyStep {
 
-        private MemoryEstimation memoryEstimation;
-        private String procName;
-        private String nodeProperty;
+        private final MemoryEstimation memoryEstimation;
+        private final String procName;
+        private final String nodeProperty;
 
         public TestNodePropertyStepWithFixedEstimation(String procName, MemoryEstimation memoryEstimation) {
             this.memoryEstimation = memoryEstimation;

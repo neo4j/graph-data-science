@@ -46,7 +46,7 @@ public class Leiden extends Algorithm<LeidenResult> {
     private final int maxIterations;
     private final double initialGamma;
     private final double theta;
-    private double[] modularities;
+    private final double[] modularities;
     private double modularity;
     private final LeidenDendrogramManager dendrogramManager;
     private final Optional<NodePropertyValues> seedValues;

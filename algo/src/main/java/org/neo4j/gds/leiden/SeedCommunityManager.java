@@ -55,7 +55,7 @@ interface SeedCommunityManager {
 
     class FullSeedCommunityManager implements SeedCommunityManager {
 
-        private HugeLongArray reverseMap;
+        private final HugeLongArray reverseMap;
 
         FullSeedCommunityManager(HugeLongArray reverseMap) {
             this.reverseMap = reverseMap;

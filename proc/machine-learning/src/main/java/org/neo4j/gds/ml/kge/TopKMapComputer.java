@@ -39,19 +39,19 @@ import java.util.stream.LongStream;
 
 public class TopKMapComputer extends Algorithm<KGEPredictResult> {
 
-    private Graph graph;
-    private ProgressTracker progressTracker;
-    private BitSet sourceNodes;
-    private BitSet targetNodes;
+    private final Graph graph;
+    private final ProgressTracker progressTracker;
+    private final BitSet sourceNodes;
+    private final BitSet targetNodes;
 
-    private String nodeEmbeddingProperty;
-    private DoubleArrayList relationshipTypeEmbedding;
-    private int concurrency;
+    private final String nodeEmbeddingProperty;
+    private final DoubleArrayList relationshipTypeEmbedding;
+    private final int concurrency;
 
-    private int topK;
-    private ScoreFunction scoreFunction;
+    private final int topK;
+    private final ScoreFunction scoreFunction;
 
-    private boolean higherIsBetter;
+    private final boolean higherIsBetter;
 
     public TopKMapComputer(
         Graph graph,

@@ -25,7 +25,7 @@ import java.util.Optional;
 class TestLicenseStates {
 
     static class ExpiredLicenseState implements LicenseState {
-        private ZonedDateTime pastTime;
+        private final ZonedDateTime pastTime;
 
         ExpiredLicenseState(ZonedDateTime pastTime) {this.pastTime = pastTime;}
 

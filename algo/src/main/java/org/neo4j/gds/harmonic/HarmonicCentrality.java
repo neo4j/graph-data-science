@@ -39,7 +39,7 @@ public class HarmonicCentrality extends Algorithm<HarmonicResult> {
     private final ExecutorService executorService;
     private final HugeAtomicDoubleArray inverseFarness;
 
-    private Graph graph;
+    private final Graph graph;
 
     public HarmonicCentrality(
         Graph graph,

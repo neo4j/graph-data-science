@@ -51,7 +51,7 @@ public class LabelPropagation extends Algorithm<LabelPropagationResult> {
     private final LabelPropagationBaseConfig config;
     private final ExecutorService executor;
 
-    private Graph graph;
+    private final Graph graph;
     private HugeLongArray labels;
     private final long maxLabelId;
     private int batchSize;

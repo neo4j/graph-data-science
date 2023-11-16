@@ -32,7 +32,7 @@ import java.util.concurrent.ExecutorService;
 
 public class KmeansPlusPlusSampler extends KmeansSampler {
 
-    private List<KmeansTask> tasks;
+    private final List<KmeansTask> tasks;
     private final int concurrency;
     private final ProgressTracker progressTracker;
     private final HugeDoubleArray distanceFromClosestCentroid;

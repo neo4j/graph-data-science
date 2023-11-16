@@ -44,7 +44,7 @@ public class CollapsePath extends Algorithm<SingleTypeRelationships> {
     private final List<Graph[]> pathTemplates;
     private final long nodeCount;
     private final boolean allowSelfLoops;
-    private RelationshipType mutateRelationshipType;
+    private final RelationshipType mutateRelationshipType;
     private final int concurrency;
     private final ExecutorService executorService;
 

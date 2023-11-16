@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @GdlExtension
 class WeightedDagLongestPathTest {
-    private static DagLongestPathBaseConfig CONFIG = new DagLongestPathStreamConfigImpl.Builder()
+    private static final DagLongestPathBaseConfig CONFIG = new DagLongestPathStreamConfigImpl.Builder()
         .concurrency(4)
         .build();
 

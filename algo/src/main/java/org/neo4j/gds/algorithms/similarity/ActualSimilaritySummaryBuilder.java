@@ -30,7 +30,7 @@ import static org.neo4j.gds.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 
 public class ActualSimilaritySummaryBuilder implements SimilaritySummaryBuilder {
 
-    private DoubleHistogram histogram;
+    private final DoubleHistogram histogram;
 
     public ActualSimilaritySummaryBuilder(){
         this.histogram=new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);

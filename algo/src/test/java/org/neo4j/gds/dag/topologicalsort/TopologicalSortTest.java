@@ -42,11 +42,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @GdlExtension
 class TopologicalSortTest {
-    private static TopologicalSortBaseConfig CONFIG = new TopologicalSortStreamConfigImpl.Builder()
+    private static final TopologicalSortBaseConfig CONFIG = new TopologicalSortStreamConfigImpl.Builder()
         .concurrency(4)
         .computeMaxDistanceFromSource(true)
         .build();
-    private static TopologicalSortBaseConfig BASIC_CONFIG = new TopologicalSortStreamConfigImpl.Builder()
+    private static final TopologicalSortBaseConfig BASIC_CONFIG = new TopologicalSortStreamConfigImpl.Builder()
         .concurrency(4)
         .build();
 

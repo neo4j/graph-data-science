@@ -21,8 +21,8 @@ package org.neo4j.gds.similarity.nodesim;
 
 class DegreeFilter {
 
-    private int lowerBound;
-    private int upperBound;
+    private final int lowerBound;
+    private final int upperBound;
 
     DegreeFilter(int lowerBound, int upperBound) {
         this.lowerBound = lowerBound;

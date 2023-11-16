@@ -44,8 +44,8 @@ public class BetweennessCentrality extends Algorithm<HugeAtomicDoubleArray> {
     private final double divisor;
     private final ForwardTraverser.Factory traverserFactory;
 
-    private HugeAtomicDoubleArray centrality;
-    private SelectionStrategy selectionStrategy;
+    private final HugeAtomicDoubleArray centrality;
+    private final SelectionStrategy selectionStrategy;
 
     private final ExecutorService executorService;
     private final int concurrency;

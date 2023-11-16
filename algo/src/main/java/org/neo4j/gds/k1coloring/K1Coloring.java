@@ -70,7 +70,7 @@ public class K1Coloring extends Algorithm<K1ColoringResult> {
 
     private final long maxIterations;
 
-    private BitSet[] nodesToColor;
+    private final BitSet[] nodesToColor;
     // Not thread-safe on purpose
 
     private int bitSetId;

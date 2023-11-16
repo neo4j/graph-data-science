@@ -28,7 +28,7 @@ class RelationshipFilterer {
     private long filteringSpurNode;
     private int allNeighbors;
     private int neighborIndex;
-    private  boolean trackRelationships;
+    private final boolean trackRelationships;
     private final ToLongBiFunction<MutablePathResult, Integer> relationshipAvoidMapper;
 
     RelationshipFilterer(int k,boolean trackRelationships){

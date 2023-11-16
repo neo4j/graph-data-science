@@ -27,7 +27,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 final class ModularityColorArray {
 
     private final HugeLongArray sortedNodesByColor;
-    private BitSet colorCoordinates;
+    private final BitSet colorCoordinates;
 
     private final long numberOfColors;
 
