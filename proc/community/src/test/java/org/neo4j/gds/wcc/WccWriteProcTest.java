@@ -506,7 +506,8 @@ class WccWriteProcTest extends BaseProcTest {
                             null,
                             null,
                             algorithmsBusinessFacade
-                        )
+                        ),
+                        null
                     );
 
                     Map<String, Object> configMap = Map.of("writeProperty", WRITE_PROPERTY);

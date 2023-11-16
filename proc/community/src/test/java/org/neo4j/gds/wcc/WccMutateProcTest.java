@@ -356,7 +356,8 @@ class WccMutateProcTest extends BaseProcTest {
                     null,
                     null,
                     null
-                )
+                ),
+                null
             );
 
             ProcedureMethodHelper.mutateMethods(procedure)
@@ -491,7 +492,8 @@ class WccMutateProcTest extends BaseProcTest {
                     null,
                     null,
                     null
-                )
+                ),
+                null
             );
                 ProcedureMethodHelper.mutateMethods(procedure)
                     .forEach(mutateMethod -> {
@@ -550,7 +552,8 @@ class WccMutateProcTest extends BaseProcTest {
                     null,
                     null,
                     null
-                )
+                ),
+                null
             );
 
             var methods = ProcedureMethodHelper.mutateMethods(proc).collect(Collectors.toList());
@@ -633,7 +636,8 @@ class WccMutateProcTest extends BaseProcTest {
                             null,
                             null,
                             null
-                        )
+                        ),
+                        null
                     );
                     Map<String, Object> config = new HashMap<>(additionalConfig);
                     config.put("mutateProperty", MUTATE_PROPERTY);

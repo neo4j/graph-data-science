@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
@@ -32,15 +33,18 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
     private final Log log;
     private final CatalogFacadeProvider catalogFacadeProvider;
     private final CommunityProcedureProvider communityProcedureProvider;
+    private final DeprecatedProceduresMetricService deprecatedProceduresMetricService;
 
     public GraphDataScienceProvider(
         Log log,
         CatalogFacadeProvider catalogFacadeProvider,
-        CommunityProcedureProvider communityProcedureProvider
+        CommunityProcedureProvider communityProcedureProvider,
+        DeprecatedProceduresMetricService deprecatedProceduresMetricService
     ) {
         this.log = log;
         this.catalogFacadeProvider = catalogFacadeProvider;
         this.communityProcedureProvider = communityProcedureProvider;
+        this.deprecatedProceduresMetricService = deprecatedProceduresMetricService;
     }
 
     @Override
@@ -48,6 +52,6 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         var catalogFacade = catalogFacadeProvider.createCatalogFacade(context);
         var communityProcedureFacade = communityProcedureProvider.createCommunityProcedureFacade(context);
 
-        return new GraphDataScience(log, catalogFacade, communityProcedureFacade);
+        return new GraphDataScience(log, catalogFacade, communityProcedureFacade, deprecatedProceduresMetricService);
     }
 }

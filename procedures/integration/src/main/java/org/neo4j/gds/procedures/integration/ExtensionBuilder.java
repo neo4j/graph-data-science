@@ -207,7 +207,7 @@ public final class ExtensionBuilder {
             metricsFacade
         );
 
-        return new GraphDataScienceProvider(log, catalogFacadeProvider, communityProcedureProvider);
+        return new GraphDataScienceProvider(log, catalogFacadeProvider, communityProcedureProvider, metricsFacade.deprecatedProcedures());
     }
 
     private CatalogFacadeProvider createCatalogFacadeProvider(
