@@ -19,8 +19,6 @@ project(':algo-common').projectDir = file('algo-common')
 include('algo-test')
 project(':algo-test').projectDir = file('algo-test')
 
-include('algorithm-metrics-api')
-project(':algorithm-metrics-api').projectDir = file('algorithm-metrics-api')
 
 include('alpha-proc')
 project(':alpha-proc').projectDir = file('alpha/alpha-proc')
@@ -120,6 +118,9 @@ project(':memory-estimation').projectDir = file('memory-estimation')
 
 include('memory-usage')
 project(':memory-usage').projectDir = file('memory-usage')
+
+include('metrics-api')
+project(':metrics-api').projectDir = file('metrics-api')
 
 include('ml-core')
 project(':ml-core').projectDir = file('ml/ml-core')

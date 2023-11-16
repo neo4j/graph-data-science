@@ -18,7 +18,6 @@ dependencies {
     compileOnly(group: 'org.neo4j', name: 'neo4j-logging', version: ver.'neo4j') { transitive = false }
 
     // the necessary GDS things for the extension to construct the application
-    implementation project(':algorithm-metrics-api')
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-utils')
@@ -28,6 +27,7 @@ dependencies {
     implementation project(':graph-store-catalog-applications')
     implementation project(':licensing')
     implementation project(':logging')
+    implementation project(':metrics-api')
     implementation project(':native-projection')
     implementation project(':neo4j-api')
     implementation project(':neo4j-kernel-adapter')
