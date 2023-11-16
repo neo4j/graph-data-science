@@ -26,38 +26,57 @@ import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
- * Iterator over all nodes in a given component. Contains utility functions to determine a unique index per
- * node and the index bounds per component.
+ * Manages nodes sorted by component. Produces an iterator over all nodes in a given component.
  */
-public class ComponentIterator implements Iterator<Long> {
-    private long runningIdx;
-    private long componentId;
-    private HugeLongArray components;
-    private HugeLongArray nodesSortedByComponent;
+public class NodesSortedByComponent {
+    private final HugeLongArray components;
+    private final HugeAtomicLongArray upperBoundPerComponent;
+    private final HugeLongArray nodesSorted;
 
-    public ComponentIterator(long componentId, HugeLongArray components, HugeLongArray nodesSortedByComponent,
-        HugeAtomicLongArray upperBoundPerComponent) {
-
-        this.componentId = componentId;
+    public NodesSortedByComponent(HugeLongArray components, int concurrency) {
         this.components = components;
-        this.nodesSortedByComponent = nodesSortedByComponent;
-        this.runningIdx = upperBoundPerComponent.get(componentId);
+        this.upperBoundPerComponent = computeIndexUpperBoundPerComponent(components, concurrency);
+        var componentCoordinateArray = HugeAtomicLongArray.of(components.size(), ParalleLongPageCreator.passThrough(concurrency));
+        upperBoundPerComponent.copyTo(componentCoordinateArray, components.size());
+        this.nodesSorted = computeNodesSortedByComponent(components, componentCoordinateArray, concurrency);
     }
 
-    @Override
-    public boolean hasNext() {
-        return components.get(nodesSortedByComponent.get(runningIdx)) == componentId;
+    public Iterator<Long> iterator(long componentId) {
+        return new Iterator<>() {
+            long runningIdx = getUpperBoundPerComponent().get(componentId);
+            @Override
+            public boolean hasNext() {
+                return getComponents().get(getNodesSorted().get(runningIdx)) == componentId;
+            }
+
+            @Override
+            public Long next() {
+                try {
+                    return getNodesSorted().get(runningIdx--);
+                } catch (ArrayIndexOutOfBoundsException ex) {
+                    throw new NoSuchElementException();
+                }
+            }
+        };
     }
 
-    @Override
-    public Long next() {
-        return nodesSortedByComponent.get(runningIdx--);
+    HugeLongArray getComponents() {
+        return components;
     }
 
-    public static HugeAtomicLongArray getIndexUpperBoundPerComponent(HugeLongArray components, int concurrency) {
+    HugeAtomicLongArray getUpperBoundPerComponent() {
+        return upperBoundPerComponent;
+    }
+
+    HugeLongArray getNodesSorted() {
+        return nodesSorted;
+    }
+
+    static HugeAtomicLongArray computeIndexUpperBoundPerComponent(HugeLongArray components, int concurrency) {
         long nodeCount = components.size();
         var upperBoundPerComponent = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(concurrency));
 
@@ -83,7 +102,7 @@ public class ComponentIterator implements Iterator<Long> {
         return upperBoundPerComponent;
     }
 
-    public static HugeLongArray getNodesSortedByComponent(HugeLongArray components,
+    static HugeLongArray computeNodesSortedByComponent(HugeLongArray components,
         HugeAtomicLongArray componentCoordinateArray, int concurrency) {
 
         long nodeCount = components.size();
