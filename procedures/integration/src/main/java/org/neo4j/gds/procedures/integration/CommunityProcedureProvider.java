@@ -29,6 +29,7 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStatsBusinessFacade
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
+import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
@@ -65,6 +66,7 @@ public class CommunityProcedureProvider {
     private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final KernelTransactionAccessor kernelTransactionAccessor;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
+    private final AlgorithmMetricsService algorithmMetricsService;
     private final TerminationFlagService terminationFlagService;
     private final UserLogServices userLogServices;
     private final UserAccessor userAccessor;
@@ -78,6 +80,7 @@ public class CommunityProcedureProvider {
         KernelTransactionAccessor kernelTransactionAccessor,
         ExporterBuildersProviderService exporterBuildersProviderService,
         TaskRegistryFactoryService taskRegistryFactoryService,
+        AlgorithmMetricsService algorithmMetricsService,
         TerminationFlagService terminationFlagService,
         UserLogServices userLogServices,
         UserAccessor userAccessor
@@ -91,6 +94,7 @@ public class CommunityProcedureProvider {
         this.kernelTransactionAccessor = kernelTransactionAccessor;
         this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
+        this.algorithmMetricsService = algorithmMetricsService;
         this.terminationFlagService = terminationFlagService;
         this.userLogServices = userLogServices;
         this.userAccessor = userAccessor;
@@ -124,6 +128,7 @@ public class CommunityProcedureProvider {
                 algorithmMemoryValidationService,
                 taskRegistryFactory,
                 userLogRegistryFactory,
+                algorithmMetricsService,
                 log
             )
         );

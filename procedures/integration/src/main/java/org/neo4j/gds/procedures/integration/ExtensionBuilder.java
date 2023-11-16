@@ -20,6 +20,8 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.function.ThrowingFunction;
+import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
+import org.neo4j.gds.algorithms.metrics.PassthroughAlgorithmMetricRegistrar;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
@@ -192,14 +194,16 @@ public final class ExtensionBuilder {
         ExporterBuildersProviderService exporterBuildersProviderService,
         Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator
     ) {
+        var algorithmMetricsService = new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar());
+
         var catalogFacadeProvider = createCatalogFacadeProvider(
             exporterBuildersProviderService,
             businessFacadeDecorator
         );
 
-        var communityProcedureProvider = createCommunityProcedureProvider(exporterBuildersProviderService);
-        var similarityProcedureProvider = createSimilarityProcedureProvider(exporterBuildersProviderService);
-        var centralityProcedureProvider = createCentralityProcedureProvider(exporterBuildersProviderService);
+        var communityProcedureProvider = createCommunityProcedureProvider(exporterBuildersProviderService, algorithmMetricsService);
+        var similarityProcedureProvider = createSimilarityProcedureProvider(exporterBuildersProviderService, algorithmMetricsService);
+        var centralityProcedureProvider = createCentralityProcedureProvider(exporterBuildersProviderService, algorithmMetricsService);
 
         return new GraphDataScienceProvider(
             log,
@@ -231,7 +235,10 @@ public final class ExtensionBuilder {
         );
     }
 
-    private CommunityProcedureProvider createCommunityProcedureProvider(ExporterBuildersProviderService exporterBuildersProviderService) {
+    private CommunityProcedureProvider createCommunityProcedureProvider(
+        ExporterBuildersProviderService exporterBuildersProviderService,
+        AlgorithmMetricsService algorithmMetricsService
+    ) {
         var algorithmMetaDataSetterService = new AlgorithmMetaDataSetterService();
 
         return new CommunityProcedureProvider(
@@ -243,13 +250,17 @@ public final class ExtensionBuilder {
             kernelTransactionAccessor,
             exporterBuildersProviderService,
             taskRegistryFactoryService,
+            algorithmMetricsService,
             terminationFlagService,
             userLogServices,
             userAccessor
         );
     }
 
-    private SimilarityProcedureProvider createSimilarityProcedureProvider(ExporterBuildersProviderService exporterBuildersProviderService) {
+    private SimilarityProcedureProvider createSimilarityProcedureProvider(
+        ExporterBuildersProviderService exporterBuildersProviderService,
+        AlgorithmMetricsService algorithmMetricsService
+    ) {
         var algorithmMetaDataSetterService = new AlgorithmMetaDataSetterService();
 
         return new SimilarityProcedureProvider(
@@ -261,13 +272,17 @@ public final class ExtensionBuilder {
             kernelTransactionAccessor,
             exporterBuildersProviderService,
             taskRegistryFactoryService,
+            algorithmMetricsService,
             terminationFlagService,
             userLogServices,
             userAccessor
         );
     }
 
-    private CentralityProcedureProvider createCentralityProcedureProvider(ExporterBuildersProviderService exporterBuildersProviderService) {
+    private CentralityProcedureProvider createCentralityProcedureProvider(
+        ExporterBuildersProviderService exporterBuildersProviderService,
+        AlgorithmMetricsService algorithmMetricsService
+    ) {
         var algorithmMetaDataSetterService = new AlgorithmMetaDataSetterService();
 
         return new CentralityProcedureProvider(
@@ -279,6 +294,7 @@ public final class ExtensionBuilder {
             kernelTransactionAccessor,
             exporterBuildersProviderService,
             taskRegistryFactoryService,
+            algorithmMetricsService,
             terminationFlagService,
             userLogServices,
             userAccessor

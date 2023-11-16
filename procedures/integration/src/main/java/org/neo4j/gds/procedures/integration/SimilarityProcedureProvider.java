@@ -22,6 +22,7 @@ package org.neo4j.gds.procedures.integration;
 import org.neo4j.gds.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
+import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsEstimateBusinessFacade;
@@ -64,6 +65,7 @@ public class SimilarityProcedureProvider {
     private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final KernelTransactionAccessor kernelTransactionAccessor;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
+    private final AlgorithmMetricsService algorithmMetricsService;
     private final TerminationFlagService terminationFlagService;
 
     private final UserLogServices userLogServices;
@@ -78,7 +80,9 @@ public class SimilarityProcedureProvider {
         KernelTransactionAccessor kernelTransactionAccessor,
         ExporterBuildersProviderService exporterBuildersProviderService,
         TaskRegistryFactoryService taskRegistryFactoryService,
-        TerminationFlagService terminationFlagService, UserLogServices userLogServices,
+        AlgorithmMetricsService algorithmMetricsService,
+        TerminationFlagService terminationFlagService,
+        UserLogServices userLogServices,
         UserAccessor userAccessor
     ) {
         this.log = log;
@@ -89,6 +93,7 @@ public class SimilarityProcedureProvider {
         this.databaseIdAccessor = databaseIdAccessor;
         this.kernelTransactionAccessor = kernelTransactionAccessor;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
+        this.algorithmMetricsService = algorithmMetricsService;
         this.terminationFlagService = terminationFlagService;
         this.userLogServices = userLogServices;
         this.userAccessor = userAccessor;
@@ -124,6 +129,7 @@ public class SimilarityProcedureProvider {
                 algorithmMemoryValidationService,
                 taskRegistryFactory,
                 userLogRegistryFactory,
+                algorithmMetricsService,
                 log
             )
         );

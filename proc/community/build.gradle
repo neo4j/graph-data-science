@@ -42,6 +42,8 @@ dependencies {
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor project(':config-generator')
 
+    testImplementation project(':algorithm-metrics-api')
+
     testImplementation project(':logging')
     testImplementation project(':memory-usage')
     testImplementation project(':native-projection')

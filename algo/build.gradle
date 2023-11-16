@@ -27,6 +27,7 @@ dependencies {
     compileOnly group: 'org.neo4j', name: 'neo4j-graph-algo', version: ver.'neo4j'
 
     implementation project(':algo-common')
+    implementation project(':algorithm-metrics-api')
     implementation project(':annotations')
     implementation project(':collections-memory-estimation')
     implementation project(':config-api')

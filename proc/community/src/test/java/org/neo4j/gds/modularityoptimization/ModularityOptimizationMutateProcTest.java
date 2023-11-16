@@ -50,6 +50,7 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStatsBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
+import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.DatabaseId;
@@ -574,6 +575,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
                     memoryUsageValidator,
                     TaskRegistryFactory.empty(),
                     EmptyUserLogRegistryFactory.INSTANCE,
+                    mock(AlgorithmMetricsService.class),
                     logMock
                 )
             ),

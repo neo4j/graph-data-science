@@ -46,6 +46,7 @@ import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
+import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.DatabaseId;
@@ -324,6 +325,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     memoryUsageValidator,
                     TaskRegistryFactory.empty(),
                     EmptyUserLogRegistryFactory.INSTANCE,
+                    mock(AlgorithmMetricsService.class),
                     logMock
                 )
             ),
@@ -452,6 +454,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     memoryUsageValidator,
                     TaskRegistryFactory.empty(),
                     EmptyUserLogRegistryFactory.INSTANCE,
+                    mock(AlgorithmMetricsService.class),
                     logMock
                 )
             ),
@@ -535,6 +538,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     memoryUsageValidator,
                     TaskRegistryFactory.empty(),
                     EmptyUserLogRegistryFactory.INSTANCE,
+                    mock(AlgorithmMetricsService.class),
                     logMock
                 )
             ),
@@ -620,6 +624,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     memoryUsageValidator,
                     TaskRegistryFactory.empty(),
                     EmptyUserLogRegistryFactory.INSTANCE,
+                    mock(AlgorithmMetricsService.class),
                     logMock
                 )
             ),
