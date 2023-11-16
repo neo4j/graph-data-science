@@ -336,7 +336,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             .targetNodes(List.of(target1, target2))
             .build();
 
-        var steinerTreeAlgorithmFactory = new SteinerTreeAlgorithmFactory();
+        var steinerTreeAlgorithmFactory = new SteinerTreeAlgorithmFactory<>();
         var log = Neo4jProxy.testLog();
         Task baseTask = steinerTreeAlgorithmFactory.progressTask(graph, config);
         var progressTracker = new TestProgressTracker(
@@ -377,7 +377,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             .targetNodes(List.of(target1, target2))
             .build();
 
-        var steinerTreeAlgorithmFactory = new SteinerTreeAlgorithmFactory();
+        var steinerTreeAlgorithmFactory = new SteinerTreeAlgorithmFactory<>();
         var log = Neo4jProxy.testLog();
         Task baseTask = steinerTreeAlgorithmFactory.progressTask(graph, config);
         var progressTracker = new TestProgressTracker(
@@ -424,7 +424,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             .targetNodes(List.of(target1, target2))
             .build();
 
-        var steinerTreeAlgorithmFactory = new SteinerTreeAlgorithmFactory();
+        var steinerTreeAlgorithmFactory = new SteinerTreeAlgorithmFactory<>();
         var log = Neo4jProxy.testLog();
         Task baseTask = steinerTreeAlgorithmFactory.progressTask(invGraph, config);
         var progressTracker = new TestProgressTracker(

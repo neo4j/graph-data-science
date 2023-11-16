@@ -118,7 +118,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
         ForkJoinPool forkJoinPool = ExecutorServiceUtil.createForkJoinPool(concurrency);
         var tasks = ConcurrentHashMap.<ForkJoinTask<Void>>newKeySet();
 
-        LongFunction<CountedCompleter> taskProducer = longestPathDistances.isPresent()
+        LongFunction<CountedCompleter<Void>> taskProducer = longestPathDistances.isPresent()
             ? (nodeId) -> new LongestPathTask(
             null,
             nodeId,

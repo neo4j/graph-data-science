@@ -497,7 +497,7 @@ public class FastRPTest {
             .randomSeed(42L)
             .build();
 
-        var factory = new FastRPFactory();
+        var factory = new FastRPFactory<>();
 
         var progressTask = factory.progressTask(graph, config);
         var log = Neo4jProxy.testLog();

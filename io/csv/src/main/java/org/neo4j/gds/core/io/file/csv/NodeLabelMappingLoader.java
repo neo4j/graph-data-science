@@ -40,7 +40,7 @@ public class NodeLabelMappingLoader {
     private final HashMap<String, String> mapping;
 
     NodeLabelMappingLoader(Path csvDirectory) {
-        this.mapping = new HashMap();
+        this.mapping = new HashMap<>();
         this.labelMappingPath = csvDirectory.resolve(CsvNodeLabelMappingVisitor.LABEL_MAPPING_FILE_NAME);
         CsvMapper csvMapper = new CsvMapper();
         csvMapper.enable(CsvParser.Feature.TRIM_SPACES);

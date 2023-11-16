@@ -107,6 +107,7 @@ public final class GraphStoreGraphPropertyVisitor extends GraphPropertyVisitor {
 
     public interface StreamBuilder<T extends BaseStream<?, T>> {
         void add(Object value);
+
         ReducibleStream<T> build();
 
         static StreamBuilder<?> forType(ValueType valueType) {
@@ -244,13 +245,19 @@ public final class GraphStoreGraphPropertyVisitor extends GraphPropertyVisitor {
         private HugeSparseObjectArrayList<T, ?> createArrayList(ValueType valueType) {
             switch (valueType) {
                 case LONG_ARRAY:
-                    return (HugeSparseObjectArrayList<T, ?>) HugeSparseLongArrayList.of(valueType.fallbackValue().longArrayValue());
+                    return (HugeSparseObjectArrayList<T, ?>) HugeSparseLongArrayList.of(valueType.fallbackValue()
+                        .longArrayValue());
                 case DOUBLE_ARRAY:
-                    return (HugeSparseObjectArrayList<T, ?>) HugeSparseDoubleArrayList.of(valueType.fallbackValue().doubleArrayValue());
+                    return (HugeSparseObjectArrayList<T, ?>) HugeSparseDoubleArrayList.of(valueType.fallbackValue()
+                        .doubleArrayValue());
                 case FLOAT_ARRAY:
-                    return (HugeSparseObjectArrayList<T, ?>) HugeSparseFloatArrayList.of(valueType.fallbackValue().floatArrayValue());
+                    return (HugeSparseObjectArrayList<T, ?>) HugeSparseFloatArrayList.of(valueType.fallbackValue()
+                        .floatArrayValue());
                 default:
-                    throw new IllegalArgumentException(formatWithLocale("Unsupported object stream type %s", valueType));
+                    throw new IllegalArgumentException(formatWithLocale(
+                        "Unsupported object stream type %s",
+                        valueType
+                    ));
             }
         }
     }
