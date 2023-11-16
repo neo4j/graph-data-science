@@ -17,11 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.projections;
+package org.neo4j.gds.metrics.projections;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.neo4j.gds.metrics.ExecutionMetricRegistrar;
 
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -31,7 +32,7 @@ class ProjectionMetricsServiceTest {
     @Test
     void shouldCreateNativeProjectionMetric() {
         // given
-        var registrarMock = mock(ProjectionMetricRegistrar.class);
+        var registrarMock = Mockito.mock(ExecutionMetricRegistrar.class);
         var metricsService = new ProjectionMetricsService(registrarMock);
 
         // when
@@ -45,7 +46,7 @@ class ProjectionMetricsServiceTest {
     @Test
     void shouldCreateCypherProjectionMetric() {
         // given
-        var registrarMock = mock(ProjectionMetricRegistrar.class);
+        var registrarMock = Mockito.mock(ExecutionMetricRegistrar.class);
         var metricsService = new ProjectionMetricsService(registrarMock);
 
         // when
@@ -59,7 +60,7 @@ class ProjectionMetricsServiceTest {
     @Test
     void shouldCreateCypherV2ProjectionMetric() {
         // given
-        var registrarMock = mock(ProjectionMetricRegistrar.class);
+        var registrarMock = Mockito.mock(ExecutionMetricRegistrar.class);
         var metricsService = new ProjectionMetricsService(registrarMock);
 
         // when

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.BaseConfig;
@@ -32,6 +31,7 @@ import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GraphStoreFromCatalogLoader;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
+import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.gds.transaction.EmptyTransactionContext;
 import org.neo4j.gds.transaction.TransactionContext;

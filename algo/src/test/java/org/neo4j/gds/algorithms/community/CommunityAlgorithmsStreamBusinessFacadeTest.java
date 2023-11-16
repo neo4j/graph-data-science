@@ -24,8 +24,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.RequestScopedDependencies;
-import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
-import org.neo4j.gds.algorithms.metrics.PassthroughAlgorithmMetricRegistrar;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -39,6 +37,8 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
+import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.wcc.WccBaseConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -103,7 +103,7 @@ class CommunityAlgorithmsStreamBusinessFacadeTest {
                     new AlgorithmRunner(
                         logMock,
                         graphStoreCatalogServiceMock,
-                        new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
+                        new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
                         mock(AlgorithmMemoryValidationService.class),
                         RequestScopedDependencies.builder().build(),
                         TaskRegistryFactory.empty(),
@@ -142,7 +142,7 @@ class CommunityAlgorithmsStreamBusinessFacadeTest {
                     new AlgorithmRunner(
                         null,
                         graphStoreCatalogServiceMock,
-                        new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
+                        new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
                         null,
                         RequestScopedDependencies.builder().build(),
                         mock(TaskRegistryFactory.class),

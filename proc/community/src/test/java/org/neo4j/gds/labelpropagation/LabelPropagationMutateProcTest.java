@@ -46,8 +46,6 @@ import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
-import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
-import org.neo4j.gds.algorithms.metrics.PassthroughAlgorithmMetricRegistrar;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.DatabaseId;
@@ -75,6 +73,8 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
+import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
@@ -325,7 +325,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                 new AlgorithmRunner(
                     logMock,
                     graphStoreCatalogService,
-                    new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
+                    new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
                     memoryUsageValidator,
                     RequestScopedDependencies.builder()
                         .with(DatabaseId.of(db.databaseName()))
@@ -456,7 +456,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                 new AlgorithmRunner(
                     logMock,
                     graphStoreCatalogService,
-                    new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
+                    new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
                     memoryUsageValidator,
                     RequestScopedDependencies.builder()
                         .with(DatabaseId.of(db.databaseName()))
@@ -542,7 +542,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                 new AlgorithmRunner(
                     logMock,
                     graphStoreCatalogService,
-                    new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
+                    new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
                     memoryUsageValidator,
                     RequestScopedDependencies.builder()
                         .with(DatabaseId.of(db.databaseName()))
@@ -630,7 +630,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                 new AlgorithmRunner(
                     logMock,
                     graphStoreCatalogService,
-                    new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
+                    new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
                     memoryUsageValidator,
                     RequestScopedDependencies.builder()
                         .with(DatabaseId.of(db.databaseName()))

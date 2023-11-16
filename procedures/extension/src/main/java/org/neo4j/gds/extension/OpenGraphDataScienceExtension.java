@@ -21,10 +21,10 @@ package org.neo4j.gds.extension;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
-import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
-import org.neo4j.gds.algorithms.metrics.PassthroughAlgorithmMetricRegistrar;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.core.write.NativeExportBuildersProvider;
+import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
+import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.integration.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.integration.ExtensionBuilder;
@@ -67,7 +67,7 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator = Optional.empty();
 
         // metrics are a no-op in OpenGDS
-        var algorithmMetricsService = new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar());
+        var algorithmMetricsService = new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar());
 
         extensionBuilder
             .withComponent(

@@ -26,7 +26,6 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.AlgorithmMemoryEstimation;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.RequestScopedDependencies;
-import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.GraphDimensions;
@@ -35,6 +34,7 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;

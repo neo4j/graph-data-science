@@ -17,20 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms.metrics;
+package org.neo4j.gds.metrics.algorithms;
 
-public abstract class AlgorithmMetric implements AutoCloseable {
+import org.neo4j.gds.metrics.ExecutionMetricRegistrar;
+import org.neo4j.gds.metrics.ExecutionMetric;
 
-    protected final String algorithm;
+public class AlgorithmMetricsService {
 
-    protected AlgorithmMetric(String algorithm) {
-        this.algorithm = algorithm;
+    private final ExecutionMetricRegistrar metricRegistrar;
+
+    public AlgorithmMetricsService(ExecutionMetricRegistrar metricRegistrar) {
+        this.metricRegistrar = metricRegistrar;
     }
 
-    public abstract void start();
-
-    public abstract void failed();
-
-    @Override
-    public abstract void close();
+    public ExecutionMetric create(String algorithm) {
+        return metricRegistrar.create(algorithm);
+    }
 }

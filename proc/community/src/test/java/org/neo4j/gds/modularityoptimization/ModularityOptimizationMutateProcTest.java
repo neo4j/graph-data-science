@@ -50,8 +50,6 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStatsBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
-import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
-import org.neo4j.gds.algorithms.metrics.PassthroughAlgorithmMetricRegistrar;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.DatabaseId;
@@ -77,6 +75,8 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
+import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
@@ -575,7 +575,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
                 new AlgorithmRunner(
                     logMock,
                     graphStoreCatalogService,
-                    new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
+                    new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
                     memoryUsageValidator,
                     RequestScopedDependencies.builder()
                         .with(DatabaseId.of(db.databaseName()))

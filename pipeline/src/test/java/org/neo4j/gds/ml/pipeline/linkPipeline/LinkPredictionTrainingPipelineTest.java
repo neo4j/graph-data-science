@@ -24,8 +24,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
-import org.neo4j.gds.algorithms.metrics.PassthroughAlgorithmMetricRegistrar;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
@@ -43,6 +41,8 @@ import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
+import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
+import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
 import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
@@ -197,7 +197,7 @@ class LinkPredictionTrainingPipelineTest {
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .isGdsAdmin(false)
-            .algorithmMetricsService(new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()))
+            .algorithmMetricsService(new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()))
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
@@ -242,7 +242,7 @@ class LinkPredictionTrainingPipelineTest {
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .isGdsAdmin(false)
-            .algorithmMetricsService(new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()))
+            .algorithmMetricsService(new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()))
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();
@@ -287,7 +287,7 @@ class LinkPredictionTrainingPipelineTest {
             .taskRegistryFactory(EmptyTaskRegistryFactory.INSTANCE)
             .userLogRegistryFactory(EmptyUserLogRegistryFactory.INSTANCE)
             .isGdsAdmin(false)
-            .algorithmMetricsService(new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()))
+            .algorithmMetricsService(new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()))
             .build();
 
         var pipeline = new LinkPredictionTrainingPipeline();

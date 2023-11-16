@@ -20,8 +20,6 @@
 package org.neo4j.gds;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
-import org.neo4j.gds.algorithms.metrics.PassthroughAlgorithmMetricRegistrar;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
@@ -60,6 +58,8 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.termination.TerminationMonitor;
+import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
+import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.test.ImmutableTestWriteConfig;
 import org.neo4j.gds.test.TestAlgoResultBuilder;
 import org.neo4j.gds.test.TestAlgorithm;
@@ -98,7 +98,7 @@ class WriteNodePropertiesComputationResultConsumerTest extends BaseTest {
         .modelCatalog(ModelCatalog.EMPTY)
         .isGdsAdmin(false)
         .nodePropertyExporterBuilder(new NativeNodePropertiesExporterBuilder(EmptyTransactionContext.INSTANCE))
-        .algorithmMetricsService(new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()))
+        .algorithmMetricsService(new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()))
         .build();
 
     @Test

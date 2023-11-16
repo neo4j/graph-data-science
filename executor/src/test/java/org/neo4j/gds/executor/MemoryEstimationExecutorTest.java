@@ -27,8 +27,6 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.RelationshipProjections;
-import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
-import org.neo4j.gds.algorithms.metrics.PassthroughAlgorithmMetricRegistrar;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
@@ -43,6 +41,8 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.gdl.GdlGraphs;
+import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
+import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.termination.TerminationMonitor;
 import org.neo4j.gds.test.TestAlgorithm;
@@ -87,7 +87,7 @@ class MemoryEstimationExecutorTest extends BaseTest {
             .nodeLookup(NodeLookup.EMPTY)
             .modelCatalog(ModelCatalog.EMPTY)
             .isGdsAdmin(false)
-            .algorithmMetricsService(new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()))
+            .algorithmMetricsService(new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()))
             .build();
 
         memoryEstimationExecutor = new MemoryEstimationExecutor<>(

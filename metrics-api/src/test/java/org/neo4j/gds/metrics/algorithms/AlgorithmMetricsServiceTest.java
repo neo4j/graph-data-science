@@ -17,15 +17,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms.metrics;
+package org.neo4j.gds.metrics.algorithms;
 
-/**
- * No-op metrics registrar; to be used when metrics are not enabled in Neo4j.
- */
-public class PassthroughAlgorithmMetricRegistrar implements AlgorithmMetricRegistrar {
+import org.junit.jupiter.api.Test;
+import org.neo4j.gds.metrics.ExecutionMetricRegistrar;
 
-    @Override
-    public AlgorithmMetric create(String algorithm) {
-        return new PassthroughAlgorithmMetric(algorithm);
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+
+class AlgorithmMetricsServiceTest {
+
+    @Test
+    void shouldCreateAlgorithmMetric() {
+        // given
+        var registrarMock = mock(ExecutionMetricRegistrar.class);
+        var metricsService = new AlgorithmMetricsService(registrarMock);
+
+        // when
+        metricsService.create("foo");
+
+        // then
+        verify(registrarMock, times(1)).create("foo");
+        verifyNoMoreInteractions(registrarMock);
     }
+
 }

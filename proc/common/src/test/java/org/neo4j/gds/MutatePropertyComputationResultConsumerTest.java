@@ -22,8 +22,6 @@ package org.neo4j.gds;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
-import org.neo4j.gds.algorithms.metrics.PassthroughAlgorithmMetricRegistrar;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.CloseableResourceRegistry;
@@ -50,6 +48,8 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
+import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.nodeproperties.IdentityPropertyValues;
 import org.neo4j.gds.termination.TerminationMonitor;
 import org.neo4j.gds.test.ImmutableTestMutateConfig;
@@ -90,7 +90,7 @@ class MutatePropertyComputationResultConsumerTest {
         .nodeLookup(NodeLookup.EMPTY)
         .modelCatalog(ModelCatalog.EMPTY)
         .isGdsAdmin(false)
-        .algorithmMetricsService(new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()))
+        .algorithmMetricsService(new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()))
         .build();
 
     @BeforeEach
