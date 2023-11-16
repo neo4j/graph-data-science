@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.SplittableRandom;
 import java.util.stream.LongStream;
 
-public final class BatchSampler {
+final class BatchSampler {
 
     public static final double DEGREE_SMOOTHING_FACTOR = 0.75;
     private final Graph graph;

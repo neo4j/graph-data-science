@@ -28,12 +28,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.applications.graphstorecatalog.TopologyResult;
 import org.neo4j.gds.beta.generator.GraphGenerateProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.applications.graphstorecatalog.TopologyResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,9 +51,8 @@ class GraphStreamRelationshipsProcTest extends BaseProcTest {
                               ", (c)-[:REL2]->(b)" +
                               ", (b)-[:REL2]->(a)";
 
-    @SuppressWarnings("WeakerAccess")
     @Inject
-    IdFunction idFunction;
+    private IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {

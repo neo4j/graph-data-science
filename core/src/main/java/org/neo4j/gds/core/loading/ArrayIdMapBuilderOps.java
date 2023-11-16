@@ -31,7 +31,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import java.util.OptionalLong;
 import java.util.stream.LongStream;
 
-public final class ArrayIdMapBuilderOps {
+final class ArrayIdMapBuilderOps {
 
     static ArrayIdMap build(
         HugeLongArray internalToOriginalIds,

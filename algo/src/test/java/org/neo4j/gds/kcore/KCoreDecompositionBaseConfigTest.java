@@ -48,7 +48,7 @@ class KCoreDecompositionBaseConfigTest {
 
 
         @Inject
-        GraphStore graphStore;
+        private GraphStore graphStore;
 
 
         @Test
@@ -76,7 +76,7 @@ class KCoreDecompositionBaseConfigTest {
 
 
         @Inject
-        GraphStore graphStore;
+        private GraphStore graphStore;
 
         @Test
         void shouldNotThrowForUndirected() {

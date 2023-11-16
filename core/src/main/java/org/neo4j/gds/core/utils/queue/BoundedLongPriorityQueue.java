@@ -49,7 +49,7 @@ public abstract class BoundedLongPriorityQueue {
     final double[] priorities;
     int elementCount = 0;
 
-    BoundedLongPriorityQueue(int bound) {
+    private BoundedLongPriorityQueue(int bound) {
         this.bound = bound;
         this.elements = new long[bound];
         this.priorities = new double[bound];

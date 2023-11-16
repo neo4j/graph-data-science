@@ -27,6 +27,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.scaling.Center;
 import org.neo4j.gds.scaling.Max;
@@ -63,6 +65,9 @@ class ArticleRankProcTest extends BaseProcTest {
             Arguments.of(GdsCypher.ExecutionModes.MUTATE),
             Arguments.of(GdsCypher.ExecutionModes.STATS)
         );}
+
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setupGraph() throws Exception {

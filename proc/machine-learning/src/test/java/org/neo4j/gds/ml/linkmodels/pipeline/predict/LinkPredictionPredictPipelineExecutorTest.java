@@ -106,7 +106,7 @@ class LinkPredictionPredictPipelineExecutorTest {
                                   "(n0)-[:CONTEXT]->(n2)";
 
     @Inject
-    GraphStore multiLabelGraphStore;
+    private GraphStore multiLabelGraphStore;
     private final String username = "user";
 
     @AfterEach

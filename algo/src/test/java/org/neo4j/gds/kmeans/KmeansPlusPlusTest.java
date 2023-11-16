@@ -100,7 +100,6 @@ public class KmeansPlusPlusTest {
         KmeansSampler kmeansSampler = KmeansSampler.createSampler(
             KmeansSampler.SamplerType.KMEANSPP,
             new SplittableRandom(19),
-            nodePropertyValues,
             clusterManager,
             10,
             3,

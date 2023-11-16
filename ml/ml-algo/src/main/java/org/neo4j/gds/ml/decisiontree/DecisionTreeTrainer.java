@@ -51,7 +51,7 @@ public abstract class DecisionTreeTrainer<PREDICTION extends Number> {
     }
 
     // Does not include the class itself as it will be inherited anyway.
-    public static MemoryRange estimateTree(
+    static MemoryRange estimateTree(
         DecisionTreeTrainerConfig config,
         long numberOfTrainingSamples,
         long leafNodeSizeInBytes,

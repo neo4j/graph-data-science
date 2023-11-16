@@ -58,37 +58,37 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
     static String gdl = "(n1 :A)-[:T {foo: 5} ]->(n2 :A)-[:T {foo: 5} ]->(n3 :A)-[:T {foo: 5} ]->(n4 :A)-[:T {foo: 5} ]->(n5 :B)-[:T {foo: 5} ]->(n6 :A)";
 
     @Inject
-    TestGraph graph;
+    private TestGraph graph;
 
     @Inject
-    GraphStore graphStore;
+    private GraphStore graphStore;
 
     @GdlGraph(orientation = Orientation.UNDIRECTED, graphNamePrefix = "multiLabel")
     static String gdlMultiLabel = "(n1 :A)-[:T {foo: 5} ]->(n2 :C)-[:T {foo: 5} ]->(n3 :A)-[:T {foo: 5} ]->(n4 :A)-[:T {foo: 5} ]->(n5 :B)-[:T {foo: 5} ]->(n6 :D)";
 
     @Inject
-    TestGraph multiLabelGraph;
+    private TestGraph multiLabelGraph;
 
     @Inject
-    GraphStore multiLabelGraphStore;
+    private GraphStore multiLabelGraphStore;
 
     @GdlGraph(orientation = Orientation.UNDIRECTED, graphNamePrefix = "multi")
     static String gdlMultiGraph = "(n1 :A), (n2: A), (n1)-->(n2), (n2)-->(n1), (n1)-->(n2), (n1)-->(n2)";
 
     @Inject
-    TestGraph multiGraph;
+    private TestGraph multiGraph;
 
     @Inject
-    GraphStore multiGraphStore;
+    private GraphStore multiGraphStore;
 
     @GdlGraph(orientation = Orientation.UNDIRECTED, graphNamePrefix = "negative")
     static String gdlNegative = "(n1 :A)-[:T {foo: 5} ]->(n2 :A)-[:T {foo: 5} ]->(n3 :A)-[:T {foo: 5} ]->(n4 :A)-[:T {foo: 5} ]->(n5 :B)-[:T {foo: 5} ]->(n6 :A), (n1)-[:NEGATIVE]->(n3), (n3)-[:NEGATIVE]->(n5), (n5)-[:NEGATIVE]->(n7 :A)";
 
     @Inject
-    TestGraph negativeGraph;
+    private TestGraph negativeGraph;
 
     @Inject
-    GraphStore negativeGraphStore;
+    private GraphStore negativeGraphStore;
 
     @Test
     void split() {

@@ -33,7 +33,7 @@ import static org.neo4j.gds.core.compression.common.VarLongEncoding.encodedVLong
 import static org.neo4j.gds.core.compression.common.VarLongEncoding.zigZag;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class CompressedRandomWalks {
+class CompressedRandomWalks {
     private final HugeObjectArray<byte[]> compressedWalks;
     private final HugeIntArray walkLengths;
 

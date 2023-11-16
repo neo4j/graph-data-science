@@ -50,7 +50,7 @@ class ProgressTrackingTest {
         " ()-[:REL2]->(),";
 
     @Inject
-    Graph graph;
+    private Graph graph;
 
     @Test
     void shouldLogProgress() {

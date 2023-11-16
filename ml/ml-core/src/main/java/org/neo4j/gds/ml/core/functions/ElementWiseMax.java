@@ -27,7 +27,7 @@ import org.neo4j.gds.ml.core.tensor.Matrix;
 
 
 public class ElementWiseMax extends SingleParentVariable<Matrix, Matrix> {
-    public static final int INVALID_NEIGHBOR = -1;
+    private static final int INVALID_NEIGHBOR = -1;
     private final BatchNeighbors batchNeighbors;
 
     public ElementWiseMax(Variable<Matrix> parentVariable, BatchNeighbors batchGraph) {

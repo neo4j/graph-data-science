@@ -36,7 +36,7 @@ import java.util.Optional;
 
 import static org.neo4j.gds.utils.PriorityServiceLoader.loadService;
 
-public class EditionLifecycleAdapter extends LifecycleAdapter {
+class EditionLifecycleAdapter extends LifecycleAdapter {
 
     private final ExtensionContext context;
     private final Config config;

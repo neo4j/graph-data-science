@@ -45,11 +45,11 @@ public abstract class EdgeSplitter {
     private final RelationshipType selectedRelationshipType;
     private final RelationshipType remainingRelationshipType;
 
-    protected final IdMap sourceNodes;
-    protected final IdMap targetNodes;
-    protected final IdMap rootNodes;
+    private final IdMap sourceNodes;
+    private final IdMap targetNodes;
+    private final IdMap rootNodes;
 
-    protected int concurrency;
+    final int concurrency;
 
     EdgeSplitter(
         Optional<Long> maybeSeed,
@@ -144,11 +144,11 @@ public abstract class EdgeSplitter {
 
     protected abstract long validPositiveRelationshipCandidateCount(Graph graph, LongLongPredicate isValidNodePair);
 
-    protected boolean sample(double probability) {
+    boolean sample(double probability) {
         return rng.nextDouble() < probability;
     }
 
-    protected long samplesPerNode(long maxSamples, double remainingSamples, long remainingNodes) {
+    long samplesPerNode(long maxSamples, double remainingSamples, long remainingNodes) {
         var numSamplesOnAverage = remainingSamples / remainingNodes;
         var wholeSamples = (long) numSamplesOnAverage;
         var extraSample = sample(numSamplesOnAverage - wholeSamples) ? 1 : 0;

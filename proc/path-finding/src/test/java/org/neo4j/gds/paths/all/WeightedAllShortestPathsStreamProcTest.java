@@ -82,7 +82,7 @@ final class WeightedAllShortestPathsStreamProcTest extends BaseProcTest {
     private static long targetNodeId;
 
     @Inject
-    IdFunction idFunction;
+    private IdFunction idFunction;
 
 
     @BeforeEach

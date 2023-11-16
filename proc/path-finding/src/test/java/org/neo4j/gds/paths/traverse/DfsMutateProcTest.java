@@ -29,6 +29,8 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
@@ -69,6 +71,9 @@ class DfsMutateProcTest extends BaseProcTest {
         ", (d)-[:TYPE]->(f)" +
         ", (e)-[:TYPE]->(g)" +
         ", (f)-[:TYPE]->(g)";
+
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setupGraph() throws Exception {

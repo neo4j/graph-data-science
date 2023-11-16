@@ -309,7 +309,7 @@ public final class CommunityStatistics {
             });
         }
 
-        public long count() {
+        long count() {
             return count;
         }
     }

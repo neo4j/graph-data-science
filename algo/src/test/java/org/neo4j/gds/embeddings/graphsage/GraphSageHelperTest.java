@@ -170,7 +170,7 @@ class GraphSageHelperTest {
                                                   ", (a)-[:REL]->(b)";
 
         @Inject
-        TestGraph validGraph;
+        private TestGraph validGraph;
 
         @Test
         void shouldConcatenateFeatures() {
@@ -200,10 +200,10 @@ class GraphSageHelperTest {
                                                 ", (a)-[:REL]->(b)";
 
         @Inject
-        Graph graph;
+        private Graph graph;
 
         @Inject
-        IdFunction idFunction;
+        private IdFunction idFunction;
 
         @Test
         void shouldThrowOnMissingProperties() {

@@ -27,6 +27,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
@@ -55,6 +56,9 @@ class NodeRegressionPipelineStreamProcTest extends BaseProcTest {
 
     @Inject
     private ModelCatalog modelCatalog;
+
+    @Inject
+    private IdFunction idFunction;
 
     private static final String SIMPLE_MODEL_NAME = "simpleModel";
 

@@ -78,7 +78,7 @@ class LeidenWriteProcTest extends BaseProcTest {
         "  (a6)-[:R {weight: 1.0}]->(a7)";
 
     @Inject
-    IdFunction idFunction;
+    private IdFunction idFunction;
 
 
     @BeforeEach

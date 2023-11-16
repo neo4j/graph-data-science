@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
@@ -31,6 +32,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.Aggregation;
@@ -38,10 +40,8 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.HugeGraph;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -50,6 +50,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.modularity.ModularityCalculator;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 import java.util.Optional;
@@ -61,8 +62,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.gds.CommunityHelper.assertCommunities;
-import static org.neo4j.gds.CommunityHelper.assertCommunitiesWithLabels;
 import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 import static org.neo4j.gds.TestSupport.ids;
 import static org.neo4j.gds.compat.TestLog.INFO;
@@ -165,7 +164,7 @@ class LouvainTest {
         final HugeLongArray[] dendrogram = result.dendrogramManager().getAllDendrograms();
         final double[] modularities = result.modularities();
 
-        assertCommunities(
+        CommunityHelper.assertCommunities(
             dendrogram[0],
             ids(mappedId, "a", "b", "d"),
             ids(mappedId, "c", "e", "f", "x"),
@@ -173,7 +172,7 @@ class LouvainTest {
             ids(mappedId, "j", "k", "l", "m", "n")
         );
 
-        assertCommunities(
+        CommunityHelper.assertCommunities(
             dendrogram[1],
             ids(mappedId, "a", "b", "c", "d", "e", "f", "x"),
             ids(mappedId, "g", "h", "i"),
@@ -214,7 +213,7 @@ class LouvainTest {
         final HugeLongArray[] dendrogram = result.dendrogramManager().getAllDendrograms();
         final double[] modularities = result.modularities();
 
-        assertCommunities(
+        CommunityHelper.assertCommunities(
             dendrogram[0],
             ids(mappedId, "a", "b", "d"),
             ids(mappedId, "c", "e", "x"),
@@ -223,7 +222,7 @@ class LouvainTest {
             ids(mappedId, "j", "k", "l", "m", "n")
         );
 
-        assertCommunities(
+        CommunityHelper.assertCommunities(
             dendrogram[1],
             ids(mappedId, "a", "b", "c", "d", "e", "f", "g", "x"),
             ids(mappedId, "h", "i", "j", "k", "l", "m", "n")
@@ -269,7 +268,7 @@ class LouvainTest {
             42L, ids(mappedId, "j", "k", "l", "m", "n")
         );
 
-        assertCommunitiesWithLabels(
+        CommunityHelper.assertCommunitiesWithLabels(
             dendrogram[0],
             expectedCommunitiesWithLabels
         );

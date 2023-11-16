@@ -38,7 +38,6 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil.NodeIdPropertyStep;
@@ -67,10 +66,7 @@ class NodePropertyStepExecutorTest {
         "(b1)-[:R2]->(b2)";
 
     @Inject
-    GraphStore graphStore;
-
-    @Inject
-    IdFunction idFunction;
+    private GraphStore graphStore;
 
     @Test
     void executeSeveralSteps() {

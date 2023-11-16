@@ -58,7 +58,7 @@ public abstract class CollectionStep<SPEC extends CollectionStep.Spec> implement
         this.testGenerator = testGenerator;
     }
 
-    public abstract String annotation();
+    protected abstract String annotation();
 
     @Override
     public Set<String> annotations() {

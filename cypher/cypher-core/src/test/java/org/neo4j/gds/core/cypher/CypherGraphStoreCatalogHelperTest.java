@@ -43,10 +43,10 @@ class CypherGraphStoreCatalogHelperTest {
     public static String DB_CYPHER_B = "CREATE (:B)";
 
     @Inject
-    GraphStore aGraphStore;
+    private GraphStore aGraphStore;
 
     @Inject
-    GraphStore bGraphStore;
+    private GraphStore bGraphStore;
 
     @AfterEach
     void tearDown() {
@@ -86,7 +86,7 @@ class CypherGraphStoreCatalogHelperTest {
     }
 
     static class TestGraphStoreWrapper extends GraphStoreAdapter {
-        public TestGraphStoreWrapper(GraphStore graphStore) {
+        TestGraphStoreWrapper(GraphStore graphStore) {
             super(graphStore);
         }
     }

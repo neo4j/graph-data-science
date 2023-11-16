@@ -37,7 +37,7 @@ import static org.neo4j.gds.collections.ArrayUtil.oversizeHuge;
 
 class ArrayUtilTest {
 
-    static Stream<Integer> testDataSizes() {
+    private static Stream<Integer> testDataSizes() {
         return Stream.of(32, 33, 64, 65, 2048, 2049, 4096, 4097);
     }
 

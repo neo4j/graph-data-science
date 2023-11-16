@@ -32,7 +32,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 
-public class SpanningTreeWithParallelEdgesWriteTest extends BaseProcTest {
+class SpanningTreeWithParallelEdgesWriteTest extends BaseProcTest {
 
     @Neo4jGraph
     static final String DB_CYPHER =
@@ -42,8 +42,7 @@ public class SpanningTreeWithParallelEdgesWriteTest extends BaseProcTest {
         "CREATE (a)-[:LINK1 {cost:1}]->(b)";
 
     @Inject
-    IdFunction idFunction;
-
+    private IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {

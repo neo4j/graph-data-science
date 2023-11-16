@@ -51,7 +51,7 @@ class LinkFeatureExtractorTest {
                                         "(a)-[:REL]->(d)";
 
     @Inject
-    Graph graph;
+    private Graph graph;
 
     @Test
     void singleLinkFeatureStep() {

@@ -53,14 +53,14 @@ class UnionGraphTest {
     @GdlGraph(graphNamePrefix = "undirected", orientation = Orientation.UNDIRECTED)
     private static final String GDL = "()-->()-->()";
     @Inject
-    TestGraph naturalGraph;
+    private TestGraph naturalGraph;
     @Inject
-    TestGraph undirectedGraph;
+    private TestGraph undirectedGraph;
 
     @GdlGraph(graphNamePrefix = "directedA")
     private static final String labeled_GDL = "()-[:A]->()";
     @Inject
-    TestGraph directedAGraph;
+    private TestGraph directedAGraph;
 
     @Test
     void conflictingDirectionThrowsException() {
@@ -97,10 +97,10 @@ class UnionGraphTest {
         ", (c)-[:REL2]->(b)";
 
     @Inject
-    GraphStore multiRelTypeGraphStore;
+    private GraphStore multiRelTypeGraphStore;
 
     @Inject
-    IdFunction multiRelTypeIdFunction;
+    private IdFunction multiRelTypeIdFunction;
 
     @ParameterizedTest
     @MethodSource("nodeRelCombinations")

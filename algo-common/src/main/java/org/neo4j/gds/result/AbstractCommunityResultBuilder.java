@@ -54,17 +54,9 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
         ProcedureReturnColumns returnColumns,
         int concurrency
     ) {
-        this(returnColumns, DefaultPool.INSTANCE, concurrency);
-    }
-
-    protected AbstractCommunityResultBuilder(
-        ProcedureReturnColumns returnColumns,
-        ExecutorService executorService,
-        int concurrency
-    ) {
         this.buildHistogram = returnColumns.contains("communityDistribution") || returnColumns.contains("componentDistribution");
         this.buildCommunityCount = returnColumns.contains("communityCount") || returnColumns.contains("componentCount");
-        this.executorService = executorService;
+        this.executorService = DefaultPool.INSTANCE;
         this.concurrency = concurrency;
     }
 

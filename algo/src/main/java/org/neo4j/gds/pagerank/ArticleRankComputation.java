@@ -33,7 +33,7 @@ import java.util.function.LongToDoubleFunction;
 
 public final class ArticleRankComputation implements PregelComputation<PageRankConfig> {
 
-    static final String PAGE_RANK = "pagerank";
+    private static final String PAGE_RANK = "pagerank";
 
     private final boolean hasSourceNodes;
     private final LongSet sourceNodes;

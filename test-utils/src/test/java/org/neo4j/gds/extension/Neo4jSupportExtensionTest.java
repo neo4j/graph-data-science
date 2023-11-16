@@ -45,6 +45,9 @@ class Neo4jSupportExtensionTest extends BaseTest {
                                             "  (a { id: 0 })" +
                                             ", (b { id: 1 })";
 
+    @Inject
+    private IdFunction idFunction;
+
     @Test
     void shouldLoadGraphAndIdFunctionThroughExtension() {
         assertNotNull(db);

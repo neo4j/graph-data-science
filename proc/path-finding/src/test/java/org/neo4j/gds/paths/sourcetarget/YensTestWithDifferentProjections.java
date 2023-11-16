@@ -57,7 +57,7 @@ class YensTestWithDifferentProjections extends BaseProcTest {
         "(d)-[:PATH]->(e)";
 
     @Inject
-    IdFunction idFunction;
+    private IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {

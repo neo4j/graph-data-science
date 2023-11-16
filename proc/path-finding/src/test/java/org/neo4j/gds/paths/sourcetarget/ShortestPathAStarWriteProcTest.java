@@ -26,6 +26,8 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
@@ -80,6 +82,9 @@ class ShortestPathAStarWriteProcTest extends BaseProcTest {
             ", (nN)-[:TYPE {cost: 554.0}]->(nO)" +
             ", (nO)-[:TYPE {cost: 603.0}]->(nP)" +
             ", (nP)-[:TYPE {cost: 847.0}]->(nX)";
+
+    @Inject
+    private IdFunction idFunction;
 
     long idA, idB, idC, idD, idE, idF, idG, idH, idX;
     long[] ids0;

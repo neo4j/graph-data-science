@@ -27,6 +27,8 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
@@ -78,6 +80,9 @@ class ShortestPathAStarMutateProcTest extends BaseProcTest {
             ", (nN)-[:T{w: 554.0}]->(nO)" +
             ", (nO)-[:T{w: 603.0}]->(nP)" +
             ", (nP)-[:T{w: 847.0}]->(nX)";
+
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {

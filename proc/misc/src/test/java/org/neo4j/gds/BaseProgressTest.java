@@ -36,8 +36,8 @@ import java.util.stream.Stream;
 
 public abstract class BaseProgressTest extends BaseTest {
 
-    protected static final MemoryRange MEMORY_ESTIMATION_RANGE = MemoryRange.of(10, 20);
-    protected static final int REQUESTED_CPU_CORES = 5;
+    private static final MemoryRange MEMORY_ESTIMATION_RANGE = MemoryRange.of(10, 20);
+    private static final int REQUESTED_CPU_CORES = 5;
 
     @Override
     @ExtensionCallback

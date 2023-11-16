@@ -28,6 +28,8 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
@@ -45,6 +47,9 @@ class SteinerTreeMutateProcTest extends BaseProcTest {
         " ,(b:Node) " +
         " ,(c:Node) " +
         " ,(a)-[:TYPE {cost: 5.4}]->(b) ";
+
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {

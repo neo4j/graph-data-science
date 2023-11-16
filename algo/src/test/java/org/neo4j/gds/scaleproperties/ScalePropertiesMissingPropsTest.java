@@ -47,7 +47,7 @@ class ScalePropertiesMissingPropsTest {
         "(e:A {         b: 25                                             })";
 
     @Inject
-    TestGraph graph;
+    private TestGraph graph;
 
     @Test
     void partialArrays() {

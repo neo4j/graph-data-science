@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.neo4j.gds.ml.kge.ScoreFunction.TRANSE;
 
 @GdlExtension
-public class KGEPredictMutateConfigTest {
+class KGEPredictMutateConfigTest {
 
     @GdlGraph(orientation = Orientation.NATURAL)
     static final String GDL_GRAPH = "(:A {embedding: [0.1, 0.9]})" +
@@ -44,7 +44,7 @@ public class KGEPredictMutateConfigTest {
         "(:C)";
 
     @Inject
-    GraphStore graphStore;
+    private GraphStore graphStore;
 
     @Test
     void scoringFunctionMustMatch() {

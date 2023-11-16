@@ -41,7 +41,7 @@ class BatchSamplerTest {
     public static final String GDL = GraphSageTestGraph.GDL;
 
     @Inject
-    Graph graph;
+    private Graph graph;
 
     @Test
     void sampleDenseGraph() {

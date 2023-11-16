@@ -32,6 +32,8 @@ import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.graphdb.security.AuthorizationViolationException;
@@ -59,6 +61,9 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
 
     @Neo4jGraph
     private static final String DB_CYPHER = "CREATE (" + String.join("), (", nodeVariables) + ")";
+
+    @Inject
+    private IdFunction idFunction;
 
     private Graph graph;
 

@@ -25,6 +25,8 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
@@ -69,6 +71,9 @@ class PageRankPregelProcTest extends BaseProcTest {
         ", (k)-[:REL]->(e)";
     
     private static final double RESULT_ERROR = 1e-3;
+
+    @Inject
+    private IdFunction idFunction;
 
     private List<Map<String, Object>> expected;
 

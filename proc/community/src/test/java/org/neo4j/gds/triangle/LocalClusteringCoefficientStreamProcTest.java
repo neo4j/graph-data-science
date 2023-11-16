@@ -47,7 +47,7 @@ class LocalClusteringCoefficientStreamProcTest extends BaseProcTest {
                                            "(b)-[:T]->(e) ";
 
     @Inject
-    IdFunction idFunction;
+    private IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {

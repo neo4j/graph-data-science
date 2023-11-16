@@ -42,7 +42,7 @@ import static org.neo4j.gds.paths.PathTestUtil.expected;
 final class BellmanFordCopiedDeltaSteppingTests {
 
     // concurrency X id-supplier
-    static Stream<Arguments> testParameters() {
+    private static Stream<Arguments> testParameters() {
         return TestSupport.crossArguments(
             () -> TestSupport.crossArguments(
                 () -> IntStream.of(1, 4).mapToObj(Arguments::of)
@@ -198,7 +198,7 @@ final class BellmanFordCopiedDeltaSteppingTests {
             ", (e)-[:TYPE]->(d)";
 
         @Inject
-        TestGraph graph;
+        private TestGraph graph;
 
         IdFunction idFunction = (name) -> graph.toMappedNodeId(name);
 

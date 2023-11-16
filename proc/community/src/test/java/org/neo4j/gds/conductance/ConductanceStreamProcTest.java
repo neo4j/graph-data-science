@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ConductanceStreamProcTest extends BaseProcTest {
 
-    static final String GRAPH_NAME = "myGraph";
+    private static final String GRAPH_NAME = "myGraph";
 
     @Neo4jGraph
     @Language("Cypher")

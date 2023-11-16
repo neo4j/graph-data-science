@@ -64,6 +64,9 @@ final class NodeRegressionPipelineMutateProcTest extends BaseProcTest {
     @Inject
     private ModelCatalog modelCatalog;
 
+    @Inject
+    private IdFunction idFunction;
+
     private static final String SIMPLE_MODEL_NAME = "simpleModel";
 
     @BeforeEach

@@ -53,10 +53,10 @@ class NodeLabelMutatorApplicationTest {
             ", (d:B)";
 
     @Inject
-    GraphStore graphStore;
+    private GraphStore graphStore;
 
     @Inject
-    IdFunction idFunction;
+    private IdFunction idFunction;
 
     @GdlGraph(graphNamePrefix = "all")
     private static final String ALL_DB_CYPHER =
@@ -68,11 +68,11 @@ class NodeLabelMutatorApplicationTest {
 
     @SuppressWarnings("WeakerAccess")
     @Inject
-    GraphStore allGraphStore;
+    private GraphStore allGraphStore;
 
     @SuppressWarnings("WeakerAccess")
     @Inject
-    IdFunction allIdFunction;
+    private IdFunction allIdFunction;
 
     @Test
     void mutateNodeLabelMultiLabelProjection(SoftAssertions assertions) {

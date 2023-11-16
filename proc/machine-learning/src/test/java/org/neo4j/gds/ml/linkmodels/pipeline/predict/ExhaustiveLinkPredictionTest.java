@@ -81,10 +81,10 @@ class ExhaustiveLinkPredictionTest {
 
 
     @Inject
-    TestGraph multiLabelGraph;
+    private TestGraph multiLabelGraph;
 
     @Inject
-    GraphStore multiLabelGraphStore;
+    private GraphStore multiLabelGraphStore;
 
     @ParameterizedTest
     @CsvSource(value = {"3, 1", "3, 4", "50, 1", "50, 4"})

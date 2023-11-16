@@ -125,7 +125,7 @@ public final class AdjacencyCompression {
         return ensureBufferSize(data.buffer, out, data.length);
     }
 
-    static byte[] ensureBufferSize(long[] data, byte[] out, int length) {
+    private static byte[] ensureBufferSize(long[] data, byte[] out, int length) {
         var requiredBytes = encodedVLongsSize(data, length);
         if (requiredBytes > out.length) {
             return new byte[requiredBytes];

@@ -62,7 +62,7 @@ class K1ColoringWriteProcTest extends BaseProcTest {
         ",(a)-[:REL]->(c)";
 
     @Inject
-    IdToVariable idToVariable;
+    private IdToVariable idToVariable;
 
 
     @BeforeEach

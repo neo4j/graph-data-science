@@ -128,7 +128,7 @@ class CypherMapWrapperTest {
         assertTrue(doubleEx.getMessage().contains("must be of type `Long` but was `Double`"));
     }
 
-    static Stream<Arguments> requiredParams() {
+    private static Stream<Arguments> requiredParams() {
         return Stream.of(
             arguments(
                 map("foo", 42, "bar", -42),
@@ -156,7 +156,7 @@ class CypherMapWrapperTest {
         );
     }
 
-    static Stream<Arguments> unexpectedParams() {
+    private static Stream<Arguments> unexpectedParams() {
         return Stream.of(
             arguments(
                 map("fou", 42),
@@ -196,7 +196,7 @@ class CypherMapWrapperTest {
         );
     }
 
-    static Stream<Arguments> mutexParams() {
+    private static Stream<Arguments> mutexParams() {
         return Stream.of(
             arguments(
                 map("aaa", 42, "bbb", 1337, "xxx", 42),

@@ -64,7 +64,7 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
     private final int concurrency;
     private final TentativeDistances parentsAndDistances;
 
-    protected DagLongestPath(
+    DagLongestPath(
         Graph graph,
         ProgressTracker progressTracker,
         int concurrency

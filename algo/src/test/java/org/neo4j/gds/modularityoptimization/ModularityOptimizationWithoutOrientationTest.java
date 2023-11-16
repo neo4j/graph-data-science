@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestProgressTracker;
@@ -51,7 +52,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.gds.CommunityHelper.assertCommunities;
 import static org.neo4j.gds.TestSupport.ids;
 import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.core.ProcedureConstants.TOLERANCE_DEFAULT;
@@ -110,7 +110,7 @@ class ModularityOptimizationWithoutOrientationTest {
         var pmo = compute(graph, 3, null, 1, 10_000);
 
         assertEquals(0.12244, pmo.modularity(), 0.001);
-        assertCommunities(
+        CommunityHelper.assertCommunities(
             getCommunityIds(graph.nodeCount(), pmo),
             ids(mappedId, "a", "b", "c", "e"),
             ids(mappedId, "d", "f")
@@ -123,7 +123,7 @@ class ModularityOptimizationWithoutOrientationTest {
         var pmo = compute(graph, 3, null, 3, 2);
 
         assertEquals(0.4985, pmo.modularity(), 0.001);
-        assertCommunities(
+        CommunityHelper.assertCommunities(
             getCommunityIds(graph.nodeCount(), pmo),
             ids(mappedId, "a", "e", "f"),
             ids(mappedId, "b", "c", "d")
@@ -144,7 +144,7 @@ class ModularityOptimizationWithoutOrientationTest {
 
         long[] actualCommunities = getCommunityIds(graph.nodeCount(), pmo);
         assertEquals(0.0816, pmo.modularity(), 0.001);
-        assertCommunities(actualCommunities, ids(mappedId, EXPECTED_SEED_COMMUNITIES));
+        CommunityHelper.assertCommunities(actualCommunities, ids(mappedId, EXPECTED_SEED_COMMUNITIES));
 
         assertThat(actualCommunities)
             // this is a new color based on the largest seed value and the original id
@@ -170,7 +170,7 @@ class ModularityOptimizationWithoutOrientationTest {
 
         long[] actualCommunities = getCommunityIds(graph.nodeCount(), pmo);
         assertEquals(0.0816, pmo.modularity(), 0.001);
-        assertCommunities(actualCommunities, ids(mappedId, EXPECTED_SEED_COMMUNITIES));
+        CommunityHelper.assertCommunities(actualCommunities, ids(mappedId, EXPECTED_SEED_COMMUNITIES));
         assertTrue(actualCommunities[0] == 4 && actualCommunities[2] == 2 || actualCommunities[3] == 3);
         assertTrue(pmo.ranIterations() <= 3);
     }

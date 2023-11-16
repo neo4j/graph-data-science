@@ -43,9 +43,9 @@ class SourceNodeConfigTest {
             " (a1:Node)";
 
     @Inject
-    GraphStore graphStore;
+    private GraphStore graphStore;
     @Inject
-    IdFunction idFunction;
+    private IdFunction idFunction;
 
     @Test
     void shouldThrowForInvalidNode() {

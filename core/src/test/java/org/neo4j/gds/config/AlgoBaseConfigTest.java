@@ -37,7 +37,7 @@ class AlgoBaseConfigTest {
     public static final String GDL_GRAPH = "(:A)-[:REL]->(:B)-[:REL2]->(:C)";
 
     @Inject
-    GraphStore graphStore;
+    private GraphStore graphStore;
 
     @Test
     void validateNodeLabels() {
@@ -87,7 +87,7 @@ class AlgoBaseConfigTest {
 
 
     @Configuration
-    interface TestConfig extends AlgoBaseConfig {
+     interface TestConfig extends AlgoBaseConfig {
     }
 
 }

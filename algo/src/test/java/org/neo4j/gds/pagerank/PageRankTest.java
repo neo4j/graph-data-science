@@ -497,7 +497,7 @@ class PageRankTest {
         private Graph graph;
 
         @Inject
-        IdFunction idFunction;
+        private IdFunction idFunction;
 
         @Test
         void eigenvector() {

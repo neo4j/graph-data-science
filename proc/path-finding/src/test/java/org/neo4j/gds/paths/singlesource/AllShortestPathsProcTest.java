@@ -26,11 +26,13 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 abstract class AllShortestPathsProcTest extends BaseTest
 {
-    protected static final String GRAPH_NAME = "graph";
+    private static final String GRAPH_NAME = "graph";
     // Track expected results
     long idA, idB, idC, idD, idE, idF;
     static double[] costs0, costs1, costs2, costs3, costs4, costs5;
@@ -53,9 +55,12 @@ abstract class AllShortestPathsProcTest extends BaseTest
            ", (d)-[:TYPE {cost: 11}]->(f)" +
            ", (e)-[:TYPE {cost: 4}]->(d)";
 
-    public abstract Class<?> getProcedureClazz();
+    protected abstract Class<?> getProcedureClazz();
 
-    public abstract String getProcedureName();
+    protected abstract String getProcedureName();
+
+    @Inject
+    IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {

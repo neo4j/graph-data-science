@@ -25,6 +25,8 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.HashMap;
@@ -49,6 +51,9 @@ class KSpanningTreeWriteProcTest extends BaseProcTest {
         " (a)-[:TYPE {w:1.0}]->(d),\n" +
         " (b)-[:TYPE {w:1.0}]->(c),\n" +
         " (d)-[:TYPE {w:3.0}]->(c)";
+
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setupGraph() throws Exception {

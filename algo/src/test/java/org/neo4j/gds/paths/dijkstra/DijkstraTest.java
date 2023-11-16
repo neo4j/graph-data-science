@@ -58,17 +58,17 @@ final class DijkstraTest {
     @GdlGraph
     private static final String DUMMY = "()";
 
-    static ImmutableShortestPathDijkstraStreamConfig.Builder defaultSourceTargetConfigBuilder() {
+    private static ImmutableShortestPathDijkstraStreamConfig.Builder defaultSourceTargetConfigBuilder() {
         return ImmutableShortestPathDijkstraStreamConfig.builder()
             .concurrency(1);
     }
 
-    static ImmutableAllShortestPathsDijkstraStreamConfig.Builder defaultSingleSourceConfigBuilder() {
+    private static ImmutableAllShortestPathsDijkstraStreamConfig.Builder defaultSingleSourceConfigBuilder() {
         return ImmutableAllShortestPathsDijkstraStreamConfig.builder()
             .concurrency(1);
     }
 
-    static Stream<Arguments> expectedMemoryEstimation() {
+    private static Stream<Arguments> expectedMemoryEstimation() {
         return Stream.of(
             // trackRelationships = false
             Arguments.of(1_000, false, 40_616),
@@ -393,7 +393,7 @@ final class DijkstraTest {
             ", (e)-[:TYPE {cost: 4}]->(d)";
 
         @Inject
-        TestGraph graph;
+        private TestGraph graph;
 
         @Test
         void sourceTargetWithHeuristic() {

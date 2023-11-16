@@ -23,7 +23,7 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 
-public final class AdjacencyPackerUtil {
+final class AdjacencyPackerUtil {
 
     static final int BYTE_ARRAY_BASE_OFFSET = UnsafeUtil.arrayBaseOffset(byte[].class);
 

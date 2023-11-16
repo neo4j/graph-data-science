@@ -27,6 +27,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -39,7 +40,6 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
-import static org.neo4j.gds.CommunityHelper.assertCommunities;
 import static org.neo4j.gds.GdsCypher.ExecutionModes.WRITE;
 
 class ModularityOptimizationWriteProcTest extends BaseProcTest {
@@ -175,7 +175,7 @@ class ModularityOptimizationWriteProcTest extends BaseProcTest {
         runQueryWithRowConsumer("MATCH (n) RETURN n.community as community", (row) -> {
             communities[i.getAndIncrement()] = row.getNumber(COMMUNITY).longValue();
         });
-        assertCommunities(communities, new long[]{0, 1}, new long[]{2, 3, 4, 5});
+        CommunityHelper.assertCommunities(communities, new long[]{0, 1}, new long[]{2, 3, 4, 5});
     }
 
     @Test
@@ -278,6 +278,6 @@ class ModularityOptimizationWriteProcTest extends BaseProcTest {
             actualCommunities[(int) nameMapping.get(name)] = community;
         });
 
-        assertCommunities(actualCommunities, expectedCommunities);
+        CommunityHelper.assertCommunities(actualCommunities, expectedCommunities);
     }
 }

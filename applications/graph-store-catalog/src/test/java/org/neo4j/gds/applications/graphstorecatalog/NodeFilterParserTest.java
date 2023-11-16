@@ -43,7 +43,7 @@ class NodeFilterParserTest {
 
     @SuppressWarnings("WeakerAccess")
     @Inject
-    GraphStore graphStore;
+    private GraphStore graphStore;
 
     @ParameterizedTest
     @ValueSource(

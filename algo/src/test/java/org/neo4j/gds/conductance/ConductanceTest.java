@@ -82,7 +82,7 @@ final class ConductanceTest {
     @Inject
     private TestGraph undirectedGraph;
 
-    static Stream<Arguments> correctResultsParameters() {
+    private static Stream<Arguments> correctResultsParameters() {
         return TestSupport.crossArguments(
             () -> Stream.of(
                 Arguments.of(

@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public final class CollectionUtil {
+final class CollectionUtil {
 
     public static <T> Stream<IntObjectPair<T>> enumerate(Collection<T> items) {
         int size = items.size();

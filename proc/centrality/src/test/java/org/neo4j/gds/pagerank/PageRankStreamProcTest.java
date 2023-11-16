@@ -26,6 +26,8 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.graphdb.QueryExecutionException;
 
@@ -85,6 +87,9 @@ class PageRankStreamProcTest extends BaseProcTest {
         ", (u)-[:TYPE3 {weight: 1.0}]->(v)" +
         ", (u)-[:TYPE3 {weight: 1.0}]->(w)" +
         ", (v)-[:TYPE3 {weight: 1.0}]->(w)";
+
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setupGraph() throws Exception {

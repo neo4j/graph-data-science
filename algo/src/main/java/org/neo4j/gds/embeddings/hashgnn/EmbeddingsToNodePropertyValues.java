@@ -55,7 +55,7 @@ public final class EmbeddingsToNodePropertyValues {
         private final HugeObjectArray<HugeAtomicBitSet> binaryEmbeddings;
         private final int embeddingDimension;
 
-        public BinaryArrayNodePropertyValues(
+        BinaryArrayNodePropertyValues(
             HugeObjectArray<HugeAtomicBitSet> binaryEmbeddings,
             int embeddingDimension
         ) {

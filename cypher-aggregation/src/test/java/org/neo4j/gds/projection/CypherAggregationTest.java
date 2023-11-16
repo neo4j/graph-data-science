@@ -45,6 +45,8 @@ import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.RandomGraphTestCase;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.wcc.WccStreamProc;
 import org.neo4j.graphdb.Direction;
@@ -85,6 +87,9 @@ class CypherAggregationTest extends BaseProcTest {
 
         ",(a)-[:REL {prop: 42} ]->(b)<-[:REL {prop: 43} ]-(c)" +
         ",(d)-[:REL {prop: 44} ]->(e)<-[:REL]-(f)";
+
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {
@@ -707,7 +712,7 @@ class CypherAggregationTest extends BaseProcTest {
             .containsExactlyInAnyOrder(org.neo4j.gds.RelationshipType.of("INDEXED"));
     }
 
-    static Stream<Arguments> undirectedTypes() {
+    private static Stream<Arguments> undirectedTypes() {
         return Stream.of(
             Arguments.of(
                 List.of("UNDIRECTED"),

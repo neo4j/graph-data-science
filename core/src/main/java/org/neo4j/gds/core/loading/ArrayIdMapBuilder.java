@@ -79,7 +79,7 @@ public final class ArrayIdMapBuilder implements IdMapBuilder {
         return array;
     }
 
-    public long size() {
+    private long size() {
         return allocationIndex.get();
     }
 
@@ -104,7 +104,7 @@ public final class ArrayIdMapBuilder implements IdMapBuilder {
             this.length = 0;
         }
 
-        public boolean nextBuffer() {
+        boolean nextBuffer() {
             if (!cursor.next()) {
                 return false;
             }

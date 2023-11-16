@@ -34,7 +34,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 class DefaultValueIOHelperTest {
 
-    static Stream<Arguments> defaultValuesAndSerializedFormat() {
+    private static Stream<Arguments> defaultValuesAndSerializedFormat() {
         return Stream.of(
             Arguments.of(DefaultValue.of(42.0, ValueType.DOUBLE, true), "DefaultValue(42.0)", ValueType.DOUBLE),
             Arguments.of(DefaultValue.of(1337, ValueType.LONG, true), "DefaultValue(1337)", ValueType.LONG),

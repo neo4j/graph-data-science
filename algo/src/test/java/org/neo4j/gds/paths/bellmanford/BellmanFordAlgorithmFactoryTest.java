@@ -53,7 +53,7 @@ class BellmanFordAlgorithmFactoryTest {
         );
     }
 
-    static Stream<Arguments> memoryEstimationSetup() {
+    private static Stream<Arguments> memoryEstimationSetup() {
         return Stream.of(
             Arguments.of("Track negative cycles", true, 1520),
             Arguments.of("Don't track negative cycles", false, 1400)

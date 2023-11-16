@@ -297,7 +297,7 @@ public final class ChunkedAdjacencyLists {
             }
         }
 
-        public void consume(Consumer consumer) {
+        void consume(Consumer consumer) {
             while (targetListIterator.next(targetListBatch)) {
                 positionsListIterator.next(positionsListBatch);
                 lastValuesListIterator.next(lastValuesListBatch);

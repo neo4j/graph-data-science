@@ -90,7 +90,7 @@ class LinkPredictionClassImbalanceTrainTest {
         "(h)-[:REL {label: 0.0}]->(i)";
 
     @Inject
-    Graph trainGraph;
+    private Graph trainGraph;
 
     @Test
     void focalLossImprovesMinorityClassPredictionsLR() {

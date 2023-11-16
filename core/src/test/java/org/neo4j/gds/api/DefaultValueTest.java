@@ -47,7 +47,7 @@ class DefaultValueTest {
         Assertions.assertEquals(DefaultValue.of(42), DefaultValue.of(DefaultValue.of(42)));
     }
 
-    static Stream<Arguments> validLongValues() {
+    private static Stream<Arguments> validLongValues() {
         return Stream.of(
             arguments(42, 42L),
             arguments(42L, 42L),
@@ -67,7 +67,7 @@ class DefaultValueTest {
         assertEquals(expected, defaultValue.longValue());
     }
 
-    static Stream<Arguments> invalidNumericValues() {
+    private static Stream<Arguments> invalidNumericValues() {
         return Stream.of(
             arguments("Foo"),
             arguments(true),
@@ -97,7 +97,7 @@ class DefaultValueTest {
         assertThat(e.getMessage()).contains("Cannot safely convert 42.42 into an long value");
     }
 
-    static Stream<Arguments> defaultValueArrayParams() {
+    private static Stream<Arguments> defaultValueArrayParams() {
         return Stream.of(
                 Arguments.of(DefaultValue.of(new float[] {1337F})),
                 Arguments.of(DefaultValue.of(new double[] {1337D})),
@@ -123,7 +123,7 @@ class DefaultValueTest {
         assertThat(value.longArrayValue()).containsExactly(1337L);
     }
 
-    static Stream<Arguments> validDoubleValues() {
+    private static Stream<Arguments> validDoubleValues() {
         return Stream.of(
             arguments(42, 42.0D),
             arguments(42L, 42.0D),

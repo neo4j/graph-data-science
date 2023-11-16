@@ -72,7 +72,7 @@ class SplitRelationshipsTest {
         "        (c)-[:REL2]->(g)";
 
     @Inject
-    GraphStore graphStore;
+    private GraphStore graphStore;
 
     @Test
     void computeWithOffset() {

@@ -48,7 +48,7 @@ class CompositeAdjacencyCursorTest extends BaseTest {
     private CompositeAdjacencyCursor adjacencyCursor;
 
     @Inject
-    Graph graph;
+    private Graph graph;
 
     @BeforeEach
     void setup() {

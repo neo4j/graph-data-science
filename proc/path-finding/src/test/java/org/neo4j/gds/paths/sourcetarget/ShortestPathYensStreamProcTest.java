@@ -28,6 +28,8 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.paths.PathFactory;
 import org.neo4j.gds.paths.StreamResult;
@@ -63,6 +65,10 @@ class ShortestPathYensStreamProcTest extends BaseProcTest {
 
     protected static final String GRAPH_NAME = "graph";
     private static final String K_KEY = "k";
+
+    @Inject
+    private IdFunction idFunction;
+
     long idC;
     long idH;
     long idD;

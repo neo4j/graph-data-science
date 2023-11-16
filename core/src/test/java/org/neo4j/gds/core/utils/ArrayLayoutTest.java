@@ -44,7 +44,7 @@ class ArrayLayoutTest {
             .containsSubsequence(expected);
     }
 
-    static Stream<Arguments> layouts() {
+    private static Stream<Arguments> layouts() {
         return Stream.of(
             arguments(
                 new long[]{1, 2, 3, 4, 5, 6, 7, 8},
@@ -114,7 +114,7 @@ class ArrayLayoutTest {
         assertThat(layout[ArrayLayout.searchEytzinger(layout, 7)]).isEqualTo(7L);
     }
 
-    static Stream<long[]> duplicateValues() {
+    private static Stream<long[]> duplicateValues() {
         return Stream.of(
             new long[]{1, 3, 3, 7},
             new long[]{1, 3, 3, 7, 7},

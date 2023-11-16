@@ -83,7 +83,7 @@ class NodeRegressionTrainTest {
         "({scalar: 42.5,    target:  85 }),";
 
     @Inject
-    GraphStore graphStore;
+    private GraphStore graphStore;
 
     @GdlGraph(graphNamePrefix = "nan", idOffset = 42)
     private static final String NAN_DB_QUERY =
@@ -95,7 +95,7 @@ class NodeRegressionTrainTest {
         "({scalar: 42.5,    target:  85.0 }),";
 
     @Inject
-    GraphStore nanGraphStore;
+    private GraphStore nanGraphStore;
 
     @Test
     void trainWithOnlyLR() {

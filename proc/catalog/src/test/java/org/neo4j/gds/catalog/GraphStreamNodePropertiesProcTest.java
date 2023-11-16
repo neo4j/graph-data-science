@@ -55,9 +55,8 @@ class GraphStreamNodePropertiesProcTest extends BaseProcTest {
         ", (e:B {nodeProp1: 4.0, nodeProp2: 46})" +
         ", (f:B {nodeProp1: 5.0, nodeProp2: 47})";
 
-    @SuppressWarnings("WeakerAccess")
     @Inject
-    IdFunction idFunction;
+    private IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {

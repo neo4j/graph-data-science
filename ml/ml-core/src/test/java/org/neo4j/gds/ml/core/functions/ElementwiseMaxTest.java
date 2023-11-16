@@ -56,7 +56,7 @@ class ElementwiseMaxTest extends ComputationGraphBaseTest implements FiniteDiffe
         ", (u2)-[:ORDERED {times: 3}]->(d4)";
 
     @Inject
-    TestGraph graph;
+    private TestGraph graph;
 
     @Test
     void testApplyUnweighted() {

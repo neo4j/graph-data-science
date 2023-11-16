@@ -26,6 +26,8 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.HashSet;
@@ -62,6 +64,8 @@ class SccStreamProcTest extends BaseProcTest {
             ", (h)-[:TYPE {cost: 3}]->(i)" +
             ", (i)-[:TYPE {cost: 3}]->(g)";
 
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setUp() throws Exception {

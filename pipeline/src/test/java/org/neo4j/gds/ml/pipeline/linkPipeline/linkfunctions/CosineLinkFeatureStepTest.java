@@ -65,7 +65,7 @@ final class CosineLinkFeatureStepTest extends FeatureStepBaseTest {
     }
 
     @Test
-    public void handlesZeroVectors() {
+    void handlesZeroVectors() {
         var step = LinkFeatureStepFactory.create(
             "cosine",
             LinkFeatureStepConfigurationImpl.builder().nodeProperties(List.of("zeros")).build()

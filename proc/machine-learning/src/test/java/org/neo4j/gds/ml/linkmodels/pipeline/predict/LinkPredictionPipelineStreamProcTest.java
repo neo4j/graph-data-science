@@ -77,6 +77,9 @@ class LinkPredictionPipelineStreamProcTest extends BaseProcTest {
     @Inject
     private ModelCatalog modelCatalog;
 
+    @Inject
+    private IdFunction idFunction;
+
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(GraphListProc.class, GraphProjectProc.class, LinkPredictionPipelineStreamProc.class);

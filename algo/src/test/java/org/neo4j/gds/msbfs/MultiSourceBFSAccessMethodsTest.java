@@ -75,7 +75,7 @@ final class MultiSourceBFSAccessMethodsTest {
                 ", (d)-[:BAR]->(f)";
 
         @Inject
-        Graph graph;
+        private Graph graph;
 
         @Test
         void testWithPredecessor() {

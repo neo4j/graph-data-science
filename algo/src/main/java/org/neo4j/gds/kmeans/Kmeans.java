@@ -223,7 +223,6 @@ public class Kmeans extends Algorithm<KmeansResult> {
         KmeansSampler sampler = KmeansSampler.createSampler(
             samplerType,
             random,
-            nodePropertyValues,
             clusterManager,
             nodeCount,
             k,

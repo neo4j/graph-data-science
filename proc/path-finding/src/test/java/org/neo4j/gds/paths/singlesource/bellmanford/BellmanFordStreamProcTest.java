@@ -41,7 +41,7 @@ import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 class BellmanFordStreamProcTest extends BaseProcTest {
 
     @Inject
-    public IdFunction idFunction;
+    private IdFunction idFunction;
 
     @BeforeEach
     void setUp() throws Exception {
@@ -159,9 +159,6 @@ class BellmanFordStreamProcTest extends BaseProcTest {
             "  (a2)-[:R {weight: -8.0}]->(a3), " +
             "  (a3)-[:R {weight: -4.0}]->(a4), " +
             "  (a4)-[:R {weight: 1.0}]->(a2) ";
-
-        @Inject
-        public IdFunction idFunction;
 
         @Test
         void streamWithNegativeCycle(SoftAssertions assertions) {

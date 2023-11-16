@@ -58,10 +58,10 @@ class NodeFilteredGraphTest {
                         " (c)-->(e)";
 
     @Inject
-    GraphStore graphStore;
+    private GraphStore graphStore;
 
     @Inject
-    IdFunction idFunction;
+    private IdFunction idFunction;
 
     @Test
     void filteredIdMapThatIncludesAllNodes() {

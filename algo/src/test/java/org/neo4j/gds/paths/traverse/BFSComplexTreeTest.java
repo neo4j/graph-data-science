@@ -123,7 +123,7 @@ class BFSComplexTreeTest {
             ).mapToLong(graph::toMappedNodeId).toArray());
     }
 
-    static Stream<Arguments> bfsParameters() {
+    private static Stream<Arguments> bfsParameters() {
         return crossArguments(
             () -> Stream.of(Arguments.of(1), Arguments.of(4), Arguments.of(8)), // concurrencies
             () -> Stream.of(Arguments.of(1), Arguments.of(3), Arguments.of(5), Arguments.of(64))  // deltas

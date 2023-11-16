@@ -33,6 +33,8 @@ import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 
@@ -54,6 +56,9 @@ class HarmonicCentralityWriteProcTest extends BaseProcTest {
         ",      (a)-[:TYPE]->(b)" +
         ",      (b)-[:TYPE]->(c)" +
         ",      (d)-[:TYPE]->(e)";
+
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setupGraph() throws Exception {

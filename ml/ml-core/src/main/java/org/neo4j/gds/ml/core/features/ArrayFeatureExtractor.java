@@ -19,6 +19,6 @@
  */
 package org.neo4j.gds.ml.core.features;
 
-public interface ArrayFeatureExtractor extends FeatureExtractor {
+interface ArrayFeatureExtractor extends FeatureExtractor {
     double[] extract(long nodeId);
 }

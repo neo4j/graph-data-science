@@ -35,11 +35,11 @@ public abstract class AbstractTransactionIdStore implements TransactionIdStore {
     protected final int initialTransactionChecksum;
     protected final long previouslyCommittedTxCommitTimestamp;
 
-    public AbstractTransactionIdStore() {
+    protected AbstractTransactionIdStore() {
         this(1L, -559063315, 0L, 0L, 64L);
     }
 
-    public AbstractTransactionIdStore(
+    private AbstractTransactionIdStore(
         long previouslyCommittedTxId,
         int checksum,
         long previouslyCommittedTxCommitTimestamp,

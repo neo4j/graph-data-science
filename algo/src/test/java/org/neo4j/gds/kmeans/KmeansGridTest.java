@@ -110,7 +110,6 @@ class KmeansGridTest {
         KmeansSampler kmeansSampler = KmeansSampler.createSampler(
             KmeansSampler.SamplerType.KMEANSPP,
             new SplittableRandom(19),
-            nodePropertyValues,
             clusterManager,
             graph.nodeCount(),
             2,

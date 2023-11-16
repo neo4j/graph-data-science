@@ -66,10 +66,10 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         "(a5)-[:T {foo: 5} ]->(a6)";
 
     @Inject
-    GraphStore graphStore;
+    private GraphStore graphStore;
 
     @Inject
-    TestGraph graph;
+    private TestGraph graph;
 
     @GdlGraph(orientation = Orientation.NATURAL, graphNamePrefix = "multiLabel")
     static String gdlMultiLabel =
@@ -86,10 +86,10 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         "(n5)-[:T {foo: 5} ]->(n6)";
 
     @Inject
-    TestGraph multiLabelGraph;
+    private TestGraph multiLabelGraph;
 
     @Inject
-    GraphStore multiLabelGraphStore;
+    private GraphStore multiLabelGraphStore;
 
     @GdlGraph(orientation = Orientation.NATURAL, graphNamePrefix = "multi")
     static String gdlMultiGraph =
@@ -101,10 +101,10 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         "(n1)-->(n2)";
 
     @Inject
-    TestGraph multiGraph;
+    private TestGraph multiGraph;
 
     @Inject
-    GraphStore multiGraphStore;
+    private GraphStore multiGraphStore;
 
     @GdlGraph(orientation = Orientation.NATURAL, graphNamePrefix = "skewed")
     static String gdlSkewed =
@@ -121,10 +121,10 @@ class DirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
         "(a1)-[:T {foo: 5} ]->(a6)";
 
     @Inject
-    GraphStore skewedGraphStore;
+    private GraphStore skewedGraphStore;
 
     @Inject
-    TestGraph skewedGraph;
+    private TestGraph skewedGraph;
 
     @Test
     void splitSkewedGraph() {

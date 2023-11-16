@@ -60,19 +60,19 @@ class GraphStoreRelationshipVisitorTest {
     static String DB_CYPHER = "CREATE (a:A)-[:R {p: 1.23}]->(b:A)-[:R1 {r: 1337}]->(c:B)-[:R1 {r: 42}]->(a)-[:R2]->(b)";
 
     @Inject
-    GraphStore graphStore;
+    private GraphStore graphStore;
 
     @Inject
-    Graph graph;
+    private Graph graph;
 
     @GdlGraph(graphNamePrefix = "multipleProps")
     static String MULTI_PROPS_CYPHER = "(a)-[:R {p: 42.0D, r: 13.37D}]->(b)";
 
     @Inject
-    Graph multiplePropsGraph;
+    private Graph multiplePropsGraph;
 
     @Inject
-    IdFunction multiplePropsIdFunction;
+    private IdFunction multiplePropsIdFunction;
 
     @Test
     void shouldAddRelationshipsToRelationshipBuilder() {

@@ -27,7 +27,7 @@ import org.neo4j.internal.batchimport.input.InputEntityVisitor;
 import java.io.Flushable;
 import java.io.IOException;
 
-public final class ElementImportRunner<T extends InputEntityVisitor.Adapter & Flushable> implements Runnable {
+final class ElementImportRunner<T extends InputEntityVisitor.Adapter & Flushable> implements Runnable {
     private final T visitor;
     private final InputIterator inputIterator;
     private final ProgressTracker progressTracker;

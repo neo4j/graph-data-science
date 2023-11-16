@@ -44,7 +44,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
  */
 public class ANPStrategy implements ExecutionStrategy {
 
-    final BfsConsumer perNodeAction;
+    private final BfsConsumer perNodeAction;
 
     public ANPStrategy(BfsConsumer perNodeAction) {
         this.perNodeAction = perNodeAction;

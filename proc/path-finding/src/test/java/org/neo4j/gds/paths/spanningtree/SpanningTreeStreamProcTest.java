@@ -60,6 +60,9 @@ class SpanningTreeStreamProcTest extends BaseProcTest {
                                     "CREATE (c)-[:TYPE {cost:5.0}]->(e) " +
                                     "CREATE (d)-[:TYPE {cost:6.0}]->(e)";
 
+    @Inject
+    private IdFunction idFunction;
+
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(SpanningTreeStreamProc.class, GraphProjectProc.class);
@@ -71,9 +74,6 @@ class SpanningTreeStreamProcTest extends BaseProcTest {
             .yields();
         runQuery(createQuery);
     }
-
-    @Inject
-    IdFunction idFunction;
 
     private long getSourceNode() {
         return idFunction.of("a");

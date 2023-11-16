@@ -43,17 +43,6 @@ class BaseProcUnitTest {
     }
 
     @Test
-    void testRunWithExceptionLoggingWithRunnable() {
-        RuntimeException exception = new RuntimeException("Exception when using Runnable");
-        Runnable runnable = () -> {
-            throw exception;
-        };
-
-        assertThrows(RuntimeException.class, () -> baseProc.runWithExceptionLogging("test message", runnable));
-        assertTrue(log.containsMessage("warn", "test message - Exception when using Runnable"));
-    }
-
-    @Test
     void testRunWithExceptionLoggingWithSupplier() {
         RuntimeException exception = new RuntimeException("Exception when using Supplier");
         Supplier<?> supplier = () -> {

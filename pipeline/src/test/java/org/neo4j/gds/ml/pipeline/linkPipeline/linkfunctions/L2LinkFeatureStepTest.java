@@ -50,7 +50,7 @@ final class L2LinkFeatureStepTest {
                           "(a)-[:REL]->(d)";
 
     @Inject
-    Graph graph;
+    private Graph graph;
 
     @Test
     void runL2LinkFeatureStep() {

@@ -85,7 +85,7 @@ final class DegreeCentralityTest {
     @Inject
     private TestGraph graph;
 
-    static Stream<Arguments> degreeCentralityParameters() {
+    private static Stream<Arguments> degreeCentralityParameters() {
         return crossArguments(
             toArgumentsFlat(() ->
                 Stream.of(
@@ -160,7 +160,7 @@ final class DegreeCentralityTest {
         });
     }
 
-    static Stream<Arguments> configParamsAndExpectedMemory() {
+    private static Stream<Arguments> configParamsAndExpectedMemory() {
         return Stream.of(
             Arguments.of(true, 1, MemoryUsage.sizeOfInstance(DegreeCentrality.class) + HugeDoubleArray.memoryEstimation(10_000L)),
             Arguments.of(true, 4, MemoryUsage.sizeOfInstance(DegreeCentrality.class) + HugeDoubleArray.memoryEstimation(10_000L)),

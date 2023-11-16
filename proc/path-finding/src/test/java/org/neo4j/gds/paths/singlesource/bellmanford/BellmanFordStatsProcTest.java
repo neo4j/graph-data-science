@@ -23,8 +23,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.extension.IdFunction;
-import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.concurrent.atomic.LongAdder;
@@ -46,8 +44,6 @@ class BellmanFordStatsProcTest extends BaseProcTest {
         "  (a2)-[:R {weight: -8.0}]->(a3), " +
         "  (a3)-[:R {weight: -4.0}]->(a4), " +
         "  (a4)-[:R {weight: 1.0}]->(a2) ";
-    @Inject
-    public IdFunction idFunction;
 
     @BeforeEach
     void setUp() throws Exception {

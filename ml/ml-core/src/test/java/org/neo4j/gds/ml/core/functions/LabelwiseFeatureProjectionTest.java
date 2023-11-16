@@ -52,7 +52,7 @@ class LabelwiseFeatureProjectionTest implements FiniteDifferenceTest {
         ", (c1)-[:ORDERED {rating: 4.0}]->(d1)";
 
     @Inject
-    TestGraph graph;
+    private TestGraph graph;
 
     @Test
     void shouldMultiplyWeights() {

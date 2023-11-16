@@ -81,7 +81,7 @@ class CsvToGraphStoreImporterIntegrationTest {
     @TempDir
     Path graphLocation;
 
-    static Stream<Arguments> concurrencyLabelMappingArgs() {
+    private static Stream<Arguments> concurrencyLabelMappingArgs() {
         return Stream.of(
             Arguments.of(1, false),
             Arguments.of(4, false),

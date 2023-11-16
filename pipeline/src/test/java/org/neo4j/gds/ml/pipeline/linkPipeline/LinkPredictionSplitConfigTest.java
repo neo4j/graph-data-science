@@ -40,14 +40,14 @@ class LinkPredictionSplitConfigTest {
         StringUtils.repeat(" ,()-->()", 9);
 
     @Inject
-    GraphStore graphStore;
+    private GraphStore graphStore;
 
     @GdlGraph(graphNamePrefix = "negative")
     static String negativeGraph =
         "(:A)-[:T]->(:A)";
 
     @Inject
-    GraphStore negativeGraphStore;
+    private GraphStore negativeGraphStore;
 
     @Test
     void expectedSetSize() {

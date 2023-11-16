@@ -90,7 +90,7 @@ class CypherMapAccessTest {
         ), ex.getMessage());
     }
 
-    static Stream<Arguments> positiveRangeValidationParameters() {
+    private static Stream<Arguments> positiveRangeValidationParameters() {
         return Stream.of(
             Arguments.of(42, 42, 84, true, false),
             Arguments.of(84, 42, 84, false, true),
@@ -98,7 +98,7 @@ class CypherMapAccessTest {
         );
     }
 
-    static Stream<Arguments> negativeRangeValidationParameters() {
+    private static Stream<Arguments> negativeRangeValidationParameters() {
         return Stream.of(
             Arguments.of(42, 42, 84, false, false),
             Arguments.of(84, 42, 84, false, false),

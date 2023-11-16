@@ -28,6 +28,8 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
@@ -43,6 +45,9 @@ class FilteredKnnStreamProcTest extends BaseProcTest {
         ", (b { id: 2, knn: 2.0 } )" +
         ", (c { id: 3, knn: 5.0 } )" +
         ", (a)-[:IGNORE]->(b)";
+
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {

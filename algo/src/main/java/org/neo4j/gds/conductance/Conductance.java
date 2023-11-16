@@ -301,11 +301,11 @@ public class Conductance extends Algorithm<ConductanceResult> {
         }
 
 
-        public HugeSparseDoubleArray internalCounts() {
+        HugeSparseDoubleArray internalCounts() {
             return internalCounts;
         }
 
-        public HugeSparseDoubleArray externalCounts() {
+        HugeSparseDoubleArray externalCounts() {
             return externalCounts;
         }
     }

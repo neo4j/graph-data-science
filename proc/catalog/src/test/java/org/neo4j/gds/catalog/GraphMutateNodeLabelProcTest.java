@@ -45,7 +45,7 @@ class GraphMutateNodeLabelProcTest extends BaseProcTest {
         ", (d:B)";
 
     @Inject
-    IdFunction idFunction;
+    private IdFunction idFunction;
 
     @BeforeEach
     void setUp() throws Exception {
