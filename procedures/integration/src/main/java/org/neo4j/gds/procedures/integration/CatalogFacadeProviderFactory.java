@@ -47,6 +47,7 @@ import org.neo4j.gds.beta.filter.GraphStoreFilterService;
 import org.neo4j.gds.core.loading.GraphProjectCypherResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.procedures.KernelTransactionAccessor;
 import org.neo4j.gds.procedures.ProcedureTransactionAccessor;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
@@ -84,6 +85,7 @@ class CatalogFacadeProviderFactory {
         DatabaseIdAccessor databaseIdAccessor,
         KernelTransactionAccessor kernelTransactionAccessor,
         TaskRegistryFactoryService taskRegistryFactoryService,
+        ProjectionMetricsService projectionMetricsService,
         TerminationFlagService terminationFlagService,
         UserLogServices userLogServices,
         UserAccessor userServices
@@ -170,7 +172,8 @@ class CatalogFacadeProviderFactory {
             writeNodePropertiesApplication,
             writeRelationshipPropertiesApplication,
             writeRelationshipsApplication,
-            businessFacadeDecorator
+            businessFacadeDecorator,
+            projectionMetricsService
         );
     }
 }

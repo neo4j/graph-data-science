@@ -29,7 +29,8 @@ import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.internal.MemoryEstimationSettings;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
+import org.neo4j.gds.metrics.MetricsFacade;
+import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.KernelTransactionAccessor;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
@@ -188,26 +189,31 @@ public final class ExtensionBuilder {
      *
      * @param exporterBuildersProviderService The catalog of writers
      * @param businessFacadeDecorator         Any checks added across requests
-     * @param algorithmMetricsService
+     * @param metricsFacade
      */
     public ThrowingFunction<Context, GraphDataScience, ProcedureException> gdsProvider(
         ExporterBuildersProviderService exporterBuildersProviderService,
         Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator,
-        AlgorithmMetricsService algorithmMetricsService
+        MetricsFacade metricsFacade
     ) {
         var catalogFacadeProvider = createCatalogFacadeProvider(
             exporterBuildersProviderService,
-            businessFacadeDecorator
+            businessFacadeDecorator,
+            metricsFacade.projectionMetrics()
         );
 
-        var communityProcedureProvider = createCommunityProcedureProvider(exporterBuildersProviderService, algorithmMetricsService);
+        var communityProcedureProvider = createCommunityProcedureProvider(
+            exporterBuildersProviderService,
+            metricsFacade
+        );
 
         return new GraphDataScienceProvider(log, catalogFacadeProvider, communityProcedureProvider);
     }
 
     private CatalogFacadeProvider createCatalogFacadeProvider(
         ExporterBuildersProviderService exporterBuildersProviderService,
-        Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator
+        Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator,
+        ProjectionMetricsService projectionMetricsService
     ) {
         var catalogFacadeProviderFactory = new CatalogFacadeProviderFactory(
             log,
@@ -220,6 +226,7 @@ public final class ExtensionBuilder {
             databaseIdAccessor,
             kernelTransactionAccessor,
             taskRegistryFactoryService,
+            projectionMetricsService,
             terminationFlagService,
             userLogServices,
             userAccessor
@@ -227,7 +234,7 @@ public final class ExtensionBuilder {
     }
 
     private CommunityProcedureProvider createCommunityProcedureProvider(ExporterBuildersProviderService exporterBuildersProviderService,
-        AlgorithmMetricsService algorithmMetricsService
+        MetricsFacade metricsFacade
     ) {
         var algorithmMetaDataSetterService = new AlgorithmMetaDataSetterService();
 
@@ -243,7 +250,7 @@ public final class ExtensionBuilder {
             terminationFlagService,
             userLogServices,
             userAccessor,
-            algorithmMetricsService
+            metricsFacade.algorithmMetrics()
         );
     }
 }

@@ -31,7 +31,7 @@ import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GraphStoreFromCatalogLoader;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
-import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
+import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.gds.transaction.EmptyTransactionContext;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -77,7 +77,7 @@ public abstract class BaseProc {
     public Username username = Username.EMPTY_USERNAME;
 
     @Context
-    public AlgorithmMetricsService algorithmMetricsService;
+    public MetricsFacade metricsFacade;
 
     protected String username() {
         return username.username();
@@ -161,7 +161,7 @@ public abstract class BaseProc {
                 .algorithmMetaDataSetter(new TransactionAlgorithmMetaDataSetter(transaction))
                 .nodeLookup(new TransactionNodeLookup(transaction))
                 .isGdsAdmin(transactionContext().isGdsAdmin())
-                .algorithmMetricsService(algorithmMetricsService)
+                .metricsFacade(metricsFacade)
                 .build();
     }
 

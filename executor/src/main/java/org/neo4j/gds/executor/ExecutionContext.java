@@ -37,8 +37,7 @@ import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
-import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
-import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
+import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
 
@@ -72,7 +71,7 @@ public interface ExecutionContext {
 
     boolean isGdsAdmin();
 
-    AlgorithmMetricsService algorithmMetricsService();
+    MetricsFacade metricsFacade();
 
     @Nullable
     RelationshipStreamExporterBuilder relationshipStreamExporterBuilder();
@@ -178,8 +177,9 @@ public interface ExecutionContext {
         }
 
         @Override
-        public AlgorithmMetricsService algorithmMetricsService() {
-            return new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar());
+        public MetricsFacade metricsFacade() {
+            return MetricsFacade.PASSTHROUGH_METRICS_FACADE;
+
         }
 
         @Override

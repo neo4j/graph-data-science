@@ -58,8 +58,7 @@ import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
-import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
+import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.test.ImmutableTestWriteConfig;
 import org.neo4j.gds.test.TestAlgoResultBuilder;
 import org.neo4j.gds.test.TestAlgorithm;
@@ -98,7 +97,7 @@ class WriteNodePropertiesComputationResultConsumerTest extends BaseTest {
         .modelCatalog(ModelCatalog.EMPTY)
         .isGdsAdmin(false)
         .nodePropertyExporterBuilder(new NativeNodePropertiesExporterBuilder(EmptyTransactionContext.INSTANCE))
-        .algorithmMetricsService(new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()))
+        .metricsFacade(MetricsFacade.PASSTHROUGH_METRICS_FACADE)
         .build();
 
     @Test
