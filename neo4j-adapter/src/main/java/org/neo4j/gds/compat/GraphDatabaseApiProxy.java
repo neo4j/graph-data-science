@@ -275,6 +275,20 @@ public final class GraphDatabaseApiProxy {
         }
     }
 
+    public static int arrowListenPort(GraphDatabaseService db) {
+        try {
+            // resolve listenPort through ArrowServer, as internal.arrow.status only returns the configured port
+            // using reflection as this class only exists for Neo4j >= 5.14
+            var arrowServerClass = Class.forName("com.neo4j.arrow.ArrowServer");
+            Method listenPortMethod = arrowServerClass.getMethod("listenPort");
+            Object arrowServer = GraphDatabaseApiProxy.resolveDependency(db, arrowServerClass);
+            return (int) listenPortMethod.invoke(arrowServer);
+        } catch (ClassNotFoundException | IllegalAccessException | InvocationTargetException |
+                 NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private static Optional<Method> getMethod(Class<?> clazz, String name, Class<?>... parameterTypes) {
         try {
             return Optional.of(clazz.getMethod(name, parameterTypes));
