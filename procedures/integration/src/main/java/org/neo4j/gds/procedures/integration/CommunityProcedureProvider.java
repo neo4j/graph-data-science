@@ -33,8 +33,6 @@ import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
-import org.neo4j.gds.configuration.DefaultsConfiguration;
-import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.logging.Log;
@@ -43,6 +41,7 @@ import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
 import org.neo4j.gds.procedures.KernelTransactionAccessor;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.TerminationFlagService;
+import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.configparser.ConfigurationParser;
 import org.neo4j.gds.services.DatabaseIdAccessor;
@@ -55,49 +54,61 @@ import org.neo4j.kernel.api.procedure.Context;
  * We call it a provider because it is used as a sub-provider to the {@link org.neo4j.gds.procedures.GraphDataScience} provider.
  */
 public class CommunityProcedureProvider {
+    // dull static stuff
+    private final FictitiousGraphStoreEstimationService fictitiousGraphStoreEstimationService = new FictitiousGraphStoreEstimationService();
+
     // Global state and services
     private final Log log;
+    private final ConfigurationParser configurationParser;
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final boolean useMaxMemoryEstimation;
 
     // Request scoped state and services
     private final AlgorithmMetaDataSetterService algorithmMetaDataSetterService;
+    private final AlgorithmMetricsService algorithmMetricsService;
     private final DatabaseIdAccessor databaseIdAccessor;
     private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final KernelTransactionAccessor kernelTransactionAccessor;
+    private final MutateNodePropertyService mutateNodePropertyService;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
-    private final AlgorithmMetricsService algorithmMetricsService;
     private final TerminationFlagService terminationFlagService;
-    private final UserLogServices userLogServices;
     private final UserAccessor userAccessor;
+    private final UserLogServices userLogServices;
 
     public CommunityProcedureProvider(
         Log log,
+        ConfigurationParser configurationParser,
         GraphStoreCatalogService graphStoreCatalogService,
         boolean useMaxMemoryEstimation,
         AlgorithmMetaDataSetterService algorithmMetaDataSetterService,
-        DatabaseIdAccessor databaseIdAccessor,
-        KernelTransactionAccessor kernelTransactionAccessor,
-        ExporterBuildersProviderService exporterBuildersProviderService,
-        TaskRegistryFactoryService taskRegistryFactoryService,
         AlgorithmMetricsService algorithmMetricsService,
+        DatabaseIdAccessor databaseIdAccessor,
+        ExporterBuildersProviderService exporterBuildersProviderService,
+        KernelTransactionAccessor kernelTransactionAccessor,
+        MutateNodePropertyService mutateNodePropertyService,
+        TaskRegistryFactoryService taskRegistryFactoryService,
         TerminationFlagService terminationFlagService,
-        UserLogServices userLogServices,
-        UserAccessor userAccessor
+        UserAccessor userAccessor, UserLogServices userLogServices
     ) {
+        // fundamental
         this.log = log;
+
+        // global state
+        this.configurationParser = configurationParser;
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.useMaxMemoryEstimation = useMaxMemoryEstimation;
 
+        // request scope
         this.algorithmMetaDataSetterService = algorithmMetaDataSetterService;
-        this.databaseIdAccessor = databaseIdAccessor;
-        this.kernelTransactionAccessor = kernelTransactionAccessor;
-        this.exporterBuildersProviderService = exporterBuildersProviderService;
-        this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.algorithmMetricsService = algorithmMetricsService;
+        this.databaseIdAccessor = databaseIdAccessor;
+        this.exporterBuildersProviderService = exporterBuildersProviderService;
+        this.kernelTransactionAccessor = kernelTransactionAccessor;
+        this.mutateNodePropertyService = mutateNodePropertyService;
+        this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.terminationFlagService = terminationFlagService;
-        this.userLogServices = userLogServices;
         this.userAccessor = userAccessor;
+        this.userLogServices = userLogServices;
     }
 
     public CommunityProcedureFacade createCommunityProcedureFacade(Context context) throws ProcedureException {
@@ -109,32 +120,35 @@ public class CommunityProcedureProvider {
         var algorithmMetaDataSetter = algorithmMetaDataSetterService.getAlgorithmMetaDataSetter(kernelTransaction);
         var algorithmMemoryValidationService = new AlgorithmMemoryValidationService(log, useMaxMemoryEstimation);
         var databaseId = databaseIdAccessor.getDatabaseId(context.graphDatabaseAPI());
+        var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(graphDatabaseService);
+        var exporterContext = new ExporterContext.ProcedureContextWrapper(context);
+        var nodePropertyExporterBuilder = exportBuildersProvider.nodePropertyExporterBuilder(exporterContext);
         var returnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
         var terminationFlag = terminationFlagService.createTerminationFlag(kernelTransaction);
         var user = userAccessor.getUser(context.securityContext());
-        var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
-        var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
-        var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(graphDatabaseService);
+        var configurationCreator = new ConfigurationCreator(configurationParser, algorithmMetaDataSetter, user);
         var requestScopedDependencies = RequestScopedDependencies.builder()
             .with(databaseId)
             .with(terminationFlag)
             .with(user)
             .build();
+        var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
+        var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
+        var writeNodePropertyService = new WriteNodePropertyService(
+            log,
+            nodePropertyExporterBuilder,
+            taskRegistryFactory,
+            terminationFlag
+        );
         var algorithmRunner = new AlgorithmRunner(
             log,
             graphStoreCatalogService,
-            algorithmMemoryValidationService,
-            taskRegistryFactory,
-            userLogRegistryFactory,
             algorithmMetricsService,
-            requestScopedDependencies
+            algorithmMemoryValidationService,
+            requestScopedDependencies,
+            taskRegistryFactory,
+            userLogRegistryFactory
         );
-
-        // algorithm facade
-        var communityAlgorithmsFacade = new CommunityAlgorithmsFacade(algorithmRunner);
-
-        // moar services
-        var fictitiousGraphStoreEstimationService = new FictitiousGraphStoreEstimationService();
         var graphLoaderContext = GraphLoaderContextProvider.buildGraphLoaderContext(
             context,
             databaseId,
@@ -144,48 +158,36 @@ public class CommunityProcedureProvider {
             log
         );
         var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(
-            user,
-            graphLoaderContext
+            graphLoaderContext,
+            user
+        );
+        var algorithmEstimator = new AlgorithmEstimator(
+            graphStoreCatalogService,
+            fictitiousGraphStoreEstimationService,
+            databaseGraphStoreEstimationService,
+            databaseId,
+            user
         );
 
-        var exporterContext = new ExporterContext.ProcedureContextWrapper(context);
+        // algorithm facade
+        var communityAlgorithmsFacade = new CommunityAlgorithmsFacade(algorithmRunner);
 
-
-        // business facades
-        var estimateBusinessFacade = new CommunityAlgorithmsEstimateBusinessFacade(
-            new AlgorithmEstimator(
-                graphStoreCatalogService,
-                fictitiousGraphStoreEstimationService,
-                databaseGraphStoreEstimationService,
-                databaseId,
-                user
-            )
+        // mode-specific facades
+        var estimateBusinessFacade = new CommunityAlgorithmsEstimateBusinessFacade(algorithmEstimator);
+        var mutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
+            mutateNodePropertyService,
+            communityAlgorithmsFacade
         );
         var statsBusinessFacade = new CommunityAlgorithmsStatsBusinessFacade(communityAlgorithmsFacade);
         var streamBusinessFacade = new CommunityAlgorithmsStreamBusinessFacade(communityAlgorithmsFacade);
-        var mutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
+        var writeBusinessFacade = new CommunityAlgorithmsWriteBusinessFacade(
             communityAlgorithmsFacade,
-            new MutateNodePropertyService(log)
-        );
-        CommunityAlgorithmsWriteBusinessFacade writeBusinessFacade = new CommunityAlgorithmsWriteBusinessFacade(
-            communityAlgorithmsFacade,
-            new WriteNodePropertyService(
-                exportBuildersProvider.nodePropertyExporterBuilder(exporterContext),
-                log,
-                taskRegistryFactory,
-                terminationFlag
-            )
-        );
-        var configurationParser = new ConfigurationParser(
-            DefaultsConfiguration.Instance,
-            LimitsConfiguration.Instance
+            writeNodePropertyService
         );
 
         // procedure facade
         return new CommunityProcedureFacade(
-            configurationParser,
-            algorithmMetaDataSetter,
-            user,
+            configurationCreator,
             returnColumns,
             estimateBusinessFacade,
             mutateBusinessFacade,

@@ -78,6 +78,7 @@ import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.configparser.ConfigurationParser;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
@@ -570,22 +571,21 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
         );
 
         var algorithmsMutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
-            new CommunityAlgorithmsFacade(
+            new MutateNodePropertyService(logMock), new CommunityAlgorithmsFacade(
                 new AlgorithmRunner(
                     logMock,
                     graphStoreCatalogService,
-                    memoryUsageValidator,
-                    TaskRegistryFactory.empty(),
-                    EmptyUserLogRegistryFactory.INSTANCE,
                     new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
+                    memoryUsageValidator,
                     RequestScopedDependencies.builder()
                         .with(DatabaseId.of(db.databaseName()))
                         .with(TerminationFlag.RUNNING_TRUE)
                         .with(new User(getUsername(), false))
-                        .build()
+                        .build(),
+                    TaskRegistryFactory.empty(),
+                    EmptyUserLogRegistryFactory.INSTANCE
                 )
-            ),
-            new MutateNodePropertyService(logMock)
+            )
         );
 
         return new GraphDataScience(
@@ -593,9 +593,11 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             null,
             null,
             new CommunityProcedureFacade(
-                ConfigurationParser.EMPTY,
-                null,
-                new User(getUsername(), false),
+                new ConfigurationCreator(
+                    ConfigurationParser.EMPTY,
+                    null,
+                    new User(getUsername(), false)
+                ),
                 ProcedureReturnColumns.EMPTY,
                 mock(CommunityAlgorithmsEstimateBusinessFacade.class),
                 algorithmsMutateBusinessFacade,

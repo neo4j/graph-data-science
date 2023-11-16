@@ -103,11 +103,11 @@ class CommunityAlgorithmsStreamBusinessFacadeTest {
                     new AlgorithmRunner(
                         logMock,
                         graphStoreCatalogServiceMock,
-                        mock(AlgorithmMemoryValidationService.class),
-                        TaskRegistryFactory.empty(),
-                        EmptyUserLogRegistryFactory.INSTANCE,
                         new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
-                        RequestScopedDependencies.builder().build()
+                        mock(AlgorithmMemoryValidationService.class),
+                        RequestScopedDependencies.builder().build(),
+                        TaskRegistryFactory.empty(),
+                        EmptyUserLogRegistryFactory.INSTANCE
                     )
                 )
             );
@@ -142,11 +142,11 @@ class CommunityAlgorithmsStreamBusinessFacadeTest {
                     new AlgorithmRunner(
                         null,
                         graphStoreCatalogServiceMock,
-                        null,
-                        mock(TaskRegistryFactory.class),
-                        mock(UserLogRegistryFactory.class),
                         new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
-                        RequestScopedDependencies.builder().build()
+                        null,
+                        RequestScopedDependencies.builder().build(),
+                        mock(TaskRegistryFactory.class),
+                        mock(UserLogRegistryFactory.class)
                     )
                 )
             );

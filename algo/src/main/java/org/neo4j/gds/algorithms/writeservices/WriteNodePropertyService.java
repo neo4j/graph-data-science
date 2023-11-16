@@ -38,8 +38,8 @@ public class WriteNodePropertyService {
     private final TerminationFlag terminationFlag;
 
     public WriteNodePropertyService(
-        NodePropertyExporterBuilder nodePropertyExporterBuilder,
         Log log,
+        NodePropertyExporterBuilder nodePropertyExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag
     ) {

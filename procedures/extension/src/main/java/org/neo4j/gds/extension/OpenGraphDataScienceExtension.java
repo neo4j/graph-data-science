@@ -62,18 +62,20 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
 
         // we always just offer native writes in OpenGDS
         ExporterBuildersProviderService exporterBuildersProviderService = __ -> new NativeExportBuildersProvider();
+
         // we have no extra checks to do in OpenGDS
         Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator = Optional.empty();
 
+        // metrics are a no-op in OpenGDS
         var algorithmMetricsService = new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar());
 
         extensionBuilder
             .withComponent(
                 GraphDataScience.class,
                 () -> extensionBuilder.gdsProvider(
+                    algorithmMetricsService,
                     exporterBuildersProviderService,
-                    businessFacadeDecorator,
-                    algorithmMetricsService
+                    businessFacadeDecorator
                 )
             )
             .withComponent(

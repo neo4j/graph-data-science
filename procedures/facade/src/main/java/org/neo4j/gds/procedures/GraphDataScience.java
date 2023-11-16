@@ -32,7 +32,6 @@ public class GraphDataScience {
     private final CentralityProcedureFacade centralityProcedureFacade;
     private final SimilarityProcedureFacade similarityProcedureFacade;
 
-
     public GraphDataScience(
         Log log, CatalogFacade catalogFacade,
         CentralityProcedureFacade centralityProcedureFacade,

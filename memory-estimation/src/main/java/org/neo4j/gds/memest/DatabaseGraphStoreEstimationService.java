@@ -25,18 +25,15 @@ import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.ImmutableGraphLoader;
 
 public class DatabaseGraphStoreEstimationService {
-
-    private final User user;
     private final GraphLoaderContext graphLoaderContext;
+    private final User user;
 
-    public DatabaseGraphStoreEstimationService(User user, GraphLoaderContext graphLoaderContext) {
-        this.user = user;
+    public DatabaseGraphStoreEstimationService(GraphLoaderContext graphLoaderContext, User user) {
         this.graphLoaderContext = graphLoaderContext;
+        this.user = user;
     }
 
-    public GraphMemoryEstimation estimate(
-        GraphProjectConfig graphProjectConfig
-    ) {
+    public GraphMemoryEstimation estimate(GraphProjectConfig graphProjectConfig) {
         var graphStoreFactory = ImmutableGraphLoader
             .builder()
             .context(this.graphLoaderContext)

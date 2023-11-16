@@ -52,11 +52,11 @@ public final class AlgorithmRunner {
     public AlgorithmRunner(
         Log log,
         GraphStoreCatalogService graphStoreCatalogService,
-        AlgorithmMemoryValidationService memoryUsageValidator,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
         AlgorithmMetricsService algorithmMetricsService,
-        RequestScopedDependencies requestScopedDependencies
+        AlgorithmMemoryValidationService memoryUsageValidator,
+        RequestScopedDependencies requestScopedDependencies,
+        TaskRegistryFactory taskRegistryFactory,
+        UserLogRegistryFactory userLogRegistryFactory
     ) {
         this.log = log;
         this.graphStoreCatalogService = graphStoreCatalogService;

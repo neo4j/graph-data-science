@@ -33,8 +33,6 @@ import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStatsBusinessFaca
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
-import org.neo4j.gds.configuration.DefaultsConfiguration;
-import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.logging.Log;
@@ -73,84 +71,62 @@ public class SimilarityProcedureProvider {
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final AlgorithmMetricsService algorithmMetricsService;
     private final TerminationFlagService terminationFlagService;
-
     private final UserLogServices userLogServices;
     private final UserAccessor userAccessor;
+    private final ConfigurationParser configurationParser;
 
     SimilarityProcedureProvider(
         Log log,
+        ConfigurationParser configurationParser,
         GraphStoreCatalogService graphStoreCatalogService,
         boolean useMaxMemoryEstimation,
         AlgorithmMetaDataSetterService algorithmMetaDataSetterService,
-        DatabaseIdAccessor databaseIdAccessor,
-        KernelTransactionAccessor kernelTransactionAccessor,
-        ExporterBuildersProviderService exporterBuildersProviderService,
-        TaskRegistryFactoryService taskRegistryFactoryService,
         AlgorithmMetricsService algorithmMetricsService,
+        DatabaseIdAccessor databaseIdAccessor,
+        ExporterBuildersProviderService exporterBuildersProviderService,
+        KernelTransactionAccessor kernelTransactionAccessor,
+        TaskRegistryFactoryService taskRegistryFactoryService,
         TerminationFlagService terminationFlagService,
-        UserLogServices userLogServices,
-        UserAccessor userAccessor
+        UserAccessor userAccessor, UserLogServices userLogServices
     ) {
         this.log = log;
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.useMaxMemoryEstimation = useMaxMemoryEstimation;
-        this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.algorithmMetaDataSetterService = algorithmMetaDataSetterService;
+        this.algorithmMetricsService = algorithmMetricsService;
+        this.configurationParser = configurationParser;
         this.databaseIdAccessor = databaseIdAccessor;
+        this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.kernelTransactionAccessor = kernelTransactionAccessor;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
-        this.algorithmMetricsService = algorithmMetricsService;
         this.terminationFlagService = terminationFlagService;
-        this.userLogServices = userLogServices;
         this.userAccessor = userAccessor;
+        this.userLogServices = userLogServices;
     }
 
     SimilarityProcedureFacade createSimilarityProcedureFacade(Context context) throws ProcedureException {
-
         // Neo4j's services
         var graphDatabaseService = context.graphDatabaseAPI();
         var kernelTransaction = kernelTransactionAccessor.getKernelTransaction(context);
 
         // services derived from Neo4j's procedure context - request scoped dependencies
         var algorithmMemoryValidationService = new AlgorithmMemoryValidationService(log, useMaxMemoryEstimation);
-        var databaseId = databaseIdAccessor.getDatabaseId(context.graphDatabaseAPI());
-        var returnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
-        var user = userAccessor.getUser(context.securityContext());
         var algorithmMetaDataSetter = algorithmMetaDataSetterService.getAlgorithmMetaDataSetter(kernelTransaction);
-        var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
-        var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
+        var databaseId = databaseIdAccessor.getDatabaseId(context.graphDatabaseAPI());
         var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(graphDatabaseService);
         var exporterContext = new ExporterContext.ProcedureContextWrapper(context);
+        var relationshipExporterBuilder = exportBuildersProvider.relationshipExporterBuilder(exporterContext);
+        var returnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
+        var user = userAccessor.getUser(context.securityContext());
+        var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var terminationFlag = terminationFlagService.createTerminationFlag(kernelTransaction);
-        var requestScopedDependencies = RequestScopedDependencies.builder()
-            .with(databaseId)
-            .with(user)
-            .with(terminationFlag)
-            .build();
-
-        // the business
-        var algorithmRunner = new AlgorithmRunner(
+        var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
+        var writeRelationshipService = new WriteRelationshipService(
             log,
-            graphStoreCatalogService,
-            algorithmMemoryValidationService,
+            relationshipExporterBuilder,
             taskRegistryFactory,
-            userLogRegistryFactory,
-            algorithmMetricsService,
-            requestScopedDependencies
+            terminationFlag
         );
-
-        // structural behaviour
-        var similarityAlgorithmsFacade = new SimilarityAlgorithmsFacade(
-            algorithmRunner
-        );
-        var streamBusinessFacade = new SimilarityAlgorithmsStreamBusinessFacade(similarityAlgorithmsFacade);
-
-        // inject this one and have it shared, one day it won't have a JVM wide singleton backing it, fingers crossed
-        var configurationParser = new ConfigurationParser(
-            DefaultsConfiguration.Instance,
-            LimitsConfiguration.Instance
-        );
-
         var graphLoaderContext = GraphLoaderContextProvider.buildGraphLoaderContext(
             context,
             databaseId,
@@ -159,32 +135,48 @@ public class SimilarityProcedureProvider {
             userLogRegistryFactory,
             log
         );
-        var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(
-            user,
-            graphLoaderContext
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(databaseId)
+            .with(user)
+            .with(terminationFlag)
+            .build();
+        var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(graphLoaderContext, user);
+        var algorithmEstimator = new AlgorithmEstimator(
+            graphStoreCatalogService,
+            fictitiousGraphStoreEstimationService,
+            databaseGraphStoreEstimationService,
+            databaseId,
+            user
         );
 
-        var estimateBusinessFacade = new SimilarityAlgorithmsEstimateBusinessFacade(
-            new AlgorithmEstimator(
-                graphStoreCatalogService,
-                fictitiousGraphStoreEstimationService,
-                databaseGraphStoreEstimationService,
-                databaseId,
-                user
-            )
+        // the business
+        var algorithmRunner = new AlgorithmRunner(
+            log,
+            graphStoreCatalogService,
+            algorithmMetricsService,
+            algorithmMemoryValidationService,
+            requestScopedDependencies,
+            taskRegistryFactory,
+            userLogRegistryFactory
         );
 
-        var relationshipExporterBuilder = exportBuildersProvider.relationshipExporterBuilder(exporterContext);
+        // algorithms facade
+        var similarityAlgorithmsFacade = new SimilarityAlgorithmsFacade(algorithmRunner);
 
+        // mode-specific facades
+        var estimateBusinessFacade = new SimilarityAlgorithmsEstimateBusinessFacade(algorithmEstimator);
         var mutateBusinessFacade = new SimilarityAlgorithmsMutateBusinessFacade(
             similarityAlgorithmsFacade,
             new MutateRelationshipService(log)
         );
         var statsBusinessFacade = new SimilarityAlgorithmsStatsBusinessFacade(similarityAlgorithmsFacade);
+        var streamBusinessFacade = new SimilarityAlgorithmsStreamBusinessFacade(similarityAlgorithmsFacade);
         var writeBusinessFacade = new SimilarityAlgorithmsWriteBusinessFacade(
             similarityAlgorithmsFacade,
-            new WriteRelationshipService(log, relationshipExporterBuilder, taskRegistryFactory, terminationFlag)
+            writeRelationshipService
         );
+
+        // procedure facade
         return new SimilarityProcedureFacade(
             configurationParser,
             user,
@@ -195,8 +187,6 @@ public class SimilarityProcedureProvider {
             writeBusinessFacade,
             estimateBusinessFacade,
             algorithmMetaDataSetter
-
         );
     }
-
 }

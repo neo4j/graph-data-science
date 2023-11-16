@@ -24,14 +24,10 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStatsBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
-import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutStreamConfig;
 import org.neo4j.gds.conductance.ConductanceStreamConfig;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.k1coloring.K1ColoringMutateConfig;
 import org.neo4j.gds.k1coloring.K1ColoringStatsConfig;
 import org.neo4j.gds.k1coloring.K1ColoringStreamConfig;
@@ -62,6 +58,7 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStatsConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationWriteConfig;
+import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutMutateResult;
 import org.neo4j.gds.procedures.community.approxmaxkcut.ApproxMaxKCutStreamResult;
 import org.neo4j.gds.procedures.community.conductance.ConductanceStreamResult;
@@ -112,7 +109,6 @@ import org.neo4j.gds.procedures.community.wcc.WccMutateResult;
 import org.neo4j.gds.procedures.community.wcc.WccStatsResult;
 import org.neo4j.gds.procedures.community.wcc.WccStreamResult;
 import org.neo4j.gds.procedures.community.wcc.WccWriteResult;
-import org.neo4j.gds.procedures.configparser.ConfigurationParser;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.scc.SccAlphaWriteConfig;
 import org.neo4j.gds.scc.SccMutateConfig;
@@ -133,14 +129,11 @@ import org.neo4j.gds.wcc.WccStreamConfig;
 import org.neo4j.gds.wcc.WccWriteConfig;
 
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class CommunityProcedureFacade {
     // services
-    private final ConfigurationParser configurationParser;
-    private final AlgorithmMetaDataSetter algorithmMetaDataSetter;
-    private final User user;
+    private final ConfigurationCreator configurationCreator;
     private final ProcedureReturnColumns procedureReturnColumns;
 
     // business logic
@@ -151,9 +144,7 @@ public class CommunityProcedureFacade {
     private final CommunityAlgorithmsWriteBusinessFacade writeBusinessFacade;
 
     public CommunityProcedureFacade(
-        ConfigurationParser configurationParser,
-        AlgorithmMetaDataSetter algorithmMetaDataSetter,
-        User user,
+        ConfigurationCreator configurationCreator,
         ProcedureReturnColumns procedureReturnColumns,
         CommunityAlgorithmsEstimateBusinessFacade estimateBusinessFacade,
         CommunityAlgorithmsMutateBusinessFacade mutateBusinessFacade,
@@ -161,9 +152,7 @@ public class CommunityProcedureFacade {
         CommunityAlgorithmsStreamBusinessFacade streamBusinessFacade,
         CommunityAlgorithmsWriteBusinessFacade writeBusinessFacade
     ) {
-        this.configurationParser = configurationParser;
-        this.algorithmMetaDataSetter = algorithmMetaDataSetter;
-        this.user = user;
+        this.configurationCreator = configurationCreator;
         this.procedureReturnColumns = procedureReturnColumns;
         this.estimateBusinessFacade = estimateBusinessFacade;
         this.mutateBusinessFacade = mutateBusinessFacade;
@@ -178,7 +167,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var streamConfig = createStreamConfig(configuration, WccStreamConfig::of);
+        var streamConfig = configurationCreator.createConfigurationForStream(configuration, WccStreamConfig::of);
 
         var computationResult = streamBusinessFacade.wcc(
             graphName,
@@ -192,7 +181,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, WccMutateConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, WccMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.wcc(
             graphName,
@@ -207,7 +196,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, WccStatsConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, WccStatsConfig::of);
 
         var computationResult = statsBusinessFacade.wcc(
             graphName,
@@ -222,7 +211,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var writeConfig = createConfig(configuration, WccWriteConfig::of);
+        var writeConfig = configurationCreator.createConfiguration(configuration, WccWriteConfig::of);
 
         var computationResult = writeBusinessFacade.wcc(
             graphName,
@@ -237,7 +226,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, WccMutateConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, WccMutateConfig::of);
         return Stream.of(estimateBusinessFacade.wcc(graphNameOrConfiguration, config));
     }
 
@@ -245,7 +234,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, WccStatsConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, WccStatsConfig::of);
         return Stream.of(estimateBusinessFacade.wcc(graphNameOrConfiguration, config));
     }
 
@@ -253,7 +242,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, WccWriteConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, WccWriteConfig::of);
         return Stream.of(estimateBusinessFacade.wcc(graphNameOrConfiguration, config));
     }
 
@@ -261,7 +250,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, WccStreamConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, WccStreamConfig::of);
         return Stream.of(estimateBusinessFacade.wcc(graphNameOrConfiguration, config));
     }
 
@@ -272,7 +261,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var streamConfig = createStreamConfig(
+        var streamConfig = configurationCreator.createConfigurationForStream(
             configuration,
             KCoreDecompositionStreamConfig::of
         );
@@ -289,7 +278,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, KCoreDecompositionMutateConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, KCoreDecompositionMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.kCore(
             graphName,
@@ -303,7 +292,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, KCoreDecompositionStatsConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, KCoreDecompositionStatsConfig::of);
 
         var computationResult = statsBusinessFacade.kCore(
             graphName,
@@ -317,7 +306,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, KCoreDecompositionWriteConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, KCoreDecompositionWriteConfig::of);
 
         var computationResult = writeBusinessFacade.kcore(
             graphName,
@@ -331,7 +320,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, KCoreDecompositionStreamConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, KCoreDecompositionStreamConfig::of);
         return Stream.of(estimateBusinessFacade.kcore(graphNameOrConfiguration, config));
     }
 
@@ -339,7 +328,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, KCoreDecompositionMutateConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, KCoreDecompositionMutateConfig::of);
         return Stream.of(estimateBusinessFacade.kcore(graphNameOrConfiguration, config));
     }
 
@@ -347,7 +336,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, KCoreDecompositionStatsConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, KCoreDecompositionStatsConfig::of);
         return Stream.of(estimateBusinessFacade.kcore(graphNameOrConfiguration, config));
     }
 
@@ -358,7 +347,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, LouvainStatsConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, LouvainStatsConfig::of);
 
         var computationResult = statsBusinessFacade.louvain(
             graphName,
@@ -373,7 +362,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, LouvainStatsConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, LouvainStatsConfig::of);
         return Stream.of(estimateBusinessFacade.louvain(graphNameOrConfiguration, config));
     }
 
@@ -382,7 +371,7 @@ public class CommunityProcedureFacade {
         Map<String, Object> configuration
 
     ) {
-        var streamConfig = createStreamConfig(configuration, LouvainStreamConfig::of);
+        var streamConfig = configurationCreator.createConfigurationForStream(configuration, LouvainStreamConfig::of);
 
         var computationResult = streamBusinessFacade.louvain(
             graphName,
@@ -396,7 +385,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, LouvainStreamConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, LouvainStreamConfig::of);
         return Stream.of(estimateBusinessFacade.louvain(graphNameOrConfiguration, config));
     }
 
@@ -404,7 +393,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, LouvainMutateConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, LouvainMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.louvain(
             graphName,
@@ -419,7 +408,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, LouvainMutateConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, LouvainMutateConfig::of);
         return Stream.of(estimateBusinessFacade.louvain(graphNameOrConfiguration, config));
     }
 
@@ -427,7 +416,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, LouvainWriteConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, LouvainWriteConfig::of);
 
         var computationResult = writeBusinessFacade.louvain(
             graphName,
@@ -442,7 +431,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, LouvainWriteConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, LouvainWriteConfig::of);
         return Stream.of(estimateBusinessFacade.louvain(graphNameOrConfiguration, config));
     }
 
@@ -451,7 +440,7 @@ public class CommunityProcedureFacade {
         Map<String, Object> configuration
 
     ) {
-        var streamConfig = createStreamConfig(configuration, LeidenStreamConfig::of);
+        var streamConfig = configurationCreator.createConfigurationForStream(configuration, LeidenStreamConfig::of);
 
         var computationResult = streamBusinessFacade.leiden(
             graphName,
@@ -465,7 +454,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, LeidenMutateConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, LeidenMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.leiden(
             graphName,
@@ -480,7 +469,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, LeidenStatsConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, LeidenStatsConfig::of);
 
         var computationResult = statsBusinessFacade.leiden(
             graphName,
@@ -492,7 +481,7 @@ public class CommunityProcedureFacade {
     }
 
     public Stream<LeidenWriteResult> leidenWrite(String graphName, Map<String, Object> configuration) {
-        var config = createConfig(configuration, LeidenWriteConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, LeidenWriteConfig::of);
 
         var computationResult = writeBusinessFacade.leiden(
             graphName,
@@ -507,7 +496,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, LeidenStreamConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, LeidenStreamConfig::of);
         return Stream.of(estimateBusinessFacade.leiden(graphNameOrConfiguration, config));
     }
 
@@ -515,7 +504,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, LeidenMutateConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, LeidenMutateConfig::of);
         return Stream.of(estimateBusinessFacade.leiden(graphNameOrConfiguration, config));
     }
 
@@ -523,7 +512,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, LeidenStatsConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, LeidenStatsConfig::of);
         return Stream.of(estimateBusinessFacade.leiden(graphNameOrConfiguration, config));
     }
 
@@ -531,7 +520,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, LeidenWriteConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, LeidenWriteConfig::of);
         return Stream.of(estimateBusinessFacade.leiden(graphNameOrConfiguration, config));
     }
 
@@ -540,7 +529,7 @@ public class CommunityProcedureFacade {
         Map<String, Object> configuration
 
     ) {
-        var streamConfig = createStreamConfig(configuration, SccStreamConfig::of);
+        var streamConfig = configurationCreator.createConfigurationForStream(configuration, SccStreamConfig::of);
 
         var computationResult = streamBusinessFacade.scc(
             graphName,
@@ -554,7 +543,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, SccMutateConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, SccMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.scc(
             graphName,
@@ -569,7 +558,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, SccWriteConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, SccWriteConfig::of);
 
         var computationResult = writeBusinessFacade.scc(
             graphName,
@@ -584,7 +573,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, SccStatsConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, SccStatsConfig::of);
 
         var computationResult = statsBusinessFacade.scc(
             graphName,
@@ -599,7 +588,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, SccWriteConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, SccWriteConfig::of);
         return Stream.of(estimateBusinessFacade.estimateScc(graphNameOrConfiguration, config));
     }
 
@@ -607,7 +596,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, SccMutateConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, SccMutateConfig::of);
         return Stream.of(estimateBusinessFacade.estimateScc(graphNameOrConfiguration, config));
     }
 
@@ -615,7 +604,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, SccStatsConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, SccStatsConfig::of);
         return Stream.of(estimateBusinessFacade.estimateScc(graphNameOrConfiguration, config));
     }
 
@@ -623,7 +612,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, SccStreamConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, SccStreamConfig::of);
         return Stream.of(estimateBusinessFacade.estimateScc(graphNameOrConfiguration, config));
     }
 
@@ -633,7 +622,7 @@ public class CommunityProcedureFacade {
         Map<String, Object> configuration
 
     ) {
-        var streamConfig = createStreamConfig(configuration, TriangleCountStreamConfig::of);
+        var streamConfig = configurationCreator.createConfigurationForStream(configuration, TriangleCountStreamConfig::of);
 
         var computationResult = streamBusinessFacade.triangleCount(
             graphName,
@@ -647,7 +636,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, TriangleCountMutateConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, TriangleCountMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.triangleCount(
             graphName,
@@ -661,7 +650,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, TriangleCountStatsConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, TriangleCountStatsConfig::of);
 
         var computationResult = statsBusinessFacade.triangleCount(
             graphName,
@@ -675,7 +664,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, TriangleCountWriteConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, TriangleCountWriteConfig::of);
 
         var computationResult = writeBusinessFacade.triangleCount(
             graphName,
@@ -689,7 +678,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, TriangleCountStreamConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, TriangleCountStreamConfig::of);
         return Stream.of(estimateBusinessFacade.triangleCount(graphNameOrConfiguration, config));
     }
 
@@ -697,7 +686,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, TriangleCountMutateConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, TriangleCountMutateConfig::of);
         return Stream.of(estimateBusinessFacade.triangleCount(graphNameOrConfiguration, config));
     }
 
@@ -705,7 +694,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, TriangleCountStatsConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, TriangleCountStatsConfig::of);
         return Stream.of(estimateBusinessFacade.triangleCount(graphNameOrConfiguration, config));
     }
 
@@ -713,7 +702,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, TriangleCountWriteConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, TriangleCountWriteConfig::of);
         return Stream.of(estimateBusinessFacade.triangleCount(graphNameOrConfiguration, config));
     }
 
@@ -721,7 +710,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var streamConfig = createStreamConfig(configuration, LabelPropagationStreamConfig::of);
+        var streamConfig = configurationCreator.createConfigurationForStream(configuration, LabelPropagationStreamConfig::of);
 
         var computationResult = streamBusinessFacade.labelPropagation(
             graphName,
@@ -735,7 +724,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var mutateConfig = createConfig(configuration, LabelPropagationMutateConfig::of);
+        var mutateConfig = configurationCreator.createConfiguration(configuration, LabelPropagationMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.labelPropagation(
             graphName,
@@ -750,7 +739,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, LabelPropagationStatsConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, LabelPropagationStatsConfig::of);
 
         var computationResult = statsBusinessFacade.labelPropagation(
             graphName,
@@ -765,7 +754,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, LabelPropagationWriteConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, LabelPropagationWriteConfig::of);
 
         var computationResult = writeBusinessFacade.labelPropagation(
             graphName,
@@ -780,7 +769,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, LabelPropagationStreamConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, LabelPropagationStreamConfig::of);
         return Stream.of(estimateBusinessFacade.labelPropagation(graphNameOrConfiguration, config));
     }
 
@@ -788,7 +777,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, LabelPropagationStatsConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, LabelPropagationStatsConfig::of);
         return Stream.of(estimateBusinessFacade.labelPropagation(graphNameOrConfiguration, config));
     }
 
@@ -796,7 +785,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, LabelPropagationMutateConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, LabelPropagationMutateConfig::of);
         return Stream.of(estimateBusinessFacade.labelPropagation(graphNameOrConfiguration, config));
     }
 
@@ -804,7 +793,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, LabelPropagationWriteConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, LabelPropagationWriteConfig::of);
         return Stream.of(estimateBusinessFacade.labelPropagation(graphNameOrConfiguration, config));
     }
 
@@ -813,7 +802,7 @@ public class CommunityProcedureFacade {
         Map<String, Object> configuration
 
     ) {
-        var streamConfig = createStreamConfig(configuration, ModularityStreamConfig::of);
+        var streamConfig = configurationCreator.createConfigurationForStream(configuration, ModularityStreamConfig::of);
 
         var computationResult = streamBusinessFacade.modularity(
             graphName,
@@ -827,7 +816,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, ModularityStatsConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, ModularityStatsConfig::of);
 
         var computationResult = statsBusinessFacade.modularity(
             graphName,
@@ -841,7 +830,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, ModularityStreamConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, ModularityStreamConfig::of);
         return Stream.of(estimateBusinessFacade.modularity(graphNameOrConfiguration, config));
     }
 
@@ -849,7 +838,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, ModularityStatsConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, ModularityStatsConfig::of);
         return Stream.of(estimateBusinessFacade.modularity(graphNameOrConfiguration, config));
     }
 
@@ -857,7 +846,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var streamConfig = createStreamConfig(configuration, KmeansStreamConfig::of);
+        var streamConfig = configurationCreator.createConfigurationForStream(configuration, KmeansStreamConfig::of);
 
         var computationResult = streamBusinessFacade.kmeans(
             graphName,
@@ -871,7 +860,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var mutateConfig = createConfig(configuration, KmeansMutateConfig::of);
+        var mutateConfig = configurationCreator.createConfiguration(configuration, KmeansMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.kmeans(
             graphName,
@@ -887,7 +876,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var writeConfig = createConfig(configuration, KmeansWriteConfig::of);
+        var writeConfig = configurationCreator.createConfiguration(configuration, KmeansWriteConfig::of);
 
         var computationResult = writeBusinessFacade.kmeans(
             graphName,
@@ -903,7 +892,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var statsConfig = createConfig(configuration, KmeansStatsConfig::of);
+        var statsConfig = configurationCreator.createConfiguration(configuration, KmeansStatsConfig::of);
 
         var computationResult = statsBusinessFacade.kmeans(
             graphName,
@@ -919,7 +908,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, KmeansMutateConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, KmeansMutateConfig::of);
         return Stream.of(estimateBusinessFacade.kmeans(graphNameOrConfiguration, config));
     }
 
@@ -927,7 +916,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, KmeansStatsConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, KmeansStatsConfig::of);
         return Stream.of(estimateBusinessFacade.kmeans(graphNameOrConfiguration, config));
     }
 
@@ -935,7 +924,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, KmeansStreamConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, KmeansStreamConfig::of);
         return Stream.of(estimateBusinessFacade.kmeans(graphNameOrConfiguration, config));
     }
 
@@ -943,7 +932,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, KmeansWriteConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, KmeansWriteConfig::of);
         return Stream.of(estimateBusinessFacade.kmeans(graphNameOrConfiguration, config));
     }
 
@@ -951,7 +940,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var streamConfig = createStreamConfig(
+        var streamConfig = configurationCreator.createConfigurationForStream(
             configuration,
             LocalClusteringCoefficientStreamConfig::of
         );
@@ -969,7 +958,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var mutateConfig = createConfig(configuration, LocalClusteringCoefficientMutateConfig::of);
+        var mutateConfig = configurationCreator.createConfiguration(configuration, LocalClusteringCoefficientMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.localClusteringCoefficient(
             graphName,
@@ -983,7 +972,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var statsConfig = createConfig(configuration, LocalClusteringCoefficientStatsConfig::of);
+        var statsConfig = configurationCreator.createConfiguration(configuration, LocalClusteringCoefficientStatsConfig::of);
 
         var computationResult = statsBusinessFacade.localClusteringCoefficient(
             graphName,
@@ -997,7 +986,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var writeConfig = createConfig(configuration, LocalClusteringCoefficientWriteConfig::of);
+        var writeConfig = configurationCreator.createConfiguration(configuration, LocalClusteringCoefficientWriteConfig::of);
 
         var computationResult = writeBusinessFacade.localClusteringCoefficient(
             graphName,
@@ -1011,7 +1000,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, LocalClusteringCoefficientMutateConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, LocalClusteringCoefficientMutateConfig::of);
         return Stream.of(estimateBusinessFacade.localClusteringCoefficient(graphNameOrConfiguration, config));
     }
 
@@ -1019,7 +1008,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, LocalClusteringCoefficientWriteConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, LocalClusteringCoefficientWriteConfig::of);
         return Stream.of(estimateBusinessFacade.localClusteringCoefficient(graphNameOrConfiguration, config));
     }
 
@@ -1027,7 +1016,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, LocalClusteringCoefficientStatsConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, LocalClusteringCoefficientStatsConfig::of);
         return Stream.of(estimateBusinessFacade.localClusteringCoefficient(graphNameOrConfiguration, config));
     }
 
@@ -1035,7 +1024,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, LocalClusteringCoefficientStreamConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, LocalClusteringCoefficientStreamConfig::of);
         return Stream.of(estimateBusinessFacade.localClusteringCoefficient(graphNameOrConfiguration, config));
     }
 
@@ -1044,7 +1033,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var streamConfig = createStreamConfig(
+        var streamConfig = configurationCreator.createConfigurationForStream(
             configuration,
             K1ColoringStreamConfig::of
         );
@@ -1061,10 +1050,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var mutateConfig = createConfig(
-            configuration,
-            K1ColoringMutateConfig::of
-        );
+        var mutateConfig = configurationCreator.createConfiguration(configuration, K1ColoringMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.k1coloring(
             graphName,
@@ -1079,10 +1065,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var writeConfig = createConfig(
-            configuration,
-            K1ColoringWriteConfig::of
-        );
+        var writeConfig = configurationCreator.createConfiguration(configuration, K1ColoringWriteConfig::of);
 
         var computationResult = writeBusinessFacade.k1coloring(
             graphName,
@@ -1097,7 +1080,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var streamConfig = createStreamConfig(
+        var streamConfig = configurationCreator.createConfigurationForStream(
             configuration,
             ModularityOptimizationStreamConfig::of
         );
@@ -1114,7 +1097,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var mutateConfig = createConfig(configuration, ModularityOptimizationMutateConfig::of);
+        var mutateConfig = configurationCreator.createConfiguration(configuration, ModularityOptimizationMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.modularityOptimization(
             graphName,
@@ -1132,7 +1115,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var statsConfig = createConfig(configuration, ModularityOptimizationStatsConfig::of);
+        var statsConfig = configurationCreator.createConfiguration(configuration, ModularityOptimizationStatsConfig::of);
 
         var computationResult = statsBusinessFacade.modularityOptimization(
             graphName,
@@ -1150,7 +1133,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var writeConfig = createConfig(configuration, ModularityOptimizationWriteConfig::of);
+        var writeConfig = configurationCreator.createConfiguration(configuration, ModularityOptimizationWriteConfig::of);
 
         var computationResult = writeBusinessFacade.modularityOptimization(
             graphName,
@@ -1165,7 +1148,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, ModularityOptimizationStreamConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, ModularityOptimizationStreamConfig::of);
         return Stream.of(estimateBusinessFacade.modularityOptimization(graphNameOrConfiguration, config));
     }
 
@@ -1173,7 +1156,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, ModularityOptimizationStatsConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, ModularityOptimizationStatsConfig::of);
         return Stream.of(estimateBusinessFacade.modularityOptimization(graphNameOrConfiguration, config));
     }
 
@@ -1181,7 +1164,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, ModularityOptimizationMutateConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, ModularityOptimizationMutateConfig::of);
         return Stream.of(estimateBusinessFacade.modularityOptimization(graphNameOrConfiguration, config));
     }
 
@@ -1189,7 +1172,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, ModularityOptimizationWriteConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, ModularityOptimizationWriteConfig::of);
         return Stream.of(estimateBusinessFacade.modularityOptimization(graphNameOrConfiguration, config));
     }
 
@@ -1198,10 +1181,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var statsConfig = createConfig(
-            configuration,
-            K1ColoringStatsConfig::of
-        );
+        var statsConfig = configurationCreator.createConfiguration(configuration, K1ColoringStatsConfig::of);
 
         var computationResult = statsBusinessFacade.k1coloring(
             graphName,
@@ -1216,7 +1196,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, K1ColoringMutateConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, K1ColoringMutateConfig::of);
         return Stream.of(estimateBusinessFacade.k1Coloring(graphNameOrConfiguration, config));
     }
 
@@ -1224,7 +1204,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, K1ColoringStatsConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, K1ColoringStatsConfig::of);
         return Stream.of(estimateBusinessFacade.k1Coloring(graphNameOrConfiguration, config));
     }
 
@@ -1232,7 +1212,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, K1ColoringStreamConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, K1ColoringStreamConfig::of);
         return Stream.of(estimateBusinessFacade.k1Coloring(graphNameOrConfiguration, config));
     }
 
@@ -1240,7 +1220,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, K1ColoringWriteConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, K1ColoringWriteConfig::of);
         return Stream.of(estimateBusinessFacade.k1Coloring(graphNameOrConfiguration, config));
     }
 
@@ -1248,7 +1228,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var streamConfig = createStreamConfig(
+        var streamConfig = configurationCreator.createConfigurationForStream(
             configuration,
             ConductanceStreamConfig::of
         );
@@ -1265,7 +1245,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var streamConfig = createStreamConfig(configuration, ApproxMaxKCutStreamConfig::of);
+        var streamConfig = configurationCreator.createConfigurationForStream(configuration, ApproxMaxKCutStreamConfig::of);
 
         var computationResult = streamBusinessFacade.approxMaxKCut(
             graphName,
@@ -1279,7 +1259,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var streamConfig = createConfig(configuration, ApproxMaxKCutMutateConfig::of);
+        var streamConfig = configurationCreator.createConfiguration(configuration, ApproxMaxKCutMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.approxMaxKCut(
             graphName,
@@ -1293,7 +1273,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, ApproxMaxKCutStreamConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, ApproxMaxKCutStreamConfig::of);
         return Stream.of(estimateBusinessFacade.approxMaxKCut(graphNameOrConfiguration, config));
     }
 
@@ -1301,7 +1281,7 @@ public class CommunityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
     ) {
-        var config = createConfig(algoConfiguration, ApproxMaxKCutMutateConfig::of);
+        var config = configurationCreator.createConfiguration(algoConfiguration, ApproxMaxKCutMutateConfig::of);
         return Stream.of(estimateBusinessFacade.approxMaxKCut(graphNameOrConfiguration, config));
     }
 
@@ -1309,7 +1289,7 @@ public class CommunityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, SccAlphaWriteConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, SccAlphaWriteConfig::of);
 
         var computationResult = writeBusinessFacade.alphaScc(
             graphName,
@@ -1319,26 +1299,4 @@ public class CommunityProcedureFacade {
 
         return Stream.of(SccComputationResultTransformer.toAlphaWriteResult(computationResult, config));
     }
-
-
-    private <C extends AlgoBaseConfig> C createStreamConfig(
-        Map<String, Object> configuration,
-        Function<CypherMapWrapper, C> configCreator
-    ) {
-        return createConfig(
-            configuration,
-            configCreator.andThen(algorithmConfiguration -> {
-                algorithmMetaDataSetter.set(algorithmConfiguration);
-                return algorithmConfiguration;
-            })
-        );
-    }
-
-    private <C extends AlgoBaseConfig> C createConfig(
-        Map<String, Object> configuration,
-        Function<CypherMapWrapper, C> configCreator
-    ) {
-        return configurationParser.produceConfig(configuration, configCreator, user.getUsername());
-    }
-
 }

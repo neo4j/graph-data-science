@@ -47,10 +47,10 @@ class AlgorithmRunnerTest {
         var runner = new AlgorithmRunner(
             null,
             null,
-            null,
-            null,
-            null,
             algorithmMetricsServiceMock,
+            null,
+            null,
+            null,
             null
         );
 
@@ -83,10 +83,10 @@ class AlgorithmRunnerTest {
         var runner = new AlgorithmRunner(
             logMock,
             null,
-            null,
-            null,
-            null,
             algorithmMetricsServiceMock,
+            null,
+            null,
+            null,
             null
         );
 

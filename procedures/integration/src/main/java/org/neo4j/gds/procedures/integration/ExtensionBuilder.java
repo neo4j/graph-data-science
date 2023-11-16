@@ -21,7 +21,10 @@ package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
+import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
+import org.neo4j.gds.configuration.DefaultsConfiguration;
+import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -33,6 +36,7 @@ import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.KernelTransactionAccessor;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.TerminationFlagService;
+import org.neo4j.gds.procedures.configparser.ConfigurationParser;
 import org.neo4j.gds.services.DatabaseIdAccessor;
 import org.neo4j.gds.services.UserAccessor;
 import org.neo4j.gds.services.UserLogServices;
@@ -55,6 +59,7 @@ import java.util.function.Supplier;
  */
 public final class ExtensionBuilder {
     // These are a few dull but widely used simple services
+    private final AlgorithmMetaDataSetterService algorithmMetaDataSetterService = new AlgorithmMetaDataSetterService();
     private final DatabaseIdAccessor databaseIdAccessor = new DatabaseIdAccessor();
     private final KernelTransactionAccessor kernelTransactionAccessor = new KernelTransactionAccessor();
     private final TerminationFlagService terminationFlagService = new TerminationFlagService();
@@ -71,6 +76,7 @@ public final class ExtensionBuilder {
     private final TaskStoreService taskStoreService;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final UserLogServices userLogServices;
+    private final ConfigurationParser configurationParser;
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final boolean useMaxMemoryEstimation;
 
@@ -80,6 +86,7 @@ public final class ExtensionBuilder {
         TaskStoreService taskStoreService,
         TaskRegistryFactoryService taskRegistryFactoryService,
         UserLogServices userLogServices,
+        ConfigurationParser configurationParser,
         GraphStoreCatalogService graphStoreCatalogService,
         boolean useMaxMemoryEstimation
     ) {
@@ -89,6 +96,7 @@ public final class ExtensionBuilder {
         this.taskStoreService = taskStoreService;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.userLogServices = userLogServices;
+        this.configurationParser = configurationParser;
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.useMaxMemoryEstimation = useMaxMemoryEstimation;
     }
@@ -117,12 +125,16 @@ public final class ExtensionBuilder {
         // Graph catalog state initialised here, currently just a front for a big shared singleton
         var graphStoreCatalogService = new GraphStoreCatalogService();
 
+        // Speaking of state, defaults and limits is a big shared thing also (or, will be)
+        var configurationParser = new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance);
+
         return new ExtensionBuilder(
             log,
             globalProcedures,
             taskStoreService,
             taskRegistryFactoryService,
             userLogServices,
+            configurationParser,
             graphStoreCatalogService,
             useMaxMemoryEstimation
         );
@@ -188,21 +200,27 @@ public final class ExtensionBuilder {
      *
      * @param exporterBuildersProviderService The catalog of writers
      * @param businessFacadeDecorator         Any checks added across requests
-     * @param algorithmMetricsService
      */
     public ThrowingFunction<Context, GraphDataScience, ProcedureException> gdsProvider(
+        AlgorithmMetricsService algorithmMetricsService,
         ExporterBuildersProviderService exporterBuildersProviderService,
-        Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator,
-        AlgorithmMetricsService algorithmMetricsService
+        Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator
     ) {
         var catalogFacadeProvider = createCatalogFacadeProvider(
             exporterBuildersProviderService,
             businessFacadeDecorator
         );
 
-        var communityProcedureProvider = createCommunityProcedureProvider(exporterBuildersProviderService, algorithmMetricsService);
-        var similarityProcedureProvider = createSimilarityProcedureProvider(exporterBuildersProviderService, algorithmMetricsService);
-        var centralityProcedureProvider = createCentralityProcedureProvider(exporterBuildersProviderService, algorithmMetricsService);
+        var centralityProcedureProvider = createCentralityProcedureProvider(
+            algorithmMetricsService, exporterBuildersProviderService
+        );
+        var communityProcedureProvider = createCommunityProcedureProvider(
+            algorithmMetricsService,
+            exporterBuildersProviderService
+        );
+        var similarityProcedureProvider = createSimilarityProcedureProvider(
+            algorithmMetricsService, exporterBuildersProviderService
+        );
 
         return new GraphDataScienceProvider(
             log,
@@ -234,69 +252,68 @@ public final class ExtensionBuilder {
         );
     }
 
-    private CommunityProcedureProvider createCommunityProcedureProvider(
-        ExporterBuildersProviderService exporterBuildersProviderService,
-        AlgorithmMetricsService algorithmMetricsService
+    private CentralityProcedureProvider createCentralityProcedureProvider(
+        AlgorithmMetricsService algorithmMetricsService,
+        ExporterBuildersProviderService exporterBuildersProviderService
     ) {
-        var algorithmMetaDataSetterService = new AlgorithmMetaDataSetterService();
-
-        return new CommunityProcedureProvider(
+        return new CentralityProcedureProvider(
             log,
+            configurationParser,
             graphStoreCatalogService,
             useMaxMemoryEstimation,
             algorithmMetaDataSetterService,
-            databaseIdAccessor,
-            kernelTransactionAccessor,
-            exporterBuildersProviderService,
-            taskRegistryFactoryService,
             algorithmMetricsService,
+            databaseIdAccessor,
+            exporterBuildersProviderService,
+            kernelTransactionAccessor,
+            taskRegistryFactoryService,
             terminationFlagService,
-            userLogServices,
-            userAccessor
+            userAccessor,
+            userLogServices
+        );
+    }
+
+    private CommunityProcedureProvider createCommunityProcedureProvider(
+        AlgorithmMetricsService algorithmMetricsService,
+        ExporterBuildersProviderService exporterBuildersProviderService
+    ) {
+        var mutateNodePropertyService = new MutateNodePropertyService(this.log);
+
+        return new CommunityProcedureProvider(
+            log,
+            configurationParser,
+            graphStoreCatalogService,
+            useMaxMemoryEstimation,
+            algorithmMetaDataSetterService,
+            algorithmMetricsService,
+            databaseIdAccessor,
+            exporterBuildersProviderService,
+            kernelTransactionAccessor,
+            mutateNodePropertyService,
+            taskRegistryFactoryService,
+            terminationFlagService,
+            userAccessor,
+            userLogServices
         );
     }
 
     private SimilarityProcedureProvider createSimilarityProcedureProvider(
-        ExporterBuildersProviderService exporterBuildersProviderService,
-        AlgorithmMetricsService algorithmMetricsService
+        AlgorithmMetricsService algorithmMetricsService,
+        ExporterBuildersProviderService exporterBuildersProviderService
     ) {
-        var algorithmMetaDataSetterService = new AlgorithmMetaDataSetterService();
-
         return new SimilarityProcedureProvider(
             log,
+            configurationParser,
             graphStoreCatalogService,
             useMaxMemoryEstimation,
             algorithmMetaDataSetterService,
-            databaseIdAccessor,
-            kernelTransactionAccessor,
-            exporterBuildersProviderService,
-            taskRegistryFactoryService,
             algorithmMetricsService,
-            terminationFlagService,
-            userLogServices,
-            userAccessor
-        );
-    }
-
-    private CentralityProcedureProvider createCentralityProcedureProvider(
-        ExporterBuildersProviderService exporterBuildersProviderService,
-        AlgorithmMetricsService algorithmMetricsService
-    ) {
-        var algorithmMetaDataSetterService = new AlgorithmMetaDataSetterService();
-
-        return new CentralityProcedureProvider(
-            log,
-            graphStoreCatalogService,
-            useMaxMemoryEstimation,
-            algorithmMetaDataSetterService,
             databaseIdAccessor,
-            kernelTransactionAccessor,
             exporterBuildersProviderService,
+            kernelTransactionAccessor,
             taskRegistryFactoryService,
-            algorithmMetricsService,
             terminationFlagService,
-            userLogServices,
-            userAccessor
+            userAccessor, userLogServices
         );
     }
 }

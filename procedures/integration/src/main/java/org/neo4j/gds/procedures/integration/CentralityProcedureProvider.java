@@ -33,8 +33,6 @@ import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
-import org.neo4j.gds.configuration.DefaultsConfiguration;
-import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.logging.Log;
@@ -55,37 +53,42 @@ import org.neo4j.kernel.api.procedure.Context;
  * We call it a provider because it is used as a sub-provider to the {@link org.neo4j.gds.procedures.GraphDataScience} provider.
  */
 public class CentralityProcedureProvider {
+    // dull utilities
+    private final FictitiousGraphStoreEstimationService fictitiousGraphStoreEstimationService = new FictitiousGraphStoreEstimationService();
+
     // Global state and services
     private final Log log;
+    private final ConfigurationParser configurationParser;
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final boolean useMaxMemoryEstimation;
 
     // Request scoped state and services
     private final AlgorithmMetaDataSetterService algorithmMetaDataSetterService;
+    private final AlgorithmMetricsService algorithmMetricsService;
     private final DatabaseIdAccessor databaseIdAccessor;
     private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final KernelTransactionAccessor kernelTransactionAccessor;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
-    private final AlgorithmMetricsService algorithmMetricsService;
     private final TerminationFlagService terminationFlagService;
-    private final UserLogServices userLogServices;
     private final UserAccessor userAccessor;
+    private final UserLogServices userLogServices;
 
-    public CentralityProcedureProvider(
+    CentralityProcedureProvider(
         Log log,
+        ConfigurationParser configurationParser,
         GraphStoreCatalogService graphStoreCatalogService,
         boolean useMaxMemoryEstimation,
         AlgorithmMetaDataSetterService algorithmMetaDataSetterService,
-        DatabaseIdAccessor databaseIdAccessor,
-        KernelTransactionAccessor kernelTransactionAccessor,
-        ExporterBuildersProviderService exporterBuildersProviderService,
-        TaskRegistryFactoryService taskRegistryFactoryService,
         AlgorithmMetricsService algorithmMetricsService,
+        DatabaseIdAccessor databaseIdAccessor,
+        ExporterBuildersProviderService exporterBuildersProviderService,
+        KernelTransactionAccessor kernelTransactionAccessor,
+        TaskRegistryFactoryService taskRegistryFactoryService,
         TerminationFlagService terminationFlagService,
-        UserLogServices userLogServices,
-        UserAccessor userAccessor
+        UserAccessor userAccessor, UserLogServices userLogServices
     ) {
         this.log = log;
+        this.configurationParser = configurationParser;
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.useMaxMemoryEstimation = useMaxMemoryEstimation;
 
@@ -100,13 +103,12 @@ public class CentralityProcedureProvider {
         this.userAccessor = userAccessor;
     }
 
-    public CentralityProcedureFacade createCentralityProcedureFacade(Context context) throws ProcedureException {
-
+    CentralityProcedureFacade createCentralityProcedureFacade(Context context) throws ProcedureException {
         // Neo4j's services
         var graphDatabaseService = context.graphDatabaseAPI();
-
         var kernelTransaction = kernelTransactionAccessor.getKernelTransaction(context);
 
+        // GDS services derived from Procedure Context
         var algorithmMetaDataSetter = algorithmMetaDataSetterService.getAlgorithmMetaDataSetter(kernelTransaction);
         var algorithmMemoryValidationService = new AlgorithmMemoryValidationService(log, useMaxMemoryEstimation);
         var databaseId = databaseIdAccessor.getDatabaseId(context.graphDatabaseAPI());
@@ -119,6 +121,22 @@ public class CentralityProcedureProvider {
         );
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
         var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(graphDatabaseService);
+        var exporterContext = new ExporterContext.ProcedureContextWrapper(context);
+        var graphLoaderContext = GraphLoaderContextProvider.buildGraphLoaderContext(
+            context,
+            databaseId,
+            taskRegistryFactory,
+            terminationFlag,
+            userLogRegistryFactory,
+            log
+        );
+        var writeNodePropertyService = new WriteNodePropertyService(
+            log,
+            exportBuildersProvider.nodePropertyExporterBuilder(exporterContext),
+            taskRegistryFactory,
+            terminationFlag
+        );
+        var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(graphLoaderContext, user);
         var requestScopedDependencies = RequestScopedDependencies.builder()
             .with(databaseId)
             .with(user)
@@ -129,63 +147,36 @@ public class CentralityProcedureProvider {
         var algorithmRunner = new AlgorithmRunner(
             log,
             graphStoreCatalogService,
-            algorithmMemoryValidationService,
-            taskRegistryFactory,
-            userLogRegistryFactory,
             algorithmMetricsService,
-            requestScopedDependencies
+            algorithmMemoryValidationService,
+            requestScopedDependencies,
+            taskRegistryFactory,
+            userLogRegistryFactory
         );
 
         // algorithm facade
         var centralityAlgorithmsFacade = new CentralityAlgorithmsFacade(algorithmRunner);
 
-        // moar services
-        var fictitiousGraphStoreEstimationService = new FictitiousGraphStoreEstimationService();
-        var graphLoaderContext = GraphLoaderContextProvider.buildGraphLoaderContext(
-            context,
-            databaseId,
-            taskRegistryFactory,
-            terminationFlag,
-            userLogRegistryFactory,
-            log
-        );
-        var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(
-            user,
-            graphLoaderContext
-        );
-
-        var exporterContext = new ExporterContext.ProcedureContextWrapper(context);
-
-
         // business facades
-        var estimateBusinessFacade = new CentralityAlgorithmsEstimateBusinessFacade(
-            new AlgorithmEstimator(
-                graphStoreCatalogService,
-                fictitiousGraphStoreEstimationService,
-                databaseGraphStoreEstimationService,
-                databaseId,
-                user
-            )
+        var algorithmEstimator = new AlgorithmEstimator(
+            graphStoreCatalogService,
+            fictitiousGraphStoreEstimationService,
+            databaseGraphStoreEstimationService,
+            databaseId,
+            user
         );
-        var statsBusinessFacade = new CentralityAlgorithmsStatsBusinessFacade(centralityAlgorithmsFacade);
-        var streamBusinessFacade = new CentralityAlgorithmsStreamBusinessFacade(centralityAlgorithmsFacade);
+        var estimateBusinessFacade = new CentralityAlgorithmsEstimateBusinessFacade(algorithmEstimator);
         var mutateBusinessFacade = new CentralityAlgorithmsMutateBusinessFacade(
             centralityAlgorithmsFacade,
             new MutateNodePropertyService(log)
         );
-        CentralityAlgorithmsWriteBusinessFacade writeBusinessFacade = new CentralityAlgorithmsWriteBusinessFacade(
+        var statsBusinessFacade = new CentralityAlgorithmsStatsBusinessFacade(centralityAlgorithmsFacade);
+        var streamBusinessFacade = new CentralityAlgorithmsStreamBusinessFacade(centralityAlgorithmsFacade);
+        var writeBusinessFacade = new CentralityAlgorithmsWriteBusinessFacade(
             centralityAlgorithmsFacade,
-            new WriteNodePropertyService(
-                exportBuildersProvider.nodePropertyExporterBuilder(exporterContext),
-                log,
-                taskRegistryFactory,
-                terminationFlag
-            )
+            writeNodePropertyService
         );
-        var configurationParser = new ConfigurationParser(
-            DefaultsConfiguration.Instance,
-            LimitsConfiguration.Instance
-        );
+
         // procedure facade
         return new CentralityProcedureFacade(
             configurationParser,

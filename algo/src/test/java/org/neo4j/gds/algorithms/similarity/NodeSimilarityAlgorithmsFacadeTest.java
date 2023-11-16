@@ -121,11 +121,11 @@ class NodeSimilarityAlgorithmsFacadeTest {
             new AlgorithmRunner(
                 logMock,
                 graphStoreCatalogServiceMock,
-                mock(AlgorithmMemoryValidationService.class),
-                TaskRegistryFactory.empty(),
-                EmptyUserLogRegistryFactory.INSTANCE,
                 new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
-                RequestScopedDependencies.builder().build()
+                mock(AlgorithmMemoryValidationService.class),
+                RequestScopedDependencies.builder().build(),
+                TaskRegistryFactory.empty(),
+                EmptyUserLogRegistryFactory.INSTANCE
             )
         );
         var nodeSimilarity = similarityAlgorithmsFacade.nodeSimilarity(

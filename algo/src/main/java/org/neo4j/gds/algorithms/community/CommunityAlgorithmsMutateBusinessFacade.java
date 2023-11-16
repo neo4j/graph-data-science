@@ -69,8 +69,8 @@ public class CommunityAlgorithmsMutateBusinessFacade {
     private final MutateNodePropertyService mutateNodePropertyService;
 
     public CommunityAlgorithmsMutateBusinessFacade(
-        CommunityAlgorithmsFacade communityAlgorithmsFacade,
-        MutateNodePropertyService mutateNodePropertyService
+        MutateNodePropertyService mutateNodePropertyService,
+        CommunityAlgorithmsFacade communityAlgorithmsFacade
     ) {
         this.mutateNodePropertyService = mutateNodePropertyService;
         this.communityAlgorithmsFacade = communityAlgorithmsFacade;

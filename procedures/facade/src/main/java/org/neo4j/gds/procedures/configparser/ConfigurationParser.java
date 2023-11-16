@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.configparser;
 
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitViolation;
@@ -34,16 +35,15 @@ import java.util.Map;
 import java.util.function.Function;
 
 public class ConfigurationParser {
+    public static final ConfigurationParser EMPTY = new ConfigurationParser(DefaultsConfiguration.Empty,LimitsConfiguration.Empty);
+
     private final DefaultsConfiguration defaults;
     private final LimitsConfiguration limits;
-
-    public static final ConfigurationParser  EMPTY = new ConfigurationParser(DefaultsConfiguration.Empty,LimitsConfiguration.Empty);
 
     public ConfigurationParser(
         DefaultsConfiguration defaults,
         LimitsConfiguration limits
     ) {
-
         this.defaults = defaults;
         this.limits = limits;
     }
@@ -52,7 +52,6 @@ public class ConfigurationParser {
         // apply defaults
         return  defaults.apply(configuration, username);
     }
-
 
     <CONFIG  extends AlgoBaseConfig> void validateLimits(
         CONFIG algorithmConfiguration,
@@ -123,6 +122,14 @@ public class ConfigurationParser {
     public <CONFIG extends AlgoBaseConfig> CONFIG produceConfig(
         Map<String, Object> configuration,
         Function<CypherMapWrapper, CONFIG> configCreator,
+        User user
+    ) {
+        return produceConfig(configuration, configCreator, user.getUsername());
+    }
+
+    public <CONFIG extends AlgoBaseConfig> CONFIG produceConfig(
+        Map<String, Object> configuration,
+        Function<CypherMapWrapper, CONFIG> configCreator,
         String username
     ) {
         var inputWithDefaults = applyDefaults(configuration, username);
@@ -131,5 +138,4 @@ public class ConfigurationParser {
         validateLimits(procConfig, username, inputWithDefaults);
         return procConfig;
     }
-
 }

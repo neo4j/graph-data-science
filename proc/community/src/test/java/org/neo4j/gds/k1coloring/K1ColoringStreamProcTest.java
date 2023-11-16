@@ -56,6 +56,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.configparser.ConfigurationParser;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -204,15 +205,15 @@ class K1ColoringStreamProcTest extends BaseProcTest {
                     new AlgorithmRunner(
                         logMock,
                         graphStoreCatalogService,
-                        memoryUsageValidator,
-                        taskRegistryFactory,
-                        EmptyUserLogRegistryFactory.INSTANCE,
                         new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
+                        memoryUsageValidator,
                         RequestScopedDependencies.builder()
                             .with(DatabaseId.of(db.databaseName()))
                             .with(TerminationFlag.RUNNING_TRUE)
                             .with(new User(getUsername(), false))
-                            .build()
+                            .build(),
+                        taskRegistryFactory,
+                        EmptyUserLogRegistryFactory.INSTANCE
                     )
                 ));
             proc.facade = new GraphDataScience(
@@ -220,9 +221,11 @@ class K1ColoringStreamProcTest extends BaseProcTest {
                 null,
                 null,
                 new CommunityProcedureFacade(
-                    ConfigurationParser.EMPTY,
-                    mock(AlgorithmMetaDataSetter.class),
-                    new User(getUsername(), false),
+                    new ConfigurationCreator(
+                        ConfigurationParser.EMPTY,
+                        mock(AlgorithmMetaDataSetter.class),
+                        new User(getUsername(), false)
+                    ),
                     ProcedureReturnColumns.EMPTY,
                     null,
                     null,
