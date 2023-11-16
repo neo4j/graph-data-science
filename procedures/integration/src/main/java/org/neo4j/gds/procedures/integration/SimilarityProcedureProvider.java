@@ -41,6 +41,7 @@ import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
 import org.neo4j.gds.procedures.KernelTransactionAccessor;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.TerminationFlagService;
+import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.configparser.ConfigurationParser;
 import org.neo4j.gds.procedures.similarity.SimilarityProcedureFacade;
 import org.neo4j.gds.services.DatabaseIdAccessor;
@@ -118,6 +119,7 @@ public class SimilarityProcedureProvider {
         var relationshipExporterBuilder = exportBuildersProvider.relationshipExporterBuilder(exporterContext);
         var returnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
         var user = userAccessor.getUser(context.securityContext());
+        var configurationCreator = new ConfigurationCreator(configurationParser, algorithmMetaDataSetter, user);
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var terminationFlag = terminationFlagService.createTerminationFlag(kernelTransaction);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
@@ -178,15 +180,13 @@ public class SimilarityProcedureProvider {
 
         // procedure facade
         return new SimilarityProcedureFacade(
-            configurationParser,
-            user,
+            configurationCreator,
             returnColumns,
+            estimateBusinessFacade,
             mutateBusinessFacade,
             statsBusinessFacade,
             streamBusinessFacade,
-            writeBusinessFacade,
-            estimateBusinessFacade,
-            algorithmMetaDataSetter
+            writeBusinessFacade
         );
     }
 }
