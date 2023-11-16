@@ -39,7 +39,6 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.wcc.WccBaseConfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -102,19 +101,19 @@ class CommunityAlgorithmsStreamBusinessFacadeTest {
             var algorithmsBusinessFacade = new CommunityAlgorithmsStreamBusinessFacade(
                 new CommunityAlgorithmsFacade(
                     new AlgorithmRunner(
+                        logMock,
                         graphStoreCatalogServiceMock,
                         mock(AlgorithmMemoryValidationService.class),
                         TaskRegistryFactory.empty(),
                         EmptyUserLogRegistryFactory.INSTANCE,
                         new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
-                        logMock
+                        RequestScopedDependencies.builder().build()
                     )
                 )
             );
 
             // when
             var wccComputationResult = algorithmsBusinessFacade.wcc(
-                RequestScopedDependencies.builder().with(TerminationFlag.RUNNING_TRUE).build(),
                 "meh",
                 config
             );
@@ -141,19 +140,20 @@ class CommunityAlgorithmsStreamBusinessFacadeTest {
             var algorithmsBusinessFacade = new CommunityAlgorithmsStreamBusinessFacade(
                 new CommunityAlgorithmsFacade(
                     new AlgorithmRunner(
+                        null,
                         graphStoreCatalogServiceMock,
                         null,
                         mock(TaskRegistryFactory.class),
                         mock(UserLogRegistryFactory.class),
                         new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
-                        null
+                        RequestScopedDependencies.builder().build()
                     )
                 )
             );
 
             // when
             var wccComputationResult = algorithmsBusinessFacade.wcc(
-                RequestScopedDependencies.builder().build(), "meh", mock(WccBaseConfig.class)
+                "meh", mock(WccBaseConfig.class)
             );
 
             //then

@@ -352,12 +352,17 @@ class WccMutateProcTest extends BaseProcTest {
         var algorithmsMutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
             new CommunityAlgorithmsFacade(
                 new AlgorithmRunner(
+                    logMock,
                     graphStoreCatalogService,
                     memoryUsageValidator,
                     TaskRegistryFactory.empty(),
                     EmptyUserLogRegistryFactory.INSTANCE,
                     new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
-                    logMock
+                    RequestScopedDependencies.builder()
+                        .with(DatabaseId.of(db.databaseName()))
+                        .with(TerminationFlag.RUNNING_TRUE)
+                        .with(new User(getUsername(), false))
+                        .build()
                 )
             ),
             new MutateNodePropertyService(logMock)
@@ -371,11 +376,7 @@ class WccMutateProcTest extends BaseProcTest {
                 new CommunityProcedureFacade(
                     ConfigurationParser.EMPTY,
                     null,
-                    RequestScopedDependencies.builder()
-                        .with(DatabaseId.of(db.databaseName()))
-                        .with(TerminationFlag.RUNNING_TRUE)
-                        .with(new User(getUsername(), false))
-                        .build(),
+                    new User(getUsername(), false),
                     ProcedureReturnColumns.EMPTY,
                     null,
                     algorithmsMutateBusinessFacade,
@@ -486,12 +487,17 @@ class WccMutateProcTest extends BaseProcTest {
             var algorithmsBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
                 new CommunityAlgorithmsFacade(
                     new AlgorithmRunner(
+                        logMock,
                         graphStoreCatalogService,
                         memoryUsageValidator,
                         TaskRegistryFactory.empty(),
                         EmptyUserLogRegistryFactory.INSTANCE,
                         new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
-                        logMock
+                        RequestScopedDependencies.builder()
+                            .with(DatabaseId.of(db.databaseName()))
+                            .with(TerminationFlag.RUNNING_TRUE)
+                            .with(new User(getUsername(), false))
+                            .build()
                     )
                 ),
                 new MutateNodePropertyService(logMock)
@@ -504,11 +510,7 @@ class WccMutateProcTest extends BaseProcTest {
                 new CommunityProcedureFacade(
                     ConfigurationParser.EMPTY,
                     null,
-                    RequestScopedDependencies.builder()
-                        .with(DatabaseId.of(db.databaseName()))
-                        .with(TerminationFlag.RUNNING_TRUE)
-                        .with(new User(getUsername(), false))
-                        .build(),
+                    new User(getUsername(), false),
                     ProcedureReturnColumns.EMPTY,
                     null,
                     algorithmsBusinessFacade,
@@ -560,24 +562,27 @@ class WccMutateProcTest extends BaseProcTest {
     @Test
     void testRunOnEmptyGraph() {
         applyOnProcedure((proc) -> {
-            var logMock = mock(org.neo4j.gds.logging.Log.class);
             final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
             final AlgorithmMemoryValidationService memoryUsageValidator = new AlgorithmMemoryValidationService(
-                logMock,
+                null,
                 false
             );
             var algorithmsBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
                 new CommunityAlgorithmsFacade(
                     new AlgorithmRunner(
+                        null,
                         graphStoreCatalogService,
                         memoryUsageValidator,
                         TaskRegistryFactory.empty(),
                         EmptyUserLogRegistryFactory.INSTANCE,
                         new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
-                        null
+                        RequestScopedDependencies.builder()
+                            .with(DatabaseId.of(db.databaseName()))
+                            .with(new User(getUsername(), false))
+                            .build()
                     )
                 ),
-                new MutateNodePropertyService(logMock)
+                new MutateNodePropertyService(null)
             );
             proc.facade = new GraphDataScience(
                 null,
@@ -586,10 +591,7 @@ class WccMutateProcTest extends BaseProcTest {
                 new CommunityProcedureFacade(
                     ConfigurationParser.EMPTY,
                     null,
-                    RequestScopedDependencies.builder()
-                        .with(DatabaseId.of(db.databaseName()))
-                        .with(new User(getUsername(), false))
-                        .build(),
+                    new User(getUsername(), false),
                     ProcedureReturnColumns.EMPTY,
                     null,
                     algorithmsBusinessFacade,
@@ -652,12 +654,17 @@ class WccMutateProcTest extends BaseProcTest {
         var algorithmsBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
             new CommunityAlgorithmsFacade(
                 new AlgorithmRunner(
+                    logMock,
                     graphStoreCatalogService,
                     memoryUsageValidator,
                     TaskRegistryFactory.empty(),
                     EmptyUserLogRegistryFactory.INSTANCE,
                     new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
-                    logMock
+                    RequestScopedDependencies.builder()
+                        .with(DatabaseId.of(db.databaseName()))
+                        .with(TerminationFlag.RUNNING_TRUE)
+                        .with(new User(getUsername(), false))
+                        .build()
                 )
             ),
             new MutateNodePropertyService(logMock)
@@ -673,11 +680,7 @@ class WccMutateProcTest extends BaseProcTest {
                         new CommunityProcedureFacade(
                             ConfigurationParser.EMPTY,
                             null,
-                            RequestScopedDependencies.builder()
-                                .with(DatabaseId.of(db.databaseName()))
-                                .with(TerminationFlag.RUNNING_TRUE)
-                                .with(new User(getUsername(), false))
-                                .build(),
+                            new User(getUsername(), false),
                             ProcedureReturnColumns.EMPTY,
                             null,
                             algorithmsBusinessFacade,

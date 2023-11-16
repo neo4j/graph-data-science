@@ -21,7 +21,6 @@ package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
-import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.algorithms.community.specificfields.AlphaSccSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.CommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.community.specificfields.K1ColoringSpecificFields;
@@ -36,8 +35,6 @@ import org.neo4j.gds.algorithms.community.specificfields.StandardCommunityStatis
 import org.neo4j.gds.algorithms.community.specificfields.TriangleCountSpecificFields;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ArrowConnectionInfo;
@@ -56,7 +53,6 @@ import org.neo4j.gds.result.CommunityStatistics;
 import org.neo4j.gds.result.StatisticsComputationInstructions;
 import org.neo4j.gds.scc.SccAlphaWriteConfig;
 import org.neo4j.gds.scc.SccWriteConfig;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientWriteConfig;
 import org.neo4j.gds.triangle.TriangleCountWriteConfig;
 import org.neo4j.gds.wcc.WccWriteConfig;
@@ -84,15 +80,13 @@ public class CommunityAlgorithmsWriteBusinessFacade {
     }
 
     public NodePropertyWriteResult<StandardCommunityStatisticsSpecificFields> wcc(
-        RequestScopedDependencies requestScopedDependencies,
         String graphName,
         WccWriteConfig configuration,
-        TerminationFlag terminationFlag,
         StatisticsComputationInstructions statisticsComputationInstructions
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.wcc(requestScopedDependencies, graphName, configuration)
+            () -> communityAlgorithmsFacade.wcc(graphName, configuration)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -122,23 +116,19 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             "WccWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
-            configuration.arrowConnectionInfo(),
-            terminationFlag
+            configuration.arrowConnectionInfo()
         );
 
     }
 
     public NodePropertyWriteResult<KCoreSpecificFields> kcore(
         String graphName,
-        KCoreDecompositionWriteConfig configuration,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        KCoreDecompositionWriteConfig configuration
     ) {
 
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.kCore(graphName, configuration, user, databaseId, terminationFlag)
+            () -> communityAlgorithmsFacade.kCore(graphName, configuration)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -152,8 +142,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             "KCoreWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
-            configuration.arrowConnectionInfo(),
-            terminationFlag
+            configuration.arrowConnectionInfo()
         );
 
     }
@@ -161,15 +150,12 @@ public class CommunityAlgorithmsWriteBusinessFacade {
     public NodePropertyWriteResult<StandardCommunityStatisticsSpecificFields> scc(
         String graphName,
         SccWriteConfig configuration,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag,
         StatisticsComputationInstructions statisticsComputationInstructions
     ) {
 
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.scc(graphName, configuration, user, databaseId, terminationFlag)
+            () -> communityAlgorithmsFacade.scc(graphName, configuration)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -195,8 +181,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             "SccWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
-            configuration.arrowConnectionInfo(),
-            terminationFlag
+            configuration.arrowConnectionInfo()
         );
 
     }
@@ -204,15 +189,12 @@ public class CommunityAlgorithmsWriteBusinessFacade {
     public NodePropertyWriteResult<AlphaSccSpecificFields> alphaScc(
         String graphName,
         SccAlphaWriteConfig configuration,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag,
         StatisticsComputationInstructions statisticsComputationInstructions
     ) {
 
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.scc(graphName, configuration, user, databaseId, terminationFlag)
+            () -> communityAlgorithmsFacade.scc(graphName, configuration)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -234,8 +216,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             "SccWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
-            configuration.arrowConnectionInfo(),
-            terminationFlag
+            configuration.arrowConnectionInfo()
         );
 
     }
@@ -243,15 +224,12 @@ public class CommunityAlgorithmsWriteBusinessFacade {
     public NodePropertyWriteResult<LouvainSpecificFields> louvain(
         String graphName,
         LouvainWriteConfig configuration,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag,
         StatisticsComputationInstructions statisticsComputationInstructions
     ) {
 
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.louvain(graphName, configuration, user, databaseId, terminationFlag)
+            () -> communityAlgorithmsFacade.louvain(graphName, configuration)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -290,24 +268,18 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             "LouvainWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
-            configuration.arrowConnectionInfo(),
-            terminationFlag
+            configuration.arrowConnectionInfo()
         );
     }
 
     public NodePropertyWriteResult<LabelPropagationSpecificFields>  labelPropagation(
         String graphName,
         LabelPropagationWriteConfig configuration,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag,
         StatisticsComputationInstructions statisticsComputationInstructions
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.labelPropagation(graphName, configuration, user, databaseId,
-                terminationFlag
-            )
+            () -> communityAlgorithmsFacade.labelPropagation(graphName, configuration)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -341,22 +313,18 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             "LabelPropagationWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
-            configuration.arrowConnectionInfo(),
-            terminationFlag
+            configuration.arrowConnectionInfo()
         );
     }
 
     public NodePropertyWriteResult<LeidenSpecificFields> leiden(
         String graphName,
         LeidenWriteConfig configuration,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag,
         StatisticsComputationInstructions statisticsComputationInstructions
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> communityAlgorithmsFacade.leiden(graphName, configuration, user, databaseId, terminationFlag)
+            () -> communityAlgorithmsFacade.leiden(graphName, configuration)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -400,8 +368,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             "LeidenWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
-            configuration.arrowConnectionInfo(),
-            terminationFlag
+            configuration.arrowConnectionInfo()
         );
     }
 
@@ -409,15 +376,12 @@ public class CommunityAlgorithmsWriteBusinessFacade {
     public NodePropertyWriteResult<KmeansSpecificFields> kmeans(
         String graphName,
         KmeansWriteConfig configuration,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag,
         StatisticsComputationInstructions statisticsComputationInstructions,
         boolean computeListOfCentroids
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.kmeans(graphName, configuration, user, databaseId, terminationFlag)
+            () -> communityAlgorithmsFacade.kmeans(graphName, configuration)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -443,23 +407,19 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             "KmeansWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
-            configuration.arrowConnectionInfo(),
-            terminationFlag
+            configuration.arrowConnectionInfo()
         );
     }
 
     public NodePropertyWriteResult<K1ColoringSpecificFields> k1coloring(
         String graphName,
         K1ColoringWriteConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag,
         boolean computeUsedColors
     ) {
 
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.k1Coloring(graphName, config, user, databaseId, terminationFlag)
+            () -> communityAlgorithmsFacade.k1Coloring(graphName, config)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -487,22 +447,18 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             "K1ColoringWrite",
             config.writeConcurrency(),
             config.writeProperty(),
-            config.arrowConnectionInfo(),
-            terminationFlag
+            config.arrowConnectionInfo()
         );
     }
 
     public NodePropertyWriteResult<ModularityOptimizationSpecificFields> modularityOptimization(
         String graphName,
         ModularityOptimizationWriteConfig configuration,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag,
         StatisticsComputationInstructions statisticsComputationInstructions
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.modularityOptimization(graphName, configuration, user, databaseId, terminationFlag)
+            () -> communityAlgorithmsFacade.modularityOptimization(graphName, configuration)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -538,22 +494,18 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             "ModularityOptimizationWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
-            configuration.arrowConnectionInfo(),
-            terminationFlag
+            configuration.arrowConnectionInfo()
         );
     }
 
     public NodePropertyWriteResult<TriangleCountSpecificFields> triangleCount(
         String graphName,
-        TriangleCountWriteConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        TriangleCountWriteConfig config
     ) {
 
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.triangleCount(graphName, config, user, databaseId, terminationFlag)
+            () -> communityAlgorithmsFacade.triangleCount(graphName, config)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -567,22 +519,18 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             "TriangleCountWrite",
             config.writeConcurrency(),
             config.writeProperty(),
-            config.arrowConnectionInfo(),
-            terminationFlag
+            config.arrowConnectionInfo()
         );
     }
 
     public NodePropertyWriteResult<LocalClusteringCoefficientSpecificFields> localClusteringCoefficient(
         String graphName,
-        LocalClusteringCoefficientWriteConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        LocalClusteringCoefficientWriteConfig config
     ) {
 
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
-            () -> communityAlgorithmsFacade.localClusteringCoefficient(graphName, config, user, databaseId, terminationFlag)
+            () -> communityAlgorithmsFacade.localClusteringCoefficient(graphName, config)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -599,8 +547,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             "LocalClusteringCoefficientWrite",
             config.writeConcurrency(),
             config.writeProperty(),
-            config.arrowConnectionInfo(),
-            terminationFlag
+            config.arrowConnectionInfo()
         );
     }
 
@@ -617,8 +564,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
         String procedureName,
         int writeConcurrency,
         String writeProperty,
-        Optional<ArrowConnectionInfo> arrowConnectionInfo,
-        TerminationFlag terminationFlag
+        Optional<ArrowConnectionInfo> arrowConnectionInfo
     ) {
 
         return algorithmResult.result().map(result -> {
@@ -637,8 +583,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
                 writeConcurrency,
                 writeProperty,
                 procedureName,
-                arrowConnectionInfo,
-                terminationFlag
+                arrowConnectionInfo
             );
 
             // 4. Compute result statistics
@@ -677,8 +622,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
         String procedureName,
         int writeConcurrency,
         String writeProperty,
-        Optional<ArrowConnectionInfo> arrowConnectionInfo,
-        TerminationFlag terminationFlag
+        Optional<ArrowConnectionInfo> arrowConnectionInfo
     ) {
 
         return algorithmResult.result().map(result -> {
@@ -697,8 +641,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
                 writeConcurrency,
                 writeProperty,
                 procedureName,
-                arrowConnectionInfo,
-                terminationFlag
+                arrowConnectionInfo
             );
 
 

@@ -35,15 +35,18 @@ public class WriteNodePropertyService {
     private final Log log;
     private  final NodePropertyExporterBuilder nodePropertyExporterBuilder;
     private final TaskRegistryFactory taskRegistryFactory;
+    private final TerminationFlag terminationFlag;
 
     public WriteNodePropertyService(
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         Log log,
-        TaskRegistryFactory taskRegistryFactory
+        TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag
     ) {
         this.nodePropertyExporterBuilder=nodePropertyExporterBuilder;
         this.log = log;
         this.taskRegistryFactory = taskRegistryFactory;
+        this.terminationFlag = terminationFlag;
     }
 
     public WriteNodePropertyResult write(
@@ -53,8 +56,7 @@ public class WriteNodePropertyService {
         int writeConcurrency,
         String writeProperty,
         String procedureName,
-        Optional<ArrowConnectionInfo> arrowConnectionInfo,
-        TerminationFlag terminationFlag
+        Optional<ArrowConnectionInfo> arrowConnectionInfo
     ) {
         return Neo4jDatabaseNodePropertyWriter.writeNodeProperty(
             nodePropertyExporterBuilder,

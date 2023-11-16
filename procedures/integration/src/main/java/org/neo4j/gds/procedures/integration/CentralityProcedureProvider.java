@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.gds.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsMutateBusinessFacade;
@@ -117,20 +118,26 @@ public class CentralityProcedureProvider {
             user
         );
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
-
         var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(graphDatabaseService);
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(databaseId)
+            .with(user)
+            .with(terminationFlag)
+            .build();
+
+        // the business
+        var algorithmRunner = new AlgorithmRunner(
+            log,
+            graphStoreCatalogService,
+            algorithmMemoryValidationService,
+            taskRegistryFactory,
+            userLogRegistryFactory,
+            algorithmMetricsService,
+            requestScopedDependencies
+        );
 
         // algorithm facade
-        var centralityAlgorithmsFacade = new CentralityAlgorithmsFacade(
-            new AlgorithmRunner(
-                graphStoreCatalogService,
-                algorithmMemoryValidationService,
-                taskRegistryFactory,
-                userLogRegistryFactory,
-                algorithmMetricsService,
-                log
-            )
-        );
+        var centralityAlgorithmsFacade = new CentralityAlgorithmsFacade(algorithmRunner);
 
         // moar services
         var fictitiousGraphStoreEstimationService = new FictitiousGraphStoreEstimationService();
@@ -171,7 +178,8 @@ public class CentralityProcedureProvider {
             new WriteNodePropertyService(
                 exportBuildersProvider.nodePropertyExporterBuilder(exporterContext),
                 log,
-                taskRegistryFactory
+                taskRegistryFactory,
+                terminationFlag
             )
         );
         var configurationParser = new ConfigurationParser(
@@ -182,9 +190,7 @@ public class CentralityProcedureProvider {
         return new CentralityProcedureFacade(
             configurationParser,
             user,
-            databaseId,
             returnColumns,
-            terminationFlag,
             mutateBusinessFacade,
             statsBusinessFacade,
             streamBusinessFacade,

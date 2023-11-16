@@ -25,7 +25,6 @@ import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsStatsBusinessFaca
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
-import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
@@ -36,7 +35,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.procedures.configparser.ConfigurationParser;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -46,9 +44,7 @@ public class CentralityProcedureFacade {
 
     private final ConfigurationParser configurationParser;
     private final User user;
-    private final DatabaseId databaseId;
     private final ProcedureReturnColumns procedureReturnColumns;
-    private final TerminationFlag terminationFlag;
     private final CentralityAlgorithmsMutateBusinessFacade mutateBusinessFacade;
     private final CentralityAlgorithmsStatsBusinessFacade statsBusinessFacade;
     private final CentralityAlgorithmsStreamBusinessFacade streamBusinessFacade;
@@ -60,9 +56,7 @@ public class CentralityProcedureFacade {
     public CentralityProcedureFacade(
         ConfigurationParser configurationParser,
         User user,
-        DatabaseId databaseId,
         ProcedureReturnColumns procedureReturnColumns,
-        TerminationFlag terminationFlag,
         CentralityAlgorithmsMutateBusinessFacade mutateBusinessFacade,
         CentralityAlgorithmsStatsBusinessFacade statsBusinessFacade,
         CentralityAlgorithmsStreamBusinessFacade streamBusinessFacade,
@@ -71,10 +65,8 @@ public class CentralityProcedureFacade {
         AlgorithmMetaDataSetter algorithmMetaDataSetter
     ) {
         this.configurationParser = configurationParser;
-        this.databaseId = databaseId;
         this.user = user;
         this.procedureReturnColumns = procedureReturnColumns;
-        this.terminationFlag = terminationFlag;
         this.mutateBusinessFacade = mutateBusinessFacade;
         this.statsBusinessFacade = statsBusinessFacade;
         this.streamBusinessFacade = streamBusinessFacade;
@@ -91,10 +83,7 @@ public class CentralityProcedureFacade {
 
         var computationResult = streamBusinessFacade.betweennessCentrality(
             graphName,
-            config,
-            user,
-            databaseId,
-            terminationFlag
+            config
         );
 
         return BetweenessCentralityComputationalResultTransformer.toStreamResult(computationResult);
@@ -109,9 +98,6 @@ public class CentralityProcedureFacade {
         var computationResult = statsBusinessFacade.betweennessCentrality(
             graphName,
             config,
-            user,
-            databaseId,
-            terminationFlag,
             procedureReturnColumns.contains("centralityDistribution")
         );
 
@@ -127,9 +113,6 @@ public class CentralityProcedureFacade {
         var computationResult = mutateBusinessFacade.betweennessCentrality(
             graphName,
             config,
-            user,
-            databaseId,
-            terminationFlag,
             procedureReturnColumns.contains("centralityDistribution")
         );
 
@@ -145,9 +128,6 @@ public class CentralityProcedureFacade {
         var computationResult = writeBusinessFacade.betweennessCentrality(
             graphName,
             config,
-            user,
-            databaseId,
-            terminationFlag,
             procedureReturnColumns.contains("centralityDistribution")
         );
 
@@ -194,8 +174,6 @@ public class CentralityProcedureFacade {
         return Stream.of(estimateBusinessFacade.betweennessCentrality(graphNameOrConfiguration, config));
 
     }
-
-
 
 
     // FIXME: the following two methods are duplicate, find a good place for them.

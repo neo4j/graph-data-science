@@ -27,9 +27,7 @@ import org.neo4j.gds.algorithms.AlgorithmMemoryEstimation;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
-import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -37,67 +35,39 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
 public final class AlgorithmRunner {
-
+    private final Log log;
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final AlgorithmMemoryValidationService memoryUsageValidator;
     private final TaskRegistryFactory taskRegistryFactory;
     private final UserLogRegistryFactory userLogRegistryFactory;
     private final AlgorithmMetricsService algorithmMetricsService;
-    private final Log log;
+    private final RequestScopedDependencies requestScopedDependencies;
 
     public AlgorithmRunner(
+        Log log,
         GraphStoreCatalogService graphStoreCatalogService,
         AlgorithmMemoryValidationService memoryUsageValidator,
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory,
         AlgorithmMetricsService algorithmMetricsService,
-        Log log
+        RequestScopedDependencies requestScopedDependencies
     ) {
+        this.log = log;
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.memoryUsageValidator = memoryUsageValidator;
         this.taskRegistryFactory = taskRegistryFactory;
         this.userLogRegistryFactory = userLogRegistryFactory;
         this.algorithmMetricsService = algorithmMetricsService;
-        this.log = log;
-    }
-
-    /**
-     * @deprecated Strangle this one, use the other one
-     */
-    @Deprecated
-    public <A extends Algorithm<R>, R, C extends AlgoBaseConfig> AlgorithmComputationResult<R> run(
-        String graphName,
-        C config,
-        Optional<String> relationshipProperty,
-        GraphAlgorithmFactory<A, C> algorithmFactory,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
-    ) {
-        var requestScopedDependencies = RequestScopedDependencies.builder()
-            .with(databaseId)
-            .with(terminationFlag)
-            .with(user)
-            .build();
-
-        return run(
-            requestScopedDependencies,
-            graphName,
-            config,
-            relationshipProperty,
-            algorithmFactory
-        );
+        this.requestScopedDependencies = requestScopedDependencies;
     }
 
     public <A extends Algorithm<R>, R, C extends AlgoBaseConfig> AlgorithmComputationResult<R> run(
-        RequestScopedDependencies requestScopedDependencies,
         String graphName,
         C config,
         Optional<String> relationshipProperty,

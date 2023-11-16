@@ -101,37 +101,37 @@ public class CommunityProcedureProvider {
     }
 
     public CommunityProcedureFacade createCommunityProcedureFacade(Context context) throws ProcedureException {
-
         // Neo4j's services
         var graphDatabaseService = context.graphDatabaseAPI();
-
         var kernelTransaction = kernelTransactionAccessor.getKernelTransaction(context);
 
+        // GDS derived services - request scoped things
         var algorithmMetaDataSetter = algorithmMetaDataSetterService.getAlgorithmMetaDataSetter(kernelTransaction);
         var algorithmMemoryValidationService = new AlgorithmMemoryValidationService(log, useMaxMemoryEstimation);
         var databaseId = databaseIdAccessor.getDatabaseId(context.graphDatabaseAPI());
         var returnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
         var terminationFlag = terminationFlagService.createTerminationFlag(kernelTransaction);
         var user = userAccessor.getUser(context.securityContext());
-        var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(
-            databaseId,
-            user
-        );
+        var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
-
         var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(graphDatabaseService);
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(databaseId)
+            .with(terminationFlag)
+            .with(user)
+            .build();
+        var algorithmRunner = new AlgorithmRunner(
+            log,
+            graphStoreCatalogService,
+            algorithmMemoryValidationService,
+            taskRegistryFactory,
+            userLogRegistryFactory,
+            algorithmMetricsService,
+            requestScopedDependencies
+        );
 
         // algorithm facade
-        var communityAlgorithmsFacade = new CommunityAlgorithmsFacade(
-            new AlgorithmRunner(
-                graphStoreCatalogService,
-                algorithmMemoryValidationService,
-                taskRegistryFactory,
-                userLogRegistryFactory,
-                algorithmMetricsService,
-                log
-            )
-        );
+        var communityAlgorithmsFacade = new CommunityAlgorithmsFacade(algorithmRunner);
 
         // moar services
         var fictitiousGraphStoreEstimationService = new FictitiousGraphStoreEstimationService();
@@ -172,24 +172,20 @@ public class CommunityProcedureProvider {
             new WriteNodePropertyService(
                 exportBuildersProvider.nodePropertyExporterBuilder(exporterContext),
                 log,
-                taskRegistryFactory
+                taskRegistryFactory,
+                terminationFlag
             )
         );
         var configurationParser = new ConfigurationParser(
             DefaultsConfiguration.Instance,
             LimitsConfiguration.Instance
         );
-        var requestScopedDependencies = RequestScopedDependencies.builder()
-            .with(databaseId)
-            .with(terminationFlag)
-            .with(user)
-            .build();
 
         // procedure facade
         return new CommunityProcedureFacade(
             configurationParser,
             algorithmMetaDataSetter,
-            requestScopedDependencies,
+            user,
             returnColumns,
             estimateBusinessFacade,
             mutateBusinessFacade,

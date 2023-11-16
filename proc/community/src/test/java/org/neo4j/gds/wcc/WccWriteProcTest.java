@@ -68,6 +68,7 @@ import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.configparser.ConfigurationParser;
 import org.neo4j.gds.projection.ImmutableGraphProjectFromStoreConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -478,18 +479,23 @@ class WccWriteProcTest extends BaseProcTest {
                     var algorithmsBusinessFacade = new CommunityAlgorithmsWriteBusinessFacade(
                         new CommunityAlgorithmsFacade(
                             new AlgorithmRunner(
+                                logMock,
                                 graphStoreCatalogService,
                                 memoryUsageValidator,
                                 TaskRegistryFactory.empty(),
                                 EmptyUserLogRegistryFactory.INSTANCE,
                                 new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
-                                logMock
+                                RequestScopedDependencies.builder()
+                                    .with(DatabaseId.of(db.databaseName()))
+                                    .with(new User(getUsername(), false))
+                                    .build()
                             )
                         ),
                         new WriteNodePropertyService(
                             wccWriteProc.executionContext().nodePropertyExporterBuilder(),
                             logMock,
-                            taskRegistry
+                            taskRegistry,
+                            TerminationFlag.RUNNING_TRUE
                         )
                     );
 
@@ -501,10 +507,7 @@ class WccWriteProcTest extends BaseProcTest {
                         new CommunityProcedureFacade(
                             ConfigurationParser.EMPTY,
                             null,
-                            RequestScopedDependencies.builder()
-                                .with(DatabaseId.of(db.databaseName()))
-                                .with(new User(getUsername(), false))
-                                .build(),
+                            new User(getUsername(), false),
                             ProcedureReturnColumns.EMPTY,
                             null,
                             null,

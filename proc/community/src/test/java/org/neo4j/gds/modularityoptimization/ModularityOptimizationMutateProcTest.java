@@ -572,12 +572,17 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
         var algorithmsMutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
             new CommunityAlgorithmsFacade(
                 new AlgorithmRunner(
+                    logMock,
                     graphStoreCatalogService,
                     memoryUsageValidator,
                     TaskRegistryFactory.empty(),
                     EmptyUserLogRegistryFactory.INSTANCE,
                     new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
-                    logMock
+                    RequestScopedDependencies.builder()
+                        .with(DatabaseId.of(db.databaseName()))
+                        .with(TerminationFlag.RUNNING_TRUE)
+                        .with(new User(getUsername(), false))
+                        .build()
                 )
             ),
             new MutateNodePropertyService(logMock)
@@ -590,11 +595,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             new CommunityProcedureFacade(
                 ConfigurationParser.EMPTY,
                 null,
-                RequestScopedDependencies.builder()
-                    .with(DatabaseId.of(db.databaseName()))
-                    .with(TerminationFlag.RUNNING_TRUE)
-                    .with(new User(getUsername(), false))
-                    .build(),
+                new User(getUsername(), false),
                 ProcedureReturnColumns.EMPTY,
                 mock(CommunityAlgorithmsEstimateBusinessFacade.class),
                 algorithmsMutateBusinessFacade,

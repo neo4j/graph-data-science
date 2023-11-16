@@ -30,7 +30,6 @@ package org.neo4j.gds.algorithms.centrality;
     import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
     import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
     import org.neo4j.gds.collections.ha.HugeDoubleArray;
-    import org.neo4j.gds.termination.TerminationFlag;
 
     import java.util.Optional;
 
@@ -67,8 +66,7 @@ package org.neo4j.gds.algorithms.centrality;
             "FOO",
             4,
             "foo",
-            Optional.empty(),
-            null
+            Optional.empty()
         );
 
         verifyNoInteractions(nodePropertyServiceMock);
@@ -115,8 +113,7 @@ package org.neo4j.gds.algorithms.centrality;
                 eq(4),
                 eq("foo"),
                 eq("FooWrite"),
-                eq(Optional.empty()),
-                eq(TerminationFlag.RUNNING_TRUE)
+                eq(Optional.empty())
             )).thenReturn(new WriteNodePropertyResult(4, 100));
 
             var businessFacade = new CentralityAlgorithmsWriteBusinessFacade(null, nodePropertyServiceMock);
@@ -133,8 +130,7 @@ package org.neo4j.gds.algorithms.centrality;
                 "FooWrite",
                 4,
                 "foo",
-                Optional.empty(),
-                TerminationFlag.RUNNING_TRUE
+                Optional.empty()
             );
 
 
@@ -184,8 +180,7 @@ package org.neo4j.gds.algorithms.centrality;
                 eq(4),
                 eq("foo"),
                 eq("FooWrite"),
-                eq(Optional.empty()),
-                eq(TerminationFlag.RUNNING_TRUE)
+                eq(Optional.empty())
             )).thenReturn(new WriteNodePropertyResult(4, 100));
 
             var businessFacade = new CentralityAlgorithmsWriteBusinessFacade(null, nodePropertyServiceMock);
@@ -202,8 +197,7 @@ package org.neo4j.gds.algorithms.centrality;
                 "FooWrite",
                 4,
                 "foo",
-                Optional.empty(),
-                TerminationFlag.RUNNING_TRUE
+                Optional.empty()
             );
 
 

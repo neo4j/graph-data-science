@@ -20,10 +20,7 @@
 package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
-import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutAlgorithmFactory;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
@@ -58,7 +55,6 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationFactory;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.scc.SccAlgorithmFactory;
 import org.neo4j.gds.scc.SccCommonBaseConfig;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.IntersectingTriangleCountFactory;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientFactory;
@@ -81,12 +77,10 @@ public class CommunityAlgorithmsFacade {
     }
 
     AlgorithmComputationResult<DisjointSetStruct> wcc(
-        RequestScopedDependencies requestScopedDependencies,
         String graphName,
         WccBaseConfig config
     ) {
         return algorithmRunner.run(
-            requestScopedDependencies,
             graphName,
             config,
             config.relationshipWeightProperty(),
@@ -96,236 +90,158 @@ public class CommunityAlgorithmsFacade {
 
     AlgorithmComputationResult<TriangleCountResult> triangleCount(
         String graphName,
-        TriangleCountBaseConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        TriangleCountBaseConfig config
     ) {
         return algorithmRunner.run(
             graphName,
             config,
             Optional.empty(),
-            new IntersectingTriangleCountFactory<>(),
-            user,
-            databaseId,
-            terminationFlag
+            new IntersectingTriangleCountFactory<>()
         );
     }
 
     AlgorithmComputationResult<KCoreDecompositionResult> kCore(
         String graphName,
-        KCoreDecompositionBaseConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        KCoreDecompositionBaseConfig config
     ) {
         return algorithmRunner.run(
             graphName,
             config,
             Optional.empty(),
-            new KCoreDecompositionAlgorithmFactory<>(),
-            user,
-            databaseId,
-            terminationFlag
+            new KCoreDecompositionAlgorithmFactory<>()
         );
     }
 
     AlgorithmComputationResult<LouvainResult> louvain(
         String graphName,
-        LouvainBaseConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        LouvainBaseConfig config
     ) {
         return algorithmRunner.run(
             graphName,
             config,
             config.relationshipWeightProperty(),
-            new LouvainAlgorithmFactory<>(),
-            user,
-            databaseId,
-            terminationFlag
+            new LouvainAlgorithmFactory<>()
         );
     }
 
     AlgorithmComputationResult<LeidenResult> leiden(
         String graphName,
-        LeidenBaseConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        LeidenBaseConfig config
     ) {
         return algorithmRunner.run(
             graphName,
             config,
             config.relationshipWeightProperty(),
-            new LeidenAlgorithmFactory<>(),
-            user,
-            databaseId,
-            terminationFlag
+            new LeidenAlgorithmFactory<>()
         );
     }
 
     AlgorithmComputationResult<LabelPropagationResult> labelPropagation(
         String graphName,
-        LabelPropagationBaseConfig configuration,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        LabelPropagationBaseConfig configuration
     ) {
         return algorithmRunner.run(
             graphName,
             configuration,
             configuration.relationshipWeightProperty(),
-            new LabelPropagationFactory<>(),
-            user,
-            databaseId,
-            terminationFlag
+            new LabelPropagationFactory<>()
         );
     }
 
     AlgorithmComputationResult<HugeLongArray> scc(
         String graphName,
-        SccCommonBaseConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        SccCommonBaseConfig config
     ) {
         return algorithmRunner.run(
             graphName,
             config,
             Optional.empty(),
-            new SccAlgorithmFactory<>(),
-            user,
-            databaseId,
-            terminationFlag
+            new SccAlgorithmFactory<>()
         );
     }
 
     AlgorithmComputationResult<ModularityResult> modularity(
         String graphName,
-        ModularityBaseConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        ModularityBaseConfig config
     ) {
         return algorithmRunner.run(
             graphName,
             config,
             config.relationshipWeightProperty(),
-            new ModularityCalculatorFactory<>(),
-            user,
-            databaseId,
-            terminationFlag
+            new ModularityCalculatorFactory<>()
         );
     }
 
     AlgorithmComputationResult<KmeansResult> kmeans(
         String graphName,
-        KmeansBaseConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        KmeansBaseConfig config
     ) {
         return algorithmRunner.run(
             graphName,
             config,
             Optional.empty(),
-            new KmeansAlgorithmFactory<>(),
-            user,
-            databaseId,
-            terminationFlag
+            new KmeansAlgorithmFactory<>()
         );
     }
 
     public AlgorithmComputationResult<LocalClusteringCoefficientResult> localClusteringCoefficient(
         String graphName,
-        LocalClusteringCoefficientBaseConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        LocalClusteringCoefficientBaseConfig config
     ) {
         return algorithmRunner.run(
             graphName,
             config,
             Optional.empty(),
-            new LocalClusteringCoefficientFactory<>(),
-            user,
-            databaseId,
-            terminationFlag
+            new LocalClusteringCoefficientFactory<>()
         );
     }
 
     AlgorithmComputationResult<K1ColoringResult> k1Coloring(
         String graphName,
-        K1ColoringBaseConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        K1ColoringBaseConfig config
     ) {
         return algorithmRunner.run(
             graphName,
             config,
             Optional.empty(),
-            new K1ColoringAlgorithmFactory<>(),
-            user,
-            databaseId,
-            terminationFlag
+            new K1ColoringAlgorithmFactory<>()
         );
     }
 
     AlgorithmComputationResult<ConductanceResult> conductance(
         String graphName,
-        ConductanceBaseConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        ConductanceBaseConfig config
     ) {
         return algorithmRunner.run(
             graphName,
             config,
             config.relationshipWeightProperty(),
-            new ConductanceAlgorithmFactory<>(),
-            user,
-            databaseId,
-            terminationFlag
+            new ConductanceAlgorithmFactory<>()
         );
     }
 
     AlgorithmComputationResult<ApproxMaxKCutResult> approxMaxKCut(
         String graphName,
-        ApproxMaxKCutBaseConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        ApproxMaxKCutBaseConfig config
     ) {
         return algorithmRunner.run(
             graphName,
             config,
             config.relationshipWeightProperty(),
-            new ApproxMaxKCutAlgorithmFactory<>(),
-            user,
-            databaseId,
-            terminationFlag
+            new ApproxMaxKCutAlgorithmFactory<>()
         );
     }
 
 
     public AlgorithmComputationResult<ModularityOptimizationResult> modularityOptimization(
         String graphName,
-        ModularityOptimizationBaseConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        ModularityOptimizationBaseConfig config
     ) {
         return algorithmRunner.run(
             graphName,
             config,
             config.relationshipWeightProperty(),
-            new ModularityOptimizationFactory<>(),
-            user,
-            databaseId,
-            terminationFlag
+            new ModularityOptimizationFactory<>()
         );
     }
 }

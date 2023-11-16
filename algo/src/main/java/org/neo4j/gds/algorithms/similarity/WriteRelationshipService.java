@@ -24,28 +24,29 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.config.ArrowConnectionInfo;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 
 public class WriteRelationshipService {
-
     private final Log log;
     private final RelationshipExporterBuilder relationshipExporterBuilder;
     private final TaskRegistryFactory taskRegistryFactory;
-
+    private final TerminationFlag terminationFlag;
 
     public WriteRelationshipService(
-        RelationshipExporterBuilder relationshipExporterBuilder,
         Log log,
-        TaskRegistryFactory taskRegistryFactory
+        RelationshipExporterBuilder relationshipExporterBuilder,
+        TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag
     ) {
-        this.relationshipExporterBuilder = relationshipExporterBuilder;
         this.log = log;
+        this.relationshipExporterBuilder = relationshipExporterBuilder;
         this.taskRegistryFactory = taskRegistryFactory;
+        this.terminationFlag = terminationFlag;
     }
 
     public WriteRelationshipResult write(
@@ -55,27 +56,18 @@ public class WriteRelationshipService {
         GraphStore graphStore,
         IdMap rootIdMap,
         String taskName,
-        TerminationFlag algorithmTerminationFlag,
         Optional<ArrowConnectionInfo> arrowConnectionInfo
-    ){
-
-        return  Neo4jDatabaseRelationshipWriter.writeRelationship(
+    ) {
+        return write(
             writeRelationshipType,
             writeProperty,
-            taskRegistryFactory,
-            relationshipExporterBuilder,
             graph,
             graphStore,
             rootIdMap,
-            log,
             taskName,
-            algorithmTerminationFlag,
             arrowConnectionInfo,
             (sourceNodeId, targetNodeId, property) -> true
         );
-
-
-
     }
 
     public WriteRelationshipResult write(
@@ -85,12 +77,10 @@ public class WriteRelationshipService {
         GraphStore graphStore,
         IdMap rootIdMap,
         String taskName,
-        TerminationFlag algorithmTerminationFlag,
         Optional<ArrowConnectionInfo> arrowConnectionInfo,
         RelationshipWithPropertyConsumer relationshipWithPropertyConsumer
-    ){
-
-        return  Neo4jDatabaseRelationshipWriter.writeRelationship(
+    ) {
+        return Neo4jDatabaseRelationshipWriter.writeRelationship(
             writeRelationshipType,
             writeProperty,
             taskRegistryFactory,
@@ -100,14 +90,9 @@ public class WriteRelationshipService {
             rootIdMap,
             log,
             taskName,
-            algorithmTerminationFlag,
+            terminationFlag,
             arrowConnectionInfo,
             relationshipWithPropertyConsumer
         );
-
-
     }
-
-
-
 }

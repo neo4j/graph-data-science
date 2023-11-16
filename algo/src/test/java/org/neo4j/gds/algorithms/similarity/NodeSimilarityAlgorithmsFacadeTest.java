@@ -23,6 +23,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
 import org.neo4j.gds.algorithms.metrics.PassthroughAlgorithmMetricRegistrar;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
@@ -38,7 +39,6 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.nodesim.ImmutableNodeSimilarityStreamConfig;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -119,20 +119,18 @@ class NodeSimilarityAlgorithmsFacadeTest {
 
         var similarityAlgorithmsFacade = new SimilarityAlgorithmsFacade(
             new AlgorithmRunner(
+                logMock,
                 graphStoreCatalogServiceMock,
                 mock(AlgorithmMemoryValidationService.class),
                 TaskRegistryFactory.empty(),
                 EmptyUserLogRegistryFactory.INSTANCE,
                 new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
-                logMock
+                RequestScopedDependencies.builder().build()
             )
         );
         var nodeSimilarity = similarityAlgorithmsFacade.nodeSimilarity(
             "foo",
-            config,
-            null,
-            null,
-            TerminationFlag.RUNNING_TRUE
+            config
         );
 
         assertThat(nodeSimilarity.result()).isPresent();

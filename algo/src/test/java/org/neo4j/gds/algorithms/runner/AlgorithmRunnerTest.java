@@ -49,6 +49,7 @@ class AlgorithmRunnerTest {
             null,
             null,
             null,
+            null,
             algorithmMetricsServiceMock,
             null
         );
@@ -80,12 +81,13 @@ class AlgorithmRunnerTest {
         when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
 
         var runner = new AlgorithmRunner(
+            logMock,
             null,
             null,
             null,
             null,
             algorithmMetricsServiceMock,
-            logMock
+            null
         );
 
         var algorithmMock = mock(Algorithm.class, RETURNS_DEEP_STUBS);

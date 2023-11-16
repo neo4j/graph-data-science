@@ -29,7 +29,6 @@ package org.neo4j.gds.algorithms.community;
     import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
     import org.neo4j.gds.collections.ha.HugeLongArray;
     import org.neo4j.gds.config.AlgoBaseConfig;
-    import org.neo4j.gds.termination.TerminationFlag;
     import org.neo4j.gds.result.StatisticsComputationInstructions;
     import org.neo4j.gds.wcc.WccWriteConfig;
 
@@ -66,8 +65,7 @@ package org.neo4j.gds.algorithms.community;
             "FOO",
             4,
             "foo",
-            Optional.empty(),
-            null
+            Optional.empty()
         );
 
         verifyNoInteractions(nodePropertyServiceMock);
@@ -115,8 +113,7 @@ package org.neo4j.gds.algorithms.community;
                 eq(4),
                 eq("foo"),
                 eq("FooWrite"),
-                eq(Optional.empty()),
-                eq(TerminationFlag.RUNNING_TRUE)
+                eq(Optional.empty())
             )).thenReturn(new WriteNodePropertyResult(4, 100));
 
             var businessFacade = new CommunityAlgorithmsWriteBusinessFacade(null, nodePropertyServiceMock);
@@ -131,8 +128,7 @@ package org.neo4j.gds.algorithms.community;
                 "FooWrite",
                 4,
                 "foo",
-                Optional.empty(),
-                TerminationFlag.RUNNING_TRUE
+                Optional.empty()
             );
 
 
@@ -186,8 +182,7 @@ package org.neo4j.gds.algorithms.community;
                 eq(4),
                 eq("foo"),
                 eq("FooWrite"),
-                eq(Optional.empty()),
-                eq(TerminationFlag.RUNNING_TRUE)
+                eq(Optional.empty())
             )).thenReturn(new WriteNodePropertyResult(4, 100));
 
             var businessFacade = new CommunityAlgorithmsWriteBusinessFacade(null, nodePropertyServiceMock);
@@ -207,8 +202,7 @@ package org.neo4j.gds.algorithms.community;
                 "FooWrite",
                 4,
                 "foo",
-                Optional.empty(),
-                TerminationFlag.RUNNING_TRUE
+                Optional.empty()
             );
 
 

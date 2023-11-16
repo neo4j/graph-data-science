@@ -77,8 +77,7 @@ class SimilarityAlgorithmsWriteBusinessFacadeTest {
             "TASK",
             "bar",
             "foo",
-            Optional.empty(),
-            null
+            Optional.empty()
         );
 
 
@@ -106,7 +105,7 @@ class SimilarityAlgorithmsWriteBusinessFacadeTest {
 
         var writeRelationshipService = mock(WriteRelationshipService.class);
 
-        when(writeRelationshipService.write(any(),any(),any(),any(),any(),any(),any(),any(),any())).thenReturn(new WriteRelationshipResult(2,20));
+        when(writeRelationshipService.write(any(),any(),any(),any(),any(),any(),any(),any())).thenReturn(new WriteRelationshipResult(2,20));
 
         var businessFacade = new SimilarityAlgorithmsWriteBusinessFacade(null,writeRelationshipService);
 
@@ -122,8 +121,7 @@ class SimilarityAlgorithmsWriteBusinessFacadeTest {
             "TASK",
             "bar",
             "foo",
-            Optional.empty(),
-            null
+            Optional.empty()
         );
 
 

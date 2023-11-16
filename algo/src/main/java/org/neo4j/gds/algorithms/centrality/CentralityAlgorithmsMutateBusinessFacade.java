@@ -23,14 +23,11 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.centrality.specificfields.StandardCentralityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.result.CentralityStatistics;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.function.Supplier;
 
@@ -52,14 +49,11 @@ public class CentralityAlgorithmsMutateBusinessFacade {
     public NodePropertyMutateResult<StandardCentralityStatisticsSpecificFields> betweennessCentrality(
         String graphName,
         BetweennessCentralityMutateConfig configuration,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag,
         boolean shouldComputeCentralityDistribution
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
-            () -> centralityAlgorithmsFacade.betweennessCentrality(graphName, configuration, user, databaseId, terminationFlag)
+            () -> centralityAlgorithmsFacade.betweennessCentrality(graphName, configuration)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 

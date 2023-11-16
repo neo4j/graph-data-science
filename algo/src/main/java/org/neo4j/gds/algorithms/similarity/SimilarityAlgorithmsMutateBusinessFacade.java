@@ -25,15 +25,12 @@ import org.neo4j.gds.algorithms.RelationshipMutateResult;
 import org.neo4j.gds.algorithms.similarity.specificfields.SimilaritySpecificFields;
 import org.neo4j.gds.algorithms.similarity.specificfields.SimilaritySpecificFieldsWithDistribution;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnMutateConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityMutateConfig;
 import org.neo4j.gds.similarity.knn.KnnMutateConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -58,14 +55,11 @@ public class SimilarityAlgorithmsMutateBusinessFacade {
     public RelationshipMutateResult nodeSimilarity(
         String graphName,
         NodeSimilarityMutateConfig configuration,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag,
         boolean computeSimilarityDistribution
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> similarityAlgorithmsFacade.nodeSimilarity(graphName, configuration, user, databaseId, terminationFlag)
+            () -> similarityAlgorithmsFacade.nodeSimilarity(graphName, configuration)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -86,14 +80,11 @@ public class SimilarityAlgorithmsMutateBusinessFacade {
     public RelationshipMutateResult<SimilaritySpecificFieldsWithDistribution> filteredNodeSimilarity(
         String graphName,
         FilteredNodeSimilarityMutateConfig configuration,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag,
         boolean computeSimilarityDistribution
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> similarityAlgorithmsFacade.filteredNodeSimilarity(graphName, configuration, user, databaseId, terminationFlag)
+            () -> similarityAlgorithmsFacade.filteredNodeSimilarity(graphName, configuration)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -113,14 +104,11 @@ public class SimilarityAlgorithmsMutateBusinessFacade {
     public RelationshipMutateResult knn(
         String graphName,
         KnnMutateConfig configuration,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag,
         boolean computeSimilarityDistribution
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> similarityAlgorithmsFacade.knn(graphName, configuration, user, databaseId, terminationFlag)
+            () -> similarityAlgorithmsFacade.knn(graphName, configuration)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -146,14 +134,11 @@ public class SimilarityAlgorithmsMutateBusinessFacade {
     public RelationshipMutateResult filteredKnn(
         String graphName,
         FilteredKnnMutateConfig configuration,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag,
         boolean computeSimilarityDistribution
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> similarityAlgorithmsFacade.filteredKnn(graphName, configuration, user, databaseId, terminationFlag)
+            () -> similarityAlgorithmsFacade.filteredKnn(graphName, configuration)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 

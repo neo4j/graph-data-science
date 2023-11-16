@@ -19,14 +19,12 @@
  */
 package org.neo4j.gds.procedures.community;
 
-import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStatsBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
-import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutMutateConfig;
@@ -121,7 +119,6 @@ import org.neo4j.gds.scc.SccMutateConfig;
 import org.neo4j.gds.scc.SccStatsConfig;
 import org.neo4j.gds.scc.SccStreamConfig;
 import org.neo4j.gds.scc.SccWriteConfig;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientMutateConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStatsConfig;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
@@ -143,26 +140,8 @@ public class CommunityProcedureFacade {
     // services
     private final ConfigurationParser configurationParser;
     private final AlgorithmMetaDataSetter algorithmMetaDataSetter;
-    private final RequestScopedDependencies requestScopedDependencies;
-
-    /**
-     * @deprecated Strangle.
-     */
-    @Deprecated
     private final User user;
-
-    /**
-     * @deprecated Strangle.
-     */
-    @Deprecated
-    private final DatabaseId databaseId;
     private final ProcedureReturnColumns procedureReturnColumns;
-
-    /**
-     * @deprecated Strangle.
-     */
-    @Deprecated
-    private final TerminationFlag terminationFlag;
 
     // business logic
     private final CommunityAlgorithmsEstimateBusinessFacade estimateBusinessFacade;
@@ -174,7 +153,7 @@ public class CommunityProcedureFacade {
     public CommunityProcedureFacade(
         ConfigurationParser configurationParser,
         AlgorithmMetaDataSetter algorithmMetaDataSetter,
-        RequestScopedDependencies requestScopedDependencies,
+        User user,
         ProcedureReturnColumns procedureReturnColumns,
         CommunityAlgorithmsEstimateBusinessFacade estimateBusinessFacade,
         CommunityAlgorithmsMutateBusinessFacade mutateBusinessFacade,
@@ -184,17 +163,13 @@ public class CommunityProcedureFacade {
     ) {
         this.configurationParser = configurationParser;
         this.algorithmMetaDataSetter = algorithmMetaDataSetter;
+        this.user = user;
         this.procedureReturnColumns = procedureReturnColumns;
         this.estimateBusinessFacade = estimateBusinessFacade;
         this.mutateBusinessFacade = mutateBusinessFacade;
         this.statsBusinessFacade = statsBusinessFacade;
         this.streamBusinessFacade = streamBusinessFacade;
         this.writeBusinessFacade = writeBusinessFacade;
-        this.requestScopedDependencies = requestScopedDependencies;
-
-        this.databaseId = requestScopedDependencies.getDatabaseId();
-        this.terminationFlag = requestScopedDependencies.getTerminationFlag();
-        this.user = requestScopedDependencies.getUser();
     }
 
     // WCC
@@ -206,7 +181,6 @@ public class CommunityProcedureFacade {
         var streamConfig = createStreamConfig(configuration, WccStreamConfig::of);
 
         var computationResult = streamBusinessFacade.wcc(
-            requestScopedDependencies,
             graphName,
             streamConfig
         );
@@ -221,7 +195,6 @@ public class CommunityProcedureFacade {
         var config = createConfig(configuration, WccMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.wcc(
-            requestScopedDependencies,
             graphName,
             config,
             ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns)
@@ -237,7 +210,6 @@ public class CommunityProcedureFacade {
         var config = createConfig(configuration, WccStatsConfig::of);
 
         var computationResult = statsBusinessFacade.wcc(
-            requestScopedDependencies,
             graphName,
             config,
             ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns)
@@ -253,10 +225,8 @@ public class CommunityProcedureFacade {
         var writeConfig = createConfig(configuration, WccWriteConfig::of);
 
         var computationResult = writeBusinessFacade.wcc(
-            requestScopedDependencies,
             graphName,
             writeConfig,
-            terminationFlag,
             ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns)
         );
 
@@ -309,10 +279,7 @@ public class CommunityProcedureFacade {
 
         var computationResult = streamBusinessFacade.kCore(
             graphName,
-            streamConfig,
-            user,
-            databaseId,
-            terminationFlag
+            streamConfig
         );
 
         return KCoreComputationalResultTransformer.toStreamResult(computationResult);
@@ -326,10 +293,7 @@ public class CommunityProcedureFacade {
 
         var computationResult = mutateBusinessFacade.kCore(
             graphName,
-            config,
-            user,
-            databaseId,
-            terminationFlag
+            config
         );
 
         return Stream.of(KCoreComputationalResultTransformer.toMutateResult(computationResult));
@@ -343,10 +307,7 @@ public class CommunityProcedureFacade {
 
         var computationResult = statsBusinessFacade.kCore(
             graphName,
-            config,
-            user,
-            databaseId,
-            terminationFlag
+            config
         );
 
         return Stream.of(KCoreComputationalResultTransformer.toStatsResult(computationResult, config));
@@ -360,10 +321,7 @@ public class CommunityProcedureFacade {
 
         var computationResult = writeBusinessFacade.kcore(
             graphName,
-            config,
-            user,
-            databaseId,
-            terminationFlag
+            config
         );
 
         return Stream.of(KCoreComputationalResultTransformer.toWriteResult(computationResult));
@@ -405,9 +363,6 @@ public class CommunityProcedureFacade {
         var computationResult = statsBusinessFacade.louvain(
             graphName,
             config,
-            user,
-            databaseId,
-            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
         );
 
@@ -431,10 +386,7 @@ public class CommunityProcedureFacade {
 
         var computationResult = streamBusinessFacade.louvain(
             graphName,
-            streamConfig,
-            user,
-            databaseId,
-            terminationFlag
+            streamConfig
         );
 
         return LouvainComputationResultTransformer.toStreamResult(computationResult, streamConfig);
@@ -457,9 +409,6 @@ public class CommunityProcedureFacade {
         var computationResult = mutateBusinessFacade.louvain(
             graphName,
             config,
-            user,
-            databaseId,
-            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
         );
 
@@ -483,9 +432,6 @@ public class CommunityProcedureFacade {
         var computationResult = writeBusinessFacade.louvain(
             graphName,
             config,
-            user,
-            databaseId,
-            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
         );
 
@@ -509,10 +455,7 @@ public class CommunityProcedureFacade {
 
         var computationResult = streamBusinessFacade.leiden(
             graphName,
-            streamConfig,
-            user,
-            databaseId,
-            terminationFlag
+            streamConfig
         );
 
         return LeidenComputationResultTransformer.toStreamResult(computationResult, streamConfig);
@@ -527,9 +470,6 @@ public class CommunityProcedureFacade {
         var computationResult = mutateBusinessFacade.leiden(
             graphName,
             config,
-            user,
-            databaseId,
-            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
         );
 
@@ -545,9 +485,6 @@ public class CommunityProcedureFacade {
         var computationResult = statsBusinessFacade.leiden(
             graphName,
             config,
-            user,
-            databaseId,
-            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
         );
 
@@ -560,9 +497,6 @@ public class CommunityProcedureFacade {
         var computationResult = writeBusinessFacade.leiden(
             graphName,
             config,
-            user,
-            databaseId,
-            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
         );
 
@@ -610,10 +544,7 @@ public class CommunityProcedureFacade {
 
         var computationResult = streamBusinessFacade.scc(
             graphName,
-            streamConfig,
-            user,
-            databaseId,
-            terminationFlag
+            streamConfig
         );
 
         return SccComputationResultTransformer.toStreamResult(computationResult, streamConfig);
@@ -628,9 +559,6 @@ public class CommunityProcedureFacade {
         var computationResult = mutateBusinessFacade.scc(
             graphName,
             config,
-            user,
-            databaseId,
-            terminationFlag,
             ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns)
         );
 
@@ -646,9 +574,6 @@ public class CommunityProcedureFacade {
         var computationResult = writeBusinessFacade.scc(
             graphName,
             config,
-            user,
-            databaseId,
-            terminationFlag,
             ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns)
         );
 
@@ -664,9 +589,6 @@ public class CommunityProcedureFacade {
         var computationResult = statsBusinessFacade.scc(
             graphName,
             config,
-            user,
-            databaseId,
-            terminationFlag,
             ProcedureStatisticsComputationInstructions.forComponents(procedureReturnColumns)
         );
 
@@ -715,10 +637,7 @@ public class CommunityProcedureFacade {
 
         var computationResult = streamBusinessFacade.triangleCount(
             graphName,
-            streamConfig,
-            user,
-            databaseId,
-            terminationFlag
+            streamConfig
         );
 
         return TriangleCountComputationResultTransformer.toStreamResult(computationResult);
@@ -732,10 +651,7 @@ public class CommunityProcedureFacade {
 
         var computationResult = mutateBusinessFacade.triangleCount(
             graphName,
-            config,
-            user,
-            databaseId,
-            terminationFlag
+            config
         );
 
         return Stream.of(TriangleCountComputationResultTransformer.toMutateResult(computationResult));
@@ -749,10 +665,7 @@ public class CommunityProcedureFacade {
 
         var computationResult = statsBusinessFacade.triangleCount(
             graphName,
-            config,
-            user,
-            databaseId,
-            terminationFlag
+            config
         );
 
         return Stream.of(TriangleCountComputationResultTransformer.toStatsResult(computationResult, config));
@@ -766,10 +679,7 @@ public class CommunityProcedureFacade {
 
         var computationResult = writeBusinessFacade.triangleCount(
             graphName,
-            config,
-            user,
-            databaseId,
-            terminationFlag
+            config
         );
 
         return Stream.of(TriangleCountComputationResultTransformer.toWriteResult(computationResult));
@@ -815,10 +725,7 @@ public class CommunityProcedureFacade {
 
         var computationResult = streamBusinessFacade.labelPropagation(
             graphName,
-            streamConfig,
-            user,
-            databaseId,
-            terminationFlag
+            streamConfig
         );
 
         return LabelPropagationComputationResultTransformer.toStreamResult(computationResult, streamConfig);
@@ -833,9 +740,6 @@ public class CommunityProcedureFacade {
         var computationResult = mutateBusinessFacade.labelPropagation(
             graphName,
             mutateConfig,
-            user,
-            databaseId,
-            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
         );
 
@@ -851,9 +755,6 @@ public class CommunityProcedureFacade {
         var computationResult = statsBusinessFacade.labelPropagation(
             graphName,
             config,
-            user,
-            databaseId,
-            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
         );
 
@@ -869,9 +770,6 @@ public class CommunityProcedureFacade {
         var computationResult = writeBusinessFacade.labelPropagation(
             graphName,
             config,
-            user,
-            databaseId,
-            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
         );
 
@@ -901,6 +799,7 @@ public class CommunityProcedureFacade {
         var config = createConfig(algoConfiguration, LabelPropagationMutateConfig::of);
         return Stream.of(estimateBusinessFacade.labelPropagation(graphNameOrConfiguration, config));
     }
+
     public Stream<MemoryEstimateResult> labelPropagationEstimateWrite(
         Object graphNameOrConfiguration,
         Map<String, Object> algoConfiguration
@@ -918,10 +817,7 @@ public class CommunityProcedureFacade {
 
         var computationResult = streamBusinessFacade.modularity(
             graphName,
-            streamConfig,
-            user,
-            databaseId,
-            terminationFlag
+            streamConfig
         );
 
         return ModularityComputationResultTransformer.toStreamResult(computationResult);
@@ -935,10 +831,7 @@ public class CommunityProcedureFacade {
 
         var computationResult = statsBusinessFacade.modularity(
             graphName,
-            config,
-            user,
-            databaseId,
-            terminationFlag
+            config
         );
 
         return Stream.of(ModularityComputationResultTransformer.toStatsResult(computationResult, config));
@@ -968,10 +861,7 @@ public class CommunityProcedureFacade {
 
         var computationResult = streamBusinessFacade.kmeans(
             graphName,
-            streamConfig,
-            user,
-            databaseId,
-            terminationFlag
+            streamConfig
         );
 
         return KmeansComputationResultTransformer.toStreamResult(computationResult);
@@ -986,9 +876,6 @@ public class CommunityProcedureFacade {
         var computationResult = mutateBusinessFacade.kmeans(
             graphName,
             mutateConfig,
-            user,
-            databaseId,
-            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns),
             procedureReturnColumns.contains("centroids")
         );
@@ -1005,9 +892,6 @@ public class CommunityProcedureFacade {
         var computationResult = writeBusinessFacade.kmeans(
             graphName,
             writeConfig,
-            user,
-            databaseId,
-            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns),
             procedureReturnColumns.contains("centroids")
         );
@@ -1024,9 +908,6 @@ public class CommunityProcedureFacade {
         var computationResult = statsBusinessFacade.kmeans(
             graphName,
             statsConfig,
-            user,
-            databaseId,
-            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns),
             procedureReturnColumns.contains("centroids")
         );
@@ -1077,10 +958,7 @@ public class CommunityProcedureFacade {
 
         var computationResult = streamBusinessFacade.localClusteringCoefficient(
             graphName,
-            streamConfig,
-            user,
-            databaseId,
-            terminationFlag
+            streamConfig
         );
 
         return LCCComputationResultTransformer.toStreamResult(computationResult);
@@ -1095,10 +973,7 @@ public class CommunityProcedureFacade {
 
         var computationResult = mutateBusinessFacade.localClusteringCoefficient(
             graphName,
-            mutateConfig,
-            user,
-            databaseId,
-            terminationFlag
+            mutateConfig
         );
 
         return Stream.of(LCCComputationResultTransformer.toMutateResult(computationResult, mutateConfig));
@@ -1112,10 +987,7 @@ public class CommunityProcedureFacade {
 
         var computationResult = statsBusinessFacade.localClusteringCoefficient(
             graphName,
-            statsConfig,
-            user,
-            databaseId,
-            terminationFlag
+            statsConfig
         );
 
         return Stream.of(LCCComputationResultTransformer.toStatsResult(computationResult, statsConfig));
@@ -1129,10 +1001,7 @@ public class CommunityProcedureFacade {
 
         var computationResult = writeBusinessFacade.localClusteringCoefficient(
             graphName,
-            writeConfig,
-            user,
-            databaseId,
-            terminationFlag
+            writeConfig
         );
 
         return Stream.of(LCCComputationResultTransformer.toWriteResult(computationResult));
@@ -1182,10 +1051,7 @@ public class CommunityProcedureFacade {
 
         var computationResult = streamBusinessFacade.k1coloring(
             graphName,
-            streamConfig,
-            user,
-            databaseId,
-            terminationFlag
+            streamConfig
         );
 
         return K1ColoringComputationResultTransformer.toStreamResult(computationResult, streamConfig);
@@ -1203,9 +1069,6 @@ public class CommunityProcedureFacade {
         var computationResult = mutateBusinessFacade.k1coloring(
             graphName,
             mutateConfig,
-            user,
-            databaseId,
-            terminationFlag,
             procedureReturnColumns.contains("colorCount")
         );
 
@@ -1224,9 +1087,6 @@ public class CommunityProcedureFacade {
         var computationResult = writeBusinessFacade.k1coloring(
             graphName,
             writeConfig,
-            user,
-            databaseId,
-            terminationFlag,
             procedureReturnColumns.contains("colorCount")
         );
 
@@ -1244,10 +1104,7 @@ public class CommunityProcedureFacade {
 
         var computationResult = streamBusinessFacade.modularityOptimization(
             graphName,
-            streamConfig,
-            user,
-            databaseId,
-            terminationFlag
+            streamConfig
         );
 
         return ModularityOptimisationComputationResultTransformer.toStreamResult(computationResult, streamConfig);
@@ -1262,9 +1119,6 @@ public class CommunityProcedureFacade {
         var computationResult = mutateBusinessFacade.modularityOptimization(
             graphName,
             mutateConfig,
-            user,
-            databaseId,
-            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
         );
 
@@ -1283,9 +1137,6 @@ public class CommunityProcedureFacade {
         var computationResult = statsBusinessFacade.modularityOptimization(
             graphName,
             statsConfig,
-            user,
-            databaseId,
-            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
         );
 
@@ -1304,9 +1155,6 @@ public class CommunityProcedureFacade {
         var computationResult = writeBusinessFacade.modularityOptimization(
             graphName,
             writeConfig,
-            user,
-            databaseId,
-            terminationFlag,
             ProcedureStatisticsComputationInstructions.forCommunities(procedureReturnColumns)
         );
 
@@ -1346,7 +1194,6 @@ public class CommunityProcedureFacade {
     }
 
 
-
     public Stream<K1ColoringStatsResult> k1ColoringStats(
         String graphName,
         Map<String, Object> configuration
@@ -1359,9 +1206,6 @@ public class CommunityProcedureFacade {
         var computationResult = statsBusinessFacade.k1coloring(
             graphName,
             statsConfig,
-            user,
-            databaseId,
-            terminationFlag,
             procedureReturnColumns.contains("colorCount")
         );
 
@@ -1411,10 +1255,7 @@ public class CommunityProcedureFacade {
 
         var computationResult = streamBusinessFacade.conductance(
             graphName,
-            streamConfig,
-            user,
-            databaseId,
-            terminationFlag
+            streamConfig
         );
 
         return ConductanceComputationResultTransformer.toStreamResult(computationResult);
@@ -1428,10 +1269,7 @@ public class CommunityProcedureFacade {
 
         var computationResult = streamBusinessFacade.approxMaxKCut(
             graphName,
-            streamConfig,
-            user,
-            databaseId,
-            terminationFlag
+            streamConfig
         );
 
         return ApproxMaxKCutComputationResultTransformer.toStreamResult(computationResult, streamConfig);
@@ -1445,10 +1283,7 @@ public class CommunityProcedureFacade {
 
         var computationResult = mutateBusinessFacade.approxMaxKCut(
             graphName,
-            streamConfig,
-            user,
-            databaseId,
-            terminationFlag
+            streamConfig
         );
 
         return Stream.of(ApproxMaxKCutComputationResultTransformer.toMutateResult(computationResult));
@@ -1479,9 +1314,6 @@ public class CommunityProcedureFacade {
         var computationResult = writeBusinessFacade.alphaScc(
             graphName,
             config,
-            user,
-            databaseId,
-            terminationFlag,
             new ProcedureStatisticsComputationInstructions(true, true)
         );
 

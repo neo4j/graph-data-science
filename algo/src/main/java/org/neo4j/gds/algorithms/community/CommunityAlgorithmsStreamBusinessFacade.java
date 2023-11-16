@@ -20,10 +20,7 @@
 package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
-import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -47,7 +44,6 @@ import org.neo4j.gds.modularity.ModularityResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
 import org.neo4j.gds.scc.SccBaseConfig;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientResult;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientStreamConfig;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
@@ -62,12 +58,10 @@ public class CommunityAlgorithmsStreamBusinessFacade {
     }
 
     public StreamComputationResult<DisjointSetStruct> wcc(
-        RequestScopedDependencies requestScopedDependencies,
         String graphName,
         WccBaseConfig config
     ) {
         var result = this.communityAlgorithmsFacade.wcc(
-            requestScopedDependencies,
             graphName,
             config
         );
@@ -78,18 +72,12 @@ public class CommunityAlgorithmsStreamBusinessFacade {
 
     public StreamComputationResult<KCoreDecompositionResult> kCore(
         String graphName,
-        KCoreDecompositionBaseConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        KCoreDecompositionBaseConfig config
     ) {
 
         var result = this.communityAlgorithmsFacade.kCore(
             graphName,
-            config,
-            user,
-            databaseId,
-            terminationFlag
+            config
         );
         
         return createStreamComputationResult(result);
@@ -98,18 +86,12 @@ public class CommunityAlgorithmsStreamBusinessFacade {
 
     public StreamComputationResult<LouvainResult> louvain(
         String graphName,
-        LouvainBaseConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        LouvainBaseConfig config
     ) {
 
         var result = this.communityAlgorithmsFacade.louvain(
             graphName,
-            config,
-            user,
-            databaseId,
-            terminationFlag
+            config
         );
 
         return createStreamComputationResult(result);
@@ -117,18 +99,12 @@ public class CommunityAlgorithmsStreamBusinessFacade {
 
     public StreamComputationResult<LeidenResult> leiden(
         String graphName,
-        LeidenBaseConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        LeidenBaseConfig config
     ) {
 
         var result = this.communityAlgorithmsFacade.leiden(
             graphName,
-            config,
-            user,
-            databaseId,
-            terminationFlag
+            config
         );
 
         return createStreamComputationResult(result);
@@ -136,18 +112,12 @@ public class CommunityAlgorithmsStreamBusinessFacade {
 
     public StreamComputationResult<HugeLongArray> scc(
         String graphName,
-        SccBaseConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        SccBaseConfig config
     ) {
 
         var result = this.communityAlgorithmsFacade.scc(
             graphName,
-            config,
-            user,
-            databaseId,
-            terminationFlag
+            config
         );
 
         return createStreamComputationResult(result);
@@ -155,18 +125,12 @@ public class CommunityAlgorithmsStreamBusinessFacade {
 
     public StreamComputationResult<TriangleCountResult> triangleCount(
         String graphName,
-        TriangleCountBaseConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        TriangleCountBaseConfig config
     ) {
 
         var result = this.communityAlgorithmsFacade.triangleCount(
             graphName,
-            config,
-            user,
-            databaseId,
-            terminationFlag
+            config
         );
 
         return createStreamComputationResult(result);
@@ -174,18 +138,12 @@ public class CommunityAlgorithmsStreamBusinessFacade {
 
     public StreamComputationResult<ModularityResult> modularity(
         String graphName,
-        ModularityBaseConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        ModularityBaseConfig config
     ) {
 
         var result = this.communityAlgorithmsFacade.modularity(
             graphName,
-            config,
-            user,
-            databaseId,
-            terminationFlag
+            config
         );
 
         return createStreamComputationResult(result);
@@ -194,18 +152,12 @@ public class CommunityAlgorithmsStreamBusinessFacade {
 
     public StreamComputationResult<LabelPropagationResult> labelPropagation(
         String graphName,
-        LabelPropagationBaseConfig configuration,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        LabelPropagationBaseConfig configuration
     ) {
 
         var result = this.communityAlgorithmsFacade.labelPropagation(
             graphName,
-            configuration,
-            user,
-            databaseId,
-            terminationFlag
+            configuration
         );
 
         return createStreamComputationResult(result);
@@ -213,18 +165,12 @@ public class CommunityAlgorithmsStreamBusinessFacade {
 
     public StreamComputationResult<KmeansResult> kmeans(
         String graphName,
-        KmeansBaseConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        KmeansBaseConfig config
     ) {
 
         var result = this.communityAlgorithmsFacade.kmeans(
             graphName,
-            config,
-            user,
-            databaseId,
-            terminationFlag
+            config
         );
 
         return createStreamComputationResult(result);
@@ -232,17 +178,11 @@ public class CommunityAlgorithmsStreamBusinessFacade {
 
     public StreamComputationResult<LocalClusteringCoefficientResult> localClusteringCoefficient(
         String graphName,
-        LocalClusteringCoefficientStreamConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        LocalClusteringCoefficientStreamConfig config
     ) {
         var result = this.communityAlgorithmsFacade.localClusteringCoefficient(
             graphName,
-            config,
-            user,
-            databaseId,
-            terminationFlag
+            config
         );
 
         return createStreamComputationResult(result);
@@ -250,18 +190,12 @@ public class CommunityAlgorithmsStreamBusinessFacade {
 
     public StreamComputationResult<K1ColoringResult> k1coloring(
         String graphName,
-        K1ColoringStreamConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        K1ColoringStreamConfig config
     ) {
 
         var result = this.communityAlgorithmsFacade.k1Coloring(
             graphName,
-            config,
-            user,
-            databaseId,
-            terminationFlag
+            config
         );
 
         return createStreamComputationResult(result);
@@ -269,18 +203,12 @@ public class CommunityAlgorithmsStreamBusinessFacade {
 
     public StreamComputationResult<ConductanceResult> conductance(
         String graphName,
-        ConductanceStreamConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        ConductanceStreamConfig config
     ) {
 
         var result = this.communityAlgorithmsFacade.conductance(
             graphName,
-            config,
-            user,
-            databaseId,
-            terminationFlag
+            config
         );
 
         return createStreamComputationResult(result);
@@ -289,18 +217,12 @@ public class CommunityAlgorithmsStreamBusinessFacade {
 
     public StreamComputationResult<ApproxMaxKCutResult> approxMaxKCut(
         String graphName,
-        ApproxMaxKCutBaseConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        ApproxMaxKCutBaseConfig config
     ) {
 
         var result = this.communityAlgorithmsFacade.approxMaxKCut(
             graphName,
-            config,
-            user,
-            databaseId,
-            terminationFlag
+            config
         );
 
         return createStreamComputationResult(result);
@@ -308,17 +230,11 @@ public class CommunityAlgorithmsStreamBusinessFacade {
 
     public StreamComputationResult<ModularityOptimizationResult> modularityOptimization(
         String graphName,
-        ModularityOptimizationStreamConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        ModularityOptimizationStreamConfig config
     ) {
         var result = this.communityAlgorithmsFacade.modularityOptimization(
             graphName,
-            config,
-            user,
-            databaseId,
-            terminationFlag
+            config
         );
 
         return createStreamComputationResult(result);

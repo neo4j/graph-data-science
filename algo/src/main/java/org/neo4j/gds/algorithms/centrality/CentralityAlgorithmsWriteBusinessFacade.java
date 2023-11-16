@@ -24,15 +24,12 @@ import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.centrality.specificfields.CentralityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.centrality.specificfields.StandardCentralityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.result.CentralityStatistics;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -55,14 +52,11 @@ public class CentralityAlgorithmsWriteBusinessFacade {
     public NodePropertyWriteResult<StandardCentralityStatisticsSpecificFields> betweennessCentrality(
         String graphName,
         BetweennessCentralityWriteConfig configuration,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag,
         boolean shouldComputeCentralityDistribution
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
-            () -> centralityAlgorithmsFacade.betweennessCentrality(graphName, configuration, user, databaseId, terminationFlag)
+            () -> centralityAlgorithmsFacade.betweennessCentrality(graphName, configuration)
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
@@ -82,8 +76,7 @@ public class CentralityAlgorithmsWriteBusinessFacade {
             "BetweennessCentralityWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
-            configuration.arrowConnectionInfo(),
-            terminationFlag
+            configuration.arrowConnectionInfo()
         );
     }
 
@@ -100,8 +93,7 @@ public class CentralityAlgorithmsWriteBusinessFacade {
         String procedureName,
         int writeConcurrency,
         String writeProperty,
-        Optional<ArrowConnectionInfo> arrowConnectionInfo,
-        TerminationFlag terminationFlag
+        Optional<ArrowConnectionInfo> arrowConnectionInfo
     ) {
 
         return algorithmResult.result().map(result -> {
@@ -119,8 +111,7 @@ public class CentralityAlgorithmsWriteBusinessFacade {
                 writeConcurrency,
                 writeProperty,
                 procedureName,
-                arrowConnectionInfo,
-                terminationFlag
+                arrowConnectionInfo
             );
 
             // Compute result statistics

@@ -21,8 +21,6 @@ package org.neo4j.gds.algorithms.similarity;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnBaseConfig;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnFactory;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
@@ -34,7 +32,6 @@ import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityFactory;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 
@@ -48,73 +45,49 @@ public class SimilarityAlgorithmsFacade {
 
     AlgorithmComputationResult<NodeSimilarityResult> nodeSimilarity(
         String graphName,
-        NodeSimilarityBaseConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        NodeSimilarityBaseConfig config
     ) {
         return algorithmRunner.run(
             graphName,
             config,
             config.relationshipWeightProperty(),
-            new NodeSimilarityFactory<>(),
-            user,
-            databaseId,
-            terminationFlag
+            new NodeSimilarityFactory<>()
         );
     }
 
     AlgorithmComputationResult<NodeSimilarityResult> filteredNodeSimilarity(
         String graphName,
-        FilteredNodeSimilarityBaseConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        FilteredNodeSimilarityBaseConfig config
     ) {
         return algorithmRunner.run(
             graphName,
             config,
             config.relationshipWeightProperty(),
-            new FilteredNodeSimilarityFactory<>(),
-            user,
-            databaseId,
-            terminationFlag
+            new FilteredNodeSimilarityFactory<>()
         );
     }
 
     AlgorithmComputationResult<KnnResult> knn(
         String graphName,
-        KnnBaseConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        KnnBaseConfig config
     ) {
         return algorithmRunner.run(
             graphName,
             config,
             Optional.empty(),
-            new KnnFactory<>(),
-            user,
-            databaseId,
-            terminationFlag
+            new KnnFactory<>()
         );
     }
 
     AlgorithmComputationResult<FilteredKnnResult> filteredKnn(
         String graphName,
-        FilteredKnnBaseConfig config,
-        User user,
-        DatabaseId databaseId,
-        TerminationFlag terminationFlag
+        FilteredKnnBaseConfig config
     ) {
         return algorithmRunner.run(
             graphName,
             config,
             Optional.empty(),
-            new FilteredKnnFactory<>(),
-            user,
-            databaseId,
-            terminationFlag
+            new FilteredKnnFactory<>()
         );
     }
 }

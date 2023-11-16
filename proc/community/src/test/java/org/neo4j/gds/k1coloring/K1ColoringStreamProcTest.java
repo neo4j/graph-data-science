@@ -202,12 +202,17 @@ class K1ColoringStreamProcTest extends BaseProcTest {
             var algorithmsStreamBusinessFacade = new CommunityAlgorithmsStreamBusinessFacade(
                 new CommunityAlgorithmsFacade(
                     new AlgorithmRunner(
+                        logMock,
                         graphStoreCatalogService,
                         memoryUsageValidator,
                         taskRegistryFactory,
                         EmptyUserLogRegistryFactory.INSTANCE,
                         new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
-                        logMock
+                        RequestScopedDependencies.builder()
+                            .with(DatabaseId.of(db.databaseName()))
+                            .with(TerminationFlag.RUNNING_TRUE)
+                            .with(new User(getUsername(), false))
+                            .build()
                     )
                 ));
             proc.facade = new GraphDataScience(
@@ -217,11 +222,7 @@ class K1ColoringStreamProcTest extends BaseProcTest {
                 new CommunityProcedureFacade(
                     ConfigurationParser.EMPTY,
                     mock(AlgorithmMetaDataSetter.class),
-                    RequestScopedDependencies.builder()
-                        .with(DatabaseId.of(db.databaseName()))
-                        .with(TerminationFlag.RUNNING_TRUE)
-                        .with(new User(getUsername(), false))
-                        .build(),
+                    new User(getUsername(), false),
                     ProcedureReturnColumns.EMPTY,
                     null,
                     null,

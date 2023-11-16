@@ -25,7 +25,6 @@ import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStatsBusinessFaca
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
-import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -52,7 +51,6 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteConfig;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -62,9 +60,7 @@ public class SimilarityProcedureFacade {
 
     private final ConfigurationParser configurationParser;
     private final User user;
-    private final DatabaseId databaseId;
     private final ProcedureReturnColumns procedureReturnColumns;
-    private final TerminationFlag terminationFlag;
     private final SimilarityAlgorithmsMutateBusinessFacade mutateBusinessFacade;
     private final SimilarityAlgorithmsStatsBusinessFacade statsBusinessFacade;
     private final SimilarityAlgorithmsStreamBusinessFacade streamBusinessFacade;
@@ -75,9 +71,7 @@ public class SimilarityProcedureFacade {
     public SimilarityProcedureFacade(
         ConfigurationParser configurationParser,
         User user,
-        DatabaseId databaseId,
         ProcedureReturnColumns procedureReturnColumns,
-        TerminationFlag terminationFlag,
         SimilarityAlgorithmsMutateBusinessFacade mutateBusinessFacade,
         SimilarityAlgorithmsStatsBusinessFacade statsBusinessFacade,
         SimilarityAlgorithmsStreamBusinessFacade streamBusinessFacade,
@@ -86,10 +80,8 @@ public class SimilarityProcedureFacade {
         AlgorithmMetaDataSetter algorithmMetaDataSetter
     ) {
         this.configurationParser = configurationParser;
-        this.databaseId = databaseId;
         this.user = user;
         this.procedureReturnColumns = procedureReturnColumns;
-        this.terminationFlag = terminationFlag;
         this.mutateBusinessFacade = mutateBusinessFacade;
         this.statsBusinessFacade = statsBusinessFacade;
         this.streamBusinessFacade = streamBusinessFacade;
@@ -106,10 +98,7 @@ public class SimilarityProcedureFacade {
 
         var computationResult = streamBusinessFacade.nodeSimilarity(
             graphName,
-            streamConfig,
-            user,
-            databaseId,
-            terminationFlag
+            streamConfig
         );
 
         return NodeSimilarityComputationResultTransformer.toStreamResult(computationResult);
@@ -124,9 +113,6 @@ public class SimilarityProcedureFacade {
         var computationResult = statsBusinessFacade.nodeSimilarity(
             graphName,
             statsConfig,
-            user,
-            databaseId,
-            terminationFlag,
             procedureReturnColumns.contains("similarityDistribution")
         );
 
@@ -142,9 +128,6 @@ public class SimilarityProcedureFacade {
         var computationResult = writeBusinessFacade.nodeSimilarity(
             graphName,
             statsConfig,
-            user,
-            databaseId,
-            terminationFlag,
             procedureReturnColumns.contains("similarityDistribution")
         );
 
@@ -160,9 +143,6 @@ public class SimilarityProcedureFacade {
         var computationResult = mutateBusinessFacade.nodeSimilarity(
             graphName,
             mutateConfig,
-            user,
-            databaseId,
-            terminationFlag,
             procedureReturnColumns.contains("similarityDistribution")
         );
 
@@ -211,10 +191,7 @@ public class SimilarityProcedureFacade {
 
         var computationResult = streamBusinessFacade.filteredNodeSimilarity(
             graphName,
-            streamConfig,
-            user,
-            databaseId,
-            terminationFlag
+            streamConfig
         );
 
         return NodeSimilarityComputationResultTransformer.toStreamResult(computationResult);
@@ -229,9 +206,6 @@ public class SimilarityProcedureFacade {
         var computationResult = statsBusinessFacade.filteredNodeSimilarity(
             graphName,
             statsConfig,
-            user,
-            databaseId,
-            terminationFlag,
             procedureReturnColumns.contains("similarityDistribution")
         );
 
@@ -247,9 +221,6 @@ public class SimilarityProcedureFacade {
         var computationResult = mutateBusinessFacade.filteredNodeSimilarity(
             graphName,
             mutateConfig,
-            user,
-            databaseId,
-            terminationFlag,
             procedureReturnColumns.contains("similarityDistribution")
         );
 
@@ -265,9 +236,6 @@ public class SimilarityProcedureFacade {
         var computationResult = writeBusinessFacade.filteredNodeSimilarity(
             graphName,
             writeConfig,
-            user,
-            databaseId,
-            terminationFlag,
             procedureReturnColumns.contains("similarityDistribution")
         );
 
@@ -315,10 +283,7 @@ public class SimilarityProcedureFacade {
 
         var computationResult = streamBusinessFacade.knn(
             graphName,
-            streamConfig,
-            user,
-            databaseId,
-            terminationFlag
+            streamConfig
         );
 
         return KnnComputationResultTransformer.toStreamResult(computationResult);
@@ -333,9 +298,6 @@ public class SimilarityProcedureFacade {
         var computationResult = statsBusinessFacade.knn(
             graphName,
             statsConfig,
-            user,
-            databaseId,
-            terminationFlag,
             procedureReturnColumns.contains("similarityDistribution")
         );
 
@@ -351,9 +313,6 @@ public class SimilarityProcedureFacade {
         var computationResult = writeBusinessFacade.knn(
             graphName,
             writeConfig,
-            user,
-            databaseId,
-            terminationFlag,
             procedureReturnColumns.contains("similarityDistribution")
         );
 
@@ -369,9 +328,6 @@ public class SimilarityProcedureFacade {
         var computationResult = mutateBusinessFacade.knn(
             graphName,
             mutateConfig,
-            user,
-            databaseId,
-            terminationFlag,
             procedureReturnColumns.contains("similarityDistribution")
         );
 
@@ -419,10 +375,7 @@ public class SimilarityProcedureFacade {
 
         var computationResult = streamBusinessFacade.filteredKnn(
             graphName,
-            streamConfig,
-            user,
-            databaseId,
-            terminationFlag
+            streamConfig
         );
 
         return FilteredKnnComputationResultTransformer.toStreamResult(computationResult);
@@ -437,9 +390,6 @@ public class SimilarityProcedureFacade {
         var computationResult = statsBusinessFacade.filteredKnn(
             graphName,
             statsConfig,
-            user,
-            databaseId,
-            terminationFlag,
             procedureReturnColumns.contains("similarityDistribution")
         );
 
@@ -455,9 +405,6 @@ public class SimilarityProcedureFacade {
         var computationResult = mutateBusinessFacade.filteredKnn(
             graphName,
             mutateConfig,
-            user,
-            databaseId,
-            terminationFlag,
             procedureReturnColumns.contains("similarityDistribution")
         );
 
@@ -473,9 +420,6 @@ public class SimilarityProcedureFacade {
         var computationResult = writeBusinessFacade.filteredKnn(
             graphName,
             writeConfig,
-            user,
-            databaseId,
-            terminationFlag,
             procedureReturnColumns.contains("similarityDistribution")
         );
 
@@ -514,7 +458,6 @@ public class SimilarityProcedureFacade {
         var config = createConfig(algoConfiguration, FilteredKnnWriteConfig::of);
         return Stream.of(estimateBusinessFacade.filteredKnn(graphNameOrConfiguration, config));
     }
-
 
 
     // FIXME: the following two methods are duplicate, find a good place for them.

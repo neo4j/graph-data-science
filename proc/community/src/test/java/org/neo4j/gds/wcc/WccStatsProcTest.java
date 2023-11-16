@@ -276,12 +276,16 @@ class WccStatsProcTest extends BaseProcTest {
         var statsBusinessFacade = new CommunityAlgorithmsStatsBusinessFacade(
             new CommunityAlgorithmsFacade(
                 new AlgorithmRunner(
+                    logMock,
                     graphStoreCatalogService,
                     memoryUsageValidator,
                     TaskRegistryFactory.empty(),
                     EmptyUserLogRegistryFactory.INSTANCE,
                     new AlgorithmMetricsService(new PassthroughAlgorithmMetricRegistrar()),
-                    logMock
+                    RequestScopedDependencies.builder()
+                        .with(DatabaseId.of(db.databaseName()))
+                        .with(new User(getUsername(), false))
+                        .build()
                 )
             )
         );
@@ -293,10 +297,7 @@ class WccStatsProcTest extends BaseProcTest {
             new CommunityProcedureFacade(
                 ConfigurationParser.EMPTY,
                 null,
-                RequestScopedDependencies.builder()
-                    .with(DatabaseId.of(db.databaseName()))
-                    .with(new User(getUsername(), false))
-                    .build(),
+                new User(getUsername(), false),
                 ProcedureReturnColumns.EMPTY,
                 null,
                 null,
