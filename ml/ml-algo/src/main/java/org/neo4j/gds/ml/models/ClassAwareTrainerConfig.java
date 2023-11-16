@@ -35,7 +35,7 @@ public interface ClassAwareTrainerConfig extends TrainerConfig {
     @Value.Default
     default List<Double> classWeights() {
         return List.of();
-    };
+    }
 
     @Configuration.Ignore
     default double[] initializeClassWeights(int numberOfClasses) {

@@ -43,7 +43,7 @@ class RebuildTaskTest {
             arguments(List.of(Partition.of(0,10))),
             arguments(List.of(Partition.of(0,4),Partition.of(4,6))));
 
-    };
+    }
         @ParameterizedTest
         @MethodSource("partitions")
         void shouldRebuildCorrectly(List<Partition> partitions){

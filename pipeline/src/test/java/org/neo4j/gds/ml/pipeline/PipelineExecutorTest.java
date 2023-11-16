@@ -221,7 +221,7 @@ class PipelineExecutorTest {
         }
 
         @Override
-        public void splitDatasets() {};
+        public void splitDatasets() {}
 
         @Override
         protected String execute(Map<DatasetSplits, PipelineGraphFilter> dataSplits) {

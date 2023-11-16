@@ -196,7 +196,7 @@ final class DegreeCentralityTest {
         var config = configBuilder.build();
 
         var progressTask = new DegreeCentralityFactory<>().progressTask(graph, config);
-        var log = Neo4jProxy.testLog();;
+        var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, log, 1, EmptyTaskRegistryFactory.INSTANCE);
         var degreeCentrality = new DegreeCentrality(
             graph,

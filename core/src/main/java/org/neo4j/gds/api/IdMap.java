@@ -60,7 +60,7 @@ public interface IdMap extends PartialIdMap, NodeIterator, BatchNodeIterable {
      */
     default long safeToMappedNodeId(long originalNodeId) {
         return highestOriginalId() < originalNodeId ? NOT_FOUND : toMappedNodeId(originalNodeId);
-    };
+    }
 
     /**
      * Returns the original node id for the given mapped node id.

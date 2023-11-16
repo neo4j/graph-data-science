@@ -62,7 +62,7 @@ public class NodeLabelIndexTest extends BaseTest {
         ));
 
 
-        var log = Neo4jProxy.testLog();;
+        var log = Neo4jProxy.testLog();
         var graph = new StoreLoaderBuilder()
             .databaseService(db)
             .log(log)

@@ -217,7 +217,7 @@ class DfsStreamProcTest extends BaseProcTest {
                 Stream.of("g", "e", "d", "c", "a", "b", "f").map(idFunction::of).collect(Collectors.toList()),
                 Stream.of("g", "f", "d", "b", "a", "c", "e").map(idFunction::of).collect(Collectors.toList()),
                 Stream.of("g", "f", "d", "c", "a", "b", "e").map(idFunction::of).collect(Collectors.toList())
-            );;
+            );
         });
     }
 
