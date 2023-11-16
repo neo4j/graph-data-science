@@ -2,9 +2,9 @@
 = GDS Feature Toggles
 :description: This section describes the available feature toggles in the Neo4j Graph Data Science library.
 
-
 WARNING: Feature toggles are not considered part of the public API and can be removed or changed between minor releases of the GDS Library.
 
+CAUTION: Feature toggles are not available in AuraDS.
 
 [.enterprise-edition]
 [[bit-id-map-feature-toggle]]
