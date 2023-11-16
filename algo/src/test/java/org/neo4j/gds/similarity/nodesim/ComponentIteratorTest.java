@@ -56,9 +56,10 @@ class ComponentIteratorTest {
         upperBoundPerComponent.set(0, 2);
         upperBoundPerComponent.set(1, 7);
 
-        ComponentIterator iterator = new ComponentIterator(1, nodesSortedByComponent, upperBoundPerComponent);
+        ComponentIterator iterator = new ComponentIterator(1, components, nodesSortedByComponent,
+            upperBoundPerComponent);
 
-        for (int nodeId = 7; nodeId > 2; nodeId--) {
+        for (int nodeId = 3; nodeId < 8; nodeId++) {
             assertTrue(iterator.hasNext());
             assertEquals(nodeId, iterator.next());
         }

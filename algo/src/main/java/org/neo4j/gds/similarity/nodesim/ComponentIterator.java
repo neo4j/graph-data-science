@@ -33,27 +33,28 @@ import java.util.concurrent.atomic.AtomicLong;
  * node and the index bounds per component.
  */
 public class ComponentIterator implements Iterator<Long> {
-    private long endIdx;
     private long runningIdx;
+    private long componentId;
+    private HugeLongArray components;
     private HugeLongArray nodesSortedByComponent;
 
-    public ComponentIterator(long componentId, HugeLongArray nodesSortedByComponent,
+    public ComponentIterator(long componentId, HugeLongArray components, HugeLongArray nodesSortedByComponent,
         HugeAtomicLongArray upperBoundPerComponent) {
 
+        this.componentId = componentId;
+        this.components = components;
         this.nodesSortedByComponent = nodesSortedByComponent;
-        runningIdx = upperBoundPerComponent.get(componentId - 1);
-        endIdx = upperBoundPerComponent.get(componentId);
+        this.runningIdx = upperBoundPerComponent.get(componentId);
     }
 
     @Override
     public boolean hasNext() {
-        return runningIdx < endIdx;
+        return components.get(nodesSortedByComponent.get(runningIdx)) == componentId;
     }
 
     @Override
     public Long next() {
-        runningIdx++;
-        return nodesSortedByComponent.get(runningIdx);
+        return nodesSortedByComponent.get(runningIdx--);
     }
 
     public static HugeAtomicLongArray getIndexUpperBoundPerComponent(HugeLongArray components, int concurrency) {
@@ -64,8 +65,8 @@ public class ComponentIterator implements Iterator<Long> {
         // i.e. comp1 containing 3 nodes, comp2 containing 20 nodes: {(comp1, 3), (comp2, 20)}
         ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, nodeId -> {
             {
-                long communityId = components.get(nodeId);
-                upperBoundPerComponent.getAndAdd(communityId, 1);
+                long componentId = components.get(nodeId);
+                upperBoundPerComponent.getAndAdd(componentId, 1);
             }
         });
         AtomicLong atomicNodeSum = new AtomicLong();
