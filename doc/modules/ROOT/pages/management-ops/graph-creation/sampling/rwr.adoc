@@ -136,7 +136,7 @@ In this section we will demonstrate the usage of the RWR sampling algorithm on a
 include::partial$/algorithms/shared/examples-intro.adoc[]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
-[source, cypher, role=noplay setup-query, group=example]
+[source, cypher, role=noplay setup-query]
 ----
 CREATE
   (nAlice:User {name: 'Alice'}),
@@ -163,7 +163,7 @@ Between those clusters there is one single relationship.
 We can now project the graph and store it in the graph catalog.
 
 .The following statement will project the graph and store it in the graph catalog.
-[source, cypher, role=noplay graph-project-query, group=example]
+[source, cypher, role=noplay graph-project-query]
 ----
 CALL gds.graph.project( 'myGraph', 'User', 'LINK' )
 ----
@@ -175,7 +175,7 @@ We can now go on to sample a subgraph from "myGraph" using RWR.
 Using the "Alice" `User` node as our set of start nodes, we will venture to visit four nodes in the graph for our sample.
 Since we have six nodes total in our graph, and 4/6 ≈ 0.66 we will use this as our sampling ratio.
 
-[role=query-example, group=example]
+[role=query-example]
 --
 .The following will run the Random walk with restarts sampling algorithm:
 [source, cypher, role=noplay]
@@ -197,101 +197,3 @@ RETURN nodeCount, relationshipCount
 As we can see we did indeed visit four nodes.
 Looking at the topology of our original graph, "myGraph", we can conclude that the nodes must be those corresponding to the `User` nodes with the name properties "Alice", "Bridget", "Charles" and "Doug".
 And the relationships sampled are those connecting these nodes.
-
-== Disambiguate between sampled parallel relationships
-
-When the graph contains parallel relationships between two nodes, the algorithm will sample any of them at random.
-In order to disambiguate between them, the relationship id needs to be added as a property to the projection graph.
-
-In this example graph, we will only have two nodes, but many different relationships between them.
-The relationships each have a different property value, which makes them different from one another.
-
-.The following Cypher statement will create an example graph with parallel relationships in the Neo4j database:
-[source, cypher, role=noplay setup-query, group=parallel]
-----
-CREATE
-  (nFlorentin:ParUser {name: 'Florentin'}),
-  (nPaul:ParUser {name: 'Paul'}),
-
-  (nFlorentin)-[:PAR_LINK { prop: 0.1 }]->(nPaul),
-  (nFlorentin)-[:PAR_LINK { prop: 0.2 }]->(nPaul),
-  (nFlorentin)-[:PAR_LINK { prop: 0.3 }]->(nPaul),
-  (nFlorentin)-[:PAR_LINK { prop: 0.4 }]->(nPaul),
-  (nFlorentin)-[:PAR_LINK { prop: 0.5 }]->(nPaul),
-  (nFlorentin)-[:PAR_LINK { prop: 0.6 }]->(nPaul),
-  (nFlorentin)-[:PAR_LINK { prop: 0.7 }]->(nPaul),
-  (nFlorentin)-[:PAR_LINK { prop: 0.8 }]->(nPaul);
-----
-
-We can now use a Cypher projection to project the graph with the relationship id as a relationship property and store it in the graph catalog.
-
-.The following statement will project the graph with the relationship id as a property and store it in the graph catalog.
-[source, cypher, role=noplay graph-project-query, group=parallel]
-----
-MATCH (source: ParUser)-[r:PAR_LINK]->(target: ParUser)
-RETURN gds.graph.project(
-    'parallelGraph', source, target,
-    {
-         sourceNodeLabels: labels(source),
-         targetNodeLabels: labels(target),
-         relationshipType: type(r),
-         relationshipProperties: { key: id(r) }  //  <1>
-    }
-)
-----
-<1> The relationship id is added as a property to the projection graph.
-
-=== Sampling
-
-We can now go on to sample a subgraph from "parallelGraph" using RWR.
-Using the "Florentin" `ParUser` node as our set of start nodes, this time we want to have two nodes in our sample.
-Since we have eight nodes total in our graph, we use 0.25 as our sampling ratio.
-
-[role=query-example, group=parallel]
---
-.The following will run the Random walk with restarts sampling algorithm on the parallel graph:
-[source, cypher, role=noplay]
-----
-MATCH (start:ParUser {name: 'Florentin'})
-CALL gds.graph.sample.rwr('parallelSample', 'parallelGraph', { samplingRatio: 1.0, startNodes: [start] })
-YIELD nodeCount, relationshipCount
-RETURN nodeCount, relationshipCount
-----
-
-.Results
-[opts="header"]
-|===
-| nodeCount | relationshipCount
-| 2         | 8
-|===
---
-
-We can now inspect the sampled relationships and disambiguate them by their `key` property, which is the original relationship id.
-
-[role=query-example, group=parallel]
---
-.The following will stream the relationship id property from the sampled parallel graph:
-[source, cypher, role=noplay]
-----
-CALL gds.graph.relationshipProperty.stream('parallelSample', 'key', ['PAR_LINK'])
-YIELD sourceNodeId, targetNodeId, propertyValue AS relationshipId
-MATCH (n)-[r]->(m)
-WHERE id(r) = relationshipId
-RETURN n.name AS source, m.name AS target, r.prop AS prop
-ORDER BY prop
-----
-
-.Results
-[opts="header"]
-|===
-| source       | target | prop
-| "Florentin"  | "Paul" | 0.1
-| "Florentin"  | "Paul" | 0.2
-| "Florentin"  | "Paul" | 0.3
-| "Florentin"  | "Paul" | 0.4
-| "Florentin"  | "Paul" | 0.5
-| "Florentin"  | "Paul" | 0.6
-| "Florentin"  | "Paul" | 0.7
-| "Florentin"  | "Paul" | 0.8
-|===
---

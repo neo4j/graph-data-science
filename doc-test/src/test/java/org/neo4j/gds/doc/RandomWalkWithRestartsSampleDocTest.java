@@ -21,7 +21,6 @@ package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphSampleProc;
-import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
 
 import java.util.List;
 
@@ -31,8 +30,7 @@ final class RandomWalkWithRestartsSampleDocTest extends SingleFileDocTestBase {
     protected List<Class<?>> procedures() {
         return List.of(
             GraphProjectProc.class,
-            GraphSampleProc.class,
-            GraphStreamRelationshipPropertiesProc.class
+            GraphSampleProc.class
         );
     }
 
