@@ -77,6 +77,10 @@ public class CELFStreamProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.influenceMaximization.celf.stream");
+
+        executionContext()
             .log()
             .warn(
                 "Procedure `gds.beta.influenceMaximization.celf.stream has been deprecated, please use `gds.influenceMaximization.celf.stream`.");
@@ -95,6 +99,10 @@ public class CELFStreamProc extends BaseProc {
         @Name(value = "graphName") Object graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.influenceMaximization.celf.stream.estimate");
+
         executionContext()
             .log()
             .warn(
