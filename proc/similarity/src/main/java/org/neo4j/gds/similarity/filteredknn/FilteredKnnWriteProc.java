@@ -65,13 +65,9 @@ public class FilteredKnnWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.alpha.knn.filtered.write");
-        executionContext()
-            .log()
-            .warn(
-                "Procedure `gds.alpha.knn.filtered.write` has been deprecated, please use `gds.knn.filtered.write`.");
+        facade.deprecatedProcedures().called("gds.alpha.knn.filtered.write");
+        facade.log()
+            .warn("Procedure `gds.alpha.knn.filtered.write` has been deprecated, please use `gds.knn.filtered.write`.");
         return write(graphName, configuration);
     }
 }
