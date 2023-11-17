@@ -60,6 +60,10 @@ public class ClosenessCentralityWriteProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.closeness.write");
+
+        executionContext()
             .log()
             .warn("Procedure `gds.beta.closeness.write` has been deprecated, please use `gds.closeness.write`.");
 

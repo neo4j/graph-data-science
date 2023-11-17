@@ -56,6 +56,7 @@ public class GraphMutateNodeLabelProc {
         @Name(value = "nodeLabel") String nodeLabel,
         @Name(value = "configuration") Map<String, Object> configuration
     ) {
+        facade.deprecatedProcedures().called("gds.alpha.graph.nodeLabel.mutate");
         facade.log().warn(
             "Procedure `gds.alpha.graph.nodeLabel.mutate` has been deprecated, please use `gds.graph.nodeLabel.mutate`.");
 

@@ -77,6 +77,9 @@ public class SteinerTreeWriteProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.steinerTree.write");
+        executionContext()
             .log()
             .warn("Procedure `gds.beta.steinerTree.write` has been deprecated, please use `gds.steinerTree.write`.");
         return write(graphName, configuration);

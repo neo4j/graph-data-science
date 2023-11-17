@@ -54,6 +54,9 @@ public class ModelListProc extends ModelCatalogProc {
     @Deprecated
     @Internal
     public Stream<BetaModelCatalogResult> betaList(@Name(value = "modelName", defaultValue = NO_VALUE) String modelName) {
+        executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.model.list");
 
         executionContext()
             .log()

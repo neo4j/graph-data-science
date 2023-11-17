@@ -73,6 +73,9 @@ public class SpanningTreeStreamProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called(betaProcedure);
+        executionContext()
             .log()
             .warn("Procedure `gds.beta.spanningTree.stream` has been deprecated, please use `gds.spanningTree.stream`.");
         return spanningTree(graphName, configuration);
@@ -86,6 +89,9 @@ public class SpanningTreeStreamProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
+        executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called(betaProcedure + ".estimate");
         executionContext()
             .log()
             .warn(

@@ -66,6 +66,9 @@ public class PipelineDropProc extends BaseProc {
         @Name(value = "failIfMissing", defaultValue = "true") boolean failIfMissing
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.pipeline.drop");
+        executionContext()
             .log()
             .warn("Procedure `gds.beta.pipeline.drop` has been deprecated, please use `gds.pipeline.drop`.");
 

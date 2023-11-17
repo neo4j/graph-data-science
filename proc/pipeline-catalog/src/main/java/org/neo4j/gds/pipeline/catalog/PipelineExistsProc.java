@@ -63,6 +63,9 @@ public class PipelineExistsProc extends BaseProc {
     @Deprecated(forRemoval = true)
     public Stream<PipelineExistsResult> betaExists(@Name(value = "pipelineName") String pipelineName) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.pipeline.exists");
+        executionContext()
             .log()
             .warn("The procedure `gds.beta.pipeline.exists` is deprecated and will be removed in a future release. Please use `gds.pipeline.exists` instead.");
 

@@ -68,6 +68,8 @@ public class K1ColoringStatsProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.k1coloring.stats");        executionContext()
             .log()
             .warn(
                 "Procedure `gds.beta.k1coloring.stats` has been deprecated, please use `gds.k1coloring.stats`.");
@@ -82,6 +84,9 @@ public class K1ColoringStatsProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
+        executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.k1coloring.stats.estimate");
         executionContext()
             .log()
             .warn(

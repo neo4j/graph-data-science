@@ -59,6 +59,7 @@ public class UserLogProc {
     @Deprecated(forRemoval = true)
     @Description("Log warnings and hints for currently running tasks.")
     public Stream<UserLogEntry> alphaQueryUserLog(@Name(value = "jobId", defaultValue = "") String jobId) {
+        facade.deprecatedProcedures().called("gds.alpha.userLog");
         return queryUserLog(jobId);
     }
 }

@@ -57,6 +57,10 @@ public class ClosenessCentralityMutateProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.closeness.mutate");
+
+        executionContext()
             .log()
             .warn(
                 "Procedure `gds.beta.closeness.mutate` has been deprecated, please use `gds.closeness.mutate`.");

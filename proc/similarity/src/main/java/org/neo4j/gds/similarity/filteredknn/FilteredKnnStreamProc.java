@@ -68,6 +68,9 @@ public class FilteredKnnStreamProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.alpha.knn.filtered.stream");
+        executionContext()
             .log()
             .warn(
                 "Procedure `gds.alpha.knn.filtered.stream` has been deprecated, please use `gds.knn.filtered.stream`.");

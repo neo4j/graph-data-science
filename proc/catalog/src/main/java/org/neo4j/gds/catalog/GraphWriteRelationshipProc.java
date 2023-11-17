@@ -60,6 +60,8 @@ public class GraphWriteRelationshipProc {
         @Name(value = "relationshipProperty", defaultValue = "") @Nullable String relationshipProperty,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        facade.deprecatedProcedures().called("gds.graph.writeRelationship");
+
         facade
             .log()
             .warn(

@@ -69,6 +69,9 @@ public final class FilteredKnnStatsProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.alpha.knn.filtered.stats");
+        executionContext()
             .log()
             .warn(
                 "Procedure `gds.alpha.knn.filtered.stats` has been deprecated, please use `gds.knn.filtered.stats`.");

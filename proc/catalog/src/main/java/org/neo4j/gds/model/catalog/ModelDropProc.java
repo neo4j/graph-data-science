@@ -61,6 +61,10 @@ public class ModelDropProc extends ModelCatalogProc {
         @Name(value = "failIfMissing", defaultValue = "true") boolean failIfMissing
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.model.drop");
+
+        executionContext()
             .log()
             .warn("Procedure `gds.beta.model.drop` has been deprecated, please use `gds.model.drop`.");
         return drop(modelName, failIfMissing).map(BetaModelCatalogResult::new);

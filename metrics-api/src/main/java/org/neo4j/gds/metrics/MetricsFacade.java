@@ -21,7 +21,6 @@ package org.neo4j.gds.metrics;
 
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
-import org.neo4j.gds.metrics.procedures.PassthroughDeprecatedProceduresMetricRegistrar;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 
 public class MetricsFacade {
@@ -29,7 +28,7 @@ public class MetricsFacade {
     public static final MetricsFacade PASSTHROUGH_METRICS_FACADE = new MetricsFacade(
         new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
         new ProjectionMetricsService(new PassthroughExecutionMetricRegistrar()),
-        new DeprecatedProceduresMetricService(new PassthroughDeprecatedProceduresMetricRegistrar())
+        DeprecatedProceduresMetricService.PASSTHROUGH
     );
 
     private final AlgorithmMetricsService algorithmMetricsService;

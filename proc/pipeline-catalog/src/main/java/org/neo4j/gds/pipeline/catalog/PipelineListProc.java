@@ -59,6 +59,9 @@ public class PipelineListProc extends BaseProc {
     @Deprecated(forRemoval = true)
     public Stream<PipelineCatalogResult> betaList(@Name(value = "pipelineName", defaultValue = NO_VALUE) String pipelineName) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.pipeline.list");
+        executionContext()
             .log()
             .warn("The procedure `gds.beta.pipeline.list` is deprecated and will be removed in a future release. Please use `gds.pipeline.list` instead.");
 

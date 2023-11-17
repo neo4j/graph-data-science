@@ -67,6 +67,8 @@ public class GraphStreamNodePropertiesProc {
         @Name(value = "nodeLabels", defaultValue = "['*']") Object nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        facade.deprecatedProcedures().called("gds.graph.streamNodeProperties");
+
         facade
             .log()
             .warn(
@@ -107,6 +109,8 @@ public class GraphStreamNodePropertiesProc {
         @Name(value = "nodeLabels", defaultValue = "['*']") Object nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        facade.deprecatedProcedures().called("gds.graph.streamNodeProperty");
+
         facade
             .log()
             .warn(

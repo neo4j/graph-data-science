@@ -65,6 +65,8 @@ public class ApproxMaxKCutStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        facade.deprecatedProcedures().called("gds.alpha.maxkcut.stream");
+
         facade
             .log()
             .warn("Procedure `gds.alpha.maxkcut.stream` has been deprecated, please use `gds.maxkcut.stream`.");
@@ -80,6 +82,7 @@ public class ApproxMaxKCutStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
+        facade.deprecatedProcedures().called("gds.alpha.maxkcut.stream.estimate");
         facade
             .log()
             .warn("Procedure `gds.alpha.maxkcut.stream.estimate` has been deprecated, please use `gds.maxkcut.stream.estimate`.");

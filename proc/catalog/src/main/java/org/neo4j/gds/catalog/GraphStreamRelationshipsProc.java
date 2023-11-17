@@ -57,6 +57,8 @@ public class GraphStreamRelationshipsProc {
         @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        facade.deprecatedProcedures().called("gds.beta.graph.relationships.stream");
+
         facade.log().warn("Procedure `gds.beta.graph.relationships.stream` has been deprecated, please use `gds.graph.relationships.stream`.");
 
         return facade.catalog().streamRelationships(graphName, relationshipTypes, configuration);

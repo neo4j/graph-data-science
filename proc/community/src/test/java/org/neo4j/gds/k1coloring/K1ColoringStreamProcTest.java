@@ -55,6 +55,7 @@ import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
+import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
@@ -233,7 +234,8 @@ class K1ColoringStreamProcTest extends BaseProcTest {
                     algorithmsStreamBusinessFacade,
                     null
                 ),
-                null
+                null,
+                DeprecatedProceduresMetricService.PASSTHROUGH
             );
             var someJobId = new JobId();
             Map<String, Object> configMap = Map.of("jobId", someJobId);

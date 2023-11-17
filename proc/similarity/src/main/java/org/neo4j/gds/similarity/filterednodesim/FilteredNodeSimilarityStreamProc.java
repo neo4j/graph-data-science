@@ -74,6 +74,9 @@ public class FilteredNodeSimilarityStreamProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ){
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.alpha.nodeSimilarity.filtered.stream");
+        executionContext()
             .log()
             .warn("Procedure `gds.alpha.nodeSimilarity.filtered.stream` has been deprecated, please use `gds.nodeSimilarity.filtered.stream`.");
 
@@ -88,6 +91,9 @@ public class FilteredNodeSimilarityStreamProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
+        executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.alpha.nodeSimilarity.filtered.stream.estimate");
         executionContext()
             .log()
             .warn("Procedure `gds.alpha.nodeSimilarity.filtered.stream.estimate` has been deprecated, please use `gds.nodeSimilarity.filtered.stream.estimate`.");

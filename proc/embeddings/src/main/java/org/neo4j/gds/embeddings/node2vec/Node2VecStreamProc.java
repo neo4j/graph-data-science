@@ -69,6 +69,9 @@ public class Node2VecStreamProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.node2vec.stream");
+        executionContext()
             .log()
             .warn(
                 "Procedure `gds.beta.node2vec.stream` has been deprecated, please use `gds.node2vec.stream`.");
@@ -83,6 +86,9 @@ public class Node2VecStreamProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
+        executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.node2vec.stream.estimate");
         executionContext()
             .log()
             .warn(
