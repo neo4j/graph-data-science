@@ -20,7 +20,6 @@
 package org.neo4j.gds.similarity.nodesim;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -28,7 +27,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import static org.neo4j.gds.graphbuilder.TransactionTerminationTestUtils.assertTerminates;
 
-class NodeSimilarityTerminationTest extends BaseTest {
+class NodeSimilarityTerminationTest {
 
     @Test
     void shouldTerminate() {
