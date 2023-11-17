@@ -19,98 +19,127 @@
  */
 package org.neo4j.gds.triangle.intersect;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.StoreLoaderBuilder;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.UnionGraph;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 
-import java.util.Arrays;
-import java.util.PrimitiveIterator;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
-import static org.neo4j.gds.compat.GraphDatabaseApiProxy.applyInFullAccessTransaction;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 
-final class CompositeIntersectionTest extends BaseTest {
+final class CompositeIntersectionTest {
 
     private static final int DEGREE = 25;
-    private static final RelationshipType TYPE_1 = RelationshipType.withName("TYPE1");
-    private static final RelationshipType TYPE_2 = RelationshipType.withName("TYPE2");
-    private static UnionGraph GRAPH;
-    private static long START1;
-    private static long START2;
-    private static long[] TARGETS;
 
-    @BeforeEach
-    void setup() {
-        Random random = new Random(0L);
-        long[] neoStarts = new long[2];
-        long[] neoTargets = applyInFullAccessTransaction(db, tx -> {
-            Node start1 = tx.createNode();
-            Node start2 = tx.createNode();
-            Node start3 = tx.createNode();
-            neoStarts[0] = start1.getId();
-            neoStarts[1] = start2.getId();
-            start1.createRelationshipTo(start2, TYPE_1);
-            long[] targets = new long[DEGREE];
-            int some = 0;
-            for (int i = 0; i < DEGREE; i++) {
-                RelationshipType type = i % 2 == 0 ? TYPE_1 : TYPE_2;
-                Node target = tx.createNode();
-                start1.createRelationshipTo(target, type);
-                start3.createRelationshipTo(target, type);
-                if (random.nextBoolean()) {
-                    start2.createRelationshipTo(target, type);
-                    targets[some++] = target.getId();
-                }
-            }
-            return Arrays.copyOf(targets, some);
-        });
-
-        GRAPH = ((UnionGraph) new StoreLoaderBuilder()
-            .databaseService(db)
-            .addRelationshipType(TYPE_1.name())
-            .addRelationshipType(TYPE_2.name())
-            .globalOrientation(Orientation.UNDIRECTED)
-            .build()
-            .graph());
-
-        START1 = GRAPH.toMappedNodeId(neoStarts[0]);
-        START2 = GRAPH.toMappedNodeId(neoStarts[1]);
-        TARGETS = Arrays.stream(neoTargets).map(GRAPH::toMappedNodeId).toArray();
-        Arrays.sort(TARGETS);
-    }
 
     @Test
     void intersectWithTargets() {
+
+        ArrayList<Long> targets = new ArrayList<>();
+        var graph = produceGraph(targets);
+        var targetIterator = targets.iterator();
+
+        var start1 = Math.min(graph.toMappedNodeId(DEGREE + 1), graph.toMappedNodeId(DEGREE));
+        var start2 = Math.max(graph.toMappedNodeId(DEGREE + 1), graph.toMappedNodeId(DEGREE));
+
         var intersect = new UnionGraphIntersect.UnionGraphIntersectFactory().load(
-            GRAPH,
+            graph,
             ImmutableRelationshipIntersectConfig.builder().build()
         );
 
-        PrimitiveIterator.OfLong targets = Arrays.stream(TARGETS).iterator();
-        intersect.intersectAll(START1, (a, b, c) -> {
-            assertEquals(START1, a);
-            assertEquals(START2, b);
-            assertEquals(targets.nextLong(), c);
+        intersect.intersectAll(start2, (a, b, c) -> {
+
+            Long next = targetIterator.next();
+            var targetMappedId = graph.toMappedNodeId(next);
+            assertThat(a).isEqualTo(targetMappedId);
+            assertThat(b).isEqualTo(start1);
+            assertThat(c).isEqualTo(start2);
+
         });
+
+        assertThat(targetIterator.hasNext()).isFalse();
+
     }
 
     @Test
     void intersectWithTargetsWithMaxDegree() {
+        var targets = new ArrayList<Long>();
+        var graph = produceGraph(targets);
+
+        var start2 = Math.max(graph.toMappedNodeId(DEGREE + 1), graph.toMappedNodeId(DEGREE));
+
         var intersect = new UnionGraphIntersect.UnionGraphIntersectFactory().load(
-            GRAPH,
+            graph,
             ImmutableRelationshipIntersectConfig.builder().maxDegree(0).build()
         );
-
-        intersect.intersectAll(
-            START1,
-            (a, b, c) -> fail("This code should have been protected by the max degree filter")
+        assertThatNoException().isThrownBy(
+            () ->
+                intersect.intersectAll(start2, (a, b, c) ->
+                {
+                    throw new IllegalArgumentException();
+                })
         );
+
+    }
+
+    Graph produceGraph(ArrayList<Long> targets) {
+        Random random = new Random(0);
+        var nodesBuilder = GraphFactory.initNodesBuilder()
+            .maxOriginalId(2 + DEGREE)
+            .concurrency(1)
+            .build();
+
+        for (long i = 0; i < 3 + DEGREE; ++i) {
+            nodesBuilder.addNode(i);
+        }
+
+        var idMap = nodesBuilder.build().idMap();
+        RelationshipsBuilder relationshipsBuilder1 = GraphFactory.initRelationshipsBuilder()
+            .nodes(idMap)
+            .relationshipType(org.neo4j.gds.RelationshipType.of("FOO"))
+            .orientation(Orientation.UNDIRECTED)
+            .executorService(DefaultPool.INSTANCE)
+            .build();
+
+        RelationshipsBuilder relationshipsBuilder2 = GraphFactory.initRelationshipsBuilder()
+            .nodes(idMap)
+            .relationshipType(org.neo4j.gds.RelationshipType.of("BAR"))
+            .orientation(Orientation.UNDIRECTED)
+            .executorService(DefaultPool.INSTANCE)
+            .build();
+
+
+        long start0 = DEGREE + 2, start1 = DEGREE + 1, start2 = DEGREE;
+        relationshipsBuilder1.add(start1, start2);
+
+        for (int targetId = 0; targetId < start2; targetId++) {
+            var relationshipBuilder = relationshipsBuilder1;
+            if (random.nextBoolean()) {
+                relationshipBuilder = relationshipsBuilder2;
+            }
+            relationshipBuilder.add(start1, targetId);
+            relationshipBuilder.add(start0, targetId);
+
+            if (random.nextBoolean()) {
+                relationshipBuilder.add(start2, targetId);
+                targets.add((long) targetId);
+            }
+        }
+
+        var relationships1 = relationshipsBuilder1.build();
+        var relationships2 = relationshipsBuilder2.build();
+
+        var graph1 = GraphFactory.create(idMap, relationships1);
+        var graph2 = GraphFactory.create(idMap, relationships2);
+
+        return UnionGraph.of(List.of(graph1, graph2));
+
     }
 }
