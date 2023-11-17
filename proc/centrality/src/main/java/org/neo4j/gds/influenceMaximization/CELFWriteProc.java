@@ -83,6 +83,10 @@ public class CELFWriteProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.influenceMaximization.celf.write");
+
+        executionContext()
             .log()
             .warn(
                 "Procedure `gds.beta.influenceMaximization.celf.write has been deprecated, please use `gds.influenceMaximization.celf.write`.");
@@ -101,6 +105,10 @@ public class CELFWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
+        executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.influenceMaximization.celf.write.estimate");
+
         executionContext()
             .log()
             .warn(
