@@ -71,6 +71,9 @@ public class FilteredNodeSimilarityMutateProc  extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.alpha.nodeSimilarity.filtered.mutate");
+        executionContext()
             .log()
             .warn("Procedure `gds.alpha.nodeSimilarity.filtered.mutate` has been deprecated, please use `gds.nodeSimilarity.filtered.mutate`.");
 
@@ -85,6 +88,9 @@ public class FilteredNodeSimilarityMutateProc  extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
+        executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.alpha.nodeSimilarity.filtered.mutate.estimate");
         executionContext()
             .log()
             .warn("Procedure `gds.alpha.nodeSimilarity.filtered.mutate.estimate` has been deprecated, please use `gds.nodeSimilarity.filtered.mutate.estimate`.");

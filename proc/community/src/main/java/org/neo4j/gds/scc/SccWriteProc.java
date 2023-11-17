@@ -69,6 +69,9 @@ public class SccWriteProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.alpha.scc.write");
+        executionContext()
             .log()
             .warn(
                 "Procedure `gds.alpha.scc.write` has been deprecated, please use `gds.scc.write`.");

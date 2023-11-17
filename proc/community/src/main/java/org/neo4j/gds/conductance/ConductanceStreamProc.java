@@ -54,6 +54,7 @@ public class ConductanceStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        facade.deprecatedProcedures().called("gds.alpha.conductance.stream");
         facade
             .log()
             .warn("Procedure `gds.alpha.conductance.stream` has been deprecated, please use `gds.conductance.stream`.");

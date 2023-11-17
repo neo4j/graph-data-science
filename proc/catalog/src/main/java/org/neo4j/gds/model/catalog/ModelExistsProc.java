@@ -54,6 +54,9 @@ public class ModelExistsProc extends ModelCatalogProc {
     @Deprecated(forRemoval = true)
     @Internal
     public Stream<ModelExistsResult> betaExists(@Name(value = "modelName") String modelName) {
+        executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.model.exists");
 
         executionContext()
             .log()

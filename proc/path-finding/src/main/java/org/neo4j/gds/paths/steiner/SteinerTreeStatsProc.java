@@ -70,6 +70,10 @@ public class SteinerTreeStatsProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.steinerTree.stats");
+
+        executionContext()
             .log()
             .warn("Procedure `gds.beta.steinerTree.stats` has been deprecated, please use `gds.steinerTree.stats`.");
         return compute(graphName, configuration);

@@ -56,6 +56,9 @@ public class HashGNNMutateProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.hashgnn.mutate");
         executionContext().log()
             .warn("Procedure `gds.beta.hashgnn.mutate` has been deprecated, please use `gds.hashgnn.mutate`.");
         return mutate(graphName, configuration);
@@ -82,6 +85,9 @@ public class HashGNNMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
+        executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.hashgnn.mutate.estimate");
         executionContext().log()
             .warn("Procedure `gds.beta.hashgnn.mutate.estimate` has been deprecated, please use `gds.hashgnn.mutate.estimate`.");
         return estimate(graphNameOrConfiguration, algoConfiguration);

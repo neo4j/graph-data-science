@@ -56,6 +56,10 @@ public class ClosenessCentralityStreamProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.closeness.stream");
+
+        executionContext()
             .log()
             .warn("Procedure `gds.beta.closeness.stream` has been deprecated, please use `gds.closeness.stream`.");
 

@@ -56,6 +56,10 @@ public class CollapsePathMutateProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.collapsePath.mutate");
+
+        executionContext()
             .log()
             .warn("Procedure `gds.beta.collapsePath.mutate` has been deprecated, please use `gds.collapsePath.mutate`.");
 

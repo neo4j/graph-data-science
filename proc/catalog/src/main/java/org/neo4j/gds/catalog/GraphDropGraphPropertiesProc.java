@@ -46,6 +46,7 @@ public class GraphDropGraphPropertiesProc {
         @Name(value = "graphProperty") String graphProperty,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        facade.deprecatedProcedures().called("gds.alpha.graph.graphProperty.drop");
         facade.log()
             .warn("Procedure `gds.alpha.graph.graphProperty.drop` has been deprecated, please use `gds.graph.graphProperty.drop`.");
 

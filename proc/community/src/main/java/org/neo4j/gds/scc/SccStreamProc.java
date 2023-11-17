@@ -68,6 +68,7 @@ public class SccStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        facade.deprecatedProcedures().called("gds.alpha.scc.stream");
         facade
             .log()
             .warn(

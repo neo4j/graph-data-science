@@ -67,6 +67,7 @@ public class ModularityStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        facade.deprecatedProcedures().called("gds.alpha.modularity.stream");
         facade
             .log()
             .warn("Procedure `gds.alpha.modularity.stream` has been deprecated, please use `gds.modularity.stream`.");

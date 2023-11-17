@@ -60,6 +60,7 @@ public class GraphSampleProc {
         @Name(value = "fromGraphName") String fromGraphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        facade.deprecatedProcedures().called("gds.alpha.graph.sample.rwr");
         facade.log()
             .warn("Procedure `gds.alpha.graph.sample.rwr` has been deprecated, please use `gds.graph.sample.rwr`.");
         return sampleRandomWalkWithRestarts(graphName, fromGraphName, configuration);

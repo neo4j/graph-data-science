@@ -66,6 +66,7 @@ public class GraphStreamRelationshipPropertiesProc {
         @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        facade.deprecatedProcedures().called("gds.graph.streamRelationshipProperties");
 
         facade
             .log()
@@ -106,6 +107,8 @@ public class GraphStreamRelationshipPropertiesProc {
         @Name(value = "relationshipTypes", defaultValue = "['*']") List<String> relationshipTypes,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        facade.deprecatedProcedures().called("gds.graph.streamRelationshipProperty");
+
         facade
             .log()
             .warn(

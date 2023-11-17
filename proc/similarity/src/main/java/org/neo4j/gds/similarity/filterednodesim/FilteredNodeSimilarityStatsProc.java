@@ -71,6 +71,9 @@ public class FilteredNodeSimilarityStatsProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ){
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.alpha.nodeSimilarity.filtered.stats");
+        executionContext()
             .log()
             .warn("Procedure `gds.alpha.nodeSimilarity.filtered.stats` has been deprecated, please use `gds.nodeSimilarity.filtered.stats`.");
 
@@ -85,6 +88,9 @@ public class FilteredNodeSimilarityStatsProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
+        executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.alpha.nodeSimilarity.filtered.stats.estimate");
         executionContext()
             .log()
             .warn("Procedure `gds.alpha.nodeSimilarity.filtered.stats.estimate` has been deprecated, please use `gds.nodeSimilarity.filtered.stats.estimate`.");

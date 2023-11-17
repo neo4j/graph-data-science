@@ -71,6 +71,10 @@ public class ApproxMaxKCutMutateProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.alpha.maxkcut.mutate");
+
+        executionContext()
             .log()
             .warn("Procedure `gds.alpha.maxkcut.mutate` has been deprecated, please use `gds.maxkcut.mutate`.");
 
@@ -85,6 +89,10 @@ public class ApproxMaxKCutMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
+        executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.alpha.maxkcut.mutate.estimate");
+
         executionContext()
             .log()
             .warn("Procedure `gds.alpha.maxkcut.mutate.estimate` has been deprecated, please use `gds.maxkcut.mutate.estimate`.");

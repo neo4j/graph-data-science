@@ -75,6 +75,10 @@ public class GraphCreateEphemeralDatabaseProc extends BaseProc {
         @Name(value = "graphName") String graphName
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.alpha.create.cypherdb");
+
+        executionContext()
             .log()
             .warn(
                 "Procedure `gds.alpha.create.cypherdb` has been deprecated, please use `gds.ephemeral.database.create`.");

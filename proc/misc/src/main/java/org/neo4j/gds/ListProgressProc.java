@@ -60,6 +60,10 @@ public class ListProgressProc extends BaseProc {
         @Name(value = "jobId", defaultValue = "") String jobId
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.listProgress");
+
+        executionContext()
             .log()
             .warn("Procedure `gds.beta.listProgress` has been deprecated, please use `gds.listProgress`.");
 

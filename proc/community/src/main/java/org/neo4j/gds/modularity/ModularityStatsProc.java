@@ -66,6 +66,9 @@ public class ModularityStatsProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.alpha.modularity.stats");
+        executionContext()
             .log()
             .warn("Procedure `gds.alpha.modularity.stats` has been deprecated, please use `gds.modularity.stats`.");
 

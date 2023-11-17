@@ -54,6 +54,10 @@ public class AllShortestPathsStreamProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.alpha.allShortestPaths.stream");
+
+        executionContext()
             .log()
             .warn(
                 "Procedure `gds.alpha.allShortestPaths.stream` has been deprecated, please use `gds.allShortestPaths.stream`.");

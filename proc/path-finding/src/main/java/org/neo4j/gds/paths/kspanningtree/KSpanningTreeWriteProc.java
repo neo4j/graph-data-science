@@ -63,6 +63,10 @@ public class KSpanningTreeWriteProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.alpha.kSpanningTree.write");
+
+        executionContext()
             .log()
             .warn("Procedure `gds.alpha.kSpanningTree.write` has been deprecated, please use `gds.kSpanningTree.write`.");
 

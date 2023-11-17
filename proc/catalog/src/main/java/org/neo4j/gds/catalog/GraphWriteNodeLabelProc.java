@@ -56,6 +56,7 @@ public class GraphWriteNodeLabelProc {
         @Name(value = "nodeLabel") String nodeLabel,
         @Name(value = "configuration") Map<String, Object> configuration
     ) {
+        facade.deprecatedProcedures().called("gds.alpha.graph.nodeLabel.write");
 
         facade
             .log()

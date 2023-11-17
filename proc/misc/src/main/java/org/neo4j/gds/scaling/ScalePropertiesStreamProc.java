@@ -74,6 +74,10 @@ public class ScalePropertiesStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.alpha.scaleProperties.stream");
+
         var spec = new ScalePropertiesStreamSpec();
         spec.setAllowL1L2Scalers(true);
         return new ProcedureExecutor<>(

@@ -88,6 +88,10 @@ public class NodeClassificationPipelineAddTrainerMethodProcs extends BaseProc {
         @Name(value = "config") Map<String, Object> randomForestClassifierConfig
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.alpha.pipeline.nodeClassification.addRandomForest");
+
+        executionContext()
             .log()
             .warn(
                 "Procedure `gds.alpha.pipeline.nodeClassification.addRandomForest` has been deprecated, please use `gds.beta.pipeline.nodeClassification.addRandomForest`.");

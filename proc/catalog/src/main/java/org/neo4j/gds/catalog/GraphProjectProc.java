@@ -126,6 +126,7 @@ public class GraphProjectProc {
         @Name(value = "relationshipFilter") String relationshipFilter,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        facade.deprecatedProcedures().called("gds.beta.graph.project.subgraph");
         facade.log().warn("Procedure `gds.beta.graph.project.subgraph` has been deprecated, please use `gds.graph.filter`.");
         return facade.catalog().subGraphProject(graphName, fromGraphName, nodeFilter, relationshipFilter, configuration);
     }

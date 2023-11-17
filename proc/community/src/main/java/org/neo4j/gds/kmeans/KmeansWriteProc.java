@@ -65,6 +65,9 @@ public class KmeansWriteProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.kmeans.write");
         executionContext().log()
             .warn("Procedure `gds.beta.kmeans.write.estimate` has been deprecated, please use `gds.kmeans.write.estimate`.");
         return write(graphName, configuration);
@@ -93,6 +96,9 @@ public class KmeansWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
+        executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.kmeans.write.estimate");
         executionContext().log()
             .warn("Procedure `gds.beta.kmeans.write.estimate` has been deprecated, please use `gds.kmeans.write.estimate`.");
         return estimate(graphName, configuration);

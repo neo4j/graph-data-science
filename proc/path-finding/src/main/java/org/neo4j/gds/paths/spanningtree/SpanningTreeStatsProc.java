@@ -74,6 +74,10 @@ public class SpanningTreeStatsProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called(betaProcedure);
+
+        executionContext()
             .log()
             .warn("Procedure `gds.beta.spanningTree.stats` has been deprecated, please use `gds.spanningTree.stats`.");
         return spanningTree(graphName, configuration);
@@ -87,6 +91,9 @@ public class SpanningTreeStatsProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
+        executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called(betaProcedure + ".estimate");
         executionContext()
             .log()
             .warn(

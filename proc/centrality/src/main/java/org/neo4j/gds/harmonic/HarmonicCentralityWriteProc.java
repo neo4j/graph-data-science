@@ -61,6 +61,10 @@ public class HarmonicCentralityWriteProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.alpha.closeness.harmonic.write");
+
+        executionContext()
             .log()
             .warn("Procedure `gds.alpha.closeness.harmonic.write` has been deprecated, please use `gds.closeness.harmonic.write`.");
         return new ProcedureExecutor<>(

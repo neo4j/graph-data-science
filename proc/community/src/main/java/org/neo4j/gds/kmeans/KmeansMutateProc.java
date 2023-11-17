@@ -57,6 +57,10 @@ public class KmeansMutateProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.kmeans.mutate");
+
         executionContext().log()
             .warn("Procedure `gds.beta.kmeans.mutate` has been deprecated, please use `gds.kmeans.mutate`.");
         return mutate(graphName, configuration);
@@ -80,6 +84,9 @@ public class KmeansMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
+        executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.kmeans.mutate.estimate");
         executionContext().log()
             .warn("Procedure `gds.beta.kmeans.mutate.estimate` has been deprecated, please use `gds.kmeans.mutate.estimate`.");
         return estimate(graphName, configuration);
