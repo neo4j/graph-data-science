@@ -41,36 +41,60 @@ public enum Neo4jVersion {
     V_5_11,
     V_5_12,
     V_5_13,
+    V_5_14,
     V_Dev;
 
     private static final int MINOR_DEV_VERSION = 14;
 
-    @Override
-    public String toString() {
-        switch (this) {
-            case V_4_4:
-                return "4.4";
-            case V_5_6:
-                return "5.6";
-            case V_5_7:
-                return "5.7";
-            case V_5_8:
-                return "5.8";
-            case V_5_9:
-                return "5.9";
-            case V_5_10:
-                return "5.10";
-            case V_5_11:
-                return "5.11";
-            case V_5_12:
-                return "5.12";
-            case V_5_13:
-                return "5.13";
-            case V_Dev:
-                return "dev";
-            default:
-                throw new IllegalArgumentException("Unexpected value: " + this.name() + " (sad java 😞)");
+    static Neo4jVersion parse(String version) {
+        var versionSegments = Pattern.compile("[.-]")
+            .splitAsStream(version)
+            .limit(2)
+            .mapToInt(v -> {
+                try {
+                    return Integer.parseInt(v);
+                } catch (NumberFormatException notANumber) {
+                    return -1;
+                }
+            });
+
+        var majorMinorVersion = IntStream.concat(versionSegments, IntStream.of(-1, -1))
+            .limit(2)
+            .toArray();
+
+        var majorVersion = majorMinorVersion[0];
+        var minorVersion = majorMinorVersion[1];
+
+        if (majorVersion == 4 && minorVersion == 4) {
+            return Neo4jVersion.V_4_4;
+        } else if (majorVersion == 5) {
+            switch (minorVersion) {
+                case 6:
+                    return Neo4jVersion.V_5_6;
+                case 7:
+                    return Neo4jVersion.V_5_7;
+                case 8:
+                    return Neo4jVersion.V_5_8;
+                case 9:
+                    return Neo4jVersion.V_5_9;
+                case 10:
+                    return Neo4jVersion.V_5_10;
+                case 11:
+                    return Neo4jVersion.V_5_11;
+                case 12:
+                    return Neo4jVersion.V_5_12;
+                case 13:
+                    return Neo4jVersion.V_5_13;
+                case 14:
+                    return Neo4jVersion.V_5_14;
+                default:
+                    if (minorVersion >= MINOR_DEV_VERSION) {
+                        return Neo4jVersion.V_Dev;
+                    }
+            }
         }
+
+        throw new UnsupportedOperationException("Cannot run on Neo4j Version " + version);
     }
 
     public MajorMinorVersion semanticVersion() {
@@ -116,53 +140,34 @@ public enum Neo4jVersion {
         return neo4jVersion;
     }
 
-    static Neo4jVersion parse(String version) {
-        var versionSegments = Pattern.compile("[.-]")
-            .splitAsStream(version)
-            .limit(2)
-            .mapToInt(v -> {
-                try {
-                    return Integer.parseInt(v);
-                } catch (NumberFormatException notANumber) {
-                    return -1;
-                }
-            });
-
-        var majorMinorVersion = IntStream.concat(versionSegments, IntStream.of(-1, -1))
-            .limit(2)
-            .toArray();
-
-        var majorVersion = majorMinorVersion[0];
-        var minorVersion = majorMinorVersion[1];
-
-        if (majorVersion == 4 && minorVersion == 4) {
-            return Neo4jVersion.V_4_4;
-        } else if (majorVersion == 5) {
-            switch (minorVersion) {
-                case 6:
-                    return Neo4jVersion.V_5_6;
-                case 7:
-                    return Neo4jVersion.V_5_7;
-                case 8:
-                    return Neo4jVersion.V_5_8;
-                case 9:
-                    return Neo4jVersion.V_5_9;
-                case 10:
-                    return Neo4jVersion.V_5_10;
-                case 11:
-                    return Neo4jVersion.V_5_11;
-                case 12:
-                    return Neo4jVersion.V_5_12;
-                case 13:
-                    return Neo4jVersion.V_5_13;
-                default:
-                    if (minorVersion >= MINOR_DEV_VERSION) {
-                        return Neo4jVersion.V_Dev;
-                    }
-            }
+    @Override
+    public String toString() {
+        switch (this) {
+            case V_4_4:
+                return "4.4";
+            case V_5_6:
+                return "5.6";
+            case V_5_7:
+                return "5.7";
+            case V_5_8:
+                return "5.8";
+            case V_5_9:
+                return "5.9";
+            case V_5_10:
+                return "5.10";
+            case V_5_11:
+                return "5.11";
+            case V_5_12:
+                return "5.12";
+            case V_5_13:
+                return "5.13";
+            case V_5_14:
+                return "5.14";
+            case V_Dev:
+                return "dev";
+            default:
+                throw new IllegalArgumentException("Unexpected value: " + this.name() + " (sad java 😞)");
         }
-
-        throw new UnsupportedOperationException("Cannot run on Neo4j Version " + version);
     }
 
     @ValueClass
