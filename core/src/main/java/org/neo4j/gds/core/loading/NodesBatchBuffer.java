@@ -19,13 +19,12 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.immutables.builder.Builder;
 import org.neo4j.gds.compat.PropertyReference;
 
 import java.util.Optional;
 
-public class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
+public class NodesBatchBuffer extends RecordsBatchBuffer {
 
     private final boolean hasLabelInformation;
 
@@ -56,11 +55,6 @@ public class NodesBatchBuffer extends RecordsBatchBuffer<NodeReference> {
         this.hasLabelInformation = hasLabelInformation;
         this.properties = readProperty ? new PropertyReference[capacity] : null;
         this.labelTokens = new NodeLabelTokenSet[capacity];
-    }
-
-    @Override
-    public boolean offer(final NodeReference record) {
-        throw new NotImplementedException();
     }
 
     public void add(long nodeId, PropertyReference propertyReference, NodeLabelTokenSet labelTokens) {

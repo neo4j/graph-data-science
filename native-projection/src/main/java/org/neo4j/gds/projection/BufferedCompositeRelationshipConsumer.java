@@ -24,7 +24,7 @@ import org.neo4j.gds.core.loading.RecordsBatchBuffer;
 import org.neo4j.gds.core.loading.RelationshipReference;
 import org.neo4j.gds.core.loading.StoreScanner;
 
-public final class BufferedCompositeRelationshipConsumer extends RecordsBatchBuffer<RelationshipReference> implements StoreScanner.RecordConsumer<RelationshipReference> {
+public final class BufferedCompositeRelationshipConsumer extends RecordsBatchBuffer implements StoreScanner.RecordConsumer<RelationshipReference> {
 
     private final BufferedRelationshipConsumer[] buffers;
 

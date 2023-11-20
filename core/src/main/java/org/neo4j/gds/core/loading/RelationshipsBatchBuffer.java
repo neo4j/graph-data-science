@@ -19,12 +19,11 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.immutables.builder.Builder;
 import org.neo4j.gds.compat.PropertyReference;
 
 
-public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<RelationshipReference> {
+public final class RelationshipsBatchBuffer extends RecordsBatchBuffer {
 
     // For relationships, the buffer is divided into 2-long blocks
     // for each relationship: source, target. Relationship and
@@ -53,11 +52,6 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer<Relations
         relationshipReferencesCopy = RadixSort.newCopy(relationshipReferences);
         propertyReferencesCopy = RadixSort.newCopy(propertyReferences);
         histogram = RadixSort.newHistogram(capacity);
-    }
-
-    @Override
-    public boolean offer(final RelationshipReference record) {
-        throw new NotImplementedException();
     }
 
     public void add(long sourceId, long targetId) {

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
-public abstract class RecordsBatchBuffer<Reference> implements StoreScanner.RecordConsumer<Reference> {
+public abstract class RecordsBatchBuffer {
 
     public static final int DEFAULT_BUFFER_SIZE = 100_000;
 
@@ -42,7 +42,6 @@ public abstract class RecordsBatchBuffer<Reference> implements StoreScanner.Reco
         return length >= buffer.length;
     }
 
-    @Override
     public void reset() {
         this.length = 0;
     }

@@ -20,12 +20,10 @@
 package org.neo4j.gds.core.loading;
 
 import org.immutables.value.Value;
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.compress.AdjacencyCompressor;
 import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
 import org.neo4j.gds.api.compress.AdjacencyListsWithProperties;

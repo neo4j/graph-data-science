@@ -22,9 +22,6 @@ package org.neo4j.gds.projection;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.huge.DirectIdMap;
-import org.neo4j.gds.core.loading.RecordsBatchBuffer;
-import org.neo4j.gds.core.loading.RelationshipReference;
-import org.neo4j.gds.core.loading.StoreScanner;
 
 import java.util.stream.IntStream;
 
