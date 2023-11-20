@@ -135,13 +135,13 @@ public class Knn extends Algorithm<KnnResult> {
 
     @Override
     public KnnResult compute() {
-        this.progressTracker.beginSubTask();
-        this.progressTracker.beginSubTask();
-        HugeObjectArray<NeighborList> neighbors = this.initializeRandomNeighbors();
-        this.progressTracker.endSubTask();
-        if (neighbors == null) {
+        if (graph.nodeCount() < 2 || config.topK() == 0) {
             return new EmptyResult();
         }
+        this.progressTracker.beginSubTask();
+        this.progressTracker.beginSubTask();
+        HugeObjectArray<NeighborList> neighbors = initializeRandomNeighbors();
+        this.progressTracker.endSubTask();
 
         var maxIterations = this.config.maxIterations();
         var maxUpdates = (long) Math.ceil(this.config.sampleRate() * this.config.topK() * graph.nodeCount());
@@ -189,17 +189,7 @@ public class Knn extends Algorithm<KnnResult> {
         );
     }
 
-    private @Nullable HugeObjectArray<NeighborList> initializeRandomNeighbors() {
-        var k = this.config.topK();
-        // (int) is safe since it is at most k, which is an int
-        var boundedK = (int) Math.min(graph.nodeCount() - 1, k);
-
-        assert boundedK <= k && boundedK <= graph.nodeCount() - 1;
-
-        if (graph.nodeCount() < 2 || k == 0) {
-            return null;
-        }
-
+    private HugeObjectArray<NeighborList> initializeRandomNeighbors() {
         var neighbors = HugeObjectArray.newArray(NeighborList.class, graph.nodeCount());
 
         var randomNeighborGenerators = PartitionUtils.rangePartition(
@@ -213,7 +203,7 @@ public class Knn extends Algorithm<KnnResult> {
                     this.similarityFunction,
                     this.neighborFilterFactory.create(),
                     neighbors,
-                    boundedK,
+                    config.boundedK(graph.nodeCount()),
                     partition,
                     progressTracker,
                     neighborConsumers
@@ -253,16 +243,8 @@ public class Knn extends Algorithm<KnnResult> {
     }
 
     private long iteration(HugeObjectArray<NeighborList> neighbors) {
-        // this is a sanity check
-        // we check for this before any iteration and return
-        // and just make sure that this invariant holds on every iteration
         var nodeCount = graph.nodeCount();
-        if (nodeCount < 2 || this.config.topK() == 0) {
-            return NeighborList.NOT_INSERTED;
-        }
-
         var minBatchSize = this.config.minBatchSize();
-
         var sampledK = this.config.sampledK(nodeCount);
 
         // TODO: init in ctor and reuse - benchmark against new allocations
