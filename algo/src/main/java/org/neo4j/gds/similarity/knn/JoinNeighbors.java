@@ -41,10 +41,11 @@ final class JoinNeighbors implements Runnable {
     private final ProgressTracker progressTracker;
     private final long nodeCount;
     private final Partition partition;
-    private long nodePairsConsidered;
     private final double perturbationRate;
 
-    long updateCount;
+    private long nodePairsConsidered;
+    private long updateCount;
+
 
     JoinNeighbors(
         SplittableRandom random,
@@ -227,5 +228,9 @@ final class JoinNeighbors implements Runnable {
 
     long nodePairsConsidered() {
         return nodePairsConsidered;
+    }
+
+    long updateCount() {
+        return updateCount;
     }
 }

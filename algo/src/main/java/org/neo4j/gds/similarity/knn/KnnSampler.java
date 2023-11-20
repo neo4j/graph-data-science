@@ -23,9 +23,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.LongPredicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public interface KnnSampler {
+
+    interface Provider extends Supplier<KnnSampler> {}
+
     long[] sample(
         long nodeId,
         long lowerBoundOnValidSamplesInRange,

@@ -47,15 +47,14 @@ public class Knn extends Algorithm<KnnResult> {
     private final double deltaThreshold;
     private final double similarityCutoff;
     private final int minBatchSize;
-    private final KnnSampler.SamplerType initialSampler;
-    private final Optional<Long> randomSeed;
     private final double perturbationRate;
     private final int randomJoins;
     private final NeighborFilterFactory neighborFilterFactory;
     private final ExecutorService executorService;
-    private final SplittableRandom splittableRandom;
     private final SimilarityFunction similarityFunction;
     private final NeighbourConsumers neighborConsumers;
+    private final SplittableRandom splittableRandom;
+    private final KnnSampler.Provider samplerProvider;
 
     private long nodePairsConsidered;
 
@@ -98,7 +97,6 @@ public class Knn extends Algorithm<KnnResult> {
             similarityFunction,
             new KnnNeighborFilterFactory(graph.nodeCount()),
             context.executor(),
-            getSplittableRandom(config.randomSeed()),
             neighborConsumers
         );
     }
@@ -110,7 +108,6 @@ public class Knn extends Algorithm<KnnResult> {
         NeighborFilterFactory neighborFilterFactory,
         KnnContext context
     ) {
-        SplittableRandom splittableRandom = getSplittableRandom(config.randomSeed());
         SimilarityFunction similarityFunction = defaultSimilarityFunction(similarityComputer);
         return new Knn(
             context.progressTracker(),
@@ -131,14 +128,8 @@ public class Knn extends Algorithm<KnnResult> {
             similarityFunction,
             neighborFilterFactory,
             context.executor(),
-            splittableRandom,
             NeighbourConsumers.no_op
         );
-    }
-
-    @NotNull
-    private static SplittableRandom getSplittableRandom(Optional<Long> randomSeed) {
-        return randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
     }
 
     Knn(
@@ -153,14 +144,13 @@ public class Knn extends Algorithm<KnnResult> {
         double deltaThreshold,
         double similarityCutoff,
         int minBatchSize,
-        KnnSampler.SamplerType initialSampler,
+        KnnSampler.SamplerType initialSamplerType,
         Optional<Long> randomSeed,
         int randomJoins,
         double perturbationRate,
         SimilarityFunction similarityFunction,
         NeighborFilterFactory neighborFilterFactory,
         ExecutorService executorService,
-        SplittableRandom splittableRandom,
         NeighbourConsumers neighborConsumers
     ) {
         super(progressTracker);
@@ -174,15 +164,24 @@ public class Knn extends Algorithm<KnnResult> {
         this.deltaThreshold = deltaThreshold;
         this.similarityCutoff = similarityCutoff;
         this.minBatchSize = minBatchSize;
-        this.initialSampler = initialSampler;
-        this.randomSeed = randomSeed;
         this.randomJoins = randomJoins;
         this.perturbationRate = perturbationRate;
         this.similarityFunction = similarityFunction;
         this.neighborFilterFactory = neighborFilterFactory;
         this.executorService = executorService;
-        this.splittableRandom = splittableRandom;
         this.neighborConsumers = neighborConsumers;
+
+        this.splittableRandom = randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
+        switch (initialSamplerType) {
+            case UNIFORM:
+                this.samplerProvider = new UniformKnnSampler.Provider(graph.nodeCount(), splittableRandom);
+                break;
+            case RANDOMWALK:
+                this.samplerProvider = new RandomWalkKnnSampler.Provider(graph, randomSeed, boundedK, splittableRandom);
+                break;
+            default:
+                throw new IllegalStateException("Invalid KnnSampler");
+        }
     }
 
     public ExecutorService executorService() {
@@ -252,7 +251,7 @@ public class Knn extends Algorithm<KnnResult> {
             partition -> {
                 var localRandom = splittableRandom.split();
                 return new GenerateRandomNeighbors(
-                    initializeSampler(localRandom),
+                    samplerProvider.get(),
                     localRandom,
                     similarityFunction,
                     neighborFilterFactory.create(),
@@ -276,24 +275,6 @@ public class Knn extends Algorithm<KnnResult> {
         this.nodePairsConsidered += randomNeighborGenerators.stream().mapToLong(GenerateRandomNeighbors::neighborsFound).sum();
 
         return neighbors;
-    }
-
-    private KnnSampler initializeSampler(SplittableRandom random) {
-        switch(initialSampler) {
-            case UNIFORM: {
-                return new UniformKnnSampler(random, graph.nodeCount());
-            }
-            case RANDOMWALK: {
-                return new RandomWalkKnnSampler(
-                    graph.concurrentCopy(),
-                    random,
-                    randomSeed,
-                    boundedK
-                );
-            }
-            default:
-                throw new IllegalStateException("Invalid KnnSampler");
-        }
     }
 
     private long iteration(HugeObjectArray<NeighborList> neighbors) {
@@ -362,7 +343,7 @@ public class Knn extends Algorithm<KnnResult> {
 
         this.nodePairsConsidered += neighborsJoiners.stream().mapToLong(JoinNeighbors::nodePairsConsidered).sum();
 
-        return neighborsJoiners.stream().mapToLong(joiner -> joiner.updateCount).sum();
+        return neighborsJoiners.stream().mapToLong(JoinNeighbors::updateCount).sum();
     }
 
     private static void reverseOldAndNewNeighbors(
