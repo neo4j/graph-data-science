@@ -19,11 +19,12 @@
  */
 package org.neo4j.gds.projection;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.huge.DirectIdMap;
 
 import java.util.stream.IntStream;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class BufferedCompositeRelationshipConsumerTest {
 
@@ -45,13 +46,13 @@ class BufferedCompositeRelationshipConsumerTest {
             .targetNodeReference(1)
             .build();
 
-        Assertions.assertThat(compositeBatchBuffer.offer(type0Rel)).isTrue();
-        Assertions.assertThat(compositeBatchBuffer.offer(type1Rel)).isTrue();
-        Assertions.assertThat(compositeBatchBuffer.offer(type0Rel)).isFalse();
-        Assertions.assertThat(compositeBatchBuffer.offer(type1Rel)).isFalse();
-        Assertions.assertThat(compositeBatchBuffer.offer(type0Rel)).isFalse();
-        Assertions.assertThat(compositeBatchBuffer.offer(type1Rel)).isFalse();
-        Assertions.assertThat(compositeBatchBuffer.isFull()).isTrue();
+        assertThat(compositeBatchBuffer.offer(type0Rel)).isTrue();
+        assertThat(compositeBatchBuffer.offer(type1Rel)).isTrue();
+        assertThat(compositeBatchBuffer.offer(type0Rel)).isFalse();
+        assertThat(compositeBatchBuffer.offer(type1Rel)).isFalse();
+        assertThat(compositeBatchBuffer.offer(type0Rel)).isFalse();
+        assertThat(compositeBatchBuffer.offer(type1Rel)).isFalse();
+        assertThat(compositeBatchBuffer.isFull()).isTrue();
     }
 
     private static BufferedCompositeRelationshipConsumer createCompositeBuffer(int typeCount, int capacity) {
