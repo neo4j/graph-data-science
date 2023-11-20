@@ -24,11 +24,17 @@ import org.mockito.Mockito;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
+import org.neo4j.gds.core.utils.shuffle.ShuffleUtil;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
+import java.util.SplittableRandom;
+import java.util.function.LongUnaryOperator;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -37,29 +43,30 @@ class NodesSortedByComponentTest {
 
     @Test
     void shouldDetermineIndexUpperBound() {
-        var components = HugeLongArray.newArray(28);
-        // nodeId, componentId
-        for (int nodeId = 0; nodeId < 3; nodeId++) {
-            components.set(nodeId, 0); // size 3
-        }
-        for (int nodeId = 3; nodeId < 8; nodeId++) {
-            components.set(nodeId, 1); // size 5
-        }
-        for (int nodeId = 8; nodeId < 12; nodeId++) {
-            components.set(nodeId, 2); // size 4
-        }
-        for (int nodeId = 12; nodeId < 18; nodeId++) {
-            components.set(nodeId, 3); // size 6
-        }
-        components.set(18, 4); // size 1
-        for (int nodeId = 19; nodeId < 21; nodeId++) {
-            components.set(nodeId, 5); // size 2
-        }
-        for (int nodeId = 21; nodeId < 28; nodeId++) {
-            components.set(nodeId, 6); // size 7
-        }
+        // nodeId -> componentId
+        var components = new LongUnaryOperator() {
+            @Override
+            public long applyAsLong(long nodeId) {
+                if (nodeId < 3) {
+                    return 0L; // size 3
+                } else if (nodeId < 8) {
+                    return 1L; // size 5
+                } else if (nodeId < 12) {
+                    return 2L; // size 4
+                } else if (nodeId < 18) {
+                    return 3L; // size 6
+                } else if (nodeId < 19) {
+                    return 4L; // size 1
+                } else if (nodeId < 21) {
+                    return 5L; // size 2
+                } else {
+                    return 6L; // size 7
+                }
+            }
+        };
 
-        var idxUpperBoundPerComponent = NodesSortedByComponent.computeIndexUpperBoundPerComponent(components, 4);
+
+        var idxUpperBoundPerComponent = NodesSortedByComponent.computeIndexUpperBoundPerComponent(components, 28, 4);
         // we cannot infer which component follows another, but the size must match for the component
         Map<Long, Long> componentPerIdxUpperBound = new HashMap<>(7);
         for (int i = 0; i < 7; i++) {
@@ -83,14 +90,17 @@ class NodesSortedByComponentTest {
 
     @Test
     void shouldReturnNodesForComponent() {
-        var components = HugeLongArray.newArray(8);
-        // nodeId, componentId
-        for (int nodeId = 0; nodeId < 3; nodeId++) {
-            components.set(nodeId, 0);
-        }
-        for (int nodeId = 3; nodeId < 8; nodeId++) {
-            components.set(nodeId, 1);
-        }
+        // nodeId -> componentId
+        var components = new LongUnaryOperator() {
+            @Override
+            public long applyAsLong(long nodeId) {
+                if (nodeId < 3) {
+                    return 0L; // size 3
+                } else {
+                    return 1L; // size 5
+                }
+            }
+        };
 
         var nodesSorted = HugeLongArray.newArray(8);
         // uniqueIdx, nodeId
@@ -105,20 +115,43 @@ class NodesSortedByComponentTest {
 
         var upperBoundPerComponent = HugeAtomicLongArray.of(8, ParalleLongPageCreator.passThrough(4));
         // componentId, upperBound
-        upperBoundPerComponent.set(0, 2);
-        upperBoundPerComponent.set(1, 7);
+        upperBoundPerComponent.set(0, 3);
+        upperBoundPerComponent.set(1, 8);
 
         NodesSortedByComponent nodesSortedByComponentMock = Mockito.mock(NodesSortedByComponent.class);
         Mockito.doReturn(components).when(nodesSortedByComponentMock).getComponents();
         Mockito.doReturn(upperBoundPerComponent).when(nodesSortedByComponentMock).getUpperBoundPerComponent();
         Mockito.doReturn(nodesSorted).when(nodesSortedByComponentMock).getNodesSorted();
-        Mockito.doCallRealMethod().when(nodesSortedByComponentMock).iterator(1L);
+        Mockito.doCallRealMethod().when(nodesSortedByComponentMock).iterator(1L,-1L);
 
-        Iterator<Long> iterator = nodesSortedByComponentMock.iterator(1L);
+        Iterator<Long> iterator = nodesSortedByComponentMock.iterator(1L, -1L);
         for (int nodeId = 3; nodeId < 8; nodeId++) {
             assertTrue(iterator.hasNext());
             assertEquals(nodeId, iterator.next());
         }
         assertFalse(iterator.hasNext());
+    }
+
+    @Test
+    void shouldRespectOffset() {
+        LongUnaryOperator components = nodeId -> 0L;
+
+        var nodesSorted = HugeLongArray.newArray(20);
+        nodesSorted.setAll(x -> x);
+        ShuffleUtil.shuffleArray(nodesSorted, new SplittableRandom(92));
+
+        var upperBoundPerComponent = HugeAtomicLongArray.of(1, ParalleLongPageCreator.passThrough(4));
+        upperBoundPerComponent.set(0, 20);
+
+        NodesSortedByComponent nodesSortedByComponentMock = Mockito.mock(NodesSortedByComponent.class);
+        Mockito.doReturn(components).when(nodesSortedByComponentMock).getComponents();
+        Mockito.doReturn(upperBoundPerComponent).when(nodesSortedByComponentMock).getUpperBoundPerComponent();
+        Mockito.doReturn(nodesSorted).when(nodesSortedByComponentMock).getNodesSorted();
+        Mockito.doCallRealMethod().when(nodesSortedByComponentMock).iterator(0L,11L);
+
+        Set<Long> resultingNodes = new HashSet<>();
+        Iterator<Long> iterator = nodesSortedByComponentMock.iterator(0L, 11L);
+        iterator.forEachRemaining(resultingNodes::add);
+        assertThat(resultingNodes).containsExactlyInAnyOrder(11L, 12L, 13L, 14L, 15L, 16L, 17L, 18L, 19L);
     }
 }

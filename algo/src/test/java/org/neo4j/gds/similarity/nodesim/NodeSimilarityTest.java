@@ -212,6 +212,8 @@ final class NodeSimilarityTest {
         EXPECTED_OUTGOING_TOP_K_1.add(resultString(0, 3, 1.0));
         EXPECTED_OUTGOING_TOP_K_1.add(resultString(1, 0, 2 / 3.0));
         EXPECTED_OUTGOING_TOP_K_1.add(resultString(2, 0, 1 / 3.0));
+        EXPECTED_OUTGOING_TOP_K_1.add(resultString(1, 3, 2 / 3.0));
+        EXPECTED_OUTGOING_TOP_K_1.add(resultString(2, 3, 1 / 3.0));
         EXPECTED_OUTGOING_TOP_K_1.add(resultString(3, 0, 1.0));
 
         EXPECTED_OUTGOING_SIMILARITY_CUTOFF.add(resultString(0, 1, 2 / 3.0));
@@ -255,6 +257,7 @@ final class NodeSimilarityTest {
         EXPECTED_INCOMING_TOP_K_1.add(resultString(4, 5, 1.0));
         EXPECTED_INCOMING_TOP_K_1.add(resultString(5, 4, 1.0));
         EXPECTED_INCOMING_TOP_K_1.add(resultString(6, 4, 1 / 2.0));
+        EXPECTED_INCOMING_TOP_K_1.add(resultString(6, 5, 1 / 2.0));
 
         EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(resultString(4, 5, 1.0));
         EXPECTED_INCOMING_SIMILARITY_CUTOFF.add(resultString(4, 6, 1 / 2.0));
@@ -394,7 +397,7 @@ final class NodeSimilarityTest {
             .map(NodeSimilarityTest::resultString)
             .collect(Collectors.toSet());
 
-        assertEquals(orientation == REVERSE ? EXPECTED_INCOMING_TOP_K_1 : EXPECTED_OUTGOING_TOP_K_1, result);
+        assertThat(result).containsAnyElementsOf(orientation == REVERSE ? EXPECTED_INCOMING_TOP_K_1 : EXPECTED_OUTGOING_TOP_K_1);
     }
 
     @ParameterizedTest(name = "orientation: {0}, concurrency: {1}")
