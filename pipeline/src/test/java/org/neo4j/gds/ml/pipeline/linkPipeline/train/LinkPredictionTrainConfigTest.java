@@ -37,10 +37,10 @@ class LinkPredictionTrainConfigTest {
     static final String GDL_GRAPH = "()-[:REL]->()-[:CONTEXT]->()";
 
     @Inject
-    GraphStore graphStore;
+    private GraphStore graphStore;
 
     @Inject
-    GraphStore directedGraphStore;
+    private GraphStore directedGraphStore;
 
     @Test
     void targetRelMustBeUndirected() {

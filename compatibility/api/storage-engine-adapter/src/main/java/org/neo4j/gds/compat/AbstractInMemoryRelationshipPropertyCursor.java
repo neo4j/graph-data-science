@@ -30,7 +30,7 @@ public abstract class AbstractInMemoryRelationshipPropertyCursor extends Abstrac
 
     protected final CypherGraphStore graphStore;
     protected final TokenHolders tokenHolders;
-    protected InMemoryPropertySelection selection;
+    private InMemoryPropertySelection selection;
     private DoubleList propertyValues;
     private int[] propertyIds;
     private int index;

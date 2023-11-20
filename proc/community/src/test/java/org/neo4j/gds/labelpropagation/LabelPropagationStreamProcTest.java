@@ -35,6 +35,8 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.ArrayList;
@@ -66,6 +68,9 @@ class LabelPropagationStreamProcTest extends BaseProcTest {
         ", (b)-[:X]->(j:B {id: 9,  weight: 1.0, seed: 1}) " +
         ", (b)-[:X]->(k:B {id: 10, weight: 1.0, seed: 1}) " +
         ", (b)-[:X]->(l:B {id: 11, weight: 8.0, seed: 2})";
+
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {

@@ -24,6 +24,8 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 
 import java.util.List;
 import java.util.Map;
@@ -48,6 +50,9 @@ public abstract class AllShortestPathsMutateProcTest extends AllShortestPathsPro
         ", (c)-[:MUTATE {w: 3.0D}]->(e)" +
         ", (d)-[:MUTATE {w: 11.0D}]->(f)" +
         ", (e)-[:MUTATE {w: 4.0D}]->(d)";
+
+    @Inject
+    private IdFunction idFunction;
 
     @Test
     void testMutate() {

@@ -67,7 +67,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
     private final TaskRegistryFactory taskRegistryFactory;
     private final Log log;
     private final String rootTaskName;
-    private ExecutorService executorService;
+    private final ExecutorService executorService;
 
     public GraphStoreToFileExporter(
         GraphStore graphStore,

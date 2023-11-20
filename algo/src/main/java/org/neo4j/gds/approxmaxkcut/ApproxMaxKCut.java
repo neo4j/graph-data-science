@@ -49,7 +49,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCutResult> {
     private static final Comparator MINIMIZING = (lhs, rhs) -> lhs < rhs;
     private static final Comparator MAXIMIZING = (lhs, rhs) -> lhs > rhs;
 
-    private Graph graph;
+    private final Graph graph;
     private final SplittableRandom random;
     private final ApproxMaxKCutBaseConfig config;
     private final Comparator comparator;

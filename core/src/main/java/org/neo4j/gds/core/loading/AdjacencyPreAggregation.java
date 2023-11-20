@@ -23,7 +23,7 @@ import com.carrotsearch.hppc.sorting.IndirectSort;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.utils.AscendingLongComparator;
 
-public final class AdjacencyPreAggregation {
+final class AdjacencyPreAggregation {
 
     // Used to replace target ids for aggregated relationships.
     // If pre-aggregation is applied, the target array is not

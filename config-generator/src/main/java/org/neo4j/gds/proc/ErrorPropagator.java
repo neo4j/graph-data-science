@@ -25,7 +25,7 @@ import com.squareup.javapoet.NameAllocator;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
-public final class ErrorPropagator {
+final class ErrorPropagator {
 
     private ErrorPropagator() {}
 

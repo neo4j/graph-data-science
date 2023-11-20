@@ -236,7 +236,7 @@ class KCoreDecompositionTest {
 
 
         @Inject
-        TestGraph graph;
+        private TestGraph graph;
 
         @Test
         void shouldAdvanceScanningDegreeCorrectly() {

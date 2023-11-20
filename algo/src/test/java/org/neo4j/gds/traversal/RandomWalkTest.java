@@ -464,7 +464,7 @@ class RandomWalkTest {
             ", (e)-[:REL]->(a)";
 
         @Inject
-        TestGraph graph;
+        private TestGraph graph;
 
         @Test
         void progressLogging() throws InterruptedException {

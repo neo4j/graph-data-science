@@ -26,7 +26,7 @@ import org.neo4j.gds.ml.core.tensor.Tensor;
 public class Relu<T extends Tensor<T>> extends SingleParentVariable<T, T> {
 
     private static final double ALPHA = 0.01;
-    private double alpha;
+    private final double alpha;
 
     public Relu(Variable<T> parent, double alpha) {
         super(parent, parent.dimensions());

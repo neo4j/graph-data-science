@@ -22,6 +22,8 @@ package org.neo4j.gds.paths.singlesource;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 
 import java.util.List;
 import java.util.Map;
@@ -30,6 +32,9 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.instanceOf;
 
 public abstract class AllShortestPathsStatsProcTest extends AllShortestPathsProcTest {
+
+    @Inject
+    IdFunction idFunction;
 
     @Test
     void testStats() {

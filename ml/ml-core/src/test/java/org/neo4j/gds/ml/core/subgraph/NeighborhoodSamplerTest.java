@@ -126,7 +126,7 @@ class NeighborhoodSamplerTest {
             "(a)-[:R]->(s)";
 
         @Inject
-        TestGraph graph;
+        private TestGraph graph;
 
 
         @Test
@@ -181,7 +181,7 @@ class NeighborhoodSamplerTest {
             "(a)-[:R { weight: 99.0 }]->(h)";
 
         @Inject
-        TestGraph graph;
+        private TestGraph graph;
 
         @Test
         void shouldSampleSubsetOfNeighbors() {

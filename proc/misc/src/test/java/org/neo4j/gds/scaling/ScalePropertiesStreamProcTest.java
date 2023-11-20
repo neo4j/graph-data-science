@@ -25,6 +25,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
@@ -45,6 +47,9 @@ class ScalePropertiesStreamProcTest extends BaseProcTest {
         ",(n3:A {myProp: [3, 2]})" +
         ",(n4:A {myProp: [4, 2]})" +
         ",(n5:A {myProp: [5, 2]})";
+
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setUp() throws Exception {

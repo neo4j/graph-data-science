@@ -61,14 +61,14 @@ class CSRCompositeRelationshipIteratorTest {
 
 
     @Inject
-    GraphStore graphStore;
+    private GraphStore graphStore;
     @Inject
-    GraphStore inverseGraphStore;
+    private GraphStore inverseGraphStore;
 
     @Inject
-    IdFunction idFunction;
+    private IdFunction idFunction;
     @Inject
-    IdFunction inverseIdFunction;
+    private IdFunction inverseIdFunction;
 
     @Test
     void canIterateSingleProperty() {

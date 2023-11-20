@@ -48,7 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 class ListProgressProcTest extends BaseProgressTest {
 
     @Inject
-    public FakeClock fakeClock;
+    private FakeClock fakeClock;
 
     @BeforeEach
     void setUp() throws Exception {

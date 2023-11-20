@@ -50,7 +50,7 @@ class CELFAlgorithmFactoryTest {
         );
     }
 
-    static Stream<Arguments> configurations() {
+    private static Stream<Arguments> configurations() {
         return Stream.of(
             Arguments.of(1, 1, 3_256),
             Arguments.of(10, 1, 3_504),

@@ -113,11 +113,11 @@ class BetweennessCentralityTest {
         ", (a)-[:REL]->(d)" +
         ", (d)-[:REL]->(a)";
 
-    static Stream<Arguments> testArguments() {
+    private static Stream<Arguments> testArguments() {
         return crossArguments(() -> Stream.of(1, 4).map(Arguments::of), BetweennessCentralityTest::expectedResults);
     }
 
-    static Stream<Arguments> expectedResults() {
+    private static Stream<Arguments> expectedResults() {
         return Stream.of(
             Arguments.of(fromGdl(LINE, "line"), 5, Map.of("a", 0.0, "b", 3.0, "c", 4.0, "d", 3.0, "e", 0.0)),
             Arguments.of(fromGdl(LINE, "line"), 2, Map.of("a", 0.0, "b", 3.0, "c", 4.0, "d", 2.0, "e", 0.0)),
@@ -172,7 +172,7 @@ class BetweennessCentralityTest {
         assertEquals(0.0, actualResult.get((int) graph.toMappedNodeId("e")));
     }
 
-    static Stream<Arguments> expectedMemoryEstimation() {
+    private static Stream<Arguments> expectedMemoryEstimation() {
         return Stream.of(
             Arguments.of(1, 6_000_376L, 6_000_376L),
             Arguments.of(4, 21_601_192L, 21_601_192L),

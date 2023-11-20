@@ -40,7 +40,7 @@ class CompositeAdjacencyListTest {
         ", (a)-[:T2]->(c)";
 
     @Inject
-    Graph graph;
+    private Graph graph;
 
     @Test
     void shouldIgnoreInputDegreeForCursor() {

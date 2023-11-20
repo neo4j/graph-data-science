@@ -65,7 +65,7 @@ import static org.neo4j.gds.paths.PathTestUtil.expected;
 final class DeltaSteppingTest {
 
     // delta X concurrency X id-supplier
-    public static Stream<Arguments> testParameters() {
+    private static Stream<Arguments> testParameters() {
         return TestSupport.crossArguments(
             () -> TestSupport.crossArguments(
                 () -> DoubleStream.of(0.25, 0.5, 1, 2, 8).mapToObj(Arguments::of),
@@ -113,10 +113,10 @@ final class DeltaSteppingTest {
                 ", (e)-[:TYPE {cost: 4}]->(d)";
 
         @Inject
-        Graph graph;
+        private Graph graph;
 
         @Inject
-        IdFunction idFunction;
+        private IdFunction idFunction;
 
         @ParameterizedTest
         @MethodSource("org.neo4j.gds.paths.delta.DeltaSteppingTest#testParameters")
@@ -323,7 +323,7 @@ final class DeltaSteppingTest {
                 ", (e)-[:TYPE]->(d)";
 
         @Inject
-        TestGraph graph;
+        private TestGraph graph;
 
         @ParameterizedTest
         @MethodSource("org.neo4j.gds.paths.delta.DeltaSteppingTest#testParameters")

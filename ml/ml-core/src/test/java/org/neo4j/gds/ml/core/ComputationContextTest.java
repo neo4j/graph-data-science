@@ -30,7 +30,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class ComputationContextTest {
+class ComputationContextTest {
 
     @Test
     void render() {

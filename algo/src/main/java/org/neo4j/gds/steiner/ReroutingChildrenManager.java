@@ -27,9 +27,9 @@ import org.neo4j.gds.mem.MemoryUsage;
 
 class ReroutingChildrenManager {
 
-    private HugeObjectArray<LinkedNode> nodes;
-    private BitSet isTerminal;
-    private long sourceId;
+    private final HugeObjectArray<LinkedNode> nodes;
+    private final BitSet isTerminal;
+    private final long sourceId;
 
     static MemoryEstimation estimation() {
 

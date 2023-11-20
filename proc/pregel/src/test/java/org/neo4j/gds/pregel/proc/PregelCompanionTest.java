@@ -49,10 +49,10 @@ class PregelCompanionTest {
             " ()-[:REL2]->(),";
 
     @Inject
-    GraphStore graphStore;
+    private GraphStore graphStore;
 
     @Inject
-    GraphStore undirectedGraphStore;
+    private GraphStore undirectedGraphStore;
 
     static Stream<Arguments> relTypeCombinations() {
         var rel = RelationshipType.of("REL");

@@ -60,7 +60,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
         ", (b)-[:REL2 { relProp1: 3.0, relProp2: 45.0}]->(b)";
 
     @Inject
-    IdFunction idFunction;
+    private IdFunction idFunction;
 
     long nodeA;
     long nodeB;

@@ -59,7 +59,6 @@ abstract class CypherRecordLoader<R> {
     static final long NO_COUNT = -1L;
 
     final GraphProjectFromCypherConfig cypherConfig;
-    final GraphLoaderContext loadingContext;
 
     private final long recordCount;
     protected final String loadQuery;
@@ -75,7 +74,6 @@ abstract class CypherRecordLoader<R> {
         this.loadQuery = loadQuery;
         this.recordCount = recordCount;
         this.cypherConfig = cypherConfig;
-        this.loadingContext = loadingContext;
         var dependencyResolver = loadingContext.dependencyResolver();
         this.executionEngine = dependencyResolver.resolveDependency(QueryExecutionEngine.class);
         this.contextFactory = Neo4jTransactionalContextFactory.create(dependencyResolver.resolveDependency(GraphDatabaseQueryService.class));

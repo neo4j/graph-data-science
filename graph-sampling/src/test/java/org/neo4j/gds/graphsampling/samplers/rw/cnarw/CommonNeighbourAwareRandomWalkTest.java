@@ -169,7 +169,7 @@ class CommonNeighbourAwareRandomWalkTest {
     private TestGraph naturalUnionGraph;
 
 
-    Graph getGraph(CommonNeighbourAwareRandomWalkConfig config) {
+    private Graph getGraph(CommonNeighbourAwareRandomWalkConfig config) {
         return graphStore.getGraph(
             config.nodeLabelIdentifiers(graphStore),
             config.internalRelationshipTypes(graphStore),

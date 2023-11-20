@@ -24,6 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.Map;
@@ -59,6 +61,9 @@ class DegreeCentralityStreamProcTest extends BaseProcTest {
 
         ", (f)-[:TYPE1 {weight: 2.0}]->(b)" +
         ", (f)-[:TYPE1 {weight: 2.0}]->(e)";
+
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {

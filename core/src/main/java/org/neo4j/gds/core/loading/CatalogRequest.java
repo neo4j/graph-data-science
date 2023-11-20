@@ -77,16 +77,12 @@ public abstract class CatalogRequest {
         return of(username, databaseId.databaseName());
     }
 
-    public static CatalogRequest ofAdmin(String username, String databaseName) {
-        return ofAdmin(username, Optional.empty(), databaseName);
-    }
-
     public static CatalogRequest ofAdmin(String username, Optional<String> usernameOverride, String databaseName) {
         return ImmutableCatalogRequest.of(databaseName, username, usernameOverride, true);
     }
 
     public static CatalogRequest ofAdmin(String username, DatabaseId databaseId) {
-        return ofAdmin(username, databaseId.databaseName());
+        return ofAdmin(username, Optional.empty(), databaseId.databaseName());
     }
 
     public static CatalogRequest ofAdmin(String username, Optional<String> usernameOverride, DatabaseId databaseId) {

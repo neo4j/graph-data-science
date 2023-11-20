@@ -48,10 +48,10 @@ class NodesFilterTest {
         ", (d:B)";
 
     @Inject
-    GraphStore graphStore;
+    private GraphStore graphStore;
 
     @Inject
-    IdFunction idFunction;
+    private IdFunction idFunction;
 
     @Test
     void basicFiltering() throws ParseException {

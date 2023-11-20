@@ -346,7 +346,7 @@ class LinkPredictionTrainingPipelineTest {
 
         public String mutateNodeProperty() {
             return "";
-        };
+        }
     }
 
     @Nested

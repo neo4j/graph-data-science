@@ -56,7 +56,7 @@ class TopKMapComputerTest {
             ", (c)-[:REL {prop: 1.0}]->(b)";
 
     @Inject
-    TestGraph graph;
+    private TestGraph graph;
 
     @Test
     void shouldComputeTopKMapTransE() {

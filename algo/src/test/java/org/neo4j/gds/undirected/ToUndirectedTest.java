@@ -65,9 +65,9 @@ class ToUndirectedTest {
         ", (a)-[:T2 {prop1: 4.0D, prop2: 5.0D, prop3: 6.0D}]->(a)";
 
     @Inject
-    GraphStore directedGraphStore;
+    private GraphStore directedGraphStore;
     @Inject
-    GraphStore undirectedGraphStore;
+    private GraphStore undirectedGraphStore;
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void shouldCreateUndirectedRelationships(int concurrency) {
@@ -111,9 +111,9 @@ class ToUndirectedTest {
         ", (b)-[:T2 {prop1: 4.0D}]->(c)" +
         ", (a)-[:T2 {prop1: 4.0D}]->(a)";
     @Inject
-    GraphStore singleDirectedGraphStore;
+    private GraphStore singleDirectedGraphStore;
     @Inject
-    GraphStore singleUndirectedGraphStore;
+    private GraphStore singleUndirectedGraphStore;
 
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
@@ -157,9 +157,9 @@ class ToUndirectedTest {
         ", (a)-[:T2]->(a)";
 
     @Inject
-    GraphStore noPropertyDirectedGraphStore;
+    private GraphStore noPropertyDirectedGraphStore;
     @Inject
-    GraphStore noPropertyUndirectedGraphStore;
+    private GraphStore noPropertyUndirectedGraphStore;
 
     @ParameterizedTest
     @ValueSource(ints = {1, 4})

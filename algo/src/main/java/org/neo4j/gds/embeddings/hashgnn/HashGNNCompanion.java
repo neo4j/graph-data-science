@@ -27,9 +27,7 @@ import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 
 import java.util.SplittableRandom;
 
-public class HashGNNCompanion {
-    private HashGNNCompanion() {}
-
+public final class HashGNNCompanion {
     static void hashArgMin(
         HugeAtomicBitSet bitSet,
         int[] hashes,
@@ -73,6 +71,7 @@ public class HashGNNCompanion {
 
     @ValueClass
     interface HashTriple {
+
         /*
         The values a, b and c represent parameters of the hash function: h(x) = x * a + b mod c,
         where 0 < a, b < c and c is a prime number.
@@ -105,4 +104,6 @@ public class HashGNNCompanion {
             return output;
         }
     }
+
+    private HashGNNCompanion() {}
 }

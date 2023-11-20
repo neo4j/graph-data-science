@@ -81,16 +81,16 @@ class MultiLabelGraphSageTrainTest {
         "  (n0)-[:T]->(n1)";
 
     @Inject
-    TestGraph weightedGraph;
+    private TestGraph weightedGraph;
 
     @Inject
-    TestGraph missingArrayGraph;
+    private TestGraph missingArrayGraph;
 
     @Inject
-    TestGraph missingArray2Graph;
+    private TestGraph missingArray2Graph;
 
     @Inject
-    TestGraph unequalGraph;
+    private TestGraph unequalGraph;
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("featureSizes")

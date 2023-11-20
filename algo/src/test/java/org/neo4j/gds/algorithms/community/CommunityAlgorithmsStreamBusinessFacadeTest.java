@@ -80,10 +80,10 @@ class CommunityAlgorithmsStreamBusinessFacadeTest {
                 ", (h)-[:TYPE]->(i)";
 
         @Inject
-        TestGraph graph;
+        private TestGraph graph;
 
         @Inject
-        GraphStore graphStore;
+        private GraphStore graphStore;
 
         @Test
         void wcc() {

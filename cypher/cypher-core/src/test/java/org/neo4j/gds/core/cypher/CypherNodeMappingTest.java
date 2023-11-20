@@ -42,12 +42,12 @@ class CypherIdMapTest {
                           ", (c:C)";
 
     @Inject
-    GraphStore graphStore;
+    private GraphStore graphStore;
 
     @Inject
-    IdFunction idFunction;
+    private IdFunction idFunction;
 
-    CypherIdMap idMap;
+    private CypherIdMap idMap;
 
     @BeforeEach
     void setup() {

@@ -28,6 +28,8 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.ArrayList;
@@ -71,6 +73,9 @@ class DfsStreamProcTest extends BaseProcTest {
         ", (f)-[:TYPE {cost:1.0}]->(g)";
 
     private static final String REVERSE_GRAPH_NAME = DEFAULT_GRAPH_NAME + "_reverse";
+
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setupGraph() throws Exception {
@@ -217,11 +222,11 @@ class DfsStreamProcTest extends BaseProcTest {
                 Stream.of("g", "e", "d", "c", "a", "b", "f").map(idFunction::of).collect(Collectors.toList()),
                 Stream.of("g", "f", "d", "b", "a", "c", "e").map(idFunction::of).collect(Collectors.toList()),
                 Stream.of("g", "f", "d", "c", "a", "b", "e").map(idFunction::of).collect(Collectors.toList())
-            );;
+            );
         });
     }
 
-    static Stream<Arguments> pathQueryBuilders() {
+    private static Stream<Arguments> pathQueryBuilders() {
         return Stream.of(
             Arguments.of((Function<GdsCypher.ParametersBuildStage, String>) GdsCypher.ParametersBuildStage::yields, "No yield fields specified"),
             Arguments.of((Function<GdsCypher.ParametersBuildStage, String>) stage -> stage.yields("path"), "Only `path` yield field")

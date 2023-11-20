@@ -27,6 +27,8 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.HashMap;
@@ -54,6 +56,8 @@ class WeightedBetweennessStreamProcTest extends BaseProcTest {
         ", (d) -[:REL {weight: 0.2}]->(e)" +
         ", (e) -[:REL {weight: 1.0}]->(f)";
 
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setupGraph() throws Exception {

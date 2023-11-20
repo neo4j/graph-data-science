@@ -49,14 +49,14 @@ import static org.neo4j.gds.paths.PathTestUtil.expected;
 @GdlExtension
 class AStarTest {
 
-    static ImmutableShortestPathAStarStreamConfig.Builder defaultSourceTargetConfigBuilder() {
+    private static ImmutableShortestPathAStarStreamConfig.Builder defaultSourceTargetConfigBuilder() {
         return ImmutableShortestPathAStarStreamConfig.builder()
             .latitudeProperty("latitude")
             .longitudeProperty("longitude")
             .concurrency(1);
     }
 
-    static Stream<Arguments> expectedMemoryEstimation() {
+    private static Stream<Arguments> expectedMemoryEstimation() {
         return Stream.of(
             Arguments.of(1_000, 56_856L),
             Arguments.of(1_000_000, 56_125_728L),
@@ -119,7 +119,7 @@ class AStarTest {
         ", (nP)-[:TYPE {cost: 847.0}]->(nX)";
 
     @Inject
-    TestGraph graph;
+    private TestGraph graph;
 
     @Test
     void sourceTarget() {

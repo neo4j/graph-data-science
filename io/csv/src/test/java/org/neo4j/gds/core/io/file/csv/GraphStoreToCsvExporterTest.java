@@ -85,7 +85,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         ", (d)-[:REL2 { prop3: 5, prop4: 47 }]->(a)";
 
     @Inject
-    public GraphStore graphStore;
+    private GraphStore graphStore;
 
     @Inject
     private IdFunction idFunction;
@@ -104,7 +104,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         ", (d)-[:REL1]->(a)";
 
     @Inject
-    public GraphStore concurrentGraphStore;
+    private GraphStore concurrentGraphStore;
 
     @GdlGraph(graphNamePrefix = "noProperties", orientation = REVERSE)
     private static final String GDL_WITHOUT_PROPERTIES = "CREATE" +
@@ -120,7 +120,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         ", (d)-[:REL4]->(a)";
 
     @Inject
-    public GraphStore noPropertiesGraphStore;
+    private GraphStore noPropertiesGraphStore;
 
     private static final List<String> NODE_COLUMNS = List.of(ID_COLUMN_NAME);
     private static final List<String> RELATIONSHIP_COLUMNS = List.of(START_ID_COLUMN_NAME, END_ID_COLUMN_NAME);

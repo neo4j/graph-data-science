@@ -31,7 +31,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @GdlExtension
-public class BfsConfigTest {
+class BfsConfigTest {
 
     @GdlGraph
     private static final String DB_CYPHER =
@@ -42,10 +42,10 @@ public class BfsConfigTest {
 
 
     @Inject
-    GraphStore graphStore;
+    private GraphStore graphStore;
 
     @Inject
-    IdFunction idFunction;
+    private IdFunction idFunction;
 
     @Test
     void shouldNotAllowNegativeTargetNodes() {

@@ -43,7 +43,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentrality.DegreeFunction>
     static final String DEGREE_CENTRALITY_DESCRIPTION = "Degree centrality measures the number of incoming and outgoing relationships from a node.";
     private static final double DEFAULT_WEIGHT = 0D;
 
-    private Graph graph;
+    private final Graph graph;
     private final ExecutorService executor;
     private final DegreeCentralityConfig config;
 

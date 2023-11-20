@@ -78,7 +78,7 @@ class AdjacencyCompressionTest {
         assertEquals(4L, data.buffer[1]);
     }
 
-    static Stream<Arguments> aggregationsWithResults() {
+    private static Stream<Arguments> aggregationsWithResults() {
         return Stream.of(
             Arguments.of(
                 values(),
@@ -193,7 +193,7 @@ class AdjacencyCompressionTest {
         };
     }
 
-    static Stream<Arguments> deltaArrays() {
+    private static Stream<Arguments> deltaArrays() {
         return Stream.of(
             Arguments.of(new long[0], 0, new long[0]),
             Arguments.of(new long[] {1, 1, 1}, 0, new long[] {1, 2, 3}),

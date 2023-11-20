@@ -52,7 +52,6 @@ public class BellmanFordMutateSpec implements AlgorithmSpec<BellmanFord, Bellman
         return (username, configuration) -> BellmanFordMutateConfig.of(configuration);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public ComputationResultConsumer<BellmanFord, BellmanFordResult, BellmanFordMutateConfig, Stream<BellmanFordMutateResult>> computationResultConsumer() {
         return new BellmanFordMutateResultConsumer();

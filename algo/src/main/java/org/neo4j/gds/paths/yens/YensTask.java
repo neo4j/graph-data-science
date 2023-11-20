@@ -44,7 +44,7 @@ public class YensTask implements Runnable {
     private final RelationshipFilterer relationshipFilterer;
 
     private MutablePathResult previousPath;
-    private AtomicInteger currentSpurIndexId;
+    private final AtomicInteger currentSpurIndexId;
 
     private final ArrayList<MutablePathResult> kShortestPaths;
     private final CandidatePathsPriorityQueue candidatePathsQueue;

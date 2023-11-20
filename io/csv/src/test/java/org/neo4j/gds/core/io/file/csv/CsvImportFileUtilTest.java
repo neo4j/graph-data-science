@@ -219,7 +219,7 @@ class CsvImportFileUtilTest {
         assertThat(CsvImportFileUtil.inferNodeLabels(Paths.get(noLabelsNodeHeaderFileName))).isEqualTo(new String[0]);
     }
 
-    static Stream<Arguments> nodeFileNames() {
+    private static Stream<Arguments> nodeFileNames() {
         return Stream.of(
             Arguments.of(
                 List.of(
@@ -242,7 +242,7 @@ class CsvImportFileUtilTest {
         );
     }
 
-    static Stream<Arguments> relationshipsFileNames() {
+    private static Stream<Arguments> relationshipsFileNames() {
         return Stream.of(
             Arguments.of(
                 List.of(
@@ -261,7 +261,7 @@ class CsvImportFileUtilTest {
         );
     }
 
-    static Stream<Arguments> graphPropertyFileNames() {
+    private static Stream<Arguments> graphPropertyFileNames() {
         return Stream.of(
             Arguments.of(
                 List.of(

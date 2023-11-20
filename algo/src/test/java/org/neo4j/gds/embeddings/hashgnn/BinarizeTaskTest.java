@@ -46,10 +46,10 @@ class BinarizeTaskTest {
         ", (c:N {f1: 1.0, f2: [-1.0]})";
 
     @Inject
-    Graph graph;
+    private Graph graph;
 
     @Inject
-    IdFunction idFunction;
+    private IdFunction idFunction;
 
     @Test
     void shouldPerformHyperplaneRounding() {

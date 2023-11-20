@@ -124,7 +124,7 @@ public final class ParallelUtil {
         Supplier<PartitionConsumer<P>> taskSupplier
     ) {
         try (
-            var localConsumer = CloseableThreadLocal.withInitial(taskSupplier);
+            var localConsumer = CloseableThreadLocal.withInitial(taskSupplier)
         ) {
             var taskStream = partitions.map(partition -> (Runnable) () -> localConsumer.get().consume(partition));
             runnerBuilder.tasks(taskStream);

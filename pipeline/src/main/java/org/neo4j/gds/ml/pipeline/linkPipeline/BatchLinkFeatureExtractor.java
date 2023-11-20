@@ -26,12 +26,12 @@ import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 class BatchLinkFeatureExtractor implements Runnable {
-    final LinkFeatureExtractor extractor;
-    final DegreePartition partition;
-    final long relationshipOffset;
-    final Graph graph;
-    final HugeObjectArray<double[]> linkFeatures;
-    final ProgressTracker progressTracker;
+    private final LinkFeatureExtractor extractor;
+    private final DegreePartition partition;
+    private final long relationshipOffset;
+    private final Graph graph;
+    private final HugeObjectArray<double[]> linkFeatures;
+    private final ProgressTracker progressTracker;
 
     BatchLinkFeatureExtractor(
         LinkFeatureExtractor extractor,

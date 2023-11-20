@@ -26,6 +26,8 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
@@ -40,6 +42,9 @@ class SteinerTreeStreamProcTest extends BaseProcTest {
                                     "CREATE(b:Node) " +
                                     "CREATE(c:Node) " +
                                     "CREATE (a)-[:TYPE {cost:1.0}]->(b) ";
+
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {

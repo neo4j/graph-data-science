@@ -77,6 +77,9 @@ class LinkPredictionPipelineStreamProcTest extends BaseProcTest {
     @Inject
     private ModelCatalog modelCatalog;
 
+    @Inject
+    private IdFunction idFunction;
+
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(GraphListProc.class, GraphProjectProc.class, LinkPredictionPipelineStreamProc.class);
@@ -129,7 +132,7 @@ class LinkPredictionPipelineStreamProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = {"N, [2424 Bytes ... 3768 Bytes]", "M, [2984 Bytes ... 5448 Bytes]"})
+    @CsvSource(value = {"N, [2432 Bytes ... 3776 Bytes]", "M, [2992 Bytes ... 5456 Bytes]"})
     void estimate(String targetNodeLabel, String expectedMemoryRange) {
         assertCypherResult(
             "CALL gds.beta.pipeline.linkPrediction.predict.stream.estimate('g', {" +

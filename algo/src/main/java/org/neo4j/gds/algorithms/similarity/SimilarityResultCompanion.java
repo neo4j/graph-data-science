@@ -33,7 +33,7 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
 import java.util.stream.Stream;
 
-class SimilarityResultCompanion {
+final class SimilarityResultCompanion {
 
     static SimilarityGraphResult computeToGraph(
         Graph graph,
@@ -82,4 +82,6 @@ class SimilarityResultCompanion {
             similarityDistribution
         );
     });
+
+    private SimilarityResultCompanion() {}
 }

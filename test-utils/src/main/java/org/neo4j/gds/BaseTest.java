@@ -27,7 +27,6 @@ import org.neo4j.gds.algorithms.metrics.AlgorithmMetricsService;
 import org.neo4j.gds.algorithms.metrics.PassthroughAlgorithmMetricRegistrar;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.IdToVariable;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraphExtension;
@@ -71,9 +70,6 @@ public abstract class BaseTest {
 
     @Inject
     public NodeFunction nodeFunction;
-
-    @Inject
-    public IdFunction idFunction;
 
     @Inject
     public IdToVariable idToVariable;

@@ -30,8 +30,8 @@ import java.util.Map;
 
 public class TestTaskStore extends PerDatabaseTaskStore {
 
-    private Map<JobId, String> tasks = new HashMap<>();
-    private List<String> tasksSeen = new ArrayList<>();
+    private final Map<JobId, String> tasks = new HashMap<>();
+    private final List<String> tasksSeen = new ArrayList<>();
 
     @Override
     public void store(String username, JobId jobId, Task task) {

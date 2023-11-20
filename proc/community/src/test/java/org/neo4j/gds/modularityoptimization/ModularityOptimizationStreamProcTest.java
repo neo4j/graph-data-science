@@ -26,12 +26,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.IdFunction;
-import org.neo4j.gds.extension.IdToVariable;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
@@ -43,7 +43,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
-import static org.neo4j.gds.CommunityHelper.assertCommunities;
 import static org.neo4j.gds.GdsCypher.ExecutionModes.STREAM;
 
 class ModularityOptimizationStreamProcTest extends BaseProcTest {
@@ -67,10 +66,7 @@ class ModularityOptimizationStreamProcTest extends BaseProcTest {
         ", (f)-[:TYPE {weight: 0.01}]->(d)";
 
     @Inject
-    IdToVariable idToVariable;
-
-    @Inject
-    IdFunction idFunction;
+    private IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {
@@ -106,7 +102,7 @@ class ModularityOptimizationStreamProcTest extends BaseProcTest {
             communities.put(nodeId, row.getNumber("communityId").longValue());
         });
 
-        assertCommunities(communities, idFunction.of("a", "b", "c", "e"), idFunction.of("d", "f"));
+        CommunityHelper.assertCommunities(communities, idFunction.of("a", "b", "c", "e"), idFunction.of("d", "f"));
     }
 
     @Test
@@ -123,7 +119,7 @@ class ModularityOptimizationStreamProcTest extends BaseProcTest {
             communities.put(nodeId, row.getNumber("communityId").longValue());
         });
 
-        assertCommunities(communities, idFunction.of("a", "e", "f"), idFunction.of("b", "c", "d"));
+        CommunityHelper.assertCommunities(communities, idFunction.of("a", "e", "f"), idFunction.of("b", "c", "d"));
     }
 
     @Test
@@ -140,7 +136,7 @@ class ModularityOptimizationStreamProcTest extends BaseProcTest {
             communities.put(nodeId, row.getNumber("communityId").longValue());
         });
 
-        assertCommunities(communities, idFunction.of("a", "b"), idFunction.of("c",  "d", "e", "f"));
+        CommunityHelper.assertCommunities(communities, idFunction.of("a", "b"), idFunction.of("c",  "d", "e", "f"));
         assertThat(communities.values()).containsExactly(0L, 0L, 2L, 2L, 2L, 2L);
     }
 

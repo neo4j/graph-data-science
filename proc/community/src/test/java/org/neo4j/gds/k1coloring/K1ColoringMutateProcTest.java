@@ -154,9 +154,9 @@ public class K1ColoringMutateProcTest extends BaseProcTest {
 
         assertCypherResult(query, List.of(Map.of(
             "nodeCount", 4L,
-            "bytesMin", 552L,
-            "bytesMax", 552L,
-            "requiredMemory", "552 Bytes"
+            "bytesMin", 544L,
+            "bytesMax", 544L,
+            "requiredMemory", "544 Bytes"
         )));
     }
 

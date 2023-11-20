@@ -43,7 +43,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
     private final Graph graph;
     private final int concurrency;
     private static final int CHUNK_SIZE = 64;
-    private int chunkSize;
+    private final int chunkSize;
     static int UNASSIGNED = -1;
     //To find relevant vertices  at each step we need to iterate from 0... nodeCount
     //When only 2% nodes remain in the graph, we can create a smaller array to loop over these ones only

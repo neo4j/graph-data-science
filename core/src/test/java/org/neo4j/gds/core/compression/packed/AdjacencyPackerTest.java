@@ -191,7 +191,7 @@ class AdjacencyPackerTest {
         });
     }
 
-    static Stream<Arguments> strategyAndValueCount() {
+    private static Stream<Arguments> strategyAndValueCount() {
         return TestSupport.crossArgument(
             () -> Arrays.stream(GdsFeatureToggles.AdjacencyPackingStrategy.values()),
             () -> Stream.of(42, 1337)
@@ -251,7 +251,7 @@ class AdjacencyPackerTest {
         });
     }
 
-    static Stream<Arguments> strategyAndBlockSizes() {
+    private static Stream<Arguments> strategyAndBlockSizes() {
         return TestSupport.crossArgument(
             () -> Arrays.stream(GdsFeatureToggles.AdjacencyPackingStrategy.values()),
             () -> IntStream.of(

@@ -58,7 +58,7 @@ public class KGEPredictStreamProcTest extends BaseProcTest {
             ", (m2)-[:T4]->(p)";
 
     @Inject
-    IdFunction idFunction;
+    private IdFunction idFunction;
 
 
     @BeforeEach

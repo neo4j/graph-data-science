@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class BoundedHistogramTest {
 
-    static Stream<Arguments> means() {
+    private static Stream<Arguments> means() {
         return Stream.of(
             Arguments.of(new int[] {5}, 5),
             Arguments.of(IntStream.range(0, 10).toArray(), 4.5),
@@ -48,7 +48,7 @@ class BoundedHistogramTest {
         assertThat(histogram.mean()).isEqualTo(expected);
     }
 
-    static Stream<Arguments> medians() {
+    private static Stream<Arguments> medians() {
         return Stream.of(
             Arguments.of(new int[] {5}, 6),
             Arguments.of(IntStream.range(0, 10).toArray(), 5),
@@ -64,7 +64,7 @@ class BoundedHistogramTest {
         assertThat(histogram.median()).isEqualTo(expected);
     }
 
-    static Stream<Arguments> mins() {
+    private static Stream<Arguments> mins() {
         return Stream.of(
             Arguments.of(new int[] {5}, 5),
             Arguments.of(IntStream.range(0, 10).toArray(), 0),
@@ -80,7 +80,7 @@ class BoundedHistogramTest {
         assertThat(histogram.min()).isEqualTo(expected);
     }
 
-    static Stream<Arguments> maxs() {
+    private static Stream<Arguments> maxs() {
         return Stream.of(
             Arguments.of(new int[] {5}, 5),
             Arguments.of(IntStream.range(0, 10).toArray(), 9),
@@ -98,7 +98,7 @@ class BoundedHistogramTest {
         assertThat(histogram.max()).isEqualTo(expected);
     }
 
-    static Stream<Arguments> adds() {
+    private static Stream<Arguments> adds() {
         return Stream.of(
             Arguments.of(new int[] {}, new int[] {42}),
             Arguments.of(new int[] {5}, new int[] {5}),
@@ -130,7 +130,7 @@ class BoundedHistogramTest {
         assertThat(expected.total()).isEqualTo(actual.total());
     }
 
-    static Stream<Arguments> percentiles() {
+    private static Stream<Arguments> percentiles() {
         return Stream.of(
             Arguments.of(new int[] {1, 1, 1, 2, 3}, 25.0f, 1),
             Arguments.of(new int[] {1, 1, 1, 2, 3}, 50.0f, 2),
@@ -147,7 +147,7 @@ class BoundedHistogramTest {
         assertThat(histogram.percentile(percentile)).isEqualTo(expected);
     }
 
-    static BoundedHistogram create(int... values) {
+    private static BoundedHistogram create(int... values) {
         int maxValue = Arrays.stream(values).max().orElse(0);
         var histogram = new BoundedHistogram(maxValue + 1);
         Arrays.stream(values).forEach(histogram::record);

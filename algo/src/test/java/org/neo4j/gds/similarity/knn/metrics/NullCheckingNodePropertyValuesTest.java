@@ -40,7 +40,7 @@ class NullCheckingNodePropertyValuesTest {
     private static final String TEST_GRAPH = "CREATE (), ()";
 
     @Inject
-    Graph graph;
+    private Graph graph;
 
     @Test
     void shouldWrapDoubleArrayPropertyAccess() {

@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public final class CollapsePathTaskSupplier implements Supplier<Runnable> {
+final class CollapsePathTaskSupplier implements Supplier<Runnable> {
     // path template index - which stack of graphs are we working on?
     private final AtomicInteger globalSharedPathTemplateIndex = new AtomicInteger(0);
 

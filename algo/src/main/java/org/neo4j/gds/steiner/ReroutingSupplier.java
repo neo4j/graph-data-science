@@ -56,4 +56,6 @@ final class ReroutingSupplier {
             return new SimpleRerouter(graph, sourceId, terminals, concurrency, progressTracker, terminationFlag);
         }
     }
+
+    private ReroutingSupplier() {}
 }

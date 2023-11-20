@@ -29,6 +29,8 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensMutateConfig;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -114,6 +116,9 @@ class ShortestPathYensMutateProcTest extends BaseProcTest {
 
         return mapWrapper;
     }
+
+    @Inject
+    private IdFunction idFunction;
 
     @Test
     void testMutate() {

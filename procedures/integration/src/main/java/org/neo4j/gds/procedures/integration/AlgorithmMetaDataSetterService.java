@@ -23,7 +23,7 @@ import org.neo4j.gds.TransactionAlgorithmMetaDataSetter;
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.kernel.api.KernelTransaction;
 
-public class AlgorithmMetaDataSetterService {
+class AlgorithmMetaDataSetterService {
     AlgorithmMetaDataSetter getAlgorithmMetaDataSetter(KernelTransaction kernelTransaction) {
         return new TransactionAlgorithmMetaDataSetter(kernelTransaction);
     }

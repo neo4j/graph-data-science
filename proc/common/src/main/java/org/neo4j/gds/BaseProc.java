@@ -42,7 +42,6 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.logging.Log;
 import org.neo4j.procedure.Context;
 
-import java.util.Collection;
 import java.util.function.Supplier;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -93,7 +92,7 @@ public abstract class BaseProc {
         );
     }
 
-    public boolean isGdsAdmin() {
+    protected boolean isGdsAdmin() {
         if (transaction == null) {
             // No transaction available (likely we're in a test), no-one is admin here
             return false;
@@ -102,15 +101,6 @@ public abstract class BaseProc {
         // com.neo4j.server.security.enterprise.auth.plugin.api.PredefinedRoles.ADMIN
         String PREDEFINED_ADMIN_ROLE = "admin";
         return transaction.securityContext().roles().contains(PREDEFINED_ADMIN_ROLE);
-    }
-
-    protected final void runWithExceptionLogging(String message, Runnable runnable) {
-        try {
-            runnable.run();
-        } catch (Exception e) {
-            log.warn(message, e);
-            throw e;
-        }
     }
 
     protected final <R> R runWithExceptionLogging(String message, Supplier<R> supplier) {
@@ -123,11 +113,7 @@ public abstract class BaseProc {
     }
 
     protected final void validateConfig(CypherMapAccess cypherConfig, BaseConfig config) {
-        validateConfig(cypherConfig, config.configKeys());
-    }
-
-    protected final void validateConfig(CypherMapAccess cypherConfig, Collection<String> allowedKeys) {
-        cypherConfig.requireOnlyKeysFrom(allowedKeys);
+        cypherConfig.requireOnlyKeysFrom(config.configKeys());
     }
 
     protected final void validateGraphNameAndEnsureItDoesNotExist(String username, String graphName) {
@@ -165,7 +151,7 @@ public abstract class BaseProc {
                 .build();
     }
 
-    public TransactionContext transactionContext() {
+    protected TransactionContext transactionContext() {
         return databaseService == null
             ? EmptyTransactionContext.INSTANCE
             : DatabaseTransactionContext.of(databaseService, procedureTransaction);

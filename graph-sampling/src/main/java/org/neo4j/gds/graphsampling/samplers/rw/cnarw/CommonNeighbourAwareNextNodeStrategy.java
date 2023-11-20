@@ -37,7 +37,7 @@ public class CommonNeighbourAwareNextNodeStrategy implements NextNodeStrategy {
     private final LongArrayBuffer uSortedNeighs = new LongArrayBuffer();
     private final LongArrayBuffer vSortedNeighs = new LongArrayBuffer();
 
-    private MutableInt idx = new MutableInt();
+    private final MutableInt idx = new MutableInt();
 
     CommonNeighbourAwareNextNodeStrategy(
         Graph inputGraph,

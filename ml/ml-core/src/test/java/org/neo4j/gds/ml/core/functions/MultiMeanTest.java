@@ -54,7 +54,7 @@ class MultiMeanTest extends ComputationGraphBaseTest implements FiniteDifference
         ", (u2)-[:ORDERED {times: 3}]->(d4)";
 
     @Inject
-    TestGraph graph;
+    private TestGraph graph;
 
     @Test
     void shouldAverageUnweighted() {

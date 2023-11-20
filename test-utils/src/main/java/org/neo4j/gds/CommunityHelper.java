@@ -88,17 +88,7 @@ public final class CommunityHelper {
         }
     }
 
-    public static void assertSameCommunity(HugeLongArray communities, long[] members) {
-        assertSameCommunity(communities.toArray(), members);
-    }
-
-    public static void assertSameCommunity(long[] communities, long[] members) {
-        List<Long> communitiesList = Arrays.stream(communities).boxed().collect(toList());
-        List<Long> membersList = Arrays.stream(members).boxed().collect(toList());
-        assertSameCommunity(communitiesList, membersList);
-    }
-
-    public static void assertSameCommunity(List<Long> communities, List<Long> members) {
+    private static void assertSameCommunity(List<Long> communities, List<Long> members) {
         long expectedCommunity = communities.get(members.get(0).intValue());
 
         for (int i = 1; i < members.size(); i++) {
@@ -122,7 +112,7 @@ public final class CommunityHelper {
         assertCommunitiesWithLabels(communityData.toArray(), expectedCommunities);
     }
 
-    public static void assertCommunitiesWithLabels(long[] communityData, Map<Long, long[]> expectedCommunities) {
+    private static void assertCommunitiesWithLabels(long[] communityData, Map<Long, long[]> expectedCommunities) {
         List<Long> communityDataList = Arrays.stream(communityData).boxed().collect(toList());
         List<List<Long>> expectedCommunitiesList = expectedCommunities
             .values()

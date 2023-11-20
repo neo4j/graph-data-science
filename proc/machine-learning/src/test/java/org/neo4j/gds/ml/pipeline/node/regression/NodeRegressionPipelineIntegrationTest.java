@@ -101,7 +101,7 @@ final class NodeRegressionPipelineIntegrationTest extends BaseProcTest {
         ", (c9h)-[:T {w: 3}]->(a6h)";
 
     @Inject
-    ModelCatalog modelCatalog;
+    private ModelCatalog modelCatalog;
 
     @BeforeEach
     void setUp() throws Exception {

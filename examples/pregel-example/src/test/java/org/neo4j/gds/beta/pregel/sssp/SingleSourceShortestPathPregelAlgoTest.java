@@ -67,7 +67,7 @@ class SingleSourceShortestPathPregelAlgoTest {
     private TestGraph graph;
 
     @Inject
-    IdFunction idFunction;
+    private IdFunction idFunction;
 
     @Test
     void runSSSP() {

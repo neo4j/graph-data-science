@@ -37,6 +37,8 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.loading.AdjacencyTestUtils;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -60,6 +62,9 @@ class ScanningRelationshipsImporterTest extends BaseTest {
                                     "(a)-[:R { p: 3.0 }]->(d)," +
                                     "(b)-[:R { p: 4.0 }]->(c)," +
                                     "(c)-[:R { p: 5.0 }]->(a)";
+
+    @Inject
+    private IdFunction idFunction;
 
     @Test
     void shouldLoadInverseRelationships() {

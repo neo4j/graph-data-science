@@ -27,6 +27,8 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.graphdb.Path;
 
@@ -48,6 +50,9 @@ class DagLongestPathStreamProcTest extends BaseProcTest {
         ", (n1)-[:T {prop: 0.0}]->(n3)" +
         ", (n2)-[:T {prop: 4.0}]->(n3)";
 
+
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setUp() throws Exception {

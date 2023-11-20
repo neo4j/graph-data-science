@@ -110,7 +110,7 @@ class CSRGraphStoreTest {
         assertThat(graphStore.schema().relationshipSchema().isUndirected()).isEqualTo(false);
     }
 
-    static Stream<Arguments> characteristics() {
+    private static Stream<Arguments> characteristics() {
         return TestSupport.crossArguments(
             () -> Stream.of(Arguments.of(true), Arguments.of(false)),
             () -> Stream.of(Arguments.of(Orientation.NATURAL), Arguments.of(Orientation.REVERSE))
@@ -146,7 +146,7 @@ class CSRGraphStoreTest {
         });
     }
 
-    static Stream<Arguments> mixedOrientation() {
+    private static Stream<Arguments> mixedOrientation() {
         return Stream.of(
             Arguments.of(Orientation.UNDIRECTED, 4, Orientation.NATURAL, 5),
             Arguments.of(Orientation.NATURAL, 2, Orientation.UNDIRECTED, 4)
@@ -306,7 +306,7 @@ class CSRGraphStoreTest {
         assertThat(actual).isEqualTo(expected);
     }
 
-    static Stream<Graph> nthTestGraphs() {
+    private static Stream<Graph> nthTestGraphs() {
         return Stream.of(
             GdlFactory.of(
                 " (a)-[:T]->(b)" +

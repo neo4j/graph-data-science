@@ -40,9 +40,8 @@ import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
 class BellmanFordMutateProcTest extends BaseProcTest{
 
-
     @Inject
-    public IdFunction idFunction;
+    private IdFunction idFunction;
 
     @BeforeEach
     void setUp() throws Exception {

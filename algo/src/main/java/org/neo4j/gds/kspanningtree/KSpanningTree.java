@@ -43,7 +43,7 @@ import java.util.function.DoubleUnaryOperator;
  */
 public class KSpanningTree extends Algorithm<SpanningTree> {
 
-    private Graph graph;
+    private final Graph graph;
     private final DoubleUnaryOperator minMax;
     private final long startNodeId;
     private final long k;

@@ -27,6 +27,8 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
@@ -59,6 +61,9 @@ class ShortestPathDijkstraMutateProcTest extends BaseProcTest {
     public String expectedMutatedGraph() {
         return DB_CYPHER + ", (a)-[:PATH {w: 3.0D}]->(f)";
     }
+
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {

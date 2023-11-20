@@ -28,7 +28,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public abstract class CsvTest {
+abstract class CsvTest {
 
     @TempDir
     protected Path tempDir;

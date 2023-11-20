@@ -56,10 +56,10 @@ class LinkPredictionSimilarityComputerTest {
 
 
     @Inject
-    public TestGraph graph;
+    private TestGraph graph;
 
     @Inject
-    public GraphStore graphStore;
+    private GraphStore graphStore;
 
     @Test
     void validateComputeSimilarity() {

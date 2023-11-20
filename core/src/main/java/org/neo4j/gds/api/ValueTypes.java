@@ -23,6 +23,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.values.storable.NumberType;
 
 public final class ValueTypes {
+
     public static ValueType fromNumberType(NumberType nt) {
         switch (nt) {
             case FLOATING_POINT:
@@ -35,4 +36,6 @@ public final class ValueTypes {
                 throw new IllegalArgumentException("Unexpected value: " + nt + " (sad java 😞)");
         }
     }
+
+    private ValueTypes() {}
 }

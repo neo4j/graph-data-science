@@ -45,10 +45,10 @@ class FilteredKnnBaseConfigTest {
     static final String GDL = "CREATE (a), (b)";
 
     @Inject
-    GraphStore graphStore;
+    private GraphStore graphStore;
 
     @Inject
-    IdFunction idFunction;
+    private IdFunction idFunction;
 
     @ParameterizedTest
     @MethodSource("configs")

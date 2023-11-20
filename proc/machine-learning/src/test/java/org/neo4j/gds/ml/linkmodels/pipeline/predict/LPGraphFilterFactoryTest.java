@@ -56,7 +56,7 @@ class LPGraphFilterFactoryTest {
                                   "(n4)-[:CONTEXT]->(n0) ";
 
     @Inject
-    GraphStore multiLabelGraphStore;
+    private GraphStore multiLabelGraphStore;
 
     LinkPredictionTrainConfig trainConfig = LinkPredictionTrainConfigImpl
         .builder()

@@ -236,14 +236,14 @@ final class AbstractCommunityResultBuilderTest {
             .build();
     }
 
-    static Stream<Arguments> concurrencies() {
+    private static Stream<Arguments> concurrencies() {
         return Stream.of(
             Arguments.of(1),
             Arguments.of(4)
         );
     }
 
-    static ProcedureReturnColumns procedureReturnColumns(String... returnColumns) {
+    private static ProcedureReturnColumns procedureReturnColumns(String... returnColumns) {
         return new ProcedureReturnColumns() {
 
             @Override

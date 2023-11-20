@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Locale;
 
 public final class MissingParameterExceptions {
+
     public static IllegalArgumentException missingValueFor(String key, Collection<String> candidates) {
         return new IllegalArgumentException(missingValueForMessage(key, candidates));
     }
@@ -56,4 +57,6 @@ public final class MissingParameterExceptions {
             String.join(", ", suggestions)
         );
     }
+
+    private MissingParameterExceptions() {}
 }

@@ -38,6 +38,6 @@ public enum TrainingMethod {
     MLPClassification {
         @Override
         public String toString() { return "MultilayerPerceptron"; }
-    };
+    }
 
 }

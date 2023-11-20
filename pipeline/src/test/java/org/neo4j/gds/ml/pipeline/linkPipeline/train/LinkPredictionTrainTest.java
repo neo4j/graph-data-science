@@ -120,7 +120,7 @@ class LinkPredictionTrainTest {
         "(n)-[:REL {label: 0.0}]->(o) ";
 
     @Inject
-    Graph trainGraph;
+    private Graph trainGraph;
 
     private int numberOfConcreteTrainerConfig = 0;
 

@@ -26,10 +26,10 @@ import org.neo4j.gds.api.schema.PropertySchema;
 
 public abstract class ElementSchemaVisitor extends InputSchemaVisitor.Adapter implements PropertySchema {
 
-    String key;
-    ValueType valueType;
-    DefaultValue defaultValue;
-    PropertyState state;
+    private String key;
+    private ValueType valueType;
+    private DefaultValue defaultValue;
+    private PropertyState state;
 
     protected abstract void export();
 

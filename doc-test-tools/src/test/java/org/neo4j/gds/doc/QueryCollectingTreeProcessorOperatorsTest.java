@@ -20,12 +20,12 @@
 package org.neo4j.gds.doc;
 
 import org.asciidoctor.Asciidoctor;
+import org.asciidoctor.Options;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.ResourceUtil;
 import org.neo4j.gds.doc.syntax.DocQuery;
 
-import java.util.Collections;
 import java.util.List;
 
 import static org.asciidoctor.Asciidoctor.Factory.create;
@@ -45,7 +45,7 @@ class QueryCollectingTreeProcessorOperatorsTest {
         var file = ResourceUtil.path("query-collecting-tree-processor-test_operators.adoc").toFile();
         assertThat(file).exists().canRead();
 
-        asciidoctor.loadFile(file, Collections.emptyMap());
+        asciidoctor.loadFile(file, Options.builder().build());
     }
 
     @Test

@@ -43,10 +43,10 @@ class GraphStoreAddNodeLabelTest {
         ", (d:B)";
 
     @Inject
-    GraphStore multiLabelGraphStore;
+    private GraphStore multiLabelGraphStore;
 
     @Inject
-    IdFunction multiLabelIdFunction;
+    private IdFunction multiLabelIdFunction;
 
     @GdlGraph(graphNamePrefix = "singleLabel")
     private static final String SINGLE_LABEL_DB_CYPHER =
@@ -56,10 +56,10 @@ class GraphStoreAddNodeLabelTest {
         ", (c:A {p: 3})";
 
     @Inject
-    GraphStore singleLabelGraphStore;
+    private GraphStore singleLabelGraphStore;
 
     @Inject
-    IdFunction singleLabelIdFunction;
+    private IdFunction singleLabelIdFunction;
 
 
     @Test

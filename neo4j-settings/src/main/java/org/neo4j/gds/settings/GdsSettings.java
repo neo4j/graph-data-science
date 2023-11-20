@@ -23,7 +23,9 @@ import org.neo4j.graphdb.config.Setting;
 
 import java.nio.file.Path;
 
-public class GdsSettings {
+public final class GdsSettings {
+
+    private GdsSettings() {}
 
     public static Setting<Path> exportLocation() {
         return GraphStoreExportSettings.export_location_setting;

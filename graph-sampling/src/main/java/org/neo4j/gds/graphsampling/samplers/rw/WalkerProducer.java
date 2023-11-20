@@ -31,7 +31,7 @@ import org.neo4j.gds.graphsampling.samplers.rw.rwr.RWRNodeSamplingStrategySuppli
 import java.util.Optional;
 import java.util.SplittableRandom;
 
-public class WalkerProducer {
+public final class WalkerProducer {
 
 private final NodeSamplingStrategySupplier nodeSamplingStrategySupplier;
 

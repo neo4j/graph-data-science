@@ -43,7 +43,7 @@ public class Conductance extends Algorithm<ConductanceResult> {
 
     private static final double DEFAULT_WEIGHT = 0.0D;
 
-    private Graph graph;
+    private final Graph graph;
     private final ExecutorService executor;
     private final ConductanceBaseConfig config;
     private final WeightTransformer weightTransformer;
@@ -301,11 +301,11 @@ public class Conductance extends Algorithm<ConductanceResult> {
         }
 
 
-        public HugeSparseDoubleArray internalCounts() {
+        HugeSparseDoubleArray internalCounts() {
             return internalCounts;
         }
 
-        public HugeSparseDoubleArray externalCounts() {
+        HugeSparseDoubleArray externalCounts() {
             return externalCounts;
         }
     }

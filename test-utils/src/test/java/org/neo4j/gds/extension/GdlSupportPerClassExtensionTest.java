@@ -34,7 +34,7 @@ class GdlSupportPerClassExtensionTest {
     public static final String GRAPH = "(a)-[:REL]->(b)";
 
     @Inject
-    GraphStore graphStore;
+    private GraphStore graphStore;
 
     @BeforeAll
     void setUp() {

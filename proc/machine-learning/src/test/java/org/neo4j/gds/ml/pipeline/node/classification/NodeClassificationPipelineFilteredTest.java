@@ -75,7 +75,7 @@ public class NodeClassificationPipelineFilteredTest extends BaseProcTest {
         ", (x10)-[:R]->(y2)";
 
     @Inject
-    IdFunction idFunction;
+    private IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {

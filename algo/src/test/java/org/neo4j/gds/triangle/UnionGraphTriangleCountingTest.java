@@ -91,7 +91,7 @@ class UnionGraphTriangleCountingTest {
         "(a21)-[:T1]->(a24) ";
 
     @Inject
-    Graph graph;
+    private Graph graph;
 
     @Test
     void shouldWorkWithUnionGraphs() {

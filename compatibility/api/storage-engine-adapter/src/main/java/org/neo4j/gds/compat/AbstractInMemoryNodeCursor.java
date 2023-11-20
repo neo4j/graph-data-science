@@ -86,7 +86,7 @@ public abstract class AbstractInMemoryNodeCursor extends NodeRecord implements S
         return Arrays.copyOf(intNodeLabelReadBuffer, nodeLabelCounter.getValue());
     }
 
-    public boolean hasAtLeastOneLabelForCurrentNode() {
+    protected boolean hasAtLeastOneLabelForCurrentNode() {
         var hasLabel = new MutableBoolean(false);
         graphStore.nodes().forEachNodeLabel(getId(), __ -> {
             hasLabel.setTrue();

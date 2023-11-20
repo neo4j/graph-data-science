@@ -30,6 +30,8 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -86,6 +88,9 @@ class CELFStreamProcTest extends BaseProcTest {
         ", (d)-[:RELATIONSHIP]->(h)" +
         ", (e)-[:RELATIONSHIP]->(i)" +
         ", (f)-[:RELATIONSHIP]->(j)";
+
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {

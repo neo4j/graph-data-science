@@ -33,6 +33,8 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.Arrays;
@@ -47,6 +49,9 @@ import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
 
 class WccStreamProcTest extends BaseProcTest {
+
+    @Inject
+    private IdFunction idFunction;
 
     @Neo4jGraph
     @Language("Cypher")

@@ -28,15 +28,16 @@ import org.neo4j.gds.graphsampling.samplers.rw.rwr.RandomWalkWithRestarts;
 
 import java.util.function.Function;
 
-public class SamplerCompanion {
+public final class SamplerCompanion {
     public static final Function<CypherMapWrapper, RandomWalkWithRestartsConfig> RWR_CONFIG_PROVIDER =
-        (cypherMapWrapper) -> RandomWalkWithRestartsConfig.of(cypherMapWrapper);
+        RandomWalkWithRestartsConfig::of;
     public static final Function<CypherMapWrapper, RandomWalkWithRestartsConfig> CNARW_CONFIG_PROVIDER =
-        (cypherMapWrapper) -> CommonNeighbourAwareRandomWalkConfig.of(cypherMapWrapper);
+        CommonNeighbourAwareRandomWalkConfig::of;
 
     public static final Function<RandomWalkWithRestartsConfig, RandomWalkBasedNodesSampler> RWR_PROVIDER =
-        (rwrConfig) -> new RandomWalkWithRestarts(rwrConfig);
+        RandomWalkWithRestarts::new;
     public static final Function<RandomWalkWithRestartsConfig, RandomWalkBasedNodesSampler> CNARW_PROVIDER =
         (cnarwConfig) -> new CommonNeighbourAwareRandomWalk((CommonNeighbourAwareRandomWalkConfig) cnarwConfig);
 
+    private SamplerCompanion() {}
 }

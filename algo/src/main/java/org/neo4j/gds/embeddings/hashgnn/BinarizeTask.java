@@ -132,7 +132,7 @@ class BinarizeTask implements Runnable {
     // creates a random projection vector for each feature
     // (input features vector for each node is the concatenation of the node's properties)
     // this array is used embed the properties themselves from inputDimension to embeddingDimension dimensions.
-    public static double[][] embedProperties(int vectorDimension, SplittableRandom rng, int inputDimension) {
+    private static double[][] embedProperties(int vectorDimension, SplittableRandom rng, int inputDimension) {
         var propertyEmbeddings = new double[inputDimension][];
 
         for (int inputFeature = 0; inputFeature < inputDimension; inputFeature++) {
@@ -197,15 +197,15 @@ class BinarizeTask implements Runnable {
         return bitset;
     }
 
-    public long totalFeatureCount() {
+    private long totalFeatureCount() {
         return totalFeatureCount;
     }
 
-    public double scalarProductSum() {
+    private double scalarProductSum() {
         return scalarProductSum;
     }
 
-    public double scalarProductSumOfSquares() {
+    private double scalarProductSumOfSquares() {
         return scalarProductSumOfSquares;
     }
 

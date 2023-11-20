@@ -26,9 +26,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
+import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.functions.AsNodeFunc;
 
@@ -41,7 +44,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG_ARRAY;
-import static org.neo4j.gds.CommunityHelper.assertCommunities;
 
 class LouvainWriteProcTest extends BaseProcTest {
 
@@ -89,6 +91,9 @@ class LouvainWriteProcTest extends BaseProcTest {
         ", (k)-[:TYPE {weight: 1.0}]->(l)" +
         ", (l)-[:TYPE {weight: 1.0}]->(n)" +
         ", (m)-[:TYPE {weight: 1.0}]->(n)";
+
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {
@@ -164,7 +169,7 @@ class LouvainWriteProcTest extends BaseProcTest {
             actualCommunities.put(nodeId, row.getNumber("community").longValue());
         });
 
-        assertCommunities(
+        CommunityHelper.assertCommunities(
             actualCommunities,
             idFunction.of("a", "b", "c", "d", "e", "f", "x"),
             idFunction.of("g", "h", "i"),
@@ -213,7 +218,7 @@ class LouvainWriteProcTest extends BaseProcTest {
             actualCommunities.put(nodeId, row.getNumber("community").longValue());
         });
 
-        assertCommunities(
+        CommunityHelper.assertCommunities(
             actualCommunities,
             idFunction.of("a", "b", "c", "d", "e", "f", "x"),
             idFunction.of("g", "h", "i"),

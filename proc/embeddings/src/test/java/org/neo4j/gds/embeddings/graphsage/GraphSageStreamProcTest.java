@@ -35,6 +35,8 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
@@ -89,6 +91,9 @@ class GraphSageStreamProcTest extends BaseProcTest {
     static String graphName = "embeddingsGraph";
 
     static String modelName = "graphSageModel";
+
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {

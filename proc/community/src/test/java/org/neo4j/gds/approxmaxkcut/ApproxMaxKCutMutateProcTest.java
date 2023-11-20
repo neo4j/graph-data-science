@@ -136,7 +136,7 @@ class ApproxMaxKCutMutateProcTest extends BaseProcTest {
         TestSupport.assertGraphEquals(fromGdl(expectedMutatedGraph()), actualGraph);
     }
 
-    String expectedMutatedGraph() {
+    private String expectedMutatedGraph() {
         return
             "  (a { community: 1 })" +
             ", (b { community: 1 })" +

@@ -29,6 +29,8 @@ import org.neo4j.gds.TestLogProvider;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
@@ -69,6 +71,9 @@ class ShortestPathDijkstraWriteProcTest extends BaseProcTest {
                                             ", (c)-[:TYPE {cost: 3}]->(e)" +
                                             ", (d)-[:TYPE {cost: 11}]->(f)" +
                                             ", (e)-[:TYPE {cost: 4}]->(d)";
+
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {

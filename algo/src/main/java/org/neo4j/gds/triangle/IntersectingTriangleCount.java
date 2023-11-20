@@ -55,18 +55,18 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
 
     static final int EXCLUDED_NODE_TRIANGLE_COUNT = -1;
 
-    private Graph graph;
+    private final Graph graph;
     private final RelationshipIntersectFactory intersectFactory;
     private final RelationshipIntersectConfig intersectConfig;
     private final TriangleCountBaseConfig config;
-    private ExecutorService executorService;
+    private final ExecutorService executorService;
     private final AtomicLong queue;
 
     // results
     private final HugeAtomicLongArray triangleCounts;
     private long globalTriangleCount;
 
-    private LongAdder globalTriangleCounter;
+    private final LongAdder globalTriangleCounter;
 
     public static IntersectingTriangleCount create(
         Graph graph,

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.kmeans;
 
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.utils.StringFormatting;
@@ -58,7 +57,6 @@ public abstract class KmeansSampler {
     public static KmeansSampler createSampler(
         SamplerType samplerType,
         SplittableRandom random,
-        NodePropertyValues nodePropertyValues,
         ClusterManager clusterManager,
         long nodeCount,
         int k,
@@ -76,7 +74,6 @@ public abstract class KmeansSampler {
                 clusterManager,
                 nodeCount,
                 k,
-                nodePropertyValues,
                 distanceFromCenter,
                 concurrency,
                 executorService,
@@ -90,8 +87,8 @@ public abstract class KmeansSampler {
     public enum SamplerType {
         UNIFORM("UNIFORM", "UNIFORM"), KMEANSPP("KMEANS++", "KMEANSPP");
 
-        private String samplerName;
-        private String samplerType;
+        private final String samplerName;
+        private final String samplerType;
 
         SamplerType(String samplerName, String samplerType) {
             this.samplerName = samplerName;

@@ -24,13 +24,13 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
 public class DoubleEuclideanDistanceLinkScorer implements LinkScorer {
 
-    NodePropertyValues embeddings;
+    private final NodePropertyValues embeddings;
 
-    double[] relationshipTypeEmbedding;
+    private final double[] relationshipTypeEmbedding;
 
-    long currentSourceNode;
+    private final double[] currentCandidateTarget;
 
-    double[] currentCandidateTarget;
+    private long currentSourceNode;
 
     DoubleEuclideanDistanceLinkScorer(NodePropertyValues embeddings, DoubleArrayList relationshipTypeEmbedding) {
         this.embeddings = embeddings;

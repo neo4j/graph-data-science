@@ -30,7 +30,7 @@ import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.values.AnyValue;
 
 @SuppressForbidden(reason = "This is the compat API")
-public final class CallableProcedureImpl implements CallableProcedure {
+final class CallableProcedureImpl implements CallableProcedure {
     private final CompatCallableProcedure procedure;
 
     CallableProcedureImpl(CompatCallableProcedure procedure) {

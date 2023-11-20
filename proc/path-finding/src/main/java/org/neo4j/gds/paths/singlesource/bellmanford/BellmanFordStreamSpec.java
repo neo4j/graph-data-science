@@ -54,7 +54,6 @@ public class BellmanFordStreamSpec implements
         return (username, configuration) -> BellmanFordStreamConfig.of(configuration);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public ComputationResultConsumer<BellmanFord, BellmanFordResult, BellmanFordStreamConfig, Stream<StreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(

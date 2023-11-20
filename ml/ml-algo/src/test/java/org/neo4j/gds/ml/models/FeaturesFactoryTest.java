@@ -43,7 +43,7 @@ class FeaturesFactoryTest {
         ", (e:N {bananas: 100.0, arrayProperty: [1.0, 0.9], a: 1.0})";
 
     @Inject
-    TestGraph graph;
+    private TestGraph graph;
 
     @Test
     void lazyFeaturesSingleScalar() {

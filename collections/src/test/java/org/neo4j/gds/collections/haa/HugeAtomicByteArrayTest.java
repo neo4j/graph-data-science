@@ -479,7 +479,7 @@ final class HugeAtomicByteArrayTest {
         }
     }
 
-    private static class PassThroughPageCreator implements PageCreator.BytePageCreator {
+    private static final class PassThroughPageCreator implements PageCreator.BytePageCreator {
 
         static PassThroughPageCreator INSTANCE = new PassThroughPageCreator();
 

@@ -41,7 +41,7 @@ public abstract class IntPriorityQueue {
 
     private HugeIntArray heap;
 
-    private IntLongScatterMap mapElementToIndex;
+    private final IntLongScatterMap mapElementToIndex;
     private long size = 0;
 
     /**

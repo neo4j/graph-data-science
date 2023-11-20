@@ -25,8 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.catalog.GraphListProc;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.extension.IdFunction;
-import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.List;
@@ -59,10 +57,6 @@ class KGEPredictWriteProcTest extends BaseProcTest {
             ", (m1)-[:T4]->(m3)" +
             ", (m2)-[:T4]->(m4)" +
             ", (m2)-[:T4]->(p)";
-
-    @Inject
-    IdFunction idFunction;
-
 
     @BeforeEach
     void setup() throws Exception {

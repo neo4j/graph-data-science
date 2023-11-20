@@ -47,7 +47,7 @@ public class CypherQueryEstimator {
         );
     }
 
-    public EstimationResult runEstimationQuery(String query, Collection<String> reservedColumns) {
+    private EstimationResult runEstimationQuery(String query, Collection<String> reservedColumns) {
         return context.withRestrictedAccess(READ).apply((tx, ktx) -> {
             var explainQuery = formatWithLocale("EXPLAIN %s", query);
             try (var result = tx.execute(explainQuery)) {

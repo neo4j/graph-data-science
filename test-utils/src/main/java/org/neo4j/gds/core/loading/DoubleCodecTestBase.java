@@ -123,7 +123,7 @@ public abstract class DoubleCodecTestBase {
         }
     }
 
-    static double[] testDoubles() {
+    private static double[] testDoubles() {
         var specialNaN = Double.longBitsToDouble(Double.doubleToLongBits(Double.NaN) + 42);
         return new double[]{
             0.0,

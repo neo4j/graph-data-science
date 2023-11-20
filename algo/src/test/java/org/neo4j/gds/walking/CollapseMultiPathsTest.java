@@ -89,7 +89,7 @@ class CollapseMultiPathsTest {
     @Inject
     private IdFunction idFunction;
 
-    private IdFunction mappedId = name -> graphStore.nodes().toMappedNodeId(idFunction.of(name));
+    private final IdFunction mappedId = name -> graphStore.nodes().toMappedNodeId(idFunction.of(name));
 
     @Test
     void shouldFollowRoutesFromMovies() {

@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.DoubleUnaryOperator;
 
-public class SpanningTreeCompanion {
+public final class SpanningTreeCompanion {
 
     public static DoubleUnaryOperator parse(Object input) {
         if (input instanceof String) {
@@ -70,4 +70,6 @@ public class SpanningTreeCompanion {
             return "minimum";
         }
     }
+
+    private SpanningTreeCompanion() {}
 }

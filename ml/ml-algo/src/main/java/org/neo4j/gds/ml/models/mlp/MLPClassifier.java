@@ -63,7 +63,7 @@ public final class MLPClassifier implements Classifier {
         Variable<Matrix> inputToNextLayer = batchFeatures;
         for (int i = 0; i < data.depth()-1; i++) {
             outputFromPrevLayer = inputToNextLayer;
-            inputToNextLayer = new Relu(
+            inputToNextLayer = new Relu<>(
                 new MatrixVectorSum(
                     MatrixMultiplyWithTransposedSecondOperand.of(outputFromPrevLayer, data.weights().get(i)),
                     data.biases().get(i)),

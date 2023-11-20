@@ -37,7 +37,7 @@ class FeaturePropertiesConfigTest {
     static final String GDL_GRAPH = "(:A {a: 1}), (:B {b: 1}), (:AB {a: 1, b: 1})";
 
     @Inject
-    GraphStore graphStore;
+    private GraphStore graphStore;
 
     @Test
     void validateMustExistOnAllLabels() {

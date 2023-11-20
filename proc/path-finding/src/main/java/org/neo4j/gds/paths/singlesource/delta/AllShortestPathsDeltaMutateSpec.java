@@ -53,7 +53,6 @@ public class AllShortestPathsDeltaMutateSpec implements AlgorithmSpec<DeltaStepp
         return (username, configuration) -> AllShortestPathsDeltaMutateConfig.of(configuration);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public ComputationResultConsumer<DeltaStepping, PathFindingResult, AllShortestPathsDeltaMutateConfig, Stream<MutateResult>> computationResultConsumer() {
         return new ShortestPathMutateResultConsumer<>();

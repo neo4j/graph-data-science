@@ -39,6 +39,6 @@ public class TrainResult extends MLTrainResult {
         long trainMillis
     ) {
         super(Optional.of(model), trainMillis);
-        this.modelSelectionStats = trainingStatistics.toMap();;
+        this.modelSelectionStats = trainingStatistics.toMap();
     }
 }

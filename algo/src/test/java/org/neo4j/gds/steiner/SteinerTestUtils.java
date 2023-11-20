@@ -25,9 +25,9 @@ import org.neo4j.gds.extension.IdFunction;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class SteinerTestUtils {
+final class SteinerTestUtils {
 
-    final static Offset offset = Offset.offset(1e-5);
+    static final Offset<Double> offset = Offset.offset(1e-5);
 
     static void assertTreeIsCorrect(
         IdFunction idFunction,
@@ -61,4 +61,6 @@ public class SteinerTestUtils {
         }
         return nodes;
     }
+
+    private SteinerTestUtils() {}
 }

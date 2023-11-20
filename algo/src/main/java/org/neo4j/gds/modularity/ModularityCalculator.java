@@ -35,7 +35,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.DoubleAdder;
 import java.util.function.LongUnaryOperator;
 
-public class ModularityCalculator extends Algorithm<ModularityResult> {
+public final class ModularityCalculator extends Algorithm<ModularityResult> {
 
     private final Graph graph;
     private final LongUnaryOperator communityIdProvider;

@@ -57,7 +57,7 @@ class FilteredNodeSimilarityStreamProcTest extends BaseProcTest {
         ", (d)-[:LIKES]->(i3)";
 
     @Inject
-    IdFunction idFunction;
+    private IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {

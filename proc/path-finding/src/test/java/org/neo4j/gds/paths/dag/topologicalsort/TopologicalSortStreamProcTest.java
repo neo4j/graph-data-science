@@ -25,6 +25,8 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -43,6 +45,9 @@ class TopologicalSortStreamProcTest extends BaseProcTest {
         ", (n0)-[:R]->(n2)" +
         ", (n2)-[:R]->(n1)" +
         ", (n3)-[:R]->(n0)";
+
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setUp() throws Exception {

@@ -65,7 +65,7 @@ class PipelineExecutorTest {
 
     @Test
     void shouldCleanGraphStoreWhenComputationIsComplete() {
-        var pipelineExecutor = new SucceedingPipelineExecutor(
+        var pipelineExecutor = new SucceedingPipelineExecutor<>(
             new BogusNodePropertyPipeline(),
             graphStore,
             new PipelineExecutorTestConfig(),
@@ -78,7 +78,7 @@ class PipelineExecutorTest {
 
     @Test
     void shouldCleanGraphStoreOnFailureWhenExecuting() {
-        var pipelineExecutor = new FailingPipelineExecutor(
+        var pipelineExecutor = new FailingPipelineExecutor<>(
             new BogusNodePropertyPipeline(),
             graphStore,
             new PipelineExecutorTestConfig(),
@@ -93,7 +93,7 @@ class PipelineExecutorTest {
     void shouldHaveCorrectProgressLoggingOnSuccessfulComputation() {
         var log = Neo4jProxy.testLog();
         var pipeline = new BogusNodePropertyPipeline();
-        var pipelineExecutor = new SucceedingPipelineExecutor(
+        var pipelineExecutor = new SucceedingPipelineExecutor<>(
             pipeline,
             graphStore,
             new PipelineExecutorTestConfig(),
@@ -116,7 +116,7 @@ class PipelineExecutorTest {
 
     @Test
     void shouldCleanGraphStoreWhenNodePropertyStepIsFailing() {
-        var pipelineExecutor = new SucceedingPipelineExecutor(
+        var pipelineExecutor = new SucceedingPipelineExecutor<>(
             new FailingNodePropertyPipeline(),
             graphStore,
             new PipelineExecutorTestConfig(),
@@ -132,7 +132,7 @@ class PipelineExecutorTest {
     void shouldHaveCorrectProgressLoggingOnFailure() {
         var log = Neo4jProxy.testLog();
         var pipeline = new BogusNodePropertyPipeline();
-        var pipelineExecutor = new FailingPipelineExecutor(
+        var pipelineExecutor = new FailingPipelineExecutor<>(
             pipeline,
             graphStore,
             new PipelineExecutorTestConfig(),
@@ -160,7 +160,7 @@ class PipelineExecutorTest {
             Stream.of(new L2FeatureStep(List.of("a")))
         );
 
-        var executor = new FailingPipelineExecutor(
+        var executor = new FailingPipelineExecutor<>(
             pipeline,
             invalidGraphStore,
             new PipelineExecutorTestConfig(),
@@ -221,7 +221,7 @@ class PipelineExecutorTest {
         }
 
         @Override
-        public void splitDatasets() {};
+        public void splitDatasets() {}
 
         @Override
         protected String execute(Map<DatasetSplits, PipelineGraphFilter> dataSplits) {

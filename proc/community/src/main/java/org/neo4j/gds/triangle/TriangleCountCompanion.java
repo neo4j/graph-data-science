@@ -26,4 +26,5 @@ final class TriangleCountCompanion {
         "Triangle counting is a community detection graph algorithm that is used to " +
         "determine the number of triangles passing through each node in the graph.";
 
+    private TriangleCountCompanion() {}
 }

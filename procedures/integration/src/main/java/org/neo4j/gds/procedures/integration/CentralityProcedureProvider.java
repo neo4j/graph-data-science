@@ -52,7 +52,7 @@ import org.neo4j.kernel.api.procedure.Context;
 /**
  * We call it a provider because it is used as a sub-provider to the {@link org.neo4j.gds.procedures.GraphDataScience} provider.
  */
-public class CentralityProcedureProvider {
+class CentralityProcedureProvider {
     // dull utilities
     private final FictitiousGraphStoreEstimationService fictitiousGraphStoreEstimationService = new FictitiousGraphStoreEstimationService();
 

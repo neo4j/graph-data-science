@@ -33,6 +33,8 @@ import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.Arrays;
@@ -65,6 +67,9 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
         ", (b)-[:X]->(n9:B {id: 9,  weight: 1.0, seed: 1}) " +
         ", (b)-[:X]->(n10:B {id: 10, weight: 1.0, seed: 1}) " +
         ", (b)-[:X]->(n11:B {id: 11, weight: 8.0, seed: 2})";
+
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {

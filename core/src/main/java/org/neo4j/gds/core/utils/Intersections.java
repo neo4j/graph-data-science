@@ -196,4 +196,6 @@ public final class Intersections {
 
         return (float) (dotProduct / Math.sqrt(xLength * yLength));
     }
+
+    private Intersections() {}
 }

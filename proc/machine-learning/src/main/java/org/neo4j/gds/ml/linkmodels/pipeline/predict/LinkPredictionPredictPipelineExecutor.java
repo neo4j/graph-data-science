@@ -109,7 +109,7 @@ public class LinkPredictionPredictPipelineExecutor extends PredictPipelineExecut
             config.isApproximateStrategy()
                 ? Tasks.task(
                 "Approximate link prediction",
-                KnnFactory.knnTaskTree(graphStore.getUnion(), config.approximateConfig())
+                KnnFactory.knnTaskTree(graphStore.getUnion().nodeCount(), config.approximateConfig().maxIterations())
             )
                 : Tasks.leaf("Exhaustive link prediction", graphStore.getUnion().nodeCount() * graphStore.getUnion().nodeCount() / 2)
         );

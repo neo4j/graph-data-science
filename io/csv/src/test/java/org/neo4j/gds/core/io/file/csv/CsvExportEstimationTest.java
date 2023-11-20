@@ -48,7 +48,7 @@ class CsvExportEstimationTest {
         ", (d)-[:REL2 { prop3: 5, prop4: 47 }]->(a)";
 
     @Inject
-    public GraphStore graphStore;
+    private GraphStore graphStore;
 
     @Test
     void estimate() {

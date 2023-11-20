@@ -30,7 +30,7 @@ public class DoubleDistMultLinkScorer implements LinkScorer {
 
     private long currentSourceNode;
 
-    private double[] currentCandidateTarget;
+    private final double[] currentCandidateTarget;
 
 
     DoubleDistMultLinkScorer(NodePropertyValues embeddings, DoubleArrayList relationshipTypeEmbedding) {

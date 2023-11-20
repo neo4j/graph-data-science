@@ -28,7 +28,7 @@ import java.util.List;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public abstract class AbstractLinkFeatureAppenderFactory {
+abstract class AbstractLinkFeatureAppenderFactory {
 
     protected abstract LinkFeatureAppender doubleArrayAppender(NodePropertyValues props, int dimension);
     protected abstract LinkFeatureAppender floatArrayAppender(NodePropertyValues props, int dimension);

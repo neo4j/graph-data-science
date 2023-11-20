@@ -25,6 +25,8 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.graphdb.QueryExecutionException;
 
@@ -48,6 +50,9 @@ class BetweennessCentralityStreamProcTest extends BaseProcTest {
         ", (b)-[:REL]->(c)" +
         ", (c)-[:REL]->(d)" +
         ", (d)-[:REL]->(e)";
+
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {

@@ -55,7 +55,7 @@ public class DropNodePropertiesApplication {
         );
     }
 
-    long computeWithProgressTracking(
+    private long computeWithProgressTracking(
         GraphStore graphStore,
         ProgressTrackerFactory progressTrackerFactory,
         List<String> nodeProperties
@@ -67,7 +67,7 @@ public class DropNodePropertiesApplication {
         return computeWithErrorHandling(graphStore, progressTracker, nodeProperties);
     }
 
-    long computeWithErrorHandling(
+    private long computeWithErrorHandling(
         GraphStore graphStore,
         ProgressTracker progressTracker,
         List<String> nodeProperties

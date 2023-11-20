@@ -52,7 +52,6 @@ public class AllShortestPathsDeltaWriteSpec implements AlgorithmSpec<DeltaSteppi
         return (username, configuration) -> AllShortestPathsDeltaWriteConfig.of(configuration);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public ComputationResultConsumer<DeltaStepping, PathFindingResult, AllShortestPathsDeltaWriteConfig, Stream<StandardWriteRelationshipsResult>> computationResultConsumer() {
         return new ShortestPathWriteResultConsumer<>();

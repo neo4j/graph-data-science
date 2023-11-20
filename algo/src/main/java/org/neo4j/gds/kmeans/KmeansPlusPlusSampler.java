@@ -21,9 +21,8 @@ package org.neo4j.gds.kmeans;
 
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
@@ -32,13 +31,11 @@ import java.util.concurrent.ExecutorService;
 
 public class KmeansPlusPlusSampler extends KmeansSampler {
 
-    private List<KmeansTask> tasks;
+    private final List<KmeansTask> tasks;
     private final int concurrency;
     private final ProgressTracker progressTracker;
     private final HugeDoubleArray distanceFromClosestCentroid;
     private final ExecutorService executorService;
-
-    private NodePropertyValues nodePropertyValues;
 
 
     public KmeansPlusPlusSampler(
@@ -46,7 +43,6 @@ public class KmeansPlusPlusSampler extends KmeansSampler {
         ClusterManager clusterManager,
         long nodeCount,
         int k,
-        NodePropertyValues nodePropertyValues,
         HugeDoubleArray distanceFromClosestCentroid,
         int concurrency,
         ExecutorService executorService,
@@ -54,7 +50,6 @@ public class KmeansPlusPlusSampler extends KmeansSampler {
         ProgressTracker progressTracker
     ) {
         super(random, clusterManager, nodeCount, k);
-        this.nodePropertyValues = nodePropertyValues;
         this.distanceFromClosestCentroid = distanceFromClosestCentroid;
         this.executorService = executorService;
         this.tasks = tasks;

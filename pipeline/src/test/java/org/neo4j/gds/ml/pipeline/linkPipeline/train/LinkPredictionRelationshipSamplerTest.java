@@ -98,10 +98,10 @@ class LinkPredictionRelationshipSamplerTest {
         "(c)-[:NEGATIVE]->(k)";
 
     @Inject
-    GraphStore graphStore;
+    private GraphStore graphStore;
 
     @Inject
-    IdFunction idFunction;
+    private IdFunction idFunction;
 
     @GdlGraph(graphNamePrefix = "multi", orientation = Orientation.UNDIRECTED)
     private static final String MULTI_GRAPH =
@@ -129,7 +129,7 @@ class LinkPredictionRelationshipSamplerTest {
         "(n1)-[:T]->(m1)";
 
     @Inject
-    GraphStore multiGraphStore;
+    private GraphStore multiGraphStore;
 
     @Test
     void splitWeightedGraph() {

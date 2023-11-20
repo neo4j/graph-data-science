@@ -105,13 +105,13 @@ public class FastRPTest {
         ", (c)-[:REL {weight: 1.0}]->(b)";
 
     @Inject
-    Graph scalarGraph;
+    private Graph scalarGraph;
 
     @Inject
-    Graph arrayGraph;
+    private Graph arrayGraph;
 
     @Inject
-    GraphStore scalarGraphStore;
+    private GraphStore scalarGraphStore;
 
     @Test
     void shouldYieldSameResultsForScalarAndArrayProperties() {
@@ -497,7 +497,7 @@ public class FastRPTest {
             .randomSeed(42L)
             .build();
 
-        var factory = new FastRPFactory();
+        var factory = new FastRPFactory<>();
 
         var progressTask = factory.progressTask(graph, config);
         var log = Neo4jProxy.testLog();
@@ -542,10 +542,10 @@ public class FastRPTest {
             ", (d)-[:REL {weight: 1.0}]->(d)";
 
         @Inject
-        GraphStore graphStore;
+        private GraphStore graphStore;
 
         @Inject
-        IdFunction idFunction;
+        private IdFunction idFunction;
 
         @Test
         void shouldFailWhenNodePropertiesAreMissing() {

@@ -25,7 +25,7 @@ public class K1ColoringSpecificFields {
     private final long ranIterations;
     private final boolean didConverge;
 
-    public static K1ColoringSpecificFields EMPTY= new K1ColoringSpecificFields(0,0,0,false);
+    public final static K1ColoringSpecificFields EMPTY = new K1ColoringSpecificFields(0,0,0,false);
 
     public K1ColoringSpecificFields(
         long nodeCount,

@@ -70,18 +70,18 @@ public final class BFS extends Algorithm<HugeLongArray> {
     private final long maximumDepth;
     // An array to keep the node ids that were already traversed in the correct order.
     // It is initialized with the total number of nodes, but may contain less than that.
-    private HugeLongArray traversedNodes;
+    private final HugeLongArray traversedNodes;
 
     // An array to keep the weight/depth of the node at the same position in `traversedNodes`.
     // It is initialized with the total number of nodes, but may contain less than that.
     // This is used for early termination when `maxDepth` parameter is specified.
     // `maxDepth` specifies the number of "layers" that will be traversed in the input graph,
     // starting from `startNodeId`.
-    private HugeDoubleArray weights;
+    private final HugeDoubleArray weights;
 
     // Used to keep track of the visited nodes, the value at each index will be `true` for
     // each node id in the `traversedNodes`.
-    private HugeAtomicBitSet visited;
+    private final HugeAtomicBitSet visited;
 
     private final int concurrency;
 

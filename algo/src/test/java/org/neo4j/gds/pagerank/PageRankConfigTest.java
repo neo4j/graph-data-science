@@ -41,7 +41,7 @@ public class PageRankConfigTest {
 
 
     @Inject
-    GraphStore graphStore;
+    private GraphStore graphStore;
 
     @Test
     void shouldNotAllowNegativeSourceNodes() {

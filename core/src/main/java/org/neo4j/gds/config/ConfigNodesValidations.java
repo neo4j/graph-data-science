@@ -96,7 +96,7 @@ public final class ConfigNodesValidations {
         ));
     }
 
-    static boolean labelFilteredGraphNotContainsNode(
+    private static boolean labelFilteredGraphNotContainsNode(
         Collection<NodeLabel> filteredNodeLabels,
         IdMap idMap,
         long neoNodeId
@@ -108,7 +108,7 @@ public final class ConfigNodesValidations {
             .noneMatch(filteredNodeLabels::contains);
     }
 
-    static String nodeLabelFilterDescription(Collection<NodeLabel> filteredNodeLabels, GraphStore graphStore) {
+    private static String nodeLabelFilterDescription(Collection<NodeLabel> filteredNodeLabels, GraphStore graphStore) {
         return filteredNodeLabels.containsAll(graphStore.nodeLabels())
             ? ""
             : " for the labels " + StringJoining.join(filteredNodeLabels.stream().map(NodeLabel::name));

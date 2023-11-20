@@ -55,10 +55,10 @@ class InverseRelationshipsTest {
         ", (a)-[:T1 {prop1: 4.0D, prop2: 5.0D, prop3: 6.0D}]->(a)";
 
     @Inject
-    GraphStore graphStore;
+    private GraphStore graphStore;
 
     @Inject
-    GraphStore inverseGraphStore;
+    private GraphStore inverseGraphStore;
 
     static Stream<Object> multipleTypes() {
         return Stream.of(List.of("T1", "T2"), "*");

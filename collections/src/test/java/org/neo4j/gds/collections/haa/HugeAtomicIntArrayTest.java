@@ -479,7 +479,7 @@ final class HugeAtomicIntArrayTest {
         }
     }
 
-    private static class PassThroughPageCreator implements PageCreator.IntPageCreator {
+    private static final class PassThroughPageCreator implements PageCreator.IntPageCreator {
 
         static PassThroughPageCreator INSTANCE = new PassThroughPageCreator();
 

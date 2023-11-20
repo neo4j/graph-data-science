@@ -24,7 +24,7 @@ import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 
 import java.util.List;
 
-public final class CompositeNodeCursorImpl extends CompositeNodeCursor {
+final class CompositeNodeCursorImpl extends CompositeNodeCursor {
 
     CompositeNodeCursorImpl(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
         super(cursors, labelIds);

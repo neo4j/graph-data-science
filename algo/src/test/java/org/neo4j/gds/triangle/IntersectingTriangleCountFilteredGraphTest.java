@@ -56,7 +56,7 @@ class IntersectingTriangleCountFilteredGraphTest {
                                     ", (b1)-[:R1]->(b3)";
 
     @Inject
-    GraphStore graphStore;
+    private GraphStore graphStore;
     
 
     @Test

@@ -32,6 +32,8 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphWriteNodePropertiesProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.graphdb.QueryExecutionException;
 
@@ -78,6 +80,8 @@ class ApproxMaxKCutStreamProcTest extends BaseProcTest {
 
     static final String GRAPH_NAME = "myGraph";
 
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setupGraph() throws Exception {
@@ -125,7 +129,7 @@ class ApproxMaxKCutStreamProcTest extends BaseProcTest {
 
     }
 
-    static Stream<Arguments> communitySizeInputs() {
+    private static Stream<Arguments> communitySizeInputs() {
         return Stream.of(
                 Arguments.of(Map.of("minCommunitySize", 1), Map.of(
                         "a", 1L,

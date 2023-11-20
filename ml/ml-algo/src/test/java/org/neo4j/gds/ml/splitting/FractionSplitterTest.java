@@ -43,7 +43,7 @@ class FractionSplitterTest {
 
         assertThat(split.trainSet().toArray()).containsExactly(0, 1, 2, 3, 4, 5);
         assertThat(split.testSet().toArray()).containsExactly(6, 7, 8, 9);
-    };
+    }
 
 
     @Test

@@ -67,10 +67,10 @@ class ScalePropertiesTest {
         "(e:A {a: -10, b: 24, c: 100, bAndC: [24.0, 100.0], longArrayB: [24L], floatArrayB: [24.0], doubleArray: [1.000000005d], mixedSizeArray: [1.0, 2.0, 3.0]})";
 
     @Inject
-    TestGraph graph;
+    private TestGraph graph;
 
     @Inject
-    GraphDimensions graphDimensions;
+    private GraphDimensions graphDimensions;
 
     @Test
     void scaleSingleProperty() {

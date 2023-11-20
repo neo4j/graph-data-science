@@ -22,7 +22,7 @@ package org.neo4j.gds.leiden;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 
-public class CommunityData {
+class CommunityData {
     final HugeDoubleArray communityVolumes;
     final HugeLongArray seededCommunitiesForNextIteration;
     final HugeDoubleArray aggregatedNodeSeedVolume;

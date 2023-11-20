@@ -32,8 +32,8 @@ import java.util.SplittableRandom;
 import java.util.stream.Collectors;
 
 class DensifyTask implements Runnable {
-    static final int SPARSITY = 3;
-    static final double ENTRY_PROBABILITY = 1.0 / (2 * SPARSITY);
+    private static final int SPARSITY = 3;
+    private static final double ENTRY_PROBABILITY = 1.0 / (2 * SPARSITY);
     private final Partition partition;
     private final HashGNNConfig config;
     private final HugeObjectArray<double[]> denseFeatures;

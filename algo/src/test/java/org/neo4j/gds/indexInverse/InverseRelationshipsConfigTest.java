@@ -44,10 +44,10 @@ class InverseRelationshipsConfigTest {
     @GdlGraph(graphNamePrefix = "undirected", orientation = Orientation.UNDIRECTED)
     private static final String UNDIRECTED = "()-[:X]->()";
     @Inject
-    GraphStore graphStore;
+    private GraphStore graphStore;
 
     @Inject
-    GraphStore undirectedGraphStore;
+    private GraphStore undirectedGraphStore;
 
     @Test
     void supportString() {

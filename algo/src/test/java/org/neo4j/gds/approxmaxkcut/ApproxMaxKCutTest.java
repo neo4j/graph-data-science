@@ -106,7 +106,7 @@ final class ApproxMaxKCutTest {
     @Inject
     private TestGraph minGraph;
 
-    static Stream<Arguments> kCutParameters() {
+    private static Stream<Arguments> kCutParameters() {
         return TestSupport.crossArguments(
             () -> Stream.of(
                 Arguments.of(
@@ -369,7 +369,7 @@ final class ApproxMaxKCutTest {
         }
     }
 
-    static long memUsageHelper(long nodeCount, int k, boolean vns) {
+    private static long memUsageHelper(long nodeCount, int k, boolean vns) {
         var memUsage = 0;
 
         memUsage += MemoryUsage.sizeOfInstance(ApproxMaxKCut.class);
@@ -388,7 +388,7 @@ final class ApproxMaxKCutTest {
         return memUsage;
     }
 
-    static Stream<Arguments> configParamsForMemoryEstimationTest() {
+    private static Stream<Arguments> configParamsForMemoryEstimationTest() {
         return TestSupport.crossArguments(
             // node count
             () -> Stream.of(Arguments.of(10_000L), Arguments.of(40_000L)),

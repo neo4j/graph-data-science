@@ -64,7 +64,7 @@ class GraphStoreCatalogServiceGetGraphTest {
             ", (g)-[:T1]->(a)";
 
     @Inject
-    GraphStore graphStore;
+    private GraphStore graphStore;
 
     @Test
     void shouldWorkWithoutAnyFilters(SoftAssertions assertions) {

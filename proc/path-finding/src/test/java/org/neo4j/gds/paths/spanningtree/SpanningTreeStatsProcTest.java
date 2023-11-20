@@ -26,6 +26,8 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -55,6 +57,9 @@ class SpanningTreeStatsProcTest extends BaseProcTest {
                                     "CREATE (b)-[:TYPE {cost:4.0}]->(d) " +
                                     "CREATE (c)-[:TYPE {cost:5.0}]->(e) " +
                                     "CREATE (d)-[:TYPE {cost:6.0}]->(e)";
+
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {

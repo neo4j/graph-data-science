@@ -35,9 +35,7 @@ import org.neo4j.gds.logging.Log;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class Neo4jDatabaseRelationshipWriter {
-
-
+public final class Neo4jDatabaseRelationshipWriter {
     public static WriteRelationshipResult writeRelationship(
         String writeRelationshipType,
         String writeProperty,
@@ -81,7 +79,7 @@ public class Neo4jDatabaseRelationshipWriter {
 
         }
         return new WriteRelationshipResult(graph.relationshipCount(), writeMillis.get());
-
     }
-    
+
+    private Neo4jDatabaseRelationshipWriter() {}
 }

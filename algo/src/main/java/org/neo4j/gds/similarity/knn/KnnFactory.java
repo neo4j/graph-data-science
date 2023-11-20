@@ -85,21 +85,21 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return knnTaskTree(graph, config);
+        return knnTaskTree(graph.nodeCount(), config.maxIterations());
     }
 
-    public static Task knnTaskTree(Graph graph, KnnBaseConfig config) {
+    public static Task knnTaskTree(long nodeCount, int maxIterations) {
         return Tasks.task(
             KNN_BASE_TASK_NAME,
-            Tasks.leaf("Initialize random neighbors", graph.nodeCount()),
+            Tasks.leaf("Initialize random neighbors", nodeCount),
             Tasks.iterativeDynamic(
                 "Iteration",
                 () -> List.of(
-                    Tasks.leaf("Split old and new neighbors", graph.nodeCount()),
-                    Tasks.leaf("Reverse old and new neighbors", graph.nodeCount()),
-                    Tasks.leaf("Join neighbors", graph.nodeCount())
+                    Tasks.leaf("Split old and new neighbors", nodeCount),
+                    Tasks.leaf("Reverse old and new neighbors", nodeCount),
+                    Tasks.leaf("Join neighbors", nodeCount)
                 ),
-                config.maxIterations()
+                maxIterations
             )
         );
     }

@@ -25,6 +25,8 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.paths.PathFactory;
 import org.neo4j.gds.paths.StreamResult;
@@ -83,6 +85,9 @@ class ShortestPathAStarStreamProcTest extends BaseProcTest {
     long idA, idB, idC, idD, idE, idF, idG, idH, idX;
     long[] ids0;
     double[] costs0;
+
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {

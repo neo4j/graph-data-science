@@ -61,10 +61,10 @@ class UserInputNegativeSamplerTest {
         "(a4)-->(a5)";
 
     @Inject
-    Graph graph;
+    private Graph graph;
 
     @Inject
-    IdFunction idFunction;
+    private IdFunction idFunction;
 
 
     @Test

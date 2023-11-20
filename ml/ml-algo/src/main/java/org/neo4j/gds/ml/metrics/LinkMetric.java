@@ -69,7 +69,7 @@ public enum LinkMetric implements Metric {
         return curveConsumer.auc();
     }
 
-    private static class SignedProbabilitiesConsumer {
+    private static final class SignedProbabilitiesConsumer {
         private final CurveConsumer innerConsumer;
         private final long positiveCount;
         private final long negativeCount;

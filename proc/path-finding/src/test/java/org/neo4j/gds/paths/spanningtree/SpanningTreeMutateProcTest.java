@@ -31,6 +31,8 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
 import java.util.Optional;
@@ -64,6 +66,9 @@ class SpanningTreeMutateProcTest extends BaseProcTest {
         "CREATE (c)-[:TYPE {cost:5.0}]->(e) " +
         "CREATE (d)-[:TYPE {cost:6.0}]->(e)";
 
+
+    @Inject
+    private IdFunction idFunction;
 
     @BeforeEach
     void setup() throws Exception {

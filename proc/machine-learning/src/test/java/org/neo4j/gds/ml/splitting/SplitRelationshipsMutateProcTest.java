@@ -100,7 +100,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
             () -> runQuery(query)
         );
         assertThat(ex)
-            .getRootCause()
+            .rootCause()
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Could not find the specified `nonNegativeRelationshipTypes` of ['MISSING']. Available relationship types are ['T'].");
     }
@@ -120,7 +120,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
             () -> runQuery(query)
         );
         assertThat(ex)
-            .getRootCause()
+            .rootCause()
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("The specified `remainingRelationshipType` of `T` already exists in the in-memory graph.");
     }
@@ -141,7 +141,7 @@ class SplitRelationshipsMutateProcTest extends BaseProcTest {
             () -> runQuery(query)
         );
         assertThat(ex)
-            .getRootCause()
+            .rootCause()
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("The specified `holdoutRelationshipType` of `T` already exists in the in-memory graph.");
     }

@@ -52,7 +52,7 @@ public class InMemoryRelationshipScanCursorTest extends CypherTest {
                                            ", (c)-[:REL3 {relProp: 5.0D}]->(b)";
 
     @Inject
-    IdFunction idFunction;
+    private IdFunction idFunction;
 
     AbstractInMemoryRelationshipScanCursor relationshipScanCursor;
 

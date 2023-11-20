@@ -49,10 +49,10 @@ class GraphStoreNodeVisitorTest {
                               ", (c:B {prop3: 13.37D})";
 
     @Inject
-    GraphStore graphStore;
+    private GraphStore graphStore;
 
     @Inject
-    Graph graph;
+    private Graph graph;
 
     @Test
     void shouldAddNodesToNodesBuilder() {

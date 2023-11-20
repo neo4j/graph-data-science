@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
-public class NodeClassificationPipelineConstants {
+public final class NodeClassificationPipelineConstants {
     static final String ESTIMATE_PREDICT_DESCRIPTION = "Estimates memory for predicting classes for all nodes based on a previously trained pipeline model";
     static final String PREDICT_DESCRIPTION = "Predicts classes for all nodes based on a previously trained pipeline model";
+
+    private NodeClassificationPipelineConstants() {}
 }

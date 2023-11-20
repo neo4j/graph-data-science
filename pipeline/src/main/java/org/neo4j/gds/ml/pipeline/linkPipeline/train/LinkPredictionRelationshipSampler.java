@@ -54,7 +54,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class LinkPredictionRelationshipSampler {
 
     private final LinkPredictionSplitConfig splitConfig;
-    private LinkPredictionTrainConfig trainConfig;
+    private final LinkPredictionTrainConfig trainConfig;
     private final ProgressTracker progressTracker;
 
     private final TerminationFlag terminationFlag;

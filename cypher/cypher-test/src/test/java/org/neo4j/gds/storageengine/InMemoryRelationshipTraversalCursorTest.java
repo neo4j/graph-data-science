@@ -31,6 +31,7 @@ import org.neo4j.gds.compat.AbstractInMemoryRelationshipTraversalCursor;
 import org.neo4j.gds.compat.StorageEngineProxy;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.values.storable.Values;
 
@@ -52,6 +53,9 @@ class InMemoryRelationshipTraversalCursorTest extends CypherTest {
                                     ", (c:A)" +
                                     ", (a)-[:REL { prop1: 42.0, prop2: 12.0 }]->(b)" +
                                     ", (a)-[:REL { prop1: 13.37, prop2: 4.2 }]->(c)";
+
+    @Inject
+    private IdFunction idFunction;
 
     IdFunction mappedIdFunction;
 

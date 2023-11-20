@@ -55,7 +55,7 @@ class RandomNegativeSamplerTest {
         "(a5)-->(a6)";
 
     @Inject
-    Graph graph;
+    private Graph graph;
 
     @Test
     void generateNegativeSamples() {

@@ -22,7 +22,7 @@ package org.neo4j.gds.core.utils;
 import java.util.concurrent.TimeUnit;
 import java.util.function.LongConsumer;
 
-public class ProgressTimer implements AutoCloseable {
+public final class ProgressTimer implements AutoCloseable {
 
     private final LongConsumer onStop;
     private final long startTime;

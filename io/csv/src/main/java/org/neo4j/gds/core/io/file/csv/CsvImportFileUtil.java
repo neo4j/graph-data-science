@@ -39,7 +39,7 @@ import java.util.function.Function;
 
 import static org.neo4j.gds.core.io.file.csv.CsvFileInput.LINE_READER;
 
-public final class CsvImportFileUtil {
+final class CsvImportFileUtil {
 
     private static final ObjectReader HEADER_FILE_READER = LINE_READER;
 

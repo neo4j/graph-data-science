@@ -81,7 +81,7 @@ public class AlgoConfigParser<CONFIG extends AlgoBaseConfig> implements ProcConf
         return configurationButWithIrrelevantInputtedKeysRemoved;
     }
 
-    void validateLimits(
+    private void validateLimits(
         CONFIG algorithmConfiguration,
         String username,
         Map<String, Object> userInputWithDefaults
@@ -126,7 +126,7 @@ public class AlgoConfigParser<CONFIG extends AlgoBaseConfig> implements ProcConf
     }
 
 
-    void validateOriginalConfig(
+    private void validateOriginalConfig(
         Map<String, Object> configuration,
         Collection<String> allowedConfigKeys
     ) throws IllegalArgumentException {
@@ -136,7 +136,7 @@ public class AlgoConfigParser<CONFIG extends AlgoBaseConfig> implements ProcConf
             .requireOnlyKeysFrom(allowedConfigKeys); //ensure user has not included any  incorrect params
     }
 
-    Map<String, Object> applyDefaults(Map<String, Object> configuration, String username) {
+    private Map<String, Object> applyDefaults(Map<String, Object> configuration, String username) {
         // apply defaults
         return defaults.apply(configuration, username);
     }
