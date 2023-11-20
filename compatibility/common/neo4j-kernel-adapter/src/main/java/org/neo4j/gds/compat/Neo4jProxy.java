@@ -440,6 +440,10 @@ public final class Neo4jProxy {
         return IMPL.transactionId(kernelTransactionHandle);
     }
 
+    public static long transactionId(KernelTransaction kernelTransaction) {
+        return IMPL.transactionId(kernelTransaction);
+    }
+
     public static void reserveNeo4jIds(IdGeneratorFactory generatorFactory, int size, CursorContext cursorContext) {
         IMPL.reserveNeo4jIds(generatorFactory, size, cursorContext);
     }

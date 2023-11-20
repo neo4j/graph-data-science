@@ -724,6 +724,11 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    public long transactionId(KernelTransaction kernelTransaction) {
+        return kernelTransaction.getTransactionSequenceNumber();
+    }
+
+    @Override
     public void reserveNeo4jIds(IdGeneratorFactory generatorFactory, int size, CursorContext cursorContext) {
         IdGenerator idGenerator = generatorFactory.get(RecordIdType.NODE);
 
