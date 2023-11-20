@@ -30,7 +30,6 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import org.apache.commons.lang3.StringUtils;
-import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
@@ -68,18 +67,14 @@ public class GraphInfoLoader {
             var mappingIterator = objectReader.<GraphInfoLine>readValues(fileReader);
 
             var line = mappingIterator.next();
-            var databaseId = DatabaseId.of(line.databaseName);
 
-            // This is for backwards compatibility. If the remote database id is not specified
-            // we use the default neo4j database instead for remote database locations.
-            var remoteDatabaseId = Optional.ofNullable(StringUtils.trimToNull(line.remoteDatabaseId));
-            if (line.databaseLocation == DatabaseLocation.REMOTE && remoteDatabaseId.isEmpty()) {
-                remoteDatabaseId = Optional.of(GraphDatabaseSettings.DEFAULT_DATABASE_NAME);
-            }
+            var databaseId = DatabaseId.of(line.databaseName);
+            var remoteDatabaseId = Optional.ofNullable(StringUtils.trimToNull(line.remoteDatabaseId)).map(DatabaseId::of);
+
             var databaseInfo = ImmutableDatabaseInfo.builder()
                 .databaseId(databaseId)
                 .databaseLocation(line.databaseLocation)
-                .remoteDatabaseId(remoteDatabaseId.map(DatabaseId::of))
+                .remoteDatabaseId(remoteDatabaseId)
                 .build();
             return ImmutableGraphInfo.builder()
                 .databaseInfo(databaseInfo)
