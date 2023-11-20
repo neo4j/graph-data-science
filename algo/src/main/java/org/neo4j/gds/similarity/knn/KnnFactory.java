@@ -112,18 +112,17 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
         return MemoryEstimations.setup(
             taskName,
             (dim, concurrency) -> {
-                var boundedK = configuration.boundedK(dim.nodeCount());
-                var sampledK = configuration.sampledK(dim.nodeCount());
+                var k = configuration.k(dim.nodeCount());
 
                 LongFunction<MemoryRange> tempListEstimation = nodeCount -> MemoryRange.of(
                     HugeObjectArray.memoryEstimation(nodeCount, 0),
                     HugeObjectArray.memoryEstimation(
                         nodeCount,
-                        sizeOfInstance(LongArrayList.class) + sizeOfLongArray(sampledK)
+                        sizeOfInstance(LongArrayList.class) + sizeOfLongArray(k.sampledValue)
                     )
                 );
 
-                var neighborListEstimate = NeighborList.memoryEstimation(boundedK)
+                var neighborListEstimate = NeighborList.memoryEstimation(k.boundedValue)
                     .estimate(dim, concurrency)
                     .memoryUsage();
 
@@ -142,13 +141,13 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
                     .fixed(
                         "initial-random-neighbors (per thread)",
                         KnnFactory
-                            .initialSamplerMemoryEstimation(configuration.initialSampler(), boundedK)
+                            .initialSamplerMemoryEstimation(configuration.initialSampler(), k.boundedValue)
                             .times(concurrency)
                     )
                     .fixed(
                         "sampled-random-neighbors (per thread)",
                         MemoryRange.of(
-                            sizeOfIntArray(sizeOfOpenHashContainer(sampledK)) * concurrency
+                            sizeOfIntArray(sizeOfOpenHashContainer(k.sampledValue)) * concurrency
                         )
                     )
                     .build();

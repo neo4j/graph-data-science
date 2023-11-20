@@ -41,9 +41,6 @@ public class Knn extends Algorithm<KnnResult> {
     private final int concurrency;
     private final int maxIterations;
     private final double sampleRate;
-    private final int topK;
-    private final int boundedK;
-    private final int sampledK;
     private final double deltaThreshold;
     private final double similarityCutoff;
     private final int minBatchSize;
@@ -55,6 +52,7 @@ public class Knn extends Algorithm<KnnResult> {
     private final NeighbourConsumers neighborConsumers;
     private final SplittableRandom splittableRandom;
     private final KnnSampler.Provider samplerProvider;
+    private final K k;
 
     private long nodePairsConsidered;
 
@@ -84,9 +82,7 @@ public class Knn extends Algorithm<KnnResult> {
             config.concurrency(),
             config.maxIterations(),
             config.sampleRate(),
-            config.topK(),
-            config.boundedK(graph.nodeCount()),
-            config.sampledK(graph.nodeCount()),
+            config.k(graph.nodeCount()),
             config.deltaThreshold(),
             config.similarityCutoff(),
             config.minBatchSize(),
@@ -115,9 +111,7 @@ public class Knn extends Algorithm<KnnResult> {
             config.concurrency(),
             config.maxIterations(),
             config.sampleRate(),
-            config.topK(),
-            config.boundedK(graph.nodeCount()),
-            config.sampledK(graph.nodeCount()),
+            config.k(graph.nodeCount()),
             config.deltaThreshold(),
             config.similarityCutoff(),
             config.minBatchSize(),
@@ -138,9 +132,7 @@ public class Knn extends Algorithm<KnnResult> {
         int concurrency,
         int maxIterations,
         double sampleRate,
-        int topK,
-        int boundedK,
-        int sampledK,
+        K k,
         double deltaThreshold,
         double similarityCutoff,
         int minBatchSize,
@@ -158,9 +150,7 @@ public class Knn extends Algorithm<KnnResult> {
         this.concurrency = concurrency;
         this.maxIterations = maxIterations;
         this.sampleRate = sampleRate;
-        this.topK = topK;
-        this.boundedK = boundedK;
-        this.sampledK = sampledK;
+        this.k = k;
         this.deltaThreshold = deltaThreshold;
         this.similarityCutoff = similarityCutoff;
         this.minBatchSize = minBatchSize;
@@ -177,7 +167,7 @@ public class Knn extends Algorithm<KnnResult> {
                 this.samplerProvider = new UniformKnnSampler.Provider(graph.nodeCount(), splittableRandom);
                 break;
             case RANDOMWALK:
-                this.samplerProvider = new RandomWalkKnnSampler.Provider(graph, randomSeed, boundedK, splittableRandom);
+                this.samplerProvider = new RandomWalkKnnSampler.Provider(graph, randomSeed, k.boundedValue, splittableRandom);
                 break;
             default:
                 throw new IllegalStateException("Invalid KnnSampler");
@@ -190,7 +180,7 @@ public class Knn extends Algorithm<KnnResult> {
 
     @Override
     public KnnResult compute() {
-        if (graph.nodeCount() < 2 || topK == 0) {
+        if (graph.nodeCount() < 2 || k.value == 0) {
             return new EmptyResult();
         }
         this.progressTracker.beginSubTask();
@@ -198,7 +188,7 @@ public class Knn extends Algorithm<KnnResult> {
         HugeObjectArray<NeighborList> neighbors = initializeRandomNeighbors();
         this.progressTracker.endSubTask();
 
-        var maxUpdates = (long) Math.ceil(sampleRate * topK * graph.nodeCount());
+        var maxUpdates = (long) Math.ceil(sampleRate * k.value * graph.nodeCount());
         var updateThreshold = (long) Math.floor(deltaThreshold * maxUpdates);
 
         long updateCount;
@@ -256,7 +246,7 @@ public class Knn extends Algorithm<KnnResult> {
                     similarityFunction,
                     neighborFilterFactory.create(),
                     neighbors,
-                    boundedK,
+                    k.boundedValue,
                     partition,
                     progressTracker,
                     neighborConsumers
@@ -290,7 +280,7 @@ public class Knn extends Algorithm<KnnResult> {
             neighbors,
             allOldNeighbors,
             allNewNeighbors,
-            sampledK,
+            k.sampledValue,
             progressTracker
         ));
         progressTracker.endSubTask();
@@ -323,7 +313,7 @@ public class Knn extends Algorithm<KnnResult> {
                 allNewNeighbors,
                 reverseOldNeighbors,
                 reverseNewNeighbors,
-                sampledK,
+                k.sampledValue,
                 perturbationRate,
                 randomJoins,
                 partition,

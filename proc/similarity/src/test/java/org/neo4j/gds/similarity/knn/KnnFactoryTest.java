@@ -55,8 +55,7 @@ class KnnFactoryTest {
     @MethodSource("smallParameters")
     void memoryEstimationWithNodeProperty(long nodeCount, KnnSampler.SamplerType initialSampler) {
         var config = knnConfig(initialSampler);
-        var boundedK = config.boundedK(nodeCount);
-        var sampledK = config.sampledK(nodeCount);
+        var k = config.k(nodeCount);
 
         MemoryEstimation estimation = new KnnFactory<>().memoryEstimation(config);
         GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
@@ -65,8 +64,8 @@ class KnnFactoryTest {
 
         assertEstimation(
             nodeCount,
-            boundedK,
-            sampledK,
+            k.boundedValue,
+            k.sampledValue,
             initialSampler,
             actual
         );
@@ -86,15 +85,14 @@ class KnnFactoryTest {
     @MethodSource("largeParameters")
     void memoryEstimationLargePagesWithProperty(long nodeCount, KnnSampler.SamplerType initialSampler) {
         var config = knnConfig(initialSampler);
-        var boundedK = config.boundedK(nodeCount);
-        var sampledK = config.sampledK(nodeCount);
+        var k = config.k(nodeCount);
 
         MemoryEstimation estimation = new KnnFactory<>().memoryEstimation(config);
         GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
         MemoryTree estimate = estimation.estimate(dimensions, 1);
         MemoryRange actual = estimate.memoryUsage();
 
-        assertEstimation(nodeCount, boundedK, sampledK, initialSampler, actual);
+        assertEstimation(nodeCount, k.boundedValue, k.sampledValue, initialSampler, actual);
     }
 
     private void assertEstimation(
