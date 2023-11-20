@@ -188,9 +188,7 @@ public class CentralityProcedureFacade {
 
         var computationResult = streamBusinessFacade.degreeCentrality(
             graphName,
-            config,
-            user,
-            databaseId
+            config
         );
 
         return DefaultCentralityComputationalResultTransformer.toStreamResult(computationResult);
@@ -205,8 +203,6 @@ public class CentralityProcedureFacade {
         var computationResult = statsBusinessFacade.degreeCentrality(
             graphName,
             config,
-            user,
-            databaseId,
             procedureReturnColumns.contains("centralityDistribution")
         );
 
@@ -222,8 +218,6 @@ public class CentralityProcedureFacade {
         var computationResult = mutateBusinessFacade.degreeCentrality(
             graphName,
             config,
-            user,
-            databaseId,
             procedureReturnColumns.contains("centralityDistribution")
         );
 
@@ -240,8 +234,6 @@ public class CentralityProcedureFacade {
         var computationResult = writeBusinessFacade.degreeCentrality(
             graphName,
             config,
-            user,
-            databaseId,
             procedureReturnColumns.contains("centralityDistribution")
         );
 

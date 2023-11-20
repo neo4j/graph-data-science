@@ -49,16 +49,12 @@ public class CentralityAlgorithmsStreamBusinessFacade {
 
     public StreamComputationResult<DegreeCentralityResult> degreeCentrality(
         String graphName,
-        DegreeCentralityStreamConfig config,
-        User user,
-        DatabaseId databaseId
+        DegreeCentralityStreamConfig config
     ) {
 
         var result = this.centralityAlgorithmsFacade.degreeCentrality(
             graphName,
-            config,
-            user,
-            databaseId
+            config
         );
 
         return createStreamComputationResult(result);

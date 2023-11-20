@@ -50,17 +50,15 @@ public class CentralityAlgorithmsFacade {
 
     AlgorithmComputationResult<DegreeCentralityResult> degreeCentrality(
         String graphName,
-        DegreeCentralityConfig config,
-        User user,
-        DatabaseId databaseId
+        DegreeCentralityConfig config
+
     ) {
         return algorithmRunner.run(
             graphName,
             config,
             config.relationshipWeightProperty(),
-            new DegreeCentralityFactory<>(),
-            user,
-            databaseId
+            new DegreeCentralityFactory<>()
+
         );
     }
 

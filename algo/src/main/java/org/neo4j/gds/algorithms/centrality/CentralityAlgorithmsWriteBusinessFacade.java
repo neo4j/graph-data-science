@@ -24,7 +24,6 @@ import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.centrality.specificfields.CentralityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ArrowConnectionInfo;
@@ -75,13 +74,11 @@ public class CentralityAlgorithmsWriteBusinessFacade {
     public NodePropertyWriteResult<DefaultCentralitySpecificFields> degreeCentrality(
         String graphName,
         DegreeCentralityWriteConfig configuration,
-        User user,
-        DatabaseId databaseId,
         boolean shouldComputeCentralityDistribution
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
-            () -> centralityAlgorithmsFacade.degreeCentrality(graphName, configuration, user, databaseId)
+            () -> centralityAlgorithmsFacade.degreeCentrality(graphName, configuration)
         );
 
         return writeToDatabase(
@@ -105,7 +102,7 @@ public class CentralityAlgorithmsWriteBusinessFacade {
         String procedureName,
         int writeConcurrency,
         String writeProperty,
-        Optional<WriteConfig.ArrowConnectionInfo> arrowConnectionInfo
+        Optional<ArrowConnectionInfo> arrowConnectionInfo
     ) {
 
         CentralityFunctionSupplier<RESULT> centralityFunctionSupplier = (r) -> r.centralityScoreProvider();

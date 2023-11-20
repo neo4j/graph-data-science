@@ -62,13 +62,11 @@ public class CentralityAlgorithmsStatsBusinessFacade {
     public StatsResult<DefaultCentralitySpecificFields> degreeCentrality(
         String graphName,
         DegreeCentralityStatsConfig configuration,
-        User user,
-        DatabaseId databaseId,
         boolean shouldComputeCentralityDistribution
     ) {
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> centralityAlgorithmsFacade.degreeCentrality(graphName, configuration, user, databaseId)
+            () -> centralityAlgorithmsFacade.degreeCentrality(graphName, configuration)
         );
 
         return statsResult(
