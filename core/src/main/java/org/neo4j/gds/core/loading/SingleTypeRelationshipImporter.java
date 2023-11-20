@@ -87,6 +87,10 @@ public final class SingleTypeRelationshipImporter {
         return this.typeId;
     }
 
+    public boolean skipDanglingRelationships() {
+        return this.importMetaData.skipDanglingRelationships();
+    }
+
     public Collection<AdjacencyBuffer.AdjacencyListBuilderTask> adjacencyListBuilderTasks(Optional<AdjacencyCompressor.ValueMapper> mapper) {
         return adjacencyBuffer.adjacencyListBuilderTasks(mapper, Optional.empty());
     }

@@ -148,6 +148,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
                         var buffer = new BufferedRelationshipConsumerBuilder()
                             .idMap(idMap)
                             .type(importer.typeId())
+                            .skipDanglingRelationships(importer.skipDanglingRelationships())
                             .capacity(scanner.bufferSize())
                             .build();
 
