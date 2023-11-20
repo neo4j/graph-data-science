@@ -513,7 +513,6 @@ class KnnTest {
                 "Knn :: Initialize random neighbors :: Start",
                 "Knn :: Initialize random neighbors 100%",
                 "Knn :: Initialize random neighbors :: Finished",
-                "Knn :: Graph init took `some time`",
                 "Knn :: Iteration :: Start",
                 "Knn :: Iteration :: Split old and new neighbors 1 of 100 :: Start",
                 "Knn :: Iteration :: Split old and new neighbors 1 of 100 100%",
@@ -524,10 +523,8 @@ class KnnTest {
                 "Knn :: Iteration :: Join neighbors 1 of 100 :: Start",
                 "Knn :: Iteration :: Join neighbors 1 of 100 100%",
                 "Knn :: Iteration :: Join neighbors 1 of 100 :: Finished",
-                "Knn :: Iteration :: Graph iteration 1 took `some time`",
                 "Knn :: Iteration :: Finished",
-                "Knn :: Finished",
-                "Knn :: Graph execution took `some time`"
+                "Knn :: Finished"
             );
     }
 

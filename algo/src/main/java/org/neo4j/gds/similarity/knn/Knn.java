@@ -27,7 +27,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -38,8 +37,6 @@ import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
-
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class Knn extends Algorithm<KnnResult> {
     private final Graph graph;
@@ -139,65 +136,57 @@ public class Knn extends Algorithm<KnnResult> {
     @Override
     public KnnResult compute() {
         this.progressTracker.beginSubTask();
-        HugeObjectArray<NeighborList> neighbors;
-        try (var ignored1 = ProgressTimer.start(this::logOverallTime)) {
-            try (var ignored2 = ProgressTimer.start(this::logInitTime)) {
-                this.progressTracker.beginSubTask();
-                neighbors = this.initializeRandomNeighbors();
-                this.progressTracker.endSubTask();
-            }
-            if (neighbors == null) {
-                return new EmptyResult();
-            }
-
-            var maxIterations = this.config.maxIterations();
-            var maxUpdates = (long) Math.ceil(this.config.sampleRate() * this.config.topK() * graph.nodeCount());
-            var updateThreshold = (long) Math.floor(this.config.deltaThreshold() * maxUpdates);
-
-            long updateCount;
-            int iteration = 0;
-            boolean didConverge = false;
-
-            this.progressTracker.beginSubTask();
-            for (; iteration < maxIterations; iteration++) {
-                int currentIteration = iteration;
-                try (var ignored3 = ProgressTimer.start(took -> this.logIterationTime(currentIteration + 1, took))) {
-                    updateCount = iteration(neighbors);
-                }
-                if (updateCount <= updateThreshold) {
-                    iteration++;
-                    didConverge = true;
-                    break;
-                }
-            }
-            if (config.similarityCutoff() > 0) {
-                var similarityCutoff = config.similarityCutoff();
-                var neighborFilterTasks = PartitionUtils.rangePartition(
-                    concurrency,
-                    neighbors.size(),
-                    partition -> (Runnable) () -> partition.consume(
-                        nodeId -> neighbors.get(nodeId).filterHighSimilarityResults(similarityCutoff)
-                    ),
-                    Optional.of(config.minBatchSize())
-                );
-                RunWithConcurrency.builder()
-                    .concurrency(concurrency)
-                    .tasks(neighborFilterTasks)
-                    .terminationFlag(terminationFlag)
-                    .executor(this.executorService)
-                    .run();
-            }
-            this.progressTracker.endSubTask();
-
-            this.progressTracker.endSubTask();
-            return ImmutableKnnResult.of(
-                neighbors,
-                iteration,
-                didConverge,
-                this.nodePairsConsidered,
-                graph.nodeCount()
-            );
+        this.progressTracker.beginSubTask();
+        HugeObjectArray<NeighborList> neighbors = this.initializeRandomNeighbors();
+        this.progressTracker.endSubTask();
+        if (neighbors == null) {
+            return new EmptyResult();
         }
+
+        var maxIterations = this.config.maxIterations();
+        var maxUpdates = (long) Math.ceil(this.config.sampleRate() * this.config.topK() * graph.nodeCount());
+        var updateThreshold = (long) Math.floor(this.config.deltaThreshold() * maxUpdates);
+
+        long updateCount;
+        int iteration = 0;
+        boolean didConverge = false;
+
+        this.progressTracker.beginSubTask();
+        for (; iteration < maxIterations; iteration++) {
+            updateCount = iteration(neighbors);
+            if (updateCount <= updateThreshold) {
+                iteration++;
+                didConverge = true;
+                break;
+            }
+        }
+        if (config.similarityCutoff() > 0) {
+            var similarityCutoff = config.similarityCutoff();
+            var neighborFilterTasks = PartitionUtils.rangePartition(
+                concurrency,
+                neighbors.size(),
+                partition -> (Runnable) () -> partition.consume(
+                    nodeId -> neighbors.get(nodeId).filterHighSimilarityResults(similarityCutoff)
+                ),
+                Optional.of(config.minBatchSize())
+            );
+            RunWithConcurrency.builder()
+                .concurrency(concurrency)
+                .tasks(neighborFilterTasks)
+                .terminationFlag(terminationFlag)
+                .executor(this.executorService)
+                .run();
+        }
+        this.progressTracker.endSubTask();
+
+        this.progressTracker.endSubTask();
+        return ImmutableKnnResult.of(
+            neighbors,
+            iteration,
+            didConverge,
+            this.nodePairsConsidered,
+            graph.nodeCount()
+        );
     }
 
     private @Nullable HugeObjectArray<NeighborList> initializeRandomNeighbors() {
@@ -584,18 +573,6 @@ public class Knn extends Algorithm<KnnResult> {
         long nodePairsConsidered() {
             return nodePairsConsidered;
         }
-    }
-
-    private void logInitTime(long ms) {
-        progressTracker.logInfo(formatWithLocale("Graph init took %d ms", ms));
-    }
-
-    private void logIterationTime(int iteration, long ms) {
-        progressTracker.logInfo(formatWithLocale("Graph iteration %d took %d ms", iteration, ms));
-    }
-
-    private void logOverallTime(long ms) {
-        progressTracker.logInfo(formatWithLocale("Graph execution took %d ms", ms));
     }
 
     private static final class EmptyResult extends KnnResult {
