@@ -50,7 +50,7 @@ public class NodesSortedByComponent {
             long runningIdx = getUpperBoundPerComponent().get(componentId);
             @Override
             public boolean hasNext() {
-                return getComponents().get(getNodesSorted().get(runningIdx)) == componentId;
+                return runningIdx > -1 && getComponents().get(getNodesSorted().get(runningIdx)) == componentId;
             }
 
             @Override
