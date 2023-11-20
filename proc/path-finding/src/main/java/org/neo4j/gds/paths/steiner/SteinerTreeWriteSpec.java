@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.paths.steiner;
 
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
@@ -98,7 +99,7 @@ public class SteinerTreeWriteSpec implements
                         .withProgressTracker(ProgressTracker.NULL_TRACKER)
                         .withArrowConnectionInfo(
                             config.arrowConnectionInfo(),
-                            computationResult.graphStore().databaseInfo().databaseId().databaseName()
+                            computationResult.graphStore().databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                         )
                         .build()
                         .write(

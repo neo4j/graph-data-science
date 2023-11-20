@@ -20,11 +20,11 @@
 package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -36,6 +36,7 @@ import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Collections;
 import java.util.List;
@@ -133,7 +134,7 @@ public class WriteNodePropertiesApplication {
                     .withProgressTracker(progressTracker)
                     .withArrowConnectionInfo(
                         config.arrowConnectionInfo(),
-                        graphStore.databaseInfo().databaseId().databaseName()
+                        graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                     )
                     .build();
 

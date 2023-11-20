@@ -21,8 +21,8 @@ package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.ArrowConnectionInfo;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.values.storable.Values;
 
 import java.util.Optional;
@@ -38,7 +38,7 @@ public abstract class RelationshipExporterBuilder {
     protected ProgressTracker progressTracker = ProgressTracker.NULL_TRACKER;
     protected RelationshipPropertyTranslator propertyTranslator = Values::doubleValue;
     protected Optional<ArrowConnectionInfo> arrowConnectionInfo = Optional.empty();
-    protected String databaseName; // coupled with arrowConnectionInfo, but should not appear in external API
+    protected Optional<String> remoteDatabaseName; // coupled with arrowConnectionInfo, but should not appear in external API
 
     public abstract RelationshipExporter build();
 
@@ -76,8 +76,8 @@ public abstract class RelationshipExporterBuilder {
         return this;
     }
 
-    public RelationshipExporterBuilder withArrowConnectionInfo(Optional<ArrowConnectionInfo> arrowConnectionInfo, String databaseName) {
-        this.databaseName = databaseName;
+    public RelationshipExporterBuilder withArrowConnectionInfo(Optional<ArrowConnectionInfo> arrowConnectionInfo, Optional<String> remoteDatabaseName) {
+        this.remoteDatabaseName = remoteDatabaseName;
         this.arrowConnectionInfo = arrowConnectionInfo;
         return this;
     }

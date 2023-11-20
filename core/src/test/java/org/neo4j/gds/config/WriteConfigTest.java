@@ -26,8 +26,8 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
-import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -88,7 +88,7 @@ class WriteConfigTest {
             .build();
 
         var testGraphStore = new GraphStoreBuilder()
-            .databaseInfo(ImmutableDatabaseInfo.of(DatabaseId.of("neo4j"), DatabaseLocation.LOCAL))
+            .databaseInfo(DatabaseInfo.of(DatabaseId.of("neo4j"), DatabaseLocation.LOCAL))
             .capabilities(ImmutableStaticCapabilities.of(writeMode))
             .schema(GraphSchema.mutable())
             .nodes(nodes)

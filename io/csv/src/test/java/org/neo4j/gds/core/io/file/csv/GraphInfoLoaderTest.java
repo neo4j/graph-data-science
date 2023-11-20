@@ -56,7 +56,7 @@ class GraphInfoLoaderTest {
                 "inverseIndexedRelTypes",
                 "idMapBuilderType"
             ),
-            String.join(", ", "my-database", "REMOTE", "19", "1337", "REL;42", "REL;REL1", ArrayIdMapBuilder.ID)
+            String.join(", ", "my-database", "LOCAL", "19", "1337", "REL;42", "REL;REL1", ArrayIdMapBuilder.ID)
         );
         FileUtils.writeLines(graphInfoFile, lines);
 
@@ -65,7 +65,7 @@ class GraphInfoLoaderTest {
 
         assertThat(graphInfo).isNotNull();
         assertThat(graphInfo.databaseInfo().databaseId()).isEqualTo(databaseId);
-        assertThat(graphInfo.databaseInfo().databaseLocation()).isEqualTo(DatabaseLocation.REMOTE);
+        assertThat(graphInfo.databaseInfo().databaseLocation()).isEqualTo(DatabaseLocation.LOCAL);
 
         assertThat(graphInfo.idMapBuilderType()).isEqualTo(ArrayIdMapBuilder.ID);
 
@@ -116,11 +116,12 @@ class GraphInfoLoaderTest {
                 "databaseId",
                 "databaseName",
                 "databaseLocation",
+                "remoteDatabaseId",
                 "nodeCount",
                 "maxOriginalId",
                 "relTypeCounts"
             ),
-            String.join(", ", "26ca2600-2f7a-4e99-acc1-9d976603698c", "my-database", "REMOTE", "19", "1337", "REL;42")
+            String.join(", ", "26ca2600-2f7a-4e99-acc1-9d976603698c", "my-database", "REMOTE", "remote-db", "19", "1337", "REL;42")
         );
         FileUtils.writeLines(graphInfoFile, lines);
 

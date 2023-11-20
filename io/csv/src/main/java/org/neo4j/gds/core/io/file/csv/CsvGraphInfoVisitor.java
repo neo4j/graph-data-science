@@ -21,6 +21,7 @@ package org.neo4j.gds.core.io.file.csv;
 
 import de.siegmar.fastcsv.writer.CsvWriter;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.core.io.file.GraphInfo;
 import org.neo4j.gds.core.io.file.SingleRowVisitor;
 
@@ -34,6 +35,7 @@ public class CsvGraphInfoVisitor implements SingleRowVisitor<GraphInfo> {
     public static final String GRAPH_INFO_FILE_NAME = "graph_info.csv";
     public static final String DATABASE_NAME_COLUMN_NAME = "databaseName";
     public static final String DATABASE_LOCATION_COLUMN_NAME = "databaseLocation";
+    public static final String REMOTE_DATABASE_ID_COLUMN_NAME = "remoteDatabaseId";
     public static final String ID_MAP_BUILDER_TYPE_COLUMN_NAME = "idMapBuilderType";
     public static final String NODE_COUNT_COLUMN_NAME = "nodeCount";
     public static final String MAX_ORIGINAL_ID_COLUMN_NAME = "maxOriginalId";
@@ -64,6 +66,7 @@ public class CsvGraphInfoVisitor implements SingleRowVisitor<GraphInfo> {
         this.csvWriter.writeRow(
             graphInfo.databaseInfo().databaseId().databaseName(),
             graphInfo.databaseInfo().databaseLocation().name(),
+            graphInfo.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName).orElse(""),
             graphInfo.idMapBuilderType(),
             Long.toString(graphInfo.nodeCount()),
             Long.toString(graphInfo.maxOriginalId()),
@@ -85,6 +88,7 @@ public class CsvGraphInfoVisitor implements SingleRowVisitor<GraphInfo> {
         this.csvWriter.writeRow(
             DATABASE_NAME_COLUMN_NAME,
             DATABASE_LOCATION_COLUMN_NAME,
+            REMOTE_DATABASE_ID_COLUMN_NAME,
             ID_MAP_BUILDER_TYPE_COLUMN_NAME,
             NODE_COUNT_COLUMN_NAME,
             MAX_ORIGINAL_ID_COLUMN_NAME,

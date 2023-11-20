@@ -19,16 +19,38 @@
  */
 package org.neo4j.gds.api;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
+
+import java.util.Optional;
 
 @ValueClass
 public interface DatabaseInfo {
 
-    enum DatabaseLocation {
-        LOCAL, REMOTE, NONE
+    static DatabaseInfo of(DatabaseId databaseId, DatabaseLocation databaseLocation) {
+        return ImmutableDatabaseInfo.of(databaseId, databaseLocation, Optional.empty());
     }
 
     DatabaseId databaseId();
 
     DatabaseLocation databaseLocation();
+
+    Optional<DatabaseId> remoteDatabaseId();
+
+    @Value.Check()
+    default void validateRemoteDatabaseHasIdSet() {
+        if (databaseLocation() == DatabaseLocation.REMOTE) {
+            if (remoteDatabaseId().isEmpty()) {
+                throw new IllegalStateException("Remote database id must be set when database location is remote");
+            }
+        } else {
+            if (remoteDatabaseId().isPresent()) {
+                throw new IllegalStateException("Remote database id must not be set when database location is not remote");
+            }
+        }
+    }
+
+    enum DatabaseLocation {
+        LOCAL, REMOTE, NONE
+    }
 }

@@ -20,6 +20,7 @@
 package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
@@ -110,7 +111,7 @@ public class WriteRelationshipsApplication {
             .withIdMappingOperator(graph::toOriginalNodeId)
             .withGraph(graph)
             .withTerminationFlag(terminationFlag)
-            .withArrowConnectionInfo(arrowConnectionInfo, graphStore.databaseInfo().databaseId().databaseName())
+            .withArrowConnectionInfo(arrowConnectionInfo, graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName))
             .withProgressTracker(progressTracker);
 
         if (relationshipProperty.isPresent()) {

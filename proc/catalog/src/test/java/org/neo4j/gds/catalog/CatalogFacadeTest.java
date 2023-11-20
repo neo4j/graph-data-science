@@ -32,7 +32,6 @@ import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
@@ -307,7 +306,7 @@ class CatalogFacadeTest {
     private static class StubGraphStore implements GraphStore {
         @Override
         public DatabaseInfo databaseInfo() {
-            return ImmutableDatabaseInfo.of(DatabaseId.of("foo"), DatabaseLocation.LOCAL);
+            return DatabaseInfo.of(DatabaseId.of("foo"), DatabaseLocation.LOCAL);
         }
 
         @Override

@@ -68,7 +68,8 @@ class DummyGraphStore implements GraphStore {
 
     @Override
     public DatabaseInfo databaseInfo() {
-        return ImmutableDatabaseInfo.of(DatabaseId.of("some database"), DatabaseLocation.LOCAL);
+        return ImmutableDatabaseInfo.builder().databaseId(DatabaseId.of("some database")).databaseLocation(
+            DatabaseLocation.LOCAL).build();
     }
 
     @Override

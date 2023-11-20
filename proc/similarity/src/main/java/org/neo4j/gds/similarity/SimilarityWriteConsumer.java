@@ -21,6 +21,7 @@ package org.neo4j.gds.similarity;
 
 import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
@@ -115,7 +116,7 @@ public class SimilarityWriteConsumer<ALGO extends Algorithm<ALGO_RESULT>, ALGO_R
                             .withProgressTracker(progressTracker)
                             .withArrowConnectionInfo(
                                 config.arrowConnectionInfo(),
-                                computationResult.graphStore().databaseInfo().databaseId().databaseName()
+                                computationResult.graphStore().databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                             )
                             .build();
 

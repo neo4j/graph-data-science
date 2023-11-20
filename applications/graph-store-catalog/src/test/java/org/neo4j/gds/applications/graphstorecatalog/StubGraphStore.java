@@ -29,7 +29,6 @@ import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Topology;
@@ -61,7 +60,7 @@ class StubGraphStore implements GraphStore {
 
     StubGraphStore() {
         this(
-            ImmutableDatabaseInfo.of(
+            DatabaseInfo.of(
                 DatabaseId.of(UUID.randomUUID().toString()),
                 DatabaseInfo.DatabaseLocation.LOCAL
             )

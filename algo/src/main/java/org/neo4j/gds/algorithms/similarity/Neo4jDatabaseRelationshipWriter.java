@@ -19,18 +19,19 @@
  */
 package org.neo4j.gds.algorithms.similarity;
 
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.RelationshipExporter;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
@@ -67,7 +68,7 @@ public final class Neo4jDatabaseRelationshipWriter {
                 .withProgressTracker(progressTracker)
                 .withArrowConnectionInfo(
                     arrowConnectionInfo,
-                    graphStore.databaseInfo().databaseId().databaseName()
+                    graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                 )
                 .build();
 

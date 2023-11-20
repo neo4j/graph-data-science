@@ -177,8 +177,12 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             Map.of()
         );
 
+        var databaseInfo = ImmutableDatabaseInfo.builder()
+            .databaseId(databaseId)
+            .databaseLocation(DatabaseLocation.LOCAL)
+            .build();
         return new GraphStoreBuilder()
-            .databaseInfo(ImmutableDatabaseInfo.of(databaseId, DatabaseLocation.LOCAL))
+            .databaseInfo(databaseInfo)
             .capabilities(capabilities)
             .schema(schema)
             .nodes(nodes)

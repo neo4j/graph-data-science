@@ -29,6 +29,8 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import org.apache.commons.lang3.StringUtils;
+import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
@@ -45,6 +47,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -66,8 +69,20 @@ public class GraphInfoLoader {
 
             var line = mappingIterator.next();
             var databaseId = DatabaseId.of(line.databaseName);
+
+            // This is for backwards compatibility. If the remote database id is not specified
+            // we use the default neo4j database instead for remote database locations.
+            var remoteDatabaseId = Optional.ofNullable(StringUtils.trimToNull(line.remoteDatabaseId));
+            if (line.databaseLocation == DatabaseLocation.REMOTE && remoteDatabaseId.isEmpty()) {
+                remoteDatabaseId = Optional.of(GraphDatabaseSettings.DEFAULT_DATABASE_NAME);
+            }
+            var databaseInfo = ImmutableDatabaseInfo.builder()
+                .databaseId(databaseId)
+                .databaseLocation(line.databaseLocation)
+                .remoteDatabaseId(remoteDatabaseId.map(DatabaseId::of))
+                .build();
             return ImmutableGraphInfo.builder()
-                .databaseInfo(ImmutableDatabaseInfo.of(databaseId, line.databaseLocation))
+                .databaseInfo(databaseInfo)
                 .idMapBuilderType(line.idMapBuilderType)
                 .nodeCount(line.nodeCount)
                 .maxOriginalId(line.maxOriginalId)
@@ -90,6 +105,9 @@ public class GraphInfoLoader {
 
         @JsonProperty
         DatabaseLocation databaseLocation = DatabaseLocation.LOCAL;
+
+        @JsonProperty
+        String remoteDatabaseId = null;
 
         @JsonProperty
         String idMapBuilderType = IdMap.NO_TYPE;

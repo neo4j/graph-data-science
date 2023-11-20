@@ -20,13 +20,14 @@
 package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.write.RelationshipPropertiesExporterBuilder;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.values.storable.Values;
 
 import java.util.List;
@@ -56,7 +57,7 @@ public class WriteRelationshipPropertiesApplication {
             .withProgressTracker(ProgressTracker.NULL_TRACKER)
             .withArrowConnectionInfo(
                 configuration.arrowConnectionInfo(),
-                graphStore.databaseInfo().databaseId().databaseName()
+                graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
             )
             .withRelationshipCount(relationshipCount)
             .build();
