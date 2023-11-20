@@ -38,8 +38,19 @@ import java.util.stream.LongStream;
 
 public class Knn extends Algorithm<KnnResult> {
     private final Graph graph;
-    private final KnnBaseConfig config;
     private final int concurrency;
+    private final int maxIterations;
+    private final double sampleRate;
+    private final int topK;
+    private final int boundedK;
+    private final int sampledK;
+    private final double deltaThreshold;
+    private final double similarityCutoff;
+    private final int minBatchSize;
+    private final KnnSampler.SamplerType initialSampler;
+    private final Optional<Long> randomSeed;
+    private final double perturbationRate;
+    private final int randomJoins;
     private final NeighborFilterFactory neighborFilterFactory;
     private final ExecutorService executorService;
     private final SplittableRandom splittableRandom;
@@ -71,7 +82,19 @@ public class Knn extends Algorithm<KnnResult> {
         return new Knn(
             context.progressTracker(),
             graph,
-            config,
+            config.concurrency(),
+            config.maxIterations(),
+            config.sampleRate(),
+            config.topK(),
+            config.boundedK(graph.nodeCount()),
+            config.sampledK(graph.nodeCount()),
+            config.deltaThreshold(),
+            config.similarityCutoff(),
+            config.minBatchSize(),
+            config.initialSampler(),
+            config.randomSeed(),
+            config.randomJoins(),
+            config.perturbationRate(),
             similarityFunction,
             new KnnNeighborFilterFactory(graph.nodeCount()),
             context.executor(),
@@ -92,7 +115,19 @@ public class Knn extends Algorithm<KnnResult> {
         return new Knn(
             context.progressTracker(),
             graph,
-            config,
+            config.concurrency(),
+            config.maxIterations(),
+            config.sampleRate(),
+            config.topK(),
+            config.boundedK(graph.nodeCount()),
+            config.sampledK(graph.nodeCount()),
+            config.deltaThreshold(),
+            config.similarityCutoff(),
+            config.minBatchSize(),
+            config.initialSampler(),
+            config.randomSeed(),
+            config.randomJoins(),
+            config.perturbationRate(),
             similarityFunction,
             neighborFilterFactory,
             context.executor(),
@@ -109,7 +144,19 @@ public class Knn extends Algorithm<KnnResult> {
     Knn(
         ProgressTracker progressTracker,
         Graph graph,
-        KnnBaseConfig config,
+        int concurrency,
+        int maxIterations,
+        double sampleRate,
+        int topK,
+        int boundedK,
+        int sampledK,
+        double deltaThreshold,
+        double similarityCutoff,
+        int minBatchSize,
+        KnnSampler.SamplerType initialSampler,
+        Optional<Long> randomSeed,
+        int randomJoins,
+        double perturbationRate,
         SimilarityFunction similarityFunction,
         NeighborFilterFactory neighborFilterFactory,
         ExecutorService executorService,
@@ -118,8 +165,19 @@ public class Knn extends Algorithm<KnnResult> {
     ) {
         super(progressTracker);
         this.graph = graph;
-        this.config = config;
-        this.concurrency = config.concurrency();
+        this.concurrency = concurrency;
+        this.maxIterations = maxIterations;
+        this.sampleRate = sampleRate;
+        this.topK = topK;
+        this.boundedK = boundedK;
+        this.sampledK = sampledK;
+        this.deltaThreshold = deltaThreshold;
+        this.similarityCutoff = similarityCutoff;
+        this.minBatchSize = minBatchSize;
+        this.initialSampler = initialSampler;
+        this.randomSeed = randomSeed;
+        this.randomJoins = randomJoins;
+        this.perturbationRate = perturbationRate;
         this.similarityFunction = similarityFunction;
         this.neighborFilterFactory = neighborFilterFactory;
         this.executorService = executorService;
@@ -133,7 +191,7 @@ public class Knn extends Algorithm<KnnResult> {
 
     @Override
     public KnnResult compute() {
-        if (graph.nodeCount() < 2 || config.topK() == 0) {
+        if (graph.nodeCount() < 2 || topK == 0) {
             return new EmptyResult();
         }
         this.progressTracker.beginSubTask();
@@ -141,9 +199,8 @@ public class Knn extends Algorithm<KnnResult> {
         HugeObjectArray<NeighborList> neighbors = initializeRandomNeighbors();
         this.progressTracker.endSubTask();
 
-        var maxIterations = this.config.maxIterations();
-        var maxUpdates = (long) Math.ceil(this.config.sampleRate() * this.config.topK() * graph.nodeCount());
-        var updateThreshold = (long) Math.floor(this.config.deltaThreshold() * maxUpdates);
+        var maxUpdates = (long) Math.ceil(sampleRate * topK * graph.nodeCount());
+        var updateThreshold = (long) Math.floor(deltaThreshold * maxUpdates);
 
         long updateCount;
         int iteration = 0;
@@ -158,15 +215,14 @@ public class Knn extends Algorithm<KnnResult> {
                 break;
             }
         }
-        if (config.similarityCutoff() > 0) {
-            var similarityCutoff = config.similarityCutoff();
+        if (similarityCutoff > 0) {
             var neighborFilterTasks = PartitionUtils.rangePartition(
                 concurrency,
                 neighbors.size(),
                 partition -> (Runnable) () -> partition.consume(
                     nodeId -> neighbors.get(nodeId).filterHighSimilarityResults(similarityCutoff)
                 ),
-                Optional.of(config.minBatchSize())
+                Optional.of(minBatchSize)
             );
             RunWithConcurrency.builder()
                 .concurrency(concurrency)
@@ -198,16 +254,16 @@ public class Knn extends Algorithm<KnnResult> {
                 return new GenerateRandomNeighbors(
                     initializeSampler(localRandom),
                     localRandom,
-                    this.similarityFunction,
-                    this.neighborFilterFactory.create(),
+                    similarityFunction,
+                    neighborFilterFactory.create(),
                     neighbors,
-                    config.boundedK(graph.nodeCount()),
+                    boundedK,
                     partition,
                     progressTracker,
                     neighborConsumers
                 );
             },
-            Optional.of(config.minBatchSize())
+            Optional.of(minBatchSize)
         );
 
         RunWithConcurrency.builder()
@@ -223,7 +279,7 @@ public class Knn extends Algorithm<KnnResult> {
     }
 
     private KnnSampler initializeSampler(SplittableRandom random) {
-        switch(config.initialSampler()) {
+        switch(initialSampler) {
             case UNIFORM: {
                 return new UniformKnnSampler(random, graph.nodeCount());
             }
@@ -231,8 +287,8 @@ public class Knn extends Algorithm<KnnResult> {
                 return new RandomWalkKnnSampler(
                     graph.concurrentCopy(),
                     random,
-                    config.randomSeed(),
-                    config.boundedK(graph.nodeCount())
+                    randomSeed,
+                    boundedK
                 );
             }
             default:
@@ -242,8 +298,6 @@ public class Knn extends Algorithm<KnnResult> {
 
     private long iteration(HugeObjectArray<NeighborList> neighbors) {
         var nodeCount = graph.nodeCount();
-        var minBatchSize = this.config.minBatchSize();
-        var sampledK = this.config.sampledK(nodeCount);
 
         // TODO: init in ctor and reuse - benchmark against new allocations
         var allOldNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount);
@@ -289,8 +343,8 @@ public class Knn extends Algorithm<KnnResult> {
                 reverseOldNeighbors,
                 reverseNewNeighbors,
                 sampledK,
-                this.config.perturbationRate(),
-                this.config.randomJoins(),
+                perturbationRate,
+                randomJoins,
                 partition,
                 progressTracker
             ),
