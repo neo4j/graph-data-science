@@ -17,59 +17,59 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.closeness;
+package org.neo4j.gds.procedures.centrality.betacloseness;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
-import org.neo4j.gds.results.StandardMutateResult;
+import org.neo4j.gds.results.StandardWriteResult;
 
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public final class BetaMutateResult extends StandardMutateResult {
+public final class BetaClosenessCentralityWriteResult extends StandardWriteResult {
 
     public final long nodePropertiesWritten;
-    public final String mutateProperty;
+    public final String writeProperty;
     public final Map<String, Object> centralityDistribution;
 
-    BetaMutateResult(
+    public BetaClosenessCentralityWriteResult(
         long nodePropertiesWritten,
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
-        long mutateMillis,
-        String mutateProperty,
+        long writeMillis,
+        String writeProperty,
         @Nullable Map<String, Object> centralityDistribution,
         Map<String, Object> config
     ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, mutateMillis, config);
-        this.mutateProperty = mutateProperty;
+        super(preProcessingMillis, computeMillis, postProcessingMillis, writeMillis, config);
+        this.writeProperty = writeProperty;
         this.centralityDistribution = centralityDistribution;
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    static final class Builder extends AbstractCentralityResultBuilder<BetaMutateResult> {
-        public String mutateProperty;
+    public static final class Builder extends AbstractCentralityResultBuilder<BetaClosenessCentralityWriteResult> {
+        public String writeProperty;
 
-         Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+        public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 
-        public Builder withMutateProperty(String mutateProperty) {
-            this.mutateProperty = mutateProperty;
+        public Builder withWriteProperty(String writeProperty) {
+            this.writeProperty = writeProperty;
             return this;
         }
 
         @Override
-        public BetaMutateResult buildResult() {
-            return new BetaMutateResult(
+        public BetaClosenessCentralityWriteResult buildResult() {
+            return new BetaClosenessCentralityWriteResult(
                 nodePropertiesWritten,
                 preProcessingMillis,
                 computeMillis,
                 postProcessingMillis,
-                mutateMillis,
-                mutateProperty,
+                writeMillis,
+                writeProperty,
                 centralityHistogram,
                 config.toMap()
             );

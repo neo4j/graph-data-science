@@ -41,6 +41,8 @@ import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
 import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
 import org.neo4j.gds.degree.DegreeCentralityStreamConfig;
 import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
+import org.neo4j.gds.procedures.centrality.betacloseness.BetaClosenessCentralityMutateResult;
+import org.neo4j.gds.procedures.centrality.betacloseness.BetaClosenessCentralityWriteResult;
 import org.neo4j.gds.procedures.configparser.ConfigurationParser;
 import org.neo4j.gds.results.MemoryEstimateResult;
 
@@ -344,6 +346,44 @@ public class CentralityProcedureFacade {
 
         return Stream.of(DefaultCentralityComputationalResultTransformer.toWriteResult(computationResult));
     }
+
+    public Stream<BetaClosenessCentralityMutateResult> betaClosenessCentralityMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, ClosenessCentralityMutateConfig::of);
+
+        var computationResult = mutateBusinessFacade.closenessCentrality(
+            graphName,
+            config,
+            procedureReturnColumns.contains("centralityDistribution")
+        );
+
+        return Stream.of(BetaClosenessCentralityComputationalResultTransformer.toMutateResult(
+            computationResult,
+            config
+        ));
+    }
+
+
+    public Stream<BetaClosenessCentralityWriteResult> betaClosenessCentralityWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, ClosenessCentralityWriteConfig::of);
+
+        var computationResult = writeBusinessFacade.closenessCentrality(
+            graphName,
+            config,
+            procedureReturnColumns.contains("centralityDistribution")
+        );
+
+        return Stream.of(BetaClosenessCentralityComputationalResultTransformer.toWriteResult(
+            computationResult,
+            config
+        ));
+    }
+
 
 
     // FIXME: the following two methods are duplicate, find a good place for them.

@@ -28,6 +28,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.centrality.betacloseness.BetaClosenessCentralityWriteResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -38,7 +39,7 @@ import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 
 @GdsCallable(name = "gds.beta.closeness.write", description = CLOSENESS_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 
-public class BetaClosenessCentralityWriteSpec implements AlgorithmSpec<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteConfig, Stream<BetaWriteResult>, ClosenessCentralityAlgorithmFactory<ClosenessCentralityWriteConfig>> {
+public class BetaClosenessCentralityWriteSpec implements AlgorithmSpec<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteConfig, Stream<BetaClosenessCentralityWriteResult>, ClosenessCentralityAlgorithmFactory<ClosenessCentralityWriteConfig>> {
 
     @Override
     public String name() {
@@ -56,7 +57,7 @@ public class BetaClosenessCentralityWriteSpec implements AlgorithmSpec<Closeness
     }
 
     @Override
-    public ComputationResultConsumer<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteConfig, Stream<BetaWriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteConfig, Stream<BetaClosenessCentralityWriteResult>> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>( this::resultBuilder,
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().writeProperty(),
@@ -66,11 +67,12 @@ public class BetaClosenessCentralityWriteSpec implements AlgorithmSpec<Closeness
             )),
             name());
     }
-    private AbstractResultBuilder<BetaWriteResult> resultBuilder(
+
+    private AbstractResultBuilder<BetaClosenessCentralityWriteResult> resultBuilder(
         ComputationResult<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new BetaWriteResult.Builder(
+        var builder = new BetaClosenessCentralityWriteResult.Builder(
             executionContext.returnColumns(),
             computationResult.config().concurrency()
         );

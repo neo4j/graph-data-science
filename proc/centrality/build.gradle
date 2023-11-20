@@ -19,6 +19,7 @@ dependencies {
     implementation project(':core')
     implementation project(':core-write')
     implementation project(':executor')
+    implementation project(':logging')
     implementation project(':neo4j-api')
     implementation project(':opengds-procedure-facade')
     implementation project(':pregel')

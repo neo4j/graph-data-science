@@ -19,12 +19,9 @@
  */
 package org.neo4j.gds.closeness;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.centrality.CentralityWriteResult;
+import org.neo4j.gds.procedures.centrality.betacloseness.BetaClosenessCentralityWriteResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -37,9 +34,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.closeness.ClosenessCentrality.CLOSENESS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class ClosenessCentralityWriteProc extends BaseProc {
-    @Context
-    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
+public class ClosenessCentralityWriteProc {
 
     @Context
     public GraphDataScience facade;
@@ -57,27 +52,19 @@ public class ClosenessCentralityWriteProc extends BaseProc {
     @Internal
     @Procedure(value = "gds.beta.closeness.write", mode = WRITE, deprecatedBy = "gds.closeness.write")
     @Description(CLOSENESS_DESCRIPTION)
-    public Stream<BetaWriteResult> writeBeta(
+    public Stream<BetaClosenessCentralityWriteResult> writeBeta(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
+        facade
             .deprecatedProcedures().called("gds.beta.closeness.write");
 
-        executionContext()
+        facade
             .log()
             .warn("Procedure `gds.beta.closeness.write` has been deprecated, please use `gds.closeness.write`.");
 
-        return new ProcedureExecutor<>(
-            new BetaClosenessCentralityWriteSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.centrality().betaClosenessCentralityWrite(graphName, configuration);
 
     }
-
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
-    }
+    
 }
