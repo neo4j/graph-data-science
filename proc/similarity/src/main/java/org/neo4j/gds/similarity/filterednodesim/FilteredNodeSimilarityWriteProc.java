@@ -69,6 +69,9 @@ public class FilteredNodeSimilarityWriteProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ){
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.alpha.nodeSimilarity.filtered.write");
+        executionContext()
             .log()
             .warn("Procedure `gds.alpha.nodeSimilarity.filtered.write` has been deprecated, please use `gds.nodeSimilarity.filtered.write`.");
 
@@ -83,6 +86,9 @@ public class FilteredNodeSimilarityWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
+        executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.alpha.nodeSimilarity.filtered.write.estimate");
         executionContext()
             .log()
             .warn("Procedure `gds.alpha.nodeSimilarity.filtered.write.estimate` has been deprecated, please use `gds.nodeSimilarity.filtered.write.estimate`.");

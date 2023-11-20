@@ -55,6 +55,7 @@ public class KmeansStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        facade.deprecatedProcedures().called("gds.beta.kmeans.stream");
         facade.log()
             .warn("Procedure `gds.beta.kmeans.stream` has been deprecated, please use `gds.kmeans.stream`.");
         return stream(graphName, configuration);
@@ -77,6 +78,7 @@ public class KmeansStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
+        facade.deprecatedProcedures().called("gds.beta.kmeans.stream.estimate");
         facade.log()
             .warn("Procedure `gds.beta.kmeans.stream.estimate` has been deprecated, please use `gds.kmeans.stream.estimate`.");
         return estimate(graphName, configuration);

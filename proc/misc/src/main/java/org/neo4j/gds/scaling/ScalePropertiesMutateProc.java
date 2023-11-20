@@ -74,6 +74,9 @@ public class ScalePropertiesMutateProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.alpha.scaleProperties.mutate");
         var spec = new ScalePropertiesMutateSpec();
         spec.setAllowL1L2Scalers(true);
         return new ProcedureExecutor<>(

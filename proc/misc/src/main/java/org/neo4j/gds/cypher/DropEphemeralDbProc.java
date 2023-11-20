@@ -73,6 +73,10 @@ public class DropEphemeralDbProc extends BaseProc {
         @Name(value = "dbName") String dbName
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.alpha.drop.cypherdb");
+
+        executionContext()
             .log()
             .warn("Procedure `gds.alpha.drop.cypherdb` has been deprecated, please use `gds.ephemeral.database.drop`.");
         

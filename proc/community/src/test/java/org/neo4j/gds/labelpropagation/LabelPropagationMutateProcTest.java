@@ -75,6 +75,7 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
+import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
@@ -356,7 +357,8 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     null,
                     null
                 ),
-                null
+                null,
+                DeprecatedProceduresMetricService.PASSTHROUGH
             );
 
             ProcedureMethodHelper.mutateMethods(procedure)
@@ -487,7 +489,8 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     null,
                     null
                 ),
-                null
+                null,
+                DeprecatedProceduresMetricService.PASSTHROUGH
             );
 
             ProcedureMethodHelper.mutateMethods(procedure)
@@ -572,7 +575,8 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     null,
                     null
                 ),
-                null
+                null,
+                DeprecatedProceduresMetricService.PASSTHROUGH
             );
 
             var methods = ProcedureMethodHelper.mutateMethods(procedure).collect(Collectors.toList());
@@ -661,7 +665,8 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     null,
                     null
                 ),
-                null
+                null,
+                DeprecatedProceduresMetricService.PASSTHROUGH
             );
             ProcedureMethodHelper.mutateMethods(procedure)
                 .forEach(mutateMethod -> {

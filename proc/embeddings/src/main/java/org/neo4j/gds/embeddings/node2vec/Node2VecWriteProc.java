@@ -76,6 +76,10 @@ public class Node2VecWriteProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.node2vec.write");
+
+        executionContext()
             .log()
             .warn(
                 "Procedure `gds.beta.node2vec.write` has been deprecated, please use `gds.node2vec.write`.");
@@ -92,6 +96,10 @@ public class Node2VecWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
+        executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.node2vec.write.estimate");
+
         executionContext()
             .log()
             .warn(

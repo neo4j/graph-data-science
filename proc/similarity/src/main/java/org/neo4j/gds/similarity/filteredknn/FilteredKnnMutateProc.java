@@ -66,6 +66,10 @@ public class FilteredKnnMutateProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.alpha.knn.filtered.mutate");
+
+        executionContext()
             .log()
             .warn(
                 "Procedure `gds.alpha.knn.filtered.mutate` has been deprecated, please use `gds.knn.filtered.mutate`.");

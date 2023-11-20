@@ -56,6 +56,9 @@ public class HashGNNStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.hashgnn.stream");
         executionContext().log()
             .warn("Procedure `gds.beta.hashgnn.stream` has been deprecated, please use `gds.hashgnn.stream`.");
         return stream(graphName, configuration);
@@ -82,6 +85,9 @@ public class HashGNNStreamProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
+        executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.hashgnn.stream.estimate");
         executionContext().log()
             .warn("Procedure `gds.beta.hashgnn.stream.estimate` has been deprecated, please use `gds.hashgnn.stream.estimate`.");
         return estimate(graphNameOrConfiguration, algoConfiguration);

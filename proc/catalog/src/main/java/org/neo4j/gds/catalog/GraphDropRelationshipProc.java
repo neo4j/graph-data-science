@@ -55,6 +55,7 @@ public class GraphDropRelationshipProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "relationshipType") String relationshipType
     ) {
+        facade.deprecatedProcedures().called("gds.graph.deleteRelationships");
         facade
             .log()
             .warn(

@@ -59,6 +59,8 @@ public class GraphDropNodePropertiesProc {
         @Name(value = "nodeProperties") @NotNull Object nodeProperties,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        facade.deprecatedProcedures().called("gds.graph.removeNodeProperties");
+
         facade
             .log()
             .warn(

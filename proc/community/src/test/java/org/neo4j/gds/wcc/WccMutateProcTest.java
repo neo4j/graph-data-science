@@ -73,6 +73,7 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
+import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
@@ -386,7 +387,8 @@ class WccMutateProcTest extends BaseProcTest {
                     null,
                     null
                 ),
-                null
+                null,
+                DeprecatedProceduresMetricService.PASSTHROUGH
             );
 
             ProcedureMethodHelper.mutateMethods(procedure)
@@ -521,7 +523,8 @@ class WccMutateProcTest extends BaseProcTest {
                     null,
                     null
                 ),
-                null
+                null,
+                DeprecatedProceduresMetricService.PASSTHROUGH
             );
                 ProcedureMethodHelper.mutateMethods(procedure)
                     .forEach(mutateMethod -> {
@@ -603,7 +606,8 @@ class WccMutateProcTest extends BaseProcTest {
                     null,
                     null
                 ),
-                null
+                null,
+                DeprecatedProceduresMetricService.PASSTHROUGH
             );
 
             var methods = ProcedureMethodHelper.mutateMethods(proc).collect(Collectors.toList());
@@ -693,7 +697,8 @@ class WccMutateProcTest extends BaseProcTest {
                             null,
                             null
                         ),
-                        null
+                        null,
+                        DeprecatedProceduresMetricService.PASSTHROUGH
                     );
                     Map<String, Object> config = new HashMap<>(additionalConfig);
                     config.put("mutateProperty", MUTATE_PROPERTY);

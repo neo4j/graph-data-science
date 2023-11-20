@@ -20,30 +20,40 @@
 package org.neo4j.gds.metrics;
 
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
+import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 
 public class MetricsFacade {
 
     public static final MetricsFacade PASSTHROUGH_METRICS_FACADE = new MetricsFacade(
         new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
-        new ProjectionMetricsService(new PassthroughExecutionMetricRegistrar())
+        new ProjectionMetricsService(new PassthroughExecutionMetricRegistrar()),
+        DeprecatedProceduresMetricService.PASSTHROUGH
     );
 
-    private  final AlgorithmMetricsService algorithmMetricsService;
-    private  final ProjectionMetricsService projectionMetricsService;
+    private final AlgorithmMetricsService algorithmMetricsService;
+    private final ProjectionMetricsService projectionMetricsService;
+    private final DeprecatedProceduresMetricService deprecatedProceduresMetricService;
 
     public MetricsFacade(
         AlgorithmMetricsService algorithmMetricsService,
-        ProjectionMetricsService projectionMetricsService
-    ){
+        ProjectionMetricsService projectionMetricsService,
+        DeprecatedProceduresMetricService deprecatedProceduresMetricService
+    ) {
         this.algorithmMetricsService = algorithmMetricsService;
         this.projectionMetricsService = projectionMetricsService;
+        this.deprecatedProceduresMetricService = deprecatedProceduresMetricService;
     }
 
-    public AlgorithmMetricsService algorithmMetrics(){
-        return  algorithmMetricsService;
+    public AlgorithmMetricsService algorithmMetrics() {
+        return algorithmMetricsService;
     }
-    public ProjectionMetricsService projectionMetrics(){
-        return  projectionMetricsService;
+
+    public ProjectionMetricsService projectionMetrics() {
+        return projectionMetricsService;
+    }
+
+    public DeprecatedProceduresMetricService deprecatedProcedures() {
+        return deprecatedProceduresMetricService;
     }
 }

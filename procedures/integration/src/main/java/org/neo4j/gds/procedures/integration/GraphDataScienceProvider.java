@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
@@ -34,24 +35,27 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
     private final CentralityProcedureProvider centralityProcedureProvider;
     private final CommunityProcedureProvider communityProcedureProvider;
     private final SimilarityProcedureProvider similarityProcedureProvider;
+    private final DeprecatedProceduresMetricService deprecatedProceduresMetricService;
 
     public GraphDataScienceProvider(
         Log log,
         CatalogFacadeProvider catalogFacadeProvider,
         CentralityProcedureProvider centralityProcedureProvider,
         CommunityProcedureProvider communityProcedureProvider,
-        SimilarityProcedureProvider similarityProcedureProvider
+        SimilarityProcedureProvider similarityProcedureProvider,
+        DeprecatedProceduresMetricService deprecatedProceduresMetricService
     ) {
         this.log = log;
         this.catalogFacadeProvider = catalogFacadeProvider;
         this.centralityProcedureProvider = centralityProcedureProvider;
         this.communityProcedureProvider = communityProcedureProvider;
         this.similarityProcedureProvider = similarityProcedureProvider;
+        this.deprecatedProceduresMetricService = deprecatedProceduresMetricService;
     }
 
     @Override
     public GraphDataScience apply(Context context) throws ProcedureException {
-        
+
         var catalogFacade = catalogFacadeProvider.createCatalogFacade(context);
         var centralityProcedureFacade = centralityProcedureProvider.createCentralityProcedureFacade(context);
         var communityProcedureFacade = communityProcedureProvider.createCommunityProcedureFacade(context);
@@ -62,7 +66,8 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             catalogFacade,
             centralityProcedureFacade,
             communityProcedureFacade,
-            similarityProcedureFacade
+            similarityProcedureFacade,
+            deprecatedProceduresMetricService
         );
     }
 }

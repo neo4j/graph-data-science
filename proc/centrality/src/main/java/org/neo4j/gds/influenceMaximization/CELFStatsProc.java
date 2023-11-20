@@ -75,6 +75,10 @@ public class CELFStatsProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.influenceMaximization.celf.stats");
+
+        executionContext()
             .log()
             .warn(
                 "Procedure `gds.beta.influenceMaximization.celf.stats has been deprecated, please use `gds.influenceMaximization.celf.stats`.");
@@ -93,6 +97,10 @@ public class CELFStatsProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
+        executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.influenceMaximization.celf.stats.estimate");
+
         executionContext()
             .log()
             .warn(

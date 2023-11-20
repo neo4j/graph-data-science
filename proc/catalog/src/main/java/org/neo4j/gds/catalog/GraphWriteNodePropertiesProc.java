@@ -62,6 +62,7 @@ public class GraphWriteNodePropertiesProc {
     ) {
         Preconditions.check();
 
+        facade.deprecatedProcedures().called("gds.graph.writeNodeProperties");
         facade.log().warn("Procedure `gds.graph.writeNodeProperties` has been deprecated, please use `gds.graph.nodeProperties.write`.");
 
         return facade.catalog().writeNodeProperties(graphName, nodeProperties, nodeLabels, configuration);

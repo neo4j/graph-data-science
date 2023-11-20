@@ -69,6 +69,9 @@ public class Node2VecMutateProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.node2vec.mutate");
+        executionContext()
             .log()
             .warn(
                 "Procedure `gds.beta.node2vec.mutate` has been deprecated, please use `gds.node2vec.mutate`.");
@@ -85,6 +88,10 @@ public class Node2VecMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
+        executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.node2vec.mutate.estimate");
+
         executionContext()
             .log()
             .warn(

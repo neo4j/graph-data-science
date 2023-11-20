@@ -71,6 +71,9 @@ public class SteinerTreeStreamProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.steinerTree.stream");
+        executionContext()
             .log()
             .warn("Procedure `gds.beta.steinerTree.stream` has been deprecated, please use `gds.steinerTree.stream`.");
         return spanningTree(graphName, configuration);

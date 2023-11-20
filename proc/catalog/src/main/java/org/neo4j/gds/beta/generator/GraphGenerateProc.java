@@ -48,6 +48,7 @@ public final class GraphGenerateProc {
         @Name(value = "averageDegree") long averageDegree,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        facade.deprecatedProcedures().called("gds.beta.graph.generate");
         facade
             .log()
             .warn("Procedure `gds.beta.graph.generate` has been deprecated, please use `gds.graph.generate`.");

@@ -135,6 +135,10 @@ public class GraphStoreExportProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.graph.export.csv");
+
+        executionContext()
             .log()
             .warn("Procedure `gds.beta.graph.export.csv` has been deprecated, please use `gds.graph.export.csv`.");
 
@@ -188,6 +192,9 @@ public class GraphStoreExportProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.graph.export.csv.estimate");
         executionContext()
             .log()
             .warn(

@@ -87,6 +87,9 @@ public class LinkPredictionPipelineAddTrainerMethodProcs extends BaseProc {
         @Name(value = "config") Map<String, Object> randomForestClassifierConfig
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.alpha.pipeline.linkPrediction.addRandomForest");
+        executionContext()
             .log()
             .warn(
                 "Procedure `gds.alpha.pipeline.linkPrediction.addRandomForest` has been deprecated, please use `gds.beta.pipeline.linkPrediction.addRandomForest`.");

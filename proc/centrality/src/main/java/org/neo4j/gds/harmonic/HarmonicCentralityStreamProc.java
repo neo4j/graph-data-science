@@ -58,6 +58,10 @@ public class HarmonicCentralityStreamProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.alpha.closeness.harmonic.stream");
+
+        executionContext()
             .log()
             .warn("Procedure `gds.alpha.closeness.harmonic.stream` has been deprecated, please use `gds.closeness.harmonic.stream`.");
         return new ProcedureExecutor<>(

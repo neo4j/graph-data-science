@@ -70,6 +70,10 @@ public class SteinerTreeMutateProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.steinerTree.mutate");
+
+        executionContext()
             .log()
             .warn("Procedure `gds.beta.steinerTree.mutate` has been deprecated, please use `gds.steinerTree.mutate`.");
         return mutate(graphName, configuration);

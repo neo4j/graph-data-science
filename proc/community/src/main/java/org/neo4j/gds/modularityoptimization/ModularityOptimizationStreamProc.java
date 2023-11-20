@@ -72,6 +72,9 @@ public class ModularityOptimizationStreamProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.modularityOptimization.stream");
+        executionContext()
             .log()
             .warn("Procedure `gds.beta.modularityOptimization.stream` has been deprecated, please use `gds.modularityOptimization.stream`.");
 
@@ -86,6 +89,9 @@ public class ModularityOptimizationStreamProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
+        executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.beta.modularityOptimization.stream.estimate");
         executionContext()
             .log()
             .warn("Procedure `gds.beta.modularityOptimization.stream.estimate` has been deprecated, please use `gds.modularityOptimization.stream.estimate`.");

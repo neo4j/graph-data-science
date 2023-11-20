@@ -55,6 +55,15 @@ public class TriangleProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        executionContext()
+            .metricsFacade()
+            .deprecatedProcedures().called("gds.alpha.triangles");
+
+        executionContext()
+            .log()
+            .warn(
+                "Procedure `gds.alpha.triangles` has been deprecated, please use `gds.triangles`.");
+
         return stream(graphName, configuration);
     }
 }

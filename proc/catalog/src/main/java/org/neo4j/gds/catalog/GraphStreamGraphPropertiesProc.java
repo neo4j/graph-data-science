@@ -49,6 +49,7 @@ public class GraphStreamGraphPropertiesProc {
         @Name(value = "graphProperty") String graphProperty,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
+        facade.deprecatedProcedures().called("gds.alpha.graph.graphProperty.stream");
         facade.log()
             .warn(
                 "Procedure `gds.alpha.graph.graphProperty.stream` has been deprecated, please use `gds.graph.graphProperty.stream`.");
