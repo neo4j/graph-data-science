@@ -21,12 +21,12 @@ package org.neo4j.gds.algorithms.centrality;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
-import org.neo4j.gds.algorithms.centrality.specificfields.StandardCentralityStatisticsSpecificFields;
+import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
 import org.neo4j.gds.result.CentralityStatistics;
 
 import java.util.function.Supplier;
@@ -46,7 +46,7 @@ public class CentralityAlgorithmsMutateBusinessFacade {
         this.mutateNodePropertyService = mutateNodePropertyService;
     }
 
-    public NodePropertyMutateResult<StandardCentralityStatisticsSpecificFields> betweennessCentrality(
+    public NodePropertyMutateResult<DefaultCentralitySpecificFields> betweennessCentrality(
         String graphName,
         BetweennessCentralityMutateConfig configuration,
         boolean shouldComputeCentralityDistribution
@@ -55,24 +55,59 @@ public class CentralityAlgorithmsMutateBusinessFacade {
         var intermediateResult = runWithTiming(
             () -> centralityAlgorithmsFacade.betweennessCentrality(graphName, configuration)
         );
-        var algorithmResult = intermediateResult.algorithmResult;
+
+        return mutateNodeProperty(
+            intermediateResult.algorithmResult,
+            configuration,
+            shouldComputeCentralityDistribution,
+            intermediateResult.computeMilliseconds
+        );
+    }
+
+    public NodePropertyMutateResult<DefaultCentralitySpecificFields> degreeCentrality(
+        String graphName,
+        DegreeCentralityMutateConfig configuration,
+        boolean shouldComputeCentralityDistribution
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = runWithTiming(
+            () -> centralityAlgorithmsFacade.degreeCentrality(graphName, configuration)
+        );
+
+        return mutateNodeProperty(
+            intermediateResult.algorithmResult,
+            configuration,
+            shouldComputeCentralityDistribution,
+            intermediateResult.computeMilliseconds
+        );
+    }
+
+
+    <RESULT extends CentralityAlgorithmResult, CONFIG extends MutateNodePropertyConfig> NodePropertyMutateResult<DefaultCentralitySpecificFields> mutateNodeProperty(
+        AlgorithmComputationResult<RESULT> algorithmResult,
+        CONFIG configuration,
+        boolean shouldComputeCentralityDistribution,
+        long computeMilliseconds
+    ) {
+
+        CentralityFunctionSupplier<RESULT> centralityFunctionSupplier = (r) -> r.centralityScoreProvider();
+        SpecificFieldsWithCentralityDistributionSupplier<RESULT, DefaultCentralitySpecificFields> specificFieldsSupplier = (r, c) -> new DefaultCentralitySpecificFields(
+            c);
+        Supplier<DefaultCentralitySpecificFields> emptyASFSupplier = () -> DefaultCentralitySpecificFields.EMPTY;
+
+        NodePropertyValuesMapper<RESULT> nodePropertyValuesMapper = (r) -> r.nodePropertyValues();
 
         return mutateNodeProperty(
             algorithmResult,
             configuration,
-            (bcResult) -> bcResult::get,
-            (bcResult) -> NodePropertyValuesAdapter.adapt(bcResult),
-            (result, centralityDistribution) -> {
-                return new StandardCentralityStatisticsSpecificFields(
-                    centralityDistribution
-                );
-            },
+            centralityFunctionSupplier,
+            nodePropertyValuesMapper,
+            specificFieldsSupplier,
             shouldComputeCentralityDistribution,
-            intermediateResult.computeMilliseconds,
-            () -> StandardCentralityStatisticsSpecificFields.EMPTY
+            computeMilliseconds,
+            emptyASFSupplier
         );
     }
-
     <RESULT, CONFIG extends MutateNodePropertyConfig, ASF> NodePropertyMutateResult<ASF> mutateNodeProperty(
         AlgorithmComputationResult<RESULT> algorithmResult,
         CONFIG configuration,

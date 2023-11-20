@@ -20,10 +20,8 @@
 package org.neo4j.gds.degree;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.centrality.CentralityWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -38,19 +36,18 @@ import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class DegreeCentralityWriteProc extends BaseProc {
+
     @Context
-    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
+    public GraphDataScience facade;
+
 
     @Procedure(value = "gds.degree.write", mode = WRITE)
     @Description(DEGREE_CENTRALITY_DESCRIPTION)
-    public Stream<WriteResult> write(
+    public Stream<CentralityWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new DegreeCentralityWriteSpecification(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.centrality().degreeCentralityWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.degree.write.estimate", mode = READ)
@@ -59,15 +56,8 @@ public class DegreeCentralityWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new DegreeCentralityWriteSpecification(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.centrality().degreeCentralityWriteEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
-    }
+
 }

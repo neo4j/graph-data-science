@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.betweenness;
 
-import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -33,7 +32,7 @@ import static org.neo4j.gds.betweenness.BetweennessCentrality.BETWEENNESS_DESCRI
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
 
 @GdsCallable(name = "gds.betweenness.stats", description = BETWEENNESS_DESCRIPTION, executionMode = STATS)
-public class BetweennessCentralityStatsSpecification implements AlgorithmSpec<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStatsConfig, Stream<CentralityStatsResult>, BetweennessCentralityFactory<BetweennessCentralityStatsConfig>> {
+public class BetweennessCentralityStatsSpecification implements AlgorithmSpec<BetweennessCentrality, BetwennessCentralityResult, BetweennessCentralityStatsConfig, Stream<CentralityStatsResult>, BetweennessCentralityFactory<BetweennessCentralityStatsConfig>> {
     @Override
     public String name() {
         return "BetweennessCentralityStats";
@@ -50,14 +49,15 @@ public class BetweennessCentralityStatsSpecification implements AlgorithmSpec<Be
     }
 
     @Override
-    public ComputationResultConsumer<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStatsConfig, Stream<CentralityStatsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<BetweennessCentrality, BetwennessCentralityResult, BetweennessCentralityStatsConfig, Stream<CentralityStatsResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             var builder = new CentralityStatsResult.Builder(
                 executionContext.returnColumns(),
                 computationResult.config().concurrency()
             );
 
-            computationResult.result().ifPresent(result -> builder.withCentralityFunction(result::get));
+            computationResult.result()
+                .ifPresent(result -> builder.withCentralityFunction(result.centralityScoreProvider()));
 
             return Stream.of(
                 builder.withPreProcessingMillis(computationResult.preProcessingMillis())

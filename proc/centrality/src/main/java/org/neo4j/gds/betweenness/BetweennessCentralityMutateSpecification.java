@@ -21,8 +21,6 @@ package org.neo4j.gds.betweenness;
 
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
 import org.neo4j.gds.api.properties.nodes.EmptyDoubleNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -39,7 +37,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 
 @GdsCallable(name = "gds.betweenness.mutate", description = BetweennessCentrality.BETWEENNESS_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class BetweennessCentralityMutateSpecification implements AlgorithmSpec<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateConfig, Stream<CentralityMutateResult>, BetweennessCentralityFactory<BetweennessCentralityMutateConfig>> {
+public class BetweennessCentralityMutateSpecification implements AlgorithmSpec<BetweennessCentrality, BetwennessCentralityResult, BetweennessCentralityMutateConfig, Stream<CentralityMutateResult>, BetweennessCentralityFactory<BetweennessCentralityMutateConfig>> {
     @Override
     public String name() {
         return "BetweennessCentralityMutate";
@@ -56,12 +54,12 @@ public class BetweennessCentralityMutateSpecification implements AlgorithmSpec<B
     }
 
     @Override
-    public ComputationResultConsumer<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateConfig, Stream<CentralityMutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<BetweennessCentrality, BetwennessCentralityResult, BetweennessCentralityMutateConfig, Stream<CentralityMutateResult>> computationResultConsumer() {
         return new MutatePropertyComputationResultConsumer<>(
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),
                 computationResult.result()
-                    .map(NodePropertyValuesAdapter::adapt)
+                    .map(BetwennessCentralityResult::nodePropertyValues)
                     .orElse(EmptyDoubleNodePropertyValues.INSTANCE)
                 )
             ),
@@ -70,7 +68,7 @@ public class BetweennessCentralityMutateSpecification implements AlgorithmSpec<B
     }
 
     private AbstractResultBuilder<CentralityMutateResult> resultBuilder(
-        ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityMutateConfig> computationResult,
+        ComputationResult<BetweennessCentrality, BetwennessCentralityResult, BetweennessCentralityMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
         var builder = new CentralityMutateResult.Builder(
@@ -78,7 +76,8 @@ public class BetweennessCentralityMutateSpecification implements AlgorithmSpec<B
             computationResult.config().concurrency()
         );
 
-        computationResult.result().ifPresent(result -> builder.withCentralityFunction(result::get));
+        computationResult.result()
+            .ifPresent(result -> builder.withCentralityFunction(result.centralityScoreProvider()));
 
         return builder;
     }

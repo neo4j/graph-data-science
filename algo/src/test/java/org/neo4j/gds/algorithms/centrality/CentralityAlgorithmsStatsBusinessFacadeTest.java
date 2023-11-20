@@ -22,7 +22,7 @@ package org.neo4j.gds.algorithms.centrality;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
-import org.neo4j.gds.algorithms.centrality.specificfields.StandardCentralityStatisticsSpecificFields;
+import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
@@ -69,7 +69,7 @@ class CentralityAlgorithmsStatsBusinessFacadeTest {
             null,
             false,
             0L,
-            () -> StandardCentralityStatisticsSpecificFields.EMPTY
+            () -> DefaultCentralitySpecificFields.EMPTY
         );
 
         assertThat(statsResult.algorithmSpecificFields().centralityDistribution())
@@ -98,10 +98,10 @@ class CentralityAlgorithmsStatsBusinessFacadeTest {
             algorithmResultMock,
             configMock,
             ((r) -> r::get),
-            (r,  cs) -> new StandardCentralityStatisticsSpecificFields(cs),
+            (r, cs) -> new DefaultCentralitySpecificFields(cs),
             false,
             50L,
-            () -> StandardCentralityStatisticsSpecificFields.EMPTY
+            () -> DefaultCentralitySpecificFields.EMPTY
         );
 
 
@@ -130,10 +130,10 @@ class CentralityAlgorithmsStatsBusinessFacadeTest {
             algorithmResultMock,
             configMock,
             ((r) -> r::get),
-            (r,  cs) -> new StandardCentralityStatisticsSpecificFields(cs),
+            (r, cs) -> new DefaultCentralitySpecificFields(cs),
             true,
             50L,
-            () -> StandardCentralityStatisticsSpecificFields.EMPTY
+            () -> DefaultCentralitySpecificFields.EMPTY
         );
 
 

@@ -22,6 +22,7 @@ package org.neo4j.gds.traversal;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.degree.DegreeCentrality;
+import org.neo4j.gds.degree.DegreeFunction;
 import org.neo4j.gds.degree.ImmutableDegreeCentralityConfig;
 import org.neo4j.gds.ml.core.samplers.RandomWalkSampler;
 
@@ -41,7 +42,7 @@ public final class RandomWalkCompanion {
             : graph::degree;
     }
 
-    private static DegreeCentrality.DegreeFunction cumulativeWeightsFromProperty(
+    private static DegreeFunction cumulativeWeightsFromProperty(
         Graph graph,
         int concurrency,
         ExecutorService executorService,
@@ -58,7 +59,7 @@ public final class RandomWalkCompanion {
             executorService,
             degreeCentralityConfig,
             progressTracker
-        ).compute();
+        ).compute().degreeFunction();
 
     }
 

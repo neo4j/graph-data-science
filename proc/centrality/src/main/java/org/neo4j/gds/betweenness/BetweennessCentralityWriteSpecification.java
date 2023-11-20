@@ -21,8 +21,6 @@ package org.neo4j.gds.betweenness;
 
 import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
 import org.neo4j.gds.api.properties.nodes.EmptyDoubleNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -40,7 +38,7 @@ import static org.neo4j.gds.betweenness.BetweennessCentrality.BETWEENNESS_DESCRI
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 
 @GdsCallable(name = "gds.betweenness.write", description = BETWEENNESS_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class BetweennessCentralityWriteSpecification implements AlgorithmSpec<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteConfig, Stream<CentralityWriteResult>, BetweennessCentralityFactory<BetweennessCentralityWriteConfig>> {
+public class BetweennessCentralityWriteSpecification implements AlgorithmSpec<BetweennessCentrality, BetwennessCentralityResult, BetweennessCentralityWriteConfig, Stream<CentralityWriteResult>, BetweennessCentralityFactory<BetweennessCentralityWriteConfig>> {
     @Override
     public String name() {
         return "BetweennessCentralityWrite";
@@ -57,13 +55,13 @@ public class BetweennessCentralityWriteSpecification implements AlgorithmSpec<Be
     }
 
     @Override
-    public ComputationResultConsumer<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteConfig, Stream<CentralityWriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<BetweennessCentrality, BetwennessCentralityResult, BetweennessCentralityWriteConfig, Stream<CentralityWriteResult>> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>(
             this::resultBuilder,
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().writeProperty(),
                     computationResult.result()
-                        .map(NodePropertyValuesAdapter::adapt)
+                        .map(BetwennessCentralityResult::nodePropertyValues)
                         .orElse(EmptyDoubleNodePropertyValues.INSTANCE)
                 )
             ),
@@ -72,7 +70,7 @@ public class BetweennessCentralityWriteSpecification implements AlgorithmSpec<Be
     }
 
     private AbstractResultBuilder<CentralityWriteResult> resultBuilder(
-        ComputationResult<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityWriteConfig> computationResult,
+        ComputationResult<BetweennessCentrality, BetwennessCentralityResult, BetweennessCentralityWriteConfig> computationResult,
         ExecutionContext executionContext
     ) {
         var builder = new CentralityWriteResult.Builder(
@@ -80,7 +78,8 @@ public class BetweennessCentralityWriteSpecification implements AlgorithmSpec<Be
             computationResult.config().concurrency()
         );
 
-        computationResult.result().ifPresent(result -> builder.withCentralityFunction(result::get));
+        computationResult.result()
+            .ifPresent(result -> builder.withCentralityFunction(result.centralityScoreProvider()));
 
         return builder;
     }

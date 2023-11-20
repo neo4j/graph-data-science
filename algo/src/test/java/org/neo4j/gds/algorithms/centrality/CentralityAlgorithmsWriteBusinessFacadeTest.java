@@ -22,7 +22,7 @@ package org.neo4j.gds.algorithms.centrality;
     import org.assertj.core.data.Offset;
     import org.junit.jupiter.api.Test;
     import org.neo4j.gds.algorithms.AlgorithmComputationResult;
-    import org.neo4j.gds.algorithms.centrality.specificfields.StandardCentralityStatisticsSpecificFields;
+    import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
     import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyResult;
     import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
     import org.neo4j.gds.api.Graph;
@@ -62,7 +62,7 @@ package org.neo4j.gds.algorithms.centrality;
             null,
             true,
             0,
-            ()-> StandardCentralityStatisticsSpecificFields.EMPTY,
+            () -> DefaultCentralitySpecificFields.EMPTY,
             "FOO",
             4,
             "foo",
@@ -123,10 +123,10 @@ package org.neo4j.gds.algorithms.centrality;
                 configurationMock,
                 ((r)->r::get),
                 nodePropertyValuesMapper,
-                ((r,  cs) -> new StandardCentralityStatisticsSpecificFields(cs)),
+                ((r, cs) -> new DefaultCentralitySpecificFields(cs)),
                 false,
                 0L,
-                () -> StandardCentralityStatisticsSpecificFields.EMPTY,
+                () -> DefaultCentralitySpecificFields.EMPTY,
                 "FooWrite",
                 4,
                 "foo",
@@ -190,10 +190,10 @@ package org.neo4j.gds.algorithms.centrality;
                 configurationMock,
                 ((r)->r::get),
                 nodePropertyValuesMapper,
-                ((r,  cs) -> new StandardCentralityStatisticsSpecificFields(cs)),
+                ((r, cs) -> new DefaultCentralitySpecificFields(cs)),
                 true,
                 0L,
-                () -> StandardCentralityStatisticsSpecificFields.EMPTY,
+                () -> DefaultCentralitySpecificFields.EMPTY,
                 "FooWrite",
                 4,
                 "foo",

@@ -155,7 +155,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Gra
             ProgressTracker.NULL_TRACKER
         );
 
-        var degrees = degreeCentrality.compute();
+        var degrees = degreeCentrality.compute().degreeFunction();
         return degrees::get;
     }
 

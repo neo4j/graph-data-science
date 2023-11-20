@@ -23,24 +23,24 @@ import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.algorithms.centrality.specificfields.StandardCentralityStatisticsSpecificFields;
+import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
+import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
-import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.config.AlgoBaseConfig;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-final class BetweenessCentralityComputationalResultTransformer {
+final class DefaultCentralityComputationalResultTransformer {
 
-    private BetweenessCentralityComputationalResultTransformer() {}
+    private DefaultCentralityComputationalResultTransformer() {}
 
-    static Stream<CentralityStreamResult> toStreamResult(
-        StreamComputationResult<HugeAtomicDoubleArray> computationResult
+
+    static <RESULT extends CentralityAlgorithmResult> Stream<CentralityStreamResult> toStreamResult(
+        StreamComputationResult<RESULT> computationResult
     ) {
-        return computationResult.result().map(bcResult -> {
-            var nodePropertyValues = NodePropertyValuesAdapter.adapt(bcResult);
+        return computationResult.result().map(result -> {
+            var nodePropertyValues = result.nodePropertyValues();
             var graph = computationResult.graph();
             return LongStream
                 .range(IdMap.START_NODE_ID, graph.nodeCount())
@@ -55,8 +55,8 @@ final class BetweenessCentralityComputationalResultTransformer {
     }
 
     static CentralityStatsResult toStatsResult(
-        StatsResult<StandardCentralityStatisticsSpecificFields> computationResult,
-        BetweennessCentralityStatsConfig configuration
+        StatsResult<DefaultCentralitySpecificFields> computationResult,
+        AlgoBaseConfig configuration
     ) {
         return new CentralityStatsResult(
             computationResult.algorithmSpecificFields().centralityDistribution(),
@@ -68,7 +68,7 @@ final class BetweenessCentralityComputationalResultTransformer {
     }
 
     static CentralityMutateResult toMutateResult(
-        NodePropertyMutateResult<StandardCentralityStatisticsSpecificFields> computationResult
+        NodePropertyMutateResult<DefaultCentralitySpecificFields> computationResult
     ) {
         return new CentralityMutateResult(
             computationResult.nodePropertiesWritten(),
@@ -82,7 +82,7 @@ final class BetweenessCentralityComputationalResultTransformer {
     }
 
     static CentralityWriteResult toWriteResult(
-        NodePropertyWriteResult<StandardCentralityStatisticsSpecificFields> computationResult
+        NodePropertyWriteResult<DefaultCentralitySpecificFields> computationResult
     ) {
         return new CentralityWriteResult(
             computationResult.nodePropertiesWritten(),

@@ -27,6 +27,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.centrality.CentralityMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -35,7 +36,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 
 @GdsCallable(name = "gds.degree.mutate", description = DegreeCentrality.DEGREE_CENTRALITY_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class DegreeCentralityMutateSpecification implements AlgorithmSpec<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityMutateConfig, Stream<MutateResult>, DegreeCentralityFactory<DegreeCentralityMutateConfig>> {
+public class DegreeCentralityMutateSpecification implements AlgorithmSpec<DegreeCentrality, DegreeCentralityResult, DegreeCentralityMutateConfig, Stream<CentralityMutateResult>, DegreeCentralityFactory<DegreeCentralityMutateConfig>> {
     @Override
     public String name() {
         return "DegreeCentralityMutate";
@@ -52,26 +53,27 @@ public class DegreeCentralityMutateSpecification implements AlgorithmSpec<Degree
     }
 
     @Override
-    public ComputationResultConsumer<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<DegreeCentrality, DegreeCentralityResult, DegreeCentralityMutateConfig, Stream<CentralityMutateResult>> computationResultConsumer() {
         return new MutatePropertyComputationResultConsumer<>(
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),
-                DegreeCentralityNodePropertyValues.from(computationResult)
+                computationResult.result().orElse(DegreeCentralityResult.EMPTY).nodePropertyValues()
             )),
             this::resultBuilder
         );
     }
 
-    private AbstractResultBuilder<MutateResult> resultBuilder(
-        ComputationResult<DegreeCentrality, DegreeCentrality.DegreeFunction, DegreeCentralityMutateConfig> computationResult,
+    private AbstractResultBuilder<CentralityMutateResult> resultBuilder(
+        ComputationResult<DegreeCentrality, DegreeCentralityResult, DegreeCentralityMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new MutateResult.Builder(
+        var builder = new CentralityMutateResult.Builder(
             executionContext.returnColumns(),
             computationResult.config().concurrency()
         );
 
-        computationResult.result().ifPresent(result -> builder.withCentralityFunction(result::get));
+        computationResult.result()
+            .ifPresent(result -> builder.withCentralityFunction(result.centralityScoreProvider()));
 
         return builder;
     }

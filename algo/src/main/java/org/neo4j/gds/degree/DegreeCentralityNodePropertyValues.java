@@ -20,20 +20,14 @@
 package org.neo4j.gds.degree;
 
 import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
-import org.neo4j.gds.executor.ComputationResult;
 
 final class DegreeCentralityNodePropertyValues implements DoubleNodePropertyValues {
 
     private final long nodeCount;
-    private final DegreeCentrality.DegreeFunction degreeFunction;
+    private final DegreeFunction degreeFunction;
 
-    static DegreeCentralityNodePropertyValues from(ComputationResult<DegreeCentrality, DegreeCentrality.DegreeFunction, ? extends DegreeCentralityConfig> computationResult) {
-        return computationResult.result()
-            .map(result -> new DegreeCentralityNodePropertyValues(computationResult.graph().nodeCount(), result))
-            .orElseGet(() -> new DegreeCentralityNodePropertyValues(0, (nodeId) -> -1L));
-    }
 
-    DegreeCentralityNodePropertyValues(long nodeCount, DegreeCentrality.DegreeFunction degreeFunction) {
+    DegreeCentralityNodePropertyValues(long nodeCount, DegreeFunction degreeFunction) {
         this.nodeCount = nodeCount;
         this.degreeFunction = degreeFunction;
     }

@@ -20,8 +20,6 @@
 package org.neo4j.gds.betweenness;
 
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -37,7 +35,7 @@ import static org.neo4j.gds.betweenness.BetweennessCentrality.BETWEENNESS_DESCRI
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 @GdsCallable(name = "gds.betweenness.stream", description = BETWEENNESS_DESCRIPTION, executionMode = STREAM)
-public class BetweennessCentralityStreamSpecification implements AlgorithmSpec<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStreamConfig, Stream<CentralityStreamResult>, BetweennessCentralityFactory<BetweennessCentralityStreamConfig>> {
+public class BetweennessCentralityStreamSpecification implements AlgorithmSpec<BetweennessCentrality, BetwennessCentralityResult, BetweennessCentralityStreamConfig, Stream<CentralityStreamResult>, BetweennessCentralityFactory<BetweennessCentralityStreamConfig>> {
 
     @Override
     public String name() {
@@ -55,13 +53,13 @@ public class BetweennessCentralityStreamSpecification implements AlgorithmSpec<B
     }
 
     @Override
-    public ComputationResultConsumer<BetweennessCentrality, HugeAtomicDoubleArray, BetweennessCentralityStreamConfig, Stream<CentralityStreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<BetweennessCentrality, BetwennessCentralityResult, BetweennessCentralityStreamConfig, Stream<CentralityStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),
             ()  -> computationResult.result()
                 .map(result -> {
-                    var nodePropertyValues = NodePropertyValuesAdapter.adapt(result);
+                    var nodePropertyValues = result.nodePropertyValues();
                     var graph = computationResult.graph();
                     return LongStream
                         .range(IdMap.START_NODE_ID, graph.nodeCount())
