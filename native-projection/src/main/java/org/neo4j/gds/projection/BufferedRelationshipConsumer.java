@@ -95,4 +95,9 @@ public class BufferedRelationshipConsumer implements StoreScanner.RecordConsumer
         return !this.buffer.isFull();
 
     }
+
+    @Override
+    public void reset() {
+        this.buffer.reset();
+    }
 }

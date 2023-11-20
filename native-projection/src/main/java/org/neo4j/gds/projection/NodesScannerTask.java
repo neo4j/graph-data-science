@@ -25,15 +25,13 @@ import org.neo4j.gds.core.loading.AdjacencyBuffer;
 import org.neo4j.gds.core.loading.NativeNodePropertyImporter;
 import org.neo4j.gds.core.loading.NodeImporter;
 import org.neo4j.gds.core.loading.NodeReference;
-import org.neo4j.gds.core.loading.NodesBatchBuffer;
-import org.neo4j.gds.core.loading.NodesBatchBufferBuilder;
 import org.neo4j.gds.core.loading.RecordScannerTask;
 import org.neo4j.gds.core.loading.ScanState;
 import org.neo4j.gds.core.loading.StoreScanner;
 import org.neo4j.gds.core.utils.RawValues;
 import org.neo4j.gds.core.utils.StatementAction;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.kernel.api.KernelTransaction;
 

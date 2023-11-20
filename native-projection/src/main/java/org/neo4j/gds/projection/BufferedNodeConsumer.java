@@ -102,8 +102,8 @@ public final class BufferedNodeConsumer implements StoreScanner.RecordConsumer<N
 
         if (this.nodeLabelIds.isEmpty()) {
             var propertiesReference = this.readProperty
-                ? Neo4jProxy.noPropertyReference()
-                : record.propertiesReference();
+                ? record.propertiesReference()
+                : Neo4jProxy.noPropertyReference();
             this.buffer.add(record.nodeId(), propertiesReference, NodeLabelTokenSet.ANY_LABEL);
         } else {
             boolean atLeastOneLabelFound = false;
@@ -118,12 +118,17 @@ public final class BufferedNodeConsumer implements StoreScanner.RecordConsumer<N
             }
             if (atLeastOneLabelFound) {
                 var propertiesReference = this.readProperty
-                    ? Neo4jProxy.noPropertyReference()
-                    : record.propertiesReference();
+                    ? record.propertiesReference()
+                    : Neo4jProxy.noPropertyReference();
 
                 this.buffer.add(record.nodeId(), propertiesReference, labels);
             }
         }
         return !this.buffer.isFull();
+    }
+
+    @Override
+    public void reset() {
+        this.buffer.reset();
     }
 }
