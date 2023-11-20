@@ -21,7 +21,6 @@ package org.neo4j.gds.closeness;
 
 import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
 import org.neo4j.gds.api.properties.nodes.EmptyDoubleNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -39,7 +38,7 @@ import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 
 @GdsCallable(name = "gds.beta.closeness.write", description = CLOSENESS_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 
-public class BetaClosenessCentralityWriteSpec implements AlgorithmSpec<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteConfig, Stream<BetaWriteResult>, ClosenessCentralityFactory<ClosenessCentralityWriteConfig>> {
+public class BetaClosenessCentralityWriteSpec implements AlgorithmSpec<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteConfig, Stream<BetaWriteResult>, ClosenessCentralityAlgorithmFactory<ClosenessCentralityWriteConfig>> {
 
     @Override
     public String name() {
@@ -47,8 +46,8 @@ public class BetaClosenessCentralityWriteSpec implements AlgorithmSpec<Closeness
     }
 
     @Override
-    public ClosenessCentralityFactory<ClosenessCentralityWriteConfig> algorithmFactory(ExecutionContext executionContext) {
-        return new ClosenessCentralityFactory<>();
+    public ClosenessCentralityAlgorithmFactory<ClosenessCentralityWriteConfig> algorithmFactory(ExecutionContext executionContext) {
+        return new ClosenessCentralityAlgorithmFactory<>();
     }
 
     @Override
@@ -62,8 +61,7 @@ public class BetaClosenessCentralityWriteSpec implements AlgorithmSpec<Closeness
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().writeProperty(),
                 computationResult.result()
-                    .map(ClosenessCentralityResult::centralities)
-                    .map(NodePropertyValuesAdapter::adapt)
+                    .map(ClosenessCentralityResult::nodePropertyValues)
                     .orElse(EmptyDoubleNodePropertyValues.INSTANCE)
             )),
             name());
@@ -77,7 +75,9 @@ public class BetaClosenessCentralityWriteSpec implements AlgorithmSpec<Closeness
             computationResult.config().concurrency()
         );
 
-        computationResult.result().ifPresent(result -> builder.withCentralityFunction(result.centralities()::get));
+        computationResult.result()
+            .ifPresent(result -> builder.withCentralityFunction(result.centralityScoreProvider()));
+
 
         builder.withWriteProperty(computationResult.config().writeProperty());
 

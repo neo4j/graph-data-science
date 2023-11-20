@@ -92,13 +92,13 @@ class ClosenessCentralityDirectedTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        var result = algo.compute().centralities();
-        assertThat(result.get(idFunction.of("a"))).isEqualTo(2 / 3.0);
-        assertThat(result.get(idFunction.of("b"))).isEqualTo(1);
-        assertThat(result.get(idFunction.of("c"))).isEqualTo(0);
-        assertThat(result.get(idFunction.of("d"))).isEqualTo(2 / 3.0);
-        assertThat(result.get(idFunction.of("e"))).isEqualTo(1);
-        assertThat(result.get(idFunction.of("f"))).isEqualTo(0);
+        var result = algo.compute().centralityScoreProvider();
+        assertThat(result.applyAsDouble(idFunction.of("a"))).isEqualTo(2 / 3.0);
+        assertThat(result.applyAsDouble(idFunction.of("b"))).isEqualTo(1);
+        assertThat(result.applyAsDouble(idFunction.of("c"))).isEqualTo(0);
+        assertThat(result.applyAsDouble(idFunction.of("d"))).isEqualTo(2 / 3.0);
+        assertThat(result.applyAsDouble(idFunction.of("e"))).isEqualTo(1);
+        assertThat(result.applyAsDouble(idFunction.of("f"))).isEqualTo(0);
     }
 
     @Test
@@ -112,12 +112,12 @@ class ClosenessCentralityDirectedTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        var result = algo.compute().centralities();
-        assertThat(result.get(idFunction.of("a"))).isEqualTo(4 / 15.0);
-        assertThat(result.get(idFunction.of("b"))).isEqualTo(2 / 5.0);
-        assertThat(result.get(idFunction.of("c"))).isEqualTo(0);
-        assertThat(result.get(idFunction.of("d"))).isEqualTo(4 / 15.0);
-        assertThat(result.get(idFunction.of("e"))).isEqualTo(2 / 5.0);
-        assertThat(result.get(idFunction.of("f"))).isEqualTo(0);
+        var result = algo.compute().centralityScoreProvider();
+        assertThat(result.applyAsDouble(idFunction.of("a"))).isEqualTo(4 / 15.0);
+        assertThat(result.applyAsDouble(idFunction.of("b"))).isEqualTo(2 / 5.0);
+        assertThat(result.applyAsDouble(idFunction.of("c"))).isEqualTo(0);
+        assertThat(result.applyAsDouble(idFunction.of("d"))).isEqualTo(4 / 15.0);
+        assertThat(result.applyAsDouble(idFunction.of("e"))).isEqualTo(2 / 5.0);
+        assertThat(result.applyAsDouble(idFunction.of("f"))).isEqualTo(0);
     }
 }

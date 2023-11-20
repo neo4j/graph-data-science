@@ -27,7 +27,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface ClosenessCentralityConfig extends AlgoBaseConfig {
+public interface ClosenessCentralityBaseConfig extends AlgoBaseConfig {
 
     @Value.Default
     default boolean useWassermanFaust() {

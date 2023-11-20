@@ -21,6 +21,7 @@ package org.neo4j.gds.closeness;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.centrality.CentralityStatsResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -36,7 +37,7 @@ public class ClosenessCentralityStatsProc extends BaseProc {
 
     @Procedure(value = "gds.closeness.stats", mode = READ)
     @Description(CLOSENESS_DESCRIPTION)
-    public Stream<StatsResult> stats(
+    public Stream<CentralityStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -50,7 +51,7 @@ public class ClosenessCentralityStatsProc extends BaseProc {
     @Internal
     @Procedure(value = "gds.beta.closeness.stats", mode = READ, deprecatedBy = "gds.closeness.stats")
     @Description(CLOSENESS_DESCRIPTION)
-    public Stream<StatsResult> statsBeta(
+    public Stream<CentralityStatsResult> statsBeta(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

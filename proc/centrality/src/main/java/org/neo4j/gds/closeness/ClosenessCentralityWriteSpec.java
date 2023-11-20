@@ -21,7 +21,6 @@ package org.neo4j.gds.closeness;
 
 import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
 import org.neo4j.gds.api.properties.nodes.EmptyDoubleNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -29,6 +28,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.centrality.CentralityWriteResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -38,7 +38,7 @@ import static org.neo4j.gds.closeness.ClosenessCentrality.CLOSENESS_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 
 @GdsCallable(name = "gds.closeness.write", description = CLOSENESS_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class ClosenessCentralityWriteSpec implements AlgorithmSpec<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteConfig, Stream<WriteResult>, ClosenessCentralityFactory<ClosenessCentralityWriteConfig>> {
+public class ClosenessCentralityWriteSpec implements AlgorithmSpec<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteConfig, Stream<CentralityWriteResult>, ClosenessCentralityAlgorithmFactory<ClosenessCentralityWriteConfig>> {
 
     @Override
     public String name() {
@@ -46,8 +46,8 @@ public class ClosenessCentralityWriteSpec implements AlgorithmSpec<ClosenessCent
     }
 
     @Override
-    public ClosenessCentralityFactory<ClosenessCentralityWriteConfig> algorithmFactory(ExecutionContext executionContext) {
-        return new ClosenessCentralityFactory<>();
+    public ClosenessCentralityAlgorithmFactory<ClosenessCentralityWriteConfig> algorithmFactory(ExecutionContext executionContext) {
+        return new ClosenessCentralityAlgorithmFactory<>();
     }
 
     @Override
@@ -56,27 +56,28 @@ public class ClosenessCentralityWriteSpec implements AlgorithmSpec<ClosenessCent
     }
 
     @Override
-    public ComputationResultConsumer<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteConfig, Stream<CentralityWriteResult>> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>( this::resultBuilder,
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().writeProperty(),
                 computationResult.result()
-                    .map(ClosenessCentralityResult::centralities)
-                    .map(NodePropertyValuesAdapter::adapt)
+                    .map(ClosenessCentralityResult::nodePropertyValues)
                     .orElse(EmptyDoubleNodePropertyValues.INSTANCE)
             )),
             name());
     }
-    private AbstractResultBuilder<WriteResult> resultBuilder(
+
+    private AbstractResultBuilder<CentralityWriteResult> resultBuilder(
         ComputationResult<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityWriteConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new WriteResult.Builder(
+        var builder = new CentralityWriteResult.Builder(
             executionContext.returnColumns(),
             computationResult.config().concurrency()
         );
 
-        computationResult.result().ifPresent(result -> builder.withCentralityFunction(result.centralities()::get));
+        computationResult.result()
+            .ifPresent(result -> builder.withCentralityFunction(result.centralityScoreProvider()));
 
         return builder;
     }

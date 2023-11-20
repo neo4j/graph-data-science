@@ -23,6 +23,7 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.centrality.CentralityWriteResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -41,7 +42,7 @@ public class ClosenessCentralityWriteProc extends BaseProc {
 
     @Procedure(value = "gds.closeness.write", mode = WRITE)
     @Description(CLOSENESS_DESCRIPTION)
-    public Stream<WriteResult> write(
+    public Stream<CentralityWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

@@ -20,7 +20,6 @@
 package org.neo4j.gds.closeness;
 
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -36,7 +35,7 @@ import static org.neo4j.gds.closeness.ClosenessCentrality.CLOSENESS_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 @GdsCallable(name = "gds.closeness.stream", aliases = {"gds.beta.closeness.stream"}, description = CLOSENESS_DESCRIPTION, executionMode = STREAM)
-public class ClosenessCentralityStreamSpec implements AlgorithmSpec<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityStreamConfig, Stream<CentralityStreamResult>, ClosenessCentralityFactory<ClosenessCentralityStreamConfig>> {
+public class ClosenessCentralityStreamSpec implements AlgorithmSpec<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityStreamConfig, Stream<CentralityStreamResult>, ClosenessCentralityAlgorithmFactory<ClosenessCentralityStreamConfig>> {
 
     @Override
     public String name() {
@@ -44,8 +43,8 @@ public class ClosenessCentralityStreamSpec implements AlgorithmSpec<ClosenessCen
     }
 
     @Override
-    public ClosenessCentralityFactory<ClosenessCentralityStreamConfig> algorithmFactory(ExecutionContext executionContext) {
-        return new ClosenessCentralityFactory<>();
+    public ClosenessCentralityAlgorithmFactory<ClosenessCentralityStreamConfig> algorithmFactory(ExecutionContext executionContext) {
+        return new ClosenessCentralityAlgorithmFactory<>();
     }
 
     @Override
@@ -60,7 +59,7 @@ public class ClosenessCentralityStreamSpec implements AlgorithmSpec<ClosenessCen
             executionContext.log(),
             () -> computationResult.result()
                 .map(result -> {
-                    var nodePropertyValues = NodePropertyValuesAdapter.adapt(result.centralities());
+                    var nodePropertyValues = result.nodePropertyValues();
                     var graph = computationResult.graph();
                     return LongStream
                         .range(IdMap.START_NODE_ID, graph.nodeCount())

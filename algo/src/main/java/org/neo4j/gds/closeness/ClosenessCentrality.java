@@ -55,7 +55,7 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
 
     public static ClosenessCentrality of(
         Graph graph,
-        ClosenessCentralityConfig config,
+        ClosenessCentralityBaseConfig config,
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
@@ -102,7 +102,7 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
         var centralities = computeCloseness();
         progressTracker.endSubTask();
 
-        return ImmutableClosenessCentralityResult.of(centralities);
+        return new ClosenessCentralityResult(centralities);
     }
 
     private void computeFarness() {

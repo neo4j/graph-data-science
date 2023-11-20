@@ -26,6 +26,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.centrality.CentralityStatsResult;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 
 import java.util.stream.Stream;
@@ -34,7 +35,7 @@ import static org.neo4j.gds.closeness.ClosenessCentrality.CLOSENESS_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
 
 @GdsCallable(name = "gds.closeness.stats", aliases = {"gds.beta.closeness.stats"}, description = CLOSENESS_DESCRIPTION, executionMode = STATS)
-public class ClosenessCentralityStatsSpec implements AlgorithmSpec<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityStatsConfig, Stream<StatsResult>, ClosenessCentralityFactory<ClosenessCentralityStatsConfig>> {
+public class ClosenessCentralityStatsSpec implements AlgorithmSpec<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityStatsConfig, Stream<CentralityStatsResult>, ClosenessCentralityAlgorithmFactory<ClosenessCentralityStatsConfig>> {
 
     @Override
     public String name() {
@@ -42,8 +43,8 @@ public class ClosenessCentralityStatsSpec implements AlgorithmSpec<ClosenessCent
     }
 
     @Override
-    public ClosenessCentralityFactory<ClosenessCentralityStatsConfig> algorithmFactory(ExecutionContext executionContext) {
-        return new ClosenessCentralityFactory<>();
+    public ClosenessCentralityAlgorithmFactory<ClosenessCentralityStatsConfig> algorithmFactory(ExecutionContext executionContext) {
+        return new ClosenessCentralityAlgorithmFactory<>();
     }
 
     @Override
@@ -52,23 +53,25 @@ public class ClosenessCentralityStatsSpec implements AlgorithmSpec<ClosenessCent
     }
 
     @Override
-    public ComputationResultConsumer<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityStatsConfig, Stream<StatsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityStatsConfig, Stream<CentralityStatsResult>> computationResultConsumer() {
         return new StatsComputationResultConsumer<>(this::resultBuilder);
 
     }
 
 
-    private AbstractCentralityResultBuilder<StatsResult> resultBuilder(
+    private AbstractCentralityResultBuilder<CentralityStatsResult> resultBuilder(
         ComputationResult<ClosenessCentrality, ClosenessCentralityResult,
             ClosenessCentralityStatsConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        AbstractCentralityResultBuilder<StatsResult> builder = new StatsResult.Builder(
+        AbstractCentralityResultBuilder<CentralityStatsResult> builder = new CentralityStatsResult.Builder(
             executionContext.returnColumns(),
             computationResult.config().concurrency()
         );
 
-        computationResult.result().ifPresent(result -> builder.withCentralityFunction(result.centralities()::get));
+        computationResult.result()
+            .ifPresent(result -> builder.withCentralityFunction(result.centralityScoreProvider()));
+
 
         return builder;
 

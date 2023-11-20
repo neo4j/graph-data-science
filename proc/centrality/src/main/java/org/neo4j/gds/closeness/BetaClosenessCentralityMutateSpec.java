@@ -21,7 +21,6 @@ package org.neo4j.gds.closeness;
 
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
 import org.neo4j.gds.api.properties.nodes.EmptyDoubleNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -38,7 +37,7 @@ import static org.neo4j.gds.closeness.ClosenessCentrality.CLOSENESS_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 
 @GdsCallable(name = "gds.beta.closeness.mutate", description = CLOSENESS_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class BetaClosenessCentralityMutateSpec implements AlgorithmSpec<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityMutateConfig,Stream<BetaMutateResult>, ClosenessCentralityFactory<ClosenessCentralityMutateConfig>> {
+public class BetaClosenessCentralityMutateSpec implements AlgorithmSpec<ClosenessCentrality, ClosenessCentralityResult, ClosenessCentralityMutateConfig, Stream<BetaMutateResult>, ClosenessCentralityAlgorithmFactory<ClosenessCentralityMutateConfig>> {
 
     @Override
     public String name() {
@@ -46,8 +45,8 @@ public class BetaClosenessCentralityMutateSpec implements AlgorithmSpec<Closenes
     }
 
     @Override
-    public ClosenessCentralityFactory<ClosenessCentralityMutateConfig> algorithmFactory(ExecutionContext executionContext) {
-        return new ClosenessCentralityFactory<>();
+    public ClosenessCentralityAlgorithmFactory<ClosenessCentralityMutateConfig> algorithmFactory(ExecutionContext executionContext) {
+        return new ClosenessCentralityAlgorithmFactory<>();
     }
 
     @Override
@@ -61,8 +60,8 @@ public class BetaClosenessCentralityMutateSpec implements AlgorithmSpec<Closenes
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),
                 computationResult.result()
-                    .map(ClosenessCentralityResult::centralities)
-                    .map(NodePropertyValuesAdapter::adapt)
+                    .map(ClosenessCentralityResult::nodePropertyValues)
+
                     .orElse(EmptyDoubleNodePropertyValues.INSTANCE)
             )),
             this::resultBuilder
@@ -78,7 +77,8 @@ public class BetaClosenessCentralityMutateSpec implements AlgorithmSpec<Closenes
         );
 
         builder.withMutateProperty(computationResult.config().mutateProperty());
-        computationResult.result().ifPresent(result -> builder.withCentralityFunction(result.centralities()::get));
+        computationResult.result()
+            .ifPresent(result -> builder.withCentralityFunction(result.centralityScoreProvider()));
 
         return builder;
     }
