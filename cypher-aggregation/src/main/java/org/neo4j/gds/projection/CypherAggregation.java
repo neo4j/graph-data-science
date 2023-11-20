@@ -109,10 +109,18 @@ public class CypherAggregation implements CompatUserAggregationFunction {
         var metricsFacade = Neo4jProxy.lookupComponentProvider(ctx, MetricsFacade.class, true);
         var username = Neo4jProxy.lookupComponentProvider(ctx, Username.class, true);
         var transaction = Neo4jProxy.lookupComponentProvider(ctx, Transaction.class, true);
-        var ktxs = GraphDatabaseApiProxy.resolveDependency(databaseService, KernelTransactions.class);
-        var queryProvider = ExecutingQueryProvider.fromTransaction(ktxs, transaction);
 
         var runsOnCompositeDatabase = Neo4jProxy.isCompositeDatabase(databaseService);
+
+        ExecutingQueryProvider queryProvider;
+        if (runsOnCompositeDatabase) {
+            queryProvider = ExecutingQueryProvider.empty();
+        } else {
+            assert GraphDatabaseApiProxy.containsDependency(databaseService, KernelTransactions.class);
+            var ktxs = GraphDatabaseApiProxy.resolveDependency(databaseService, KernelTransactions.class);
+            queryProvider = ExecutingQueryProvider.fromTransaction(ktxs, transaction);
+        }
+
         var writeMode = runsOnCompositeDatabase
             ? WriteMode.NONE
             : WriteMode.LOCAL;
