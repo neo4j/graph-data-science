@@ -440,7 +440,7 @@ class KnnTest {
             }
         });
 
-        var joinNeighbors = new Knn.JoinNeighbors(
+        var joinNeighbors = new JoinNeighbors(
             random,
             similarityFunction,
             new KnnNeighborFilter(graph.nodeCount()),
