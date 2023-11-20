@@ -23,6 +23,7 @@ import org.neo4j.gds.annotation.CustomProcedure;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.compat.CompatUserAggregationFunction;
 import org.neo4j.gds.compat.CompatUserAggregator;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
@@ -35,6 +36,7 @@ import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.kernel.api.procedure.Context;
+import org.neo4j.kernel.impl.api.KernelTransactions;
 import org.neo4j.procedure.Name;
 import org.neo4j.values.AnyValue;
 import org.neo4j.values.storable.TextValue;
@@ -107,7 +109,8 @@ public class CypherAggregation implements CompatUserAggregationFunction {
         var metricsFacade = Neo4jProxy.lookupComponentProvider(ctx, MetricsFacade.class, true);
         var username = Neo4jProxy.lookupComponentProvider(ctx, Username.class, true);
         var transaction = Neo4jProxy.lookupComponentProvider(ctx, Transaction.class, true);
-        var queryProvider = ExecutingQueryProvider.fromTransaction(transaction);
+        var ktxs = GraphDatabaseApiProxy.resolveDependency(databaseService, KernelTransactions.class);
+        var queryProvider = ExecutingQueryProvider.fromTransaction(ktxs, transaction);
 
         var runsOnCompositeDatabase = Neo4jProxy.isCompositeDatabase(databaseService);
         var writeMode = runsOnCompositeDatabase

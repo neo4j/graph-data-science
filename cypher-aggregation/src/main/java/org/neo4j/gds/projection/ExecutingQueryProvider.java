@@ -19,8 +19,9 @@
  */
 package org.neo4j.gds.projection;
 
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.kernel.impl.api.KernelStatement;
+import org.neo4j.kernel.impl.api.KernelTransactions;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 
 import java.util.Optional;
@@ -28,8 +29,8 @@ import java.util.Optional;
 interface ExecutingQueryProvider {
     Optional<String> executingQuery();
 
-    static ExecutingQueryProvider fromTransaction(Transaction transaction) {
-        return new TxQuery(transaction);
+    static ExecutingQueryProvider fromTransaction(KernelTransactions ktxs, Transaction transaction) {
+        return new TxQuery(ktxs, transaction);
     }
 
     static ExecutingQueryProvider empty() {
@@ -39,9 +40,11 @@ interface ExecutingQueryProvider {
 
 
 final class TxQuery implements ExecutingQueryProvider {
+    private final KernelTransactions ktxs;
     private final Transaction transaction;
 
-    TxQuery(Transaction transaction) {
+    TxQuery(KernelTransactions ktxs, Transaction transaction) {
+        this.ktxs = ktxs;
         this.transaction = transaction;
     }
 
@@ -51,15 +54,13 @@ final class TxQuery implements ExecutingQueryProvider {
             return Optional.empty();
         }
 
-        try (var statement = ((InternalTransaction) this.transaction).kernelTransaction().acquireStatement()) {
-            if (!(statement instanceof KernelStatement)) {
-                return Optional.empty();
-            }
-
-            return ((KernelStatement) statement).queryRegistry().executingQuery().flatMap(eq ->
-                eq.snapshot()
-                    .obfuscatedQueryText()
-                    .or(() -> Optional.ofNullable(eq.rawQueryText())));
-        }
+        var txId = Neo4jProxy.transactionId(((InternalTransaction) this.transaction).kernelTransaction());
+        return this.ktxs.activeTransactions().stream()
+            .filter(handle -> Neo4jProxy.transactionId(handle) == txId)
+            .flatMap(handle -> handle.executingQuery().stream())
+            .flatMap(eq -> eq.snapshot()
+                .obfuscatedQueryText()
+                .or(() -> Optional.ofNullable(eq.rawQueryText())).stream())
+            .findAny();
     }
 }

@@ -837,6 +837,11 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    public long transactionId(KernelTransaction kernelTransaction) {
+        return kernelTransaction.lastTransactionTimestampWhenStarted();
+    }
+
+    @Override
     public void reserveNeo4jIds(IdGeneratorFactory generatorFactory, int size, CursorContext cursorContext) {
         IdGenerator idGenerator = generatorFactory.get(RecordIdType.NODE);
 
