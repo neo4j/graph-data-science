@@ -21,7 +21,9 @@ package org.neo4j.gds.closeness;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.centrality.CentralityMutateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -35,17 +37,15 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ClosenessCentralityMutateProc extends BaseProc {
 
-
+    @Context
+    public GraphDataScience facade;
     @Procedure(value = "gds.closeness.mutate", mode = READ)
     @Description(CLOSENESS_DESCRIPTION)
     public Stream<CentralityMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new ClosenessCentralityMutateSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.centrality().closenessCentralityMutate(graphName, configuration);
     }
 
 
