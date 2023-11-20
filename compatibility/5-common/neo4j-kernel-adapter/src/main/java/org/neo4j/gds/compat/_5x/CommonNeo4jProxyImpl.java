@@ -462,7 +462,12 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
 
     @Override
     public long transactionId(org.neo4j.kernel.api.KernelTransactionHandle kernelTransactionHandle) {
-        return 0;
+        throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
+    }
+
+    @Override
+    public long transactionId(org.neo4j.kernel.api.KernelTransaction kernelTransaction) {
+        throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
     }
 
     @Override
