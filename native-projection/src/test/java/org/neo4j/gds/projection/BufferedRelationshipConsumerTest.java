@@ -24,7 +24,6 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.huge.DirectIdMap;
-import org.neo4j.gds.core.loading.RelationshipReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;

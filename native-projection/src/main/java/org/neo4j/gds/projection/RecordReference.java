@@ -17,18 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.projection;
 
-import org.neo4j.gds.compat.PropertyReference;
-import org.neo4j.kernel.impl.store.record.NodeRecord;
-
-public interface NodeReference extends RecordReference<NodeRecord> {
-
-    long nodeId();
-
-    NodeLabelTokenSet labels();
-
-    long relationshipReference();
-
-    PropertyReference propertiesReference();
+public interface RecordReference<Record> {
 }

@@ -21,10 +21,8 @@ package org.neo4j.gds.projection;
 
 import org.immutables.builder.Builder;
 import org.neo4j.gds.api.PartialIdMap;
-import org.neo4j.gds.core.loading.RelationshipReference;
 import org.neo4j.gds.core.loading.RelationshipsBatchBuffer;
 import org.neo4j.gds.core.loading.RelationshipsBatchBufferBuilder;
-import org.neo4j.gds.core.loading.StoreScanner;
 
 import java.util.Optional;
 

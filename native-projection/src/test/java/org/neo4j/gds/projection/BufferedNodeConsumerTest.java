@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.loading.NodeLabelTokenSet;
-import org.neo4j.gds.core.loading.NodeReference;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

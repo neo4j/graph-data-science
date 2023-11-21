@@ -17,65 +17,57 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.projection;
 
-import org.neo4j.gds.compat.CompositeNodeCursor;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.kernel.api.KernelTransaction;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+final class NodeLabelIndexBasedScanner extends AbstractNodeCursorBasedScanner<NodeLabelIndexCursor> {
 
-final class MultipleNodeLabelIndexBasedScanner extends AbstractNodeCursorBasedScanner<CompositeNodeCursor> {
-
-    private final int[] labelIds;
+    private final int labelId;
     private final boolean allowPartitionedScan;
 
-    MultipleNodeLabelIndexBasedScanner(
-        int[] labelIds,
+    NodeLabelIndexBasedScanner(
+        int labelId,
         int prefetchSize,
         TransactionContext transaction,
         boolean allowPartitionedScan
     ) {
         super(prefetchSize, transaction);
-        this.labelIds = labelIds;
+        this.labelId = labelId;
         this.allowPartitionedScan = allowPartitionedScan;
     }
 
     @Override
-    CompositeNodeCursor entityCursor(KernelTransaction transaction) {
-        List<NodeLabelIndexCursor> cursors = Arrays
-            .stream(labelIds)
-            .mapToObj(i -> Neo4jProxy.allocateNodeLabelIndexCursor(transaction))
-            .collect(Collectors.toList());
-        return Neo4jProxy.compositeNodeCursor(cursors, labelIds);
+    NodeLabelIndexCursor entityCursor(KernelTransaction transaction) {
+        return Neo4jProxy.allocateNodeLabelIndexCursor(transaction);
     }
 
     @Override
-    StoreScan<CompositeNodeCursor> entityCursorScan(KernelTransaction transaction) {
-        return new CompositeNodeScan(Neo4jProxy.entityCursorScan(
+    StoreScan<NodeLabelIndexCursor> entityCursorScan(KernelTransaction transaction) {
+        return Neo4jProxy.nodeLabelIndexScan(
             transaction,
-            labelIds,
+            labelId,
             batchSize(),
             allowPartitionedScan
-        ));
+        );
     }
 
     @Override
-    NodeReference cursorReference(KernelTransaction transaction, CompositeNodeCursor cursor) {
-        return new MultipleNodeLabelIndexReference(
+    NodeReference cursorReference(KernelTransaction transaction, NodeLabelIndexCursor cursor) {
+        return new NodeLabelIndexReference(
             cursor,
             transaction.dataRead(),
-            Neo4jProxy.allocateNodeCursor(transaction)
+            Neo4jProxy.allocateNodeCursor(transaction),
+            labelId
         );
     }
 
     @Override
     void closeCursorReference(NodeReference nodeReference) {
-        ((MultipleNodeLabelIndexReference) nodeReference).close();
+        ((NodeLabelIndexReference) nodeReference).close();
     }
 }

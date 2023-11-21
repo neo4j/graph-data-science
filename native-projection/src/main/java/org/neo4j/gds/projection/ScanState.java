@@ -17,11 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.projection;
 
 import org.jetbrains.annotations.Contract;
 
-public final class ScanState {
+final class ScanState {
     private boolean batchConsumed;
 
     public static ScanState of() {
@@ -34,7 +34,7 @@ public final class ScanState {
 
     /**
      * Advances the provided scan to the next batch of records and immediately consumes
-     * the batch into the provided {@link org.neo4j.gds.core.loading.StoreScanner.RecordConsumer}.
+     * the batch into the provided {@link org.neo4j.gds.projection.StoreScanner.RecordConsumer}.
      * <br>
      * There are two scenarios that can happen while consuming a batch of records from the
      * kernel. If we read in fixed-size batches, these batches usually align with the
