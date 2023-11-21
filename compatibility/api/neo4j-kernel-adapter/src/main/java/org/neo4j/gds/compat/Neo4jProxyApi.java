@@ -340,4 +340,6 @@ public interface Neo4jProxyApi {
     GlobalProcedureRegistry globalProcedureRegistry(GlobalProcedures globalProcedures);
 
     DependencyResolver emptyDependencyResolver();
+
+    String metricsManagerClass();
 }

@@ -476,4 +476,8 @@ public final class Neo4jProxy {
     private Neo4jProxy() {
         throw new UnsupportedOperationException("No instances");
     }
+
+    public static String metricsManagerClass() {
+        return IMPL.metricsManagerClass();
+    }
 }
