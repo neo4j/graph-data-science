@@ -444,7 +444,7 @@ class KnnTest {
             random,
             similarityFunction,
             new KnnNeighborFilter(graph.nodeCount()),
-            allNeighbors,
+            new Neighbors(allNeighbors),
             allOldNeighbors,
             allNewNeighbors,
             HugeObjectArray.newArray(LongArrayList.class, graph.nodeCount()),

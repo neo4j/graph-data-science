@@ -31,7 +31,7 @@ final class JoinNeighbors implements Runnable {
     private final SplittableRandom random;
     private final SimilarityFunction similarityFunction;
     private final NeighborFilter neighborFilter;
-    private final HugeObjectArray<NeighborList> allNeighbors;
+    private final Neighbors allNeighbors;
     private final HugeObjectArray<LongArrayList> allOldNeighbors;
     private final HugeObjectArray<LongArrayList> allNewNeighbors;
     private final HugeObjectArray<LongArrayList> allReverseOldNeighbors;
@@ -51,7 +51,7 @@ final class JoinNeighbors implements Runnable {
         SplittableRandom random,
         SimilarityFunction similarityFunction,
         NeighborFilter neighborFilter,
-        HugeObjectArray<NeighborList> allNeighbors,
+        Neighbors allNeighbors,
         HugeObjectArray<LongArrayList> allOldNeighbors,
         HugeObjectArray<LongArrayList> allNewNeighbors,
         HugeObjectArray<LongArrayList> allReverseOldNeighbors,
@@ -190,10 +190,9 @@ final class JoinNeighbors implements Runnable {
             return 0;
         }
 
-        nodePairsConsidered++;
         var similarity = similarityFunction.computeSimilarity(node1, node2);
 
-        var neighbors1 = allNeighbors.get(node1);
+        var neighbors1 = allNeighbors.getAndIncrementCounter(node1);
 
         var updates = 0L;
 
@@ -218,8 +217,7 @@ final class JoinNeighbors implements Runnable {
         }
 
         var similarity = similarityFunction.computeSimilarity(node1, node2);
-        nodePairsConsidered++;
-        var neighbors = allNeighbors.get(node1);
+        var neighbors = allNeighbors.getAndIncrementCounter(node1);
 
         synchronized (neighbors) {
             return neighbors.add(node2, similarity, random, perturbationRate);
@@ -227,7 +225,7 @@ final class JoinNeighbors implements Runnable {
     }
 
     long nodePairsConsidered() {
-        return nodePairsConsidered;
+        return allNeighbors.joinCounter();
     }
 
     long updateCount() {

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.similarity.knn;
 
-import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -33,20 +32,18 @@ final class GenerateRandomNeighbors implements Runnable {
     private final SplittableRandom random;
     private final SimilarityFunction similarityFunction;
     private final NeighborFilter neighborFilter;
-    private final HugeObjectArray<NeighborList> neighbors;
+    private final Neighbors neighbors;
     private final int boundedK;
     private final ProgressTracker progressTracker;
     private final Partition partition;
     private final NeighbourConsumers neighbourConsumers;
-
-    private long neighborsFound;
 
     GenerateRandomNeighbors(
         KnnSampler sampler,
         SplittableRandom random,
         SimilarityFunction similarityFunction,
         NeighborFilter neighborFilter,
-        HugeObjectArray<NeighborList> neighbors,
+        Neighbors neighbors,
         int boundedK,
         Partition partition,
         ProgressTracker progressTracker,
@@ -60,7 +57,6 @@ final class GenerateRandomNeighbors implements Runnable {
         this.boundedK = boundedK;
         this.progressTracker = progressTracker;
         this.partition = partition;
-        this.neighborsFound = 0;
         this.neighbourConsumers = neighbourConsumers;
     }
 
@@ -88,12 +84,7 @@ final class GenerateRandomNeighbors implements Runnable {
             assert neighbors.size() >= Math.min(neighborFilter.lowerBoundOfPotentialNeighbours(nodeId), boundedK);
 
             this.neighbors.set(nodeId, neighbors);
-            neighborsFound += neighbors.size();
         });
         progressTracker.logProgress(partition.nodeCount());
-    }
-
-    long neighborsFound() {
-        return neighborsFound;
     }
 }

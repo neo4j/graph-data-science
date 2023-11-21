@@ -119,8 +119,6 @@ public class Knn extends Algorithm<KnnResult> {
     private final KnnSampler.Factory samplerFactory;
     private final K k;
 
-    private long nodePairsConsidered;
-
     Knn(
         ProgressTracker progressTracker,
         Graph graph,
@@ -176,7 +174,7 @@ public class Knn extends Algorithm<KnnResult> {
         }
         this.progressTracker.beginSubTask();
         this.progressTracker.beginSubTask();
-        HugeObjectArray<NeighborList> neighbors = initializeRandomNeighbors();
+        var neighbors = initializeRandomNeighbors();
         this.progressTracker.endSubTask();
 
         long updateCount;
@@ -197,7 +195,7 @@ public class Knn extends Algorithm<KnnResult> {
                 concurrency,
                 neighbors.size(),
                 partition -> (Runnable) () -> partition.consume(
-                    nodeId -> neighbors.get(nodeId).filterHighSimilarityResults(similarityCutoff)
+                    nodeId -> neighbors.filterHighSimilarityResult(nodeId, similarityCutoff)
                 ),
                 Optional.of(minBatchSize)
             );
@@ -212,16 +210,16 @@ public class Knn extends Algorithm<KnnResult> {
 
         this.progressTracker.endSubTask();
         return ImmutableKnnResult.of(
-            neighbors,
+            neighbors.data(),
             iteration,
             didConverge,
-            this.nodePairsConsidered,
+            neighbors.neighborsFound() + neighbors.joinCounter(),
             graph.nodeCount()
         );
     }
 
-    private HugeObjectArray<NeighborList> initializeRandomNeighbors() {
-        var neighbors = HugeObjectArray.newArray(NeighborList.class, graph.nodeCount());
+    private Neighbors initializeRandomNeighbors() {
+        var neighbors = new Neighbors(graph.nodeCount());
 
         var randomNeighborGenerators = PartitionUtils.rangePartition(
             concurrency,
@@ -247,15 +245,13 @@ public class Knn extends Algorithm<KnnResult> {
             .concurrency(concurrency)
             .tasks(randomNeighborGenerators)
             .terminationFlag(terminationFlag)
-            .executor(this.executorService)
+            .executor(executorService)
             .run();
-
-        this.nodePairsConsidered += randomNeighborGenerators.stream().mapToLong(GenerateRandomNeighbors::neighborsFound).sum();
 
         return neighbors;
     }
 
-    private long iteration(HugeObjectArray<NeighborList> neighbors) {
+    private long iteration(Neighbors neighbors) {
         var nodeCount = graph.nodeCount();
 
         // TODO: init in ctor and reuse - benchmark against new allocations
@@ -318,8 +314,6 @@ public class Knn extends Algorithm<KnnResult> {
             .executor(this.executorService)
             .run();
         progressTracker.endSubTask();
-
-        this.nodePairsConsidered += neighborsJoiners.stream().mapToLong(JoinNeighbors::nodePairsConsidered).sum();
 
         return neighborsJoiners.stream().mapToLong(JoinNeighbors::updateCount).sum();
     }

@@ -77,7 +77,7 @@ class SplitOldAndNewNeighborsTest extends RandomNodeCountAndKValues {
 
         var splitNeighbors = new SplitOldAndNewNeighbors(
             new SplittableRandom(),
-            allNeighbors,
+            new Neighbors(allNeighbors),
             allOldNeighbors,
             allNewNeighbors,
             sampledK,

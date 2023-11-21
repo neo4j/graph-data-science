@@ -21,8 +21,8 @@ package org.neo4j.gds.similarity.knn;
 
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.LongArrayList;
-import org.neo4j.gds.core.concurrency.BiLongConsumer;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.concurrency.BiLongConsumer;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.SplittableRandom;
@@ -37,7 +37,7 @@ import java.util.SplittableRandom;
  */
 final class SplitOldAndNewNeighbors implements BiLongConsumer {
     private final SplittableRandom random;
-    private final HugeObjectArray<NeighborList> neighbors;
+    private final Neighbors neighbors;
     private final HugeObjectArray<LongArrayList> allOldNeighbors;
     private final HugeObjectArray<LongArrayList> allNewNeighbors;
     private final int sampledK;
@@ -45,7 +45,7 @@ final class SplitOldAndNewNeighbors implements BiLongConsumer {
 
     SplitOldAndNewNeighbors(
         SplittableRandom random,
-        HugeObjectArray<NeighborList> neighbors,
+        Neighbors neighbors,
         HugeObjectArray<LongArrayList> allOldNeighbors,
         HugeObjectArray<LongArrayList> allNewNeighbors,
         int sampledK,
