@@ -22,7 +22,6 @@ package org.neo4j.gds.projection;
 import com.carrotsearch.hppc.LongSet;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.loading.AdjacencyBuffer;
-import org.neo4j.gds.core.loading.NativeNodePropertyImporter;
 import org.neo4j.gds.core.loading.NodeImporter;
 import org.neo4j.gds.core.loading.RecordScannerTask;
 import org.neo4j.gds.core.utils.RawValues;

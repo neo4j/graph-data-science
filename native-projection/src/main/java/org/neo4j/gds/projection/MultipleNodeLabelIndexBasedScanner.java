@@ -22,7 +22,6 @@ package org.neo4j.gds.projection;
 import org.neo4j.gds.compat.CompositeNodeCursor;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.StoreScan;
-import org.neo4j.gds.core.loading.CompositeNodeScan;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.kernel.api.KernelTransaction;
