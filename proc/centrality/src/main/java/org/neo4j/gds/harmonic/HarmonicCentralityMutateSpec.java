@@ -28,16 +28,17 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.centrality.CentralityMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
-import static org.neo4j.gds.harmonic.HarmonicCentralityProc.DESCRIPTION;
+import static org.neo4j.gds.harmonic.HarmonicCentralityCompanion.DESCRIPTION;
 
 @GdsCallable(name = "gds.closeness.harmonic.mutate", description = DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class HarmonicCentralityMutateSpec implements AlgorithmSpec<HarmonicCentrality, HarmonicResult, HarmonicCentralityMutateConfig, Stream<MutateResult>, HarmonicCentralityAlgorithmFactory<HarmonicCentralityMutateConfig>> {
+public class HarmonicCentralityMutateSpec implements AlgorithmSpec<HarmonicCentrality, HarmonicResult, HarmonicCentralityMutateConfig, Stream<CentralityMutateResult>, HarmonicCentralityAlgorithmFactory<HarmonicCentralityMutateConfig>> {
 
     @Override
     public String name() {
@@ -55,7 +56,7 @@ public class HarmonicCentralityMutateSpec implements AlgorithmSpec<HarmonicCentr
     }
 
     @Override
-    public ComputationResultConsumer<HarmonicCentrality, HarmonicResult, HarmonicCentralityMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<HarmonicCentrality, HarmonicResult, HarmonicCentralityMutateConfig, Stream<CentralityMutateResult>> computationResultConsumer() {
         return new MutatePropertyComputationResultConsumer<>(
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),
@@ -67,11 +68,11 @@ public class HarmonicCentralityMutateSpec implements AlgorithmSpec<HarmonicCentr
         );
     }
 
-    private AbstractResultBuilder<MutateResult> resultBuilder(
+    private AbstractResultBuilder<CentralityMutateResult> resultBuilder(
         ComputationResult<HarmonicCentrality, HarmonicResult, HarmonicCentralityMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new MutateResult.Builder(
+        var builder = new CentralityMutateResult.Builder(
             executionContext.returnColumns(),
             computationResult.config().concurrency()
         );

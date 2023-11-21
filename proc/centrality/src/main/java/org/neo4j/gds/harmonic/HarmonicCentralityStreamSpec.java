@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.harmonic.HarmonicCentralityProc.DESCRIPTION;
+import static org.neo4j.gds.harmonic.HarmonicCentralityCompanion.DESCRIPTION;
 
 @GdsCallable(name = "gds.alpha.closeness.harmonic.stream", description = DESCRIPTION, executionMode = STREAM)
 public class HarmonicCentralityStreamSpec implements AlgorithmSpec<HarmonicCentrality, HarmonicResult, HarmonicCentralityStreamConfig,Stream<CentralityStreamResult>, HarmonicCentralityAlgorithmFactory<HarmonicCentralityStreamConfig>> {
@@ -60,13 +60,13 @@ public class HarmonicCentralityStreamSpec implements AlgorithmSpec<HarmonicCentr
             () -> computationResult.result()
                 .map(result -> {
                     var graph = computationResult.graph();
-                    var centralities = result.centralities();
+                    var centralityScoreProvider = result.centralityScoreProvider();
                     return LongStream
                         .range(IdMap.START_NODE_ID, graph.nodeCount())
                         .mapToObj(nodeId ->
                             new CentralityStreamResult(
                                 graph.toOriginalNodeId(nodeId),
-                                centralities.get(nodeId)
+                                centralityScoreProvider.applyAsDouble(nodeId)
                             ));
                 }).orElseGet(Stream::empty));
     }

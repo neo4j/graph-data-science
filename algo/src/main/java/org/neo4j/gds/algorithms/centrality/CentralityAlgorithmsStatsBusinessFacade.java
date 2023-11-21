@@ -29,6 +29,7 @@ import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
+import org.neo4j.gds.harmonic.HarmonicCentralityStatsConfig;
 import org.neo4j.gds.result.CentralityStatistics;
 
 import java.util.function.Supplier;
@@ -86,6 +87,24 @@ public class CentralityAlgorithmsStatsBusinessFacade {
         // 1. Run the algorithm and time the execution
         var intermediateResult = AlgorithmRunner.runWithTiming(
             () -> centralityAlgorithmsFacade.closenessCentrality(graphName, configuration)
+        );
+
+        return statsResult(
+            intermediateResult.algorithmResult,
+            configuration,
+            shouldComputeCentralityDistribution,
+            intermediateResult.computeMilliseconds
+        );
+    }
+
+    public StatsResult<DefaultCentralitySpecificFields> harmonicCentrality(
+        String graphName,
+        HarmonicCentralityStatsConfig configuration,
+        boolean shouldComputeCentralityDistribution
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> centralityAlgorithmsFacade.harmonicCentrality(graphName, configuration)
         );
 
         return statsResult(

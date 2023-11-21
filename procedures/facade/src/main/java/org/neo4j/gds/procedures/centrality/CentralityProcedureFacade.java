@@ -41,6 +41,10 @@ import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
 import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
 import org.neo4j.gds.degree.DegreeCentralityStreamConfig;
 import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
+import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
+import org.neo4j.gds.harmonic.HarmonicCentralityStatsConfig;
+import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
+import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
 import org.neo4j.gds.procedures.centrality.betacloseness.BetaClosenessCentralityMutateResult;
 import org.neo4j.gds.procedures.centrality.betacloseness.BetaClosenessCentralityWriteResult;
 import org.neo4j.gds.procedures.configparser.ConfigurationParser;
@@ -383,6 +387,67 @@ public class CentralityProcedureFacade {
             config
         ));
     }
+
+    public Stream<CentralityStreamResult> harmonicCentralityStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createStreamConfig(configuration, HarmonicCentralityStreamConfig::of);
+
+        var computationResult = streamBusinessFacade.harmonicCentrality(
+            graphName,
+            config
+        );
+
+        return DefaultCentralityComputationalResultTransformer.toStreamResult(computationResult);
+    }
+
+    public Stream<CentralityStatsResult> harmonicCentralityStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, HarmonicCentralityStatsConfig::of);
+
+        var computationResult = statsBusinessFacade.harmonicCentrality(
+            graphName,
+            config,
+            procedureReturnColumns.contains("centralityDistribution")
+        );
+
+        return Stream.of(DefaultCentralityComputationalResultTransformer.toStatsResult(computationResult, config));
+    }
+
+    public Stream<CentralityMutateResult> harmonicCentralityMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, HarmonicCentralityMutateConfig::of);
+
+        var computationResult = mutateBusinessFacade.harmonicCentrality(
+            graphName,
+            config,
+            procedureReturnColumns.contains("centralityDistribution")
+        );
+
+        return Stream.of(DefaultCentralityComputationalResultTransformer.toMutateResult(computationResult));
+    }
+
+
+    public Stream<CentralityWriteResult> harmonicCentralityWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, HarmonicCentralityWriteConfig::of);
+
+        var computationResult = writeBusinessFacade.harmonicCentrality(
+            graphName,
+            config,
+            procedureReturnColumns.contains("centralityDistribution")
+        );
+
+        return Stream.of(DefaultCentralityComputationalResultTransformer.toWriteResult(computationResult));
+    }
+
 
 
 

@@ -30,6 +30,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
+import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
 import org.neo4j.gds.result.CentralityStatistics;
 
 import java.util.Optional;
@@ -115,6 +116,29 @@ public class CentralityAlgorithmsWriteBusinessFacade {
             configuration.arrowConnectionInfo()
         );
     }
+
+    public NodePropertyWriteResult<DefaultCentralitySpecificFields> harmonicCentrality(
+        String graphName,
+        HarmonicCentralityWriteConfig configuration,
+        boolean shouldComputeCentralityDistribution
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = runWithTiming(
+            () -> centralityAlgorithmsFacade.harmonicCentrality(graphName, configuration)
+        );
+
+        return writeToDatabase(
+            intermediateResult.algorithmResult,
+            configuration,
+            shouldComputeCentralityDistribution,
+            intermediateResult.computeMilliseconds,
+            "HarmonicCentralityWrite",
+            configuration.writeConcurrency(),
+            configuration.writeProperty(),
+            configuration.arrowConnectionInfo()
+        );
+    }
+
 
 
 

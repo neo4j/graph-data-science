@@ -27,6 +27,8 @@ import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.closeness.ClosenessCentralityStreamConfig;
 import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.degree.DegreeCentralityStreamConfig;
+import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
+import org.neo4j.gds.harmonic.HarmonicResult;
 
 public class CentralityAlgorithmsStreamBusinessFacade {
 
@@ -41,7 +43,7 @@ public class CentralityAlgorithmsStreamBusinessFacade {
         BetweennessCentralityStreamConfig config
     ) {
 
-        var result = this.centralityAlgorithmsFacade.betweennessCentrality(
+        var result = centralityAlgorithmsFacade.betweennessCentrality(
             graphName,
             config
         );
@@ -54,7 +56,7 @@ public class CentralityAlgorithmsStreamBusinessFacade {
         DegreeCentralityStreamConfig config
     ) {
 
-        var result = this.centralityAlgorithmsFacade.degreeCentrality(
+        var result = centralityAlgorithmsFacade.degreeCentrality(
             graphName,
             config
         );
@@ -67,13 +69,27 @@ public class CentralityAlgorithmsStreamBusinessFacade {
         ClosenessCentralityStreamConfig config
     ) {
 
-        var result = this.centralityAlgorithmsFacade.closenessCentrality(
+        var result = centralityAlgorithmsFacade.closenessCentrality(
             graphName,
             config
         );
 
         return createStreamComputationResult(result);
     }
+
+    public StreamComputationResult<HarmonicResult> harmonicCentrality(
+        String graphName,
+        HarmonicCentralityStreamConfig config
+    ) {
+
+        var result = centralityAlgorithmsFacade.harmonicCentrality(
+            graphName,
+            config
+        );
+
+        return createStreamComputationResult(result);
+    }
+
 
 
     // FIXME: the following method is duplicate, find a good place for it.

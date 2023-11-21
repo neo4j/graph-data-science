@@ -30,6 +30,9 @@ import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.degree.DegreeCentralityConfig;
 import org.neo4j.gds.degree.DegreeCentralityFactory;
 import org.neo4j.gds.degree.DegreeCentralityResult;
+import org.neo4j.gds.harmonic.HarmonicCentralityAlgorithmFactory;
+import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
+import org.neo4j.gds.harmonic.HarmonicResult;
 
 import java.util.Optional;
 
@@ -77,6 +80,20 @@ public class CentralityAlgorithmsFacade {
             config,
             Optional.empty(),
             new ClosenessCentralityAlgorithmFactory<>()
+
+        );
+    }
+
+    AlgorithmComputationResult<HarmonicResult> harmonicCentrality(
+        String graphName,
+        HarmonicCentralityBaseConfig config
+
+    ) {
+        return algorithmRunner.run(
+            graphName,
+            config,
+            Optional.empty(),
+            new HarmonicCentralityAlgorithmFactory<>()
 
         );
     }

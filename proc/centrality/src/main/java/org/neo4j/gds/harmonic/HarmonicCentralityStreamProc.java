@@ -21,7 +21,9 @@ package org.neo4j.gds.harmonic;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.centrality.CentralityStreamResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -30,10 +32,13 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.harmonic.HarmonicCentralityProc.DESCRIPTION;
+import static org.neo4j.gds.harmonic.HarmonicCentralityCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class HarmonicCentralityStreamProc extends BaseProc {
+
+    @Context
+    public GraphDataScience facade;
 
     @Procedure(name = "gds.closeness.harmonic.stream", mode = READ)
     @Description(DESCRIPTION)
@@ -42,11 +47,7 @@ public class HarmonicCentralityStreamProc extends BaseProc {
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
 
-
-        return new ProcedureExecutor<>(
-            new HarmonicCentralityStreamSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.centrality().harmonicCentralityStream(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)

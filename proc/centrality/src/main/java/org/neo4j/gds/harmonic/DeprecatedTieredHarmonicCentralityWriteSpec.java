@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
-import static org.neo4j.gds.harmonic.HarmonicCentralityProc.DESCRIPTION;
+import static org.neo4j.gds.harmonic.HarmonicCentralityCompanion.DESCRIPTION;
 
 @GdsCallable(name = "gds.alpha.closeness.harmonic.write", description = DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class DeprecatedTieredHarmonicCentralityWriteSpec implements AlgorithmSpec<HarmonicCentrality, HarmonicResult, DeprecatedTieredHarmonicCentralityWriteConfig, Stream<DeprecatedTieredWriteResult>, HarmonicCentralityAlgorithmFactory<DeprecatedTieredHarmonicCentralityWriteConfig>> {
