@@ -60,11 +60,10 @@ public class PageRankStreamSpec implements AlgorithmSpec<PageRankAlgorithm, Page
             () -> computationResult.result()
                 .map(result -> {
                     var graph = computationResult.graph();
-                    var scores = result.scores();
                     return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
                         .mapToObj(nodeId -> new CentralityStreamResult(
                             graph.toOriginalNodeId(nodeId),
-                            scores.get(nodeId)
+                            result.centralityScoreProvider().applyAsDouble(nodeId)
                         ));
                 }).orElseGet(Stream::empty)
         );

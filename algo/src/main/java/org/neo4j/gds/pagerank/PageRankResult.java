@@ -19,15 +19,41 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 
-@ValueClass
-public interface PageRankResult {
+import java.util.function.LongToDoubleFunction;
 
-    HugeDoubleArray scores();
 
-    int iterations();
+public class PageRankResult implements CentralityAlgorithmResult {
 
-    boolean didConverge();
+    private final HugeDoubleArray scores;
+    private final int ranIterations;
+    private final boolean didConverge;
+
+    public PageRankResult(HugeDoubleArray scores, int ranIterations, boolean didConverge) {
+        this.scores = scores;
+        this.ranIterations = ranIterations;
+        this.didConverge = didConverge;
+    }
+
+    public int iterations() {
+        return ranIterations;
+    }
+
+    public boolean didConverge() {
+        return didConverge;
+    }
+
+    @Override
+    public NodePropertyValues nodePropertyValues() {
+        return NodePropertyValuesAdapter.adapt(scores);
+    }
+
+    @Override
+    public LongToDoubleFunction centralityScoreProvider() {
+        return scores::get;
+    }
 }

@@ -33,6 +33,9 @@ import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.harmonic.HarmonicCentralityAlgorithmFactory;
 import org.neo4j.gds.harmonic.HarmonicCentralityBaseConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
+import org.neo4j.gds.pagerank.PageRankAlgorithmFactory;
+import org.neo4j.gds.pagerank.PageRankConfig;
+import org.neo4j.gds.pagerank.PageRankResult;
 
 import java.util.Optional;
 
@@ -99,5 +102,16 @@ public class CentralityAlgorithmsFacade {
     }
 
 
+    AlgorithmComputationResult<PageRankResult> pageRank(
+        String graphName,
+        PageRankConfig config
+    ) {
+        return algorithmRunner.run(
+            graphName,
+            config,
+            config.relationshipWeightProperty(),
+            new PageRankAlgorithmFactory<>()
+        );
+    }
 
 }

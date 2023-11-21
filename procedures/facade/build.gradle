@@ -39,6 +39,8 @@ dependencies {
     implementation project(':termination')
     implementation project(':transaction')
 
+    compileOnly project(':pregel')
+
     compileOnly group: 'org.jetbrains', name: 'annotations', version: ver.'jetbrains-annotations'
 
     // test infrastructure

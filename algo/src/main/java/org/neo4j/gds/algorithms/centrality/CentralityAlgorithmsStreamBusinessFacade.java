@@ -29,6 +29,8 @@ import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.degree.DegreeCentralityStreamConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
+import org.neo4j.gds.pagerank.PageRankConfig;
+import org.neo4j.gds.pagerank.PageRankResult;
 
 public class CentralityAlgorithmsStreamBusinessFacade {
 
@@ -89,7 +91,20 @@ public class CentralityAlgorithmsStreamBusinessFacade {
 
         return createStreamComputationResult(result);
     }
+    public StreamComputationResult<PageRankResult> pageRank(
+        String graphName,
+        PageRankConfig config
+    ) {
 
+        var result = this.centralityAlgorithmsFacade.pageRank(
+            graphName,
+            config
+        );
+
+        return createStreamComputationResult(result);
+    }
+
+    // ################################################################################################################
 
 
     // FIXME: the following method is duplicate, find a good place for it.

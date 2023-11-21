@@ -114,12 +114,15 @@ class PageRankTest {
                 .tolerance(0)
                 .build();
 
-            var actual = runOnPregel(graph, config).scores();
+            var rankProvider = runOnPregel(graph, config).centralityScoreProvider();
 
             var expected = graph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(actual.get(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                assertThat(rankProvider.applyAsDouble(nodeId)).isEqualTo(
+                    expected.doubleValue(nodeId),
+                    within(SCORE_PRECISION)
+                );
             }
         }
 
@@ -156,12 +159,15 @@ class PageRankTest {
                 .sourceNodes(sourceNodeIds)
                 .build();
 
-            var actual = runOnPregel(graph, config).scores();
+            var rankProvider = runOnPregel(graph, config).centralityScoreProvider();
 
             var expected = graph.nodeProperties(expectedPropertyKey);
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(actual.get(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                assertThat(rankProvider.applyAsDouble(nodeId)).isEqualTo(
+                    expected.doubleValue(nodeId),
+                    within(SCORE_PRECISION)
+                );
             }
         }
 
@@ -340,12 +346,15 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var actual = runOnPregel(graph, config).scores();
+            var rankProvider = runOnPregel(graph, config).centralityScoreProvider();
 
             var expected = graph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(actual.get(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                assertThat(rankProvider.applyAsDouble(nodeId)).isEqualTo(
+                    expected.doubleValue(nodeId),
+                    within(SCORE_PRECISION)
+                );
             }
         }
 
@@ -358,12 +367,15 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var actual = runOnPregel(zeroWeightsGraph, config).scores();
+            var rankProvider = runOnPregel(zeroWeightsGraph, config).centralityScoreProvider();
 
             var expected = zeroWeightsGraph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < zeroWeightsGraph.nodeCount(); nodeId++) {
-                assertThat(actual.get(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                assertThat(rankProvider.applyAsDouble(nodeId)).isEqualTo(
+                    expected.doubleValue(nodeId),
+                    within(SCORE_PRECISION)
+                );
             }
         }
     }
@@ -435,12 +447,12 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var actual = runOnPregel(graph, config, Mode.ARTICLE_RANK).scores();
+            var rankProvider = runOnPregel(graph, config, Mode.ARTICLE_RANK).centralityScoreProvider();
 
             var expected = graph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                softly.assertThat(actual.get(nodeId))
+                softly.assertThat(rankProvider.applyAsDouble(nodeId))
                     .isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
@@ -455,12 +467,12 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var actual = runOnPregel(paperGraph, config, Mode.ARTICLE_RANK).scores();
+            var rankProvider = runOnPregel(paperGraph, config, Mode.ARTICLE_RANK).centralityScoreProvider();
 
             var expected = paperGraph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < paperGraph.nodeCount(); nodeId++) {
-                softly.assertThat(actual.get(nodeId))
+                softly.assertThat(rankProvider.applyAsDouble(nodeId))
                     .isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
             }
         }
@@ -508,12 +520,15 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var actual = runOnPregel(graph, config, Mode.EIGENVECTOR).scores();
+            var rankProvider = runOnPregel(graph, config, Mode.EIGENVECTOR).centralityScoreProvider();
 
             var expected = graph.nodeProperties("expectedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(actual.get(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                assertThat(rankProvider.applyAsDouble(nodeId)).isEqualTo(
+                    expected.doubleValue(nodeId),
+                    within(SCORE_PRECISION)
+                );
             }
         }
 
@@ -527,12 +542,15 @@ class PageRankTest {
                 .concurrency(1)
                 .build();
 
-            var actual = runOnPregel(graph, config, Mode.EIGENVECTOR).scores();
+            var rankProvider = runOnPregel(graph, config, Mode.EIGENVECTOR).centralityScoreProvider();
 
             var expected = graph.nodeProperties("expectedWeightedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(actual.get(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                assertThat(rankProvider.applyAsDouble(nodeId)).isEqualTo(
+                    expected.doubleValue(nodeId),
+                    within(SCORE_PRECISION)
+                );
             }
         }
 
@@ -546,12 +564,15 @@ class PageRankTest {
                 .addSourceNode(idFunction.of("d"))
                 .build();
 
-            var actual = runOnPregel(graph, config, Mode.EIGENVECTOR).scores();
+            var rankProvider = runOnPregel(graph, config, Mode.EIGENVECTOR).centralityScoreProvider();
 
             var expected = graph.nodeProperties("expectedPersonalizedRank");
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(actual.get(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                assertThat(rankProvider.applyAsDouble(nodeId)).isEqualTo(
+                    expected.doubleValue(nodeId),
+                    within(SCORE_PRECISION)
+                );
             }
         }
     }
@@ -596,12 +617,15 @@ class PageRankTest {
                 .scaler(ScalerFactory.parse(scalerName))
                 .build();
 
-            var actual = runOnPregel(graph, config).scores();
+            var rankProvider = runOnPregel(graph, config).centralityScoreProvider();
 
             var expected = graph.nodeProperties(expectedPropertyKey);
 
             for (int nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-                assertThat(actual.get(nodeId)).isEqualTo(expected.doubleValue(nodeId), within(SCORE_PRECISION));
+                assertThat(rankProvider.applyAsDouble(nodeId)).isEqualTo(
+                    expected.doubleValue(nodeId),
+                    within(SCORE_PRECISION)
+                );
             }
         }
     }
@@ -646,11 +670,11 @@ class PageRankTest {
 
         var configBuilder = ImmutablePageRankConfig.builder();
 
-        var singleThreaded = runOnPregel(graph, configBuilder.concurrency(1).build(), mode).scores();
-        var multiThreaded = runOnPregel(graph, configBuilder.concurrency(4).build(), mode).scores();
+        var singleThreaded = runOnPregel(graph, configBuilder.concurrency(1).build(), mode).centralityScoreProvider();
+        var multiThreaded = runOnPregel(graph, configBuilder.concurrency(4).build(), mode).centralityScoreProvider();
 
         for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
-            assertThat(singleThreaded.get(nodeId)).isEqualTo(multiThreaded.get(nodeId), Offset.offset(1e-5));
+            assertThat(singleThreaded.applyAsDouble(nodeId)).isEqualTo(multiThreaded.applyAsDouble(nodeId), Offset.offset(1e-5));
         }
     }
 

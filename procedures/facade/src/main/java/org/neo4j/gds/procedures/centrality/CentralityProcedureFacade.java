@@ -48,6 +48,7 @@ import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
 import org.neo4j.gds.procedures.centrality.alphaharmonic.AlphaHarmonicStreamResult;
 import org.neo4j.gds.procedures.centrality.alphaharmonic.AlphaHarmonicWriteResult;
+import org.neo4j.gds.pagerank.PageRankStreamConfig;
 import org.neo4j.gds.procedures.centrality.betacloseness.BetaClosenessCentralityMutateResult;
 import org.neo4j.gds.procedures.centrality.betacloseness.BetaClosenessCentralityWriteResult;
 import org.neo4j.gds.procedures.configparser.ConfigurationParser;
@@ -484,7 +485,21 @@ public class CentralityProcedureFacade {
     }
 
 
+    public Stream<CentralityStreamResult> pageRankStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createStreamConfig(configuration, PageRankStreamConfig::of);
 
+        var computationResult = streamBusinessFacade.pageRank(
+            graphName,
+            config
+        );
+
+        return DefaultCentralityComputationalResultTransformer.toStreamResult(computationResult);
+    }
+
+    // ################################################################################################################
 
     // FIXME: the following two methods are duplicate, find a good place for them.
     private <C extends AlgoBaseConfig> C createStreamConfig(

@@ -74,11 +74,11 @@ public class PageRankAlgorithm extends Algorithm<PageRankResult> {
 
         scaleScores(scores);
 
-        return ImmutablePageRankResult.builder()
-            .scores(scores)
-            .iterations(pregelResult.ranIterations())
-            .didConverge(pregelResult.didConverge())
-            .build();
+        return new PageRankResult(
+            scores,
+            pregelResult.ranIterations(),
+            pregelResult.didConverge()
+        );
     }
 
     private void scaleScores(HugeDoubleArray scores) {

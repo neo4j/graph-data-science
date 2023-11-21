@@ -21,7 +21,6 @@ package org.neo4j.gds.pagerank;
 
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
 import org.neo4j.gds.api.properties.nodes.EmptyDoubleNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -63,8 +62,7 @@ public class PageRankMutateSpec implements AlgorithmSpec<PageRankAlgorithm, Page
                     NodeProperty.of(
                         computationResult.config().mutateProperty(),
                         computationResult.result()
-                            .map(PageRankResult::scores)
-                            .map(NodePropertyValuesAdapter::adapt)
+                            .map(PageRankResult::nodePropertyValues)
                             .orElse(EmptyDoubleNodePropertyValues.INSTANCE)
                     )
                 ),
@@ -85,7 +83,7 @@ public class PageRankMutateSpec implements AlgorithmSpec<PageRankAlgorithm, Page
             builder
                 .withDidConverge(result.didConverge())
                 .withRanIterations(result.iterations())
-                .withCentralityFunction(result.scores()::get)
+                .withCentralityFunction(result.centralityScoreProvider())
                 .withScalerVariant(computationResult.config().scaler());
         });
 

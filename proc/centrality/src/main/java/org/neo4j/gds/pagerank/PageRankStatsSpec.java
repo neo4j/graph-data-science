@@ -61,7 +61,7 @@ public class PageRankStatsSpec implements AlgorithmSpec<PageRankAlgorithm, PageR
                 builder
                     .withDidConverge(result.didConverge())
                     .withRanIterations(result.iterations())
-                    .withCentralityFunction(result.scores()::get)
+                    .withCentralityFunction(result.centralityScoreProvider())
                     .withScalerVariant(computationResult.config().scaler());
             });
 
