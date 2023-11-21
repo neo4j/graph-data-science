@@ -857,4 +857,9 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     public String neo4jArrowServerAddressHeader() {
         throw new UnsupportedOperationException("Not implemented for Neo4j versions <5.14");
     }
+
+    @Override
+    public String metricsManagerClass() {
+        return "com.neo4j.metrics.global.MetricsManager";
+    }
 }

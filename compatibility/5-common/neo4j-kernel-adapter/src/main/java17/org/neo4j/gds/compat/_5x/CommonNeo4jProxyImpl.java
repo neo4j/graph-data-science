@@ -752,4 +752,9 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
     }
 
     public abstract CursorContextFactory cursorContextFactory(Optional<PageCacheTracer> pageCacheTracer);
+
+    @Override
+    public String metricsManagerClass() {
+        return "com.neo4j.metrics.global.MetricsManager";
+    }
 }

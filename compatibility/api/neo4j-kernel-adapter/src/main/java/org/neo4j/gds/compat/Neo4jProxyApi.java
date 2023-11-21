@@ -317,4 +317,6 @@ public interface Neo4jProxyApi {
     DependencyResolver emptyDependencyResolver();
 
     String neo4jArrowServerAddressHeader();
+
+    String metricsManagerClass();
 }
