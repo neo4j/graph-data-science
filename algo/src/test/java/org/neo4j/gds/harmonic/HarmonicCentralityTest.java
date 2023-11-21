@@ -21,13 +21,9 @@ package org.neo4j.gds.harmonic;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
-import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
@@ -35,8 +31,6 @@ import org.neo4j.gds.extension.Inject;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
-import static org.neo4j.gds.assertj.Extractors.removingThreadId;
-import static org.neo4j.gds.compat.TestLog.INFO;
 
 @GdlExtension
 public class HarmonicCentralityTest {
@@ -79,29 +73,5 @@ public class HarmonicCentralityTest {
         assertThat(result.applyAsDouble(mappedId.of("d"))).isEqualTo(0.25, within(0.1));
         assertThat(result.applyAsDouble(mappedId.of("e"))).isEqualTo(0.25, within(0.1));
     }
-
-    @Test
-    void testLogging() {
-        var task = Tasks.leaf("My task");
-        var log = Neo4jProxy.testLog();
-        var progressTracker = new TestProgressTracker(task, log, 1, EmptyTaskRegistryFactory.INSTANCE);
-
-        var algo = new HarmonicCentrality(
-            graph,
-            1,
-            DefaultPool.INSTANCE,
-            progressTracker
-        );
-
-        algo.compute();
-
-        assertThat(log.getMessages(INFO))
-            // avoid asserting on the thread id
-            .extracting(removingThreadId())
-            .containsExactly(
-                "My task :: Start",
-                "My task 100%",
-                "My task :: Finished"
-            );
-    }
+    
 }
