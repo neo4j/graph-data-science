@@ -17,11 +17,9 @@ dependencies {
     compileOnly         group: 'com.github.spotbugs',      name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
     compileOnly project(':progress-tracking')
 
-    neodeps().each {
-        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
-            transitive = false
-        }
-    }
+    compileOnly group: 'org.neo4j', name: 'annotations', version: ver.'neo4j'
+    compileOnly group: 'org.neo4j', name: 'neo4j-kernel', version: ver.'neo4j'
+    compileOnly group: 'org.neo4j', name: 'neo4j-unsafe', version: ver.'neo4j'
 
     implementation project(':annotations')
     implementation project(':config-api')
@@ -71,12 +69,4 @@ dependencies {
     testImplementation group: 'net.jqwik',          name: 'jqwik',                  version: ver.'jqwik'
     testImplementation group: 'io.qala.datagen',    name: 'qala-datagen-junit5',    version: ver.'qala-datagen'
     testImplementation group: 'org.junit-pioneer',  name: 'junit-pioneer',          version: ver.'junit-pioneer'
-}
-
-afterEvaluate {
-    if (ver.'neo4j'.startsWith('5.')) {
-        dependencies {
-            testImplementation group: 'org.neo4j', name: 'neo4j-record-storage-engine', version: ver.'neo4j'
-        }
-    }
 }
