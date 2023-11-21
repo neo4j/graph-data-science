@@ -1,6 +1,6 @@
 ext {
     gdsBaseVersion = '2.5.5'
-    gdsAuraVersion = '44'
+    gdsAuraVersion = '45'
 
     gdsVersion = gdsBaseVersion + (rootProject.hasProperty('aurads') ? "+${gdsAuraVersion}" : "")
 }
