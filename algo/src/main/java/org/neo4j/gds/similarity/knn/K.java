@@ -26,14 +26,6 @@ public final class K {
             throw new IllegalArgumentException("sampleRate must be more than 0.0 and less than or equal to 1.0");
         // (int) is safe because value is at most `topK`, which is an int
         var boundedValue = Math.max(0, (int) Math.min(value, nodeCount - 1));
-        // (int) is safe because value is at most `topK`, which is an int
-        // This could be violated if a sampleRate outside of [0,1] is used
-        // which is only possible from our tests
-
-
-        // Nah that shouldn't be possible anymore anywhere, yeah?
-
-
         var sampledValue = Math.max(0, (int) Math.min((long) Math.ceil(sampleRate * value), nodeCount - 1));
         return new K(value, boundedValue, sampledValue);
     }

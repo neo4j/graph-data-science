@@ -180,7 +180,7 @@ public class Knn extends Algorithm<KnnResult> {
 
     @Override
     public KnnResult compute() {
-        if (graph.nodeCount() < 2 || k.value == 0) {
+        if (graph.nodeCount() < 2) {
             return new EmptyResult();
         }
         this.progressTracker.beginSubTask();
