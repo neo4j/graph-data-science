@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
 import org.immutables.builder.Builder;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.loading.NodeLabelTokenSet;
 import org.neo4j.gds.core.loading.NodesBatchBuffer;
 import org.neo4j.gds.core.loading.NodesBatchBufferBuilder;
@@ -35,7 +36,7 @@ import static org.neo4j.kernel.impl.store.record.AbstractBaseRecord.NO_ID;
 
 public final class BufferedNodeConsumer implements StoreScanner.RecordConsumer<NodeReference> {
 
-    private final NodesBatchBuffer buffer;
+    private final NodesBatchBuffer<PropertyReference> buffer;
 
     private final long highestPossibleNodeCount;
     private final LongSet nodeLabelIds;
@@ -50,10 +51,11 @@ public final class BufferedNodeConsumer implements StoreScanner.RecordConsumer<N
         Optional<Boolean> hasLabelInformation,
         Optional<Boolean> readProperty
     ) {
-        NodesBatchBuffer buffer = new NodesBatchBufferBuilder()
+        var buffer = new NodesBatchBufferBuilder<PropertyReference>()
             .capacity(capacity)
             .hasLabelInformation(hasLabelInformation)
             .readProperty(readProperty)
+            .propertyReferenceClass(PropertyReference.class)
             .build();
 
         LongSet labelIds = nodeLabelIds.orElseGet(LongHashSet::new);
@@ -68,7 +70,7 @@ public final class BufferedNodeConsumer implements StoreScanner.RecordConsumer<N
     }
 
     private BufferedNodeConsumer(
-        NodesBatchBuffer buffer,
+        NodesBatchBuffer<PropertyReference> buffer,
         long highestPossibleNodeCount,
         LongSet nodeLabelIds,
         boolean readProperty
@@ -80,7 +82,7 @@ public final class BufferedNodeConsumer implements StoreScanner.RecordConsumer<N
         this.readProperty = readProperty;
     }
 
-    NodesBatchBuffer nodesBatchBuffer() {
+    NodesBatchBuffer<PropertyReference> nodesBatchBuffer() {
         return this.buffer;
     }
 

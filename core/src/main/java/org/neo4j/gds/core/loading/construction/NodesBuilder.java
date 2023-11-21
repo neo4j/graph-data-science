@@ -27,8 +27,6 @@ import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
-import org.neo4j.gds.compat.LongPropertyReference;
-import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.ImmutableNodes;
@@ -61,6 +59,7 @@ import java.util.stream.Collectors;
 import static java.util.stream.Collectors.toMap;
 
 public final class NodesBuilder {
+    private static final Integer NO_PROPERTY = -1;
     public static final long UNKNOWN_MAX_ID = -1L;
 
     private final long maxOriginalId;
@@ -285,7 +284,7 @@ public final class NodesBuilder {
 
         private final LongAdder importedNodes;
         private final LongPredicate seenNodeIdPredicate;
-        private final NodesBatchBuffer buffer;
+        private final NodesBatchBuffer<Integer> buffer;
         private final NodeImporter nodeImporter;
         private final List<PropertyValues> batchNodeProperties;
         private final NodesBuilderContext.ThreadLocalContext threadLocalContext;
@@ -302,10 +301,11 @@ public final class NodesBuilder {
             this.seenNodeIdPredicate = seenNodeIdPredicate;
             this.threadLocalContext = threadLocalContext;
 
-            this.buffer = new NodesBatchBufferBuilder()
+            this.buffer = new NodesBatchBufferBuilder<Integer>()
                 .capacity(ParallelUtil.DEFAULT_BATCH_SIZE)
                 .hasLabelInformation(hasLabelInformation)
                 .readProperty(hasProperties)
+                .propertyReferenceClass(Integer.class)
                 .build();
 
             this.nodeImporter = nodeImporter;
@@ -316,7 +316,7 @@ public final class NodesBuilder {
             if (!seenNodeIdPredicate.test(originalId)) {
                 var threadLocalTokens = threadLocalContext.addNodeLabelToken(nodeLabelToken);
 
-                buffer.add(originalId, LongPropertyReference.empty(), threadLocalTokens);
+                buffer.add(originalId, NO_PROPERTY, threadLocalTokens);
                 if (buffer.isFull()) {
                     flushBuffer();
                     reset();
@@ -333,7 +333,7 @@ public final class NodesBuilder {
                 int propertyReference = batchNodeProperties.size();
                 batchNodeProperties.add(properties);
 
-                buffer.add(originalId, LongPropertyReference.of(propertyReference), threadLocalTokens);
+                buffer.add(originalId, propertyReference, threadLocalTokens);
                 if (buffer.isFull()) {
                     flushBuffer();
                     reset();
@@ -361,9 +361,8 @@ public final class NodesBuilder {
             this.importedNodes.add(importedNodes);
         }
 
-        private int importProperties(long nodeReference, NodeLabelTokenSet labelTokens, PropertyReference propertiesReference) {
-            if (!propertiesReference.isEmpty()) {
-                var propertyValueIndex = (int) ((LongPropertyReference) propertiesReference).id;
+        private int importProperties(long nodeReference, NodeLabelTokenSet labelTokens, int propertyValueIndex) {
+            if (propertyValueIndex != NO_PROPERTY) {
                 var properties = this.batchNodeProperties.get(propertyValueIndex);
 
                 properties.forEach((propertyKey, propertyValue) -> {

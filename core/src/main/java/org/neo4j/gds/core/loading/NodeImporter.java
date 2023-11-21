@@ -22,7 +22,6 @@ package org.neo4j.gds.core.loading;
 import com.carrotsearch.hppc.IntObjectMap;
 import org.immutables.builder.Builder;
 import org.neo4j.gds.NodeLabel;
-import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.utils.RawValues;
 
 import java.util.Collections;
@@ -31,10 +30,10 @@ import java.util.Optional;
 
 public class NodeImporter {
 
-    private static int importProperties(
+    private static <PROPERTY_REF> int importProperties(
         NodeImporter.PropertyReader reader,
         long[] batch,
-        PropertyReference[] properties,
+        PROPERTY_REF[] properties,
         NodeLabelTokenSet[] labelTokens,
         int length
     ) {
@@ -67,14 +66,18 @@ public class NodeImporter {
         this.importProperties = importProperties;
     }
 
-    public long importNodes(NodesBatchBuffer buffer, PropertyReader reader) {
+    public <PROPERTY_REF> long importNodes(NodesBatchBuffer<PROPERTY_REF> buffer, PropertyReader<PROPERTY_REF> reader) {
         var tokenToLabelMap = this.labelTokenNodeLabelMapping.orElseThrow(
             () -> new IllegalStateException("Missing Token-to-NodeLabel mapping")
         );
         return importNodes(buffer, tokenToLabelMap, reader);
     }
 
-    public long importNodes(NodesBatchBuffer buffer, IntObjectMap<List<NodeLabel>> tokenToNodeLabelsMap, PropertyReader reader) {
+    public <PROPERTY_REF> long importNodes(
+        NodesBatchBuffer<PROPERTY_REF> buffer,
+        IntObjectMap<List<NodeLabel>> tokenToNodeLabelsMap,
+        PropertyReader<PROPERTY_REF> reader
+    ) {
         int batchLength = buffer.length();
         if (batchLength == 0) {
             return 0;
@@ -142,8 +145,8 @@ public class NodeImporter {
         }
     }
 
-    public interface PropertyReader {
-        int readProperty(long nodeReference, NodeLabelTokenSet labelTokens, PropertyReference propertiesReference);
+    public interface PropertyReader<PROPERTY_REF> {
+        int readProperty(long nodeReference, NodeLabelTokenSet labelTokens, PROPERTY_REF propertiesReference);
     }
 
     @FunctionalInterface

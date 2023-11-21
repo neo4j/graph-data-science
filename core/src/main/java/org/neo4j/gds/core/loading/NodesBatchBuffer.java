@@ -20,44 +20,47 @@
 package org.neo4j.gds.core.loading;
 
 import org.immutables.builder.Builder;
-import org.neo4j.gds.compat.PropertyReference;
 
+import java.lang.reflect.Array;
 import java.util.Optional;
 
-public class NodesBatchBuffer extends RecordsBatchBuffer {
+public class NodesBatchBuffer<PROPERTY_REF> extends RecordsBatchBuffer {
 
     private final boolean hasLabelInformation;
 
     private final NodeLabelTokenSet[] labelTokens;
     // property ids, consecutive
-    private final PropertyReference[] properties;
+    private final PROPERTY_REF[] properties;
 
     @Builder.Factory
-    static NodesBatchBuffer nodesBatchBuffer(
+    static <PROPERTY_REF> NodesBatchBuffer<PROPERTY_REF> nodesBatchBuffer(
         int capacity,
         Optional<Boolean> hasLabelInformation,
-        Optional<Boolean> readProperty
+        Optional<Boolean> readProperty,
+        Class<PROPERTY_REF> propertyReferenceClass
     ) {
-        return new NodesBatchBuffer(
+        return new NodesBatchBuffer<>(
             // TODO: we probably wanna adjust the capacity here
             capacity,
             hasLabelInformation.orElse(false),
-            readProperty.orElse(false)
+            readProperty.orElse(false),
+            propertyReferenceClass
         );
     }
 
     private NodesBatchBuffer(
         int capacity,
         boolean hasLabelInformation,
-        boolean readProperty
+        boolean readProperty,
+        Class<PROPERTY_REF> propertyReferenceClass
     ) {
         super(capacity);
         this.hasLabelInformation = hasLabelInformation;
-        this.properties = readProperty ? new PropertyReference[capacity] : null;
+        this.properties = readProperty ? (PROPERTY_REF[]) Array.newInstance(propertyReferenceClass, capacity) : null;
         this.labelTokens = new NodeLabelTokenSet[capacity];
     }
 
-    public void add(long nodeId, PropertyReference propertyReference, NodeLabelTokenSet labelTokens) {
+    public void add(long nodeId, PROPERTY_REF propertyReference, NodeLabelTokenSet labelTokens) {
         int len = length++;
         buffer[len] = nodeId;
         if (properties != null) {
@@ -68,7 +71,7 @@ public class NodesBatchBuffer extends RecordsBatchBuffer {
         }
     }
 
-    public PropertyReference[] properties() {
+    public PROPERTY_REF[] properties() {
         return this.properties;
     }
 
