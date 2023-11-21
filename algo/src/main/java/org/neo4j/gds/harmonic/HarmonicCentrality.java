@@ -81,7 +81,7 @@ public class HarmonicCentrality extends Algorithm<HarmonicResult> {
 
         progressTracker.endSubTask();
 
-        return ImmutableHarmonicResult.of(inverseFarness);
+        return new HarmonicResult(inverseFarness);
     }
 
 }

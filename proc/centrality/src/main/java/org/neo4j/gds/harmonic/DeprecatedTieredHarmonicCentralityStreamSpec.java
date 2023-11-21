@@ -59,13 +59,13 @@ public class DeprecatedTieredHarmonicCentralityStreamSpec implements AlgorithmSp
             () -> computationResult.result()
                 .map(result -> {
                     var graph = computationResult.graph();
-                    var centralities = result.centralities();
+                    var centralityScoreProvider = result.centralityScoreProvider();
                     return LongStream
                         .range(IdMap.START_NODE_ID, graph.nodeCount())
                         .mapToObj(nodeId ->
                             new DeprecatedTieredStreamResult(
                                 graph.toOriginalNodeId(nodeId),
-                                centralities.get(nodeId)
+                                centralityScoreProvider.applyAsDouble(nodeId)
                             ));
                 }).orElseGet(Stream::empty));
     }

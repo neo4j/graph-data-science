@@ -21,7 +21,6 @@ package org.neo4j.gds.harmonic;
 
 import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
 import org.neo4j.gds.api.properties.nodes.EmptyDoubleNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResult;
@@ -62,8 +61,7 @@ public class DeprecatedTieredHarmonicCentralityWriteSpec implements AlgorithmSpe
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().writeProperty(),
                 computationResult.result()
-                    .map(HarmonicResult::centralities)
-                    .map(NodePropertyValuesAdapter::adapt)
+                    .map(HarmonicResult::nodePropertyValues)
                     .orElse(EmptyDoubleNodePropertyValues.INSTANCE)
             )),
             name()
@@ -79,7 +77,9 @@ public class DeprecatedTieredHarmonicCentralityWriteSpec implements AlgorithmSpe
             computationResult.config().concurrency()
         ).withWriteProperty(computationResult.config().writeProperty());
 
-        computationResult.result().ifPresent(result -> builder.withCentralityFunction(result.centralities()::get));
+        computationResult.result()
+            .ifPresent(result -> builder.withCentralityFunction(result.centralityScoreProvider()));
+
 
         return builder;
 
