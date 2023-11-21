@@ -116,7 +116,7 @@ public class Knn extends Algorithm<KnnResult> {
     private final SimilarityFunction similarityFunction;
     private final NeighbourConsumers neighborConsumers;
     private final SplittableRandom splittableRandom;
-    private final KnnSampler.Provider samplerProvider;
+    private final KnnSampler.Factory samplerFactory;
     private final K k;
 
     private long nodePairsConsidered;
@@ -155,10 +155,10 @@ public class Knn extends Algorithm<KnnResult> {
         this.splittableRandom = randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
         switch (initialSamplerType) {
             case UNIFORM:
-                this.samplerProvider = new UniformKnnSampler.Provider(graph.nodeCount(), splittableRandom);
+                this.samplerFactory = new UniformKnnSampler.Factory(graph.nodeCount());
                 break;
             case RANDOMWALK:
-                this.samplerProvider = new RandomWalkKnnSampler.Provider(graph, randomSeed, k.value, splittableRandom);
+                this.samplerFactory = new RandomWalkKnnSampler.Factory(graph, randomSeed, k.value);
                 break;
             default:
                 throw new IllegalStateException("Invalid KnnSampler");
@@ -229,7 +229,7 @@ public class Knn extends Algorithm<KnnResult> {
             partition -> {
                 var localRandom = splittableRandom.split();
                 return new GenerateRandomNeighbors(
-                    samplerProvider.get(),
+                    samplerFactory.create(localRandom),
                     localRandom,
                     similarityFunction,
                     neighborFilterFactory.create(),

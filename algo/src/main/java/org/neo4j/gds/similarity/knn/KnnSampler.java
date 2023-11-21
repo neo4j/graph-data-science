@@ -22,13 +22,15 @@ package org.neo4j.gds.similarity.knn;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.SplittableRandom;
 import java.util.function.LongPredicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public interface KnnSampler {
 
-    interface Provider extends Supplier<KnnSampler> {}
+    interface Factory {
+        KnnSampler create(SplittableRandom random);
+    }
 
     long[] sample(
         long nodeId,

@@ -127,21 +127,19 @@ class RandomWalkKnnSampler implements KnnSampler {
         return samples;
     }
 
-    public static class Provider implements KnnSampler.Provider {
+    public static class Factory implements KnnSampler.Factory {
         private final Graph graph;
         private final Optional<Long> randomSeed;
         private final int boundedK;
-        private final SplittableRandom random;
 
-        Provider(Graph graph, Optional<Long> randomSeed, int boundedK, SplittableRandom random) {
+        Factory(Graph graph, Optional<Long> randomSeed, int boundedK) {
             this.graph = graph;
             this.randomSeed = randomSeed;
             this.boundedK = boundedK;
-            this.random = random;
         }
 
-        public KnnSampler get() {
-            return new RandomWalkKnnSampler(graph.concurrentCopy(), random.split(), randomSeed, boundedK);
+        public KnnSampler create(SplittableRandom random) {
+            return new RandomWalkKnnSampler(graph.concurrentCopy(), random, randomSeed, boundedK);
         }
     }
 }
