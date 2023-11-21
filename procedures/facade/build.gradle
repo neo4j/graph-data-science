@@ -36,6 +36,7 @@ dependencies {
     implementation project(':proc-common')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
+    implementation project(':subgraph-filtering')
     implementation project(':termination')
     implementation project(':transaction')
 
