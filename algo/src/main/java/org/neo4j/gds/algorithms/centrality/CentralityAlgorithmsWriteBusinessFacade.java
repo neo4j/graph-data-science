@@ -21,6 +21,7 @@ package org.neo4j.gds.algorithms.centrality;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
+import org.neo4j.gds.algorithms.centrality.specificfields.AlphaHarmonicSpecificFields;
 import org.neo4j.gds.algorithms.centrality.specificfields.CentralityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
@@ -30,6 +31,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
+import org.neo4j.gds.harmonic.DeprecatedTieredHarmonicCentralityWriteConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
 import org.neo4j.gds.result.CentralityStatistics;
 
@@ -139,7 +141,37 @@ public class CentralityAlgorithmsWriteBusinessFacade {
         );
     }
 
+    public NodePropertyWriteResult<AlphaHarmonicSpecificFields> alphaHarmonicCentrality(
+        String graphName,
+        DeprecatedTieredHarmonicCentralityWriteConfig configuration,
+        boolean shouldComputeCentralityDistribution
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = runWithTiming(
+            () -> centralityAlgorithmsFacade.harmonicCentrality(graphName, configuration)
+        );
 
+        var algorithmResult = intermediateResult.algorithmResult;
+        return writeToDatabase(
+            algorithmResult,
+            configuration,
+            CentralityAlgorithmResult::centralityScoreProvider,
+            CentralityAlgorithmResult::nodePropertyValues,
+            (result, centralityDistribution) -> new AlphaHarmonicSpecificFields(
+                centralityDistribution,
+                intermediateResult.algorithmResult.graph().nodeCount()
+            ),
+            shouldComputeCentralityDistribution,
+            intermediateResult.computeMilliseconds,
+            () -> AlphaHarmonicSpecificFields.EMPTY,
+            "HarmonicCentralityWrite",
+            configuration.writeConcurrency(),
+            configuration.writeProperty(),
+            configuration.arrowConnectionInfo()
+
+        );
+
+    }
 
 
     <RESULT extends CentralityAlgorithmResult, CONFIG extends AlgoBaseConfig> NodePropertyWriteResult<DefaultCentralitySpecificFields> writeToDatabase(

@@ -139,7 +139,7 @@ class HarmonicCentralityWriteProcTest extends BaseProcTest {
     void testProgressTracking() {
         TestProcedureRunner.applyOnProcedure(db, HarmonicCentralityWriteProc.class, proc -> {
             var taskStore = new PerDatabaseTaskStore();
-            proc.nodePropertyExporterBuilder = new NativeNodePropertiesExporterBuilder(
+            var nodePropertyExporterBuilder = new NativeNodePropertiesExporterBuilder(
                 DatabaseTransactionContext.of(proc.databaseService, proc.procedureTransaction)
             );
 
@@ -149,7 +149,7 @@ class HarmonicCentralityWriteProcTest extends BaseProcTest {
                 jobId
             ));
 
-            proc.facade = createFacade(proc.nodePropertyExporterBuilder, proc.taskRegistryFactory);
+            proc.facade = createFacade(nodePropertyExporterBuilder, proc.taskRegistryFactory);
 
 
             proc.write(
@@ -204,7 +204,7 @@ class HarmonicCentralityWriteProcTest extends BaseProcTest {
         );
 
         return new GraphDataScience(
-            null,
+            logMock,
             null,
             new CentralityProcedureFacade(
                 ConfigurationParser.EMPTY,

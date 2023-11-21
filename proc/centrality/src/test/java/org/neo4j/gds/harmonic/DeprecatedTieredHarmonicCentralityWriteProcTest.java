@@ -97,12 +97,11 @@ class DeprecatedTieredHarmonicCentralityWriteProcTest extends BaseProcTest {
         var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.closeness.harmonic")
             .writeMode()
-            .addParameter("writeProperty", "centralityScore")
             .yields();
 
         var rowCount= runQueryWithRowConsumer(query, row -> {
             assertThat(row.getNumber("nodes")).isEqualTo(5L);
-            assertThat(row.getString("writeProperty")).isEqualTo("centralityScore");
+            assertThat(row.getString("writeProperty")).isEqualTo("centrality");
 
             assertThat((long)row.getNumber("writeMillis")).isGreaterThan(-1L);
             assertThat((long)row.getNumber("computeMillis")).isGreaterThan(-1L);
@@ -116,7 +115,7 @@ class DeprecatedTieredHarmonicCentralityWriteProcTest extends BaseProcTest {
         assertThat(rowCount).isEqualTo(1);
 
 
-        var resultQuery = "MATCH (n) RETURN id(n) AS id, n.centralityScore AS centrality";
+        var resultQuery = "MATCH (n) RETURN id(n) AS id, n.centrality AS centrality";
 
         var resultMap = new HashMap<Long, Double>();
         runQueryWithRowConsumer(resultQuery, row -> {
@@ -144,12 +143,11 @@ class DeprecatedTieredHarmonicCentralityWriteProcTest extends BaseProcTest {
                 taskStore,
                 jobId
             ));
-            proc.nodePropertyExporterBuilder = new NativeNodePropertiesExporterBuilder(
+            var nodePropertyExporterBuilder = new NativeNodePropertiesExporterBuilder(
                 DatabaseTransactionContext.of(proc.databaseService, proc.procedureTransaction)
             );
 
-            proc.facade = createFacade(proc.nodePropertyExporterBuilder, proc.taskRegistryFactory);
-
+            proc.facade = createFacade(nodePropertyExporterBuilder, proc.taskRegistryFactory);
 
             proc.alphaWrite(
                 DEFAULT_GRAPH_NAME,
@@ -203,7 +201,7 @@ class DeprecatedTieredHarmonicCentralityWriteProcTest extends BaseProcTest {
         );
 
         return new GraphDataScience(
-            null,
+            logMock,
             null,
             new CentralityProcedureFacade(
                 ConfigurationParser.EMPTY,

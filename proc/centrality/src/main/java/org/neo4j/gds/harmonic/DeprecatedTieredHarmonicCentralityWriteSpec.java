@@ -28,6 +28,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.centrality.alphaharmonic.AlphaHarmonicWriteResult;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 
 import java.util.List;
@@ -37,7 +38,7 @@ import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.gds.harmonic.HarmonicCentralityCompanion.DESCRIPTION;
 
 @GdsCallable(name = "gds.alpha.closeness.harmonic.write", description = DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class DeprecatedTieredHarmonicCentralityWriteSpec implements AlgorithmSpec<HarmonicCentrality, HarmonicResult, DeprecatedTieredHarmonicCentralityWriteConfig, Stream<DeprecatedTieredWriteResult>, HarmonicCentralityAlgorithmFactory<DeprecatedTieredHarmonicCentralityWriteConfig>> {
+public class DeprecatedTieredHarmonicCentralityWriteSpec implements AlgorithmSpec<HarmonicCentrality, HarmonicResult, DeprecatedTieredHarmonicCentralityWriteConfig, Stream<AlphaHarmonicWriteResult>, HarmonicCentralityAlgorithmFactory<DeprecatedTieredHarmonicCentralityWriteConfig>> {
 
     @Override
     public String name() {
@@ -55,7 +56,7 @@ public class DeprecatedTieredHarmonicCentralityWriteSpec implements AlgorithmSpe
     }
 
     @Override
-    public ComputationResultConsumer<HarmonicCentrality, HarmonicResult, DeprecatedTieredHarmonicCentralityWriteConfig, Stream<DeprecatedTieredWriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<HarmonicCentrality, HarmonicResult, DeprecatedTieredHarmonicCentralityWriteConfig, Stream<AlphaHarmonicWriteResult>> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>(
             this::resultBuilder,
             computationResult -> List.of(ImmutableNodeProperty.of(
@@ -68,11 +69,11 @@ public class DeprecatedTieredHarmonicCentralityWriteSpec implements AlgorithmSpe
         );
     }
 
-    private AbstractCentralityResultBuilder<DeprecatedTieredWriteResult> resultBuilder(
+    private AbstractCentralityResultBuilder<AlphaHarmonicWriteResult> resultBuilder(
         ComputationResult<HarmonicCentrality, HarmonicResult, DeprecatedTieredHarmonicCentralityWriteConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new DeprecatedTieredWriteResult.Builder(
+        var builder = new AlphaHarmonicWriteResult.Builder(
             executionContext.returnColumns(),
             computationResult.config().concurrency()
         ).withWriteProperty(computationResult.config().writeProperty());

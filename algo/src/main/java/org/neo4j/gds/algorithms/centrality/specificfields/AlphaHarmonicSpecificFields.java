@@ -17,22 +17,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.harmonic;
+package org.neo4j.gds.algorithms.centrality.specificfields;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.core.CypherMapWrapper;
+import java.util.Map;
 
-@Configuration
-public interface DeprecatedTieredHarmonicCentralityWriteConfig extends HarmonicCentralityWriteConfig {
+public class AlphaHarmonicSpecificFields  implements  CentralityStatisticsSpecificFields{
 
-    @Override
-    @Value.Default
-    default String writeProperty() {
-        return "centrality";
+    private final Map<String, Object> centralityDistribution;
+    private final  long nodes;
+
+    public static final AlphaHarmonicSpecificFields EMPTY = new AlphaHarmonicSpecificFields(
+        Map.of(),0
+    );
+
+    public AlphaHarmonicSpecificFields(Map<String,Object> centralityDistribution,long nodes){
+        this.centralityDistribution = centralityDistribution;
+        this.nodes=nodes;
     }
 
-    static DeprecatedTieredHarmonicCentralityWriteConfig of(CypherMapWrapper config) {
-        return new DeprecatedTieredHarmonicCentralityWriteConfigImpl(config);
+    public long nodes(){
+        return nodes;
+    }
+    @Override
+    public Map<String, Object> centralityDistribution() {
+        return centralityDistribution;
     }
 }

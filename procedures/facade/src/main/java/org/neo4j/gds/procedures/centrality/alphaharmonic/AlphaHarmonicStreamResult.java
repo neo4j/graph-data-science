@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.harmonic;
+package org.neo4j.gds.procedures.centrality.alphaharmonic;
 
-public final class DeprecatedTieredStreamResult {
+public final class AlphaHarmonicStreamResult {
     public final long nodeId;
     public final double centrality;
 
-    DeprecatedTieredStreamResult(long nodeId, double centrality) {
+    public AlphaHarmonicStreamResult(long nodeId, double centrality) {
         this.nodeId = nodeId;
         this.centrality = centrality;
     }

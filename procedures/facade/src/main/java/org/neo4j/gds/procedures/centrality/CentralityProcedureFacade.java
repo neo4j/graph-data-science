@@ -41,10 +41,13 @@ import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
 import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
 import org.neo4j.gds.degree.DegreeCentralityStreamConfig;
 import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
+import org.neo4j.gds.harmonic.DeprecatedTieredHarmonicCentralityWriteConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStatsConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
+import org.neo4j.gds.procedures.centrality.alphaharmonic.AlphaHarmonicStreamResult;
+import org.neo4j.gds.procedures.centrality.alphaharmonic.AlphaHarmonicWriteResult;
 import org.neo4j.gds.procedures.centrality.betacloseness.BetaClosenessCentralityMutateResult;
 import org.neo4j.gds.procedures.centrality.betacloseness.BetaClosenessCentralityWriteResult;
 import org.neo4j.gds.procedures.configparser.ConfigurationParser;
@@ -446,6 +449,38 @@ public class CentralityProcedureFacade {
         );
 
         return Stream.of(DefaultCentralityComputationalResultTransformer.toWriteResult(computationResult));
+    }
+
+    public Stream<AlphaHarmonicStreamResult> alphaHarmonicCentralityStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, HarmonicCentralityStreamConfig::of);
+
+        var computationResult = streamBusinessFacade.harmonicCentrality(
+            graphName,
+            config
+        );
+
+        return AlphaHarmonicCentralityComputationalResultTransformer.toStreamResult(computationResult);
+    }
+
+    public Stream<AlphaHarmonicWriteResult> alphaHarmonicCentralityWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, DeprecatedTieredHarmonicCentralityWriteConfig::of);
+
+        var computationResult = writeBusinessFacade.alphaHarmonicCentrality(
+            graphName,
+            config,
+            procedureReturnColumns.contains("centralityDistribution")
+        );
+
+        return Stream.of(AlphaHarmonicCentralityComputationalResultTransformer.toWriteResult(
+            computationResult,
+            config
+        ));
     }
 
 
