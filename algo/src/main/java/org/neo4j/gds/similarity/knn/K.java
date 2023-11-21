@@ -20,23 +20,31 @@
 package org.neo4j.gds.similarity.knn;
 
 public final class K {
-    static K create(int value, double sampleRate, long nodeCount) {
+    static K create(int value, long nodeCount, double sampleRate, double deltaThreshold) {
         if (value < 1) throw new IllegalArgumentException("K value must be 1 or more");
         if (Double.compare(sampleRate, 0.0) < 1 || Double.compare(sampleRate, 1.0) > 0)
             throw new IllegalArgumentException("sampleRate must be more than 0.0 and less than or equal to 1.0");
+        if (Double.compare(deltaThreshold, 0.0) < 0 || Double.compare(deltaThreshold, 1.0) > 0)
+            throw new IllegalArgumentException("deltaThreshold must be more than or equal to 0.0 and less than or equal to 1.0");
         // (int) is safe because value is at most `topK`, which is an int
         var boundedValue = Math.max(0, (int) Math.min(value, nodeCount - 1));
         var sampledValue = Math.max(0, (int) Math.min((long) Math.ceil(sampleRate * value), nodeCount - 1));
-        return new K(value, boundedValue, sampledValue);
+
+        var maxUpdates = (long) Math.ceil(sampleRate * value * nodeCount);
+        var updateThreshold = (long) Math.floor(deltaThreshold * maxUpdates);
+
+        return new K(value, boundedValue, sampledValue, updateThreshold);
     }
 
-    public int value;
-    public int boundedValue;
-    public int sampledValue;
+    public final int value;
+    public final int boundedValue;
+    public final int sampledValue;
+    public final long updateThreshold;
 
-    private K(int value, int boundedValue, int sampledValue) {
+    private K(int value, int boundedValue, int sampledValue, long updateThreshold) {
         this.value = value;
         this.boundedValue = boundedValue;
         this.sampledValue = sampledValue;
+        this.updateThreshold = updateThreshold;
     }
 }

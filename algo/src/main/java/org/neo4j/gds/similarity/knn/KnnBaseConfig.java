@@ -96,6 +96,6 @@ public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, SingleT
     @Value.Default
     @Configuration.Ignore
     default K k(long nodeCount) {
-        return K.create(topK(), sampleRate(), nodeCount);
+        return K.create(topK(), nodeCount, sampleRate(), deltaThreshold());
     }
 }

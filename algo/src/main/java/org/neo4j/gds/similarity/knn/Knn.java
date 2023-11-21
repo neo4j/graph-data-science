@@ -40,8 +40,6 @@ public class Knn extends Algorithm<KnnResult> {
     private final Graph graph;
     private final int concurrency;
     private final int maxIterations;
-    private final double sampleRate;
-    private final double deltaThreshold;
     private final double similarityCutoff;
     private final int minBatchSize;
     private final double perturbationRate;
@@ -81,9 +79,7 @@ public class Knn extends Algorithm<KnnResult> {
             graph,
             config.concurrency(),
             config.maxIterations(),
-            config.sampleRate(),
             config.k(graph.nodeCount()),
-            config.deltaThreshold(),
             config.similarityCutoff(),
             config.minBatchSize(),
             config.initialSampler(),
@@ -110,9 +106,7 @@ public class Knn extends Algorithm<KnnResult> {
             graph,
             config.concurrency(),
             config.maxIterations(),
-            config.sampleRate(),
             config.k(graph.nodeCount()),
-            config.deltaThreshold(),
             config.similarityCutoff(),
             config.minBatchSize(),
             config.initialSampler(),
@@ -131,9 +125,7 @@ public class Knn extends Algorithm<KnnResult> {
         Graph graph,
         int concurrency,
         int maxIterations,
-        double sampleRate,
         K k,
-        double deltaThreshold,
         double similarityCutoff,
         int minBatchSize,
         KnnSampler.SamplerType initialSamplerType,
@@ -149,9 +141,7 @@ public class Knn extends Algorithm<KnnResult> {
         this.graph = graph;
         this.concurrency = concurrency;
         this.maxIterations = maxIterations;
-        this.sampleRate = sampleRate;
         this.k = k;
-        this.deltaThreshold = deltaThreshold;
         this.similarityCutoff = similarityCutoff;
         this.minBatchSize = minBatchSize;
         this.randomJoins = randomJoins;
@@ -188,9 +178,6 @@ public class Knn extends Algorithm<KnnResult> {
         HugeObjectArray<NeighborList> neighbors = initializeRandomNeighbors();
         this.progressTracker.endSubTask();
 
-        var maxUpdates = (long) Math.ceil(sampleRate * k.value * graph.nodeCount());
-        var updateThreshold = (long) Math.floor(deltaThreshold * maxUpdates);
-
         long updateCount;
         int iteration = 0;
         boolean didConverge = false;
@@ -198,7 +185,7 @@ public class Knn extends Algorithm<KnnResult> {
         this.progressTracker.beginSubTask();
         for (; iteration < maxIterations; iteration++) {
             updateCount = iteration(neighbors);
-            if (updateCount <= updateThreshold) {
+            if (updateCount <= k.updateThreshold) {
                 iteration++;
                 didConverge = true;
                 break;
