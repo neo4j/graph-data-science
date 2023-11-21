@@ -28,7 +28,7 @@ import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.Properties;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
-import org.neo4j.gds.api.ValueTypes;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.graph.GraphPropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
@@ -37,7 +37,6 @@ import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.utils.StringJoining;
-import org.neo4j.values.storable.NumberType;
 
 import java.util.Map;
 import java.util.Optional;
@@ -185,12 +184,12 @@ public final class CSRGraphStoreUtil {
                     propertyKey,
                     RelationshipProperty.of(
                         propertyKey,
-                        NumberType.FLOATING_POINT,
+                        ValueType.DOUBLE,
                         relationshipPropertySchema.state(),
                         relationshipProperties.orElseThrow(),
                         relationshipPropertySchema.defaultValue().isUserDefined()
                             ? relationshipPropertySchema.defaultValue()
-                            : ValueTypes.fromNumberType(NumberType.FLOATING_POINT).fallbackValue(),
+                            : ValueType.DOUBLE.fallbackValue(),
                         relationshipPropertySchema.aggregation()
                     )
                 )

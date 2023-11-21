@@ -32,6 +32,7 @@ import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.ValueTypes;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
@@ -171,7 +172,7 @@ public interface RelationshipImportResult {
                 propertyMapping.propertyKey(),
                 RelationshipProperty.of(
                     propertyMapping.propertyKey(),
-                    NumberType.FLOATING_POINT,
+                    ValueType.DOUBLE,
                     PropertyState.PERSISTENT,
                     ImmutableProperties.of(
                         propertiesList,

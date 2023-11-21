@@ -24,7 +24,6 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.values.storable.NumberType;
 
 @ValueClass
 public interface RelationshipProperty {
@@ -60,7 +59,7 @@ public interface RelationshipProperty {
 
     static RelationshipProperty of(
         String key,
-        NumberType type,
+        ValueType type,
         PropertyState state,
         Properties values,
         DefaultValue defaultValue,
@@ -68,7 +67,7 @@ public interface RelationshipProperty {
     ) {
         return ImmutableRelationshipProperty.of(
             values,
-            RelationshipPropertySchema.of(key, ValueTypes.fromNumberType(type), defaultValue, state, aggregation)
+            RelationshipPropertySchema.of(key, type, defaultValue, state, aggregation)
         );
     }
 }
