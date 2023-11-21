@@ -19,8 +19,10 @@
  */
 package org.neo4j.gds.closeness;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.centrality.CentralityMutateResult;
+import org.neo4j.gds.procedures.centrality.betacloseness.BetaClosenessCentralityMutateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -32,19 +34,17 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.closeness.ClosenessCentrality.CLOSENESS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class ClosenessCentralityMutateProc extends BaseProc {
+public class ClosenessCentralityMutateProc {
 
-
+    @Context
+    public GraphDataScience facade;
     @Procedure(value = "gds.closeness.mutate", mode = READ)
     @Description(CLOSENESS_DESCRIPTION)
-    public Stream<MutateResult> mutate(
+    public Stream<CentralityMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new ClosenessCentralityMutateSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.centrality().closenessCentralityMutate(graphName, configuration);
     }
 
 
@@ -52,23 +52,19 @@ public class ClosenessCentralityMutateProc extends BaseProc {
     @Internal
     @Procedure(value = "gds.beta.closeness.mutate", mode = READ, deprecatedBy = "gds.closeness.mutate")
     @Description(CLOSENESS_DESCRIPTION)
-    public Stream<BetaMutateResult> mutateBeta(
+    public Stream<BetaClosenessCentralityMutateResult> mutateBeta(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
+        facade
             .deprecatedProcedures().called("gds.beta.closeness.mutate");
 
-        executionContext()
+        facade
             .log()
             .warn(
                 "Procedure `gds.beta.closeness.mutate` has been deprecated, please use `gds.closeness.mutate`.");
-        
-        return new ProcedureExecutor<>(
-            new BetaClosenessCentralityMutateSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+
+        return facade.centrality().betaClosenessCentralityMutate(graphName, configuration);
 
     }
 

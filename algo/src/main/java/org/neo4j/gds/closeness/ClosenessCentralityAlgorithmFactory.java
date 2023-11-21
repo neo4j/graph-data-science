@@ -27,7 +27,8 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
-public class ClosenessCentralityFactory<CONFIG extends ClosenessCentralityConfig> extends GraphAlgorithmFactory<ClosenessCentrality, CONFIG> {
+public class ClosenessCentralityAlgorithmFactory<CONFIG extends ClosenessCentralityBaseConfig> extends
+    GraphAlgorithmFactory<ClosenessCentrality, CONFIG> {
     @Override
     public ClosenessCentrality build(
         Graph graph,

@@ -23,6 +23,8 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
+import org.neo4j.gds.closeness.ClosenessCentralityResult;
+import org.neo4j.gds.closeness.ClosenessCentralityStreamConfig;
 import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.degree.DegreeCentralityStreamConfig;
 
@@ -59,6 +61,20 @@ public class CentralityAlgorithmsStreamBusinessFacade {
 
         return createStreamComputationResult(result);
     }
+
+    public StreamComputationResult<ClosenessCentralityResult> closenessCentrality(
+        String graphName,
+        ClosenessCentralityStreamConfig config
+    ) {
+
+        var result = this.centralityAlgorithmsFacade.closenessCentrality(
+            graphName,
+            config
+        );
+
+        return createStreamComputationResult(result);
+    }
+
 
     // FIXME: the following method is duplicate, find a good place for it.
     private <RESULT> StreamComputationResult<RESULT> createStreamComputationResult(

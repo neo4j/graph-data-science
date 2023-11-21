@@ -25,6 +25,7 @@ import org.neo4j.gds.algorithms.centrality.specificfields.CentralityStatisticsSp
 import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
+import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -92,6 +93,29 @@ public class CentralityAlgorithmsWriteBusinessFacade {
             configuration.arrowConnectionInfo()
         );
     }
+
+    public NodePropertyWriteResult<DefaultCentralitySpecificFields> closenessCentrality(
+        String graphName,
+        ClosenessCentralityWriteConfig configuration,
+        boolean shouldComputeCentralityDistribution
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = runWithTiming(
+            () -> centralityAlgorithmsFacade.closenessCentrality(graphName, configuration)
+        );
+
+        return writeToDatabase(
+            intermediateResult.algorithmResult,
+            configuration,
+            shouldComputeCentralityDistribution,
+            intermediateResult.computeMilliseconds,
+            "ClosenessCentralityWrite",
+            configuration.writeConcurrency(),
+            configuration.writeProperty(),
+            configuration.arrowConnectionInfo()
+        );
+    }
+
 
 
     <RESULT extends CentralityAlgorithmResult, CONFIG extends AlgoBaseConfig> NodePropertyWriteResult<DefaultCentralitySpecificFields> writeToDatabase(

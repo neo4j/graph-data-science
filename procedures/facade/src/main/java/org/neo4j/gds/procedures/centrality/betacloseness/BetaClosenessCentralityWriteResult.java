@@ -17,43 +17,60 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.closeness;
+package org.neo4j.gds.procedures.centrality.betacloseness;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
-import org.neo4j.gds.results.StandardStatsResult;
+import org.neo4j.gds.results.StandardWriteResult;
 
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public class StatsResult extends StandardStatsResult {
+public final class BetaClosenessCentralityWriteResult extends StandardWriteResult {
 
+    public final long nodePropertiesWritten;
+    public final String writeProperty;
     public final Map<String, Object> centralityDistribution;
 
-    StatsResult(
-        @Nullable Map<String, Object> centralityDistribution,
+    public BetaClosenessCentralityWriteResult(
+        long nodePropertiesWritten,
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
-        Map<String, Object> configuration
+        long writeMillis,
+        String writeProperty,
+        @Nullable Map<String, Object> centralityDistribution,
+        Map<String, Object> config
     ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
+        super(preProcessingMillis, computeMillis, postProcessingMillis, writeMillis, config);
+        this.writeProperty = writeProperty;
         this.centralityDistribution = centralityDistribution;
+        this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    static final class Builder extends AbstractCentralityResultBuilder<StatsResult> {
-         Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+    public static final class Builder extends AbstractCentralityResultBuilder<BetaClosenessCentralityWriteResult> {
+        public String writeProperty;
+
+        public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 
+        public Builder withWriteProperty(String writeProperty) {
+            this.writeProperty = writeProperty;
+            return this;
+        }
+
         @Override
-        public StatsResult buildResult() {
-            return new StatsResult(
-                centralityHistogram,
+        public BetaClosenessCentralityWriteResult buildResult() {
+            return new BetaClosenessCentralityWriteResult(
+                nodePropertiesWritten,
                 preProcessingMillis,
                 computeMillis,
                 postProcessingMillis,
+                writeMillis,
+                writeProperty,
+                centralityHistogram,
                 config.toMap()
             );
         }

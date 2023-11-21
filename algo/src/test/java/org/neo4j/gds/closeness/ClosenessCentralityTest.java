@@ -97,19 +97,19 @@ class ClosenessCentralityTest {
             ProgressTracker.NULL_TRACKER
         );
 
-        var result = algo.compute().centralities();
+        var result = algo.compute().centralityScoreProvider();
 
-        assertThat(result.get(idFunction.of("a"))).isCloseTo(0.4, Offset.offset(0.01));
-        assertThat(result.get(idFunction.of("b"))).isCloseTo(0.57, Offset.offset(0.01));
-        assertThat(result.get(idFunction.of("c"))).isCloseTo(0.66, Offset.offset(0.01));
-        assertThat(result.get(idFunction.of("d"))).isCloseTo(0.57, Offset.offset(0.01));
-        assertThat(result.get(idFunction.of("e"))).isCloseTo(0.4, Offset.offset(0.01));
+        assertThat(result.applyAsDouble(idFunction.of("a"))).isCloseTo(0.4, Offset.offset(0.01));
+        assertThat(result.applyAsDouble(idFunction.of("b"))).isCloseTo(0.57, Offset.offset(0.01));
+        assertThat(result.applyAsDouble(idFunction.of("c"))).isCloseTo(0.66, Offset.offset(0.01));
+        assertThat(result.applyAsDouble(idFunction.of("d"))).isCloseTo(0.57, Offset.offset(0.01));
+        assertThat(result.applyAsDouble(idFunction.of("e"))).isCloseTo(0.4, Offset.offset(0.01));
     }
 
     @Test
     void shouldLogProgress() {
         var config = ImmutableClosenessCentralityStreamConfig.builder().concurrency(4).build();
-        var progressTask = new ClosenessCentralityFactory<>().progressTask(graph, config);
+        var progressTask = new ClosenessCentralityAlgorithmFactory<>().progressTask(graph, config);
         var testLog = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
 

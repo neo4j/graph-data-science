@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.closeness;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.centrality.CentralityStreamResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -33,7 +33,10 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.closeness.ClosenessCentrality.CLOSENESS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class ClosenessCentralityStreamProc extends BaseProc {
+public class ClosenessCentralityStreamProc {
+
+    @Context
+    public GraphDataScience facade;
 
     @Procedure(value = "gds.closeness.stream", mode = READ)
     @Description(CLOSENESS_DESCRIPTION)
@@ -41,10 +44,7 @@ public class ClosenessCentralityStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new ClosenessCentralityStreamSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.centrality().closenessCentralityStream(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)
@@ -55,11 +55,10 @@ public class ClosenessCentralityStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
+        facade
             .deprecatedProcedures().called("gds.beta.closeness.stream");
 
-        executionContext()
+        facade
             .log()
             .warn("Procedure `gds.beta.closeness.stream` has been deprecated, please use `gds.closeness.stream`.");
 

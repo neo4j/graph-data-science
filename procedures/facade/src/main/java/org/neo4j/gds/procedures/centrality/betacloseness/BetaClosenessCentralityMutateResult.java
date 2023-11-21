@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.closeness;
+package org.neo4j.gds.procedures.centrality.betacloseness;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
@@ -27,13 +27,13 @@ import org.neo4j.gds.results.StandardMutateResult;
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public final class BetaMutateResult extends StandardMutateResult {
+public final class BetaClosenessCentralityMutateResult extends StandardMutateResult {
 
     public final long nodePropertiesWritten;
     public final String mutateProperty;
     public final Map<String, Object> centralityDistribution;
 
-    BetaMutateResult(
+    public BetaClosenessCentralityMutateResult(
         long nodePropertiesWritten,
         long preProcessingMillis,
         long computeMillis,
@@ -49,10 +49,10 @@ public final class BetaMutateResult extends StandardMutateResult {
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    static final class Builder extends AbstractCentralityResultBuilder<BetaMutateResult> {
+    public static final class Builder extends AbstractCentralityResultBuilder<BetaClosenessCentralityMutateResult> {
         public String mutateProperty;
 
-         Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+        public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 
@@ -62,8 +62,8 @@ public final class BetaMutateResult extends StandardMutateResult {
         }
 
         @Override
-        public BetaMutateResult buildResult() {
-            return new BetaMutateResult(
+        public BetaClosenessCentralityMutateResult buildResult() {
+            return new BetaClosenessCentralityMutateResult(
                 nodePropertiesWritten,
                 preProcessingMillis,
                 computeMillis,

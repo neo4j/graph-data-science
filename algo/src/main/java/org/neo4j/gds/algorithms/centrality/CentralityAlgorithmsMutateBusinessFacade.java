@@ -24,6 +24,7 @@ import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
+import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
@@ -72,6 +73,24 @@ public class CentralityAlgorithmsMutateBusinessFacade {
         // 1. Run the algorithm and time the execution
         var intermediateResult = runWithTiming(
             () -> centralityAlgorithmsFacade.degreeCentrality(graphName, configuration)
+        );
+
+        return mutateNodeProperty(
+            intermediateResult.algorithmResult,
+            configuration,
+            shouldComputeCentralityDistribution,
+            intermediateResult.computeMilliseconds
+        );
+    }
+
+    public NodePropertyMutateResult<DefaultCentralitySpecificFields> closenessCentrality(
+        String graphName,
+        ClosenessCentralityMutateConfig configuration,
+        boolean shouldComputeCentralityDistribution
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = runWithTiming(
+            () -> centralityAlgorithmsFacade.closenessCentrality(graphName, configuration)
         );
 
         return mutateNodeProperty(

@@ -19,8 +19,9 @@
  */
 package org.neo4j.gds.closeness;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.centrality.CentralityStatsResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -32,35 +33,34 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.closeness.ClosenessCentrality.CLOSENESS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class ClosenessCentralityStatsProc extends BaseProc {
+public class ClosenessCentralityStatsProc {
+
+    @Context
+    public GraphDataScience facade;
 
     @Procedure(value = "gds.closeness.stats", mode = READ)
     @Description(CLOSENESS_DESCRIPTION)
-    public Stream<StatsResult> stats(
+    public Stream<CentralityStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new ClosenessCentralityStatsSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.centrality().closenessCentralityStats(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)
     @Internal
     @Procedure(value = "gds.beta.closeness.stats", mode = READ, deprecatedBy = "gds.closeness.stats")
     @Description(CLOSENESS_DESCRIPTION)
-    public Stream<StatsResult> statsBeta(
+    public Stream<CentralityStatsResult> statsBeta(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
+        facade
             .deprecatedProcedures().called("gds.beta.closeness.stats");
 
-        executionContext()
-            .log()
-            .warn("Procedure `gds.beta.closeness.stats` has been deprecated, please use `gds.closeness.stats`.");
+        facade.log()
+            .warn(
+                "Procedure `gds.beta.closeness.stats` has been deprecated, please use `gds.closeness.stats`.");
 
         return stats(graphName, configuration);
     }

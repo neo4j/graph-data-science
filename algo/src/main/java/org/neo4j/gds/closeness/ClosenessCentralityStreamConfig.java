@@ -27,7 +27,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface ClosenessCentralityStreamConfig extends ClosenessCentralityConfig {
+public interface ClosenessCentralityStreamConfig extends ClosenessCentralityBaseConfig {
 
     static ClosenessCentralityStreamConfig of(CypherMapWrapper config) {
         return new ClosenessCentralityStreamConfigImpl(config);

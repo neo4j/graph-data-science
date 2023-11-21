@@ -19,10 +19,29 @@
  */
 package org.neo4j.gds.closeness;
 
-import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 
-@ValueClass
-public interface ClosenessCentralityResult {
-    HugeDoubleArray centralities();
+import java.util.function.LongToDoubleFunction;
+
+
+public class ClosenessCentralityResult implements CentralityAlgorithmResult {
+
+    private final HugeDoubleArray centralities;
+
+    ClosenessCentralityResult(HugeDoubleArray centralities) {
+        this.centralities = centralities;
+    }
+    
+    @Override
+    public NodePropertyValues nodePropertyValues() {
+        return NodePropertyValuesAdapter.adapt(centralities);
+    }
+
+    @Override
+    public LongToDoubleFunction centralityScoreProvider() {
+        return centralities::get;
+    }
 }
