@@ -37,15 +37,14 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.loading.AdjacencyTestUtils;
-import org.neo4j.gds.extension.IdFunction;
-import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
+import org.neo4j.gds.extension.IdFunction;
+import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
-import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.logging.NullLog;
 
 import java.util.function.LongToIntFunction;
@@ -158,10 +157,10 @@ class ScanningRelationshipsImporterTest extends BaseTest {
         GraphProjectFromStoreConfig graphProjectConfig,
         GraphLoaderContext graphLoaderContext
     ) {
-        return new GraphDimensionsStoreReader(
-            graphLoaderContext.transactionContext(),
-            graphProjectConfig,
-            graphLoaderContext.dependencyResolver().resolveDependency(IdGeneratorFactory.class)
-        ).call();
+        return new GraphDimensionsReaderBuilder()
+            .graphProjectConfig(graphProjectConfig)
+            .graphLoaderContext(graphLoaderContext)
+            .build()
+            .call();
     }
 }

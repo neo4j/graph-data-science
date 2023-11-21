@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.IntObjectMap;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.LongSet;
+import org.immutables.builder.Builder;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.ElementProjection;
@@ -31,8 +32,8 @@ import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.utils.StatementFunction;
@@ -55,16 +56,29 @@ import java.util.stream.StreamSupport;
 
 import static org.neo4j.gds.core.GraphDimensions.ANY_LABEL;
 import static org.neo4j.gds.core.GraphDimensions.ANY_RELATIONSHIP_TYPE;
+import static org.neo4j.gds.core.GraphDimensions.NO_SUCH_LABEL;
 import static org.neo4j.gds.core.GraphDimensions.NO_SUCH_RELATIONSHIP_TYPE;
 
-public abstract class GraphDimensionsReader<T extends GraphProjectConfig> extends StatementFunction<GraphDimensions> {
+final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
 
     private final IdGeneratorFactory idGeneratorFactory;
-    protected T graphProjectConfig;
+    protected GraphProjectFromStoreConfig graphProjectConfig;
 
-    GraphDimensionsReader(
+    @Builder.Factory
+    static GraphDimensionsReader graphDimensionsReader(
+        GraphLoaderContext graphLoaderContext,
+        GraphProjectFromStoreConfig graphProjectConfig
+    ) {
+        return new GraphDimensionsReader(
+            graphLoaderContext.transactionContext(),
+            graphProjectConfig,
+            graphLoaderContext.dependencyResolver().resolveDependency(IdGeneratorFactory.class)
+        );
+    }
+
+    private GraphDimensionsReader(
         TransactionContext tx,
-        T graphProjectConfig,
+        GraphProjectFromStoreConfig graphProjectConfig,
         IdGeneratorFactory idGeneratorFactory
     ) {
         super(tx);
@@ -116,13 +130,40 @@ public abstract class GraphDimensionsReader<T extends GraphProjectConfig> extend
             .build();
     }
 
-    protected abstract TokenElementIdentifierMappings<NodeLabel> getNodeLabelTokens(TokenRead tokenRead);
+    protected TokenElementIdentifierMappings<NodeLabel> getNodeLabelTokens(TokenRead tokenRead) {
+        var labelTokenNodeLabelMappings = new TokenElementIdentifierMappings<NodeLabel>(
+            ANY_LABEL);
+        graphProjectConfig.nodeProjections()
+            .projections()
+            .forEach((nodeLabel, projection) -> {
+                var labelToken = projection.projectAll() ? ANY_LABEL : getNodeLabelToken(tokenRead, projection.label());
+                labelTokenNodeLabelMappings.put(labelToken, nodeLabel);
+            });
+        return labelTokenNodeLabelMappings;
+    }
 
-    protected abstract TokenElementIdentifierMappings<RelationshipType> getRelationshipTypeTokens(TokenRead tokenRead);
+    protected TokenElementIdentifierMappings<RelationshipType> getRelationshipTypeTokens(TokenRead tokenRead) {
+        var typeTokenRelTypeMappings = new TokenElementIdentifierMappings<RelationshipType>(
+            ANY_RELATIONSHIP_TYPE);
+        graphProjectConfig.relationshipProjections()
+            .projections()
+            .forEach((relType, projection) -> {
+                var typeToken = projection.projectAll() ? ANY_RELATIONSHIP_TYPE : getRelationshipTypeToken(
+                    tokenRead,
+                    projection.type()
+                );
+                typeTokenRelTypeMappings.put(typeToken, relType);
+            });
+        return typeTokenRelTypeMappings;
+    }
 
-    protected abstract NodeProjections getNodeProjections();
+    protected NodeProjections getNodeProjections() {
+        return graphProjectConfig.nodeProjections();
+    }
 
-    protected abstract RelationshipProjections getRelationshipProjections();
+    protected RelationshipProjections getRelationshipProjections() {
+        return graphProjectConfig.relationshipProjections();
+    }
 
     protected Map<String, Integer> loadPropertyTokens(Map<? extends ElementIdentifier, ? extends ElementProjection> projectionMapping, TokenRead tokenRead) {
         return projectionMapping
@@ -167,6 +208,20 @@ public abstract class GraphDimensionsReader<T extends GraphProjectConfig> extend
             dataRead.countsForRelationshipWithoutTxState(labelId, id, ANY_LABEL),
             dataRead.countsForRelationshipWithoutTxState(ANY_LABEL, id, labelId)
         );
+    }
+
+    private int getNodeLabelToken(TokenRead tokenRead, String nodeLabel) {
+        int labelToken = tokenRead.nodeLabel(nodeLabel);
+        return labelToken == StatementConstants.NO_SUCH_LABEL
+            ? NO_SUCH_LABEL
+            : labelToken;
+    }
+
+    private int getRelationshipTypeToken(TokenRead tokenRead, String relationshipType) {
+        int relationshipToken = tokenRead.relationshipType(relationshipType);
+        return relationshipToken == StatementConstants.NO_SUCH_RELATIONSHIP_TYPE
+            ? NO_SUCH_RELATIONSHIP_TYPE
+            : relationshipToken;
     }
 
     public static class TokenElementIdentifierMappings<T extends ElementIdentifier> {

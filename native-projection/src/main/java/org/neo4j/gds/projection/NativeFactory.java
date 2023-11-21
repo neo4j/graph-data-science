@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.projection;
 
+import org.immutables.builder.Builder;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.GraphLoaderContext;
@@ -35,31 +36,37 @@ import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
-import org.neo4j.internal.id.IdGeneratorFactory;
+
+import java.util.Optional;
 
 import static org.neo4j.gds.projection.GraphDimensionsValidation.validate;
 
-public final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromStoreConfig> {
+final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromStoreConfig> {
 
     private final GraphProjectFromStoreConfig storeConfig;
     private final ProgressTracker progressTracker;
 
-    public NativeFactory(
-        GraphProjectFromStoreConfig graphProjectConfig,
-        GraphLoaderContext loadingContext
+    @Builder.Factory
+    static NativeFactory nativeFactory(
+        GraphProjectFromStoreConfig graphProjectFromStoreConfig,
+        GraphLoaderContext loadingContext,
+        Optional<GraphDimensions> graphDimensions
     ) {
-        this(
-            graphProjectConfig,
+        var dimensions = graphDimensions.orElseGet(() -> new GraphDimensionsReaderBuilder()
+            .graphLoaderContext(loadingContext)
+            .graphProjectConfig(graphProjectFromStoreConfig)
+            .build()
+            .call()
+        );
+
+        return new NativeFactory(
+            graphProjectFromStoreConfig,
             loadingContext,
-            new GraphDimensionsStoreReader(
-                loadingContext.transactionContext(),
-                graphProjectConfig,
-                loadingContext.dependencyResolver().resolveDependency(IdGeneratorFactory.class)
-            ).call()
+            dimensions
         );
     }
 
-    public NativeFactory(
+    private NativeFactory(
         GraphProjectFromStoreConfig graphProjectConfig,
         GraphLoaderContext loadingContext,
         GraphDimensions graphDimensions

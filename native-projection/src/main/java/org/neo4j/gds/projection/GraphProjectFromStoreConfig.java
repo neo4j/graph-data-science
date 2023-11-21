@@ -91,14 +91,21 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
         return new GraphStoreFactory.Supplier() {
             @Override
             public GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> get(GraphLoaderContext loaderContext) {
-                return new NativeFactory(GraphProjectFromStoreConfig.this, loaderContext);
+                return new NativeFactoryBuilder()
+                    .graphProjectFromStoreConfig(GraphProjectFromStoreConfig.this)
+                    .loadingContext(loaderContext)
+                    .build();
             }
 
             @Override
             public GraphStoreFactory<? extends GraphStore, ? extends GraphProjectConfig> getWithDimension(
                 GraphLoaderContext loaderContext, GraphDimensions graphDimensions
             ) {
-                return new NativeFactory(GraphProjectFromStoreConfig.this, loaderContext, graphDimensions);
+                return new NativeFactoryBuilder()
+                    .graphProjectFromStoreConfig(GraphProjectFromStoreConfig.this)
+                    .loadingContext(loaderContext)
+                    .graphDimensions(graphDimensions)
+                    .build();
             }
         };
     }
