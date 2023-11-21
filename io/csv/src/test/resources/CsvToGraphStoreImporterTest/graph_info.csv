@@ -1,2 +1,2 @@
-databaseId,databaseName,databaseLocation,nodeCount,maxOriginalId,relTypeCounts
-26ca2600-2f7a-4e99-acc1-9d976603698c,testDb,REMOTE,10,1337,REL;3;REL1;2
+databaseId,databaseName,databaseLocation,remoteDatabaseId,nodeCount,maxOriginalId,relTypeCounts
+26ca2600-2f7a-4e99-acc1-9d976603698c,testDb,REMOTE,26ca2600-2f7a-4e99-acc1-9d976603698c,10,1337,REL;3;REL1;2
