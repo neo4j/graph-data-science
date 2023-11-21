@@ -37,22 +37,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 
 public class Knn extends Algorithm<KnnResult> {
-    private final Graph graph;
-    private final int concurrency;
-    private final int maxIterations;
-    private final double similarityCutoff;
-    private final int minBatchSize;
-    private final double perturbationRate;
-    private final int randomJoins;
-    private final NeighborFilterFactory neighborFilterFactory;
-    private final ExecutorService executorService;
-    private final SimilarityFunction similarityFunction;
-    private final NeighbourConsumers neighborConsumers;
-    private final SplittableRandom splittableRandom;
-    private final KnnSampler.Provider samplerProvider;
-    private final K k;
-
-    private long nodePairsConsidered;
 
     public static Knn createWithDefaults(Graph graph, KnnBaseConfig config, KnnContext context) {
         return createWithDefaultsAndInstrumentation(graph, config, context, NeighbourConsumers.no_op, defaultSimilarityFunction(graph, config.nodeProperties()));
@@ -119,6 +103,23 @@ public class Knn extends Algorithm<KnnResult> {
             NeighbourConsumers.no_op
         );
     }
+
+    private final Graph graph;
+    private final int concurrency;
+    private final int maxIterations;
+    private final double similarityCutoff;
+    private final int minBatchSize;
+    private final double perturbationRate;
+    private final int randomJoins;
+    private final NeighborFilterFactory neighborFilterFactory;
+    private final ExecutorService executorService;
+    private final SimilarityFunction similarityFunction;
+    private final NeighbourConsumers neighborConsumers;
+    private final SplittableRandom splittableRandom;
+    private final KnnSampler.Provider samplerProvider;
+    private final K k;
+
+    private long nodePairsConsidered;
 
     Knn(
         ProgressTracker progressTracker,
