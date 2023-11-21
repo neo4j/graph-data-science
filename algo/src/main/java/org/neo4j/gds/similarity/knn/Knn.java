@@ -157,7 +157,7 @@ public class Knn extends Algorithm<KnnResult> {
                 this.samplerProvider = new UniformKnnSampler.Provider(graph.nodeCount(), splittableRandom);
                 break;
             case RANDOMWALK:
-                this.samplerProvider = new RandomWalkKnnSampler.Provider(graph, randomSeed, k.boundedValue, splittableRandom);
+                this.samplerProvider = new RandomWalkKnnSampler.Provider(graph, randomSeed, k.value, splittableRandom);
                 break;
             default:
                 throw new IllegalStateException("Invalid KnnSampler");
@@ -233,7 +233,7 @@ public class Knn extends Algorithm<KnnResult> {
                     similarityFunction,
                     neighborFilterFactory.create(),
                     neighbors,
-                    k.boundedValue,
+                    k.value,
                     partition,
                     progressTracker,
                     neighborConsumers

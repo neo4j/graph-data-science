@@ -122,7 +122,7 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
                     )
                 );
 
-                var neighborListEstimate = NeighborList.memoryEstimation(k.boundedValue)
+                var neighborListEstimate = NeighborList.memoryEstimation(k.value)
                     .estimate(dim, concurrency)
                     .memoryUsage();
 
@@ -141,7 +141,7 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
                     .fixed(
                         "initial-random-neighbors (per thread)",
                         KnnFactory
-                            .initialSamplerMemoryEstimation(configuration.initialSampler(), k.boundedValue)
+                            .initialSamplerMemoryEstimation(configuration.initialSampler(), k.value)
                             .times(concurrency)
                     )
                     .fixed(

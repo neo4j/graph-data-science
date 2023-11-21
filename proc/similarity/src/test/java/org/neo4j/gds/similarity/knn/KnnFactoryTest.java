@@ -64,7 +64,7 @@ class KnnFactoryTest {
 
         assertEstimation(
             nodeCount,
-            k.boundedValue,
+            k.value,
             k.sampledValue,
             initialSampler,
             actual
@@ -92,7 +92,7 @@ class KnnFactoryTest {
         MemoryTree estimate = estimation.estimate(dimensions, 1);
         MemoryRange actual = estimate.memoryUsage();
 
-        assertEstimation(nodeCount, k.boundedValue, k.sampledValue, initialSampler, actual);
+        assertEstimation(nodeCount, k.value, k.sampledValue, initialSampler, actual);
     }
 
     private void assertEstimation(
