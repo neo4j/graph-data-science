@@ -29,20 +29,16 @@ import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.ImmutableSingleTypeRelationshipImportContext;
 import org.neo4j.gds.core.loading.ImportSizing;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
-import org.neo4j.gds.core.loading.RelationshipReference;
-import org.neo4j.gds.core.loading.RelationshipScanCursorBasedScanner;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter.SingleTypeRelationshipImportContext;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporterBuilder;
-import org.neo4j.gds.core.loading.StoreScanner;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
-public final class ScanningRelationshipsImporter extends ScanningRecordsImporter<RelationshipReference, RelationshipImportResult> {
+final class ScanningRelationshipsImporter extends ScanningRecordsImporter<RelationshipReference, RelationshipImportResult> {
 
     private final GraphProjectFromStoreConfig graphProjectConfig;
     private final GraphLoaderContext loadingContext;

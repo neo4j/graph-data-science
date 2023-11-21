@@ -17,37 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.projection;
 
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.PropertyReference;
-import org.neo4j.internal.kernel.api.NodeCursor;
+import org.neo4j.gds.core.loading.NodeLabelTokenSet;
+import org.neo4j.kernel.impl.store.record.NodeRecord;
 
-public final class NodeCursorReference implements NodeReference {
+public interface NodeReference extends RecordReference<NodeRecord> {
 
-    private final NodeCursor nodeCursor;
+    long nodeId();
 
-    NodeCursorReference(NodeCursor nodeCursor) {
-        this.nodeCursor = nodeCursor;
-    }
+    NodeLabelTokenSet labels();
 
-    @Override
-    public long nodeId() {
-        return nodeCursor.nodeReference();
-    }
+    long relationshipReference();
 
-    @Override
-    public NodeLabelTokenSet labels() {
-        return NodeLabelTokenSet.from(nodeCursor.labels().all());
-    }
-
-    @Override
-    public long relationshipReference() {
-        return nodeCursor.relationshipsReference();
-    }
-
-    @Override
-    public PropertyReference propertiesReference() {
-        return Neo4jProxy.propertyReference(nodeCursor);
-    }
+    PropertyReference propertiesReference();
 }

@@ -24,10 +24,8 @@ import com.carrotsearch.hppc.LongSet;
 import org.immutables.builder.Builder;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.NodeLabelTokenSet;
-import org.neo4j.gds.core.loading.NodeReference;
 import org.neo4j.gds.core.loading.NodesBatchBuffer;
 import org.neo4j.gds.core.loading.NodesBatchBufferBuilder;
-import org.neo4j.gds.core.loading.StoreScanner;
 import org.neo4j.token.api.TokenConstants;
 
 import java.util.Optional;

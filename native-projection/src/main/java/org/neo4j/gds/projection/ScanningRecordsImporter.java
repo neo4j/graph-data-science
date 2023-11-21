@@ -22,7 +22,6 @@ package org.neo4j.gds.projection;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.ImportSizing;
-import org.neo4j.gds.core.loading.StoreScanner;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.transaction.TransactionContext;
 
@@ -34,9 +33,9 @@ import java.util.concurrent.ExecutorService;
 import static org.neo4j.gds.mem.MemoryUsage.humanReadable;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public abstract class ScanningRecordsImporter<Record, T> {
+abstract class ScanningRecordsImporter<Record, T> {
 
-    static final BigInteger A_BILLION = BigInteger.valueOf(1_000_000_000L);
+    private static final BigInteger A_BILLION = BigInteger.valueOf(1_000_000_000L);
 
     private final StoreScanner.Factory<Record> storeScannerFactory;
 

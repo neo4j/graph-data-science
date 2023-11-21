@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.projection;
 
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.StoreScan;
@@ -28,7 +28,7 @@ import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.impl.store.format.standard.RelationshipRecordFormat;
 
-public final class RelationshipScanCursorBasedScanner extends AbstractCursorBasedScanner<RelationshipReference, RelationshipScanCursor> {
+final class RelationshipScanCursorBasedScanner extends AbstractCursorBasedScanner<RelationshipReference, RelationshipScanCursor> {
 
     private final long relationshipCount;
 

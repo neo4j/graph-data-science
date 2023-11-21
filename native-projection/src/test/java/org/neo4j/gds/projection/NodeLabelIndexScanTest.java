@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.loading;
+package org.neo4j.gds.projection;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.loading.RecordsBatchBuffer;
 import org.neo4j.graphdb.Label;
 
 import java.util.HashSet;

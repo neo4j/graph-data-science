@@ -21,8 +21,6 @@ package org.neo4j.gds.projection;
 
 import org.immutables.builder.Builder;
 import org.neo4j.gds.core.loading.RecordsBatchBuffer;
-import org.neo4j.gds.core.loading.RelationshipReference;
-import org.neo4j.gds.core.loading.StoreScanner;
 
 public final class BufferedCompositeRelationshipConsumer extends RecordsBatchBuffer implements StoreScanner.RecordConsumer<RelationshipReference> {
 

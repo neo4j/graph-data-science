@@ -35,10 +35,7 @@ import org.neo4j.gds.core.loading.LabelInformation;
 import org.neo4j.gds.core.loading.LabelInformationBuilders;
 import org.neo4j.gds.core.loading.NativeNodePropertyImporter;
 import org.neo4j.gds.core.loading.NodeImporterBuilder;
-import org.neo4j.gds.core.loading.NodeReference;
-import org.neo4j.gds.core.loading.NodeScannerFactory;
 import org.neo4j.gds.core.loading.Nodes;
-import org.neo4j.gds.core.loading.StoreScanner;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -48,7 +45,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference, Nodes> {
+final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference, Nodes> {
 
     private final LoadablePropertyMappings propertyMappings;
     private final Map<NodeLabel, PropertyMappings> propertyMappingsByLabel;
