@@ -17,22 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.pagerank;
+package org.neo4j.gds.procedures.centrality.pagerank;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.procedures.centrality.pagerank.PageRankProcCompanion;
-import org.neo4j.gds.procedures.centrality.pagerank.PageRankStatsResult;
 
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public final class MutateResult extends PageRankStatsResult {
+public final class PageRankMutateResult extends PageRankStatsResult {
 
     public final long mutateMillis;
     public final long nodePropertiesWritten;
 
-    MutateResult(
+    PageRankMutateResult(
         long ranIterations,
         boolean didConverge,
         @Nullable Map<String, Object> centralityDistribution,
@@ -57,15 +55,15 @@ public final class MutateResult extends PageRankStatsResult {
     }
 
 
-    static class Builder extends PageRankProcCompanion.PageRankResultBuilder<MutateResult> {
+    public static class Builder extends PageRankProcCompanion.PageRankResultBuilder<PageRankMutateResult> {
 
-        Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+        public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 
         @Override
-        public MutateResult buildResult() {
-            return new MutateResult(
+        public PageRankMutateResult buildResult() {
+            return new PageRankMutateResult(
                 ranIterations,
                 didConverge,
                 centralityHistogram,

@@ -22,6 +22,7 @@ package org.neo4j.gds.algorithms.centrality;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
+import org.neo4j.gds.algorithms.centrality.specificfields.PageRankSpecificFields;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
@@ -30,6 +31,8 @@ import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
+import org.neo4j.gds.pagerank.PageRankMutateConfig;
+import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.result.CentralityStatistics;
 
 import java.util.function.Supplier;
@@ -121,20 +124,52 @@ public class CentralityAlgorithmsMutateBusinessFacade {
         );
     }
 
+    public NodePropertyMutateResult<PageRankSpecificFields> pageRank(
+        String graphName,
+        PageRankMutateConfig configuration,
+        boolean shouldComputeCentralityDistribution
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = runWithTiming(
+            () -> centralityAlgorithmsFacade.pageRank(graphName, configuration)
+        );
 
-    <RESULT extends CentralityAlgorithmResult, CONFIG extends MutateNodePropertyConfig> NodePropertyMutateResult<DefaultCentralitySpecificFields> mutateNodeProperty(
+        CentralityFunctionSupplier<PageRankResult> centralityFunctionSupplier = CentralityAlgorithmResult::centralityScoreProvider;
+        SpecificFieldsWithCentralityDistributionSupplier<PageRankResult, PageRankSpecificFields> specificFieldsSupplier = (r, c) -> new PageRankSpecificFields(
+            r.iterations(),
+            r.didConverge(),
+            c
+        );
+        Supplier<PageRankSpecificFields> emptyASFSupplier = () -> PageRankSpecificFields.EMPTY;
+
+        NodePropertyValuesMapper<PageRankResult> nodePropertyValuesMapper = PageRankResult::nodePropertyValues;
+
+        return mutateNodeProperty(
+            intermediateResult.algorithmResult,
+            configuration,
+            centralityFunctionSupplier,
+            nodePropertyValuesMapper,
+            specificFieldsSupplier,
+            shouldComputeCentralityDistribution,
+            intermediateResult.computeMilliseconds,
+            emptyASFSupplier
+        );
+    }
+
+
+    private <RESULT extends CentralityAlgorithmResult, CONFIG extends MutateNodePropertyConfig> NodePropertyMutateResult<DefaultCentralitySpecificFields> mutateNodeProperty(
         AlgorithmComputationResult<RESULT> algorithmResult,
         CONFIG configuration,
         boolean shouldComputeCentralityDistribution,
         long computeMilliseconds
     ) {
 
-        CentralityFunctionSupplier<RESULT> centralityFunctionSupplier = (r) -> r.centralityScoreProvider();
+        CentralityFunctionSupplier<RESULT> centralityFunctionSupplier = CentralityAlgorithmResult::centralityScoreProvider;
         SpecificFieldsWithCentralityDistributionSupplier<RESULT, DefaultCentralitySpecificFields> specificFieldsSupplier = (r, c) -> new DefaultCentralitySpecificFields(
             c);
         Supplier<DefaultCentralitySpecificFields> emptyASFSupplier = () -> DefaultCentralitySpecificFields.EMPTY;
 
-        NodePropertyValuesMapper<RESULT> nodePropertyValuesMapper = (r) -> r.nodePropertyValues();
+        NodePropertyValuesMapper<RESULT> nodePropertyValuesMapper = CentralityAlgorithmResult::nodePropertyValues;
 
         return mutateNodeProperty(
             algorithmResult,

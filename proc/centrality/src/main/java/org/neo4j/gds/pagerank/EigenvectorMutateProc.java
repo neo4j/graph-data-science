@@ -22,6 +22,7 @@ package org.neo4j.gds.pagerank;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.centrality.pagerank.PageRankMutateResult;
 import org.neo4j.gds.procedures.centrality.pagerank.PageRankProcCompanion;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
@@ -37,7 +38,7 @@ public class EigenvectorMutateProc extends BaseProc {
 
     @Procedure(value = "gds.eigenvector.mutate", mode = READ)
     @Description(PageRankProcCompanion.EIGENVECTOR_DESCRIPTION)
-    public Stream<MutateResult> mutate(
+    public Stream<PageRankMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

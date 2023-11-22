@@ -28,6 +28,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.centrality.pagerank.PageRankMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -37,7 +38,7 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 import static org.neo4j.gds.procedures.centrality.pagerank.PageRankProcCompanion.PAGE_RANK_DESCRIPTION;
 
 @GdsCallable(name = "gds.pageRank.mutate", description = PAGE_RANK_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class PageRankMutateSpec implements AlgorithmSpec<PageRankAlgorithm, PageRankResult,PageRankMutateConfig,Stream<MutateResult>,PageRankAlgorithmFactory<PageRankMutateConfig>> {
+public class PageRankMutateSpec implements AlgorithmSpec<PageRankAlgorithm, PageRankResult,PageRankMutateConfig,Stream<PageRankMutateResult>,PageRankAlgorithmFactory<PageRankMutateConfig>> {
 
     @Override
     public String name() {
@@ -55,7 +56,7 @@ public class PageRankMutateSpec implements AlgorithmSpec<PageRankAlgorithm, Page
     }
 
     @Override
-    public ComputationResultConsumer<PageRankAlgorithm, PageRankResult, PageRankMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<PageRankAlgorithm, PageRankResult, PageRankMutateConfig, Stream<PageRankMutateResult>> computationResultConsumer() {
         return new MutatePropertyComputationResultConsumer<>(
             computationResult ->
                 List.of(
@@ -70,11 +71,11 @@ public class PageRankMutateSpec implements AlgorithmSpec<PageRankAlgorithm, Page
         );
     }
 
-    private AbstractResultBuilder<MutateResult> resultBuilder(
+    private AbstractResultBuilder<PageRankMutateResult> resultBuilder(
         ComputationResult<PageRankAlgorithm, PageRankResult, PageRankMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new MutateResult.Builder(
+        var builder = new PageRankMutateResult.Builder(
             executionContext.returnColumns(),
             computationResult.config().concurrency()
         );
