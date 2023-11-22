@@ -489,7 +489,7 @@ YIELD nodeCount, bytesMin, bytesMax, requiredMemory
 [opts="header", cols="1,1,1,1"]
 |===
 | nodeCount | bytesMin | bytesMax | requiredMemory
-| 5         | 2232     | 3288     | "[2232 Bytes \... 3288 Bytes]"
+| 5         | 2224     | 3280     | "[2224 Bytes \... 3280 Bytes]"
 |===
 --
 

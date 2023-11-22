@@ -25,6 +25,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.similarity.knn.Knn;
 import org.neo4j.gds.similarity.knn.KnnContext;
+import org.neo4j.gds.similarity.knn.KnnNeighborFilterFactory;
 import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.knn.SimilarityFunction;
 
@@ -73,7 +74,22 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
         var targetNodeFilter = config.targetNodeFilter().toNodeFilter(graph);
         var targetNodeFiltering = TargetNodeFiltering.create(graph.nodeCount(), config.k(graph.nodeCount()).value, targetNodeFilter, graph, optionalSimilarityFunction, config.similarityCutoff());
         var similarityFunction = optionalSimilarityFunction.orElse(Knn.defaultSimilarityFunction(graph, config.nodeProperties()));
-        var knn = Knn.createWithDefaultsAndInstrumentation(graph, config, context, targetNodeFiltering, similarityFunction);
+        var knn = new Knn(
+            context.progressTracker(),
+            graph,
+            config.concurrency(),
+            config.maxIterations(),
+            config.k(graph.nodeCount()),
+            config.similarityCutoff(),
+            config.minBatchSize(),
+            config.initialSampler(),
+            config.randomSeed(),
+            config.neighborJoiningParameters(),
+            similarityFunction,
+            new KnnNeighborFilterFactory(graph.nodeCount()),
+            context.executor(),
+            targetNodeFiltering
+        );
         var sourceNodeFilter = config.sourceNodeFilter().toNodeFilter(graph);
 
         return new FilteredKnn(context.progressTracker(), knn, targetNodeFiltering, sourceNodeFilter);

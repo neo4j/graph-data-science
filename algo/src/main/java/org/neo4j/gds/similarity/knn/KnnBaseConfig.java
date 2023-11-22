@@ -98,4 +98,11 @@ public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, SingleT
     default K k(long nodeCount) {
         return K.create(topK(), nodeCount, sampleRate(), deltaThreshold());
     }
+
+    @Value.Default
+    @Configuration.Ignore
+    default NeighborJoiningParameters neighborJoiningParameters() {
+        return NeighborJoiningParameters.create(perturbationRate(), randomJoins());
+    }
+
 }

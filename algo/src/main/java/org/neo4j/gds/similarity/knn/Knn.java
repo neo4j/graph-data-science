@@ -20,7 +20,6 @@
 package org.neo4j.gds.similarity.knn;
 
 import com.carrotsearch.hppc.LongArrayList;
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
@@ -38,42 +37,17 @@ import java.util.stream.LongStream;
 
 public class Knn extends Algorithm<KnnResult> {
 
-    public static Knn createWithDefaults(Graph graph, KnnBaseConfig config, KnnContext context) {
-        return createWithDefaultsAndInstrumentation(graph, config, context, NeighbourConsumers.no_op, defaultSimilarityFunction(graph, config.nodeProperties()));
-    }
-
     public static SimilarityFunction defaultSimilarityFunction(Graph graph, List<KnnNodePropertySpec> nodeProperties) {
-        return defaultSimilarityFunction(SimilarityComputer.ofProperties(graph, nodeProperties));
+        return new SimilarityFunction(SimilarityComputer.ofProperties(graph, nodeProperties));
     }
 
-    private static SimilarityFunction defaultSimilarityFunction(SimilarityComputer similarityComputer) {
-        return new SimilarityFunction(similarityComputer);
-    }
-
-    @NotNull
-    public static Knn createWithDefaultsAndInstrumentation(
-        Graph graph,
-        KnnBaseConfig config,
-        KnnContext context,
-        NeighbourConsumers neighborConsumers,
-        SimilarityFunction similarityFunction
-    ) {
-        return new Knn(
-            context.progressTracker(),
+    public static Knn createWithDefaults(Graph graph, KnnBaseConfig config, KnnContext context) {
+        return create(
             graph,
-            config.concurrency(),
-            config.maxIterations(),
-            config.k(graph.nodeCount()),
-            config.similarityCutoff(),
-            config.minBatchSize(),
-            config.initialSampler(),
-            config.randomSeed(),
-            config.randomJoins(),
-            config.perturbationRate(),
-            similarityFunction,
+            config,
+            SimilarityComputer.ofProperties(graph, config.nodeProperties()),
             new KnnNeighborFilterFactory(graph.nodeCount()),
-            context.executor(),
-            neighborConsumers
+            context
         );
     }
 
@@ -84,7 +58,7 @@ public class Knn extends Algorithm<KnnResult> {
         NeighborFilterFactory neighborFilterFactory,
         KnnContext context
     ) {
-        SimilarityFunction similarityFunction = defaultSimilarityFunction(similarityComputer);
+        var similarityFunction = new SimilarityFunction(similarityComputer);
         return new Knn(
             context.progressTracker(),
             graph,
@@ -95,8 +69,7 @@ public class Knn extends Algorithm<KnnResult> {
             config.minBatchSize(),
             config.initialSampler(),
             config.randomSeed(),
-            config.randomJoins(),
-            config.perturbationRate(),
+            config.neighborJoiningParameters(),
             similarityFunction,
             neighborFilterFactory,
             context.executor(),
@@ -109,8 +82,6 @@ public class Knn extends Algorithm<KnnResult> {
     private final int maxIterations;
     private final double similarityCutoff;
     private final int minBatchSize;
-    private final double perturbationRate;
-    private final int randomJoins;
     private final NeighborFilterFactory neighborFilterFactory;
     private final ExecutorService executorService;
     private final SimilarityFunction similarityFunction;
@@ -118,8 +89,9 @@ public class Knn extends Algorithm<KnnResult> {
     private final SplittableRandom splittableRandom;
     private final KnnSampler.Factory samplerFactory;
     private final K k;
+    private final NeighborJoiningParameters neighborJoiningParameters;
 
-    Knn(
+    public Knn(
         ProgressTracker progressTracker,
         Graph graph,
         int concurrency,
@@ -129,8 +101,7 @@ public class Knn extends Algorithm<KnnResult> {
         int minBatchSize,
         KnnSampler.SamplerType initialSamplerType,
         Optional<Long> randomSeed,
-        int randomJoins,
-        double perturbationRate,
+        NeighborJoiningParameters neighborJoiningParameters,
         SimilarityFunction similarityFunction,
         NeighborFilterFactory neighborFilterFactory,
         ExecutorService executorService,
@@ -143,8 +114,7 @@ public class Knn extends Algorithm<KnnResult> {
         this.k = k;
         this.similarityCutoff = similarityCutoff;
         this.minBatchSize = minBatchSize;
-        this.randomJoins = randomJoins;
-        this.perturbationRate = perturbationRate;
+        this.neighborJoiningParameters = neighborJoiningParameters;
         this.similarityFunction = similarityFunction;
         this.neighborFilterFactory = neighborFilterFactory;
         this.executorService = executorService;
@@ -164,7 +134,7 @@ public class Knn extends Algorithm<KnnResult> {
     }
 
     public ExecutorService executorService() {
-        return this.executorService;
+        return executorService;
     }
 
     @Override
@@ -172,16 +142,16 @@ public class Knn extends Algorithm<KnnResult> {
         if (graph.nodeCount() < 2) {
             return new EmptyResult();
         }
-        this.progressTracker.beginSubTask();
-        this.progressTracker.beginSubTask();
+        progressTracker.beginSubTask();
+        progressTracker.beginSubTask();
         var neighbors = initializeRandomNeighbors();
-        this.progressTracker.endSubTask();
+        progressTracker.endSubTask();
 
         long updateCount;
         int iteration = 0;
         boolean didConverge = false;
 
-        this.progressTracker.beginSubTask();
+        progressTracker.beginSubTask();
         for (; iteration < maxIterations; iteration++) {
             updateCount = iteration(neighbors);
             if (updateCount <= k.updateThreshold) {
@@ -203,12 +173,12 @@ public class Knn extends Algorithm<KnnResult> {
                 .concurrency(concurrency)
                 .tasks(neighborFilterTasks)
                 .terminationFlag(terminationFlag)
-                .executor(this.executorService)
+                .executor(executorService)
                 .run();
         }
-        this.progressTracker.endSubTask();
+        progressTracker.endSubTask();
 
-        this.progressTracker.endSubTask();
+        progressTracker.endSubTask();
         return ImmutableKnnResult.of(
             neighbors.data(),
             iteration,
@@ -259,8 +229,8 @@ public class Knn extends Algorithm<KnnResult> {
         var allNewNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount);
 
         progressTracker.beginSubTask();
-        ParallelUtil.readParallel(concurrency, nodeCount, this.executorService, new SplitOldAndNewNeighbors(
-            this.splittableRandom,
+        ParallelUtil.readParallel(concurrency, nodeCount, executorService, new SplitOldAndNewNeighbors(
+            splittableRandom,
             neighbors,
             allOldNeighbors,
             allNewNeighbors,
@@ -289,17 +259,17 @@ public class Knn extends Algorithm<KnnResult> {
             concurrency,
             nodeCount,
             partition -> new JoinNeighbors(
-                this.splittableRandom.split(),
-                this.similarityFunction,
-                this.neighborFilterFactory.create(),
+                splittableRandom.split(),
+                similarityFunction,
+                neighborFilterFactory.create(),
                 neighbors,
                 allOldNeighbors,
                 allNewNeighbors,
                 reverseOldNeighbors,
                 reverseNewNeighbors,
                 k.sampledValue,
-                perturbationRate,
-                randomJoins,
+                neighborJoiningParameters.perturbationRate,
+                neighborJoiningParameters.randomJoins,
                 partition,
                 progressTracker
             ),
@@ -311,7 +281,7 @@ public class Knn extends Algorithm<KnnResult> {
             .concurrency(concurrency)
             .tasks(neighborsJoiners)
             .terminationFlag(terminationFlag)
-            .executor(this.executorService)
+            .executor(executorService)
             .run();
         progressTracker.endSubTask();
 

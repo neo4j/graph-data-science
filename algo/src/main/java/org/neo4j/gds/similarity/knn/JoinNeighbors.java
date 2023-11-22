@@ -42,8 +42,6 @@ final class JoinNeighbors implements Runnable {
     private final long nodeCount;
     private final Partition partition;
     private final double perturbationRate;
-
-    private long nodePairsConsidered;
     private long updateCount;
 
 
@@ -77,7 +75,6 @@ final class JoinNeighbors implements Runnable {
         this.progressTracker = progressTracker;
         this.perturbationRate = perturbationRate;
         this.updateCount = 0;
-        this.nodePairsConsidered = 0;
     }
 
     @Override

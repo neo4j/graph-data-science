@@ -132,7 +132,7 @@ class LinkPredictionPipelineStreamProcTest extends BaseProcTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = {"N, [2456 Bytes ... 3800 Bytes]", "M, [3016 Bytes ... 5480 Bytes]"})
+    @CsvSource(value = {"N, [2448 Bytes ... 3792 Bytes]", "M, [3008 Bytes ... 5472 Bytes]"})
     void estimate(String targetNodeLabel, String expectedMemoryRange) {
         assertCypherResult(
             "CALL gds.beta.pipeline.linkPrediction.predict.stream.estimate('g', {" +
