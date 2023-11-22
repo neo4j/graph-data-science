@@ -24,14 +24,15 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.centrality.pagerank.PageRankStatsResult;
 
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
-import static org.neo4j.gds.pagerank.PageRankProcCompanion.PAGE_RANK_DESCRIPTION;
+import static org.neo4j.gds.procedures.centrality.pagerank.PageRankProcCompanion.PAGE_RANK_DESCRIPTION;
 
 @GdsCallable(name = "gds.pageRank.stats", description = PAGE_RANK_DESCRIPTION, executionMode = STATS)
-public class PageRankStatsSpec implements AlgorithmSpec<PageRankAlgorithm, PageRankResult,PageRankStatsConfig,Stream<StatsResult>,PageRankAlgorithmFactory<PageRankStatsConfig>> {
+public class PageRankStatsSpec implements AlgorithmSpec<PageRankAlgorithm, PageRankResult,PageRankStatsConfig,Stream<PageRankStatsResult>,PageRankAlgorithmFactory<PageRankStatsConfig>> {
 
     @Override
     public String name() {
@@ -49,10 +50,10 @@ public class PageRankStatsSpec implements AlgorithmSpec<PageRankAlgorithm, PageR
     }
 
     @Override
-    public ComputationResultConsumer<PageRankAlgorithm, PageRankResult, PageRankStatsConfig, Stream<StatsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<PageRankAlgorithm, PageRankResult, PageRankStatsConfig, Stream<PageRankStatsResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
 
-            var builder = new StatsResult.Builder(
+            var builder = new PageRankStatsResult.Builder(
                 executionContext.returnColumns(),
                 computationResult.config().concurrency()
             );

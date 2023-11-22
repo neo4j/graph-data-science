@@ -21,11 +21,13 @@ package org.neo4j.gds.pagerank;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.procedures.centrality.pagerank.PageRankProcCompanion;
+import org.neo4j.gds.procedures.centrality.pagerank.PageRankStatsResult;
 
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public final class WriteResult extends StatsResult {
+public final class WriteResult extends PageRankStatsResult {
 
     public final long writeMillis;
     public final long nodePropertiesWritten;

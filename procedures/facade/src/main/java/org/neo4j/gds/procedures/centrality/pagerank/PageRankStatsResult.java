@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.pagerank;
+package org.neo4j.gds.procedures.centrality.pagerank;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
@@ -25,14 +25,13 @@ import org.neo4j.gds.results.StandardStatsResult;
 
 import java.util.Map;
 
-@SuppressWarnings("unused")
-public class StatsResult extends StandardStatsResult {
+public class PageRankStatsResult extends StandardStatsResult {
 
     public final long ranIterations;
     public final boolean didConverge;
     public final Map<String, Object> centralityDistribution;
 
-    StatsResult(
+    public PageRankStatsResult(
         long ranIterations,
         boolean didConverge,
         @Nullable Map<String, Object> centralityDistribution,
@@ -47,15 +46,15 @@ public class StatsResult extends StandardStatsResult {
         this.centralityDistribution = centralityDistribution;
     }
 
-    static class Builder extends PageRankProcCompanion.PageRankResultBuilder<StatsResult> {
+    public static class Builder extends PageRankProcCompanion.PageRankResultBuilder<PageRankStatsResult> {
 
-        Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+        public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 
         @Override
-        public StatsResult buildResult() {
-            return new StatsResult(
+        public PageRankStatsResult buildResult() {
+            return new PageRankStatsResult(
                 ranIterations,
                 didConverge,
                 centralityHistogram,

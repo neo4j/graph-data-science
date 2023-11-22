@@ -17,41 +17,41 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.pagerank;
+package org.neo4j.gds.procedures.centrality.pagerank;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 
-final class PageRankProcCompanion {
+public final class PageRankProcCompanion {
 
-    static final String PAGE_RANK_DESCRIPTION =
+    public static final String PAGE_RANK_DESCRIPTION =
         "Page Rank is an algorithm that measures the transitive influence or connectivity of nodes.";
 
-    static final String ARTICLE_RANK_DESCRIPTION =
+    public static final String ARTICLE_RANK_DESCRIPTION =
         "Article Rank is a variant of the Page Rank algorithm, which " +
         "measures the transitive influence or connectivity of nodes.";
 
-    static final String EIGENVECTOR_DESCRIPTION =
+    public static final String EIGENVECTOR_DESCRIPTION =
         "Eigenvector Centrality is an algorithm that measures the transitive influence or connectivity of nodes.";
 
     private PageRankProcCompanion() {}
 
 
-    abstract static class PageRankResultBuilder<PROC_RESULT> extends AbstractCentralityResultBuilder<PROC_RESULT> {
+    public abstract static class PageRankResultBuilder<PROC_RESULT> extends AbstractCentralityResultBuilder<PROC_RESULT> {
         protected long ranIterations;
 
         protected boolean didConverge;
 
-        PageRankResultBuilder(ProcedureReturnColumns returnColumns, int concurrency) {
+        public PageRankResultBuilder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 
-        PageRankResultBuilder<PROC_RESULT> withRanIterations(long ranIterations) {
+        public PageRankResultBuilder<PROC_RESULT> withRanIterations(long ranIterations) {
             this.ranIterations = ranIterations;
             return this;
         }
 
-        PageRankResultBuilder<PROC_RESULT> withDidConverge(boolean didConverge) {
+        public PageRankResultBuilder<PROC_RESULT> withDidConverge(boolean didConverge) {
             this.didConverge = didConverge;
             return this;
         }
