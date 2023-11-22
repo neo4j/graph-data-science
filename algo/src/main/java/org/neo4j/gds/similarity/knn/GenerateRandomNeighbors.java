@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.similarity.knn;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -28,36 +29,76 @@ import java.util.SplittableRandom;
  * Initial step in KNN calculation.
  */
 final class GenerateRandomNeighbors implements Runnable {
+
+    static final class Factory {
+        private final SimilarityFunction similarityFunction;
+        private final NeighbourConsumers neighbourConsumers;
+        private final int boundedK;
+        private final ProgressTracker progressTracker;
+
+        Factory(
+            SimilarityFunction similarityFunction,
+            NeighbourConsumers neighbourConsumers,
+            int boundedK,
+            ProgressTracker progressTracker
+        ) {
+            this.similarityFunction = similarityFunction;
+            this.neighbourConsumers = neighbourConsumers;
+            this.boundedK = boundedK;
+            this.progressTracker = progressTracker;
+        }
+
+        @NotNull GenerateRandomNeighbors create(
+            Partition partition,
+            Neighbors neighbors,
+            KnnSampler sampler,
+            NeighborFilter neighborFilter,
+            SplittableRandom random
+        ) {
+            return new GenerateRandomNeighbors(
+                partition,
+                neighbors,
+                sampler,
+                neighborFilter,
+                random,
+                similarityFunction,
+                neighbourConsumers,
+                boundedK,
+                progressTracker
+            );
+        }
+    }
+
+    private final Partition partition;
+    private final Neighbors neighbors;
     private final KnnSampler sampler;
+    private final NeighborFilter neighborFilter;
     private final SplittableRandom random;
     private final SimilarityFunction similarityFunction;
-    private final NeighborFilter neighborFilter;
-    private final Neighbors neighbors;
+    private final NeighbourConsumers neighbourConsumers;
     private final int boundedK;
     private final ProgressTracker progressTracker;
-    private final Partition partition;
-    private final NeighbourConsumers neighbourConsumers;
 
     GenerateRandomNeighbors(
+        Partition partition,
+        Neighbors neighbors,
         KnnSampler sampler,
+        NeighborFilter neighborFilter,
         SplittableRandom random,
         SimilarityFunction similarityFunction,
-        NeighborFilter neighborFilter,
-        Neighbors neighbors,
+        NeighbourConsumers neighbourConsumers,
         int boundedK,
-        Partition partition,
-        ProgressTracker progressTracker,
-        NeighbourConsumers neighbourConsumers
+        ProgressTracker progressTracker
     ) {
+        this.partition = partition;
+        this.neighbors = neighbors;
         this.sampler = sampler;
+        this.neighborFilter = neighborFilter;
         this.random = random;
         this.similarityFunction = similarityFunction;
-        this.neighborFilter = neighborFilter;
-        this.neighbors = neighbors;
+        this.neighbourConsumers = neighbourConsumers;
         this.boundedK = boundedK;
         this.progressTracker = progressTracker;
-        this.partition = partition;
-        this.neighbourConsumers = neighbourConsumers;
     }
 
     @Override

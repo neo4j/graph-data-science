@@ -36,6 +36,38 @@ import java.util.SplittableRandom;
  *   Mark sampled items in B[v] as false;
  */
 final class SplitOldAndNewNeighbors implements BiLongConsumer {
+
+    static final class Factory {
+        private final int sampledK;
+        private final SplittableRandom random;
+        private final ProgressTracker progressTracker;
+
+        Factory(
+            int sampledK,
+            SplittableRandom random,
+            ProgressTracker progressTracker
+        ) {
+            this.sampledK = sampledK;
+            this.random = random;
+            this.progressTracker = progressTracker;
+        }
+
+        SplitOldAndNewNeighbors create(
+            Neighbors neighbors,
+            HugeObjectArray<LongArrayList> allOldNeighbors,
+            HugeObjectArray<LongArrayList> allNewNeighbors
+        ) {
+            return new SplitOldAndNewNeighbors(
+                neighbors,
+                allOldNeighbors,
+                allNewNeighbors,
+                sampledK,
+                random,
+                progressTracker
+            );
+        }
+    }
+
     private final SplittableRandom random;
     private final Neighbors neighbors;
     private final HugeObjectArray<LongArrayList> allOldNeighbors;
@@ -44,18 +76,18 @@ final class SplitOldAndNewNeighbors implements BiLongConsumer {
     private final ProgressTracker progressTracker;
 
     SplitOldAndNewNeighbors(
-        SplittableRandom random,
         Neighbors neighbors,
         HugeObjectArray<LongArrayList> allOldNeighbors,
         HugeObjectArray<LongArrayList> allNewNeighbors,
         int sampledK,
+        SplittableRandom random,
         ProgressTracker progressTracker
     ) {
-        this.random = random;
         this.neighbors = neighbors;
         this.allOldNeighbors = allOldNeighbors;
         this.allNewNeighbors = allNewNeighbors;
         this.sampledK = sampledK;
+        this.random = random;
         this.progressTracker = progressTracker;
     }
 

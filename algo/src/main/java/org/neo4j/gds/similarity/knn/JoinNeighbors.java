@@ -28,6 +28,55 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import java.util.SplittableRandom;
 
 final class JoinNeighbors implements Runnable {
+
+    static class Factory {
+        private final SimilarityFunction similarityFunction;
+        private final int sampledK;
+        private final double perturbationRate;
+        private final int randomJoins;
+        private final ProgressTracker progressTracker;
+
+        Factory(
+            SimilarityFunction similarityFunction,
+            int sampledK,
+            double perturbationRate,
+            int randomJoins,
+            ProgressTracker progressTracker
+        ) {
+            this.similarityFunction = similarityFunction;
+            this.sampledK = sampledK;
+            this.perturbationRate = perturbationRate;
+            this.randomJoins = randomJoins;
+            this.progressTracker = progressTracker;
+        }
+        JoinNeighbors create(
+            Partition partition,
+            Neighbors allNeighbors,
+            HugeObjectArray<LongArrayList> allOldNeighbors,
+            HugeObjectArray<LongArrayList> allNewNeighbors,
+            HugeObjectArray<LongArrayList> allReverseOldNeighbors,
+            HugeObjectArray<LongArrayList> allReverseNewNeighbors,
+            NeighborFilter neighborFilter,
+            SplittableRandom random
+        ) {
+            return new JoinNeighbors(
+                partition,
+                allNeighbors,
+                allOldNeighbors,
+                allNewNeighbors,
+                allReverseOldNeighbors,
+                allReverseNewNeighbors,
+                neighborFilter,
+                random,
+                similarityFunction,
+                sampledK,
+                perturbationRate,
+                randomJoins,
+                progressTracker
+            );
+        }
+    }
+
     private final SplittableRandom random;
     private final SimilarityFunction similarityFunction;
     private final NeighborFilter neighborFilter;
@@ -46,18 +95,18 @@ final class JoinNeighbors implements Runnable {
 
 
     JoinNeighbors(
-        SplittableRandom random,
-        SimilarityFunction similarityFunction,
-        NeighborFilter neighborFilter,
+        Partition partition,
         Neighbors allNeighbors,
         HugeObjectArray<LongArrayList> allOldNeighbors,
         HugeObjectArray<LongArrayList> allNewNeighbors,
         HugeObjectArray<LongArrayList> allReverseOldNeighbors,
         HugeObjectArray<LongArrayList> allReverseNewNeighbors,
+        NeighborFilter neighborFilter,
+        SplittableRandom random,
+        SimilarityFunction similarityFunction,
         int sampledK,
         double perturbationRate,
         int randomJoins,
-        Partition partition,
         ProgressTracker progressTracker
     ) {
         this.random = random;

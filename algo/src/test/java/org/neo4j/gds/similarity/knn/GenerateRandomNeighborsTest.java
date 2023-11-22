@@ -64,15 +64,15 @@ class GenerateRandomNeighborsTest extends RandomNodeCountAndKValues {
 
         var random = new SplittableRandom();
         var generateRandomNeighbors = new GenerateRandomNeighbors(
+            Partition.of(0, nodeCount),
+            new Neighbors(allNeighbors),
             new UniformKnnSampler(random, nodeCount),
+            new KnnNeighborFilter(nodeCount),
             random,
             similarityFunction,
-            new KnnNeighborFilter(nodeCount),
-            new Neighbors(allNeighbors),
+            NeighbourConsumers.no_op,
             k,
-            Partition.of(0, nodeCount),
-            ProgressTracker.NULL_TRACKER,
-            NeighbourConsumers.no_op
+            ProgressTracker.NULL_TRACKER
         );
 
         generateRandomNeighbors.run();

@@ -441,19 +441,19 @@ class KnnTest {
         });
 
         var joinNeighbors = new JoinNeighbors(
-            random,
-            similarityFunction,
-            new KnnNeighborFilter(graph.nodeCount()),
+            Partition.of(0, 1),
             new Neighbors(allNeighbors),
             allOldNeighbors,
             allNewNeighbors,
             HugeObjectArray.newArray(LongArrayList.class, graph.nodeCount()),
             HugeObjectArray.newArray(LongArrayList.class, graph.nodeCount()),
+            new KnnNeighborFilter(graph.nodeCount()),
+            random,
+            similarityFunction,
             1,
             perturbationRate,
             0,
             // simplifying the test by only running over a single node
-            Partition.of(0, 1),
             ProgressTracker.NULL_TRACKER
         );
 

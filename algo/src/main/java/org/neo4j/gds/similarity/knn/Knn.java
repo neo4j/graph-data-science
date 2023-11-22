@@ -84,12 +84,12 @@ public class Knn extends Algorithm<KnnResult> {
     private final int minBatchSize;
     private final NeighborFilterFactory neighborFilterFactory;
     private final ExecutorService executorService;
-    private final SimilarityFunction similarityFunction;
-    private final NeighbourConsumers neighborConsumers;
     private final SplittableRandom splittableRandom;
     private final KnnSampler.Factory samplerFactory;
-    private final K k;
-    private final NeighborJoiningParameters neighborJoiningParameters;
+    private final JoinNeighbors.Factory joinNeighborsFactory;
+    private final GenerateRandomNeighbors.Factory generateRandomNeighborsFactory;
+    private final SplitOldAndNewNeighbors.Factory splitOldAndNewNeighborsFactory;
+    private final long updateThreshold;
 
     public Knn(
         ProgressTracker progressTracker,
@@ -111,16 +111,32 @@ public class Knn extends Algorithm<KnnResult> {
         this.graph = graph;
         this.concurrency = concurrency;
         this.maxIterations = maxIterations;
-        this.k = k;
         this.similarityCutoff = similarityCutoff;
         this.minBatchSize = minBatchSize;
-        this.neighborJoiningParameters = neighborJoiningParameters;
-        this.similarityFunction = similarityFunction;
         this.neighborFilterFactory = neighborFilterFactory;
         this.executorService = executorService;
-        this.neighborConsumers = neighborConsumers;
+
+        this.updateThreshold = k.updateThreshold;
 
         this.splittableRandom = randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
+        this.generateRandomNeighborsFactory = new GenerateRandomNeighbors.Factory(
+            similarityFunction,
+            neighborConsumers,
+            k.value,
+            progressTracker
+        );
+        this.splitOldAndNewNeighborsFactory = new SplitOldAndNewNeighbors.Factory(
+            k.sampledValue,
+            splittableRandom,
+            progressTracker
+        );
+        this.joinNeighborsFactory = new JoinNeighbors.Factory(
+            similarityFunction,
+            k.sampledValue,
+            neighborJoiningParameters.perturbationRate,
+            neighborJoiningParameters.randomJoins,
+            progressTracker
+        );
         switch (initialSamplerType) {
             case UNIFORM:
                 this.samplerFactory = new UniformKnnSampler.Factory(graph.nodeCount());
@@ -154,7 +170,7 @@ public class Knn extends Algorithm<KnnResult> {
         progressTracker.beginSubTask();
         for (; iteration < maxIterations; iteration++) {
             updateCount = iteration(neighbors);
-            if (updateCount <= k.updateThreshold) {
+            if (updateCount <= updateThreshold) {
                 iteration++;
                 didConverge = true;
                 break;
@@ -196,16 +212,12 @@ public class Knn extends Algorithm<KnnResult> {
             graph.nodeCount(),
             partition -> {
                 var localRandom = splittableRandom.split();
-                return new GenerateRandomNeighbors(
-                    samplerFactory.create(localRandom),
-                    localRandom,
-                    similarityFunction,
-                    neighborFilterFactory.create(),
-                    neighbors,
-                    k.value,
+                return generateRandomNeighborsFactory.create(
                     partition,
-                    progressTracker,
-                    neighborConsumers
+                    neighbors,
+                    samplerFactory.create(localRandom),
+                    neighborFilterFactory.create(),
+                    localRandom
                 );
             },
             Optional.of(minBatchSize)
@@ -229,13 +241,10 @@ public class Knn extends Algorithm<KnnResult> {
         var allNewNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount);
 
         progressTracker.beginSubTask();
-        ParallelUtil.readParallel(concurrency, nodeCount, executorService, new SplitOldAndNewNeighbors(
-            splittableRandom,
+        ParallelUtil.readParallel(concurrency, nodeCount, executorService, splitOldAndNewNeighborsFactory.create(
             neighbors,
             allOldNeighbors,
-            allNewNeighbors,
-            k.sampledValue,
-            progressTracker
+            allNewNeighbors
         ));
         progressTracker.endSubTask();
 
@@ -258,20 +267,15 @@ public class Knn extends Algorithm<KnnResult> {
         var neighborsJoiners = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,
-            partition -> new JoinNeighbors(
-                splittableRandom.split(),
-                similarityFunction,
-                neighborFilterFactory.create(),
+            partition -> joinNeighborsFactory.create(
+                partition,
                 neighbors,
                 allOldNeighbors,
                 allNewNeighbors,
                 reverseOldNeighbors,
                 reverseNewNeighbors,
-                k.sampledValue,
-                neighborJoiningParameters.perturbationRate,
-                neighborJoiningParameters.randomJoins,
-                partition,
-                progressTracker
+                neighborFilterFactory.create(),
+                splittableRandom.split()
             ),
             Optional.of(minBatchSize)
         );
