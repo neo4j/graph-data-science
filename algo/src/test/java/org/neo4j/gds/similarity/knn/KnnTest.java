@@ -448,11 +448,11 @@ class KnnTest {
             HugeObjectArray.newArray(LongArrayList.class, graph.nodeCount()),
             HugeObjectArray.newArray(LongArrayList.class, graph.nodeCount()),
             new KnnNeighborFilter(graph.nodeCount()),
-            random,
             similarityFunction,
             1,
             perturbationRate,
             0,
+            random,
             // simplifying the test by only running over a single node
             ProgressTracker.NULL_TRACKER
         );

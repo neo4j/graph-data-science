@@ -81,7 +81,7 @@ class ApproximateLinkPredictionTest {
     }
 
     @ParameterizedTest
-    @CsvSource(value = {"1, 59, 3", "2, 96, 2"})
+    @CsvSource(value = {"1, 54, 3", "2, 90, 2"})
     void shouldPredictWithTopK(int topK, long expectedLinksConsidered, int ranIterations) {
         var modelData = ImmutableLogisticRegressionData.of(
             2,
@@ -101,7 +101,7 @@ class ApproximateLinkPredictionTest {
             LPNodeFilter.of(graphN, graphN),
             LPNodeFilter.of(graphN, graphN),
             ImmutableKnnBaseConfig.builder()
-                .randomSeed(42L)
+                .randomSeed(1337L)
                 .concurrency(1)
                 .randomJoins(2)
                 .maxIterations(4)
@@ -176,7 +176,7 @@ class ApproximateLinkPredictionTest {
                 LPNodeFilter.of(graphN, graphN),
                 LPNodeFilter.of(graphN, graphN),
                 ImmutableKnnBaseConfig.builder()
-                    .randomSeed(42L)
+                    .randomSeed(1337L)
                     .concurrency(1)
                     .randomJoins(10)
                     .maxIterations(10)

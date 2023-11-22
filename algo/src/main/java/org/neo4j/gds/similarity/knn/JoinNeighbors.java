@@ -34,6 +34,7 @@ final class JoinNeighbors implements Runnable {
         private final int sampledK;
         private final double perturbationRate;
         private final int randomJoins;
+        private final SplittableRandom splittableRandom;
         private final ProgressTracker progressTracker;
 
         Factory(
@@ -41,12 +42,14 @@ final class JoinNeighbors implements Runnable {
             int sampledK,
             double perturbationRate,
             int randomJoins,
+            SplittableRandom splittableRandom,
             ProgressTracker progressTracker
         ) {
             this.similarityFunction = similarityFunction;
             this.sampledK = sampledK;
             this.perturbationRate = perturbationRate;
             this.randomJoins = randomJoins;
+            this.splittableRandom = splittableRandom;
             this.progressTracker = progressTracker;
         }
         JoinNeighbors create(
@@ -56,8 +59,7 @@ final class JoinNeighbors implements Runnable {
             HugeObjectArray<LongArrayList> allNewNeighbors,
             HugeObjectArray<LongArrayList> allReverseOldNeighbors,
             HugeObjectArray<LongArrayList> allReverseNewNeighbors,
-            NeighborFilter neighborFilter,
-            SplittableRandom random
+            NeighborFilter neighborFilter
         ) {
             return new JoinNeighbors(
                 partition,
@@ -67,11 +69,11 @@ final class JoinNeighbors implements Runnable {
                 allReverseOldNeighbors,
                 allReverseNewNeighbors,
                 neighborFilter,
-                random,
                 similarityFunction,
                 sampledK,
                 perturbationRate,
                 randomJoins,
+                splittableRandom.split(),
                 progressTracker
             );
         }
@@ -93,7 +95,6 @@ final class JoinNeighbors implements Runnable {
     private final double perturbationRate;
     private long updateCount;
 
-
     JoinNeighbors(
         Partition partition,
         Neighbors allNeighbors,
@@ -102,11 +103,11 @@ final class JoinNeighbors implements Runnable {
         HugeObjectArray<LongArrayList> allReverseOldNeighbors,
         HugeObjectArray<LongArrayList> allReverseNewNeighbors,
         NeighborFilter neighborFilter,
-        SplittableRandom random,
         SimilarityFunction similarityFunction,
         int sampledK,
         double perturbationRate,
         int randomJoins,
+        SplittableRandom random,
         ProgressTracker progressTracker
     ) {
         this.random = random;

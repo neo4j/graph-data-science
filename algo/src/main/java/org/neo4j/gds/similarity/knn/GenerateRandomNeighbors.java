@@ -34,17 +34,20 @@ final class GenerateRandomNeighbors implements Runnable {
         private final SimilarityFunction similarityFunction;
         private final NeighbourConsumers neighbourConsumers;
         private final int boundedK;
+        private final SplittableRandom random;
         private final ProgressTracker progressTracker;
 
         Factory(
             SimilarityFunction similarityFunction,
             NeighbourConsumers neighbourConsumers,
             int boundedK,
+            SplittableRandom random,
             ProgressTracker progressTracker
         ) {
             this.similarityFunction = similarityFunction;
             this.neighbourConsumers = neighbourConsumers;
             this.boundedK = boundedK;
+            this.random = random;
             this.progressTracker = progressTracker;
         }
 
@@ -52,18 +55,17 @@ final class GenerateRandomNeighbors implements Runnable {
             Partition partition,
             Neighbors neighbors,
             KnnSampler sampler,
-            NeighborFilter neighborFilter,
-            SplittableRandom random
+            NeighborFilter neighborFilter
         ) {
             return new GenerateRandomNeighbors(
                 partition,
                 neighbors,
                 sampler,
                 neighborFilter,
-                random,
                 similarityFunction,
                 neighbourConsumers,
                 boundedK,
+                random.split(),
                 progressTracker
             );
         }
@@ -84,10 +86,10 @@ final class GenerateRandomNeighbors implements Runnable {
         Neighbors neighbors,
         KnnSampler sampler,
         NeighborFilter neighborFilter,
-        SplittableRandom random,
         SimilarityFunction similarityFunction,
         NeighbourConsumers neighbourConsumers,
         int boundedK,
+        SplittableRandom random,
         ProgressTracker progressTracker
     ) {
         this.partition = partition;

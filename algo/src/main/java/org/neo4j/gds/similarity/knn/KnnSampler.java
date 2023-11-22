@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 public interface KnnSampler {
 
     interface Factory {
-        KnnSampler create(SplittableRandom random);
+        KnnSampler create();
     }
 
     long[] sample(

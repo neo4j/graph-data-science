@@ -84,7 +84,6 @@ public class Knn extends Algorithm<KnnResult> {
     private final int minBatchSize;
     private final NeighborFilterFactory neighborFilterFactory;
     private final ExecutorService executorService;
-    private final SplittableRandom splittableRandom;
     private final KnnSampler.Factory samplerFactory;
     private final JoinNeighbors.Factory joinNeighborsFactory;
     private final GenerateRandomNeighbors.Factory generateRandomNeighborsFactory;
@@ -118,11 +117,12 @@ public class Knn extends Algorithm<KnnResult> {
 
         this.updateThreshold = k.updateThreshold;
 
-        this.splittableRandom = randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
+        var splittableRandom = randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
         this.generateRandomNeighborsFactory = new GenerateRandomNeighbors.Factory(
             similarityFunction,
             neighborConsumers,
             k.value,
+            splittableRandom,
             progressTracker
         );
         this.splitOldAndNewNeighborsFactory = new SplitOldAndNewNeighbors.Factory(
@@ -135,14 +135,15 @@ public class Knn extends Algorithm<KnnResult> {
             k.sampledValue,
             neighborJoiningParameters.perturbationRate,
             neighborJoiningParameters.randomJoins,
+            splittableRandom,
             progressTracker
         );
         switch (initialSamplerType) {
             case UNIFORM:
-                this.samplerFactory = new UniformKnnSampler.Factory(graph.nodeCount());
+                this.samplerFactory = new UniformKnnSampler.Factory(graph.nodeCount(), splittableRandom);
                 break;
             case RANDOMWALK:
-                this.samplerFactory = new RandomWalkKnnSampler.Factory(graph, randomSeed, k.value);
+                this.samplerFactory = new RandomWalkKnnSampler.Factory(graph, randomSeed, k.value, splittableRandom);
                 break;
             default:
                 throw new IllegalStateException("Invalid KnnSampler");
@@ -210,16 +211,12 @@ public class Knn extends Algorithm<KnnResult> {
         var randomNeighborGenerators = PartitionUtils.rangePartition(
             concurrency,
             graph.nodeCount(),
-            partition -> {
-                var localRandom = splittableRandom.split();
-                return generateRandomNeighborsFactory.create(
-                    partition,
-                    neighbors,
-                    samplerFactory.create(localRandom),
-                    neighborFilterFactory.create(),
-                    localRandom
-                );
-            },
+            partition -> generateRandomNeighborsFactory.create(
+                partition,
+                neighbors,
+                samplerFactory.create(),
+                neighborFilterFactory.create()
+            ),
             Optional.of(minBatchSize)
         );
 
@@ -274,8 +271,7 @@ public class Knn extends Algorithm<KnnResult> {
                 allNewNeighbors,
                 reverseOldNeighbors,
                 reverseNewNeighbors,
-                neighborFilterFactory.create(),
-                splittableRandom.split()
+                neighborFilterFactory.create()
             ),
             Optional.of(minBatchSize)
         );

@@ -61,13 +61,15 @@ class UniformKnnSampler implements KnnSampler {
 
     static class Factory implements KnnSampler.Factory {
         private final long nodeCount;
+        private final SplittableRandom random;
 
-        Factory(long nodeCount) {
+        Factory(long nodeCount, SplittableRandom random) {
             this.nodeCount = nodeCount;
+            this.random = random;
         }
 
-        public KnnSampler create(SplittableRandom random) {
-            return new UniformKnnSampler(random, nodeCount);
+        public KnnSampler create() {
+            return new UniformKnnSampler(random.split(), nodeCount);
         }
     }
 }
