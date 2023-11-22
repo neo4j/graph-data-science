@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.algorithms.centrality;
 
-import com.carrotsearch.hppc.LongDoubleScatterMap;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
@@ -38,6 +37,7 @@ import org.neo4j.gds.pagerank.PageRankAlgorithmFactory;
 import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.influenceMaximization.CELFAlgorithmFactory;
+import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationBaseConfig;
 
 import java.util.Optional;
@@ -104,7 +104,7 @@ public class CentralityAlgorithmsFacade {
         );
     }
 
-    AlgorithmComputationResult<LongDoubleScatterMap> CELF(
+    AlgorithmComputationResult<CELFResult> celf(
         String graphName,
         InfluenceMaximizationBaseConfig config
 

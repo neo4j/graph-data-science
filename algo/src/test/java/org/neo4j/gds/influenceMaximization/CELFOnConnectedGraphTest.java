@@ -102,7 +102,7 @@ class CELFOnConnectedGraphTest {
         CELF celf = new CELF(graph, 5, 0.2, 3, DefaultPool.INSTANCE, 2, 0, DEFAULT_BATCH_SIZE,
             ProgressTracker.EmptyProgressTracker.NULL_TRACKER
         );
-        var celfResult = celf.compute();
+        var celfResult = celf.compute().seedSetNodes();
         var softAssertions = new SoftAssertions();
 
         softAssertions

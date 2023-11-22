@@ -19,14 +19,13 @@
  */
 package org.neo4j.gds.influenceMaximization;
 
-import com.carrotsearch.hppc.LongDoubleScatterMap;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.centrality.celf.CELFStatsResult;
 
-import java.util.Arrays;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
@@ -38,7 +37,7 @@ import static org.neo4j.gds.influenceMaximization.CELFStreamProc.DESCRIPTION;
     description = DESCRIPTION,
     executionMode = STATS
 )
-public class CELFStatsSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap, InfluenceMaximizationStatsConfig, Stream<StatsResult>, CELFAlgorithmFactory<InfluenceMaximizationStatsConfig>> {
+public class CELFStatsSpec implements AlgorithmSpec<CELF, CELFResult, InfluenceMaximizationStatsConfig, Stream<CELFStatsResult>, CELFAlgorithmFactory<InfluenceMaximizationStatsConfig>> {
     @Override
     public String name() {
         return "CELFStats";
@@ -55,18 +54,17 @@ public class CELFStatsSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap, 
     }
 
     @Override
-    public ComputationResultConsumer<CELF, LongDoubleScatterMap, InfluenceMaximizationStatsConfig, Stream<StatsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<CELF, CELFResult, InfluenceMaximizationStatsConfig, Stream<CELFStatsResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            var celfSpreadSet = computationResult.result();
-            if (celfSpreadSet.isEmpty()) {
+            var celfResult = computationResult.result();
+            if (celfResult.isEmpty()) {
                 return Stream.empty();
             }
 
-            var statsBuilder = StatsResult.builder();
+            var statsBuilder = CELFStatsResult.builder();
 
-            var celfSpreadSetValues = celfSpreadSet.get().values;
             var statsResult = statsBuilder
-                .withTotalSpread(Arrays.stream(celfSpreadSetValues).sum())
+                .withTotalSpread(celfResult.map(res -> res.totalSpread()).orElse(0D))
                 .withNodeCount(computationResult.graph().nodeCount())
                 .withComputeMillis(computationResult.computeMillis())
                 .withConfig(computationResult.config())

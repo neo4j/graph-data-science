@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.influenceMaximization;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.centrality.celf.CELFStatsResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -31,20 +31,22 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.BaseProc.ESTIMATE_DESCRIPTION;
+import static org.neo4j.gds.BaseProc.STATS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class CELFStatsProc extends BaseProc {
+public class CELFStatsProc {
+
+    @Context
+    public GraphDataScience facade;
 
     @Procedure(value = "gds.influenceMaximization.celf.stats", mode = READ)
     @Description(STATS_DESCRIPTION)
-    public Stream<StatsResult> stats(
+    public Stream<CELFStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new CELFStatsSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.centrality().celfStats(graphName, configuration);
     }
 
     @Procedure(name = "gds.influenceMaximization.celf.stats.estimate", mode = READ)
@@ -53,13 +55,7 @@ public class CELFStatsProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        var statsSpec = new CELFStatsSpec();
-
-        return new MemoryEstimationExecutor<>(
-            statsSpec,
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.centrality().celfStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(
@@ -70,18 +66,18 @@ public class CELFStatsProc extends BaseProc {
     @Description(STATS_DESCRIPTION)
     @Internal
     @Deprecated
-    public Stream<StatsResult> betaStats(
+    public Stream<CELFStatsResult> betaStats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
+        facade
             .deprecatedProcedures().called("gds.beta.influenceMaximization.celf.stats");
 
-        executionContext()
+        facade
             .log()
             .warn(
                 "Procedure `gds.beta.influenceMaximization.celf.stats has been deprecated, please use `gds.influenceMaximization.celf.stats`.");
+
         return stats(graphName, configuration);
     }
 
@@ -97,11 +93,10 @@ public class CELFStatsProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        executionContext()
-            .metricsFacade()
+        facade
             .deprecatedProcedures().called("gds.beta.influenceMaximization.celf.stats.estimate");
 
-        executionContext()
+        facade
             .log()
             .warn(
                 "Procedure `gds.beta.influenceMaximization.celf.stats.estimate has been deprecated, please use `gds.influenceMaximization.celf.stats.estimate`.");

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.influenceMaximization;
 
-import com.carrotsearch.hppc.LongDoubleScatterMap;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -40,7 +39,7 @@ import static org.neo4j.gds.influenceMaximization.CELFStreamProc.DESCRIPTION;
     description = DESCRIPTION,
     executionMode = STREAM
 )
-public class CELFStreamSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap, InfluenceMaximizationStreamConfig, Stream<CELFStreamResult>, CELFAlgorithmFactory<InfluenceMaximizationStreamConfig>> {
+public class CELFStreamSpec implements AlgorithmSpec<CELF, CELFResult, InfluenceMaximizationStreamConfig, Stream<CELFStreamResult>, CELFAlgorithmFactory<InfluenceMaximizationStreamConfig>> {
 
     @Override
     public String name() {
@@ -58,17 +57,19 @@ public class CELFStreamSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap,
     }
 
     @Override
-    public ComputationResultConsumer<CELF, LongDoubleScatterMap, InfluenceMaximizationStreamConfig, Stream<CELFStreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<CELF, CELFResult, InfluenceMaximizationStreamConfig, Stream<CELFStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),
             () -> computationResult.result()
                 .map(result -> {
                     var graph = computationResult.graph();
-                    return LongStream.of(result.keys().toArray())
+                    var celfSeedSet = result.seedSetNodes();
+                    long[] keySet = celfSeedSet.keys().toArray();
+                    return LongStream.of(keySet)
                         .mapToObj(node -> new CELFStreamResult(
                             graph.toOriginalNodeId(node),
-                            result.getOrDefault(node, 0)
+                            celfSeedSet.getOrDefault(node, 0)
                         ));
                 })
                 .orElseGet(Stream::empty)

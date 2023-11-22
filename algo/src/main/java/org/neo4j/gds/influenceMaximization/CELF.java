@@ -22,9 +22,9 @@ package org.neo4j.gds.influenceMaximization;
 import com.carrotsearch.hppc.LongDoubleScatterMap;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeIntArray;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
@@ -32,7 +32,7 @@ import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
-public class CELF extends Algorithm<LongDoubleScatterMap> {
+public class CELF extends Algorithm<CELFResult> {
 
     private final long seedSetCount;
     private final double propagationProbability;
@@ -90,7 +90,7 @@ public class CELF extends Algorithm<LongDoubleScatterMap> {
     }
 
     @Override
-    public LongDoubleScatterMap compute() {
+    public CELFResult compute() {
         //Find the first node with greedy algorithm
         progressTracker.beginSubTask();
         var firstSeedNode = greedyPart();
@@ -98,7 +98,7 @@ public class CELF extends Algorithm<LongDoubleScatterMap> {
         lazyForwardPart(firstSeedNode);
         progressTracker.endSubTask();
 
-        return seedSetNodes;
+        return new CELFResult(seedSetNodes);
     }
 
     private long greedyPart() {

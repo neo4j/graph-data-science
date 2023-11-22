@@ -19,8 +19,12 @@
  */
 package org.neo4j.gds.procedures.centrality;
 
-import com.carrotsearch.hppc.LongDoubleScatterMap;
+import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
+import org.neo4j.gds.algorithms.centrality.specificfields.CELFSpecificFields;
+import org.neo4j.gds.influenceMaximization.CELFResult;
+import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
+import org.neo4j.gds.procedures.centrality.celf.CELFStatsResult;
 import org.neo4j.gds.procedures.centrality.celf.CELFStreamResult;
 
 import java.util.stream.LongStream;
@@ -32,18 +36,30 @@ final class CELFComputationalResultTransformer {
 
 
     static  Stream<CELFStreamResult> toStreamResult(
-        StreamComputationResult<LongDoubleScatterMap> computationResult
+        StreamComputationResult<CELFResult> computationResult
     ) {
         return computationResult.result().map(result -> {
 
             var graph = computationResult.graph();
-            return LongStream.of(result.keys().toArray())
+            var celfSeedSet = result.seedSetNodes();
+            long[] keySet = celfSeedSet.keys().toArray();
+            return LongStream.of(keySet)
                 .mapToObj(node -> new CELFStreamResult(
                     graph.toOriginalNodeId(node),
-                    result.getOrDefault(node, 0)
+                    celfSeedSet.getOrDefault(node, 0)
                 ));
 
         }).orElseGet(Stream::empty);
+    }
+
+    static CELFStatsResult toStatsResult(
+        StatsResult<CELFSpecificFields> statsResult,
+        InfluenceMaximizationStatsConfig configuration
+    ) {
+        return new CELFStatsResult(statsResult.computeMillis(),
+            statsResult.algorithmSpecificFields().totalSpread(),
+            statsResult.algorithmSpecificFields().nodeCount(),
+            configuration.toMap());
     }
 
 

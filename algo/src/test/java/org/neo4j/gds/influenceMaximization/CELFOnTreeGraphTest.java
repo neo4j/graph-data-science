@@ -142,7 +142,7 @@ class CELFOnTreeGraphTest {
             DEFAULT_BATCH_SIZE,
             ProgressTracker.EmptyProgressTracker.NULL_TRACKER
         );
-        var celfResult = celf.compute();
+        var celfResult = celf.compute().seedSetNodes();
         var softAssertions = new SoftAssertions();
 
         softAssertions

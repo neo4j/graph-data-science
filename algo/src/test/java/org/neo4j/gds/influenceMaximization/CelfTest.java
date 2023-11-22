@@ -44,7 +44,18 @@ import static org.assertj.core.api.Assertions.assertThat;
              .build()
              .generate();
 
-         var celf = new CELF(graph, seedSize, 0.1, 3, DefaultPool.INSTANCE, 1, 10, 5, ProgressTracker.NULL_TRACKER).compute();
+         var celf = new CELF(
+             graph,
+             seedSize,
+             0.1,
+             3,
+             DefaultPool.INSTANCE,
+             1,
+             10,
+             5,
+             ProgressTracker.NULL_TRACKER
+         ).compute().seedSetNodes();
+         
          for (var a : celf) {
              assertThat(a.value).isNotNegative();
          }

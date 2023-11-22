@@ -31,7 +31,6 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -44,7 +43,7 @@ import static org.neo4j.gds.influenceMaximization.CELFStreamProc.DESCRIPTION;
     description = DESCRIPTION,
     executionMode = WRITE_NODE_PROPERTY
 )
-public class CELFWriteSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap, InfluenceMaximizationWriteConfig, Stream<WriteResult>, CELFAlgorithmFactory<InfluenceMaximizationWriteConfig>> {
+public class CELFWriteSpec implements AlgorithmSpec<CELF, CELFResult, InfluenceMaximizationWriteConfig, Stream<WriteResult>, CELFAlgorithmFactory<InfluenceMaximizationWriteConfig>> {
     @Override
     public String name() {
         return "CELFWrite";
@@ -61,7 +60,7 @@ public class CELFWriteSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap, 
     }
 
     @Override
-    public ComputationResultConsumer<CELF, LongDoubleScatterMap, InfluenceMaximizationWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<CELF, CELFResult, InfluenceMaximizationWriteConfig, Stream<WriteResult>> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>(
             this::resultBuilder,
             computationResult -> List.of(NodeProperty.of(
@@ -72,22 +71,26 @@ public class CELFWriteSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap, 
         );
     }
 
-    private NodePropertyValues nodePropertyValues(ComputationResult<CELF, LongDoubleScatterMap, InfluenceMaximizationWriteConfig> computationResult) {
-        var celfSeedSet = computationResult.result();
-        var graph = computationResult.graph();
+    private NodePropertyValues nodePropertyValues(ComputationResult<CELF, CELFResult, InfluenceMaximizationWriteConfig> computationResult) {
 
-        return new CELFNodeProperties(celfSeedSet.orElseGet(() -> new LongDoubleScatterMap(0)), graph.nodeCount());
+        var celfResult = computationResult.result()
+            .orElseGet(() -> new CELFResult(new LongDoubleScatterMap(0)));
+
+        var nodeCount = computationResult.graph().nodeCount();
+
+        return new CELFNodeProperties(celfResult.seedSetNodes(), nodeCount);
+
     }
 
     private AbstractResultBuilder<WriteResult> resultBuilder(
-        ComputationResult<CELF, LongDoubleScatterMap, InfluenceMaximizationWriteConfig> computationResult,
+        ComputationResult<CELF, CELFResult, InfluenceMaximizationWriteConfig> computationResult,
         ExecutionContext context
     ) {
-        var celfSeedSet = computationResult.result()
-            .orElseGet(() -> new LongDoubleScatterMap(0));
+        var celfResult = computationResult.result();
+
         var graph = computationResult.graph();
         return WriteResult.builder()
-            .withTotalSpread(Arrays.stream(celfSeedSet.values).sum())
+            .withTotalSpread(celfResult.map(res -> res.totalSpread()).orElse(0D))
             .withNodeCount(graph.nodeCount())
             .withComputeMillis(computationResult.computeMillis())
             .withConfig(computationResult.config());

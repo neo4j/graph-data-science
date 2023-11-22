@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.algorithms.centrality;
 
-import com.carrotsearch.hppc.LongDoubleScatterMap;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
@@ -32,6 +31,7 @@ import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
 import org.neo4j.gds.harmonic.HarmonicResult;
 import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
+import org.neo4j.gds.influenceMaximization.CELFResult;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
 
 public class CentralityAlgorithmsStreamBusinessFacade {
@@ -106,12 +106,12 @@ public class CentralityAlgorithmsStreamBusinessFacade {
         return createStreamComputationResult(result);
     }
 
-    public StreamComputationResult<LongDoubleScatterMap> celf(
+    public StreamComputationResult<CELFResult> celf(
         String graphName,
         InfluenceMaximizationStreamConfig config
     ) {
 
-        var result = centralityAlgorithmsFacade.CELF(
+        var result = centralityAlgorithmsFacade.celf(
             graphName,
             config
         );

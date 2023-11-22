@@ -46,6 +46,7 @@ import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStatsConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
+import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
 import org.neo4j.gds.procedures.centrality.alphaharmonic.AlphaHarmonicStreamResult;
 import org.neo4j.gds.procedures.centrality.alphaharmonic.AlphaHarmonicWriteResult;
@@ -55,6 +56,7 @@ import org.neo4j.gds.pagerank.PageRankStreamConfig;
 import org.neo4j.gds.pagerank.PageRankWriteConfig;
 import org.neo4j.gds.procedures.centrality.betacloseness.BetaClosenessCentralityMutateResult;
 import org.neo4j.gds.procedures.centrality.betacloseness.BetaClosenessCentralityWriteResult;
+import org.neo4j.gds.procedures.centrality.celf.CELFStatsResult;
 import org.neo4j.gds.procedures.centrality.celf.CELFStreamResult;
 import org.neo4j.gds.procedures.centrality.pagerank.PageRankComputationalResultTransformer;
 import org.neo4j.gds.procedures.centrality.pagerank.PageRankMutateResult;
@@ -507,11 +509,35 @@ public class CentralityProcedureFacade {
         return CELFComputationalResultTransformer.toStreamResult(computationResult);
     }
 
+    public Stream<CELFStatsResult> celfStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, InfluenceMaximizationStatsConfig::of);
+
+        var statsResult = statsBusinessFacade.celf(
+            graphName,
+            config
+        );
+
+        return Stream.of(CELFComputationalResultTransformer.toStatsResult(statsResult, config));
+    }
+
     public Stream<MemoryEstimateResult> celfStreamEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> configuration
     ) {
         var config = createConfig(configuration, InfluenceMaximizationStreamConfig::of);
+
+        return Stream.of(estimateBusinessFacade.celf(graphNameOrConfiguration, config));
+
+    }
+
+    public Stream<MemoryEstimateResult> celfStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, InfluenceMaximizationStatsConfig::of);
 
         return Stream.of(estimateBusinessFacade.celf(graphNameOrConfiguration, config));
 
