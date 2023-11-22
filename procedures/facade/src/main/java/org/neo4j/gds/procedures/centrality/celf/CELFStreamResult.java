@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.influenceMaximization;
+package org.neo4j.gds.procedures.centrality.celf;
 
-public class StreamResult {
+public class CELFStreamResult {
     public final long nodeId;
     public final double spread;
 
-    StreamResult(long nodeId, double spread) {
+    public CELFStreamResult(long nodeId, double spread) {
         this.nodeId = nodeId;
         this.spread = spread;
     }

@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.influenceMaximization;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.centrality.celf.CELFStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -33,20 +33,20 @@ import java.util.stream.Stream;
 
 import static org.neo4j.procedure.Mode.READ;
 
-public class CELFStreamProc extends BaseProc {
+public class CELFStreamProc {
 
     public static final String DESCRIPTION = "The Cost Effective Lazy Forward (CELF) algorithm aims to find k nodes that maximize the expected spread of influence in the network.";
 
+    @Context
+    public GraphDataScience facade;
+
     @Procedure(name = "gds.influenceMaximization.celf.stream", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<StreamResult> stream(
+    public Stream<CELFStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new CELFStreamSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.centrality().celfStream(graphName, configuration);
     }
 
     @Procedure(name = "gds.influenceMaximization.celf.stream.estimate", mode = READ)
@@ -55,13 +55,7 @@ public class CELFStreamProc extends BaseProc {
         @Name(value = "graphName") Object graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var streamSpec = new CELFStreamSpec();
-
-        return new MemoryEstimationExecutor<>(
-            streamSpec,
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphName, configuration);
+        return facade.centrality().celfStreamEstimate(graphName, configuration);
     }
 
     @Procedure(
@@ -72,15 +66,14 @@ public class CELFStreamProc extends BaseProc {
     @Internal
     @Description(DESCRIPTION)
     @Deprecated
-    public Stream<StreamResult> betaStream(
+    public Stream<CELFStreamResult> betaStream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
+        facade
             .deprecatedProcedures().called("gds.beta.influenceMaximization.celf.stream");
 
-        executionContext()
+        facade
             .log()
             .warn(
                 "Procedure `gds.beta.influenceMaximization.celf.stream has been deprecated, please use `gds.influenceMaximization.celf.stream`.");
@@ -99,12 +92,10 @@ public class CELFStreamProc extends BaseProc {
         @Name(value = "graphName") Object graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
+        facade
             .deprecatedProcedures().called("gds.beta.influenceMaximization.celf.stream.estimate");
 
-        executionContext()
-            .log()
+        facade.log()
             .warn(
                 "Procedure `gds.beta.influenceMaximization.celf.stream.estimate has been deprecated, please use `gds.influenceMaximization.celf.stream.estimate`.");
         return estimate(graphName, configuration);

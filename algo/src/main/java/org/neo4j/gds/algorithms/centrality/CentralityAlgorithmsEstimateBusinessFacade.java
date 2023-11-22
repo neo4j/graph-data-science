@@ -24,9 +24,13 @@ import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityFactory;
 import org.neo4j.gds.degree.DegreeCentralityConfig;
 import org.neo4j.gds.degree.DegreeCentralityFactory;
+import org.neo4j.gds.influenceMaximization.CELFAlgorithmFactory;
+import org.neo4j.gds.influenceMaximization.InfluenceMaximizationBaseConfig;
 import org.neo4j.gds.pagerank.PageRankAlgorithmFactory;
 import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
+
+import java.util.Optional;
 
 public class CentralityAlgorithmsEstimateBusinessFacade {
 
@@ -59,6 +63,18 @@ public class CentralityAlgorithmsEstimateBusinessFacade {
             configuration,
             configuration.relationshipWeightProperty(),
             new DegreeCentralityFactory<>()
+        );
+    }
+
+    public <C extends InfluenceMaximizationBaseConfig> MemoryEstimateResult celf(
+        Object graphNameOrConfiguration,
+        C configuration
+    ) {
+        return algorithmEstimator.estimate(
+            graphNameOrConfiguration,
+            configuration,
+            Optional.empty(),
+            new CELFAlgorithmFactory<>()
         );
     }
 

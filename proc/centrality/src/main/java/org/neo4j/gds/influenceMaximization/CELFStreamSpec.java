@@ -25,6 +25,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.centrality.celf.CELFStreamResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -39,7 +40,7 @@ import static org.neo4j.gds.influenceMaximization.CELFStreamProc.DESCRIPTION;
     description = DESCRIPTION,
     executionMode = STREAM
 )
-public class CELFStreamSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap, InfluenceMaximizationStreamConfig, Stream<StreamResult>, CELFAlgorithmFactory<InfluenceMaximizationStreamConfig>> {
+public class CELFStreamSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap, InfluenceMaximizationStreamConfig, Stream<CELFStreamResult>, CELFAlgorithmFactory<InfluenceMaximizationStreamConfig>> {
 
     @Override
     public String name() {
@@ -57,7 +58,7 @@ public class CELFStreamSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap,
     }
 
     @Override
-    public ComputationResultConsumer<CELF, LongDoubleScatterMap, InfluenceMaximizationStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<CELF, LongDoubleScatterMap, InfluenceMaximizationStreamConfig, Stream<CELFStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),
@@ -65,7 +66,7 @@ public class CELFStreamSpec implements AlgorithmSpec<CELF, LongDoubleScatterMap,
                 .map(result -> {
                     var graph = computationResult.graph();
                     return LongStream.of(result.keys().toArray())
-                        .mapToObj(node -> new StreamResult(
+                        .mapToObj(node -> new CELFStreamResult(
                             graph.toOriginalNodeId(node),
                             result.getOrDefault(node, 0)
                         ));

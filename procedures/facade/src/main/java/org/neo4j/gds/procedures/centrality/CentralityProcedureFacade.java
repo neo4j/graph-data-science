@@ -46,6 +46,7 @@ import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStatsConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
+import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
 import org.neo4j.gds.procedures.centrality.alphaharmonic.AlphaHarmonicStreamResult;
 import org.neo4j.gds.procedures.centrality.alphaharmonic.AlphaHarmonicWriteResult;
 import org.neo4j.gds.pagerank.PageRankMutateConfig;
@@ -54,6 +55,7 @@ import org.neo4j.gds.pagerank.PageRankStreamConfig;
 import org.neo4j.gds.pagerank.PageRankWriteConfig;
 import org.neo4j.gds.procedures.centrality.betacloseness.BetaClosenessCentralityMutateResult;
 import org.neo4j.gds.procedures.centrality.betacloseness.BetaClosenessCentralityWriteResult;
+import org.neo4j.gds.procedures.centrality.celf.CELFStreamResult;
 import org.neo4j.gds.procedures.centrality.pagerank.PageRankComputationalResultTransformer;
 import org.neo4j.gds.procedures.centrality.pagerank.PageRankMutateResult;
 import org.neo4j.gds.procedures.centrality.pagerank.PageRankStatsResult;
@@ -489,6 +491,30 @@ public class CentralityProcedureFacade {
             computationResult,
             config
         ));
+    }
+
+    public Stream<CELFStreamResult> celfStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createStreamConfig(configuration, InfluenceMaximizationStreamConfig::of);
+
+        var computationResult = streamBusinessFacade.celf(
+            graphName,
+            config
+        );
+
+        return CELFComputationalResultTransformer.toStreamResult(computationResult);
+    }
+
+    public Stream<MemoryEstimateResult> celfStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, InfluenceMaximizationStreamConfig::of);
+
+        return Stream.of(estimateBusinessFacade.celf(graphNameOrConfiguration, config));
+
     }
 
     public Stream<CentralityStreamResult> pageRankStream(
