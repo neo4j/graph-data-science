@@ -17,14 +17,29 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.harmonic;
+package org.neo4j.gds.algorithms.centrality.specificfields;
 
-public final class DeprecatedTieredStreamResult {
-    public final long nodeId;
-    public final double centrality;
+import java.util.Map;
 
-    DeprecatedTieredStreamResult(long nodeId, double centrality) {
-        this.nodeId = nodeId;
-        this.centrality = centrality;
+public class AlphaHarmonicSpecificFields  implements  CentralityStatisticsSpecificFields{
+
+    private final Map<String, Object> centralityDistribution;
+    private final  long nodes;
+
+    public static final AlphaHarmonicSpecificFields EMPTY = new AlphaHarmonicSpecificFields(
+        Map.of(),0
+    );
+
+    public AlphaHarmonicSpecificFields(Map<String,Object> centralityDistribution,long nodes){
+        this.centralityDistribution = centralityDistribution;
+        this.nodes=nodes;
+    }
+
+    public long nodes(){
+        return nodes;
+    }
+    @Override
+    public Map<String, Object> centralityDistribution() {
+        return centralityDistribution;
     }
 }

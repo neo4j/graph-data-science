@@ -27,15 +27,36 @@ import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NonReleasingTaskRegistry;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProcedureRunner;
+import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
+import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsFacade;
+import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsWriteBusinessFacade;
+import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
+import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
+import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.catalog.GraphProjectProc;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
+import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.write.NativeNodePropertiesExporterBuilder;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
+import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
+import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
+import org.neo4j.gds.procedures.configparser.ConfigurationParser;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 
 import java.util.HashMap;
@@ -43,6 +64,8 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class DeprecatedTieredHarmonicCentralityWriteProcTest extends BaseProcTest {
 
@@ -74,12 +97,11 @@ class DeprecatedTieredHarmonicCentralityWriteProcTest extends BaseProcTest {
         var query = GdsCypher.call(DEFAULT_GRAPH_NAME)
             .algo("gds.alpha.closeness.harmonic")
             .writeMode()
-            .addParameter("writeProperty", "centralityScore")
             .yields();
 
         var rowCount= runQueryWithRowConsumer(query, row -> {
             assertThat(row.getNumber("nodes")).isEqualTo(5L);
-            assertThat(row.getString("writeProperty")).isEqualTo("centralityScore");
+            assertThat(row.getString("writeProperty")).isEqualTo("centrality");
 
             assertThat((long)row.getNumber("writeMillis")).isGreaterThan(-1L);
             assertThat((long)row.getNumber("computeMillis")).isGreaterThan(-1L);
@@ -93,7 +115,7 @@ class DeprecatedTieredHarmonicCentralityWriteProcTest extends BaseProcTest {
         assertThat(rowCount).isEqualTo(1);
 
 
-        var resultQuery = "MATCH (n) RETURN id(n) AS id, n.centralityScore AS centrality";
+        var resultQuery = "MATCH (n) RETURN id(n) AS id, n.centrality AS centrality";
 
         var resultMap = new HashMap<Long, Double>();
         runQueryWithRowConsumer(resultQuery, row -> {
@@ -121,11 +143,13 @@ class DeprecatedTieredHarmonicCentralityWriteProcTest extends BaseProcTest {
                 taskStore,
                 jobId
             ));
-            proc.nodePropertyExporterBuilder = new NativeNodePropertiesExporterBuilder(
+            var nodePropertyExporterBuilder = new NativeNodePropertiesExporterBuilder(
                 DatabaseTransactionContext.of(proc.databaseService, proc.procedureTransaction)
             );
 
-            proc.write(
+            proc.facade = createFacade(nodePropertyExporterBuilder, proc.taskRegistryFactory);
+
+            proc.alphaWrite(
                 DEFAULT_GRAPH_NAME,
                 Map.of("writeProperty", "myProp")
             );
@@ -138,5 +162,61 @@ class DeprecatedTieredHarmonicCentralityWriteProcTest extends BaseProcTest {
                 "HarmonicCentralityWrite :: WriteNodeProperties"
             );
         });
+    }
+
+    private GraphDataScience createFacade(
+        NodePropertyExporterBuilder nodePropertyExporterBuilder,
+        TaskRegistryFactory taskRegistryFactory
+    ) {
+        var logMock = mock(org.neo4j.gds.logging.Log.class);
+        when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
+
+        final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
+        final AlgorithmMemoryValidationService memoryUsageValidator = new AlgorithmMemoryValidationService(
+            logMock,
+            false
+        );
+
+        var writeBusinessFacade = new CentralityAlgorithmsWriteBusinessFacade(
+            new CentralityAlgorithmsFacade(
+                new AlgorithmRunner(
+                    logMock,
+                    graphStoreCatalogService,
+                    new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
+                    memoryUsageValidator,
+                    RequestScopedDependencies.builder()
+                        .with(DatabaseId.of(db.databaseName()))
+                        .with(new User(getUsername(), false))
+                        .build(),
+                    taskRegistryFactory,
+                    EmptyUserLogRegistryFactory.INSTANCE
+                )
+            ),
+            new WriteNodePropertyService(
+                logMock,
+                nodePropertyExporterBuilder,
+                taskRegistryFactory,
+                TerminationFlag.RUNNING_TRUE
+            )
+        );
+
+        return new GraphDataScience(
+            logMock,
+            null,
+            new CentralityProcedureFacade(
+                ConfigurationParser.EMPTY,
+                new User(getUsername(), false),
+                ProcedureReturnColumns.EMPTY,
+                null,
+                null,
+                null,
+                writeBusinessFacade,
+                null,
+                null
+            ),
+            null,
+            null,
+            DeprecatedProceduresMetricService.PASSTHROUGH
+        );
     }
 }

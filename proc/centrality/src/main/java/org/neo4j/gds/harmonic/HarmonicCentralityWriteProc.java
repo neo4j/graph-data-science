@@ -20,9 +20,9 @@
 package org.neo4j.gds.harmonic;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.centrality.CentralityWriteResult;
+import org.neo4j.gds.procedures.centrality.alphaharmonic.AlphaHarmonicWriteResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -32,50 +32,41 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.harmonic.HarmonicCentralityProc.DESCRIPTION;
+import static org.neo4j.gds.harmonic.HarmonicCentralityCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class HarmonicCentralityWriteProc extends BaseProc {
-
+    
     @Context
-    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
+    public GraphDataScience facade;
 
     @Procedure(value = "gds.closeness.harmonic.write", mode = WRITE)
     @Description(DESCRIPTION)
-    public Stream<WriteResult> write(
+    public Stream<CentralityWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new HarmonicCentralityWriteSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.centrality().harmonicCentralityWrite(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)
     @Internal
     @Procedure(value = "gds.alpha.closeness.harmonic.write", mode = WRITE, deprecatedBy = "gds.closeness.harmonic.write")
     @Description(DESCRIPTION)
-    public Stream<DeprecatedTieredWriteResult> alphaWrite(
+    public Stream<AlphaHarmonicWriteResult> alphaWrite(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
+        facade
             .deprecatedProcedures().called("gds.alpha.closeness.harmonic.write");
 
-        executionContext()
+        facade
             .log()
             .warn("Procedure `gds.alpha.closeness.harmonic.write` has been deprecated, please use `gds.closeness.harmonic.write`.");
-        return new ProcedureExecutor<>(
-            new DeprecatedTieredHarmonicCentralityWriteSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+
+        return facade.centrality().alphaHarmonicCentralityWrite(graphName, configuration);
+
     }
 
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
-    }
 
 }

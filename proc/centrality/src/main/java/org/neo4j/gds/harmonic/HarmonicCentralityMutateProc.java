@@ -19,8 +19,9 @@
  */
 package org.neo4j.gds.harmonic;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.centrality.CentralityMutateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -28,21 +29,21 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.harmonic.HarmonicCentralityProc.DESCRIPTION;
+import static org.neo4j.gds.harmonic.HarmonicCentralityCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class HarmonicCentralityMutateProc extends BaseProc {
+public class HarmonicCentralityMutateProc {
+
+    @Context
+    public GraphDataScience facade;
 
     @Procedure(name = "gds.closeness.harmonic.mutate", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<MutateResult> mutate(
+    public Stream<CentralityMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new HarmonicCentralityMutateSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.centrality().harmonicCentralityMutate(graphName, configuration);
     }
 
 }

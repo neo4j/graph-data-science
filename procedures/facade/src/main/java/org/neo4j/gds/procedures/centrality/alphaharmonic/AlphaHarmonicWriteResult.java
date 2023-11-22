@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.harmonic;
+package org.neo4j.gds.procedures.centrality.alphaharmonic;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
@@ -26,7 +26,7 @@ import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public final class DeprecatedTieredWriteResult {
+public final class AlphaHarmonicWriteResult {
 
     public final long nodes;
     public final String writeProperty;
@@ -35,7 +35,7 @@ public final class DeprecatedTieredWriteResult {
     public final long preProcessingMillis;
     public final Map<String, Object> centralityDistribution;
 
-    DeprecatedTieredWriteResult(
+    public AlphaHarmonicWriteResult(
         long nodes,
         long preProcessingMillis,
         long computeMillis,
@@ -52,10 +52,10 @@ public final class DeprecatedTieredWriteResult {
         this.nodes = nodes;
     }
 
-    static final class Builder extends AbstractCentralityResultBuilder<DeprecatedTieredWriteResult> {
+    public static final class Builder extends AbstractCentralityResultBuilder<AlphaHarmonicWriteResult> {
         public String writeProperty;
 
-         Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+        public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 
@@ -71,8 +71,8 @@ public final class DeprecatedTieredWriteResult {
 
 
         @Override
-        public DeprecatedTieredWriteResult buildResult() {
-            return new DeprecatedTieredWriteResult(
+        public AlphaHarmonicWriteResult buildResult() {
+            return new AlphaHarmonicWriteResult(
                 nodeCount,
                 preProcessingMillis,
                 computeMillis,

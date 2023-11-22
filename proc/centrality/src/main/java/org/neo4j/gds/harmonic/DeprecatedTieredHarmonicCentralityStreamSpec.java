@@ -25,16 +25,17 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.centrality.alphaharmonic.AlphaHarmonicStreamResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.harmonic.HarmonicCentralityProc.DESCRIPTION;
+import static org.neo4j.gds.harmonic.HarmonicCentralityCompanion.DESCRIPTION;
 
 @GdsCallable(name = "gds.alpha.closeness.harmonic.stream", description = DESCRIPTION, executionMode = STREAM)
-public class DeprecatedTieredHarmonicCentralityStreamSpec implements AlgorithmSpec<HarmonicCentrality, HarmonicResult, HarmonicCentralityStreamConfig,Stream<DeprecatedTieredStreamResult>, HarmonicCentralityAlgorithmFactory<HarmonicCentralityStreamConfig>> {
+public class DeprecatedTieredHarmonicCentralityStreamSpec implements AlgorithmSpec<HarmonicCentrality, HarmonicResult, HarmonicCentralityStreamConfig, Stream<AlphaHarmonicStreamResult>, HarmonicCentralityAlgorithmFactory<HarmonicCentralityStreamConfig>> {
 
     @Override
     public String name() {
@@ -52,20 +53,20 @@ public class DeprecatedTieredHarmonicCentralityStreamSpec implements AlgorithmSp
     }
 
     @Override
-    public ComputationResultConsumer<HarmonicCentrality, HarmonicResult, HarmonicCentralityStreamConfig, Stream<DeprecatedTieredStreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<HarmonicCentrality, HarmonicResult, HarmonicCentralityStreamConfig, Stream<AlphaHarmonicStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),
             () -> computationResult.result()
                 .map(result -> {
                     var graph = computationResult.graph();
-                    var centralities = result.centralities();
+                    var centralityScoreProvider = result.centralityScoreProvider();
                     return LongStream
                         .range(IdMap.START_NODE_ID, graph.nodeCount())
                         .mapToObj(nodeId ->
-                            new DeprecatedTieredStreamResult(
+                            new AlphaHarmonicStreamResult(
                                 graph.toOriginalNodeId(nodeId),
-                                centralities.get(nodeId)
+                                centralityScoreProvider.applyAsDouble(nodeId)
                             ));
                 }).orElseGet(Stream::empty));
     }

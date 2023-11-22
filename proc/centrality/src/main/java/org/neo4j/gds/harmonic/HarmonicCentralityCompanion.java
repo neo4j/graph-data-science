@@ -19,20 +19,10 @@
  */
 package org.neo4j.gds.harmonic;
 
-import org.immutables.value.Value;
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.core.CypherMapWrapper;
+public final class HarmonicCentralityCompanion {
+    static final String DESCRIPTION =
+        "Harmonic centrality is a way of detecting nodes that are " +
+        "able to spread information very efficiently through a graph.";
 
-@Configuration
-public interface DeprecatedTieredHarmonicCentralityWriteConfig extends HarmonicCentralityWriteConfig {
-
-    @Override
-    @Value.Default
-    default String writeProperty() {
-        return "centrality";
-    }
-
-    static DeprecatedTieredHarmonicCentralityWriteConfig of(CypherMapWrapper config) {
-        return new DeprecatedTieredHarmonicCentralityWriteConfigImpl(config);
-    }
+    private HarmonicCentralityCompanion() {}
 }

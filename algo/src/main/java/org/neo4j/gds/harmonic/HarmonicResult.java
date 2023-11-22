@@ -19,11 +19,28 @@
  */
 package org.neo4j.gds.harmonic;
 
-import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 
-@ValueClass
-public interface HarmonicResult {
+import java.util.function.LongToDoubleFunction;
 
-    HugeAtomicDoubleArray centralities();
+public class HarmonicResult implements CentralityAlgorithmResult {
+
+    private final HugeAtomicDoubleArray centralities;
+
+    HarmonicResult(HugeAtomicDoubleArray centralities) {
+        this.centralities = centralities;
+    }
+
+    @Override
+    public NodePropertyValues nodePropertyValues() {
+        return NodePropertyValuesAdapter.adapt(centralities);
+    }
+
+    @Override
+    public LongToDoubleFunction centralityScoreProvider() {
+        return centralities::get;
+    }
 }

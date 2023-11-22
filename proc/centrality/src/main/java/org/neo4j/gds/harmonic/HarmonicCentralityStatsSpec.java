@@ -26,15 +26,16 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.centrality.CentralityStatsResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
-import static org.neo4j.gds.harmonic.HarmonicCentralityProc.DESCRIPTION;
+import static org.neo4j.gds.harmonic.HarmonicCentralityCompanion.DESCRIPTION;
 
 @GdsCallable(name = "gds.closeness.harmonic.stats", description = DESCRIPTION, executionMode = STATS)
-public class HarmonicCentralityStatsSpec implements AlgorithmSpec<HarmonicCentrality, HarmonicResult, HarmonicCentralityStatsConfig, Stream<StatsResult>, HarmonicCentralityAlgorithmFactory<HarmonicCentralityStatsConfig>> {
+public class HarmonicCentralityStatsSpec implements AlgorithmSpec<HarmonicCentrality, HarmonicResult, HarmonicCentralityStatsConfig, Stream<CentralityStatsResult>, HarmonicCentralityAlgorithmFactory<HarmonicCentralityStatsConfig>> {
 
     @Override
     public String name() {
@@ -52,20 +53,21 @@ public class HarmonicCentralityStatsSpec implements AlgorithmSpec<HarmonicCentra
     }
 
     @Override
-    public ComputationResultConsumer<HarmonicCentrality, HarmonicResult, HarmonicCentralityStatsConfig, Stream<StatsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<HarmonicCentrality, HarmonicResult, HarmonicCentralityStatsConfig, Stream<CentralityStatsResult>> computationResultConsumer() {
         return new StatsComputationResultConsumer<>(this::resultBuilder);
     }
 
-    private AbstractResultBuilder<StatsResult> resultBuilder(
+    private AbstractResultBuilder<CentralityStatsResult> resultBuilder(
         ComputationResult<HarmonicCentrality, HarmonicResult, HarmonicCentralityStatsConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new StatsResult.Builder(
+        var builder = new CentralityStatsResult.Builder(
             executionContext.returnColumns(),
             computationResult.config().concurrency()
         );
 
-        computationResult.result().ifPresent(result -> builder.withCentralityFunction(result.centralities()::get));
+        computationResult.result()
+            .ifPresent(result -> builder.withCentralityFunction(result.centralityScoreProvider()));
 
         return builder;
     }

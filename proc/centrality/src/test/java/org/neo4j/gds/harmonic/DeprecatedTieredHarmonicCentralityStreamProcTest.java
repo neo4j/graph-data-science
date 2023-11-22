@@ -80,4 +80,6 @@ class DeprecatedTieredHarmonicCentralityStreamProcTest extends BaseProcTest {
         assertThat( resultMap.get(idFunction.of("d")).doubleValue()).isCloseTo(0.25, Offset.offset(1e-5));
         assertThat( resultMap.get(idFunction.of("e")).doubleValue()).isCloseTo(0.25, Offset.offset(1e-5));
     }
+
+
 }
