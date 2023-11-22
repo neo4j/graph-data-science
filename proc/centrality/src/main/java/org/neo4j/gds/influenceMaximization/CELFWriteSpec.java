@@ -29,6 +29,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.centrality.celf.CELFWriteResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -43,7 +44,7 @@ import static org.neo4j.gds.influenceMaximization.CELFStreamProc.DESCRIPTION;
     description = DESCRIPTION,
     executionMode = WRITE_NODE_PROPERTY
 )
-public class CELFWriteSpec implements AlgorithmSpec<CELF, CELFResult, InfluenceMaximizationWriteConfig, Stream<WriteResult>, CELFAlgorithmFactory<InfluenceMaximizationWriteConfig>> {
+public class CELFWriteSpec implements AlgorithmSpec<CELF, CELFResult, InfluenceMaximizationWriteConfig, Stream<CELFWriteResult>, CELFAlgorithmFactory<InfluenceMaximizationWriteConfig>> {
     @Override
     public String name() {
         return "CELFWrite";
@@ -60,7 +61,7 @@ public class CELFWriteSpec implements AlgorithmSpec<CELF, CELFResult, InfluenceM
     }
 
     @Override
-    public ComputationResultConsumer<CELF, CELFResult, InfluenceMaximizationWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<CELF, CELFResult, InfluenceMaximizationWriteConfig, Stream<CELFWriteResult>> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>(
             this::resultBuilder,
             computationResult -> List.of(NodeProperty.of(
@@ -82,14 +83,14 @@ public class CELFWriteSpec implements AlgorithmSpec<CELF, CELFResult, InfluenceM
 
     }
 
-    private AbstractResultBuilder<WriteResult> resultBuilder(
+    private AbstractResultBuilder<CELFWriteResult> resultBuilder(
         ComputationResult<CELF, CELFResult, InfluenceMaximizationWriteConfig> computationResult,
         ExecutionContext context
     ) {
         var celfResult = computationResult.result();
 
         var graph = computationResult.graph();
-        return WriteResult.builder()
+        return CELFWriteResult.builder()
             .withTotalSpread(celfResult.map(res -> res.totalSpread()).orElse(0D))
             .withNodeCount(graph.nodeCount())
             .withComputeMillis(computationResult.computeMillis())

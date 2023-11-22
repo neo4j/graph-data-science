@@ -23,8 +23,10 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.centrality.specificfields.AlphaHarmonicSpecificFields;
+import org.neo4j.gds.algorithms.centrality.specificfields.CELFSpecificFields;
 import org.neo4j.gds.algorithms.centrality.specificfields.CentralityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
+import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.algorithms.centrality.specificfields.PageRankSpecificFields;
 import org.neo4j.gds.algorithms.runner.AlgorithmResultWithTiming;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
@@ -38,6 +40,8 @@ import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankWriteConfig;
 import org.neo4j.gds.harmonic.DeprecatedTieredHarmonicCentralityWriteConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
+import org.neo4j.gds.influenceMaximization.CELFNodeProperties;
+import org.neo4j.gds.influenceMaximization.InfluenceMaximizationWriteConfig;
 import org.neo4j.gds.result.CentralityStatistics;
 
 import java.util.Optional;
@@ -267,6 +271,44 @@ public class CentralityAlgorithmsWriteBusinessFacade {
 
         );
 
+    }
+
+    public NodePropertyWriteResult<CELFSpecificFields> celf(
+        String graphName,
+        InfluenceMaximizationWriteConfig configuration
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> centralityAlgorithmsFacade.celf(graphName, configuration)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        var writeResultBuilder = NodePropertyWriteResult.<CELFSpecificFields>builder()
+            .computeMillis(intermediateResult.computeMilliseconds)
+            .postProcessingMillis(0L)
+            .configuration(configuration);
+
+        algorithmResult.result().ifPresentOrElse(
+            result -> {
+                var nodeCount = algorithmResult.graph().nodeCount();
+                var nodeProperties = new CELFNodeProperties(result.seedSetNodes(), nodeCount);
+                var writeResult = writeNodePropertyService.write(
+                    algorithmResult.graph(),
+                    algorithmResult.graphStore(),
+                    nodeProperties,
+                    configuration.writeConcurrency(),
+                    configuration.writeProperty(),
+                    "CELFWrite",
+                    configuration.arrowConnectionInfo()
+                );
+                writeResultBuilder.writeMillis(writeResult.writeMilliseconds());
+                writeResultBuilder.nodePropertiesWritten(writeResult.nodePropertiesWritten());
+                writeResultBuilder.algorithmSpecificFields(new CELFSpecificFields(result.totalSpread(), nodeCount));
+            },
+            () -> writeResultBuilder.algorithmSpecificFields(CELFSpecificFields.EMPTY)
+        );
+
+        return writeResultBuilder.build();
     }
 
     private <RESULT extends CentralityAlgorithmResult, CONFIG extends AlgoBaseConfig> NodePropertyWriteResult<DefaultCentralitySpecificFields> writeToDatabase(

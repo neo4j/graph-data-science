@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.influenceMaximization;
+package org.neo4j.gds.procedures.centrality.celf;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
-public final class WriteResult {
+public final class CELFWriteResult {
     public final long writeMillis;
     public final long nodePropertiesWritten;
     public final long computeMillis;
@@ -31,7 +31,7 @@ public final class WriteResult {
     public final long nodeCount;
     public final Map<String, Object> configuration;
 
-    private WriteResult(
+    public CELFWriteResult(
         long writeMillis,
         long nodePropertiesWritten,
         long computeMillis,
@@ -51,16 +51,16 @@ public final class WriteResult {
         return new Builder();
     }
 
-    public static class Builder extends AbstractResultBuilder<WriteResult> {
+    public static class Builder extends AbstractResultBuilder<CELFWriteResult> {
         private double totalSpread;
 
-        Builder withTotalSpread(double totalSpread) {
+        public Builder withTotalSpread(double totalSpread) {
             this.totalSpread = totalSpread;
             return this;
         }
 
-        public WriteResult build() {
-            return new WriteResult(
+        public CELFWriteResult build() {
+            return new CELFWriteResult(
                 writeMillis,
                 nodePropertiesWritten,
                 computeMillis,

@@ -19,11 +19,8 @@
  */
 package org.neo4j.gds.influenceMaximization;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.centrality.celf.CELFWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -34,25 +31,23 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.BaseProc.ESTIMATE_DESCRIPTION;
 import static org.neo4j.gds.influenceMaximization.CELFStreamProc.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class CELFWriteProc extends BaseProc {
+public class CELFWriteProc {
 
     @Context
-    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
+    public GraphDataScience facade;
 
     @Procedure(value = "gds.influenceMaximization.celf.write", mode = WRITE)
     @Description(DESCRIPTION)
-    public Stream<WriteResult> write(
+    public Stream<CELFWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new CELFWriteSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.centrality().celfWrite(graphName, configuration);
     }
 
     @Procedure(name = "gds.influenceMaximization.celf.write.estimate", mode = READ)
@@ -61,13 +56,7 @@ public class CELFWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        var writeSpec = new CELFWriteSpec();
-
-        return new MemoryEstimationExecutor<>(
-            writeSpec,
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.centrality().celfMutateEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(
@@ -78,15 +67,14 @@ public class CELFWriteProc extends BaseProc {
     @Description(DESCRIPTION)
     @Internal
     @Deprecated
-    public Stream<WriteResult> betaWrite(
+    public Stream<CELFWriteResult> betaWrite(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
+        facade
             .deprecatedProcedures().called("gds.beta.influenceMaximization.celf.write");
 
-        executionContext()
+        facade
             .log()
             .warn(
                 "Procedure `gds.beta.influenceMaximization.celf.write has been deprecated, please use `gds.influenceMaximization.celf.write`.");
@@ -105,19 +93,14 @@ public class CELFWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        executionContext()
-            .metricsFacade()
+        facade
             .deprecatedProcedures().called("gds.beta.influenceMaximization.celf.write.estimate");
 
-        executionContext()
+        facade
             .log()
             .warn(
                 "Procedure `gds.beta.influenceMaximization.celf.write.estimate has been deprecated, please use `gds.influenceMaximization.celf.write.estimate`.");
         return estimate(graphNameOrConfiguration, algoConfiguration);
     }
 
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
-    }
 }

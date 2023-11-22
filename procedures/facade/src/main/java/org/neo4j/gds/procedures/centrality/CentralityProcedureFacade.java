@@ -49,6 +49,7 @@ import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
+import org.neo4j.gds.influenceMaximization.InfluenceMaximizationWriteConfig;
 import org.neo4j.gds.procedures.centrality.alphaharmonic.AlphaHarmonicStreamResult;
 import org.neo4j.gds.procedures.centrality.alphaharmonic.AlphaHarmonicWriteResult;
 import org.neo4j.gds.pagerank.PageRankMutateConfig;
@@ -60,6 +61,7 @@ import org.neo4j.gds.procedures.centrality.betacloseness.BetaClosenessCentrality
 import org.neo4j.gds.procedures.centrality.celf.CELFMutateResult;
 import org.neo4j.gds.procedures.centrality.celf.CELFStatsResult;
 import org.neo4j.gds.procedures.centrality.celf.CELFStreamResult;
+import org.neo4j.gds.procedures.centrality.celf.CELFWriteResult;
 import org.neo4j.gds.procedures.centrality.pagerank.PageRankComputationalResultTransformer;
 import org.neo4j.gds.procedures.centrality.pagerank.PageRankMutateResult;
 import org.neo4j.gds.procedures.centrality.pagerank.PageRankStatsResult;
@@ -539,15 +541,20 @@ public class CentralityProcedureFacade {
         return Stream.of(CELFComputationalResultTransformer.toMutateResult(mutateResult));
     }
 
-    public Stream<MemoryEstimateResult> celfMutateEstimate(
-        Object graphNameOrConfiguration,
+    public Stream<CELFWriteResult> celfWrite(
+        String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, InfluenceMaximizationMutateConfig::of);
+        var config = createConfig(configuration, InfluenceMaximizationWriteConfig::of);
 
-        return Stream.of(estimateBusinessFacade.celf(graphNameOrConfiguration, config));
+        var writeResult = writeBusinessFacade.celf(
+            graphName,
+            config
+        );
 
+        return Stream.of(CELFComputationalResultTransformer.toWriteResult(writeResult));
     }
+
 
     public Stream<MemoryEstimateResult> celfStreamEstimate(
         Object graphNameOrConfiguration,
@@ -564,6 +571,26 @@ public class CentralityProcedureFacade {
         Map<String, Object> configuration
     ) {
         var config = createConfig(configuration, InfluenceMaximizationStatsConfig::of);
+
+        return Stream.of(estimateBusinessFacade.celf(graphNameOrConfiguration, config));
+
+    }
+
+    public Stream<MemoryEstimateResult> celfMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, InfluenceMaximizationMutateConfig::of);
+
+        return Stream.of(estimateBusinessFacade.celf(graphNameOrConfiguration, config));
+
+    }
+
+    public Stream<MemoryEstimateResult> celfWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, InfluenceMaximizationWriteConfig::of);
 
         return Stream.of(estimateBusinessFacade.celf(graphNameOrConfiguration, config));
 
