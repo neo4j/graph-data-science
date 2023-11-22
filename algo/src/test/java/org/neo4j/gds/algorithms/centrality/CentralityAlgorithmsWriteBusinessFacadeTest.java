@@ -1,4 +1,4 @@
-    /*
+/*
  * Copyright (c) "Neo4j"
  * Neo4j Sweden AB [http://neo4j.com]
  *
@@ -19,34 +19,40 @@
  */
 package org.neo4j.gds.algorithms.centrality;
 
-    import org.assertj.core.data.Offset;
-    import org.junit.jupiter.api.Test;
-    import org.neo4j.gds.algorithms.AlgorithmComputationResult;
-    import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
-    import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyResult;
-    import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
-    import org.neo4j.gds.api.Graph;
-    import org.neo4j.gds.api.GraphStore;
-    import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-    import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
-    import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.assertj.core.data.Offset;
+import org.junit.jupiter.api.Test;
+import org.neo4j.gds.algorithms.AlgorithmComputationResult;
+import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
+import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyResult;
+import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.config.ArrowConnectionInfo;
+import org.neo4j.gds.pagerank.PageRankResult;
+import org.neo4j.gds.pagerank.PageRankWriteConfig;
+import org.neo4j.gds.scaling.ScalerFactory;
 
-    import java.util.Optional;
+import java.util.Optional;
 
-    import static org.assertj.core.api.Assertions.assertThat;
-    import static org.mockito.ArgumentMatchers.any;
-    import static org.mockito.ArgumentMatchers.eq;
-    import static org.mockito.Mockito.mock;
-    import static org.mockito.Mockito.verifyNoInteractions;
-    import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
-    class CentralityAlgorithmsWriteBusinessFacadeTest {
+class CentralityAlgorithmsWriteBusinessFacadeTest {
 
-        @Test
+    @Test
     void writeWithoutAlgorithmResult() {
 
         var configurationMock = mock(BetweennessCentralityWriteConfig.class);
-        var graph=mock(Graph.class);
+        var graph = mock(Graph.class);
         var graphStore = mock(GraphStore.class);
         var algorithmResult = AlgorithmComputationResult.<Long>withoutAlgorithmResult(graph, graphStore);
 
@@ -84,139 +90,224 @@ package org.neo4j.gds.algorithms.centrality;
             .isEmpty();
     }
 
-        @Test
-        void writeWithoutStatistics() {
+    @Test
+    void writeWithoutStatistics() {
 
-            var configurationMock = mock(BetweennessCentralityWriteConfig.class);
-            var graph = mock(Graph.class);
-            var graphStore = mock(GraphStore.class);
+        var configurationMock = mock(BetweennessCentralityWriteConfig.class);
+        var graph = mock(Graph.class);
+        var graphStore = mock(GraphStore.class);
 
-            var result = HugeDoubleArray.of(0.1, 0.2, 0.3, 0.4);
-            var algorithmResultMock = AlgorithmComputationResult.of(
-                result,
-                graph,
-                graphStore
-            );
+        var result = HugeDoubleArray.of(0.1, 0.2, 0.3, 0.4);
+        var algorithmResultMock = AlgorithmComputationResult.of(
+            result,
+            graph,
+            graphStore
+        );
 
-            when(graph.nodeCount()).thenReturn(4l);
-
-
-
-            var nodePropertyServiceMock = mock(WriteNodePropertyService.class);
-            NodePropertyValuesMapper<HugeDoubleArray> nodePropertyValuesMapper = (r)-> NodePropertyValuesAdapter.adapt(r);
+        when(graph.nodeCount()).thenReturn(4l);
 
 
-            when(nodePropertyServiceMock.write(
-                eq(graph),
-                eq(graphStore),
-                any(),
-                eq(4),
-                eq("foo"),
-                eq("FooWrite"),
-                eq(Optional.empty())
-            )).thenReturn(new WriteNodePropertyResult(4, 100));
-
-            var businessFacade = new CentralityAlgorithmsWriteBusinessFacade(null, nodePropertyServiceMock);
-
-            var writeResult = businessFacade.writeToDatabase(
-                algorithmResultMock,
-                configurationMock,
-                ((r)->r::get),
-                nodePropertyValuesMapper,
-                ((r, cs) -> new DefaultCentralitySpecificFields(cs)),
-                false,
-                0L,
-                () -> DefaultCentralitySpecificFields.EMPTY,
-                "FooWrite",
-                4,
-                "foo",
-                Optional.empty()
-            );
+        var nodePropertyServiceMock = mock(WriteNodePropertyService.class);
+        NodePropertyValuesMapper<HugeDoubleArray> nodePropertyValuesMapper = (r) -> NodePropertyValuesAdapter.adapt(r);
 
 
-            assertThat(writeResult.configuration())
-                .as("The configuration should be the exact same object")
-                .isSameAs(configurationMock);
+        when(nodePropertyServiceMock.write(
+            eq(graph),
+            eq(graphStore),
+            any(),
+            eq(4),
+            eq("foo"),
+            eq("FooWrite"),
+            eq(Optional.empty())
+        )).thenReturn(new WriteNodePropertyResult(4, 100));
 
-            assertThat(writeResult.nodePropertiesWritten())
-                .as("no properties should be written")
-                .isSameAs(4L);
+        var businessFacade = new CentralityAlgorithmsWriteBusinessFacade(null, nodePropertyServiceMock);
 
-            assertThat(writeResult.writeMillis())
-                .as("correct  writeMillis")
-                .isEqualTo(100);
-
-            assertThat(writeResult.algorithmSpecificFields().centralityDistribution())
-                .as("empty map")
-                .isEmpty();
-        }
-
-        @Test
-        void writeWithStatistics() {
-
-            var configurationMock = mock(BetweennessCentralityWriteConfig.class);
-            var graph = mock(Graph.class);
-            var graphStore = mock(GraphStore.class);
-
-            var result = HugeDoubleArray.of(0.1, 0.2, 0.3, 0.4);
-            var algorithmResultMock = AlgorithmComputationResult.of(
-                result,
-                graph,
-                graphStore
-            );
-
-            when(graph.nodeCount()).thenReturn(4l);
+        var writeResult = businessFacade.writeToDatabase(
+            algorithmResultMock,
+            configurationMock,
+            ((r) -> r::get),
+            nodePropertyValuesMapper,
+            ((r, cs) -> new DefaultCentralitySpecificFields(cs)),
+            false,
+            0L,
+            () -> DefaultCentralitySpecificFields.EMPTY,
+            "FooWrite",
+            4,
+            "foo",
+            Optional.empty()
+        );
 
 
+        assertThat(writeResult.configuration())
+            .as("The configuration should be the exact same object")
+            .isSameAs(configurationMock);
 
-            var nodePropertyServiceMock = mock(WriteNodePropertyService.class);
-            NodePropertyValuesMapper<HugeDoubleArray> nodePropertyValuesMapper = (r)-> NodePropertyValuesAdapter.adapt(r);
+        assertThat(writeResult.nodePropertiesWritten())
+            .as("no properties should be written")
+            .isSameAs(4L);
 
+        assertThat(writeResult.writeMillis())
+            .as("correct  writeMillis")
+            .isEqualTo(100);
 
-            when(nodePropertyServiceMock.write(
-                eq(graph),
-                eq(graphStore),
-                any(),
-                eq(4),
-                eq("foo"),
-                eq("FooWrite"),
-                eq(Optional.empty())
-            )).thenReturn(new WriteNodePropertyResult(4, 100));
-
-            var businessFacade = new CentralityAlgorithmsWriteBusinessFacade(null, nodePropertyServiceMock);
-
-            var writeResult = businessFacade.writeToDatabase(
-                algorithmResultMock,
-                configurationMock,
-                ((r)->r::get),
-                nodePropertyValuesMapper,
-                ((r, cs) -> new DefaultCentralitySpecificFields(cs)),
-                true,
-                0L,
-                () -> DefaultCentralitySpecificFields.EMPTY,
-                "FooWrite",
-                4,
-                "foo",
-                Optional.empty()
-            );
-
-
-            assertThat(writeResult.configuration())
-                .as("The configuration should be the exact same object")
-                .isSameAs(configurationMock);
-
-            assertThat(writeResult.nodePropertiesWritten())
-                .as("no properties should be written")
-                .isSameAs(4L);
-
-            assertThat(writeResult.writeMillis())
-                .as("correct  writeMillis")
-                .isEqualTo(100);
-
-            assertThat((double)writeResult.algorithmSpecificFields().centralityDistribution().get("mean"))
-                .as("correct  mean")
-                .isCloseTo(0.25, Offset.offset(1e-4));
-
-        }
-        
+        assertThat(writeResult.algorithmSpecificFields().centralityDistribution())
+            .as("empty map")
+            .isEmpty();
     }
+
+    @Test
+    void writeWithStatistics() {
+
+        var configurationMock = mock(BetweennessCentralityWriteConfig.class);
+        var graph = mock(Graph.class);
+        var graphStore = mock(GraphStore.class);
+
+        var result = HugeDoubleArray.of(0.1, 0.2, 0.3, 0.4);
+        var algorithmResultMock = AlgorithmComputationResult.of(
+            result,
+            graph,
+            graphStore
+        );
+
+        when(graph.nodeCount()).thenReturn(4l);
+
+
+        var nodePropertyServiceMock = mock(WriteNodePropertyService.class);
+        NodePropertyValuesMapper<HugeDoubleArray> nodePropertyValuesMapper = (r) -> NodePropertyValuesAdapter.adapt(r);
+
+
+        when(nodePropertyServiceMock.write(
+            eq(graph),
+            eq(graphStore),
+            any(),
+            eq(4),
+            eq("foo"),
+            eq("FooWrite"),
+            eq(Optional.empty())
+        )).thenReturn(new WriteNodePropertyResult(4, 100));
+
+        var businessFacade = new CentralityAlgorithmsWriteBusinessFacade(null, nodePropertyServiceMock);
+
+        var writeResult = businessFacade.writeToDatabase(
+            algorithmResultMock,
+            configurationMock,
+            ((r) -> r::get),
+            nodePropertyValuesMapper,
+            ((r, cs) -> new DefaultCentralitySpecificFields(cs)),
+            true,
+            0L,
+            () -> DefaultCentralitySpecificFields.EMPTY,
+            "FooWrite",
+            4,
+            "foo",
+            Optional.empty()
+        );
+
+
+        assertThat(writeResult.configuration())
+            .as("The configuration should be the exact same object")
+            .isSameAs(configurationMock);
+
+        assertThat(writeResult.nodePropertiesWritten())
+            .as("no properties should be written")
+            .isSameAs(4L);
+
+        assertThat(writeResult.writeMillis())
+            .as("correct  writeMillis")
+            .isEqualTo(100);
+
+        assertThat((double) writeResult.algorithmSpecificFields().centralityDistribution().get("mean"))
+            .as("correct  mean")
+            .isCloseTo(0.25, Offset.offset(1e-4));
+
+    }
+
+    @Test
+    void pageRankShouldHaveErrorHintDistributionForLogScaler() {
+        var pageRankConfigMock = mock(PageRankWriteConfig.class);
+        when(pageRankConfigMock.scaler()).thenReturn(ScalerFactory.parse("log"));
+
+        var centralityAlgorithmsFacadeMock = mock(CentralityAlgorithmsFacade.class);
+        var pageRankResultMock = mock(PageRankResult.class);
+
+        when(centralityAlgorithmsFacadeMock.pageRank(anyString(), any()))
+            .thenReturn(
+                AlgorithmComputationResult.of(
+                    pageRankResultMock,
+                    mock(Graph.class),
+                    mock(GraphStore.class)
+                )
+            );
+
+        var nodePropertyServiceStub = new WriteNodePropertyServiceStub(4, 100);
+
+        var businessFacade = new CentralityAlgorithmsWriteBusinessFacade(
+            centralityAlgorithmsFacadeMock,
+            nodePropertyServiceStub
+        );
+        var pageRankResult = businessFacade.pageRank("meh", pageRankConfigMock, true);
+
+        assertThat(pageRankResult.algorithmSpecificFields().centralityDistribution())
+            .hasSize(1)
+            .containsEntry("Error", "Unable to create histogram when using scaler of type LOG");
+    }
+
+    @Test
+    void pageRankShouldHaveRealDistributionWhenScalerIsNotLog() {
+        var pageRankConfigMock = mock(PageRankWriteConfig.class);
+        when(pageRankConfigMock.scaler()).thenReturn(ScalerFactory.parse("none"));
+
+        var centralityAlgorithmsFacadeMock = mock(CentralityAlgorithmsFacade.class);
+        var pageRankResultMock = mock(PageRankResult.class);
+        when(pageRankResultMock.nodeCount()).thenReturn(190L);
+        when(pageRankResultMock.centralityScoreProvider()).thenReturn(n -> (double) n);
+
+        when(centralityAlgorithmsFacadeMock.pageRank(anyString(), any()))
+            .thenReturn(
+                AlgorithmComputationResult.of(
+                    pageRankResultMock,
+                    mock(Graph.class),
+                    mock(GraphStore.class)
+                )
+            );
+
+        var nodePropertyServiceStub = new WriteNodePropertyServiceStub(4, 100);
+
+        var businessFacade = new CentralityAlgorithmsWriteBusinessFacade(
+            centralityAlgorithmsFacadeMock,
+            nodePropertyServiceStub
+        );
+        var pageRankResult = businessFacade.pageRank("meh", pageRankConfigMock, true);
+
+        assertThat(pageRankResult.algorithmSpecificFields().centralityDistribution())
+            .hasSize(9)
+            .containsKeys("max", "mean", "min", "p50", "p75", "p90", "p95", "p99", "p999")
+            .doesNotContainKey("Error");
+
+    }
+
+    private static final class WriteNodePropertyServiceStub extends WriteNodePropertyService {
+        private final long nodePropertiesWritten;
+        private final long writeMilliseconds;
+
+        WriteNodePropertyServiceStub(long nodePropertiesWritten, long writeMilliseconds) {
+            super(null, null, null, null);
+            this.nodePropertiesWritten = nodePropertiesWritten;
+            this.writeMilliseconds = writeMilliseconds;
+        }
+
+        @Override
+        public WriteNodePropertyResult write(
+            Graph graph,
+            GraphStore graphStore,
+            NodePropertyValues nodePropertyValues,
+            int writeConcurrency,
+            String writeProperty,
+            String procedureName,
+            Optional<ArrowConnectionInfo> arrowConnectionInfo
+        ) {
+            return new WriteNodePropertyResult(nodePropertiesWritten, writeMilliseconds);
+        }
+    }
+}

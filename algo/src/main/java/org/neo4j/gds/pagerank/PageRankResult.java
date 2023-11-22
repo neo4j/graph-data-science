@@ -47,6 +47,10 @@ public class PageRankResult implements CentralityAlgorithmResult {
         return didConverge;
     }
 
+    public long nodeCount() {
+        return scores.size();
+    }
+
     @Override
     public NodePropertyValues nodePropertyValues() {
         return NodePropertyValuesAdapter.adapt(scores);
@@ -56,4 +60,5 @@ public class PageRankResult implements CentralityAlgorithmResult {
     public LongToDoubleFunction centralityScoreProvider() {
         return scores::get;
     }
+
 }

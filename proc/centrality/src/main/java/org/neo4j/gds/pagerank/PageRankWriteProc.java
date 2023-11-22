@@ -20,10 +20,9 @@
 package org.neo4j.gds.pagerank;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.centrality.pagerank.PageRankWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -40,18 +39,15 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class PageRankWriteProc extends BaseProc {
 
     @Context
-    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
+    public GraphDataScience facade;
 
     @Procedure(value = "gds.pageRank.write", mode = WRITE)
     @Description(PAGE_RANK_DESCRIPTION)
-    public Stream<WriteResult> write(
+    public Stream<PageRankWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new PageRankWriteSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.centrality().pageRankWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.pageRank.write.estimate", mode = READ)
@@ -65,10 +61,5 @@ public class PageRankWriteProc extends BaseProc {
             executionContext(),
             transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
     }
 }

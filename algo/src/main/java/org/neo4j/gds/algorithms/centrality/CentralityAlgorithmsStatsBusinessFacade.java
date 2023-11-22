@@ -31,7 +31,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStatsConfig;
-import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankStatsConfig;
 import org.neo4j.gds.result.CentralityStatistics;
 
@@ -128,21 +127,30 @@ public class CentralityAlgorithmsStatsBusinessFacade {
             () -> centralityAlgorithmsFacade.pageRank(graphName, configuration)
         );
 
-        CentralityFunctionSupplier<PageRankResult> centralityFunctionSupplier = CentralityAlgorithmResult::centralityScoreProvider;
-        SpecificFieldsWithCentralityDistributionSupplier<PageRankResult, PageRankSpecificFields> specificFieldsSupplier =
-            (r, c) -> new PageRankSpecificFields(r.iterations(), r.didConverge(), c);
+        var algorithmResult = intermediateResult.algorithmResult;
+        return algorithmResult.result().map(result -> {
+            // 2. Construct NodePropertyValues from the algorithm result
+            // 2.1 Should we measure some post-processing here?
+            var nodePropertyValues = result.nodePropertyValues();
 
-        Supplier<PageRankSpecificFields> emptyASFSupplier = () -> PageRankSpecificFields.EMPTY;
+            var pageRankDistribution = PageRankDistributionComputer.computeDistribution(
+                result,
+                configuration,
+                shouldComputeCentralityDistribution
+            );
 
-        return statsResult(
-            intermediateResult.algorithmResult,
-            configuration,
-            centralityFunctionSupplier,
-            specificFieldsSupplier,
-            shouldComputeCentralityDistribution,
-            intermediateResult.computeMilliseconds,
-            emptyASFSupplier
-        );
+            var specificFields = new PageRankSpecificFields(
+                result.iterations(),
+                result.didConverge(),
+                pageRankDistribution.centralitySummary
+            );
+
+            return StatsResult.<PageRankSpecificFields>builder()
+                .computeMillis(intermediateResult.computeMilliseconds)
+                .postProcessingMillis(pageRankDistribution.postProcessingMillis)
+                .algorithmSpecificFields(specificFields)
+                .build();
+        }).orElseGet(() -> StatsResult.empty(PageRankSpecificFields.EMPTY));
 
     }
 

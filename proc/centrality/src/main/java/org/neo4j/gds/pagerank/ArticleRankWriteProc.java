@@ -25,6 +25,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.procedures.centrality.pagerank.PageRankProcCompanion;
+import org.neo4j.gds.procedures.centrality.pagerank.PageRankWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -44,7 +45,7 @@ public class ArticleRankWriteProc extends BaseProc {
 
     @Procedure(value = "gds.articleRank.write", mode = WRITE)
     @Description(PageRankProcCompanion.ARTICLE_RANK_DESCRIPTION)
-    public Stream<WriteResult> write(
+    public Stream<PageRankWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

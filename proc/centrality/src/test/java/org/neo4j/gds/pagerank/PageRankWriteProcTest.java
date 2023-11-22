@@ -29,7 +29,6 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.scaling.LogScaler;
 
 import java.util.List;
 import java.util.Map;
@@ -202,22 +201,5 @@ class PageRankWriteProcTest extends BaseProcTest {
             "configuration", allOf(isA(Map.class), hasEntry("writeProperty", writeProp))
         )));
     }
-
-    @Test
-    void shouldNotComputeCentralityDistributionOnLogScaler() {
-        var query = GdsCypher.call("graphLabel1")
-            .algo("pageRank")
-            .writeMode()
-            .addParameter("scaler", LogScaler.TYPE)
-            .addParameter("writeProperty", "writeProp")
-            .yields("centralityDistribution");
-
-        assertCypherResult(query, List.of(
-            Map.of(
-                "centralityDistribution", Map.of("Error", "Unable to create histogram when using scaler of type LOG")
-            )
-        ));
-    }
-
 
 }

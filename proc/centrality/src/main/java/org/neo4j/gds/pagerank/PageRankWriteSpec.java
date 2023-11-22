@@ -28,6 +28,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.centrality.pagerank.PageRankWriteResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -37,7 +38,7 @@ import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 import static org.neo4j.gds.procedures.centrality.pagerank.PageRankProcCompanion.PAGE_RANK_DESCRIPTION;
 
 @GdsCallable(name = "gds.pageRank.write", description = PAGE_RANK_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class PageRankWriteSpec implements AlgorithmSpec<PageRankAlgorithm, PageRankResult,PageRankWriteConfig,Stream<WriteResult>,PageRankAlgorithmFactory<PageRankWriteConfig>> {
+public class PageRankWriteSpec implements AlgorithmSpec<PageRankAlgorithm, PageRankResult,PageRankWriteConfig,Stream<PageRankWriteResult>,PageRankAlgorithmFactory<PageRankWriteConfig>> {
 
     @Override
     public String name() {
@@ -55,7 +56,7 @@ public class PageRankWriteSpec implements AlgorithmSpec<PageRankAlgorithm, PageR
     }
 
     @Override
-    public ComputationResultConsumer<PageRankAlgorithm, PageRankResult, PageRankWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<PageRankAlgorithm, PageRankResult, PageRankWriteConfig, Stream<PageRankWriteResult>> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>(
             this::resultBuilder,
             computationResult ->
@@ -69,11 +70,11 @@ public class PageRankWriteSpec implements AlgorithmSpec<PageRankAlgorithm, PageR
         );
     }
 
-    private AbstractResultBuilder<WriteResult> resultBuilder(
+    private AbstractResultBuilder<PageRankWriteResult> resultBuilder(
         ComputationResult<PageRankAlgorithm, PageRankResult, PageRankWriteConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new WriteResult.Builder(
+        var builder = new PageRankWriteResult.Builder(
             executionContext.returnColumns(),
             computationResult.config().concurrency()
         );

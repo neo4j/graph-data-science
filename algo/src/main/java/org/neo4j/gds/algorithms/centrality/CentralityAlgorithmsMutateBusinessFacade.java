@@ -32,7 +32,6 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
 import org.neo4j.gds.pagerank.PageRankMutateConfig;
-import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.result.CentralityStatistics;
 
 import java.util.function.Supplier;
@@ -133,27 +132,43 @@ public class CentralityAlgorithmsMutateBusinessFacade {
         var intermediateResult = runWithTiming(
             () -> centralityAlgorithmsFacade.pageRank(graphName, configuration)
         );
+        var algorithmResult = intermediateResult.algorithmResult;
+        return algorithmResult.result().map(result -> {
+            // 2. Construct NodePropertyValues from the algorithm result
+            // 2.1 Should we measure some post-processing here?
+            var nodePropertyValues = result.nodePropertyValues();
 
-        CentralityFunctionSupplier<PageRankResult> centralityFunctionSupplier = CentralityAlgorithmResult::centralityScoreProvider;
-        SpecificFieldsWithCentralityDistributionSupplier<PageRankResult, PageRankSpecificFields> specificFieldsSupplier = (r, c) -> new PageRankSpecificFields(
-            r.iterations(),
-            r.didConverge(),
-            c
-        );
-        Supplier<PageRankSpecificFields> emptyASFSupplier = () -> PageRankSpecificFields.EMPTY;
+            // 3. Go and mutate the graph store
+            var addNodePropertyResult = mutateNodePropertyService.mutate(
+                configuration.mutateProperty(),
+                nodePropertyValues,
+                configuration.nodeLabelIdentifiers(algorithmResult.graphStore()),
+                algorithmResult.graph(), algorithmResult.graphStore()
+            );
 
-        NodePropertyValuesMapper<PageRankResult> nodePropertyValuesMapper = PageRankResult::nodePropertyValues;
 
-        return mutateNodeProperty(
-            intermediateResult.algorithmResult,
-            configuration,
-            centralityFunctionSupplier,
-            nodePropertyValuesMapper,
-            specificFieldsSupplier,
-            shouldComputeCentralityDistribution,
-            intermediateResult.computeMilliseconds,
-            emptyASFSupplier
-        );
+            var pageRankDistribution = PageRankDistributionComputer.computeDistribution(
+                result,
+                configuration,
+                shouldComputeCentralityDistribution
+            );
+
+            var specificFields = new PageRankSpecificFields(
+                result.iterations(),
+                result.didConverge(),
+                pageRankDistribution.centralitySummary
+            );
+
+            return NodePropertyMutateResult.<PageRankSpecificFields>builder()
+                .computeMillis(intermediateResult.computeMilliseconds)
+                .postProcessingMillis(pageRankDistribution.postProcessingMillis)
+                .nodePropertiesWritten(addNodePropertyResult.nodePropertiesAdded())
+                .mutateMillis(addNodePropertyResult.mutateMilliseconds())
+                .configuration(configuration)
+                .algorithmSpecificFields(specificFields)
+                .build();
+        }).orElseGet(() -> NodePropertyMutateResult.empty(PageRankSpecificFields.EMPTY, configuration));
+
     }
 
 

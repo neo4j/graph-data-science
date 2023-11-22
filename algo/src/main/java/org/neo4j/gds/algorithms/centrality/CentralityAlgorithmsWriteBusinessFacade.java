@@ -24,6 +24,7 @@ import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.centrality.specificfields.AlphaHarmonicSpecificFields;
 import org.neo4j.gds.algorithms.centrality.specificfields.CentralityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
+import org.neo4j.gds.algorithms.centrality.specificfields.PageRankSpecificFields;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
@@ -31,6 +32,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
+import org.neo4j.gds.pagerank.PageRankWriteConfig;
 import org.neo4j.gds.harmonic.DeprecatedTieredHarmonicCentralityWriteConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
 import org.neo4j.gds.result.CentralityStatistics;
@@ -119,6 +121,56 @@ public class CentralityAlgorithmsWriteBusinessFacade {
         );
     }
 
+    public NodePropertyWriteResult<PageRankSpecificFields> pageRank(
+        String graphName,
+        PageRankWriteConfig configuration,
+        boolean shouldComputeCentralityDistribution
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = runWithTiming(
+            () -> centralityAlgorithmsFacade.pageRank(graphName, configuration)
+        );
+
+        var algorithmResult = intermediateResult.algorithmResult;
+        return algorithmResult.result().map(result -> {
+            // 2. Construct NodePropertyValues from the algorithm result
+            // 2.1 Should we measure some post-processing here?
+            var nodePropertyValues = result.nodePropertyValues();
+
+            // 3. Write to database
+            var writeNodePropertyResult = writeNodePropertyService.write(
+                algorithmResult.graph(),
+                algorithmResult.graphStore(),
+                nodePropertyValues,
+                configuration.writeConcurrency(),
+                configuration.writeProperty(),
+                "PageRankWrite",
+                configuration.arrowConnectionInfo()
+            );
+
+            var pageRankDistribution = PageRankDistributionComputer.computeDistribution(
+                result,
+                configuration,
+                shouldComputeCentralityDistribution
+            );
+
+            var specificFields = new PageRankSpecificFields(
+                result.iterations(),
+                result.didConverge(),
+                pageRankDistribution.centralitySummary
+            );
+
+            return NodePropertyWriteResult.<PageRankSpecificFields>builder()
+                .computeMillis(intermediateResult.computeMilliseconds)
+                .postProcessingMillis(pageRankDistribution.postProcessingMillis)
+                .nodePropertiesWritten(writeNodePropertyResult.nodePropertiesWritten())
+                .writeMillis(writeNodePropertyResult.writeMilliseconds())
+                .configuration(configuration)
+                .algorithmSpecificFields(specificFields)
+                .build();
+        }).orElseGet(() -> NodePropertyWriteResult.empty(PageRankSpecificFields.EMPTY, configuration));
+    }
+
     public NodePropertyWriteResult<DefaultCentralitySpecificFields> harmonicCentrality(
         String graphName,
         HarmonicCentralityWriteConfig configuration,
@@ -173,8 +225,7 @@ public class CentralityAlgorithmsWriteBusinessFacade {
 
     }
 
-
-    <RESULT extends CentralityAlgorithmResult, CONFIG extends AlgoBaseConfig> NodePropertyWriteResult<DefaultCentralitySpecificFields> writeToDatabase(
+    private <RESULT extends CentralityAlgorithmResult, CONFIG extends AlgoBaseConfig> NodePropertyWriteResult<DefaultCentralitySpecificFields> writeToDatabase(
         AlgorithmComputationResult<RESULT> algorithmResult,
         CONFIG configuration,
         boolean shouldComputeCentralityDistribution,
@@ -185,12 +236,12 @@ public class CentralityAlgorithmsWriteBusinessFacade {
         Optional<ArrowConnectionInfo> arrowConnectionInfo
     ) {
 
-        CentralityFunctionSupplier<RESULT> centralityFunctionSupplier = (r) -> r.centralityScoreProvider();
+        CentralityFunctionSupplier<RESULT> centralityFunctionSupplier = CentralityAlgorithmResult::centralityScoreProvider;
         SpecificFieldsWithCentralityDistributionSupplier<RESULT, DefaultCentralitySpecificFields> specificFieldsSupplier = (r, c) -> new DefaultCentralitySpecificFields(
             c);
         Supplier<DefaultCentralitySpecificFields> emptyASFSupplier = () -> DefaultCentralitySpecificFields.EMPTY;
 
-        NodePropertyValuesMapper<RESULT> nodePropertyValuesMapper = (r) -> r.nodePropertyValues();
+        NodePropertyValuesMapper<RESULT> nodePropertyValuesMapper = CentralityAlgorithmResult::nodePropertyValues;
 
         return writeToDatabase(
             algorithmResult,

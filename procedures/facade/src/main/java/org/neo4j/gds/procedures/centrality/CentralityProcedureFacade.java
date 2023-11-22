@@ -51,11 +51,13 @@ import org.neo4j.gds.procedures.centrality.alphaharmonic.AlphaHarmonicWriteResul
 import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.pagerank.PageRankStatsConfig;
 import org.neo4j.gds.pagerank.PageRankStreamConfig;
+import org.neo4j.gds.pagerank.PageRankWriteConfig;
 import org.neo4j.gds.procedures.centrality.betacloseness.BetaClosenessCentralityMutateResult;
 import org.neo4j.gds.procedures.centrality.betacloseness.BetaClosenessCentralityWriteResult;
 import org.neo4j.gds.procedures.centrality.pagerank.PageRankComputationalResultTransformer;
 import org.neo4j.gds.procedures.centrality.pagerank.PageRankMutateResult;
 import org.neo4j.gds.procedures.centrality.pagerank.PageRankStatsResult;
+import org.neo4j.gds.procedures.centrality.pagerank.PageRankWriteResult;
 import org.neo4j.gds.procedures.configparser.ConfigurationParser;
 import org.neo4j.gds.results.MemoryEstimateResult;
 
@@ -534,6 +536,21 @@ public class CentralityProcedureFacade {
         );
 
         return Stream.of(PageRankComputationalResultTransformer.toMutateResult(computationResult, config));
+    }
+
+    public Stream<PageRankWriteResult> pageRankWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, PageRankWriteConfig::of);
+
+        var computationResult = writeBusinessFacade.pageRank(
+            graphName,
+            config,
+            procedureReturnColumns.contains("centralityDistribution")
+        );
+
+        return Stream.of(PageRankComputationalResultTransformer.toWriteResult(computationResult, config));
     }
 
 

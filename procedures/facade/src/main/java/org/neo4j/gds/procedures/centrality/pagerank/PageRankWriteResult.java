@@ -17,22 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.pagerank;
+package org.neo4j.gds.procedures.centrality.pagerank;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.procedures.centrality.pagerank.PageRankProcCompanion;
-import org.neo4j.gds.procedures.centrality.pagerank.PageRankStatsResult;
 
 import java.util.Map;
 
-@SuppressWarnings("unused")
-public final class WriteResult extends PageRankStatsResult {
+public final class PageRankWriteResult extends PageRankStatsResult {
 
     public final long writeMillis;
     public final long nodePropertiesWritten;
 
-    WriteResult(
+    PageRankWriteResult(
         long ranIterations,
         boolean didConverge,
         @Nullable Map<String, Object> centralityDistribution,
@@ -56,15 +53,15 @@ public final class WriteResult extends PageRankStatsResult {
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    static class Builder extends PageRankProcCompanion.PageRankResultBuilder<WriteResult> {
+    public static class Builder extends PageRankProcCompanion.PageRankResultBuilder<PageRankWriteResult> {
 
-        Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+        public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
             super(returnColumns, concurrency);
         }
 
         @Override
-        public WriteResult buildResult() {
-            return new WriteResult(
+        public PageRankWriteResult buildResult() {
+            return new PageRankWriteResult(
                 ranIterations,
                 didConverge,
                 centralityHistogram,

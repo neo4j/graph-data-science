@@ -137,5 +137,4 @@ class PageRankMutateProcTest extends BaseProcTest {
         assertGraphEquals(fromGdl(expectedMutatedGraph()), mutatedGraph);
     }
 
-
 }
