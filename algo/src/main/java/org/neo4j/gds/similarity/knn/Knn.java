@@ -51,6 +51,16 @@ public class Knn extends Algorithm<KnnResult> {
         );
     }
 
+    public static Knn createWithDefaults(Graph graph, KnnParameters parameters, KnnContext context) {
+        return create(
+            graph,
+            parameters,
+            SimilarityComputer.ofProperties(graph, parameters.nodePropertySpecs()),
+            new KnnNeighborFilterFactory(graph.nodeCount()),
+            context
+        );
+    }
+
     public static Knn create(
         Graph graph,
         KnnBaseConfig config,
@@ -60,19 +70,47 @@ public class Knn extends Algorithm<KnnResult> {
     ) {
         var similarityFunction = new SimilarityFunction(similarityComputer);
         return new Knn(
-            context.progressTracker(),
             graph,
+            context.progressTracker(),
+            context.executor(),
+            config.k(graph.nodeCount()),
             config.concurrency(),
             config.maxIterations(),
-            config.k(graph.nodeCount()),
-            config.similarityCutoff(),
             config.minBatchSize(),
-            config.initialSampler(),
+            config.similarityCutoff(),
+            config.perturbationRate(),
+            config.randomJoins(),
             config.randomSeed(),
-            config.neighborJoiningParameters(),
+            config.initialSampler(),
             similarityFunction,
             neighborFilterFactory,
+            NeighbourConsumers.no_op
+        );
+    }
+
+    public static Knn create(
+        Graph graph,
+        KnnParameters parameters,
+        SimilarityComputer similarityComputer,
+        NeighborFilterFactory neighborFilterFactory,
+        KnnContext context
+    ) {
+        var similarityFunction = new SimilarityFunction(similarityComputer);
+        return new Knn(
+            graph,
+            context.progressTracker(),
             context.executor(),
+            parameters.kHolder(),
+            parameters.concurrency(),
+            parameters.minBatchSize(),
+            parameters.maxIterations(),
+            parameters.similarityCutoff(),
+            parameters.perturbationRate(),
+            parameters.randomJoins(),
+            parameters.randomSeed(),
+            parameters.samplerType(),
+            similarityFunction,
+            neighborFilterFactory,
             NeighbourConsumers.no_op
         );
     }
@@ -91,19 +129,20 @@ public class Knn extends Algorithm<KnnResult> {
     private final long updateThreshold;
 
     public Knn(
-        ProgressTracker progressTracker,
         Graph graph,
-        int concurrency,
-        int maxIterations,
+        ProgressTracker progressTracker,
+        ExecutorService executorService,
         K k,
-        double similarityCutoff,
+        int concurrency,
         int minBatchSize,
-        KnnSampler.SamplerType initialSamplerType,
+        int maxIterations,
+        double similarityCutoff,
+        double perturbationRate,
+        int randomJoins,
         Optional<Long> randomSeed,
-        NeighborJoiningParameters neighborJoiningParameters,
+        KnnSampler.SamplerType initialSamplerType,
         SimilarityFunction similarityFunction,
         NeighborFilterFactory neighborFilterFactory,
-        ExecutorService executorService,
         NeighbourConsumers neighborConsumers
     ) {
         super(progressTracker);
@@ -118,6 +157,16 @@ public class Knn extends Algorithm<KnnResult> {
         this.updateThreshold = k.updateThreshold;
 
         var splittableRandom = randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
+        switch (initialSamplerType) {
+            case UNIFORM:
+                this.samplerFactory = new UniformKnnSampler.Factory(graph.nodeCount(), splittableRandom);
+                break;
+            case RANDOMWALK:
+                this.samplerFactory = new RandomWalkKnnSampler.Factory(graph, randomSeed, k.value, splittableRandom);
+                break;
+            default:
+                throw new IllegalStateException("Invalid KnnSampler");
+        }
         this.generateRandomNeighborsFactory = new GenerateRandomNeighbors.Factory(
             similarityFunction,
             neighborConsumers,
@@ -133,21 +182,11 @@ public class Knn extends Algorithm<KnnResult> {
         this.joinNeighborsFactory = new JoinNeighbors.Factory(
             similarityFunction,
             k.sampledValue,
-            neighborJoiningParameters.perturbationRate,
-            neighborJoiningParameters.randomJoins,
+            perturbationRate,
+            randomJoins,
             splittableRandom,
             progressTracker
         );
-        switch (initialSamplerType) {
-            case UNIFORM:
-                this.samplerFactory = new UniformKnnSampler.Factory(graph.nodeCount(), splittableRandom);
-                break;
-            case RANDOMWALK:
-                this.samplerFactory = new RandomWalkKnnSampler.Factory(graph, randomSeed, k.value, splittableRandom);
-                break;
-            default:
-                throw new IllegalStateException("Invalid KnnSampler");
-        }
     }
 
     public ExecutorService executorService() {

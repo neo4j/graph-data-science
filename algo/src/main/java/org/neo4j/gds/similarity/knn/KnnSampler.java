@@ -22,7 +22,6 @@ package org.neo4j.gds.similarity.knn;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
-import java.util.SplittableRandom;
 import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
 

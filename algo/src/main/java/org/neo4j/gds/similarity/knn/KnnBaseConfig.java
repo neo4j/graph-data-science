@@ -101,8 +101,22 @@ public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, SingleT
 
     @Value.Default
     @Configuration.Ignore
-    default NeighborJoiningParameters neighborJoiningParameters() {
-        return NeighborJoiningParameters.create(perturbationRate(), randomJoins());
+    default KnnParameters toParameters(long nodeCount) {
+        return KnnParameters.create(
+            nodeCount,
+            concurrency(),
+            maxIterations(),
+            similarityCutoff(),
+            deltaThreshold(),
+            sampleRate(),
+            topK(),
+            perturbationRate(),
+            randomJoins(),
+            minBatchSize(),
+            initialSampler(),
+            randomSeed(),
+            nodeProperties()
+        );
     }
 
 }

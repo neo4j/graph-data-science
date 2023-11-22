@@ -75,19 +75,20 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
         var targetNodeFiltering = TargetNodeFiltering.create(graph.nodeCount(), config.k(graph.nodeCount()).value, targetNodeFilter, graph, optionalSimilarityFunction, config.similarityCutoff());
         var similarityFunction = optionalSimilarityFunction.orElse(Knn.defaultSimilarityFunction(graph, config.nodeProperties()));
         var knn = new Knn(
-            context.progressTracker(),
             graph,
-            config.concurrency(),
-            config.maxIterations(),
+            context.progressTracker(),
+            context.executor(),
             config.k(graph.nodeCount()),
-            config.similarityCutoff(),
+            config.concurrency(),
             config.minBatchSize(),
-            config.initialSampler(),
+            config.maxIterations(),
+            config.similarityCutoff(),
+            config.perturbationRate(),
+            config.randomJoins(),
             config.randomSeed(),
-            config.neighborJoiningParameters(),
+            config.initialSampler(),
             similarityFunction,
             new KnnNeighborFilterFactory(graph.nodeCount()),
-            context.executor(),
             targetNodeFiltering
         );
         var sourceNodeFilter = config.sourceNodeFilter().toNodeFilter(graph);
