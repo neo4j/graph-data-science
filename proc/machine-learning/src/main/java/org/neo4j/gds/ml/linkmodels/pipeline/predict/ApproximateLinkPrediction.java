@@ -78,7 +78,7 @@ public class ApproximateLinkPrediction extends LinkPrediction {
     LinkPredictionResult predictLinks(LinkPredictionSimilarityComputer linkPredictionSimilarityComputer) {
         var knn = Knn.create(
             graph,
-            knnConfig,
+            knnConfig.toParameters(graph.nodeCount()),
             linkPredictionSimilarityComputer,
             new LinkPredictionSimilarityComputer.LinkFilterFactory(
                 graph,

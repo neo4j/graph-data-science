@@ -111,7 +111,7 @@ class KnnTest {
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
 
-        var knn = Knn.createWithDefaults(graph, knnConfig, knnContext);
+        var knn = Knn.createWithDefaults(graph, knnConfig.toParameters(graph.nodeCount()), knnContext);
         var result = knn.compute();
 
         assertThat(result).isNotNull();
@@ -136,7 +136,7 @@ class KnnTest {
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
 
-        var knn = Knn.createWithDefaults(graph, knnConfig, knnContext);
+        var knn = Knn.createWithDefaults(graph, knnConfig.toParameters(graph.nodeCount()), knnContext);
         var result = knn.compute();
 
         assertThat(result).isNotNull();
@@ -178,7 +178,7 @@ class KnnTest {
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
 
-        var knn = Knn.createWithDefaults(graph, knnConfig, knnContext);
+        var knn = Knn.createWithDefaults(graph, knnConfig.toParameters(graph.nodeCount()), knnContext);
         var result = knn.compute();
 
         assertThat(result).isNotNull();
@@ -215,7 +215,7 @@ class KnnTest {
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
 
-        var knn = Knn.createWithDefaults(multPropMissingGraph, knnConfig, knnContext);
+        var knn = Knn.createWithDefaults(multPropMissingGraph, knnConfig.toParameters(multPropMissingGraph.nodeCount()), knnContext);
         var result = knn.compute();
 
         assertThat(result).isNotNull();
@@ -250,7 +250,7 @@ class KnnTest {
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
 
-        var knn = Knn.createWithDefaults(simThresholdGraph, knnConfig, knnContext);
+        var knn = Knn.createWithDefaults(simThresholdGraph, knnConfig.toParameters(simThresholdGraph.nodeCount()), knnContext);
         var result = knn.compute();
 
         assertThat(result).isNotNull();
@@ -282,7 +282,7 @@ class KnnTest {
         var knnContext = ImmutableKnnContext.builder().build();
         var knn = Knn.create(
             graph,
-            knnConfig,
+            knnConfig.toParameters(graph.nodeCount()),
             SimilarityComputer.ofProperty(graph, "knn", nodePropertyValues),
             new KnnNeighborFilterFactory(graph.nodeCount()),
             knnContext
@@ -316,7 +316,8 @@ class KnnTest {
                 .topK(1)
                 .concurrency(1)
                 .randomSeed(42L)
-                .build(),
+                .build()
+                .toParameters(graph.nodeCount()),
             SimilarityComputer.ofProperty(graph, "{knn}", nodeProperties),
             new KnnNeighborFilterFactory(graph.nodeCount()),
             ImmutableKnnContext.builder().build()
@@ -478,7 +479,7 @@ class KnnTest {
             .build();
         var knnContext = ImmutableKnnContext.builder().build();
 
-        var knn = Knn.createWithDefaults(graph, knnConfig, knnContext);
+        var knn = Knn.createWithDefaults(graph, knnConfig.toParameters(graph.nodeCount()), knnContext);
 
         var result = knn.compute();
 
@@ -539,7 +540,7 @@ class KnnTest {
         var knnContext = ImmutableKnnContext.builder().build();
 
         // Initializing KNN will cause the default metric to be resolved
-        Knn.createWithDefaults(graph, knnConfig, knnContext);
+        Knn.createWithDefaults(graph, knnConfig.toParameters(graph.nodeCount()), knnContext);
 
         assertThat(knnConfig.toMap().get("nodeProperties")).isEqualTo(
             Map.of(
@@ -568,7 +569,7 @@ class KnnTest {
             .concurrency(1)
             .build();
         var knnContext = KnnContext.empty();
-        var knn = Knn.createWithDefaults(graphWithNegativeNodePropertyValues, config, knnContext);
+        var knn = Knn.createWithDefaults(graphWithNegativeNodePropertyValues, config.toParameters(graphWithNegativeNodePropertyValues.nodeCount()), knnContext);
         var result = knn.compute();
         assertThat(result.streamSimilarityResult())
             .hasSize(2);
@@ -609,7 +610,7 @@ class KnnTest {
                 .concurrency(1)
                 .build();
             var knnContext = KnnContext.empty();
-            var knn = Knn.createWithDefaults(graph, config, knnContext);
+            var knn = Knn.createWithDefaults(graph, config.toParameters(graph.nodeCount()), knnContext);
             var result = knn.compute();
 
             assertEquals(1, result.ranIterations());
@@ -636,7 +637,7 @@ class KnnTest {
                 .build();
 
             var knnContext = KnnContext.empty();
-            var knn = Knn.createWithDefaults(graph, config, knnContext);
+            var knn = Knn.createWithDefaults(graph, config.toParameters(graph.nodeCount()), knnContext);
             var result = knn.compute();
 
             assertTrue(result.didConverge());
@@ -691,7 +692,7 @@ class KnnTest {
                 .initialSampler(KnnSampler.SamplerType.RANDOMWALK)
                 .build();
             var knnContext = KnnContext.empty();
-            var knn = Knn.createWithDefaults(graph, config, knnContext);
+            var knn = Knn.createWithDefaults(graph, config.toParameters(graph.nodeCount()), knnContext);
             var result = knn.compute();
 
             long nodeAId = idFunction.of("a");

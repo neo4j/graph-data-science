@@ -41,16 +41,6 @@ public class Knn extends Algorithm<KnnResult> {
         return new SimilarityFunction(SimilarityComputer.ofProperties(graph, nodeProperties));
     }
 
-    public static Knn createWithDefaults(Graph graph, KnnBaseConfig config, KnnContext context) {
-        return create(
-            graph,
-            config,
-            SimilarityComputer.ofProperties(graph, config.nodeProperties()),
-            new KnnNeighborFilterFactory(graph.nodeCount()),
-            context
-        );
-    }
-
     public static Knn createWithDefaults(Graph graph, KnnParameters parameters, KnnContext context) {
         return create(
             graph,
@@ -58,33 +48,6 @@ public class Knn extends Algorithm<KnnResult> {
             SimilarityComputer.ofProperties(graph, parameters.nodePropertySpecs()),
             new KnnNeighborFilterFactory(graph.nodeCount()),
             context
-        );
-    }
-
-    public static Knn create(
-        Graph graph,
-        KnnBaseConfig config,
-        SimilarityComputer similarityComputer,
-        NeighborFilterFactory neighborFilterFactory,
-        KnnContext context
-    ) {
-        var similarityFunction = new SimilarityFunction(similarityComputer);
-        return new Knn(
-            graph,
-            context.progressTracker(),
-            context.executor(),
-            config.k(graph.nodeCount()),
-            config.concurrency(),
-            config.maxIterations(),
-            config.minBatchSize(),
-            config.similarityCutoff(),
-            config.perturbationRate(),
-            config.randomJoins(),
-            config.randomSeed(),
-            config.initialSampler(),
-            similarityFunction,
-            neighborFilterFactory,
-            NeighbourConsumers.no_op
         );
     }
 
