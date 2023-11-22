@@ -22,6 +22,7 @@ package org.neo4j.gds.algorithms.centrality;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
+import org.neo4j.gds.algorithms.centrality.specificfields.CELFSpecificFields;
 import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
 import org.neo4j.gds.algorithms.centrality.specificfields.PageRankSpecificFields;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
@@ -33,6 +34,8 @@ import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
+import org.neo4j.gds.influenceMaximization.CELFNodeProperties;
+import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
 import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.result.CentralityStatistics;
@@ -195,6 +198,42 @@ public class CentralityAlgorithmsMutateBusinessFacade {
                 configuration,
                 shouldComputeCentralityDistribution
             );
+    public NodePropertyMutateResult<CELFSpecificFields> celf(
+        String graphName,
+        InfluenceMaximizationMutateConfig configuration
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> centralityAlgorithmsFacade.celf(graphName, configuration)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        var mutateResultBuilder = NodePropertyMutateResult.<CELFSpecificFields>builder()
+            .computeMillis(intermediateResult.computeMilliseconds)
+            .postProcessingMillis(0L)
+            .configuration(configuration);
+
+        algorithmResult.result().ifPresentOrElse(
+            result -> {
+                var nodeCount = algorithmResult.graph().nodeCount();
+                var nodeProperties = new CELFNodeProperties(result.seedSetNodes(), nodeCount);
+                var mutateResult = mutateNodePropertyService.mutate(
+                    configuration.mutateProperty(),
+                    nodeProperties,
+                    configuration.nodeLabelIdentifiers(algorithmResult.graphStore()),
+                    algorithmResult.graph(),
+                    algorithmResult.graphStore()
+                );
+                mutateResultBuilder.mutateMillis(mutateResult.mutateMilliseconds());
+                mutateResultBuilder.nodePropertiesWritten(mutateResult.nodePropertiesAdded());
+                mutateResultBuilder.algorithmSpecificFields(new CELFSpecificFields(result.totalSpread(), nodeCount));
+            },
+            () -> mutateResultBuilder.algorithmSpecificFields(CELFSpecificFields.EMPTY)
+        );
+
+        return mutateResultBuilder.build();
+    }
+
 
             var specificFields = new PageRankSpecificFields(
                 result.iterations(),

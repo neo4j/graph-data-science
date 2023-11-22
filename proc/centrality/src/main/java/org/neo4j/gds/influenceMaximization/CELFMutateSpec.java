@@ -30,6 +30,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.centrality.celf.CELFMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.List;
@@ -44,7 +45,7 @@ import static org.neo4j.gds.influenceMaximization.CELFStreamProc.DESCRIPTION;
     description = DESCRIPTION,
     executionMode = MUTATE_NODE_PROPERTY
 )
-public class CELFMutateSpec implements AlgorithmSpec<CELF, CELFResult, InfluenceMaximizationMutateConfig, Stream<MutateResult>, CELFAlgorithmFactory<InfluenceMaximizationMutateConfig>> {
+public class CELFMutateSpec implements AlgorithmSpec<CELF, CELFResult, InfluenceMaximizationMutateConfig, Stream<CELFMutateResult>, CELFAlgorithmFactory<InfluenceMaximizationMutateConfig>> {
     @Override
     public String name() {
         return "CELFMutate";
@@ -61,7 +62,7 @@ public class CELFMutateSpec implements AlgorithmSpec<CELF, CELFResult, Influence
     }
 
     @Override
-    public ComputationResultConsumer<CELF, CELFResult, InfluenceMaximizationMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<CELF, CELFResult, InfluenceMaximizationMutateConfig, Stream<CELFMutateResult>> computationResultConsumer() {
         MutateNodePropertyListFunction<CELF, CELFResult, InfluenceMaximizationMutateConfig> mutateConfigNodePropertyListFunction =
             computationResult -> {
                 var celfResult = computationResult.result()
@@ -81,12 +82,12 @@ public class CELFMutateSpec implements AlgorithmSpec<CELF, CELFResult, Influence
     }
 
     @NotNull
-    private AbstractResultBuilder<MutateResult> resultBuilder(
+    private AbstractResultBuilder<CELFMutateResult> resultBuilder(
         ComputationResult<CELF, CELFResult, InfluenceMaximizationMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
         var celfResult = computationResult.result();
-        return MutateResult.builder()
+        return CELFMutateResult.builder()
             .withTotalSpread(celfResult.map(res -> res.totalSpread()).orElse(0D))
             .withNodeCount(computationResult.graph().nodeCount())
             .withComputeMillis(computationResult.computeMillis())
