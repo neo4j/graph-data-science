@@ -198,6 +198,24 @@ public class CentralityAlgorithmsMutateBusinessFacade {
                 configuration,
                 shouldComputeCentralityDistribution
             );
+
+            var specificFields = new PageRankSpecificFields(
+                result.iterations(),
+                result.didConverge(),
+                pageRankDistribution.centralitySummary
+            );
+
+            return NodePropertyMutateResult.<PageRankSpecificFields>builder()
+                .computeMillis(intermediateResult.computeMilliseconds)
+                .postProcessingMillis(pageRankDistribution.postProcessingMillis)
+                .nodePropertiesWritten(addNodePropertyResult.nodePropertiesAdded())
+                .mutateMillis(addNodePropertyResult.mutateMilliseconds())
+                .configuration(configuration)
+                .algorithmSpecificFields(specificFields)
+                .build();
+        }).orElseGet(() -> NodePropertyMutateResult.empty(PageRankSpecificFields.EMPTY, configuration));
+
+    }
     public NodePropertyMutateResult<CELFSpecificFields> celf(
         String graphName,
         InfluenceMaximizationMutateConfig configuration
@@ -235,22 +253,7 @@ public class CentralityAlgorithmsMutateBusinessFacade {
     }
 
 
-            var specificFields = new PageRankSpecificFields(
-                result.iterations(),
-                result.didConverge(),
-                pageRankDistribution.centralitySummary
-            );
 
-            return NodePropertyMutateResult.<PageRankSpecificFields>builder()
-                .computeMillis(intermediateResult.computeMilliseconds)
-                .postProcessingMillis(pageRankDistribution.postProcessingMillis)
-                .nodePropertiesWritten(addNodePropertyResult.nodePropertiesAdded())
-                .mutateMillis(addNodePropertyResult.mutateMilliseconds())
-                .configuration(configuration)
-                .algorithmSpecificFields(specificFields)
-                .build();
-        }).orElseGet(() -> NodePropertyMutateResult.empty(PageRankSpecificFields.EMPTY, configuration));
-    }
 
 
     private <RESULT extends CentralityAlgorithmResult, CONFIG extends MutateNodePropertyConfig> NodePropertyMutateResult<DefaultCentralitySpecificFields> mutateNodeProperty(

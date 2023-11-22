@@ -56,7 +56,7 @@ public class CELFWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.centrality().celfMutateEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.centrality().celfWriteEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(
