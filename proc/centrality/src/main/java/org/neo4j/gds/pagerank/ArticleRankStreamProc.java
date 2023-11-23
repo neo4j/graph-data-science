@@ -20,9 +20,10 @@
 package org.neo4j.gds.pagerank;
 
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.centrality.CentralityStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -35,16 +36,16 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ArticleRankStreamProc extends PageRankStreamProc {
 
+    @Context
+    public GraphDataScience facade;
+
     @Procedure(value = "gds.articleRank.stream", mode = READ)
     @Description(ARTICLE_RANK_DESCRIPTION)
     public Stream<CentralityStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new ArticleRankStreamSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.centrality().articleRankStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.articleRank.stream.estimate", mode = READ)

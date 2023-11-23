@@ -491,7 +491,6 @@ public class CentralityProcedureFacade {
         ));
     }
 
-
     public Stream<CentralityStreamResult> pageRankStream(
         String graphName,
         Map<String, Object> configuration
@@ -505,7 +504,6 @@ public class CentralityProcedureFacade {
 
         return DefaultCentralityComputationalResultTransformer.toStreamResult(computationResult);
     }
-
 
     public Stream<PageRankStatsResult> pageRankStats(
         String graphName,
@@ -578,6 +576,20 @@ public class CentralityProcedureFacade {
         );
 
         return Stream.of(PageRankComputationalResultTransformer.toMutateResult(computationResult, config));
+    }
+
+    public Stream<CentralityStreamResult> articleRankStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createStreamConfig(configuration, PageRankStreamConfig::of);
+
+        var computationResult = streamBusinessFacade.articleRank(
+            graphName,
+            config
+        );
+
+        return DefaultCentralityComputationalResultTransformer.toStreamResult(computationResult);
     }
 
 
