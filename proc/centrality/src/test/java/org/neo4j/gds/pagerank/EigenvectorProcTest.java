@@ -242,16 +242,20 @@ class EigenvectorProcTest extends BaseProcTest {
         );
     }
 
-    @Test
-    void failOnDampingFactor() {
-        String query = GdsCypher.call(GRAPH_NAME)
-            .algo("eigenvector")
-            .streamMode()
-            .addParameter("dampingFactor", 0.5)
-            .yields();
-
+    @ParameterizedTest(name = "{1}")
+    @MethodSource("queriesWithDampingFactor")
+    void failOnDampingFactor(String query, String mode) {
         assertThatThrownBy(() -> runQuery(query))
             .hasRootCauseExactlyInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Unexpected configuration key: dampingFactor");
+    }
+
+    private static Stream<Arguments> queriesWithDampingFactor() {
+        return Stream.of(
+            Arguments.of("CALL gds.eigenvector.mutate('graph', {mutateProperty:'foo',dampingFactor: 0.5})", "mutate"),
+            Arguments.of("CALL gds.eigenvector.stats('graph', {dampingFactor: 0.5})", "stats"),
+            Arguments.of("CALL gds.eigenvector.stream('graph', {dampingFactor: 0.5})", "stream"),
+            Arguments.of("CALL gds.eigenvector.write('graph', {writeProperty:'foo', dampingFactor: 0.5})", "write")
+        );
     }
 }

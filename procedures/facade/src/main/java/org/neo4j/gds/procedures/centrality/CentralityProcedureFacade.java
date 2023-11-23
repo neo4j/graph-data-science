@@ -611,6 +611,8 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
+        eigenvectorConfigurationPreconditions(configuration);
+
         var config = createConfig(configuration, PageRankMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.eigenvector(
@@ -623,6 +625,8 @@ public class CentralityProcedureFacade {
     }
 
     public Stream<PageRankStatsResult> eigenvectorStats(String graphName, Map<String, Object> configuration) {
+        eigenvectorConfigurationPreconditions(configuration);
+
         var config = createConfig(configuration, PageRankStatsConfig::of);
 
         var computationResult = statsBusinessFacade.eigenvector(
@@ -632,6 +636,29 @@ public class CentralityProcedureFacade {
         );
 
         return Stream.of(PageRankComputationalResultTransformer.toStatsResult(computationResult, config));
+    }
+
+    public Stream<CentralityStreamResult> eigenvectorStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        eigenvectorConfigurationPreconditions(configuration);
+
+        var config = createStreamConfig(configuration, PageRankStreamConfig::of);
+
+        var computationResult = streamBusinessFacade.eigenvector(
+            graphName,
+            config
+        );
+
+        return DefaultCentralityComputationalResultTransformer.toStreamResult(computationResult);
+    }
+
+    // FIXME: this is abominable, we have to create separate configuration for Eigenvector that doesn't contain this key
+    private static void eigenvectorConfigurationPreconditions(Map<String, Object> configuration) {
+        if (configuration.containsKey("dampingFactor")) {
+            throw new IllegalArgumentException("Unexpected configuration key: dampingFactor");
+        }
     }
 
 
