@@ -107,6 +107,7 @@ class EigenvectorProcTest extends BaseProcTest {
         ));
     }
 
+    // TODO: move this out of here, it is NOT a procedure test
     @Test
     void invalidScaler() {
         assertThatThrownBy(() -> runQuery(GdsCypher.call(GRAPH_NAME)
