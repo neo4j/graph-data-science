@@ -622,6 +622,18 @@ public class CentralityProcedureFacade {
         return Stream.of(PageRankComputationalResultTransformer.toMutateResult(computationResult, config));
     }
 
+    public Stream<PageRankStatsResult> eigenvectorStats(String graphName, Map<String, Object> configuration) {
+        var config = createConfig(configuration, PageRankStatsConfig::of);
+
+        var computationResult = statsBusinessFacade.eigenvector(
+            graphName,
+            config,
+            procedureReturnColumns.contains("centralityDistribution")
+        );
+
+        return Stream.of(PageRankComputationalResultTransformer.toStatsResult(computationResult, config));
+    }
+
 
     // ################################################################################################################
 

@@ -149,6 +149,22 @@ public class CentralityAlgorithmsStatsBusinessFacade {
         );
     }
 
+    public StatsResult<PageRankSpecificFields> eigenvector(
+        String graphName,
+        PageRankStatsConfig configuration,
+        boolean shouldComputeCentralityDistribution
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> centralityAlgorithmsFacade.eigenvector(graphName, configuration)
+        );
+
+        return pageRankVariantStats(
+            intermediateResult, configuration,
+            shouldComputeCentralityDistribution
+        );
+    }
+
     @NotNull
     private static StatsResult<PageRankSpecificFields> pageRankVariantStats(
         AlgorithmResultWithTiming<AlgorithmComputationResult<PageRankResult>> intermediateResult,
