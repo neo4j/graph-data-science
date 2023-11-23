@@ -654,6 +654,23 @@ public class CentralityProcedureFacade {
         return DefaultCentralityComputationalResultTransformer.toStreamResult(computationResult);
     }
 
+    public Stream<PageRankWriteResult> eigenvectorWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        eigenvectorConfigurationPreconditions(configuration);
+
+        var config = createConfig(configuration, PageRankWriteConfig::of);
+
+        var computationResult = writeBusinessFacade.eigenvector(
+            graphName,
+            config,
+            procedureReturnColumns.contains("centralityDistribution")
+        );
+
+        return Stream.of(PageRankComputationalResultTransformer.toWriteResult(computationResult, config));
+    }
+
     // FIXME: this is abominable, we have to create separate configuration for Eigenvector that doesn't contain this key
     private static void eigenvectorConfigurationPreconditions(Map<String, Object> configuration) {
         if (configuration.containsKey("dampingFactor")) {
