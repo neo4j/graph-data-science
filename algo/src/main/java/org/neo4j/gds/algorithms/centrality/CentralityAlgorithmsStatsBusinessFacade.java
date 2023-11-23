@@ -19,11 +19,13 @@
  */
 package org.neo4j.gds.algorithms.centrality;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.centrality.specificfields.CentralityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
 import org.neo4j.gds.algorithms.centrality.specificfields.PageRankSpecificFields;
+import org.neo4j.gds.algorithms.runner.AlgorithmResultWithTiming;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
@@ -31,6 +33,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStatsConfig;
+import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankStatsConfig;
 import org.neo4j.gds.result.CentralityStatistics;
 
@@ -127,6 +130,31 @@ public class CentralityAlgorithmsStatsBusinessFacade {
             () -> centralityAlgorithmsFacade.pageRank(graphName, configuration)
         );
 
+        return pageRankVariantStats(intermediateResult, configuration, shouldComputeCentralityDistribution);
+    }
+
+    public StatsResult<PageRankSpecificFields> articleRank(
+        String graphName,
+        PageRankStatsConfig configuration,
+        boolean shouldComputeCentralityDistribution
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> centralityAlgorithmsFacade.articleRank(graphName, configuration)
+        );
+
+        return pageRankVariantStats(
+            intermediateResult, configuration,
+            shouldComputeCentralityDistribution
+        );
+    }
+
+    @NotNull
+    private static StatsResult<PageRankSpecificFields> pageRankVariantStats(
+        AlgorithmResultWithTiming<AlgorithmComputationResult<PageRankResult>> intermediateResult,
+        PageRankStatsConfig configuration,
+        boolean shouldComputeCentralityDistribution
+    ) {
         var algorithmResult = intermediateResult.algorithmResult;
         return algorithmResult.result().map(result -> {
             // 2. Construct NodePropertyValues from the algorithm result
@@ -151,7 +179,6 @@ public class CentralityAlgorithmsStatsBusinessFacade {
                 .algorithmSpecificFields(specificFields)
                 .build();
         }).orElseGet(() -> StatsResult.empty(PageRankSpecificFields.EMPTY));
-
     }
 
 

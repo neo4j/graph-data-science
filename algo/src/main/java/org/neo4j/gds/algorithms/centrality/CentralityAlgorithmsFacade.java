@@ -101,16 +101,30 @@ public class CentralityAlgorithmsFacade {
         );
     }
 
-
     AlgorithmComputationResult<PageRankResult> pageRank(
         String graphName,
         PageRankConfig config
+    ) {
+        return pageRankVariant(graphName, config, PageRankAlgorithmFactory.Mode.PAGE_RANK);
+    }
+
+    AlgorithmComputationResult<PageRankResult> articleRank(
+        String graphName,
+        PageRankConfig config
+    ) {
+        return pageRankVariant(graphName, config, PageRankAlgorithmFactory.Mode.ARTICLE_RANK);
+    }
+
+    private AlgorithmComputationResult<PageRankResult> pageRankVariant(
+        String graphName,
+        PageRankConfig config,
+        PageRankAlgorithmFactory.Mode pageRankVariant
     ) {
         return algorithmRunner.run(
             graphName,
             config,
             config.relationshipWeightProperty(),
-            new PageRankAlgorithmFactory<>()
+            new PageRankAlgorithmFactory<>(pageRankVariant)
         );
     }
 
