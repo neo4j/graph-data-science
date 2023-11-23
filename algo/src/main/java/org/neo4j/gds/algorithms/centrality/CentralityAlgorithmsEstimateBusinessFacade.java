@@ -24,6 +24,8 @@ import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityFactory;
 import org.neo4j.gds.degree.DegreeCentralityConfig;
 import org.neo4j.gds.degree.DegreeCentralityFactory;
+import org.neo4j.gds.pagerank.PageRankAlgorithmFactory;
+import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
 
 public class CentralityAlgorithmsEstimateBusinessFacade {
@@ -57,6 +59,26 @@ public class CentralityAlgorithmsEstimateBusinessFacade {
             configuration,
             configuration.relationshipWeightProperty(),
             new DegreeCentralityFactory<>()
+        );
+    }
+
+    public <C extends PageRankConfig> MemoryEstimateResult pageRank(
+        Object graphNameOrConfiguration,
+        C configuration
+    ) {
+        return pageRankVariant(graphNameOrConfiguration, configuration, PageRankAlgorithmFactory.Mode.PAGE_RANK);
+    }
+
+    private <C extends PageRankConfig> MemoryEstimateResult pageRankVariant(
+        Object graphNameOrConfiguration,
+        C configuration,
+        PageRankAlgorithmFactory.Mode variant
+    ) {
+        return algorithmEstimator.estimate(
+            graphNameOrConfiguration,
+            configuration,
+            configuration.relationshipWeightProperty(),
+            new PageRankAlgorithmFactory<>(variant)
         );
     }
 }
