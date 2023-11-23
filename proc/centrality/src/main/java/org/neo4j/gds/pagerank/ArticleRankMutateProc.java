@@ -21,9 +21,10 @@ package org.neo4j.gds.pagerank;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.centrality.pagerank.PageRankMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -36,16 +37,16 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ArticleRankMutateProc extends BaseProc {
 
+    @Context
+    public GraphDataScience facade;
+
     @Procedure(value = "gds.articleRank.mutate", mode = READ)
     @Description(ARTICLE_RANK_DESCRIPTION)
     public Stream<PageRankMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new ArticleRankMutateSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.centrality().articleRankMutate(graphName, configuration);
     }
 
     @Procedure(value = "gds.articleRank.mutate.estimate", mode = READ)

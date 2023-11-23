@@ -565,6 +565,21 @@ public class CentralityProcedureFacade {
         return Stream.of(PageRankComputationalResultTransformer.toStatsResult(computationResult, config));
     }
 
+    public Stream<PageRankMutateResult> articleRankMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, PageRankMutateConfig::of);
+
+        var computationResult = mutateBusinessFacade.articleRank(
+            graphName,
+            config,
+            procedureReturnColumns.contains("centralityDistribution")
+        );
+
+        return Stream.of(PageRankComputationalResultTransformer.toMutateResult(computationResult, config));
+    }
+
 
     // ################################################################################################################
 

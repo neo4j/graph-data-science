@@ -19,11 +19,13 @@
  */
 package org.neo4j.gds.algorithms.centrality;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
 import org.neo4j.gds.algorithms.centrality.specificfields.PageRankSpecificFields;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
+import org.neo4j.gds.algorithms.runner.AlgorithmResultWithTiming;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
@@ -32,6 +34,7 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityMutateConfig;
 import org.neo4j.gds.pagerank.PageRankMutateConfig;
+import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.result.CentralityStatistics;
 
 import java.util.function.Supplier;
@@ -132,6 +135,31 @@ public class CentralityAlgorithmsMutateBusinessFacade {
         var intermediateResult = runWithTiming(
             () -> centralityAlgorithmsFacade.pageRank(graphName, configuration)
         );
+
+        return pageRankVariant(intermediateResult, configuration, shouldComputeCentralityDistribution);
+    }
+
+    public NodePropertyMutateResult<PageRankSpecificFields> articleRank(
+        String graphName,
+        PageRankMutateConfig configuration,
+        boolean shouldComputeCentralityDistribution
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = runWithTiming(
+            () -> centralityAlgorithmsFacade.articleRank(graphName, configuration)
+        );
+
+        return pageRankVariant(
+            intermediateResult, configuration,
+            shouldComputeCentralityDistribution
+        );
+    }
+
+    @NotNull
+    private NodePropertyMutateResult<PageRankSpecificFields> pageRankVariant(
+        AlgorithmResultWithTiming<AlgorithmComputationResult<PageRankResult>> intermediateResult, PageRankMutateConfig configuration,
+        boolean shouldComputeCentralityDistribution
+    ) {
         var algorithmResult = intermediateResult.algorithmResult;
         return algorithmResult.result().map(result -> {
             // 2. Construct NodePropertyValues from the algorithm result
@@ -145,7 +173,6 @@ public class CentralityAlgorithmsMutateBusinessFacade {
                 configuration.nodeLabelIdentifiers(algorithmResult.graphStore()),
                 algorithmResult.graph(), algorithmResult.graphStore()
             );
-
 
             var pageRankDistribution = PageRankDistributionComputer.computeDistribution(
                 result,
@@ -168,7 +195,6 @@ public class CentralityAlgorithmsMutateBusinessFacade {
                 .algorithmSpecificFields(specificFields)
                 .build();
         }).orElseGet(() -> NodePropertyMutateResult.empty(PageRankSpecificFields.EMPTY, configuration));
-
     }
 
 
