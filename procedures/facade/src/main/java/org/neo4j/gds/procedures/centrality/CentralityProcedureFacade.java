@@ -695,6 +695,17 @@ public class CentralityProcedureFacade {
         return Stream.of(PageRankComputationalResultTransformer.toMutateResult(computationResult, config));
     }
 
+    public Stream<MemoryEstimateResult> eigenvectorMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
+        eigenvectorConfigurationPreconditions(configuration);
+
+        var config = createConfig(configuration, PageRankMutateConfig::of);
+
+        return Stream.of(estimateBusinessFacade.eigenvector(graphNameOrConfiguration, config));
+    }
+
     public Stream<PageRankStatsResult> eigenvectorStats(String graphName, Map<String, Object> configuration) {
         eigenvectorConfigurationPreconditions(configuration);
 
@@ -707,6 +718,17 @@ public class CentralityProcedureFacade {
         );
 
         return Stream.of(PageRankComputationalResultTransformer.toStatsResult(computationResult, config));
+    }
+
+    public Stream<MemoryEstimateResult> eigenvectorStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
+        eigenvectorConfigurationPreconditions(configuration);
+
+        var config = createConfig(configuration, PageRankStatsConfig::of);
+
+        return Stream.of(estimateBusinessFacade.eigenvector(graphNameOrConfiguration, config));
     }
 
     public Stream<CentralityStreamResult> eigenvectorStream(
@@ -725,6 +747,17 @@ public class CentralityProcedureFacade {
         return DefaultCentralityComputationalResultTransformer.toStreamResult(computationResult);
     }
 
+    public Stream<MemoryEstimateResult> eigenvectorStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
+        eigenvectorConfigurationPreconditions(configuration);
+
+        var config = createConfig(configuration, PageRankStreamConfig::of);
+
+        return Stream.of(estimateBusinessFacade.eigenvector(graphNameOrConfiguration, config));
+    }
+
     public Stream<PageRankWriteResult> eigenvectorWrite(
         String graphName,
         Map<String, Object> configuration
@@ -740,6 +773,17 @@ public class CentralityProcedureFacade {
         );
 
         return Stream.of(PageRankComputationalResultTransformer.toWriteResult(computationResult, config));
+    }
+
+    public Stream<MemoryEstimateResult> eigenvectorWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
+        eigenvectorConfigurationPreconditions(configuration);
+
+        var config = createConfig(configuration, PageRankWriteConfig::of);
+
+        return Stream.of(estimateBusinessFacade.eigenvector(graphNameOrConfiguration, config));
     }
 
     // FIXME: this is abominable, we have to create separate configuration for Eigenvector that doesn't contain this key
