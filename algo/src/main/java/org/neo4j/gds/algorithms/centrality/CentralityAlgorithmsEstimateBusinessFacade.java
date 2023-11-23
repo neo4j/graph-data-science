@@ -69,6 +69,13 @@ public class CentralityAlgorithmsEstimateBusinessFacade {
         return pageRankVariant(graphNameOrConfiguration, configuration, PageRankAlgorithmFactory.Mode.PAGE_RANK);
     }
 
+    public <C extends PageRankConfig> MemoryEstimateResult articleRank(
+        Object graphNameOrConfiguration,
+        C configuration
+    ) {
+        return pageRankVariant(graphNameOrConfiguration, configuration, PageRankAlgorithmFactory.Mode.ARTICLE_RANK);
+    }
+
     private <C extends PageRankConfig> MemoryEstimateResult pageRankVariant(
         Object graphNameOrConfiguration,
         C configuration,

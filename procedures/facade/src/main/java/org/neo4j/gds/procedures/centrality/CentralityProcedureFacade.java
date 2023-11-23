@@ -598,6 +598,15 @@ public class CentralityProcedureFacade {
         return Stream.of(PageRankComputationalResultTransformer.toStatsResult(computationResult, config));
     }
 
+    public Stream<MemoryEstimateResult> articleRankStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, PageRankStatsConfig::of);
+
+        return Stream.of(estimateBusinessFacade.articleRank(graphNameOrConfiguration, config));
+    }
+
     public Stream<PageRankMutateResult> articleRankMutate(
         String graphName,
         Map<String, Object> configuration
@@ -611,6 +620,15 @@ public class CentralityProcedureFacade {
         );
 
         return Stream.of(PageRankComputationalResultTransformer.toMutateResult(computationResult, config));
+    }
+
+    public Stream<MemoryEstimateResult> articleRankMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, PageRankMutateConfig::of);
+
+        return Stream.of(estimateBusinessFacade.articleRank(graphNameOrConfiguration, config));
     }
 
     public Stream<CentralityStreamResult> articleRankStream(
@@ -627,6 +645,15 @@ public class CentralityProcedureFacade {
         return DefaultCentralityComputationalResultTransformer.toStreamResult(computationResult);
     }
 
+    public Stream<MemoryEstimateResult> articleRankStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, PageRankStreamConfig::of);
+
+        return Stream.of(estimateBusinessFacade.articleRank(graphNameOrConfiguration, config));
+    }
+
     public Stream<PageRankWriteResult> articleRankWrite(
         String graphName,
         Map<String, Object> configuration
@@ -640,6 +667,15 @@ public class CentralityProcedureFacade {
         );
 
         return Stream.of(PageRankComputationalResultTransformer.toWriteResult(computationResult, config));
+    }
+
+    public Stream<MemoryEstimateResult> articleRankWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, PageRankWriteConfig::of);
+
+        return Stream.of(estimateBusinessFacade.articleRank(graphNameOrConfiguration, config));
     }
 
     public Stream<PageRankMutateResult> eigenvectorMutate(

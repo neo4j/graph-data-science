@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.centrality.pagerank.PageRankStatsResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -32,9 +30,11 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.ProcedureConstants.ESTIMATE_DESCRIPTION;
+import static org.neo4j.gds.ProcedureConstants.STATS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class ArticleRankStatsProc extends BaseProc {
+public class ArticleRankStatsProc {
 
     @Context
     public GraphDataScience facade;
@@ -55,11 +55,7 @@ public class ArticleRankStatsProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new ArticleRankStatsSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.centrality().articleRankStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
 
