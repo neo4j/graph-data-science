@@ -592,6 +592,20 @@ public class CentralityProcedureFacade {
         return DefaultCentralityComputationalResultTransformer.toStreamResult(computationResult);
     }
 
+    public Stream<PageRankWriteResult> articleRankWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var config = createConfig(configuration, PageRankWriteConfig::of);
+
+        var computationResult = writeBusinessFacade.articleRank(
+            graphName,
+            config,
+            procedureReturnColumns.contains("centralityDistribution")
+        );
+
+        return Stream.of(PageRankComputationalResultTransformer.toWriteResult(computationResult, config));
+    }
 
     // ################################################################################################################
 

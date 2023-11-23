@@ -19,12 +19,14 @@
  */
 package org.neo4j.gds.algorithms.centrality;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.centrality.specificfields.AlphaHarmonicSpecificFields;
 import org.neo4j.gds.algorithms.centrality.specificfields.CentralityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
 import org.neo4j.gds.algorithms.centrality.specificfields.PageRankSpecificFields;
+import org.neo4j.gds.algorithms.runner.AlgorithmResultWithTiming;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
@@ -32,6 +34,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
+import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankWriteConfig;
 import org.neo4j.gds.harmonic.DeprecatedTieredHarmonicCentralityWriteConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
@@ -131,6 +134,31 @@ public class CentralityAlgorithmsWriteBusinessFacade {
             () -> centralityAlgorithmsFacade.pageRank(graphName, configuration)
         );
 
+        return pageRankVariant(intermediateResult, configuration, shouldComputeCentralityDistribution);
+    }
+
+    public NodePropertyWriteResult<PageRankSpecificFields> articleRank(
+        String graphName,
+        PageRankWriteConfig configuration,
+        boolean shouldComputeCentralityDistribution
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = runWithTiming(
+            () -> centralityAlgorithmsFacade.articleRank(graphName, configuration)
+        );
+
+        return pageRankVariant(
+            intermediateResult, configuration,
+            shouldComputeCentralityDistribution
+        );
+    }
+
+    @NotNull
+    private NodePropertyWriteResult<PageRankSpecificFields> pageRankVariant(
+        AlgorithmResultWithTiming<AlgorithmComputationResult<PageRankResult>> intermediateResult,
+        PageRankWriteConfig configuration,
+        boolean shouldComputeCentralityDistribution
+    ) {
         var algorithmResult = intermediateResult.algorithmResult;
         return algorithmResult.result().map(result -> {
             // 2. Construct NodePropertyValues from the algorithm result
