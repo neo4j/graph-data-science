@@ -24,6 +24,9 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SimilaritiesFuncWithCypherTest extends BaseTest {
@@ -78,6 +81,22 @@ class SimilaritiesFuncWithCypherTest extends BaseTest {
         runQueryWithResultConsumer(
             "RETURN gds.similarity.jaccard([1, 5], [5, 5]) AS score",
             result -> assertEquals(1.0 / 3.0, result.next().get("score"))
+        );
+    }
+
+    @Test
+    void testJaccardFunctionWithInputFromDatabase() {
+        assertThatNoException().isThrownBy(
+            () -> runQueryWithResultConsumer(
+                "CREATE (t:Test {listone: [1, 5], listtwo: [5, 5]}) RETURN gds.similarity.jaccard(t.listone, t.listtwo) AS score",
+                result -> {
+                    assertThat(result.hasNext()).isTrue();
+                    var score = result.next().get("score");
+                    assertThat(score)
+                        .asInstanceOf(DOUBLE)
+                        .isEqualTo(1.0 / 3.0);
+                }
+            )
         );
     }
 }
