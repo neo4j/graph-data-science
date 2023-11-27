@@ -25,6 +25,7 @@ import org.neo4j.procedure.Name;
 import org.neo4j.procedure.UserFunction;
 import org.neo4j.values.storable.Values;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -152,10 +153,8 @@ public class SimilaritiesFunc {
      * @return The jaccard score, the intersection divided by the union of the input lists.
      */
     private double jaccard(List<Number> vector1, List<Number> vector2) {
-        vector1.removeIf(IS_NULL);
-        vector2.removeIf(IS_NULL);
-        vector1.sort(NUMBER_COMPARATOR);
-        vector2.sort(NUMBER_COMPARATOR);
+        var sortedVector1 = removeNullsAndSort(vector1);
+        var sortedVector2 = removeNullsAndSort(vector2);
 
         int index1 = 0;
         int index2 = 0;
@@ -163,9 +162,9 @@ public class SimilaritiesFunc {
         int intersection = 0;
         double union = 0;
 
-        while (index1 < vector1.size() && index2 < vector2.size()) {
-            Number val1 = vector1.get(index1);
-            Number val2 = vector2.get(index2);
+        while (index1 < sortedVector1.size() && index2 < sortedVector2.size()) {
+            Number val1 = sortedVector1.get(index1);
+            Number val2 = sortedVector2.get(index2);
             int compare = NUMBER_COMPARATOR.compare(val1, val2);
 
             if (compare == 0) {
@@ -183,9 +182,21 @@ public class SimilaritiesFunc {
         }
 
         // the remainder, if any, is never shared so add to the union
-        union += (vector1.size() - index1) + (vector2.size() - index2);
+        union += (sortedVector1.size() - index1) + (sortedVector2.size() - index2);
 
         return union == 0 ? 1 : intersection / union;
+    }
+
+    private static List<Number> removeNulls(List<Number> input) {
+        var output = new ArrayList<>(input);
+        output.removeIf(IS_NULL);
+        return output;
+    }
+
+    private static List<Number> removeNullsAndSort(List<Number> input) {
+        var output = removeNulls(input);
+        output.sort(NUMBER_COMPARATOR);
+        return output;
     }
 
     private static double getDoubleValue(Number value) {
