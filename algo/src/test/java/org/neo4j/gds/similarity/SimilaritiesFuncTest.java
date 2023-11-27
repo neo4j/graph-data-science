@@ -28,9 +28,12 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class SimilaritiesFuncTest {
@@ -155,6 +158,41 @@ class SimilaritiesFuncTest {
         var left = new ArrayList<Number>(Arrays.asList(null, 1, 3));
         var right = new ArrayList<Number>(Arrays.asList(1, null, 2));
         assertEquals(1 / 3.0, new SimilaritiesFunc().jaccardSimilarity(left, right));
+    }
+
+    @ParameterizedTest(name = "{2}")
+    @MethodSource("listCollectors")
+    void shouldComputeJaccardAtAllCasesOfListInput(
+        Collector<Number, ?, List<Number>> firstListCollector,
+        Collector<Number, ?, List<Number>> secondListCollector,
+        String label
+    ) {
+        var arr1 = new int[]{1,2,3};
+        var arr2 = new int[]{1,2,3};
+        var l1 = Arrays.stream(arr1).boxed().collect(firstListCollector);
+        var l2 = Arrays.stream(arr2).boxed().collect(secondListCollector);
+
+        var similarities = new SimilaritiesFunc();
+        assertThatNoException().isThrownBy(
+            () -> assertThat(similarities.jaccardSimilarity(l1, l2)).isEqualTo(1)
+        );
+    }
+
+    private static Stream<Arguments> listCollectors() {
+        return Stream.of(
+            Arguments.of(
+                Collectors.toUnmodifiableList(), Collectors.toUnmodifiableList(), "Unmodifiable, Unmodifiable"
+            ),
+            Arguments.of(
+                Collectors.toUnmodifiableList(), Collectors.toList(), "Unmodifiable, Modifiable"
+            ),
+            Arguments.of(
+                Collectors.toList(), Collectors.toList(), "Modifiable, Modifiable"
+            ),
+            Arguments.of(
+                Collectors.toList(), Collectors.toUnmodifiableList(), "Modifiable, Unmodifiable"
+            )
+        );
     }
 
 }
