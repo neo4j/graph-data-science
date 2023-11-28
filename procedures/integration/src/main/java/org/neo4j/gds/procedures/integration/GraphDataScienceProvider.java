@@ -32,13 +32,13 @@ import org.neo4j.kernel.api.procedure.Context;
 public class GraphDataScienceProvider implements ThrowingFunction<Context, GraphDataScience, ProcedureException> {
     private final Log log;
     private final CatalogFacadeProvider catalogFacadeProvider;
-    private final AlgorithmFacadeService algorithmFacadeService;
+    private final AlgorithmFacadeProviderService algorithmFacadeService;
     private final DeprecatedProceduresMetricService deprecatedProceduresMetricService;
 
-    public GraphDataScienceProvider(
+    GraphDataScienceProvider(
         Log log,
         CatalogFacadeProvider catalogFacadeProvider,
-        AlgorithmFacadeService algorithmFacadeService,
+        AlgorithmFacadeProviderService algorithmFacadeService,
         DeprecatedProceduresMetricService deprecatedProceduresMetricService
     ) {
         this.log = log;

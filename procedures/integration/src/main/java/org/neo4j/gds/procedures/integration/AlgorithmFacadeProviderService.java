@@ -45,7 +45,7 @@ import org.neo4j.gds.services.UserLogServices;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
-public class AlgorithmFacadeService {
+class AlgorithmFacadeProviderService {
 
     // dull utilities
     private final FictitiousGraphStoreEstimationService fictitiousGraphStoreEstimationService = new FictitiousGraphStoreEstimationService();
@@ -69,7 +69,7 @@ public class AlgorithmFacadeService {
 
     //algorithm facade parameters
 
-    AlgorithmFacadeService(
+    AlgorithmFacadeProviderService(
         Log log,
         ConfigurationParser configurationParser,
         GraphStoreCatalogService graphStoreCatalogService,
@@ -100,7 +100,7 @@ public class AlgorithmFacadeService {
     }
 
 
-  AlgorithmProcedureFacadeProvider createAlgorithmFacadeProvider(Context context) throws ProcedureException {
+    AlgorithmProcedureFacadeProvider createAlgorithmFacadeProvider(Context context) throws ProcedureException {
         // Neo4j's services
         var graphDatabaseService = context.graphDatabaseAPI();
         var kernelTransaction = kernelTransactionAccessor.getKernelTransaction(context);
@@ -134,12 +134,12 @@ public class AlgorithmFacadeService {
             terminationFlag
         );
 
-      var writeRelationshipService = new WriteRelationshipService(
-          log,
-          exportBuildersProvider.relationshipExporterBuilder(exporterContext),
-          taskRegistryFactory,
-          terminationFlag
-      );
+        var writeRelationshipService = new WriteRelationshipService(
+            log,
+            exportBuildersProvider.relationshipExporterBuilder(exporterContext),
+            taskRegistryFactory,
+            terminationFlag
+        );
         var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(graphLoaderContext, user);
         var requestScopedDependencies = RequestScopedDependencies.builder()
             .with(databaseId)
@@ -167,13 +167,12 @@ public class AlgorithmFacadeService {
             user
         );
 
-        var  mutateNodePropertyService = new MutateNodePropertyService(log);
-      var mutateRelationshipService = new MutateRelationshipService(log);
-        var configurationCreator= new ConfigurationCreator(configurationParser,algorithmMetaDataSetter,user);
+        var mutateNodePropertyService = new MutateNodePropertyService(log);
+        var mutateRelationshipService = new MutateRelationshipService(log);
+        var configurationCreator = new ConfigurationCreator(configurationParser, algorithmMetaDataSetter, user);
         // procedure facade
         return new AlgorithmProcedureFacadeProvider(
             configurationCreator,
-            user,
             returnColumns,
             mutateNodePropertyService,
             writeNodePropertyService,

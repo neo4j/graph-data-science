@@ -44,7 +44,6 @@ import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStreamBusinessFac
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
@@ -52,19 +51,17 @@ import org.neo4j.gds.procedures.similarity.SimilarityProcedureFacade;
 
 class AlgorithmProcedureFacadeProvider {
 
-        private final ConfigurationCreator configurationCreator;
-        private final User user;
-        private final  ProcedureCallContextReturnColumns returnColumns;
-        private final MutateNodePropertyService mutateNodePropertyService;
-        private final  WriteNodePropertyService writeNodePropertyService;
+    private final ConfigurationCreator configurationCreator;
+    private final ProcedureCallContextReturnColumns returnColumns;
+    private final MutateNodePropertyService mutateNodePropertyService;
+    private final WriteNodePropertyService writeNodePropertyService;
     private final MutateRelationshipService mutateRelationshipService;
     private final WriteRelationshipService writeRelationshipService;
-        private final  AlgorithmEstimator algorithmEstimator;
-        private  final AlgorithmRunner algorithmRunner;
+    private final AlgorithmEstimator algorithmEstimator;
+    private final AlgorithmRunner algorithmRunner;
 
     AlgorithmProcedureFacadeProvider(
         ConfigurationCreator configurationCreator,
-        User user,
         ProcedureCallContextReturnColumns returnColumns,
         MutateNodePropertyService mutateNodePropertyService,
         WriteNodePropertyService writeNodePropertyService,
@@ -74,7 +71,6 @@ class AlgorithmProcedureFacadeProvider {
         AlgorithmEstimator algorithmEstimator
     ) {
         this.configurationCreator = configurationCreator;
-        this.user = user;
         this.returnColumns = returnColumns;
         this.mutateNodePropertyService = mutateNodePropertyService;
         this.writeNodePropertyService = writeNodePropertyService;
