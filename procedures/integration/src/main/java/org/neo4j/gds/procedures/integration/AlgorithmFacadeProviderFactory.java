@@ -45,7 +45,7 @@ import org.neo4j.gds.services.UserLogServices;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
-class AlgorithmFacadeProviderService {
+class AlgorithmFacadeProviderFactory {
 
     // dull utilities
     private final FictitiousGraphStoreEstimationService fictitiousGraphStoreEstimationService = new FictitiousGraphStoreEstimationService();
@@ -69,7 +69,7 @@ class AlgorithmFacadeProviderService {
 
     //algorithm facade parameters
 
-    AlgorithmFacadeProviderService(
+    AlgorithmFacadeProviderFactory(
         Log log,
         ConfigurationParser configurationParser,
         GraphStoreCatalogService graphStoreCatalogService,

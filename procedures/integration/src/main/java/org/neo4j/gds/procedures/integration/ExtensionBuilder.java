@@ -252,11 +252,11 @@ public final class ExtensionBuilder {
         );
     }
 
-    private AlgorithmFacadeProviderService createAlgorithmService(
+    private AlgorithmFacadeProviderFactory createAlgorithmService(
         AlgorithmMetricsService algorithmMetricsService,
         ExporterBuildersProviderService exporterBuildersProviderService
     ) {
-        return new AlgorithmFacadeProviderService(
+        return new AlgorithmFacadeProviderFactory(
             log,
             configurationParser,
             graphStoreCatalogService,
