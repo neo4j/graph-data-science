@@ -30,10 +30,7 @@ import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.compress.AdjacencyCompressor.ValueMapper;
 import org.neo4j.gds.api.compress.AdjacencyListsWithProperties;
-import org.neo4j.gds.compat.LongPropertyReference;
-import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.huge.DirectIdMap;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -179,14 +176,12 @@ public abstract class AdjacencyListBuilderBaseTest {
             .importSizing(ImportSizing.of(1, nodeCount))
             .build();
 
-        DirectIdMap idMap = new DirectIdMap(nodeCount);
-
-        var relationshipsBatchBuffer = new RelationshipsBatchBufferBuilder<PropertyReference>()
+        var relationshipsBatchBuffer = new RelationshipsBatchBufferBuilder<Integer>()
             .capacity(relationshipCount)
-            .propertyReferenceClass(PropertyReference.class)
+            .propertyReferenceClass(Integer.class)
             .build();
 
-        PropertyReader.Buffered propertyReader = PropertyReader.buffered(relationshipCount, propertyCount);
+        PropertyReader.Buffered<Integer> propertyReader = PropertyReader.buffered(relationshipCount, propertyCount);
 
         Map<Long, Long> sourceNodeToTargetNode = new HashMap<>();
         Map<Long, Integer> sourceNodeToRelationshipId = new HashMap<>();
@@ -228,7 +223,7 @@ public abstract class AdjacencyListBuilderBaseTest {
                     targetId,
                     localRelationshipId,
                     // PropertyReader.Buffered does not require property references
-                    LongPropertyReference.empty()
+                    -1
                 );
                 for (int propertyKeyId : propertyKeyIds) {
                     propertyReader.add(localRelationshipId, propertyKeyId, relationshipProperty);
