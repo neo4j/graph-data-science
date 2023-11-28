@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.function.ThrowingFunction;
-import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
@@ -215,13 +214,11 @@ public final class ExtensionBuilder {
             metricsFacade.projectionMetrics()
         );
 
-        var centralityProcedureProvider = createCentralityProcedureProvider(
-            metricsFacade.algorithmMetrics(), exporterBuildersProviderService
-        );
-        var communityProcedureProvider = createCommunityProcedureProvider(
+        var algorithmFacadeService = createAlgorithmService(
             metricsFacade.algorithmMetrics(),
             exporterBuildersProviderService
         );
+
         var similarityProcedureProvider = createSimilarityProcedureProvider(
             metricsFacade.algorithmMetrics(), exporterBuildersProviderService
         );
@@ -229,8 +226,7 @@ public final class ExtensionBuilder {
         return new GraphDataScienceProvider(
             log,
             catalogFacadeProvider,
-            centralityProcedureProvider,
-            communityProcedureProvider,
+            algorithmFacadeService,
             similarityProcedureProvider,
             metricsFacade.deprecatedProcedures()
         );
@@ -259,11 +255,11 @@ public final class ExtensionBuilder {
         );
     }
 
-    private CentralityProcedureProvider createCentralityProcedureProvider(
+    private AlgorithmFacadeService createAlgorithmService(
         AlgorithmMetricsService algorithmMetricsService,
         ExporterBuildersProviderService exporterBuildersProviderService
     ) {
-        return new CentralityProcedureProvider(
+        return new AlgorithmFacadeService(
             log,
             configurationParser,
             graphStoreCatalogService,
@@ -280,29 +276,6 @@ public final class ExtensionBuilder {
         );
     }
 
-    private CommunityProcedureProvider createCommunityProcedureProvider(
-        AlgorithmMetricsService algorithmMetricsService,
-        ExporterBuildersProviderService exporterBuildersProviderService
-    ) {
-        var mutateNodePropertyService = new MutateNodePropertyService(this.log);
-
-        return new CommunityProcedureProvider(
-            log,
-            configurationParser,
-            graphStoreCatalogService,
-            useMaxMemoryEstimation,
-            algorithmMetaDataSetterService,
-            algorithmMetricsService,
-            databaseIdAccessor,
-            exporterBuildersProviderService,
-            kernelTransactionAccessor,
-            mutateNodePropertyService,
-            taskRegistryFactoryService,
-            terminationFlagService,
-            userAccessor,
-            userLogServices
-        );
-    }
 
     private SimilarityProcedureProvider createSimilarityProcedureProvider(
         AlgorithmMetricsService algorithmMetricsService,

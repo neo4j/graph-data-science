@@ -65,7 +65,7 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
 
         var nodePropertyServiceMock = mock(MutateNodePropertyService.class);
 
-        var businessFacade = new CommunityAlgorithmsMutateBusinessFacade(nodePropertyServiceMock, null);
+        var businessFacade = new CommunityAlgorithmsMutateBusinessFacade(null, nodePropertyServiceMock);
 
         var mutateResult = businessFacade.mutateNodeProperty(
             algorithmResult,
@@ -92,7 +92,7 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
 
         var nodePropertyService = new MutateNodePropertyService(mock(Log.class));
 
-        var businessFacade = new CommunityAlgorithmsMutateBusinessFacade(nodePropertyService, null);
+        var businessFacade = new CommunityAlgorithmsMutateBusinessFacade(null, nodePropertyService);
 
         var configMock = mock(MutateNodePropertyConfig.class);
         when(configMock.mutateProperty()).thenReturn("bugger-off");
@@ -148,7 +148,7 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
 
         var nodePropertyService = new MutateNodePropertyService(mock(Log.class));
 
-        var businessFacade = new CommunityAlgorithmsMutateBusinessFacade(nodePropertyService, null);
+        var businessFacade = new CommunityAlgorithmsMutateBusinessFacade(null, nodePropertyService);
 
         var configMock = mock(MutateNodePropertyConfig.class);
         when(configMock.mutateProperty()).thenReturn("bugger-off");

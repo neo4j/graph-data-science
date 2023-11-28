@@ -72,8 +72,8 @@ public class CommunityAlgorithmsWriteBusinessFacade {
     private final WriteNodePropertyService writeNodePropertyService;
 
     public CommunityAlgorithmsWriteBusinessFacade(
-        CommunityAlgorithmsFacade communityAlgorithmsFacade,
-        WriteNodePropertyService writeNodePropertyService
+        WriteNodePropertyService writeNodePropertyService,
+        CommunityAlgorithmsFacade communityAlgorithmsFacade
     ) {
         this.writeNodePropertyService = writeNodePropertyService;
         this.communityAlgorithmsFacade = communityAlgorithmsFacade;

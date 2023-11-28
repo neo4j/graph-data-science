@@ -71,8 +71,8 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
+import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
@@ -352,7 +352,7 @@ class WccMutateProcTest extends BaseProcTest {
             false
         );
         var algorithmsMutateBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
-            new MutateNodePropertyService(logMock), new CommunityAlgorithmsFacade(
+            new CommunityAlgorithmsFacade(
                 new AlgorithmRunner(
                     logMock,
                     graphStoreCatalogService,
@@ -366,7 +366,8 @@ class WccMutateProcTest extends BaseProcTest {
                     TaskRegistryFactory.empty(),
                     EmptyUserLogRegistryFactory.INSTANCE
                 )
-            )
+            ),
+            new MutateNodePropertyService(logMock)
         );
 
         applyOnProcedure(procedure -> {
@@ -489,7 +490,7 @@ class WccMutateProcTest extends BaseProcTest {
                 false
             );
             var algorithmsBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
-                new MutateNodePropertyService(logMock), new CommunityAlgorithmsFacade(
+                new CommunityAlgorithmsFacade(
                     new AlgorithmRunner(
                         logMock,
                         graphStoreCatalogService,
@@ -503,7 +504,8 @@ class WccMutateProcTest extends BaseProcTest {
                         TaskRegistryFactory.empty(),
                         EmptyUserLogRegistryFactory.INSTANCE
                     )
-                )
+                ),
+                new MutateNodePropertyService(logMock)
             );
 
             procedure.facade = new GraphDataScience(
@@ -574,7 +576,7 @@ class WccMutateProcTest extends BaseProcTest {
                 false
             );
             var algorithmsBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
-                new MutateNodePropertyService(null), new CommunityAlgorithmsFacade(
+                new CommunityAlgorithmsFacade(
                     new AlgorithmRunner(
                         null,
                         graphStoreCatalogService,
@@ -587,7 +589,8 @@ class WccMutateProcTest extends BaseProcTest {
                         TaskRegistryFactory.empty(),
                         EmptyUserLogRegistryFactory.INSTANCE
                     )
-                )
+                ),
+                new MutateNodePropertyService(null)
             );
             proc.facade = new GraphDataScience(
                 null,
@@ -660,7 +663,7 @@ class WccMutateProcTest extends BaseProcTest {
             false
         );
         var algorithmsBusinessFacade = new CommunityAlgorithmsMutateBusinessFacade(
-            new MutateNodePropertyService(logMock), new CommunityAlgorithmsFacade(
+            new CommunityAlgorithmsFacade(
                 new AlgorithmRunner(
                     logMock,
                     graphStoreCatalogService,
@@ -674,7 +677,8 @@ class WccMutateProcTest extends BaseProcTest {
                     TaskRegistryFactory.empty(),
                     EmptyUserLogRegistryFactory.INSTANCE
                 )
-            )
+            ),
+            new MutateNodePropertyService(logMock)
         );
 
         applyOnProcedure(procedure ->

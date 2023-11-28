@@ -24,9 +24,7 @@ import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsMutateBusinessFac
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsStatsBusinessFacade;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsWriteBusinessFacade;
-import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
@@ -35,8 +33,6 @@ import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityStreamConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
 import org.neo4j.gds.degree.DegreeCentralityStatsConfig;
 import org.neo4j.gds.degree.DegreeCentralityStreamConfig;
@@ -50,12 +46,13 @@ import org.neo4j.gds.influenceMaximization.InfluenceMaximizationMutateConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStatsConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationStreamConfig;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationWriteConfig;
-import org.neo4j.gds.procedures.centrality.alphaharmonic.AlphaHarmonicStreamResult;
-import org.neo4j.gds.procedures.centrality.alphaharmonic.AlphaHarmonicWriteResult;
 import org.neo4j.gds.pagerank.PageRankMutateConfig;
 import org.neo4j.gds.pagerank.PageRankStatsConfig;
 import org.neo4j.gds.pagerank.PageRankStreamConfig;
 import org.neo4j.gds.pagerank.PageRankWriteConfig;
+import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
+import org.neo4j.gds.procedures.centrality.alphaharmonic.AlphaHarmonicStreamResult;
+import org.neo4j.gds.procedures.centrality.alphaharmonic.AlphaHarmonicWriteResult;
 import org.neo4j.gds.procedures.centrality.betacloseness.BetaClosenessCentralityMutateResult;
 import org.neo4j.gds.procedures.centrality.betacloseness.BetaClosenessCentralityWriteResult;
 import org.neo4j.gds.procedures.centrality.celf.CELFMutateResult;
@@ -66,17 +63,14 @@ import org.neo4j.gds.procedures.centrality.pagerank.PageRankComputationalResultT
 import org.neo4j.gds.procedures.centrality.pagerank.PageRankMutateResult;
 import org.neo4j.gds.procedures.centrality.pagerank.PageRankStatsResult;
 import org.neo4j.gds.procedures.centrality.pagerank.PageRankWriteResult;
-import org.neo4j.gds.procedures.configparser.ConfigurationParser;
 import org.neo4j.gds.results.MemoryEstimateResult;
 
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class CentralityProcedureFacade {
 
-    private final ConfigurationParser configurationParser;
-    private final User user;
+    private final ConfigurationCreator configurationCreator;
     private final ProcedureReturnColumns procedureReturnColumns;
     private final CentralityAlgorithmsMutateBusinessFacade mutateBusinessFacade;
     private final CentralityAlgorithmsStatsBusinessFacade statsBusinessFacade;
@@ -84,35 +78,33 @@ public class CentralityProcedureFacade {
     private final CentralityAlgorithmsWriteBusinessFacade writeBusinessFacade;
 
     private final CentralityAlgorithmsEstimateBusinessFacade estimateBusinessFacade;
-    private final AlgorithmMetaDataSetter algorithmMetaDataSetter;
 
     public CentralityProcedureFacade(
-        ConfigurationParser configurationParser,
-        User user,
+        ConfigurationCreator configurationCreator,
         ProcedureReturnColumns procedureReturnColumns,
+        CentralityAlgorithmsEstimateBusinessFacade estimateBusinessFacade,
         CentralityAlgorithmsMutateBusinessFacade mutateBusinessFacade,
         CentralityAlgorithmsStatsBusinessFacade statsBusinessFacade,
         CentralityAlgorithmsStreamBusinessFacade streamBusinessFacade,
-        CentralityAlgorithmsWriteBusinessFacade writeBusinessFacade,
-        CentralityAlgorithmsEstimateBusinessFacade estimateBusinessFacade,
-        AlgorithmMetaDataSetter algorithmMetaDataSetter
+        CentralityAlgorithmsWriteBusinessFacade writeBusinessFacade
     ) {
-        this.configurationParser = configurationParser;
-        this.user = user;
+        this.configurationCreator = configurationCreator;
         this.procedureReturnColumns = procedureReturnColumns;
         this.mutateBusinessFacade = mutateBusinessFacade;
         this.statsBusinessFacade = statsBusinessFacade;
         this.streamBusinessFacade = streamBusinessFacade;
         this.writeBusinessFacade = writeBusinessFacade;
         this.estimateBusinessFacade = estimateBusinessFacade;
-        this.algorithmMetaDataSetter = algorithmMetaDataSetter;
     }
 
     public Stream<CentralityStreamResult> betweenessCentralityStream(
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createStreamConfig(configuration, BetweennessCentralityStreamConfig::of);
+        var config = configurationCreator.createConfigurationForStream(
+            configuration,
+            BetweennessCentralityStreamConfig::of
+        );
 
         var computationResult = streamBusinessFacade.betweennessCentrality(
             graphName,
@@ -126,7 +118,10 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, BetweennessCentralityStatsConfig::of);
+        var config = configurationCreator.createConfiguration(
+            configuration,
+            BetweennessCentralityStatsConfig::of
+        );
 
         var computationResult = statsBusinessFacade.betweennessCentrality(
             graphName,
@@ -141,7 +136,7 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, BetweennessCentralityMutateConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, BetweennessCentralityMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.betweennessCentrality(
             graphName,
@@ -156,7 +151,7 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, BetweennessCentralityWriteConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, BetweennessCentralityWriteConfig::of);
 
         var computationResult = writeBusinessFacade.betweennessCentrality(
             graphName,
@@ -173,7 +168,7 @@ public class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, BetweennessCentralityStreamConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, BetweennessCentralityStreamConfig::of);
 
         return Stream.of(estimateBusinessFacade.betweennessCentrality(graphNameOrConfiguration, config));
 
@@ -183,7 +178,7 @@ public class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, BetweennessCentralityStatsConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, BetweennessCentralityStatsConfig::of);
 
         return Stream.of(estimateBusinessFacade.betweennessCentrality(graphNameOrConfiguration, config));
 
@@ -193,7 +188,7 @@ public class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, BetweennessCentralityMutateConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, BetweennessCentralityMutateConfig::of);
 
         return Stream.of(estimateBusinessFacade.betweennessCentrality(graphNameOrConfiguration, config));
 
@@ -203,7 +198,7 @@ public class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, BetweennessCentralityWriteConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, BetweennessCentralityWriteConfig::of);
 
         return Stream.of(estimateBusinessFacade.betweennessCentrality(graphNameOrConfiguration, config));
 
@@ -213,7 +208,7 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createStreamConfig(configuration, DegreeCentralityStreamConfig::of);
+        var config = configurationCreator.createConfigurationForStream(configuration, DegreeCentralityStreamConfig::of);
 
         var computationResult = streamBusinessFacade.degreeCentrality(
             graphName,
@@ -227,7 +222,7 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, DegreeCentralityStatsConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, DegreeCentralityStatsConfig::of);
 
         var computationResult = statsBusinessFacade.degreeCentrality(
             graphName,
@@ -242,7 +237,7 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, DegreeCentralityMutateConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, DegreeCentralityMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.degreeCentrality(
             graphName,
@@ -258,7 +253,7 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, DegreeCentralityWriteConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, DegreeCentralityWriteConfig::of);
 
         var computationResult = writeBusinessFacade.degreeCentrality(
             graphName,
@@ -274,7 +269,7 @@ public class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, DegreeCentralityStreamConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, DegreeCentralityStreamConfig::of);
 
         return Stream.of(estimateBusinessFacade.degreeCentrality(graphNameOrConfiguration, config));
 
@@ -284,7 +279,7 @@ public class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, DegreeCentralityStatsConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, DegreeCentralityStatsConfig::of);
 
         return Stream.of(estimateBusinessFacade.degreeCentrality(graphNameOrConfiguration, config));
 
@@ -294,7 +289,7 @@ public class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, DegreeCentralityMutateConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, DegreeCentralityMutateConfig::of);
 
         return Stream.of(estimateBusinessFacade.degreeCentrality(graphNameOrConfiguration, config));
 
@@ -304,7 +299,7 @@ public class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, DegreeCentralityWriteConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, DegreeCentralityWriteConfig::of);
 
         return Stream.of(estimateBusinessFacade.degreeCentrality(graphNameOrConfiguration, config));
 
@@ -314,7 +309,10 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createStreamConfig(configuration, ClosenessCentralityStreamConfig::of);
+        var config = configurationCreator.createConfigurationForStream(
+            configuration,
+            ClosenessCentralityStreamConfig::of
+        );
 
         var computationResult = streamBusinessFacade.closenessCentrality(
             graphName,
@@ -328,7 +326,7 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, ClosenessCentralityStatsConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, ClosenessCentralityStatsConfig::of);
 
         var computationResult = statsBusinessFacade.closenessCentrality(
             graphName,
@@ -343,7 +341,7 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, ClosenessCentralityMutateConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, ClosenessCentralityMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.closenessCentrality(
             graphName,
@@ -359,7 +357,7 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, ClosenessCentralityWriteConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, ClosenessCentralityWriteConfig::of);
 
         var computationResult = writeBusinessFacade.closenessCentrality(
             graphName,
@@ -374,7 +372,7 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, ClosenessCentralityMutateConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, ClosenessCentralityMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.closenessCentrality(
             graphName,
@@ -393,7 +391,7 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, ClosenessCentralityWriteConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, ClosenessCentralityWriteConfig::of);
 
         var computationResult = writeBusinessFacade.closenessCentrality(
             graphName,
@@ -411,7 +409,10 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createStreamConfig(configuration, HarmonicCentralityStreamConfig::of);
+        var config = configurationCreator.createConfigurationForStream(
+            configuration,
+            HarmonicCentralityStreamConfig::of
+        );
 
         var computationResult = streamBusinessFacade.harmonicCentrality(
             graphName,
@@ -425,7 +426,7 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, HarmonicCentralityStatsConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, HarmonicCentralityStatsConfig::of);
 
         var computationResult = statsBusinessFacade.harmonicCentrality(
             graphName,
@@ -440,7 +441,7 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, HarmonicCentralityMutateConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, HarmonicCentralityMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.harmonicCentrality(
             graphName,
@@ -456,7 +457,7 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, HarmonicCentralityWriteConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, HarmonicCentralityWriteConfig::of);
 
         var computationResult = writeBusinessFacade.harmonicCentrality(
             graphName,
@@ -471,7 +472,7 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, HarmonicCentralityStreamConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, HarmonicCentralityStreamConfig::of);
 
         var computationResult = streamBusinessFacade.harmonicCentrality(
             graphName,
@@ -485,7 +486,10 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, DeprecatedTieredHarmonicCentralityWriteConfig::of);
+        var config = configurationCreator.createConfiguration(
+            configuration,
+            DeprecatedTieredHarmonicCentralityWriteConfig::of
+        );
 
         var computationResult = writeBusinessFacade.alphaHarmonicCentrality(
             graphName,
@@ -503,7 +507,10 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createStreamConfig(configuration, InfluenceMaximizationStreamConfig::of);
+        var config = configurationCreator.createConfigurationForStream(
+            configuration,
+            InfluenceMaximizationStreamConfig::of
+        );
 
         var computationResult = streamBusinessFacade.celf(
             graphName,
@@ -517,7 +524,7 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, InfluenceMaximizationStatsConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, InfluenceMaximizationStatsConfig::of);
 
         var statsResult = statsBusinessFacade.celf(
             graphName,
@@ -531,7 +538,7 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, InfluenceMaximizationMutateConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, InfluenceMaximizationMutateConfig::of);
 
         var mutateResult = mutateBusinessFacade.celf(
             graphName,
@@ -545,7 +552,7 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, InfluenceMaximizationWriteConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, InfluenceMaximizationWriteConfig::of);
 
         var writeResult = writeBusinessFacade.celf(
             graphName,
@@ -560,7 +567,7 @@ public class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, InfluenceMaximizationStreamConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, InfluenceMaximizationStreamConfig::of);
 
         return Stream.of(estimateBusinessFacade.celf(graphNameOrConfiguration, config));
 
@@ -570,7 +577,7 @@ public class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, InfluenceMaximizationStatsConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, InfluenceMaximizationStatsConfig::of);
 
         return Stream.of(estimateBusinessFacade.celf(graphNameOrConfiguration, config));
 
@@ -580,7 +587,7 @@ public class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, InfluenceMaximizationMutateConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, InfluenceMaximizationMutateConfig::of);
 
         return Stream.of(estimateBusinessFacade.celf(graphNameOrConfiguration, config));
 
@@ -590,7 +597,7 @@ public class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, InfluenceMaximizationWriteConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, InfluenceMaximizationWriteConfig::of);
 
         return Stream.of(estimateBusinessFacade.celf(graphNameOrConfiguration, config));
 
@@ -600,7 +607,7 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createStreamConfig(configuration, PageRankStreamConfig::of);
+        var config = configurationCreator.createConfigurationForStream(configuration, PageRankStreamConfig::of);
 
         var computationResult = streamBusinessFacade.pageRank(
             graphName,
@@ -614,7 +621,7 @@ public class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, PageRankStreamConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, PageRankStreamConfig::of);
 
         return Stream.of(estimateBusinessFacade.pageRank(graphNameOrConfiguration, config));
     }
@@ -623,7 +630,7 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, PageRankStatsConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, PageRankStatsConfig::of);
 
         var computationResult = statsBusinessFacade.pageRank(
             graphName,
@@ -638,7 +645,7 @@ public class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, PageRankStatsConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, PageRankStatsConfig::of);
 
         return Stream.of(estimateBusinessFacade.pageRank(graphNameOrConfiguration, config));
     }
@@ -647,7 +654,7 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, PageRankMutateConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, PageRankMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.pageRank(
             graphName,
@@ -662,7 +669,7 @@ public class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, PageRankMutateConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, PageRankMutateConfig::of);
 
         return Stream.of(estimateBusinessFacade.pageRank(graphNameOrConfiguration, config));
     }
@@ -671,7 +678,7 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, PageRankWriteConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, PageRankWriteConfig::of);
 
         var computationResult = writeBusinessFacade.pageRank(
             graphName,
@@ -686,13 +693,13 @@ public class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, PageRankWriteConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, PageRankWriteConfig::of);
 
         return Stream.of(estimateBusinessFacade.pageRank(graphNameOrConfiguration, config));
     }
 
     public Stream<PageRankStatsResult> articleRankStats(String graphName, Map<String, Object> configuration) {
-        var config = createConfig(configuration, PageRankStatsConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, PageRankStatsConfig::of);
 
         var computationResult = statsBusinessFacade.articleRank(
             graphName,
@@ -707,7 +714,7 @@ public class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, PageRankStatsConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, PageRankStatsConfig::of);
 
         return Stream.of(estimateBusinessFacade.articleRank(graphNameOrConfiguration, config));
     }
@@ -716,7 +723,7 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, PageRankMutateConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, PageRankMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.articleRank(
             graphName,
@@ -731,7 +738,7 @@ public class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, PageRankMutateConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, PageRankMutateConfig::of);
 
         return Stream.of(estimateBusinessFacade.articleRank(graphNameOrConfiguration, config));
     }
@@ -740,7 +747,7 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createStreamConfig(configuration, PageRankStreamConfig::of);
+        var config = configurationCreator.createConfigurationForStream(configuration, PageRankStreamConfig::of);
 
         var computationResult = streamBusinessFacade.articleRank(
             graphName,
@@ -754,7 +761,7 @@ public class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, PageRankStreamConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, PageRankStreamConfig::of);
 
         return Stream.of(estimateBusinessFacade.articleRank(graphNameOrConfiguration, config));
     }
@@ -763,7 +770,7 @@ public class CentralityProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, PageRankWriteConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, PageRankWriteConfig::of);
 
         var computationResult = writeBusinessFacade.articleRank(
             graphName,
@@ -778,7 +785,7 @@ public class CentralityProcedureFacade {
         Object graphNameOrConfiguration,
         Map<String, Object> configuration
     ) {
-        var config = createConfig(configuration, PageRankWriteConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, PageRankWriteConfig::of);
 
         return Stream.of(estimateBusinessFacade.articleRank(graphNameOrConfiguration, config));
     }
@@ -789,7 +796,7 @@ public class CentralityProcedureFacade {
     ) {
         eigenvectorConfigurationPreconditions(configuration);
 
-        var config = createConfig(configuration, PageRankMutateConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, PageRankMutateConfig::of);
 
         var computationResult = mutateBusinessFacade.eigenvector(
             graphName,
@@ -806,7 +813,7 @@ public class CentralityProcedureFacade {
     ) {
         eigenvectorConfigurationPreconditions(configuration);
 
-        var config = createConfig(configuration, PageRankMutateConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, PageRankMutateConfig::of);
 
         return Stream.of(estimateBusinessFacade.eigenvector(graphNameOrConfiguration, config));
     }
@@ -814,7 +821,7 @@ public class CentralityProcedureFacade {
     public Stream<PageRankStatsResult> eigenvectorStats(String graphName, Map<String, Object> configuration) {
         eigenvectorConfigurationPreconditions(configuration);
 
-        var config = createConfig(configuration, PageRankStatsConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, PageRankStatsConfig::of);
 
         var computationResult = statsBusinessFacade.eigenvector(
             graphName,
@@ -831,7 +838,7 @@ public class CentralityProcedureFacade {
     ) {
         eigenvectorConfigurationPreconditions(configuration);
 
-        var config = createConfig(configuration, PageRankStatsConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, PageRankStatsConfig::of);
 
         return Stream.of(estimateBusinessFacade.eigenvector(graphNameOrConfiguration, config));
     }
@@ -842,7 +849,7 @@ public class CentralityProcedureFacade {
     ) {
         eigenvectorConfigurationPreconditions(configuration);
 
-        var config = createStreamConfig(configuration, PageRankStreamConfig::of);
+        var config = configurationCreator.createConfigurationForStream(configuration, PageRankStreamConfig::of);
 
         var computationResult = streamBusinessFacade.eigenvector(
             graphName,
@@ -858,7 +865,7 @@ public class CentralityProcedureFacade {
     ) {
         eigenvectorConfigurationPreconditions(configuration);
 
-        var config = createConfig(configuration, PageRankStreamConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, PageRankStreamConfig::of);
 
         return Stream.of(estimateBusinessFacade.eigenvector(graphNameOrConfiguration, config));
     }
@@ -869,7 +876,7 @@ public class CentralityProcedureFacade {
     ) {
         eigenvectorConfigurationPreconditions(configuration);
 
-        var config = createConfig(configuration, PageRankWriteConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, PageRankWriteConfig::of);
 
         var computationResult = writeBusinessFacade.eigenvector(
             graphName,
@@ -886,7 +893,7 @@ public class CentralityProcedureFacade {
     ) {
         eigenvectorConfigurationPreconditions(configuration);
 
-        var config = createConfig(configuration, PageRankWriteConfig::of);
+        var config = configurationCreator.createConfiguration(configuration, PageRankWriteConfig::of);
 
         return Stream.of(estimateBusinessFacade.eigenvector(graphNameOrConfiguration, config));
     }
@@ -899,27 +906,4 @@ public class CentralityProcedureFacade {
     }
 
 
-    // ################################################################################################################
-
-    // FIXME: the following two methods are duplicate, find a good place for them.
-    private <C extends AlgoBaseConfig> C createStreamConfig(
-        Map<String, Object> configuration,
-        Function<CypherMapWrapper, C> configCreator
-    ) {
-        return createConfig(
-            configuration,
-            configCreator.andThen(algorithmConfiguration -> {
-                algorithmMetaDataSetter.set(algorithmConfiguration);
-                return algorithmConfiguration;
-            })
-        );
-    }
-
-    private <C extends AlgoBaseConfig> C createConfig(
-        Map<String, Object> configuration,
-        Function<CypherMapWrapper, C> configCreator
-    ) {
-        return configurationParser.produceConfig(configuration, configCreator, user.getUsername());
-    }
-    //FIXME: here ends the fixme-block
 }

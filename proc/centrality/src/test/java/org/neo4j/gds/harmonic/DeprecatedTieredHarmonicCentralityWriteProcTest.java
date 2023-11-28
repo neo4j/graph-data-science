@@ -54,6 +54,7 @@ import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.configparser.ConfigurationParser;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -204,15 +205,13 @@ class DeprecatedTieredHarmonicCentralityWriteProcTest extends BaseProcTest {
             logMock,
             null,
             new CentralityProcedureFacade(
-                ConfigurationParser.EMPTY,
-                new User(getUsername(), false),
+                new ConfigurationCreator(ConfigurationParser.EMPTY, null, new User(getUsername(), false)),
                 ProcedureReturnColumns.EMPTY,
                 null,
                 null,
                 null,
-                writeBusinessFacade,
                 null,
-                null
+                writeBusinessFacade
             ),
             null,
             null,

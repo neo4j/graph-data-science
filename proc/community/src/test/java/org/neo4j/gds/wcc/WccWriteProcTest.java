@@ -62,8 +62,8 @@ import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
+import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
@@ -479,7 +479,12 @@ class WccWriteProcTest extends BaseProcTest {
 
                     var taskRegistry = EmptyTaskRegistryFactory.INSTANCE;
                     var algorithmsBusinessFacade = new CommunityAlgorithmsWriteBusinessFacade(
-                        new CommunityAlgorithmsFacade(
+                        new WriteNodePropertyService(
+                            logMock,
+                            wccWriteProc.executionContext().nodePropertyExporterBuilder(),
+                            taskRegistry,
+                            TerminationFlag.RUNNING_TRUE
+                        ), new CommunityAlgorithmsFacade(
                             new AlgorithmRunner(
                                 logMock,
                                 graphStoreCatalogService,
@@ -492,12 +497,6 @@ class WccWriteProcTest extends BaseProcTest {
                                 TaskRegistryFactory.empty(),
                                 EmptyUserLogRegistryFactory.INSTANCE
                             )
-                        ),
-                        new WriteNodePropertyService(
-                            logMock,
-                            wccWriteProc.executionContext().nodePropertyExporterBuilder(),
-                            taskRegistry,
-                            TerminationFlag.RUNNING_TRUE
                         )
                     );
 

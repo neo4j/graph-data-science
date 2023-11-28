@@ -32,23 +32,20 @@ import org.neo4j.kernel.api.procedure.Context;
 public class GraphDataScienceProvider implements ThrowingFunction<Context, GraphDataScience, ProcedureException> {
     private final Log log;
     private final CatalogFacadeProvider catalogFacadeProvider;
-    private final CentralityProcedureProvider centralityProcedureProvider;
-    private final CommunityProcedureProvider communityProcedureProvider;
+    private final AlgorithmFacadeService algorithmFacadeService;
     private final SimilarityProcedureProvider similarityProcedureProvider;
     private final DeprecatedProceduresMetricService deprecatedProceduresMetricService;
 
     public GraphDataScienceProvider(
         Log log,
         CatalogFacadeProvider catalogFacadeProvider,
-        CentralityProcedureProvider centralityProcedureProvider,
-        CommunityProcedureProvider communityProcedureProvider,
+        AlgorithmFacadeService algorithmFacadeService,
         SimilarityProcedureProvider similarityProcedureProvider,
         DeprecatedProceduresMetricService deprecatedProceduresMetricService
     ) {
         this.log = log;
         this.catalogFacadeProvider = catalogFacadeProvider;
-        this.centralityProcedureProvider = centralityProcedureProvider;
-        this.communityProcedureProvider = communityProcedureProvider;
+        this.algorithmFacadeService = algorithmFacadeService;
         this.similarityProcedureProvider = similarityProcedureProvider;
         this.deprecatedProceduresMetricService = deprecatedProceduresMetricService;
     }
@@ -57,8 +54,10 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
     public GraphDataScience apply(Context context) throws ProcedureException {
 
         var catalogFacade = catalogFacadeProvider.createCatalogFacade(context);
-        var centralityProcedureFacade = centralityProcedureProvider.createCentralityProcedureFacade(context);
-        var communityProcedureFacade = communityProcedureProvider.createCommunityProcedureFacade(context);
+
+        var algorithmFacadeProvider = algorithmFacadeService.createAlgorithmFacadeProvider(context);
+        var centralityProcedureFacade = algorithmFacadeProvider.createCentralityProcedureFacade();
+        var communityProcedureFacade = algorithmFacadeProvider.createCommunityProcedureFacade();
         var similarityProcedureFacade = similarityProcedureProvider.createSimilarityProcedureFacade(context);
 
         return new GraphDataScience(

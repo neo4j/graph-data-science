@@ -53,7 +53,7 @@ package org.neo4j.gds.algorithms.community;
 
         var nodePropertyServiceMock = mock(WriteNodePropertyService.class);
 
-        var businessFacade = new CommunityAlgorithmsWriteBusinessFacade(null, nodePropertyServiceMock);
+            var businessFacade = new CommunityAlgorithmsWriteBusinessFacade(nodePropertyServiceMock, null);
 
         var writeResult = businessFacade.writeToDatabase(
             algorithmResult,
@@ -116,7 +116,7 @@ package org.neo4j.gds.algorithms.community;
                 eq(Optional.empty())
             )).thenReturn(new WriteNodePropertyResult(4, 100));
 
-            var businessFacade = new CommunityAlgorithmsWriteBusinessFacade(null, nodePropertyServiceMock);
+            var businessFacade = new CommunityAlgorithmsWriteBusinessFacade(nodePropertyServiceMock, null);
 
             var writeResult = businessFacade.writeToDatabase(
                 algorithmResultMock,
@@ -185,7 +185,7 @@ package org.neo4j.gds.algorithms.community;
                 eq(Optional.empty())
             )).thenReturn(new WriteNodePropertyResult(4, 100));
 
-            var businessFacade = new CommunityAlgorithmsWriteBusinessFacade(null, nodePropertyServiceMock);
+            var businessFacade = new CommunityAlgorithmsWriteBusinessFacade(nodePropertyServiceMock, null);
 
             var writeResult = businessFacade.writeToDatabase(
                 algorithmResultMock,
