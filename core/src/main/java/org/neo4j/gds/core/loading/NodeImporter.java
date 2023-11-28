@@ -99,7 +99,7 @@ public class NodeImporter {
         }
 
         var batch = buffer.batch();
-        var properties = buffer.properties();
+        var properties = buffer.propertyReferences();
         var labelTokens = buffer.labelTokens();
 
         // Import node IDs

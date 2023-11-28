@@ -31,6 +31,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.compress.AdjacencyCompressor.ValueMapper;
 import org.neo4j.gds.api.compress.AdjacencyListsWithProperties;
 import org.neo4j.gds.compat.LongPropertyReference;
+import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.huge.DirectIdMap;
 
@@ -180,8 +181,9 @@ public abstract class AdjacencyListBuilderBaseTest {
 
         DirectIdMap idMap = new DirectIdMap(nodeCount);
 
-        var relationshipsBatchBuffer = new RelationshipsBatchBufferBuilder()
+        var relationshipsBatchBuffer = new RelationshipsBatchBufferBuilder<PropertyReference>()
             .capacity(relationshipCount)
+            .propertyReferenceClass(PropertyReference.class)
             .build();
 
         PropertyReader.Buffered propertyReader = PropertyReader.buffered(relationshipCount, propertyCount);

@@ -21,6 +21,7 @@ package org.neo4j.gds.projection;
 
 import org.immutables.builder.Builder;
 import org.neo4j.gds.api.PartialIdMap;
+import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.loading.RelationshipsBatchBuffer;
 import org.neo4j.gds.core.loading.RelationshipsBatchBufferBuilder;
 
@@ -33,7 +34,7 @@ import static org.neo4j.token.api.TokenConstants.ANY_RELATIONSHIP_TYPE;
 
 public class BufferedRelationshipConsumer implements StoreScanner.RecordConsumer<RelationshipReference> {
 
-    private final RelationshipsBatchBuffer buffer;
+    private final RelationshipsBatchBuffer<PropertyReference> buffer;
 
     private final PartialIdMap idMap;
     private final int type;
@@ -46,8 +47,9 @@ public class BufferedRelationshipConsumer implements StoreScanner.RecordConsumer
         int capacity,
         Optional<Boolean> skipDanglingRelationships
     ) {
-        var buffer = new RelationshipsBatchBufferBuilder()
+        var buffer = new RelationshipsBatchBufferBuilder<PropertyReference>()
             .capacity(capacity)
+            .propertyReferenceClass(PropertyReference.class)
             .build();
 
         boolean skipDangling = skipDanglingRelationships.orElse(true);
@@ -56,7 +58,7 @@ public class BufferedRelationshipConsumer implements StoreScanner.RecordConsumer
     }
 
     private BufferedRelationshipConsumer(
-        RelationshipsBatchBuffer buffer,
+        RelationshipsBatchBuffer<PropertyReference> buffer,
         PartialIdMap idMap,
         int type,
         boolean skipDanglingRelationships
@@ -67,7 +69,7 @@ public class BufferedRelationshipConsumer implements StoreScanner.RecordConsumer
         this.skipDanglingRelationships = skipDanglingRelationships;
     }
 
-    public RelationshipsBatchBuffer relationshipsBatchBuffer() {
+    public RelationshipsBatchBuffer<PropertyReference> relationshipsBatchBuffer() {
         return this.buffer;
     }
 

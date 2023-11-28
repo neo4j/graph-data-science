@@ -24,13 +24,11 @@ import org.immutables.builder.Builder;
 import java.lang.reflect.Array;
 import java.util.Optional;
 
-public class NodesBatchBuffer<PROPERTY_REF> extends RecordsBatchBuffer {
+public final class NodesBatchBuffer<PROPERTY_REF> extends RecordsBatchBuffer {
 
     private final boolean hasLabelInformation;
-
     private final NodeLabelTokenSet[] labelTokens;
-    // property ids, consecutive
-    private final PROPERTY_REF[] properties;
+    private final PROPERTY_REF[] propertyReferences;
 
     @Builder.Factory
     static <PROPERTY_REF> NodesBatchBuffer<PROPERTY_REF> nodesBatchBuffer(
@@ -56,23 +54,24 @@ public class NodesBatchBuffer<PROPERTY_REF> extends RecordsBatchBuffer {
     ) {
         super(capacity);
         this.hasLabelInformation = hasLabelInformation;
-        this.properties = readProperty ? (PROPERTY_REF[]) Array.newInstance(propertyReferenceClass, capacity) : null;
         this.labelTokens = new NodeLabelTokenSet[capacity];
+        //noinspection unchecked
+        this.propertyReferences = readProperty ? (PROPERTY_REF[]) Array.newInstance(propertyReferenceClass, capacity) : null;
     }
 
     public void add(long nodeId, PROPERTY_REF propertyReference, NodeLabelTokenSet labelTokens) {
         int len = length++;
         buffer[len] = nodeId;
-        if (properties != null) {
-            properties[len] = propertyReference;
+        if (propertyReferences != null) {
+            propertyReferences[len] = propertyReference;
         }
         if (this.labelTokens != null) {
             this.labelTokens[len] = labelTokens;
         }
     }
 
-    public PROPERTY_REF[] properties() {
-        return this.properties;
+    public PROPERTY_REF[] propertyReferences() {
+        return this.propertyReferences;
     }
 
     public boolean hasLabelInformation() {

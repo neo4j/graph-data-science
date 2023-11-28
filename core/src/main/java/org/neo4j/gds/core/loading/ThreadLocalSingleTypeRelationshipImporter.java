@@ -36,34 +36,34 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  * type that is being imported.
  */
 @Value.Style(typeBuilder = "ThreadLocalSingleTypeRelationshipImporterBuilder")
-public abstract class ThreadLocalSingleTypeRelationshipImporter {
+public abstract class ThreadLocalSingleTypeRelationshipImporter<PROPERTY_REF> {
 
     private final AdjacencyBuffer adjacencyBuffer;
-    private final RelationshipsBatchBuffer relationshipsBatchBuffer;
+    private final RelationshipsBatchBuffer<PROPERTY_REF> relationshipsBatchBuffer;
 
-    final PropertyReader propertyReader;
+    final PropertyReader<PROPERTY_REF> propertyReader;
 
     @Builder.Factory
-    static ThreadLocalSingleTypeRelationshipImporter of(
+    static <PROPERTY_REF> ThreadLocalSingleTypeRelationshipImporter<PROPERTY_REF> of(
         AdjacencyBuffer adjacencyBuffer,
-        RelationshipsBatchBuffer relationshipsBatchBuffer,
+        RelationshipsBatchBuffer<PROPERTY_REF> relationshipsBatchBuffer,
         SingleTypeRelationshipImporter.ImportMetaData importMetaData,
-        PropertyReader propertyReader
+        PropertyReader<PROPERTY_REF> propertyReader
     ) {
         var orientation = importMetaData.projection().orientation();
         var loadProperties = importMetaData.projection().properties().hasMappings();
 
         if (orientation == Orientation.UNDIRECTED) {
             return loadProperties
-                ? new UndirectedWithProperties(
+                ? new UndirectedWithProperties<>(
                 adjacencyBuffer,
                 relationshipsBatchBuffer,
                 propertyReader
             )
-                : new Undirected(adjacencyBuffer, relationshipsBatchBuffer, propertyReader);
+                : new Undirected<>(adjacencyBuffer, relationshipsBatchBuffer, propertyReader);
         } else if (orientation == Orientation.NATURAL) {
             return loadProperties
-                ? new NaturalWithProperties(
+                ? new NaturalWithProperties<>(
                 adjacencyBuffer,
                 relationshipsBatchBuffer,
                 propertyReader
@@ -71,12 +71,12 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter {
                 : new Natural(adjacencyBuffer, relationshipsBatchBuffer, propertyReader);
         } else if (orientation == Orientation.REVERSE) {
             return loadProperties
-                ? new ReverseWithProperties(
+                ? new ReverseWithProperties<>(
                 adjacencyBuffer,
                 relationshipsBatchBuffer,
                 propertyReader
             )
-                : new Reverse(adjacencyBuffer, relationshipsBatchBuffer, propertyReader);
+                : new Reverse<>(adjacencyBuffer, relationshipsBatchBuffer, propertyReader);
         } else {
             throw new IllegalArgumentException(formatWithLocale("Unexpected orientation: %s", orientation));
         }
@@ -84,8 +84,8 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter {
 
     private ThreadLocalSingleTypeRelationshipImporter(
         AdjacencyBuffer adjacencyBuffer,
-        RelationshipsBatchBuffer relationshipsBatchBuffer,
-        PropertyReader propertyReader
+        RelationshipsBatchBuffer<PROPERTY_REF> relationshipsBatchBuffer,
+        PropertyReader<PROPERTY_REF> propertyReader
     ) {
         this.adjacencyBuffer = adjacencyBuffer;
         this.relationshipsBatchBuffer = relationshipsBatchBuffer;
@@ -95,11 +95,11 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter {
     public abstract long importRelationships();
 
     // TODO: remove, once Cypher loading uses RelationshipsBuilder
-    public RelationshipsBatchBuffer buffer() {
+    public RelationshipsBatchBuffer<PROPERTY_REF> buffer() {
         return relationshipsBatchBuffer;
     }
 
-    protected RelationshipsBatchBuffer sourceBuffer() {
+    protected RelationshipsBatchBuffer<PROPERTY_REF> sourceBuffer() {
         return relationshipsBatchBuffer;
     }
 
@@ -108,7 +108,7 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter {
     }
 
     protected int importRelationships(
-        RelationshipsBatchBuffer sourceBuffer,
+        RelationshipsBatchBuffer<PROPERTY_REF> sourceBuffer,
         long[] batch,
         long[][] properties,
         AdjacencyBuffer targetBuffer
@@ -146,12 +146,12 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter {
         return batchLength >> 1; // divide by 2
     }
 
-    private static final class Undirected extends ThreadLocalSingleTypeRelationshipImporter {
+    private static final class Undirected<PROPERTY_REF> extends ThreadLocalSingleTypeRelationshipImporter<PROPERTY_REF> {
 
         private Undirected(
             AdjacencyBuffer adjacencyBuffer,
-            RelationshipsBatchBuffer relationshipsBatchBuffer,
-            PropertyReader propertyReader
+            RelationshipsBatchBuffer<PROPERTY_REF> relationshipsBatchBuffer,
+            PropertyReader<PROPERTY_REF> propertyReader
         ) {
             super(adjacencyBuffer, relationshipsBatchBuffer, propertyReader);
         }
@@ -166,12 +166,12 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter {
         }
     }
 
-    private static final class UndirectedWithProperties extends ThreadLocalSingleTypeRelationshipImporter {
+    private static final class UndirectedWithProperties<PROPERTY_REF> extends ThreadLocalSingleTypeRelationshipImporter<PROPERTY_REF> {
 
         private UndirectedWithProperties(
             AdjacencyBuffer adjacencyBuffer,
-            RelationshipsBatchBuffer relationshipsBatchBuffer,
-            PropertyReader propertyReader
+            RelationshipsBatchBuffer<PROPERTY_REF> relationshipsBatchBuffer,
+            PropertyReader<PROPERTY_REF> propertyReader
         ) {
             super(adjacencyBuffer, relationshipsBatchBuffer, propertyReader);
         }
@@ -207,12 +207,12 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter {
         }
     }
 
-    private static final class Natural extends ThreadLocalSingleTypeRelationshipImporter {
+    private static final class Natural<PROPERTY_REF> extends ThreadLocalSingleTypeRelationshipImporter<PROPERTY_REF> {
 
         private Natural(
             AdjacencyBuffer adjacencyBuffer,
-            RelationshipsBatchBuffer relationshipsBatchBuffer,
-            PropertyReader propertyReader
+            RelationshipsBatchBuffer<PROPERTY_REF> relationshipsBatchBuffer,
+            PropertyReader<PROPERTY_REF> propertyReader
         ) {
             super(adjacencyBuffer, relationshipsBatchBuffer, propertyReader);
         }
@@ -229,12 +229,12 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter {
         }
     }
 
-    private static final class NaturalWithProperties extends ThreadLocalSingleTypeRelationshipImporter {
+    private static final class NaturalWithProperties<PROPERTY_REF> extends ThreadLocalSingleTypeRelationshipImporter<PROPERTY_REF> {
 
         private NaturalWithProperties(
             AdjacencyBuffer adjacencyBuffer,
-            RelationshipsBatchBuffer relationshipsBatchBuffer,
-            PropertyReader propertyReader
+            RelationshipsBatchBuffer<PROPERTY_REF> relationshipsBatchBuffer,
+            PropertyReader<PROPERTY_REF> propertyReader
         ) {
             super(adjacencyBuffer, relationshipsBatchBuffer, propertyReader);
         }
@@ -257,12 +257,12 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter {
         }
     }
 
-    private static final class Reverse extends ThreadLocalSingleTypeRelationshipImporter {
+    private static final class Reverse<PROPERTY_REF> extends ThreadLocalSingleTypeRelationshipImporter<PROPERTY_REF> {
 
         private Reverse(
             AdjacencyBuffer adjacencyBuffer,
-            RelationshipsBatchBuffer relationshipsBatchBuffer,
-            PropertyReader propertyReader
+            RelationshipsBatchBuffer<PROPERTY_REF> relationshipsBatchBuffer,
+            PropertyReader<PROPERTY_REF> propertyReader
         ) {
             super(adjacencyBuffer, relationshipsBatchBuffer, propertyReader);
         }
@@ -279,12 +279,12 @@ public abstract class ThreadLocalSingleTypeRelationshipImporter {
         }
     }
 
-    private static final class ReverseWithProperties extends ThreadLocalSingleTypeRelationshipImporter {
+    private static final class ReverseWithProperties<PROPERTY_REF> extends ThreadLocalSingleTypeRelationshipImporter<PROPERTY_REF> {
 
         private ReverseWithProperties(
             AdjacencyBuffer adjacencyBuffer,
-            RelationshipsBatchBuffer relationshipsBatchBuffer,
-            PropertyReader propertyReader
+            RelationshipsBatchBuffer<PROPERTY_REF> relationshipsBatchBuffer,
+            PropertyReader<PROPERTY_REF> propertyReader
         ) {
             super(adjacencyBuffer, relationshipsBatchBuffer, propertyReader);
         }

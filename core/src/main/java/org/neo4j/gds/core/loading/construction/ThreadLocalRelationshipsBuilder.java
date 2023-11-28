@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.loading.construction;
 
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.PropertyReader;
 import org.neo4j.gds.core.loading.RelationshipsBatchBufferBuilder;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
@@ -35,8 +34,8 @@ abstract class ThreadLocalRelationshipsBuilder implements AutoCloseable {
 
     static class NonIndexed extends ThreadLocalRelationshipsBuilder {
 
-        private final ThreadLocalSingleTypeRelationshipImporter importer;
-        private final PropertyReader.Buffered bufferedPropertyReader;
+        private final ThreadLocalSingleTypeRelationshipImporter<Integer> importer;
+        private final PropertyReader.Buffered<Integer> bufferedPropertyReader;
         private final int propertyCount;
         private int localRelationshipId;
 
@@ -47,8 +46,9 @@ abstract class ThreadLocalRelationshipsBuilder implements AutoCloseable {
         ) {
             this.propertyCount = propertyCount;
 
-            var relationshipsBatchBuffer = new RelationshipsBatchBufferBuilder()
+            var relationshipsBatchBuffer = new RelationshipsBatchBufferBuilder<Integer>()
                 .capacity(bufferSize)
+                .propertyReferenceClass(Integer.class)
                 .build();
 
             if (propertyCount > 1) {
@@ -82,7 +82,7 @@ abstract class ThreadLocalRelationshipsBuilder implements AutoCloseable {
                     source,
                     target,
                     Double.doubleToLongBits(relationshipPropertyValue),
-                    Neo4jProxy.noPropertyReference()
+                    RelationshipsBuilder.NO_PROPERTY_REF
                 );
             if (importer.buffer().isFull()) {
                 flushBuffer();
@@ -92,7 +92,7 @@ abstract class ThreadLocalRelationshipsBuilder implements AutoCloseable {
         @Override
         void addRelationship(long source, long target, double[] relationshipPropertyValues) {
             int nextRelationshipId = localRelationshipId++;
-            importer.buffer().add(source, target, nextRelationshipId, Neo4jProxy.noPropertyReference());
+            importer.buffer().add(source, target, nextRelationshipId, RelationshipsBuilder.NO_PROPERTY_REF);
             for (int propertyKeyId = 0; propertyKeyId < this.propertyCount; propertyKeyId++) {
                 bufferedPropertyReader.add(nextRelationshipId, propertyKeyId, relationshipPropertyValues[propertyKeyId]);
             }

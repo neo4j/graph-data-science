@@ -27,7 +27,7 @@ import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.Arrays;
 
-public interface PropertyReader {
+public interface PropertyReader<PROPERTY_REF> {
     /**
      * Load the relationship properties for the given batch of relationships.
      * Relationships are represented as two arrays from the {@link RelationshipsBatchBuffer}.
@@ -43,7 +43,7 @@ public interface PropertyReader {
      */
     long[][] readProperty(
         long[] relationshipReferences,
-        PropertyReference[] propertyReferences,
+        PROPERTY_REF[] propertyReferences,
         int numberOfReferences,
         int[] propertyKeyIds,
         double[] defaultValues,
@@ -51,14 +51,14 @@ public interface PropertyReader {
         boolean atLeastOnePropertyToLoad
     );
 
-    static PropertyReader preLoaded() {
+    static PropertyReader<Integer> preLoaded() {
         return (relationshipReferences, propertyReferences, numberOfReferences, weightProperty, defaultWeight, aggregations, atLeastOnePropertyToLoad) -> {
             long[] properties = Arrays.copyOf(relationshipReferences, numberOfReferences);
             return new long[][]{properties};
         };
     }
 
-    static PropertyReader storeBacked(KernelTransaction kernelTransaction) {
+    static PropertyReader<PropertyReference> storeBacked(KernelTransaction kernelTransaction) {
         return (relationshipReferences, propertyReferences, numberOfReferences, relationshipProperties, defaultPropertyValues, aggregations, atLeastOnePropertyToLoad) -> {
             long[][] properties = new long[relationshipProperties.length][numberOfReferences];
             if (atLeastOnePropertyToLoad) {
@@ -95,11 +95,11 @@ public interface PropertyReader {
         };
     }
 
-    static Buffered buffered(int batchSize, int propertyCount) {
-        return new Buffered(batchSize, propertyCount);
+    static <PROPERTY_REF> Buffered<PROPERTY_REF> buffered(int batchSize, int propertyCount) {
+        return new Buffered<>(batchSize, propertyCount);
     }
 
-    class Buffered implements PropertyReader {
+    class Buffered<PROPERTY_REF> implements PropertyReader<PROPERTY_REF> {
 
         private final long[][] buffer;
         private final int propertyCount;
@@ -116,7 +116,7 @@ public interface PropertyReader {
         @Override
         public long[][] readProperty(
             long[] relationshipReferences,
-            PropertyReference[] propertyReferences,
+            PROPERTY_REF[] propertyReferences,
             int numberOfReferences,
             int[] propertyKeyIds,
             double[] defaultValues,

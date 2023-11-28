@@ -35,6 +35,8 @@ import static org.neo4j.gds.api.IdMap.NOT_FOUND;
 
 public class RelationshipsBuilder {
 
+    static final int NO_PROPERTY_REF = -1;
+
     private final PartialIdMap idMap;
     private final SingleTypeRelationshipsBuilder singleTypeRelationshipsBuilder;
     private final AutoCloseableThreadLocal<ThreadLocalRelationshipsBuilder> threadLocalRelationshipsBuilders;

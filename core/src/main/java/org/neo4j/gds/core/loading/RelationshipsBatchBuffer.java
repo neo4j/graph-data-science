@@ -20,10 +20,10 @@
 package org.neo4j.gds.core.loading;
 
 import org.immutables.builder.Builder;
-import org.neo4j.gds.compat.PropertyReference;
 
+import java.lang.reflect.Array;
 
-public final class RelationshipsBatchBuffer extends RecordsBatchBuffer {
+public final class RelationshipsBatchBuffer<PROPERTY_REF> extends RecordsBatchBuffer {
 
     // For relationships, the buffer is divided into 2-long blocks
     // for each relationship: source, target. Relationship and
@@ -32,22 +32,26 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer {
 
 
     private final long[] relationshipReferences;
-    private final PropertyReference[] propertyReferences;
+    private final PROPERTY_REF[] propertyReferences;
 
     private final long[] bufferCopy;
     private final long[] relationshipReferencesCopy;
-    private final PropertyReference[] propertyReferencesCopy;
+    private final PROPERTY_REF[] propertyReferencesCopy;
     private final int[] histogram;
 
     @Builder.Factory
-    static RelationshipsBatchBuffer relationshipsBatchBuffer(int capacity) {
-        return new RelationshipsBatchBuffer(capacity);
+    static <PROPERTY_REF> RelationshipsBatchBuffer<PROPERTY_REF> relationshipsBatchBuffer(
+        int capacity,
+        Class<PROPERTY_REF> propertyReferenceClass
+    ) {
+        return new RelationshipsBatchBuffer(capacity, propertyReferenceClass);
     }
 
-    private RelationshipsBatchBuffer(int capacity) {
+    private RelationshipsBatchBuffer(int capacity, Class<PROPERTY_REF> propertyReferenceClass) {
         super(Math.multiplyExact(ENTRIES_PER_RELATIONSHIP, capacity));
         this.relationshipReferences = new long[capacity];
-        this.propertyReferences = new PropertyReference[capacity];
+        //noinspection unchecked
+        this.propertyReferences = (PROPERTY_REF[]) Array.newInstance(propertyReferenceClass, capacity);
         bufferCopy = RadixSort.newCopy(buffer);
         relationshipReferencesCopy = RadixSort.newCopy(relationshipReferences);
         propertyReferencesCopy = RadixSort.newCopy(propertyReferences);
@@ -62,7 +66,7 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer {
         this.length = 2 + position;
     }
 
-    public void add(long sourceId, long targetId, long relationshipReference, PropertyReference propertyReference) {
+    public void add(long sourceId, long targetId, long relationshipReference, PROPERTY_REF propertyReference) {
         int position = this.length;
         long[] buffer = this.buffer;
         buffer[position] = sourceId;
@@ -104,7 +108,7 @@ public final class RelationshipsBatchBuffer extends RecordsBatchBuffer {
         return this.relationshipReferences;
     }
 
-    PropertyReference[] propertyReferences() {
+    PROPERTY_REF[] propertyReferences() {
         return this.propertyReferences;
     }
 
