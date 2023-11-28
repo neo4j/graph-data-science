@@ -20,11 +20,14 @@
 package org.neo4j.gds.projection;
 
 import org.apache.commons.lang3.mutable.MutableInt;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.loading.AdjacencyBuffer;
 import org.neo4j.gds.core.loading.PropertyReader;
+import org.neo4j.gds.core.loading.ReadHelper;
 import org.neo4j.gds.core.loading.RecordScannerTask;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
 import org.neo4j.gds.core.loading.ThreadLocalSingleTypeRelationshipImporter;
@@ -33,6 +36,7 @@ import org.neo4j.gds.core.utils.StatementAction;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
+import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.Collection;
@@ -154,8 +158,8 @@ public final class RelationshipsScannerTask extends StatementAction implements R
                         buffers[idx.getAndIncrement()] = buffer;
 
                         PropertyReader<PropertyReference> propertyReader = importer.loadProperties()
-                            ? PropertyReader.storeBacked(transaction)
-                            : (relationshipReferences, propertyReferences, numberOfReferences, propertyKeyIds, defaultValues, aggregations, atLeastOnePropertyToLoad) -> new long[propertyKeyIds.length][0];
+                            ? storeBackedPropertyReader(transaction)
+                            : emptyPropertyReader();
 
                         return importer.threadLocalImporter(
                             buffer.relationshipsBatchBuffer(),
@@ -175,7 +179,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
             while (scanState.scan(cursor, compositeBuffer)) {
                 terminationFlag.assertRunning();
                 long imported = 0L;
-                for (ThreadLocalSingleTypeRelationshipImporter importer : importers) {
+                for (ThreadLocalSingleTypeRelationshipImporter<PropertyReference> importer : importers) {
                     imported += importer.importRelationships();
                 }
                 int importedRels = RawValues.getHead(imported);
@@ -189,6 +193,7 @@ public final class RelationshipsScannerTask extends StatementAction implements R
         }
     }
 
+
     @Override
     public long propertiesImported() {
         return weightsImported;
@@ -197,6 +202,49 @@ public final class RelationshipsScannerTask extends StatementAction implements R
     @Override
     public long recordsImported() {
         return relationshipsImported;
+    }
+
+    @NotNull
+    private static PropertyReader<PropertyReference> emptyPropertyReader() {
+        return (relationshipReferences, propertyReferences, numberOfReferences, propertyKeyIds, defaultValues, aggregations, atLeastOnePropertyToLoad) -> new long[propertyKeyIds.length][0];
+    }
+
+    @NotNull
+    private static PropertyReader<PropertyReference> storeBackedPropertyReader(KernelTransaction kernelTransaction) {
+        return (relationshipReferences, propertyReferences, numberOfReferences, relationshipProperties, defaultPropertyValues, aggregations, atLeastOnePropertyToLoad) -> {
+            long[][] properties = new long[relationshipProperties.length][numberOfReferences];
+            if (atLeastOnePropertyToLoad) {
+                try (PropertyCursor pc = Neo4jProxy.allocatePropertyCursor(kernelTransaction)) {
+                    double[] relProps = new double[relationshipProperties.length];
+                    for (int i = 0; i < numberOfReferences; i++) {
+                        Neo4jProxy.relationshipProperties(
+                            kernelTransaction,
+                            relationshipReferences[i],
+                            propertyReferences[i],
+                            pc
+                        );
+                        ReadHelper.readProperties(
+                            pc,
+                            relationshipProperties,
+                            defaultPropertyValues,
+                            aggregations,
+                            relProps
+                        );
+                        for (int j = 0; j < relProps.length; j++) {
+                            properties[j][i] = Double.doubleToLongBits(relProps[j]);
+                        }
+                    }
+                }
+            } else {
+                for (int i = 0; i < numberOfReferences; i++) {
+                    for (int j = 0; j < defaultPropertyValues.length; j++) {
+                        double value = aggregations[j].normalizePropertyValue(defaultPropertyValues[j]);
+                        properties[j][i] = Double.doubleToLongBits(value);
+                    }
+                }
+            }
+            return properties;
+        };
     }
 
 }
