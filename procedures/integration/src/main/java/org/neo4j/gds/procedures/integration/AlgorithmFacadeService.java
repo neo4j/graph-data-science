@@ -25,6 +25,8 @@ import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
+import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
+import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.write.ExporterContext;
@@ -131,6 +133,13 @@ public class AlgorithmFacadeService {
             taskRegistryFactory,
             terminationFlag
         );
+
+      var writeRelationshipService = new WriteRelationshipService(
+          log,
+          exportBuildersProvider.relationshipExporterBuilder(exporterContext),
+          taskRegistryFactory,
+          terminationFlag
+      );
         var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(graphLoaderContext, user);
         var requestScopedDependencies = RequestScopedDependencies.builder()
             .with(databaseId)
@@ -159,7 +168,7 @@ public class AlgorithmFacadeService {
         );
 
         var  mutateNodePropertyService = new MutateNodePropertyService(log);
-
+      var mutateRelationshipService = new MutateRelationshipService(log);
         var configurationCreator= new ConfigurationCreator(configurationParser,algorithmMetaDataSetter,user);
         // procedure facade
         return new AlgorithmProcedureFacadeProvider(
@@ -168,6 +177,8 @@ public class AlgorithmFacadeService {
             returnColumns,
             mutateNodePropertyService,
             writeNodePropertyService,
+            mutateRelationshipService,
+            writeRelationshipService,
             algorithmRunner,
             algorithmEstimator
         );

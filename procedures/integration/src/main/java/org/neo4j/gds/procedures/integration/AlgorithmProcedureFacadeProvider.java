@@ -35,11 +35,20 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
+import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
+import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsEstimateBusinessFacade;
+import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsFacade;
+import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsMutateBusinessFacade;
+import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStatsBusinessFacade;
+import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStreamBusinessFacade;
+import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsWriteBusinessFacade;
+import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
+import org.neo4j.gds.procedures.similarity.SimilarityProcedureFacade;
 
 class AlgorithmProcedureFacadeProvider {
 
@@ -48,6 +57,8 @@ class AlgorithmProcedureFacadeProvider {
         private final  ProcedureCallContextReturnColumns returnColumns;
         private final MutateNodePropertyService mutateNodePropertyService;
         private final  WriteNodePropertyService writeNodePropertyService;
+    private final MutateRelationshipService mutateRelationshipService;
+    private final WriteRelationshipService writeRelationshipService;
         private final  AlgorithmEstimator algorithmEstimator;
         private  final AlgorithmRunner algorithmRunner;
 
@@ -57,6 +68,8 @@ class AlgorithmProcedureFacadeProvider {
         ProcedureCallContextReturnColumns returnColumns,
         MutateNodePropertyService mutateNodePropertyService,
         WriteNodePropertyService writeNodePropertyService,
+        MutateRelationshipService mutateRelationshipService,
+        WriteRelationshipService writeRelationshipService,
         AlgorithmRunner algorithmRunner,
         AlgorithmEstimator algorithmEstimator
     ) {
@@ -65,8 +78,11 @@ class AlgorithmProcedureFacadeProvider {
         this.returnColumns = returnColumns;
         this.mutateNodePropertyService = mutateNodePropertyService;
         this.writeNodePropertyService = writeNodePropertyService;
+        this.mutateRelationshipService = mutateRelationshipService;
+        this.writeRelationshipService = writeRelationshipService;
         this.algorithmRunner = algorithmRunner;
         this.algorithmEstimator = algorithmEstimator;
+
     }
 
     CentralityProcedureFacade createCentralityProcedureFacade() {
@@ -127,4 +143,34 @@ class AlgorithmProcedureFacadeProvider {
             writeBusinessFacade
         );
     }
- }
+
+    SimilarityProcedureFacade createSimilarityProcedureFacade() {
+        // algorithms facade
+        var similarityAlgorithmsFacade = new SimilarityAlgorithmsFacade(algorithmRunner);
+
+        // mode-specific facades
+        var estimateBusinessFacade = new SimilarityAlgorithmsEstimateBusinessFacade(algorithmEstimator);
+        var mutateBusinessFacade = new SimilarityAlgorithmsMutateBusinessFacade(
+            similarityAlgorithmsFacade,
+            mutateRelationshipService
+        );
+        var statsBusinessFacade = new SimilarityAlgorithmsStatsBusinessFacade(similarityAlgorithmsFacade);
+        var streamBusinessFacade = new SimilarityAlgorithmsStreamBusinessFacade(similarityAlgorithmsFacade);
+        var writeBusinessFacade = new SimilarityAlgorithmsWriteBusinessFacade(
+            similarityAlgorithmsFacade,
+            writeRelationshipService
+        );
+
+        // procedure facade
+        return new SimilarityProcedureFacade(
+            configurationCreator,
+            returnColumns,
+            estimateBusinessFacade,
+            mutateBusinessFacade,
+            statsBusinessFacade,
+            streamBusinessFacade,
+            writeBusinessFacade
+        );
+
+    }
+}

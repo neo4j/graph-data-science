@@ -219,15 +219,12 @@ public final class ExtensionBuilder {
             exporterBuildersProviderService
         );
 
-        var similarityProcedureProvider = createSimilarityProcedureProvider(
-            metricsFacade.algorithmMetrics(), exporterBuildersProviderService
-        );
 
         return new GraphDataScienceProvider(
             log,
             catalogFacadeProvider,
             algorithmFacadeService,
-            similarityProcedureProvider,
+
             metricsFacade.deprecatedProcedures()
         );
     }
@@ -275,25 +272,5 @@ public final class ExtensionBuilder {
             userLogServices
         );
     }
-
-
-    private SimilarityProcedureProvider createSimilarityProcedureProvider(
-        AlgorithmMetricsService algorithmMetricsService,
-        ExporterBuildersProviderService exporterBuildersProviderService
-    ) {
-        return new SimilarityProcedureProvider(
-            log,
-            configurationParser,
-            graphStoreCatalogService,
-            useMaxMemoryEstimation,
-            algorithmMetaDataSetterService,
-            algorithmMetricsService,
-            databaseIdAccessor,
-            exporterBuildersProviderService,
-            kernelTransactionAccessor,
-            taskRegistryFactoryService,
-            terminationFlagService,
-            userAccessor, userLogServices
-        );
-    }
+    
 }

@@ -33,20 +33,17 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
     private final Log log;
     private final CatalogFacadeProvider catalogFacadeProvider;
     private final AlgorithmFacadeService algorithmFacadeService;
-    private final SimilarityProcedureProvider similarityProcedureProvider;
     private final DeprecatedProceduresMetricService deprecatedProceduresMetricService;
 
     public GraphDataScienceProvider(
         Log log,
         CatalogFacadeProvider catalogFacadeProvider,
         AlgorithmFacadeService algorithmFacadeService,
-        SimilarityProcedureProvider similarityProcedureProvider,
         DeprecatedProceduresMetricService deprecatedProceduresMetricService
     ) {
         this.log = log;
         this.catalogFacadeProvider = catalogFacadeProvider;
         this.algorithmFacadeService = algorithmFacadeService;
-        this.similarityProcedureProvider = similarityProcedureProvider;
         this.deprecatedProceduresMetricService = deprecatedProceduresMetricService;
     }
 
@@ -58,7 +55,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         var algorithmFacadeProvider = algorithmFacadeService.createAlgorithmFacadeProvider(context);
         var centralityProcedureFacade = algorithmFacadeProvider.createCentralityProcedureFacade();
         var communityProcedureFacade = algorithmFacadeProvider.createCommunityProcedureFacade();
-        var similarityProcedureFacade = similarityProcedureProvider.createSimilarityProcedureFacade(context);
+        var similarityProcedureFacade = algorithmFacadeProvider.createSimilarityProcedureFacade();
 
         return new GraphDataScience(
             log,
