@@ -22,7 +22,9 @@ package org.neo4j.gds.projection;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.loading.AdjacencyBuffer;
+import org.neo4j.gds.core.loading.PropertyReader;
 import org.neo4j.gds.core.loading.RecordScannerTask;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
 import org.neo4j.gds.core.loading.ThreadLocalSingleTypeRelationshipImporter;
@@ -151,9 +153,13 @@ public final class RelationshipsScannerTask extends StatementAction implements R
 
                         buffers[idx.getAndIncrement()] = buffer;
 
+                        PropertyReader<PropertyReference> propertyReader = importer.loadProperties()
+                            ? PropertyReader.storeBacked(transaction)
+                            : (relationshipReferences, propertyReferences, numberOfReferences, propertyKeyIds, defaultValues, aggregations, atLeastOnePropertyToLoad) -> new long[propertyKeyIds.length][0];
+
                         return importer.threadLocalImporter(
                             buffer.relationshipsBatchBuffer(),
-                            transaction
+                            propertyReader
                         );
                     }
                 ).collect(Collectors.toList());

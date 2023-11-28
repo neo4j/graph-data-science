@@ -27,9 +27,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.compress.AdjacencyCompressor;
 import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
 import org.neo4j.gds.api.compress.AdjacencyListsWithProperties;
-import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.Collection;
 import java.util.Map;
@@ -92,6 +90,10 @@ public final class SingleTypeRelationshipImporter {
         return this.importMetaData.skipDanglingRelationships();
     }
 
+    public boolean loadProperties() {
+        return this.importMetaData.projection().properties().hasMappings();
+    }
+
     public Collection<AdjacencyBuffer.AdjacencyListBuilderTask> adjacencyListBuilderTasks(Optional<AdjacencyCompressor.ValueMapper> mapper) {
         return adjacencyBuffer.adjacencyListBuilderTasks(mapper, Optional.empty());
     }
@@ -108,24 +110,6 @@ public final class SingleTypeRelationshipImporter {
         PropertyReader<PROPERTY_REF> propertyReader
     ) {
         return new ThreadLocalSingleTypeRelationshipImporterBuilder<PROPERTY_REF>()
-            .adjacencyBuffer(adjacencyBuffer)
-            .relationshipsBatchBuffer(relationshipsBatchBuffer)
-            .importMetaData(importMetaData)
-            .propertyReader(propertyReader)
-            .build();
-    }
-
-    public ThreadLocalSingleTypeRelationshipImporter<PropertyReference> threadLocalImporter(
-        RelationshipsBatchBuffer<PropertyReference> relationshipsBatchBuffer,
-        KernelTransaction kernelTransaction
-    ) {
-        var loadProperties = importMetaData.projection().properties().hasMappings();
-
-        PropertyReader<PropertyReference> propertyReader = loadProperties
-            ? PropertyReader.storeBacked(kernelTransaction)
-            : (relationshipReferences, propertyReferences, numberOfReferences, propertyKeyIds, defaultValues, aggregations, atLeastOnePropertyToLoad) -> new long[propertyKeyIds.length][0];
-
-        return new ThreadLocalSingleTypeRelationshipImporterBuilder<PropertyReference>()
             .adjacencyBuffer(adjacencyBuffer)
             .relationshipsBatchBuffer(relationshipsBatchBuffer)
             .importMetaData(importMetaData)
