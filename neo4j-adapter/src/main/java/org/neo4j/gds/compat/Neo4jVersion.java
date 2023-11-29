@@ -44,7 +44,7 @@ public enum Neo4jVersion {
     V_5_14,
     V_RC;
 
-    private static final int MINOR_DEV_VERSION = 14;
+    private static final int MINOR_DEV_VERSION = 15;
 
     @Override
     public String toString() {
