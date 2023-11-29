@@ -24,6 +24,8 @@ import org.neo4j.common.EntityType;
 import org.neo4j.common.TokenNameLookup;
 import org.neo4j.counts.CountsStore;
 import org.neo4j.counts.CountsVisitor;
+import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.compat._515.InMemoryNodeCursor;
 import org.neo4j.gds.compat._515.InMemoryPropertyCursor;
 import org.neo4j.gds.compat._515.InMemoryRelationshipScanCursor;
@@ -340,4 +342,22 @@ public class InMemoryStorageReader515 implements StorageReader {
         return tokenHolders;
     }
 
+    @Override
+    public void visitAllCounts(CountsVisitor countsVisitor, CursorContext cursorContext) {
+        for (NodeLabel label : graphStore.nodeLabels()) {
+            var tokenHolder = tokenHolders.labelTokens();
+            countsVisitor.visitNodeCount(tokenHolder.getIdByName(label.name()), graphStore.nodes().nodeCount(label));
+        }
+
+        for (RelationshipType relationshipType : graphStore.relationshipTypes()) {
+            var tokenHolder = tokenHolders.relationshipTypeTokens();
+            // we dont know start / end label for a reltype
+            countsVisitor.visitRelationshipCount(
+                -1,
+                tokenHolder.getIdByName(relationshipType.name()),
+                -1,
+                graphStore.relationshipCount(relationshipType)
+            );
+        }
+    }
 }
