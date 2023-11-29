@@ -25,20 +25,15 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.approxmaxkcut.config.ImmutableApproxMaxKCutBaseConfig;
-import org.neo4j.gds.collections.ha.HugeByteArray;
-import org.neo4j.gds.collections.haa.HugeAtomicByteArray;
-import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -46,7 +41,6 @@ import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
@@ -369,61 +363,4 @@ final class ApproxMaxKCutTest {
         }
     }
 
-    private static long memUsageHelper(long nodeCount, int k, boolean vns) {
-        var memUsage = 0;
-
-        memUsage += MemoryUsage.sizeOfInstance(ApproxMaxKCut.class);
-        // Candidate solutions.
-        memUsage += 2 * HugeByteArray.memoryEstimation(nodeCount);
-        // Improvement costs cache.
-        memUsage += HugeAtomicDoubleArray.memoryEstimation(nodeCount * k);
-        // Set swap status cache.
-        memUsage += HugeAtomicByteArray.memoryEstimation(nodeCount);
-
-        if (vns) {
-            // VNS neighbor candidate solution.
-            memUsage += HugeByteArray.memoryEstimation(nodeCount);
-        }
-
-        return memUsage;
-    }
-
-    private static Stream<Arguments> configParamsForMemoryEstimationTest() {
-        return TestSupport.crossArguments(
-            // node count
-            () -> Stream.of(Arguments.of(10_000L), Arguments.of(40_000L)),
-            // k
-            () -> Stream.of(Arguments.of((byte) 2), Arguments.of((byte) 5)),
-            // Using relationship weight
-            () -> Stream.of(Arguments.of(true), Arguments.of(false)),
-            // VNS max neighborhood order (0 means VNS not used)
-            () -> Stream.of(Arguments.of(0), Arguments.of(4)),
-            // concurrency
-            () -> Stream.of(Arguments.of(1), Arguments.of(4))
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("configParamsForMemoryEstimationTest")
-    void memoryEstimation(long nodeCount, byte k, boolean weighted, int vnsMaxNeighborhoodOrder, int concurrency) {
-        var configBuilder = ImmutableApproxMaxKCutBaseConfig.builder();
-
-        configBuilder.k(k);
-        if (weighted) {
-            configBuilder.relationshipWeightProperty("weight");
-        }
-        configBuilder.vnsMaxNeighborhoodOrder(vnsMaxNeighborhoodOrder);
-        configBuilder.concurrency(concurrency);
-
-        var config = configBuilder.build();
-
-        var expectedMemory = memUsageHelper(nodeCount, k, vnsMaxNeighborhoodOrder > 0);
-
-        assertMemoryEstimation(
-            () -> new ApproxMaxKCutAlgorithmFactory<>().memoryEstimation(config),
-            nodeCount,
-            concurrency,
-            MemoryRange.of(expectedMemory)
-        );
-    }
 }

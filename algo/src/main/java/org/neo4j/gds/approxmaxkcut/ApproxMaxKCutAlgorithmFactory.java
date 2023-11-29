@@ -22,12 +22,8 @@ package org.neo4j.gds.approxmaxkcut;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
-import org.neo4j.gds.collections.ha.HugeByteArray;
-import org.neo4j.gds.collections.haa.HugeAtomicByteArray;
-import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -93,21 +89,6 @@ public class ApproxMaxKCutAlgorithmFactory<CONFIG extends ApproxMaxKCutBaseConfi
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        MemoryEstimations.Builder builder = MemoryEstimations.builder(ApproxMaxKCut.class);
-
-        builder.perNode("best solution candidate", HugeByteArray::memoryEstimation);
-        builder.perNode("solution workspace", HugeByteArray::memoryEstimation);
-        builder.perNodeVector(
-            "local search improvement costs cache",
-            configuration.k(),
-            HugeAtomicDoubleArray::memoryEstimation
-        );
-        builder.perNode("local search set swap status cache", HugeAtomicByteArray::memoryEstimation);
-
-        if (configuration.vnsMaxNeighborhoodOrder() > 0) {
-            builder.perNode("vns neighbor solution candidate", HugeByteArray::memoryEstimation);
-        }
-
-        return builder.build();
+        return new ApproxMaxKCutAlgorithmEstimation().memoryEstimation(configuration);
     }
 }
