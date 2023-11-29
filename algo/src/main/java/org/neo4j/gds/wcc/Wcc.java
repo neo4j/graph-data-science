@@ -23,8 +23,6 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -60,13 +58,6 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
     private final long batchSize;
 
     private final Graph graph;
-
-    public static MemoryEstimation memoryEstimation(boolean incremental) {
-        return MemoryEstimations
-            .builder(Wcc.class.getSimpleName())
-            .add("dss", HugeAtomicDisjointSetStruct.memoryEstimation(incremental))
-            .build();
-    }
 
     public Wcc(
         Graph graph,
