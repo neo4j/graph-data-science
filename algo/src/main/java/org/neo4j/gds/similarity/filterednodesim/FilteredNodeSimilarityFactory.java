@@ -22,11 +22,12 @@ package org.neo4j.gds.similarity.filterednodesim;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -70,6 +71,7 @@ public class FilteredNodeSimilarityFactory<CONFIG extends FilteredNodeSimilarity
         int topK = Math.abs(config.normalizedK());
 
         MemoryEstimations.Builder builder = MemoryEstimations.builder(NodeSimilarity.class.getSimpleName())
+            .perNode("components", HugeLongArray::memoryEstimation)
             .perNode("node filter", nodeCount -> sizeOfLongArray(BitSet.bits2words(nodeCount)))
             .add(
                 "vectors",
