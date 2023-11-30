@@ -24,10 +24,10 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipConsumer;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.SetBitsIterable;
+import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -43,6 +43,8 @@ import org.neo4j.gds.wcc.WccStreamConfig;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.LongUnaryOperator;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
@@ -62,7 +64,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     private final MetricSimilarityComputer similarityComputer;
     private HugeObjectArray<long[]> neighbors;
     private HugeObjectArray<double[]> weights;
-    private HugeLongArray components;
+    private LongUnaryOperator components;
     private SimilarityPairTriConsumer similarityConsumer;
 
     private final boolean weighted;
@@ -263,9 +265,9 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     }
 
     private void initComponents() {
-        components = HugeLongArray.newArray(graph.nodeCount());
         if (!config.isEnableComponentOptimization()) {
             // considering everything as within the same component
+            components = n -> 0;
             similarityConsumer = this::computeSimilarityForSingleComponent;
             return;
         }
@@ -273,12 +275,9 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         similarityConsumer = this::computeSimilarityForComponents;
 
         if (config.componentProperty() != null) {
-            NodePropertyValues nodeProperties = graph.nodeProperties(config.componentProperty());
             // extract component info from property
-            graph.forEachNode(n -> {
-                components.set(n, nodeProperties.longValue(n));
-                return true;
-            });
+            NodePropertyValues nodeProperties = graph.nodeProperties(config.componentProperty());
+            components = initComponentIdMapping(graph, nodeProperties::longValue);
             return;
         }
 
@@ -293,10 +292,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
         Wcc wcc = new WccAlgorithmFactory<>().build(graph, wccConfig, ProgressTracker.NULL_TRACKER);
         DisjointSetStruct disjointSets = wcc.compute();
-        graph.forEachNode(n -> {
-            components.set(n, disjointSets.setIdOf(n));
-            return true;
-        });
+        components = initComponentIdMapping(graph, disjointSets::setIdOf);
         progressTracker.endSubTask();
     }
 
@@ -436,6 +432,19 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             .filter(Objects::nonNull);
     }
 
+    private static LongUnaryOperator initComponentIdMapping(Graph graph, LongUnaryOperator originComponentIdMapper) {
+        HugeLongLongMap componentIdMappings = new HugeLongLongMap();
+        AtomicLong mappedComponentId = new AtomicLong(0L);
+        graph.forEachNode(n -> {
+            long originComponentId = originComponentIdMapper.applyAsLong(n);
+            if (!componentIdMappings.containsKey(originComponentId)) {
+                componentIdMappings.put(originComponentId, mappedComponentId.getAndIncrement());
+            }
+            return true;
+        });
+        return n -> componentIdMappings.getOrDefault(originComponentIdMapper.applyAsLong(n), 0L);
+    }
+
     interface SimilarityConsumer {
         void accept(long sourceNodeId, long targetNodeId, double similarity);
     }
@@ -457,7 +466,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     }
 
     private void computeSimilarityForComponents(long sourceNodeId, long targetNodeId, SimilarityConsumer consumer) {
-        if (components.get(sourceNodeId) != components.get(targetNodeId)) {
+        if (components.applyAsLong(sourceNodeId) != components.applyAsLong(targetNodeId)) {
             consumer.accept(sourceNodeId, targetNodeId, 0);
             return;
         }
