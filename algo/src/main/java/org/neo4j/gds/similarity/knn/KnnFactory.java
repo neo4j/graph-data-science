@@ -56,7 +56,7 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
     ) {
         return Knn.createWithDefaults(
             graph,
-            configuration.toParameters(graph.nodeCount()),
+            configuration.toParameters().finalize(graph.nodeCount()),
             ImmutableKnnContext
                 .builder()
                 .progressTracker(progressTracker)

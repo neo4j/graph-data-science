@@ -101,9 +101,8 @@ public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, SingleT
 
     @Value.Default
     @Configuration.Ignore
-    default KnnParameters toParameters(long nodeCount) {
-        return KnnParameters.create(
-            nodeCount,
+    default KnnParametersSansNodeCount toParameters() {
+        return KnnParametersSansNodeCount.create(
             concurrency(),
             maxIterations(),
             similarityCutoff(),

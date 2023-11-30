@@ -22,10 +22,9 @@ package org.neo4j.gds.similarity.knn;
 import java.util.List;
 import java.util.Optional;
 
-public class KnnParameters {
+public class KnnParametersSansNodeCount {
 
-    static KnnParameters create(
-        long nodeCount,
+    static KnnParametersSansNodeCount create(
         int concurrency,
         int maxIterations,
         double similarityCutoff,
@@ -59,11 +58,13 @@ public class KnnParameters {
         // randomJoins -- 0 or more
         if (randomJoins < 0) throw new IllegalArgumentException("randomJoins must be 0 or more");
 
-        return new KnnParameters(
+        return new KnnParametersSansNodeCount(
             concurrency,
             maxIterations,
             similarityCutoff,
-            K.create(rawK, nodeCount, sampleRate, deltaThreshold),
+            deltaThreshold,
+            sampleRate,
+            rawK,
             perturbationRate,
             randomJoins,
             minBatchSize,
@@ -76,7 +77,9 @@ public class KnnParameters {
     private final int concurrency;
     private final int maxIterations;
     private final double similarityCutoff;
-    private final K kHolder;
+    private final double deltaThreshold;
+    private final double sampleRate;
+    private final int rawK;
     private final double perturbationRate;
     private final int randomJoins;
     private final int minBatchSize;
@@ -84,11 +87,13 @@ public class KnnParameters {
     private final Optional<Long> randomSeed;
     private final List<KnnNodePropertySpec> nodePropertySpecs;
 
-    private KnnParameters(
+    public KnnParametersSansNodeCount(
         int concurrency,
         int maxIterations,
         double similarityCutoff,
-        K kHolder,
+        double deltaThreshold,
+        double sampleRate,
+        int k,
         double perturbationRate,
         int randomJoins,
         int minBatchSize,
@@ -99,7 +104,9 @@ public class KnnParameters {
         this.concurrency = concurrency;
         this.maxIterations = maxIterations;
         this.similarityCutoff = similarityCutoff;
-        this.kHolder = kHolder;
+        this.deltaThreshold = deltaThreshold;
+        this.sampleRate = sampleRate;
+        this.rawK = k;
         this.perturbationRate = perturbationRate;
         this.randomJoins = randomJoins;
         this.minBatchSize = minBatchSize;
@@ -108,43 +115,21 @@ public class KnnParameters {
         this.nodePropertySpecs = nodePropertySpecs;
     }
 
-    int concurrency() {
-        return concurrency;
-    }
-
-    int maxIterations() {
-        return maxIterations;
-    }
-
-    double similarityCutoff() {
-        return similarityCutoff;
-    }
-
-    K kHolder() {
-        return kHolder;
-    }
-
-    double perturbationRate() {
-        return perturbationRate;
-    }
-
-    int randomJoins() {
-        return randomJoins;
-    }
-
-    int minBatchSize() {
-        return minBatchSize;
-    }
-
-    KnnSampler.SamplerType samplerType() {
-        return samplerType;
-    }
-
-    Optional<Long> randomSeed() {
-        return randomSeed;
-    }
-
-    List<KnnNodePropertySpec> nodePropertySpecs() {
-        return nodePropertySpecs;
+    public KnnParameters finalize(long nodeCount) {
+        return KnnParameters.create(
+            nodeCount,
+            concurrency,
+            maxIterations,
+            similarityCutoff,
+            deltaThreshold,
+            sampleRate,
+            rawK,
+            perturbationRate,
+            randomJoins,
+            minBatchSize,
+            samplerType,
+            randomSeed,
+            nodePropertySpecs
+        );
     }
 }
