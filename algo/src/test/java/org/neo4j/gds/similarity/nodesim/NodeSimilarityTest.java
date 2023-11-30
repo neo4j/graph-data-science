@@ -1006,7 +1006,7 @@ final class NodeSimilarityTest {
         List<AtomicLong> progresses = progressTracker.getProgresses();
 
         // Should log progress for prepare and actual comparisons
-        assertEquals(6, progresses.size());
+        assertThat(progresses).hasSize(6);
 
         assertThat(log.getMessages(INFO))
             .extracting(removingThreadId())
