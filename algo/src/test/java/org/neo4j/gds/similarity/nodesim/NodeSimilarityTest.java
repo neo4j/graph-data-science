@@ -982,4 +982,41 @@ final class NodeSimilarityTest {
             .hasMessageContaining("upperDegreeCutoff cannot be smaller than degreeCutoff");
     }
 
+
+    @Test
+    void shouldOptimizeForDistinctComponents() {
+        var graph = naturalGraph;
+        var config = ImmutableNodeSimilarityStreamConfig.builder().isEnableComponentOptimization(true).degreeCutoff(0).concurrency(4).build();
+        var progressTask = new NodeSimilarityFactory<>().progressTask(graph, config);
+        TestLog log = Neo4jProxy.testLog();
+        var progressTracker = new TestProgressTracker(
+            progressTask,
+            log,
+            4,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+
+        NodeSimilarity.create(
+            graph,
+            config,
+            DefaultPool.INSTANCE,
+            progressTracker
+        ).compute().streamResult().count();
+
+        List<AtomicLong> progresses = progressTracker.getProgresses();
+
+        // Should log progress for prepare and actual comparisons
+        assertEquals(6, progresses.size());
+
+        assertThat(log.getMessages(INFO))
+            .extracting(removingThreadId())
+            .contains(
+                "NodeSimilarity :: prepare :: WCC :: Start",
+                "NodeSimilarity :: prepare :: WCC :: Finished",
+                "NodeSimilarity :: prepare :: Start",
+                "NodeSimilarity :: prepare :: Finished",
+                "NodeSimilarity :: compare node pairs :: Start",
+                "NodeSimilarity :: compare node pairs :: Finished"
+            );
+    }
 }

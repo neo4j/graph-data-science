@@ -32,6 +32,9 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
+import org.neo4j.gds.wcc.ImmutableWccStreamConfig;
+import org.neo4j.gds.wcc.WccAlgorithmFactory;
+import org.neo4j.gds.wcc.WccStreamConfig;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
@@ -116,8 +119,21 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
     public Task progressTask(Graph graph, CONFIG config) {
         return Tasks.task(
             taskName(),
-            Tasks.leaf("prepare", graph.relationshipCount()),
+            prepareTask(graph, config),
             Tasks.leaf("compare node pairs")
         );
     }
+
+    private Task prepareTask(Graph graph, CONFIG config) {
+        if (config.runWCC()) {
+            WccStreamConfig wccStreamConfig = ImmutableWccStreamConfig
+                .builder()
+                .build();
+            return Tasks.task("prepare", new WccAlgorithmFactory<>().progressTask(graph, wccStreamConfig),
+                Tasks.leaf("initialize", graph.relationshipCount()));
+        } else {
+            return Tasks.leaf("prepare", graph.relationshipCount());
+        }
+    }
+
 }

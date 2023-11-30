@@ -200,6 +200,9 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
         initComponents();
 
+        if (config.runWCC()) {
+            progressTracker.beginSubTask();
+        }
         neighbors = HugeObjectArray.newArray(long[].class, graph.nodeCount());
         if (weighted) {
             weights = HugeObjectArray.newArray(double[].class, graph.nodeCount());
@@ -236,6 +239,9 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             }
             return null;
         });
+        if (config.runWCC()) {
+            progressTracker.endSubTask();
+        }
         progressTracker.endSubTask();
     }
 
@@ -261,15 +267,11 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         components = HugeLongArray.newArray(graph.nodeCount());
         if (!config.isEnableComponentOptimization()) {
             // considering everything as within the same component
-            similarityConsumer = (sourceNodeId, targetNodeId, consumer) -> {
-                computeSimilarityForSingleComponent(sourceNodeId, targetNodeId, consumer);
-            };
+            similarityConsumer = this::computeSimilarityForSingleComponent;
             return;
         }
 
-        similarityConsumer = (sourceNodeId, targetNodeId, consumer) -> {
-            computeSimilarityForComponents(sourceNodeId, targetNodeId, consumer);
-        };
+        similarityConsumer = this::computeSimilarityForComponents;
 
         if (config.componentProperty() != null) {
             NodePropertyValues nodeProperties = graph.nodeProperties(config.componentProperty());
@@ -282,6 +284,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         }
 
         // run WCC to determine components
+        progressTracker.beginSubTask();
         WccStreamConfig wccConfig = ImmutableWccStreamConfig
             .builder()
             .concurrency(concurrency)
@@ -295,6 +298,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             components.set(n, disjointSets.setIdOf(n));
             return true;
         });
+        progressTracker.endSubTask();
     }
 
     private Stream<SimilarityResult> computeAll() {

@@ -53,7 +53,7 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
     String COMPONENT_PROPERTY_KEY = "componentProperty";
 
     String ENABLE_COMPONENT_OPTIMIZATION_KEY = "enableComponentOptimization";
-    boolean ENABLE_COMPONENT_OPTIMIZATION = true;
+    boolean ENABLE_COMPONENT_OPTIMIZATION = false;
 
     @Value.Default
     @Configuration.DoubleRange(min = 0, max = 1)
@@ -199,6 +199,14 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
         if (componentProperty != null) {
             ConfigNodesValidations.validateNodePropertyExists(graphStore, selectedLabels, "Component property", componentProperty);
         }
+    }
+
+    @Value.Derived
+    default boolean runWCC() {
+        if (isEnableComponentOptimization() && componentProperty() == null) {
+            return true;
+        }
+        return false;
     }
 
 }

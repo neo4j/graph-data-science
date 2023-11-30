@@ -215,4 +215,5 @@ class FilteredNodeSimilarityTest {
                 "FilteredNodeSimilarity :: Finished"
             );
     }
+
 }
