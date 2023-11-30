@@ -27,18 +27,17 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.ArrayIdMap;
 import org.neo4j.gds.core.loading.LabelInformationBuilders;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.Intersections;
-import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -57,13 +56,12 @@ import java.util.SplittableRandom;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.neo4j.gds.TestSupport.assertMemoryRange;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.l2Normalize;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
-public class FastRPTest {
+class FastRPTest {
 
     private static final int DEFAULT_EMBEDDING_DIMENSION = 128;
     private static final FastRPBaseConfig DEFAULT_CONFIG = FastRPBaseConfig.builder()
@@ -450,34 +448,6 @@ public class FastRPTest {
         for (int i = 0; i < embeddings.size(); i++) {
             assertThat(embeddings.get(i)).containsOnly(0f);
         }
-    }
-
-    @Test
-    void testMemoryEstimationWithoutIterationWeights() {
-        var config = ImmutableFastRPBaseConfig
-            .builder()
-            .addIterationWeights(1.0D, 1.0D)
-            .embeddingDimension(128)
-            .build();
-
-        var dimensions = ImmutableGraphDimensions.builder().nodeCount(100).build();
-
-        var estimate = FastRP.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
-        assertMemoryRange(estimate, 159_808);
-    }
-
-    @Test
-    void testMemoryEstimationWithIterationWeights() {
-        var config = ImmutableFastRPBaseConfig
-            .builder()
-            .embeddingDimension(128)
-            .iterationWeights(List.of(1.0D, 2.0D))
-            .build();
-
-        var dimensions = ImmutableGraphDimensions.builder().nodeCount(100).build();
-
-        var estimate = FastRP.memoryEstimation(config).estimate(dimensions, 1).memoryUsage();
-        assertMemoryRange(estimate, 159_808);
     }
 
     @Test

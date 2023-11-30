@@ -26,14 +26,11 @@ import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionConsumer;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.core.features.FeatureConsumer;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.features.FeatureExtractor;
@@ -78,20 +75,6 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
     private final List<Number> iterationWeights;
     private final int minBatchSize;
     private List<DegreePartition> partitions;
-
-    public static MemoryEstimation memoryEstimation(FastRPBaseConfig config) {
-        var sizeOfEmbeddingArray = MemoryUsage.sizeOfFloatArray(config.embeddingDimension());
-        return MemoryEstimations
-            .builder(FastRP.class.getSimpleName())
-            .fixed(
-                "propertyVectors",
-                MemoryUsage.sizeOfFloatArray((long) config.featureProperties().size() * config.propertyDimension())
-            )
-            .perNode("embeddings", nodeCount -> HugeObjectArray.memoryEstimation(nodeCount, sizeOfEmbeddingArray))
-            .perNode("embeddingsA", nodeCount -> HugeObjectArray.memoryEstimation(nodeCount, sizeOfEmbeddingArray))
-            .perNode("embeddingsB", nodeCount -> HugeObjectArray.memoryEstimation(nodeCount, sizeOfEmbeddingArray))
-            .build();
-    }
 
     public FastRP(
         Graph graph,
