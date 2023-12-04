@@ -17,38 +17,36 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.fastrp;
+package org.neo4j.gds.k1coloring;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.neo4j.gds.TestSupport.assertMemoryRange;
+import static org.neo4j.gds.assertions.MemoryRangeAssert.assertThat;
 
-class FastRPMemoryEstimationTest {
+class K1ColoringMemoryEstimateDefinitionTest {
 
-
-    @ParameterizedTest(name = "NodeCount: {0}, concurrency: {1}")
-    @CsvSource({
-        "100, 1, 159_808",
-        "100, 8, 159_808",
-        "100, 128, 159_808",
-        "250_000, 8, 399_001_096",
-        "1_000_000, 128, 1_596_003_856"
+    @ParameterizedTest(name = "Concurrency: {0}")
+    @CsvSource(value = {
+        "1, 825240",
+        "4, 862992",
+        "42, 1341184"
     })
-    void shouldComputeMemoryEstimation(long nodeCount, int concurrency, long expectedMemory) {
-        var configMock = mock(FastRPBaseConfig.class);
-        when(configMock.embeddingDimension()).thenReturn(128);
-
-        var dimensions = GraphDimensions.of(nodeCount);
-
-        var fastRPMemoryEstimation = new FastRPMemoryEstimation();
-
-        var estimate = fastRPMemoryEstimation.memoryEstimation(configMock)
+    void shouldComputeMemoryEstimation(int concurrency, long expectedMemory) {
+        long nodeCount = 100_000L;
+        GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
+        K1ColoringStreamConfig config = ImmutableK1ColoringStreamConfig.builder().build();
+        final MemoryRange actual = new K1ColoringAlgorithmFactory<>()
+            .memoryEstimation(config)
             .estimate(dimensions, concurrency)
             .memoryUsage();
-        assertMemoryRange(estimate, expectedMemory);
+
+        assertThat(actual)
+            .hasSameMinAndMax()
+            .hasMin(expectedMemory);
     }
+
 }

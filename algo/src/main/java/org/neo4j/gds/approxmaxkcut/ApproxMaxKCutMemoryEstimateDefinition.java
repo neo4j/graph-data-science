@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.approxmaxkcut;
 
-import org.neo4j.gds.AlgorithmMemoryEstimation;
+import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.collections.ha.HugeByteArray;
 import org.neo4j.gds.collections.haa.HugeAtomicByteArray;
@@ -27,7 +27,7 @@ import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 
-public class ApproxMaxKCutAlgorithmEstimation implements AlgorithmMemoryEstimation<ApproxMaxKCutBaseConfig> {
+public class ApproxMaxKCutMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<ApproxMaxKCutBaseConfig> {
 
     @Override
     public MemoryEstimation memoryEstimation(ApproxMaxKCutBaseConfig configuration) {

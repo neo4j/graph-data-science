@@ -17,12 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.wcc;
 
-import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
 
-public interface AlgorithmMemoryEstimation<CONFIG extends AlgoBaseConfig> {
+public class WccMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<WccBaseConfig> {
 
-    MemoryEstimation memoryEstimation(CONFIG configuration);
+    @Override
+    public MemoryEstimation memoryEstimation(WccBaseConfig configuration) {
+        return MemoryEstimations
+            .builder(Wcc.class.getSimpleName())
+            .add("dss", HugeAtomicDisjointSetStruct.memoryEstimation(configuration.isIncremental()))
+            .build();
+    }
+
 }

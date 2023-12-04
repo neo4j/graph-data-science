@@ -25,9 +25,9 @@ import org.neo4j.gds.core.GraphDimensions;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.neo4j.gds.TestSupport.assertMemoryRange;
+import static org.neo4j.gds.assertions.MemoryRangeAssert.assertThat;
 
-class WccMemoryEstimationTest {
+class WccMemoryEstimateDefinitionTest {
 
     @ParameterizedTest(name = "Node count: {0}")
     @CsvSource({
@@ -36,14 +36,16 @@ class WccMemoryEstimationTest {
         "100_000_000_000, 800_122_070_392"
     })
     void shouldGiveTheSameEstimationRegardlessOfTheConcurrencyNonIncrementalConfiguration(long nodeCount, long expectedMemoryUsage) {
-        var wcc = new WccMemoryEstimation();
+        var wcc = new WccMemoryEstimateDefinition();
         var configMock = mock(WccBaseConfig.class);
         when(configMock.isIncremental()).thenReturn(false);
 
         var graphDimensions = GraphDimensions.of(nodeCount);
-        assertMemoryRange(wcc.memoryEstimation(configMock).estimate(graphDimensions, 1).memoryUsage(), expectedMemoryUsage);
-        assertMemoryRange(wcc.memoryEstimation(configMock).estimate(graphDimensions, 8).memoryUsage(), expectedMemoryUsage);
-        assertMemoryRange(wcc.memoryEstimation(configMock).estimate(graphDimensions, 64).memoryUsage(), expectedMemoryUsage);
+        assertThat(wcc.memoryEstimation(configMock).estimate(graphDimensions, 1).memoryUsage())
+            .isEqualTo(wcc.memoryEstimation(configMock).estimate(graphDimensions, 8).memoryUsage())
+            .isEqualTo(wcc.memoryEstimation(configMock).estimate(graphDimensions, 64).memoryUsage())
+            .hasMin(expectedMemoryUsage)
+            .hasMax(expectedMemoryUsage);
 
     }
 
@@ -54,14 +56,16 @@ class WccMemoryEstimationTest {
         "100_000_000_000, 1_600_244_140_760"
     })
     void shouldGiveTheSameEstimationRegardlessOfTheConcurrencyIncrementalConfiguration(long nodeCount, long expectedMemoryUsage) {
-        var wcc = new WccMemoryEstimation();
+        var wcc = new WccMemoryEstimateDefinition();
         var configMock = mock(WccBaseConfig.class);
         when(configMock.isIncremental()).thenReturn(true);
 
         var graphDimensions = GraphDimensions.of(nodeCount);
-        assertMemoryRange(wcc.memoryEstimation(configMock).estimate(graphDimensions, 1).memoryUsage(), expectedMemoryUsage);
-        assertMemoryRange(wcc.memoryEstimation(configMock).estimate(graphDimensions, 8).memoryUsage(), expectedMemoryUsage);
-        assertMemoryRange(wcc.memoryEstimation(configMock).estimate(graphDimensions, 64).memoryUsage(), expectedMemoryUsage);
+        assertThat(wcc.memoryEstimation(configMock).estimate(graphDimensions, 1).memoryUsage())
+            .isEqualTo(wcc.memoryEstimation(configMock).estimate(graphDimensions, 8).memoryUsage())
+            .isEqualTo(wcc.memoryEstimation(configMock).estimate(graphDimensions, 64).memoryUsage())
+            .hasMin(expectedMemoryUsage)
+            .hasMax(expectedMemoryUsage);
     }
 
 }

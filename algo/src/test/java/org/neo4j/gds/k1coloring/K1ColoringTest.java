@@ -30,10 +30,7 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -141,29 +138,6 @@ class K1ColoringTest {
             .isLessThanOrEqualTo(21);
     }
 
-
-    @Test
-    void shouldComputeMemoryEstimation1Thread() {
-        long nodeCount = 100_000L;
-        int concurrency = 1;
-
-        assertMemoryEstimation(nodeCount, concurrency, 825240);
-    }
-
-    @Test
-    void shouldComputeMemoryEstimation4Threads() {
-        long nodeCount = 100_000L;
-        int concurrency = 4;
-        assertMemoryEstimation(nodeCount, concurrency, 862992);
-    }
-
-    @Test
-    void shouldComputeMemoryEstimation42Threads() {
-        long nodeCount = 100_000L;
-        int concurrency = 42;
-        assertMemoryEstimation(nodeCount, concurrency, 1341184);
-    }
-
     @Test
     void everyNodeShouldHaveBeenColored() {
         RandomGraphGenerator generator = RandomGraphGenerator.builder()
@@ -236,17 +210,4 @@ class K1ColoringTest {
         );
         assertTrue(log.containsMessage(TestLog.INFO, ":: Finished"));
     }
-
-    private void assertMemoryEstimation(long nodeCount, int concurrency, long expected) {
-        GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
-        K1ColoringStreamConfig config = ImmutableK1ColoringStreamConfig.builder().build();
-        final MemoryRange actual = new K1ColoringAlgorithmFactory<>()
-            .memoryEstimation(config)
-            .estimate(dimensions, concurrency)
-            .memoryUsage();
-
-        assertEquals(actual.min, actual.max);
-        assertEquals(expected, actual.min);
-    }
-
 }

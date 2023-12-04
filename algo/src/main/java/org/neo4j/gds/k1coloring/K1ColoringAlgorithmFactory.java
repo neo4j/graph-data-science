@@ -21,16 +21,13 @@ package org.neo4j.gds.k1coloring;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.IterationsConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
 
@@ -61,14 +58,7 @@ public class K1ColoringAlgorithmFactory<T extends K1ColoringBaseConfig> extends 
 
     @Override
     public MemoryEstimation memoryEstimation(T config) {
-        return MemoryEstimations.builder(K1Coloring.class)
-            .perNode("colors", HugeLongArray::memoryEstimation)
-            .perNode("nodesToColor", MemoryUsage::sizeOfBitset)
-            .perThread("coloring", MemoryEstimations.builder()
-                .field("coloringStep", ColoringStep.class)
-                .perNode("forbiddenColors", MemoryUsage::sizeOfBitset)
-                .build())
-            .build();
+        return new K1ColoringMemoryEstimateDefinition().memoryEstimation(config);
     }
 
     @Override
