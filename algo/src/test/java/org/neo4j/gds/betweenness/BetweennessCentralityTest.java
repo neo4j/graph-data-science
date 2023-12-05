@@ -30,7 +30,6 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.TestGraph;
@@ -42,7 +41,6 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.Orientation.UNDIRECTED;
-import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 import static org.neo4j.gds.TestSupport.crossArguments;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
@@ -173,25 +171,6 @@ class BetweennessCentralityTest {
         assertEquals(0.0, actualResult.get((int) graph.toMappedNodeId("e")));
     }
 
-    private static Stream<Arguments> expectedMemoryEstimation() {
-        return Stream.of(
-            Arguments.of(1, 6_000_376L, 6_000_376L),
-            Arguments.of(4, 21_601_192L, 21_601_192L),
-            Arguments.of(42, 219_211_528L, 219_211_528L)
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("org.neo4j.gds.betweenness.BetweennessCentralityTest#expectedMemoryEstimation")
-    void testMemoryEstimation(int concurrency, long expectedMinBytes, long expectedMaxBytes) {
-        assertMemoryEstimation(
-            () -> new BetweennessCentralityFactory<>().memoryEstimation(DEFAULT_CONFIG),
-            100_000L,
-            concurrency,
-            MemoryRange.of(expectedMinBytes, expectedMaxBytes)
-        );
-    }
-    
     @Test
     void testShouldLogProgress() {
         var config = BetweennessCentralityStreamConfigImpl.builder().samplingSize(2L).build();

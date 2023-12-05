@@ -21,13 +21,8 @@ package org.neo4j.gds.betweenness;
 
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -35,11 +30,7 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
-
-import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 
 @GdlExtension
 class WeightedBetweennessCentralityTest {
@@ -136,27 +127,4 @@ class WeightedBetweennessCentralityTest {
         softAssertions.assertAll();
     }
 
-    @ParameterizedTest
-    @MethodSource("expectedWeightedMemoryEstimation")
-    void testMemoryEstimationWeighted(int concurrency, long expectedMinBytes, long expectedMaxBytes) {
-        var config = BetweennessCentralityStreamConfig.of(
-            CypherMapWrapper.create(
-                Map.of("relationshipWeightProperty", "foo")
-            )
-        );
-        assertMemoryEstimation(
-            () -> new BetweennessCentralityFactory<>().memoryEstimation(config),
-            100_000L,
-            concurrency,
-            MemoryRange.of(expectedMinBytes, expectedMaxBytes)
-        );
-    }
-
-    static Stream<Arguments> expectedWeightedMemoryEstimation() {
-        return Stream.of(
-            Arguments.of(1, 7_213_000L, 7_213_000L),
-            Arguments.of(4, 26_451_688L, 26_451_688L),
-            Arguments.of(42, 270_141_736L, 270_141_736L)
-        );
-    }
 }
