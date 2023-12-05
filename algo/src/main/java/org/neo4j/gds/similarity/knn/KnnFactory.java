@@ -30,6 +30,7 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
 
 import java.util.List;
 import java.util.function.LongFunction;
@@ -54,9 +55,12 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-        return Knn.createWithDefaults(
+        var parameters = configuration.toParameters().finalize(graph.nodeCount());
+        return Knn.create(
             graph,
-            configuration.toParameters().finalize(graph.nodeCount()),
+            parameters,
+            SimilarityComputer.ofProperties(graph, parameters.nodePropertySpecs()),
+            new KnnNeighborFilterFactory(graph.nodeCount()),
             ImmutableKnnContext
                 .builder()
                 .progressTracker(progressTracker)

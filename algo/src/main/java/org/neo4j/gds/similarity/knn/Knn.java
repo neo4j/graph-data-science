@@ -29,27 +29,12 @@ import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 
 public class Knn extends Algorithm<KnnResult> {
-
-    public static SimilarityFunction defaultSimilarityFunction(Graph graph, List<KnnNodePropertySpec> nodeProperties) {
-        return new SimilarityFunction(SimilarityComputer.ofProperties(graph, nodeProperties));
-    }
-
-    public static Knn createWithDefaults(Graph graph, KnnParameters parameters, KnnContext context) {
-        return create(
-            graph,
-            parameters,
-            SimilarityComputer.ofProperties(graph, parameters.nodePropertySpecs()),
-            new KnnNeighborFilterFactory(graph.nodeCount()),
-            context
-        );
-    }
 
     public static Knn create(
         Graph graph,

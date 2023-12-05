@@ -19,8 +19,10 @@
  */
 package org.neo4j.gds.similarity.knn;
 
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
+
 public final class K {
-    static K create(int k, long nodeCount, double sampleRate, double deltaThreshold) {
+    public static K create(int k, long nodeCount, double sampleRate, double deltaThreshold) {
         // user-provided k value must be at least 1
         if (k < 1) throw new IllegalArgumentException("K k must be 1 or more");
         // sampleRate -- value range (0.0;1.0]
@@ -28,7 +30,7 @@ public final class K {
             throw new IllegalArgumentException("sampleRate must be more than 0.0 and less than or equal to 1.0");
         // deltaThreshold -- value range [0.0;1.0]
         if (Double.compare(deltaThreshold, 0.0) < 0 || Double.compare(deltaThreshold, 1.0) > 0)
-            throw new IllegalArgumentException("deltaThreshold must be more than or equal to 0.0 and less than or equal to 1.0");
+            throw new IllegalArgumentException(formatWithLocale("deltaThreshold must be more than or equal to 0.0 and less than or equal to 1.0, was `%f`", deltaThreshold));
 
         // (int) is safe because k is at most `topK`, which is an int
         // upper bound for k is all other nodes in the graph
