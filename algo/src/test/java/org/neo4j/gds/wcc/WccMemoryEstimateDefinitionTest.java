@@ -21,11 +21,10 @@ package org.neo4j.gds.wcc;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.assertions.MemoryEstimationAssert;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.neo4j.gds.assertions.MemoryRangeAssert.assertThat;
 
 class WccMemoryEstimateDefinitionTest {
 
@@ -35,17 +34,15 @@ class WccMemoryEstimateDefinitionTest {
         "100, 864",
         "100_000_000_000, 800_122_070_392"
     })
-    void shouldGiveTheSameEstimationRegardlessOfTheConcurrencyNonIncrementalConfiguration(long nodeCount, long expectedMemoryUsage) {
-        var wcc = new WccMemoryEstimateDefinition();
+    void wccMemoryEstimation(long nodeCount, long expectedMemoryUsage) {
         var configMock = mock(WccBaseConfig.class);
         when(configMock.isIncremental()).thenReturn(false);
 
-        var graphDimensions = GraphDimensions.of(nodeCount);
-        assertThat(wcc.memoryEstimation(configMock).estimate(graphDimensions, 1).memoryUsage())
-            .isEqualTo(wcc.memoryEstimation(configMock).estimate(graphDimensions, 8).memoryUsage())
-            .isEqualTo(wcc.memoryEstimation(configMock).estimate(graphDimensions, 64).memoryUsage())
-            .hasSameMinAndMaxEqualTo(expectedMemoryUsage);
+        var memoryEstimation = new WccMemoryEstimateDefinition().memoryEstimation(configMock);
 
+        MemoryEstimationAssert.assertThat(memoryEstimation)
+            .memoryRange(nodeCount, 4)
+            .hasSameMinAndMaxEqualTo(expectedMemoryUsage);
     }
 
     @ParameterizedTest(name = "Node count: {0}")
@@ -54,16 +51,47 @@ class WccMemoryEstimateDefinitionTest {
         "100, 1_704",
         "100_000_000_000, 1_600_244_140_760"
     })
-    void shouldGiveTheSameEstimationRegardlessOfTheConcurrencyIncrementalConfiguration(long nodeCount, long expectedMemoryUsage) {
-        var wcc = new WccMemoryEstimateDefinition();
+    void incrementalWccMemoryEstimation(long nodeCount, long expectedMemoryUsage) {
         var configMock = mock(WccBaseConfig.class);
         when(configMock.isIncremental()).thenReturn(true);
 
-        var graphDimensions = GraphDimensions.of(nodeCount);
-        assertThat(wcc.memoryEstimation(configMock).estimate(graphDimensions, 1).memoryUsage())
-            .isEqualTo(wcc.memoryEstimation(configMock).estimate(graphDimensions, 8).memoryUsage())
-            .isEqualTo(wcc.memoryEstimation(configMock).estimate(graphDimensions, 64).memoryUsage())
+        var memoryEstimation = new WccMemoryEstimateDefinition().memoryEstimation(configMock);
+
+        MemoryEstimationAssert.assertThat(memoryEstimation)
+            .memoryRange(nodeCount, 4)
             .hasSameMinAndMaxEqualTo(expectedMemoryUsage);
     }
 
+    @ParameterizedTest(name = "Concurrency: {0}")
+    @CsvSource({
+        "1, 864",
+        "4, 864",
+        "128, 864"
+    })
+    void shouldGiveTheSameEstimationRegardlessOfTheConcurrency(int concurrency, long expectedMemory) {
+        var configMock = mock(WccBaseConfig.class);
+
+        var memoryEstimation = new WccMemoryEstimateDefinition().memoryEstimation(configMock);
+
+        MemoryEstimationAssert.assertThat(memoryEstimation)
+            .memoryRange(100, concurrency)
+            .hasSameMinAndMaxEqualTo(expectedMemory);
+    }
+
+    @ParameterizedTest(name = "Concurrency: {0}")
+    @CsvSource({
+        "1, 1_704",
+        "4, 1_704",
+        "128, 1_704"
+    })
+    void shouldGiveTheSameEstimationRegardlessOfTheConcurrencyIncrementalConfiguration(int concurrency, long expectedMemory) {
+        var configMock = mock(WccBaseConfig.class);
+        when(configMock.isIncremental()).thenReturn(true);
+
+        var memoryEstimation = new WccMemoryEstimateDefinition().memoryEstimation(configMock);
+
+        MemoryEstimationAssert.assertThat(memoryEstimation)
+            .memoryRange(100, concurrency)
+            .hasSameMinAndMaxEqualTo(expectedMemory);
+    }
 }
