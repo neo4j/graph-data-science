@@ -49,13 +49,11 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
         return KNN_BASE_TASK_NAME;
     }
 
-    @Override
     public Knn build(
         Graph graph,
-        CONFIG configuration,
+        KnnParameters parameters,
         ProgressTracker progressTracker
     ) {
-        var parameters = configuration.toParameters().finalize(graph.nodeCount());
         return Knn.create(
             graph,
             parameters,
@@ -67,6 +65,16 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
                 .executor(DefaultPool.INSTANCE)
                 .build()
         );
+    }
+
+    @Override
+    public Knn build(
+        Graph graph,
+        CONFIG configuration,
+        ProgressTracker progressTracker
+    ) {
+        var parameters = configuration.toParameters().finalize(graph.nodeCount());
+        return build(graph, parameters, progressTracker);
     }
 
     @Override
