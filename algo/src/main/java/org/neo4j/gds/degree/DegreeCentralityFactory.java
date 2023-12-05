@@ -22,10 +22,8 @@ package org.neo4j.gds.degree;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -50,13 +48,7 @@ public class DegreeCentralityFactory<CONFIG extends DegreeCentralityConfig> exte
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        MemoryEstimations.Builder builder = MemoryEstimations.builder(DegreeCentrality.class);
-        if (configuration.hasRelationshipWeightProperty()) {
-            return builder
-                .perNode("degree cache", HugeDoubleArray::memoryEstimation)
-                .build();
-        }
-        return builder.build();
+        return new DegreeCentralityAlgorithmEstimateDefinition().memoryEstimation(configuration);
     }
 
     @Override

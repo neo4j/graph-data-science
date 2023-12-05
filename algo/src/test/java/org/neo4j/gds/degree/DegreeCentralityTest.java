@@ -26,18 +26,15 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTracker;
-import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
 import java.util.Map;
@@ -46,7 +43,6 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 import static org.neo4j.gds.TestSupport.crossArguments;
 import static org.neo4j.gds.TestSupport.toArguments;
 import static org.neo4j.gds.TestSupport.toArgumentsFlat;
@@ -160,31 +156,6 @@ final class DegreeCentralityTest {
         });
     }
 
-    private static Stream<Arguments> configParamsAndExpectedMemory() {
-        return Stream.of(
-            Arguments.of(true, 1, MemoryUsage.sizeOfInstance(DegreeCentrality.class) + HugeDoubleArray.memoryEstimation(10_000L)),
-            Arguments.of(true, 4, MemoryUsage.sizeOfInstance(DegreeCentrality.class) + HugeDoubleArray.memoryEstimation(10_000L)),
-            Arguments.of(false, 1, MemoryUsage.sizeOfInstance(DegreeCentrality.class)),
-            Arguments.of(false, 4, MemoryUsage.sizeOfInstance(DegreeCentrality.class))
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("configParamsAndExpectedMemory")
-    void testMemoryEstimation(boolean weighted, int concurrency, long expectedMemory) {
-        var configBuilder = ImmutableDegreeCentralityConfig.builder();
-        if (weighted) {
-            configBuilder.relationshipWeightProperty("weight");
-        }
-        configBuilder.concurrency(concurrency);
-        var config = configBuilder.build();
-        assertMemoryEstimation(
-            () -> new DegreeCentralityFactory<>().memoryEstimation(config),
-            10_000L,
-            concurrency,
-            MemoryRange.of(expectedMemory)
-        );
-    }
 
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
