@@ -46,6 +46,22 @@ public final class MemoryRangeAssert extends AbstractAssert<MemoryRangeAssert, M
         return this;
     }
 
+    public MemoryRangeAssert hasSameMinAndMaxEqualTo(long expected) {
+
+        hasSameMinAndMax();
+
+        if(actual.min != expected) {
+            failWithMessage(
+                "Expected `min` and `max` to be `%s` but it was `%s`",
+                expected,
+                actual.min
+            );
+
+        }
+
+        return this;
+    }
+
     public MemoryRangeAssert hasMin(long min) {
         isNotNull();
 

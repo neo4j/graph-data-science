@@ -44,8 +44,7 @@ class WccMemoryEstimateDefinitionTest {
         assertThat(wcc.memoryEstimation(configMock).estimate(graphDimensions, 1).memoryUsage())
             .isEqualTo(wcc.memoryEstimation(configMock).estimate(graphDimensions, 8).memoryUsage())
             .isEqualTo(wcc.memoryEstimation(configMock).estimate(graphDimensions, 64).memoryUsage())
-            .hasMin(expectedMemoryUsage)
-            .hasMax(expectedMemoryUsage);
+            .hasSameMinAndMaxEqualTo(expectedMemoryUsage);
 
     }
 
@@ -64,8 +63,7 @@ class WccMemoryEstimateDefinitionTest {
         assertThat(wcc.memoryEstimation(configMock).estimate(graphDimensions, 1).memoryUsage())
             .isEqualTo(wcc.memoryEstimation(configMock).estimate(graphDimensions, 8).memoryUsage())
             .isEqualTo(wcc.memoryEstimation(configMock).estimate(graphDimensions, 64).memoryUsage())
-            .hasMin(expectedMemoryUsage)
-            .hasMax(expectedMemoryUsage);
+            .hasSameMinAndMaxEqualTo(expectedMemoryUsage);
     }
 
 }

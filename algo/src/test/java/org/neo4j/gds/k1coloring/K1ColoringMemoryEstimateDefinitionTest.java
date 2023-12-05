@@ -21,11 +21,8 @@ package org.neo4j.gds.k1coloring;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 
-import static org.neo4j.gds.assertions.MemoryRangeAssert.assertThat;
+import static org.neo4j.gds.assertions.MemoryEstimationAssert.assertThat;
 
 class K1ColoringMemoryEstimateDefinitionTest {
 
@@ -36,17 +33,13 @@ class K1ColoringMemoryEstimateDefinitionTest {
         "42, 1341184"
     })
     void shouldComputeMemoryEstimation(int concurrency, long expectedMemory) {
-        long nodeCount = 100_000L;
-        GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
-        K1ColoringStreamConfig config = ImmutableK1ColoringStreamConfig.builder().build();
-        final MemoryRange actual = new K1ColoringAlgorithmFactory<>()
-            .memoryEstimation(config)
-            .estimate(dimensions, concurrency)
-            .memoryUsage();
 
-        assertThat(actual)
-            .hasSameMinAndMax()
-            .hasMin(expectedMemory);
+        var memoryEstimation = new K1ColoringMemoryEstimateDefinition().memoryEstimation(null);
+
+        assertThat(memoryEstimation)
+            .memoryRange(100_000L, concurrency)
+            .hasSameMinAndMaxEqualTo(expectedMemory);
+
     }
 
 }

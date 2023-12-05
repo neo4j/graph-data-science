@@ -23,11 +23,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
-import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.assertions.MemoryEstimationAssert;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.neo4j.gds.assertions.MemoryRangeAssert.assertThat;
 
 class ApproxMaxKCutMemoryEstimateDefinitionTest {
 
@@ -46,10 +45,10 @@ class ApproxMaxKCutMemoryEstimateDefinitionTest {
         when(configMock.concurrency()).thenReturn(4);
 
         var memoryEstimate = new ApproxMaxKCutMemoryEstimateDefinition().memoryEstimation(configMock);
-        var estimate = memoryEstimate.estimate(GraphDimensions.of(nodeCount), 4).memoryUsage();
-        assertThat(estimate)
-            .hasSameMinAndMax()
-            .hasMin(expectedMemory);
+
+        MemoryEstimationAssert.assertThat(memoryEstimate)
+            .memoryRange(nodeCount, 4)
+            .hasSameMinAndMaxEqualTo(expectedMemory);
     }
 
     @ParameterizedTest(name = "nodeCount: {0}, k: {1}")
@@ -65,10 +64,10 @@ class ApproxMaxKCutMemoryEstimateDefinitionTest {
         when(configMock.concurrency()).thenReturn(4);
 
         var memoryEstimate = new ApproxMaxKCutMemoryEstimateDefinition().memoryEstimation(configMock);
-        var estimate = memoryEstimate.estimate(GraphDimensions.of(nodeCount), 4).memoryUsage();
-        assertThat(estimate)
-            .hasSameMinAndMax()
-            .hasMin(expectedMemory);
+
+        MemoryEstimationAssert.assertThat(memoryEstimate)
+            .memoryRange(nodeCount, 4)
+            .hasSameMinAndMaxEqualTo(expectedMemory);
     }
 
     @ParameterizedTest(name = "Concurrency: {0}")
@@ -81,11 +80,10 @@ class ApproxMaxKCutMemoryEstimateDefinitionTest {
         when(configMock.concurrency()).thenReturn(concurrency);
 
         var memoryEstimate = new ApproxMaxKCutMemoryEstimateDefinition().memoryEstimation(configMock);
-        var estimate = memoryEstimate.estimate(GraphDimensions.of(10_000), 4).memoryUsage();
-        assertThat(estimate)
-            .hasSameMinAndMax()
-            .hasMin(430_224L);
 
+        MemoryEstimationAssert.assertThat(memoryEstimate)
+            .memoryRange(10_000, 4)
+            .hasSameMinAndMaxEqualTo(430_224L);
     }
 
 }

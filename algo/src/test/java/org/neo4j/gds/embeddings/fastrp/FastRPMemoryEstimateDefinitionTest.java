@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.neo4j.gds.core.GraphDimensions;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.neo4j.gds.assertions.MemoryRangeAssert.assertThat;
+import static org.neo4j.gds.assertions.MemoryEstimationAssert.assertThat;
 
 class FastRPMemoryEstimateDefinitionTest {
 
@@ -44,15 +44,20 @@ class FastRPMemoryEstimateDefinitionTest {
         var configMock = mock(FastRPBaseConfig.class);
         when(configMock.embeddingDimension()).thenReturn(128);
 
-        var dimensions = GraphDimensions.of(nodeCount);
+        var fastRPMemoryEstimation = new FastRPMemoryEstimateDefinition();
+
+        assertThat(fastRPMemoryEstimation.memoryEstimation(configMock))
+            .memoryRange(nodeCount, concurrency)
+            .hasSameMinAndMaxEqualTo(expectedMemory);
+    }
+
+    @Test
+    void shouldHaveCorrectDescription() {
+        var configMock = mock(FastRPBaseConfig.class);
 
         var fastRPMemoryEstimation = new FastRPMemoryEstimateDefinition();
 
-        var estimate = fastRPMemoryEstimation.memoryEstimation(configMock)
-            .estimate(dimensions, concurrency)
-            .memoryUsage();
-        assertThat(estimate)
-            .hasSameMinAndMax()
-            .hasMin(expectedMemory);
+        assertThat(fastRPMemoryEstimation.memoryEstimation(configMock))
+            .hasDescription("FastRP");
     }
 }
