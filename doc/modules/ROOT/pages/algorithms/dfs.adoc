@@ -15,8 +15,8 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 == Introduction
 
 The Depth First Search algorithm is a graph traversal that starts at a given node and explores as far as possible along each branch before backtracking, see https://en.wikipedia.org/wiki/Depth-first_search.
-A related algorithm is the Breath First Search algorithm, xref:algorithms/bfs.adoc[Breath First Search].
-This algorithm can be preferred over Breath First Search for example if one wants to find a target node at a large distance and exploring a random path has decent probability of success.
+A related algorithm is the Breadth First Search algorithm, xref:algorithms/bfs.adoc[Breadth First Search].
+This algorithm can be preferred over Breadth First Search for example if one wants to find a target node at a large distance and exploring a random path has decent probability of success.
 There are multiple termination conditions supported for the traversal, based on either reaching one of several target nodes, reaching a maximum depth, exhausting a given budget of traversed relationship cost, or just traversing the whole graph.
 The output of the procedure contains information about which nodes were visited and in what order.
 
