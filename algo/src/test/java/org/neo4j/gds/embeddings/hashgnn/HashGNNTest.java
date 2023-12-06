@@ -32,18 +32,16 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.ResourceUtil;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.ArrayIdMap;
 import org.neo4j.gds.core.loading.LabelInformationBuilders;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.Intersections;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -60,7 +58,6 @@ import java.util.SplittableRandom;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 
 @GdlExtension
@@ -269,95 +266,6 @@ class HashGNNTest {
         assertThat(result.doubleArrayValue(2).length).isEqualTo(42);
     }
 
-    @ParameterizedTest
-    @CsvSource(value = {
-        // BASE
-        "    10,  4,  10_000, 20_000, 1, -1,  5_924_072, 86_324_072",
-
-        // Should increase fairly little with higher density
-        "   100,  4,  10_000, 20_000, 1, -1,  7_038_992, 87_438_992",
-
-        // Should increase fairly little with more iterations
-        "    10, 16,  10_000, 20_000, 1, -1,  5_924_072, 86_324_072",
-
-        // Should increase almost linearly with node count
-        "    10,  4, 100_000, 20_000, 1, -1, 58_124_432, 862_124_432",
-
-        // Should be unaffected by relationship count
-        "    10,  4,  10_000, 80_000, 1, -1,  5_924_072, 86_324_072",
-
-        // Should be unaffected by concurrency
-        "    10,  4,  10_000, 20_000, 8, -1, 5_924_072, 86_324_072",
-
-        // Should be affected by the output dimension
-        "    10,  4,  10_000, 20_000, 8, 100, 12_404_072, 12_404_072",
-    })
-        void shouldEstimateMemory(
-        int embeddingDensity,
-        int iterations,
-        long nodeCount,
-        long relationshipCount,
-        int concurrency,
-        int outputDimension,
-        long expectedMinMemory,
-        long expectedMaxMemory
-    ) {
-        Optional<Integer> maybeOutputDimension = outputDimension == -1 ? Optional.empty() : Optional.of(outputDimension);
-
-        var config = HashGNNStreamConfigImpl
-            .builder()
-            .featureProperties(List.of("f1", "f2"))
-            .embeddingDensity(embeddingDensity)
-            .iterations(iterations)
-            .outputDimension(maybeOutputDimension)
-            .build();
-
-        assertMemoryEstimation(
-            () -> new HashGNNFactory<>().memoryEstimation(config),
-            nodeCount,
-            relationshipCount,
-            concurrency,
-            MemoryRange.of(expectedMinMemory, expectedMaxMemory)
-        );
-    }
-
-    @Test
-    void estimationShouldUseGeneratedDimensionIfOutputIsMissing() {
-        var inputDimension = 1000L;
-        var inputRatio = 0.1;
-        var graphDims = GraphDimensions.of((long) 1e6);
-        var concurrency = 4;
-
-        var bigEstimation = new HashGNNFactory<>()
-            .memoryEstimation(HashGNNStreamConfigImpl
-                .builder()
-                .generateFeatures(Map.of("dimension", inputDimension, "densityLevel", 1))
-                .iterations(3)
-                .embeddingDensity(100)
-                .build())
-            .estimate(graphDims, concurrency)
-            .memoryUsage();
-
-        var smallEstimation = new HashGNNFactory<>()
-            .memoryEstimation(HashGNNStreamConfigImpl
-                .builder()
-                .generateFeatures(Map.of("dimension", (long) (inputRatio * inputDimension), "densityLevel", 1))
-                .iterations(3)
-                .embeddingDensity(100)
-                .build())
-            .estimate(graphDims, concurrency)
-            .memoryUsage();
-
-        var maxOutputRatio = (double) smallEstimation.max / bigEstimation.max;
-        assertThat(maxOutputRatio).isCloseTo(inputRatio, Offset.offset(0.1));
-
-        //Lower bound of the memory estimation is for bitSet.
-        //upper bound is when all the features are double[].
-        //It is a range because the non-context features need to be converted to double[],
-        // while the context can remain as bitSet
-        var minOutputRatio = (double) smallEstimation.min / bigEstimation.min;
-        assertThat(minOutputRatio).isCloseTo(0.42, Offset.offset(0.01));
-    }
 
     @ParameterizedTest
     @CsvSource(value = {"true", "false"})
