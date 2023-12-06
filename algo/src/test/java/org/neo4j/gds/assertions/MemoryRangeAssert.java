@@ -20,6 +20,7 @@
 package org.neo4j.gds.assertions;
 
 import org.assertj.core.api.AbstractAssert;
+import org.assertj.core.api.LongAssert;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 
 public final class MemoryRangeAssert extends AbstractAssert<MemoryRangeAssert, MemoryRange> {
@@ -80,5 +81,15 @@ public final class MemoryRangeAssert extends AbstractAssert<MemoryRangeAssert, M
         }
 
         return this;
+    }
+
+    public LongAssert min() {
+        isNotNull();
+        return new LongAssert(actual.min);
+    }
+
+    public LongAssert max() {
+        isNotNull();
+        return new LongAssert(actual.max);
     }
 }

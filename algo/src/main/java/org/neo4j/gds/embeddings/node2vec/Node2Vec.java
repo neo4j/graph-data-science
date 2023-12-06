@@ -21,14 +21,10 @@ package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.core.EmbeddingUtils;
 import org.neo4j.gds.traversal.RandomWalkCompanion;
 
@@ -49,18 +45,6 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
     private final TrainParameters trainParameters;
     private final int walkBufferSize;
 
-
-    public static MemoryEstimation memoryEstimation(int walksPerNode, int walkLength, int embeddingDimension) {
-        return MemoryEstimations.builder(Node2Vec.class.getSimpleName())
-            .perNode("random walks", (nodeCount) -> {
-                var numberOfRandomWalks = nodeCount * walksPerNode;
-                var randomWalkMemoryUsage = MemoryUsage.sizeOfLongArray(walkLength);
-                return HugeObjectArray.memoryEstimation(numberOfRandomWalks, randomWalkMemoryUsage);
-            })
-            .add("probability cache", RandomWalkProbabilities.memoryEstimation())
-            .add("model", Node2VecModel.memoryEstimation(embeddingDimension))
-            .build();
-    }
 
     public Node2Vec(
         Graph graph,

@@ -30,12 +30,12 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 
-class CELFAlgorithmFactoryTest {
+class CELFMemoryEstimateDefinitionTest {
 
     @ParameterizedTest
     @MethodSource("configurations")
     void memoryEstimation(int seedSetSize, int concurrency, long expectedMemory) {
-        var memoryEstimation = new CELFAlgorithmFactory<InfluenceMaximizationStreamConfig>().memoryEstimation(
+        var memoryEstimation = new CELFMemoryEstimateDefinition().memoryEstimation(
             InfluenceMaximizationStreamConfig.of(
                 CypherMapWrapper.create(
                     Map.of("seedSetSize", seedSetSize, "concurrency", concurrency)

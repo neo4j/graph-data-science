@@ -22,12 +22,9 @@ package org.neo4j.gds.embeddings.node2vec;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.BitUtil;
-import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.core.functions.Sigmoid;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
 
@@ -60,21 +57,6 @@ public class Node2VecModel {
     private final RandomWalkProbabilities randomWalkProbabilities;
     private final ProgressTracker progressTracker;
     private final long randomSeed;
-
-    public static MemoryEstimation memoryEstimation(int embeddingDimension) {
-        var vectorMemoryEstimation = MemoryUsage.sizeOfFloatArray(embeddingDimension);
-
-        return MemoryEstimations.builder(Node2Vec.class.getSimpleName())
-            .perNode(
-                "center embeddings",
-                (nodeCount) -> HugeObjectArray.memoryEstimation(nodeCount, vectorMemoryEstimation)
-            )
-            .perNode(
-                "context embeddings",
-                (nodeCount) -> HugeObjectArray.memoryEstimation(nodeCount, vectorMemoryEstimation)
-            )
-            .build();
-    }
 
     Node2VecModel(
         LongUnaryOperator toOriginalId,

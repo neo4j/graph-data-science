@@ -24,10 +24,8 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.concurrent.atomic.LongAdder;
 import java.util.stream.LongStream;
@@ -41,14 +39,6 @@ interface RandomWalkProbabilities {
     HugeDoubleArray positiveSamplingProbabilities();
     HugeLongArray negativeSamplingDistribution();
     long sampleCount();
-
-    static MemoryEstimation memoryEstimation() {
-        return MemoryEstimations.builder(RandomWalkProbabilities.class.getSimpleName())
-            .perNode("node frequencies", HugeLongArray::memoryEstimation)
-            .perNode("positive sampling probabilities", HugeDoubleArray::memoryEstimation)
-            .perNode("negative sampling distribution", HugeLongArray::memoryEstimation)
-            .build();
-    }
 
     @SuppressWarnings("immutables:incompat")
     class Builder {

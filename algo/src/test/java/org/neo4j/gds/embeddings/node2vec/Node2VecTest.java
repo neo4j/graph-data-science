@@ -22,7 +22,6 @@ package org.neo4j.gds.embeddings.node2vec;
 import org.assertj.core.api.SoftAssertions;
 import org.assertj.core.api.junit.jupiter.SoftAssertionsExtension;
 import org.assertj.core.data.Offset;
-import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +41,6 @@ import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.ArrayIdMap;
 import org.neo4j.gds.core.loading.LabelInformationBuilders;
@@ -199,30 +197,6 @@ class Node2VecTest {
                     "Node2Vec :: RandomWalk :: DegreeCentrality :: Finished"
                 );
         }
-    }
-
-    @Test
-    void shouldEstimateMemory() {
-        var nodeCount = 1000;
-        var walksPerNode = 10;
-        var walkLength = 80;
-        var embeddingDimension = 128;
-        var memoryEstimation = Node2Vec.memoryEstimation(walksPerNode, walkLength, embeddingDimension);
-
-        var numberOfRandomWalks = nodeCount * walksPerNode * walkLength;
-        var randomWalkMemoryUsageLowerBound = numberOfRandomWalks * Long.BYTES;
-
-        var estimate = memoryEstimation.estimate(GraphDimensions.of(nodeCount), 1);
-        assertThat(estimate.memoryUsage().max).isCloseTo(
-            randomWalkMemoryUsageLowerBound,
-            Percentage.withPercentage(25)
-        );
-
-        var estimateTimesHundred = memoryEstimation.estimate(GraphDimensions.of(nodeCount * 100), 1);
-        assertThat(estimateTimesHundred.memoryUsage().max).isCloseTo(
-            randomWalkMemoryUsageLowerBound * 100L,
-            Percentage.withPercentage(25)
-        );
     }
 
     @Test
