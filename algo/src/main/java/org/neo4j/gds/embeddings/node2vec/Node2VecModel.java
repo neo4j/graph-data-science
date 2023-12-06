@@ -20,10 +20,10 @@
 package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.BitUtil;
@@ -184,7 +184,7 @@ public class Node2VecModel {
                 .run();
 
             double loss = tasks.stream().mapToDouble(TrainingTask::lossSum).sum();
-            progressTracker.logInfo(formatWithLocale("Loss %.4f", loss));
+            progressTracker.logInfo(formatWithLocale("Maximum likelihood objective is %.4f", loss));
             lossPerIteration.add(loss);
 
             progressTracker.endSubTask();
