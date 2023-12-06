@@ -20,45 +20,35 @@
 package org.neo4j.gds.influenceMaximization;
 
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.junit.jupiter.params.provider.CsvSource;
 
-import java.util.Map;
-import java.util.stream.Stream;
-
-import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.neo4j.gds.assertions.MemoryEstimationAssert.assertThat;
 
 class CELFMemoryEstimateDefinitionTest {
 
     @ParameterizedTest
-    @MethodSource("configurations")
+    @CsvSource(
+        {
+            "1, 1, 3_256",
+            "1, 4, 4_840",
+            "1, 64, 36_520",
+            "10, 1, 3_504",
+            "10, 4, 5_088",
+            "10, 64, 36_768",
+        }
+    )
     void memoryEstimation(int seedSetSize, int concurrency, long expectedMemory) {
-        var memoryEstimation = new CELFMemoryEstimateDefinition().memoryEstimation(
-            InfluenceMaximizationStreamConfig.of(
-                CypherMapWrapper.create(
-                    Map.of("seedSetSize", seedSetSize, "concurrency", concurrency)
-                )));
+        var configMock = mock(InfluenceMaximizationBaseConfig.class);
+        when(configMock.seedSetSize()).thenReturn(seedSetSize);
+        when(configMock.concurrency()).thenReturn(concurrency);
 
-        assertMemoryEstimation(
-            () -> memoryEstimation,
-            42,
-            1337,
-            concurrency,
-            MemoryRange.of(expectedMemory, expectedMemory)
-        );
+        var memoryEstimation = new CELFMemoryEstimateDefinition().memoryEstimation(configMock);
+
+        assertThat(memoryEstimation)
+            .memoryRange(42, 1337, concurrency)
+            .hasSameMinAndMaxEqualTo(expectedMemory);
     }
 
-    private static Stream<Arguments> configurations() {
-        return Stream.of(
-            Arguments.of(1, 1, 3_256),
-            Arguments.of(10, 1, 3_504),
-            Arguments.of(1, 2, 3_784),
-            Arguments.of(10, 2, 40_32),
-            Arguments.of(1, 4, 4_840),
-            Arguments.of(10, 4, 5_088)
-
-        );
-    }
 }
