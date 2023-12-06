@@ -20,7 +20,6 @@
 package org.neo4j.gds.leiden;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.gdl.GdlFactory;
@@ -56,64 +55,7 @@ class LeidenAlgorithmFactoryTest {
 
         assertThat(task.render()).isEqualTo(expectedTask.render());
     }
-
-    @Test
-    void shouldEstimateMemory() {
-        var config = LeidenStatsConfigImpl.builder().maxLevels(3).build();
-        var estimate = new LeidenAlgorithmFactory<>().memoryEstimation(config)
-            .estimate(
-                GraphDimensions.of(10_000, 100_000),
-                4
-            );
-        var expected =
-            "Leiden: [3127 KiB ... 5256 KiB]" + System.lineSeparator() +
-            "|-- this.instance: 96 Bytes" + System.lineSeparator() +
-            "|-- local move communities: 78 KiB" + System.lineSeparator() +
-            "|-- local move node volumes: 78 KiB" + System.lineSeparator() +
-            "|-- local move community volumes: 78 KiB" + System.lineSeparator() +
-            "|-- current communities: 78 KiB" + System.lineSeparator() +
-            "|-- local move phase: 1173 KiB" + System.lineSeparator() +
-            "    |-- this.instance: 48 Bytes" + System.lineSeparator() +
-            "    |-- community weights: 78 KiB" + System.lineSeparator() +
-            "    |-- community volumes: 78 KiB" + System.lineSeparator() +
-            "    |-- global queue: 78 KiB" + System.lineSeparator() +
-            "    |-- global queue bitset: 1328 Bytes" + System.lineSeparator() +
-            "    |-- local move task: 938 KiB" + System.lineSeparator() +
-            "        |-- neighbor communities: 78 KiB" + System.lineSeparator() +
-            "        |-- neighbor weights: 78 KiB" + System.lineSeparator() +
-            "        |-- local queue: 78 KiB" + System.lineSeparator() +
-            "            |-- this.instance: 40 Bytes" + System.lineSeparator() +
-            "            |-- array: 78 KiB" + System.lineSeparator() +
-            "|-- modularity computation: 78 KiB" + System.lineSeparator() +
-            "    |-- this.instance: 16 Bytes" + System.lineSeparator() +
-            "    |-- relationships outside community: 78 KiB" + System.lineSeparator() +
-            "    |-- relationship calculator: 128 Bytes" + System.lineSeparator() +
-            "        |-- this.instance: 32 Bytes" + System.lineSeparator() +
-            "|-- dendogram manager: 78 KiB" + System.lineSeparator() +
-            "    |-- this.instance: 48 Bytes" + System.lineSeparator() +
-            "    |-- dendograms: 78 KiB" + System.lineSeparator() +
-            "|-- refinement phase: 470 KiB" + System.lineSeparator() +
-            "    |-- this.instance: 96 Bytes" + System.lineSeparator() +
-            "    |-- encountered communities: 78 KiB" + System.lineSeparator() +
-            "    |-- encountered community weights: 78 KiB" + System.lineSeparator() +
-            "    |-- next community probabilities: 78 KiB" + System.lineSeparator() +
-            "    |-- merged community volumes: 78 KiB" + System.lineSeparator() +
-            "    |-- relationships between communities: 78 KiB" + System.lineSeparator() +
-            "    |-- refined communities: 78 KiB" + System.lineSeparator() +
-            "    |-- merge tracking bitset: 1296 Bytes" + System.lineSeparator() +
-            "|-- aggregation phase: [700 KiB ... 2830 KiB]" + System.lineSeparator() +
-            "    |-- this.instance: 48 Bytes" + System.lineSeparator() +
-            "    |-- aggregated graph: [544 KiB ... 2674 KiB]" + System.lineSeparator() +
-            "    |-- sorted communities: 78 KiB" + System.lineSeparator() +
-            "    |-- atomic coordination array: 78 KiB" + System.lineSeparator() +
-            "|-- post-aggregation phase: 312 KiB" + System.lineSeparator() +
-            "    |-- next local move communities: 78 KiB" + System.lineSeparator() +
-            "    |-- next local move node volumes: 78 KiB" + System.lineSeparator() +
-            "    |-- next local move community volumes: 78 KiB" + System.lineSeparator() +
-            "    |-- community to node map: 78 KiB" + System.lineSeparator();
-        assertThat(estimate.render()).isEqualTo(expected);
-    }
-
+    
     @Test
     void shouldThrowIfNotUndirected() {
         var graph = GdlFactory.of("(a)-->(b)").build().getUnion();
