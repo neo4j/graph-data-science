@@ -22,14 +22,14 @@ package org.neo4j.gds.kcore;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.assertions.MemoryEstimationAssert;
 
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.Mockito.mock;
 
-class KCoreDecompositionAlgorithmFactoryTest {
+class KCoreDecompositionMemoryEstimateDefinitionTest {
 
     static Stream<Arguments> memoryEstimationTuples() {
         return Stream.of(
@@ -41,14 +41,16 @@ class KCoreDecompositionAlgorithmFactoryTest {
     @ParameterizedTest
     @MethodSource("memoryEstimationTuples")
     void memoryEstimation(int concurrency, long expectedMemoryEstimation) {
-        var config = KCoreDecompositionStreamConfigImpl.builder().concurrency(concurrency).build();
-        var factory = new KCoreDecompositionAlgorithmFactory<>();
-        var estimate = factory.memoryEstimation(config)
-            .estimate(GraphDimensions.of(100), config.concurrency());
 
-        var memoryUsage = estimate.memoryUsage();
-        assertThat(memoryUsage.min).isEqualTo(expectedMemoryEstimation);
-        assertThat(memoryUsage.max).isEqualTo(expectedMemoryEstimation);//4624L
+        var config= mock(KCoreDecompositionBaseConfig.class);
+
+        var factory = new KCoreDecompositionAlgorithmFactory<>();
+        var memoryEstimation = factory.memoryEstimation(config);
+
+        MemoryEstimationAssert.assertThat(memoryEstimation).
+            memoryRange(100,concurrency)
+            .hasSameMinAndMaxEqualTo(expectedMemoryEstimation);
+
     }
 
 }
