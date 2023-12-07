@@ -20,9 +20,9 @@
 package org.neo4j.gds.assertions;
 
 import org.assertj.core.api.AbstractAssert;
+import org.assertj.core.api.Assertions;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 
-import java.util.Arrays;
 import java.util.stream.Collectors;
 
 public class MemoryTreeAssert extends AbstractAssert<MemoryTreeAssert, MemoryTree> {
@@ -42,29 +42,10 @@ public class MemoryTreeAssert extends AbstractAssert<MemoryTreeAssert, MemoryTre
     }
 
     public  MemoryTreeAssert componentsDescriptionsContainExactly(String... expectedDescriptions){
-
+        isNotNull();
         var componentsDescription = actual.components().stream().map(MemoryTree::description).collect(Collectors.toList());
 
-        boolean different=true;
-
-        if (componentsDescription.size()== expectedDescriptions.length){
-            int length=componentsDescription.size();
-            different=false;
-            for (int i=0;i<length;++i){
-                if (!componentsDescription.get(i).equals(expectedDescriptions[i])){
-                    different=true;
-                    break;
-                }
-            }
-        }
-
-        if (different) {
-            failWithMessage(
-                "Expected `to contain exactly %s, but contains %s",
-                Arrays.toString(expectedDescriptions),
-                Arrays.toString(componentsDescription.toArray())
-            );
-        }
+        Assertions.assertThat(componentsDescription).containsExactly(expectedDescriptions);
 
         return  this;
 
