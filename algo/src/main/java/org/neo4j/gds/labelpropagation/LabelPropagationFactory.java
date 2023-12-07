@@ -19,23 +19,15 @@
  */
 package org.neo4j.gds.labelpropagation;
 
-import com.carrotsearch.hppc.LongDoubleScatterMap;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
-
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
 public class LabelPropagationFactory<CONFIG extends LabelPropagationBaseConfig> extends GraphAlgorithmFactory<LabelPropagation, CONFIG> {
 
@@ -60,25 +52,7 @@ public class LabelPropagationFactory<CONFIG extends LabelPropagationBaseConfig> 
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
-        return MemoryEstimations.builder(LabelPropagation.class)
-            .perNode("labels", HugeLongArray::memoryEstimation)
-            .perThread("votes", MemoryEstimations.builder()
-                .field("init step", InitStep.class)
-                .field("compute step", ComputeStep.class)
-                .field("step runner", StepRunner.class)
-                .field("compute step consumer", ComputeStepConsumer.class)
-                .field("votes container", LongDoubleScatterMap.class)
-                .rangePerNode("votes", nodeCount -> {
-                    long minBufferSize = MemoryUsage.sizeOfEmptyOpenHashContainer();
-                    long maxBufferSize = MemoryUsage.sizeOfOpenHashContainer(nodeCount);
-                    if (maxBufferSize < minBufferSize) {
-                        maxBufferSize = minBufferSize;
-                    }
-                    long min = sizeOfLongArray(minBufferSize) + sizeOfDoubleArray(minBufferSize);
-                    long max = sizeOfLongArray(maxBufferSize) + sizeOfDoubleArray(maxBufferSize);
-                    return MemoryRange.of(min, max);
-                }).build())
-            .build();
+        return new LabelPropagationMemoryEstimateDefinition().memoryEstimation(config);
     }
 
     @Override

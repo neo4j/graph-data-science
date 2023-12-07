@@ -23,18 +23,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.assertions.MemoryEstimationAssert;
 
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
+import static org.mockito.Mockito.mock;
 
-class LabelPropagationFactoryTest {
-    private static final LabelPropagationStreamConfig DEFAULT_CONFIG = LabelPropagationStreamConfig.of(CypherMapWrapper.empty());
+class LabelPropagationMemoryEstimateDefinitionTest {
+
 
     static Stream<Arguments> expectedMemoryEstimation() {
         return Stream.of(
@@ -47,25 +43,29 @@ class LabelPropagationFactoryTest {
     @ParameterizedTest
     @MethodSource("expectedMemoryEstimation")
     void shouldComputeMemoryEstimation(int concurrency, long expectedMinBytes, long expectedMaxBytes) {
-        assertMemoryEstimation(
-            () -> new LabelPropagationFactory<>().memoryEstimation(DEFAULT_CONFIG),
-            100_000L,
-            concurrency,
-            MemoryRange.of(expectedMinBytes, expectedMaxBytes)
-        );
+
+        var config = mock(LabelPropagationBaseConfig.class);
+        var memoryEstimation = new LabelPropagationMemoryEstimateDefinition().memoryEstimation(config);
+
+        MemoryEstimationAssert.assertThat(memoryEstimation)
+            .memoryRange( 100_000L,concurrency)
+            .hasMin(expectedMinBytes)
+            .hasMax(expectedMaxBytes);
+
     }
 
     @Test
     void shouldBoundMemEstimationToMaxSupportedDegree() {
-        var labelPropagationFactory = new LabelPropagationFactory<>();
-        GraphDimensions largeDimensions = ImmutableGraphDimensions.builder()
-            .nodeCount((long) Integer.MAX_VALUE + (long) Integer.MAX_VALUE)
-            .build();
+        var largeNodeCount = ((long) Integer.MAX_VALUE + (long) Integer.MAX_VALUE);
 
-        // test for no failure and no overflow
-        assertTrue(0 < labelPropagationFactory
-            .memoryEstimation(ImmutableLabelPropagationStreamConfig.builder().build())
-            .estimate(largeDimensions, 1)
-            .memoryUsage().max);
+        var config = mock(LabelPropagationBaseConfig.class);
+        var memoryEstimation = new LabelPropagationMemoryEstimateDefinition().memoryEstimation(config);
+
+        MemoryEstimationAssert.assertThat(memoryEstimation)
+            .memoryRange(largeNodeCount, 1)
+            .max()
+            .isPositive();
+
     }
+
 }

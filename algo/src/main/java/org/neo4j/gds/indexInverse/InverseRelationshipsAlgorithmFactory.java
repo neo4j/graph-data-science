@@ -19,14 +19,11 @@
  */
 package org.neo4j.gds.indexInverse;
 
-import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.loading.AdjacencyListBehavior;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -69,50 +66,6 @@ public class InverseRelationshipsAlgorithmFactory extends GraphStoreAlgorithmFac
 
     @Override
     public MemoryEstimation memoryEstimation(InverseRelationshipsConfig configuration) {
-        var relationshipTypes = configuration.relationshipTypes();
-
-        var builder = MemoryEstimations.builder(InverseRelationships.class);
-
-        for (String typeName : relationshipTypes) {
-            var builderForType = MemoryEstimations.builder();
-            if (typeName.equals(ElementProjection.PROJECT_ALL)) {
-                builderForType.add(
-                    "All relationships",
-                    AdjacencyListBehavior.adjacencyListsFromStarEstimation(false)
-                );
-
-                builderForType.perGraphDimension("All properties", ((graphDimensions, concurrency) -> {
-                    var singlePropertyEstimation = AdjacencyListBehavior
-                        .adjacencyPropertiesFromStarEstimation( false)
-                        .estimate(graphDimensions, concurrency)
-                        .memoryUsage();
-
-                    return singlePropertyEstimation.times(graphDimensions.relationshipPropertyTokens().size());
-                }));
-
-                builder.add(String.format(Locale.US, "Inverse '%s'", typeName), builderForType.build());
-            } else {
-                var relationshipType = RelationshipType.of(typeName);
-
-                builderForType.add(
-                    "relationships",
-                    AdjacencyListBehavior.adjacencyListEstimation(relationshipType, false)
-                );
-
-
-                builderForType.perGraphDimension("properties", ((graphDimensions, concurrency) -> {
-                    var singlePropertyEstimation = AdjacencyListBehavior
-                        .adjacencyPropertiesEstimation(relationshipType, false)
-                        .estimate(graphDimensions, concurrency)
-                        .memoryUsage();
-
-                    return singlePropertyEstimation.times(graphDimensions.relationshipPropertyTokens().size());
-                }));
-
-                builder.add(String.format(Locale.US, "Inverse '%s'", typeName), builderForType.build());
-            }
-        }
-
-        return builder.build();
+        return new InverseRelationshipsMemoryEstimateDefinition().memoryEstimation(configuration);
     }
 }

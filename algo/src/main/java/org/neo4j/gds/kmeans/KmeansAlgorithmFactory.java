@@ -22,15 +22,11 @@ package org.neo4j.gds.kmeans;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.collections.ha.HugeDoubleArray;
-import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
 
@@ -99,30 +95,6 @@ public final class KmeansAlgorithmFactory<CONFIG extends KmeansBaseConfig> exten
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        var fakeLength = 128;
-        var builder = MemoryEstimations.builder(Kmeans.class)
-            .perNode("bestCommunities", HugeIntArray::memoryEstimation)
-            .fixed(
-                "bestCentroids",
-                MemoryUsage.sizeOfArray(configuration.k(), MemoryUsage.sizeOfDoubleArray(fakeLength))
-            )
-            .perNode("nodesInCluster", MemoryUsage::sizeOfLongArray)
-            .perNode("distanceFromCentroid", HugeDoubleArray::memoryEstimation)
-            .add(ClusterManager.memoryEstimation(
-                configuration.k(),
-                fakeLength
-            ))
-            .perThread("KMeansTask", KmeansTask.memoryEstimation(configuration.k(), fakeLength));
-
-        if(configuration.computeSilhouette()) {
-            builder.perNode("silhouette", HugeDoubleArray::memoryEstimation);
-        }
-
-        if(configuration.isSeeded()) {
-            var centroids = configuration.seedCentroids();
-            builder.fixed("seededCentroids", MemoryUsage.sizeOf(centroids));
-        }
-
-        return builder.build();
+        return new KmeansMemoryEstimateDefinition().memoryEstimation(configuration);
     }
 }
