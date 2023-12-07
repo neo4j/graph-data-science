@@ -22,34 +22,24 @@ package org.neo4j.gds.modularity;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.assertions.MemoryEstimationAssert;
 
-import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
+import static org.mockito.Mockito.mock;
 
-class ModularityCalculatorFactoryTest {
+class ModularityCalculatorEstimateDefinitionTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("memoryEstimationSetup")
     void memoryEstimation(int concurrency,long expected) {
-        var config = ModularityStatsConfig.of(CypherMapWrapper.create(
-            Map.of(
-                "communityProperty","foo"
-            )
-        ));
+        var config = mock(ModularityBaseConfig.class);
 
-        var algorithmFactory = new ModularityCalculatorFactory<>();
+        var memoryEstimation = new ModularityCalculatorMemoryEstimateDefinition().memoryEstimation(config);
 
-        assertMemoryEstimation(
-            () -> algorithmFactory.memoryEstimation(config),
-            10,
-            23,
-            concurrency,
-            MemoryRange.of(expected)
-        );
+        MemoryEstimationAssert.assertThat(memoryEstimation)
+            .memoryRange(10, 23, concurrency)
+            .hasSameMinAndMaxEqualTo(expected);
     }
 
     static Stream<Arguments> memoryEstimationSetup() {
