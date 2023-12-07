@@ -47,13 +47,25 @@ public final class MemoryEstimationAssert extends AbstractAssert<MemoryEstimatio
         return this;
     }
 
-    public MemoryRangeAssert memoryRange(long nodeCount, long relationshipCount, int concurrency) {
+    public MemoryRangeAssert memoryRange(GraphDimensions graphDimensions, int concurrency) {
         isNotNull();
-        var memoryRange = actual.estimate(GraphDimensions.of(nodeCount, relationshipCount), concurrency).memoryUsage();
+        var memoryRange = actual.estimate(graphDimensions, concurrency).memoryUsage();
         return MemoryRangeAssert.assertThat(memoryRange);
+    }
+
+    public MemoryRangeAssert memoryRange(long nodeCount, long relationshipCount, int concurrency) {
+        return memoryRange(GraphDimensions.of(nodeCount, relationshipCount), concurrency);
     }
 
     public MemoryRangeAssert memoryRange(long nodeCount, int concurrency) {
         return memoryRange(nodeCount, 0, concurrency);
     }
+
+
+    public MemoryTreeAssert memoryTree(GraphDimensions graphDimensions, int concurrency) {
+        isNotNull();
+        var memoryTree = actual.estimate(graphDimensions, concurrency);
+        return MemoryTreeAssert.assertThat(memoryTree);
+    }
+    
 }
