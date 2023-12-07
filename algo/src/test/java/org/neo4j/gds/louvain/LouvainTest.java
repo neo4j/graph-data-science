@@ -21,9 +21,6 @@ package org.neo4j.gds.louvain;
 
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
@@ -36,12 +33,8 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.HugeGraph;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -55,14 +48,11 @@ import org.neo4j.gds.termination.TerminationFlag;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.LongUnaryOperator;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 import static org.neo4j.gds.TestSupport.ids;
 import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.core.ProcedureConstants.TOLERANCE_DEFAULT;
@@ -347,93 +337,6 @@ class LouvainTest {
         assertEquals(1, result.ranLevels());
     }
 
-    static Stream<Arguments> memoryEstimationTuples() {
-        return Stream.of(
-
-            arguments(1, 1, true, 6414153, 23057712),
-            arguments(1, 1, false, 6414153, 23057712),
-            arguments(1, 10, true, 6414153, 30258072),
-            arguments(1, 10, false, 6414153, 23857752),
-
-            arguments(4, 1, true, 6417441, 29057976),
-            arguments(4, 1, false, 6417441, 29057976),
-            arguments(4, 10, true, 6417441, 36258336),
-            arguments(4, 10, false, 6417441, 29858016),
-
-            arguments(42, 1, true, 6459089, 105061320),
-            arguments(42, 1, false, 6459089, 105061320),
-            arguments(42, 10, true, 6459089, 112261680),
-            arguments(42, 10, false, 6459089, 105861360)
-
-        );
-    }
-
-
-    @ParameterizedTest
-    @MethodSource("memoryEstimationTuples")
-    void testMemoryEstimation(
-        int concurrency,
-        int levels,
-        boolean includeIntermediateCommunities,
-        long expectedMinBytes,
-        long expectedMaxBytes
-    ) {
-        var nodeCount = 100_000L;
-        var relCount = 500_000L;
-
-        LouvainStreamConfig config = ImmutableLouvainStreamConfig.builder()
-            .maxLevels(levels)
-            .maxIterations(10)
-            .tolerance(TOLERANCE_DEFAULT)
-            .includeIntermediateCommunities(includeIntermediateCommunities)
-            .concurrency(1)
-            .build();
-
-        assertMemoryEstimation(
-            () -> new LouvainAlgorithmFactory<>().memoryEstimation(config),
-            nodeCount,
-            relCount,
-            concurrency,
-            MemoryRange.of(expectedMinBytes, expectedMaxBytes)
-        );
-    }
-
-    @Test
-    void testMemoryEstimationUsesOnlyOnePropertyForEachEntity() {
-        ImmutableGraphDimensions.Builder dimensionsBuilder = ImmutableGraphDimensions.builder()
-            .nodeCount(100_000L)
-            .relCountUpperBound(500_000L);
-
-        GraphDimensions dimensionsWithoutProperties = dimensionsBuilder.build();
-        GraphDimensions dimensionsWithOneProperty = dimensionsBuilder
-            .putRelationshipPropertyToken("foo", 1)
-            .build();
-        GraphDimensions dimensionsWithTwoProperties = dimensionsBuilder
-            .putRelationshipPropertyToken("foo", 1)
-            .putRelationshipPropertyToken("bar", 1)
-            .build();
-
-        LouvainStreamConfig config = ImmutableLouvainStreamConfig.builder()
-            .maxLevels(1)
-            .maxIterations(10)
-            .tolerance(TOLERANCE_DEFAULT)
-            .includeIntermediateCommunities(false)
-            .concurrency(1)
-            .build();
-
-        MemoryTree memoryTree = new LouvainAlgorithmFactory<>()
-            .memoryEstimation(config)
-            .estimate(dimensionsWithoutProperties, 1);
-        MemoryTree memoryTreeOneProperty = new LouvainAlgorithmFactory<>()
-            .memoryEstimation(config)
-            .estimate(dimensionsWithOneProperty, 1);
-        MemoryTree memoryTreeTwoProperties = new LouvainAlgorithmFactory<>()
-            .memoryEstimation(config)
-            .estimate(dimensionsWithTwoProperties, 1);
-
-        assertEquals(memoryTree.memoryUsage(), memoryTreeOneProperty.memoryUsage());
-        assertEquals(memoryTreeOneProperty.memoryUsage(), memoryTreeTwoProperties.memoryUsage());
-    }
 
     @Test
     void testCanBeInterruptedByTxCancellation() {

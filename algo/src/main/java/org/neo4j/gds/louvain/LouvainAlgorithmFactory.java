@@ -20,23 +20,9 @@
 package org.neo4j.gds.louvain;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
-import org.neo4j.gds.ImmutableRelationshipProjections;
-import org.neo4j.gds.NodeProjections;
-import org.neo4j.gds.Orientation;
-import org.neo4j.gds.RelationshipProjection;
-import org.neo4j.gds.RelationshipProjections;
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.CSRGraphStoreFactory;
-import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -81,43 +67,6 @@ public class LouvainAlgorithmFactory<CONFIG extends LouvainBaseConfig> extends G
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
-        return MemoryEstimations.builder(Louvain.class)
-            .add("modularityOptimization()", ModularityOptimizationFactory.MEMORY_ESTIMATION)
-            .rangePerGraphDimension("subGraph", (graphDimensions, concurrency) -> {
-                ImmutableGraphDimensions.Builder dimensionsBuilder = ImmutableGraphDimensions
-                    .builder()
-                    .from(graphDimensions);
-
-                GraphDimensions sparseDimensions = dimensionsBuilder.build();
-
-                // Louvain creates a new graph every iteration, this graph has one relationship property
-                RelationshipProjections relationshipProjections = ImmutableRelationshipProjections.builder()
-                    .putProjection(
-                        RelationshipType.of("AGGREGATE"),
-                        RelationshipProjection.builder()
-                            .type("AGGREGATE")
-                            .orientation(Orientation.UNDIRECTED)
-                            .aggregation(Aggregation.SUM)
-                            .addProperty("prop", "prop", DefaultValue.of(0.0))
-                            .build()
-                    )
-                    .build();
-
-                long maxGraphSize = CSRGraphStoreFactory
-                    .getMemoryEstimation(NodeProjections.all(), relationshipProjections, false)
-                    .estimate(sparseDimensions, concurrency)
-                    .memoryUsage()
-                    .max;
-
-                return MemoryRange.of(1L, maxGraphSize); // rough estimate of graph size
-            })
-            .rangePerNode("dendrograms", (nodeCount) -> MemoryRange.of(
-                HugeLongArray.memoryEstimation(nodeCount),
-                HugeLongArray.memoryEstimation(nodeCount) * (config.includeIntermediateCommunities() ? config.maxLevels() : Math.min(
-                    2,
-                    config.maxLevels()
-                ))
-            ))
-            .build();
+        return new LouvainMemoryEstimateDefinition().memoryEstimation(config);
     }
 }
