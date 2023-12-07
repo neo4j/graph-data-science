@@ -21,9 +21,6 @@ package org.neo4j.gds.modularityoptimization;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
@@ -34,10 +31,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.assertj.Extractors;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -47,12 +41,10 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.logging.Log;
 
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.TestSupport.ids;
 import static org.neo4j.gds.compat.TestLog.INFO;
 import static org.neo4j.gds.core.ProcedureConstants.TOLERANCE_DEFAULT;
@@ -188,26 +180,6 @@ class ModularityOptimizationTest {
             );
     }
 
-    @ParameterizedTest
-    @MethodSource("memoryEstimationTuples")
-    void testMemoryEstimation(int concurrency, long min, long max) {
-        GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(100_000L).build();
-
-        ModularityOptimizationStreamConfig config = ImmutableModularityOptimizationStreamConfig.builder().build();
-        MemoryTree memoryTree = new ModularityOptimizationFactory<>()
-            .memoryEstimation(config)
-            .estimate(dimensions, concurrency);
-        assertEquals(min, memoryTree.memoryUsage().min);
-        assertEquals(max, memoryTree.memoryUsage().max);
-    }
-
-    static Stream<Arguments> memoryEstimationTuples() {
-        return Stream.of(
-            arguments(1, 5614040, 8413072),
-            arguments(4, 5617328, 14413336),
-            arguments(42, 5658976, 90416680)
-        );
-    }
 
     @NotNull
     private ModularityOptimizationResult compute(

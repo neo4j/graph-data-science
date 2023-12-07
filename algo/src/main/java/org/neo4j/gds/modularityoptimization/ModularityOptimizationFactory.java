@@ -22,60 +22,31 @@ package org.neo4j.gds.modularityoptimization;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.collections.ha.HugeDoubleArray;
-import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.IterationsConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.k1coloring.ImmutableK1ColoringStreamConfig;
 import org.neo4j.gds.k1coloring.K1ColoringAlgorithmFactory;
 import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
-import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
 
 import static org.neo4j.gds.modularityoptimization.ModularityOptimization.K1COLORING_MAX_ITERATIONS;
 
-public class ModularityOptimizationFactory<T extends ModularityOptimizationBaseConfig> extends GraphAlgorithmFactory<ModularityOptimization, T> {
+public class ModularityOptimizationFactory<CONFIG extends ModularityOptimizationBaseConfig> extends
+    GraphAlgorithmFactory<ModularityOptimization, CONFIG> {
 
     private static final String MODULARITY_OPTIMIZATION_TASK_NAME = "ModularityOptimization";
 
-    public static final MemoryEstimation MEMORY_ESTIMATION =
-        MemoryEstimations.builder(ModularityOptimization.class)
-            .perNode("currentCommunities", HugeLongArray::memoryEstimation)
-            .perNode("nextCommunities", HugeLongArray::memoryEstimation)
-            .perNode("cumulativeNodeWeights", HugeDoubleArray::memoryEstimation)
-            .perNode("nodeCommunityInfluences", HugeDoubleArray::memoryEstimation)
-            .perNode("communityWeights", HugeAtomicDoubleArray::memoryEstimation)
-            .perNode("colorsUsed", MemoryUsage::sizeOfBitset)
-            .perNode("colors", HugeLongArray::memoryEstimation)
-            .rangePerNode(
-                "reversedSeedCommunityMapping", (nodeCount) ->
-                    MemoryRange.of(0, HugeLongArray.memoryEstimation(nodeCount))
-            )
-            .perNode("communityWeightUpdates", HugeAtomicDoubleArray::memoryEstimation)
-            .perThread("ModularityOptimizationTask", MemoryEstimations.builder()
-                .rangePerNode(
-                    "communityInfluences",
-                    (nodeCount) -> MemoryRange.of(
-                        MemoryUsage.sizeOfLongDoubleHashMap(50),
-                        MemoryUsage.sizeOfLongDoubleHashMap(Math.max(50, nodeCount))
-                    )
-                )
-                .build()
-            )
-            .build();
 
     @Override
-    public MemoryEstimation memoryEstimation(T configuration) {
-        return MEMORY_ESTIMATION;
+    public MemoryEstimation memoryEstimation(CONFIG configuration) {
+
+        return new ModularityOptimizationMemoryEstimateDefinition().memoryEstimation(configuration);
     }
 
     @Override
@@ -86,7 +57,7 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationBaseC
     @Override
     public ModularityOptimization build(
         Graph graph,
-        T configuration,
+        CONFIG configuration,
         ProgressTracker progressTracker
     ) {
         var seedProperty = configuration.seedProperty() != null ? graph.nodeProperties(configuration.seedProperty()) : null;
@@ -95,7 +66,7 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationBaseC
 
     public ModularityOptimization build(
         Graph graph,
-        T configuration,
+        CONFIG configuration,
         NodePropertyValues seedProperty,
         ProgressTracker progressTracker
     ) {
@@ -112,7 +83,7 @@ public class ModularityOptimizationFactory<T extends ModularityOptimizationBaseC
     }
 
     @Override
-    public Task progressTask(Graph graph, T config) {
+    public Task progressTask(Graph graph, CONFIG config) {
         return modularityOptimizationProgressTask(graph, config);
     }
 
