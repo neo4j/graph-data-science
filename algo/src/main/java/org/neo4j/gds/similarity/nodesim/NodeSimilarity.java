@@ -20,7 +20,6 @@
 package org.neo4j.gds.similarity.nodesim;
 
 import com.carrotsearch.hppc.BitSet;
-import org.apache.logging.log4j.util.TriConsumer;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipConsumer;
@@ -64,7 +63,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     private HugeObjectArray<long[]> neighbors;
     private HugeObjectArray<double[]> weights;
     private HugeLongArray components;
-    private TriConsumer<Long, Long, SimilarityConsumer> similarityConsumer;
+    private SimilarityPairTriConsumer similarityConsumer;
 
     private final boolean weighted;
 
