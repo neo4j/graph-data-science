@@ -25,7 +25,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,8 +59,7 @@ class PositiveSampleProducerTest {
         var sampleProducer = new PositiveSampleProducer(
             walks.iterator(0, nbrOfWalks),
             HugeDoubleArray.of(LongStream.range(0, nbrOfWalks).mapToDouble((l) -> 1.0).toArray()),
-            10,
-            ProgressTracker.NULL_TRACKER
+            10
         );
 
         var counter = 0L;
@@ -88,8 +86,7 @@ class PositiveSampleProducerTest {
         var sampleProducer = new PositiveSampleProducer(
             walks.iterator(0, nbrOfWalks),
             probabilities,
-            10,
-            ProgressTracker.NULL_TRACKER
+            10
         );
         // does not overflow the stack = passes test
 
@@ -112,8 +109,7 @@ class PositiveSampleProducerTest {
         var sampleProducer = new PositiveSampleProducer(
             walks.iterator(0, nbrOfWalks / 2),
             HugeDoubleArray.of(LongStream.range(0, nbrOfWalks).mapToDouble((l) -> 1.0).toArray()),
-            10,
-            ProgressTracker.NULL_TRACKER
+            10
         );
 
         var counter = 0L;
@@ -137,8 +133,7 @@ class PositiveSampleProducerTest {
         PositiveSampleProducer producer = new PositiveSampleProducer(
             walks.iterator(0, walks.size()),
             centerNodeProbabilities,
-            windowSize,
-            ProgressTracker.NULL_TRACKER
+            windowSize
         );
         while (producer.next(buffer)) {
             actualPairs.add(Pair.of(buffer[0], buffer[1]));
@@ -160,8 +155,7 @@ class PositiveSampleProducerTest {
         PositiveSampleProducer producer = new PositiveSampleProducer(
             walks.iterator(0, 2),
             centerNodeProbabilities,
-            3,
-            ProgressTracker.NULL_TRACKER
+            3
         );
         while (producer.next(buffer)) {
             actualPairs.add(Pair.of(buffer[0], buffer[1]));
@@ -206,8 +200,7 @@ class PositiveSampleProducerTest {
         PositiveSampleProducer producer = new PositiveSampleProducer(
             walks.iterator(0, walks.size()),
             centerNodeProbabilities,
-            3,
-            ProgressTracker.NULL_TRACKER
+            3
         );
 
         while (producer.next(buffer)) {
