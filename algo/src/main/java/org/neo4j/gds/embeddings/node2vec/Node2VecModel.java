@@ -60,6 +60,7 @@ public class Node2VecModel {
     private final RandomWalkProbabilities randomWalkProbabilities;
     private final ProgressTracker progressTracker;
     private final long randomSeed;
+    private static final double EPSILON = 1e-10;
 
     public static MemoryEstimation memoryEstimation(int embeddingDimension) {
         var vectorMemoryEstimation = MemoryUsage.sizeOfFloatArray(embeddingDimension);
@@ -284,9 +285,10 @@ public class Node2VecModel {
             // L_neg = -log sigmoid(-center * context) ; gradient: sigmoid (center * context)
             float affinity = centerEmbedding.innerProduct(contextEmbedding);
 
-            double positiveSigmoid = Sigmoid.sigmoid(affinity);
+            //When |affinity| > 40, positiveSigmoid = 1. Double precision is not enough.
+            //Make sure negativeSigmoid can never be 0 to avoid infinity loss.
+            double positiveSigmoid = Sigmoid.sigmoid(affinity) - EPSILON;
             double negativeSigmoid = 1 - positiveSigmoid;
-
 
             lossSum -= positive ? Math.log(positiveSigmoid) : Math.log(negativeSigmoid);
 
