@@ -20,7 +20,6 @@
 package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.Iterator;
 import java.util.concurrent.ThreadLocalRandom;
@@ -35,7 +34,6 @@ public class PositiveSampleProducer {
     private final HugeDoubleArray samplingProbabilities;
     private final int prefixWindowSize;
     private final int postfixWindowSize;
-    private final ProgressTracker progressTracker;
     private long[] currentWalk;
     private int centerWordIndex;
     private long currentCenterWord;
@@ -46,11 +44,9 @@ public class PositiveSampleProducer {
     PositiveSampleProducer(
         Iterator<long[]> walks,
         HugeDoubleArray samplingProbabilities,
-        int windowSize,
-        ProgressTracker progressTracker
+        int windowSize
     ) {
         this.walks = walks;
-        this.progressTracker = progressTracker;
         this.samplingProbabilities = samplingProbabilities;
 
         prefixWindowSize = ceilDiv(windowSize - 1, 2);
@@ -76,7 +72,6 @@ public class PositiveSampleProducer {
             return false;
         }
         long[] walk = walks.next();
-        progressTracker.logProgress();
         int filteredWalkLength = filter(walk);
 
         while (filteredWalkLength < 2 && walks.hasNext()) {

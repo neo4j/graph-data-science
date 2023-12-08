@@ -58,6 +58,8 @@ public class Node2VecModel {
     private final ProgressTracker progressTracker;
     private final long randomSeed;
 
+    private static final double EPSILON = 1e-10;
+
     Node2VecModel(
         LongUnaryOperator toOriginalId,
         long nodeCount,
@@ -144,8 +146,7 @@ public class Node2VecModel {
                     var positiveSampleProducer = new PositiveSampleProducer(
                         walks.iterator(partition.startNode(), partition.nodeCount()),
                         randomWalkProbabilities.positiveSamplingProbabilities(),
-                        windowSize,
-                        progressTracker
+                        windowSize
                     );
 
                     return new TrainingTask(
@@ -155,7 +156,8 @@ public class Node2VecModel {
                         negativeSamples,
                         learningRate,
                         negativeSamplingRate,
-                        embeddingDimension
+                        embeddingDimension,
+                        progressTracker
                     );
                 }
             );
@@ -166,7 +168,7 @@ public class Node2VecModel {
                 .run();
 
             double loss = tasks.stream().mapToDouble(TrainingTask::lossSum).sum();
-            progressTracker.logInfo(formatWithLocale("Maximum likelihood objective is %.4f", loss));
+            progressTracker.logInfo(formatWithLocale("Loss %.4f", loss));
             lossPerIteration.add(loss);
 
             progressTracker.endSubTask();
@@ -217,6 +219,8 @@ public class Node2VecModel {
         private final int negativeSamplingRate;
         private final float learningRate;
 
+        private final ProgressTracker progressTracker;
+
         private double lossSum;
 
         private TrainingTask(
@@ -226,7 +230,8 @@ public class Node2VecModel {
             NegativeSampleProducer negativeSampleProducer,
             float learningRate,
             int negativeSamplingRate,
-            int embeddingDimensions
+            int embeddingDimensions,
+            ProgressTracker progressTracker
         ) {
             this.centerEmbeddings = centerEmbeddings;
             this.contextEmbeddings = contextEmbeddings;
@@ -237,6 +242,7 @@ public class Node2VecModel {
 
             this.centerGradientBuffer = new FloatVector(embeddingDimensions);
             this.contextGradientBuffer = new FloatVector(embeddingDimensions);
+            this.progressTracker = progressTracker;
         }
 
         @Override
@@ -250,6 +256,7 @@ public class Node2VecModel {
                 for (var i = 0; i < negativeSamplingRate; i++) {
                     trainSample(buffer[0], negativeSampleProducer.next(), false);
                 }
+                progressTracker.logProgress();
             }
         }
 
@@ -261,13 +268,14 @@ public class Node2VecModel {
             // L_neg = -log sigmoid(-center * context) ; gradient: sigmoid (center * context)
             float affinity = centerEmbedding.innerProduct(contextEmbedding);
 
-            float positiveSigmoid = (float) Sigmoid.sigmoid(affinity);
-            float negativeSigmoid = 1 - positiveSigmoid;
-
+            //When |affinity| > 40, positiveSigmoid = 1. Double precision is not enough.
+            //Make sure negativeSigmoid can never be 0 to avoid infinity loss.
+            double positiveSigmoid = Sigmoid.sigmoid(affinity) - EPSILON;
+            double negativeSigmoid = 1 - positiveSigmoid;
 
             lossSum -= positive ? Math.log(positiveSigmoid) : Math.log(negativeSigmoid);
 
-            float gradient = positive ? -negativeSigmoid : positiveSigmoid;
+            float gradient = positive ? (float) -negativeSigmoid : (float) positiveSigmoid;
             // we are doing gradient descent, so we go in the negative direction of the gradient here
             float scaledGradient = -gradient * learningRate;
 
