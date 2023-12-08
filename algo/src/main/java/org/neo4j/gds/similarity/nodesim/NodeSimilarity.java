@@ -24,6 +24,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipConsumer;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.SetBitsIterable;
@@ -284,7 +285,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             // extract component info from property
             NodePropertyValues nodeProperties = graph.nodeProperties(config.componentProperty());
             return initComponentIdMapping(graph, nodeProperties::longValue);
-
         }
 
         // run WCC to determine components
@@ -432,16 +432,22 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     }
 
     private static LongUnaryOperator initComponentIdMapping(Graph graph, LongUnaryOperator originComponentIdMapper) {
-        HugeLongLongMap componentIdMappings = new HugeLongLongMap();
-        AtomicLong mappedComponentId = new AtomicLong(0L);
+        var componentIdMappings = new HugeLongLongMap();
+        var mappedComponentId = new AtomicLong(0L);
+        var mappedComponentIdPerNode = HugeLongArray.newArray(graph.nodeCount());
         graph.forEachNode(n -> {
-            long originComponentId = originComponentIdMapper.applyAsLong(n);
-            if (!componentIdMappings.containsKey(originComponentId)) {
-                componentIdMappings.put(originComponentId, mappedComponentId.getAndIncrement());
+            long originComponentIdForNode = originComponentIdMapper.applyAsLong(n);
+            long mappedComponentIdForNode = componentIdMappings.getOrDefault(originComponentIdMapper.applyAsLong(n),
+                mappedComponentId.getAndIncrement());
+
+            if (!componentIdMappings.containsKey(originComponentIdForNode)) {
+                componentIdMappings.put(originComponentIdForNode, mappedComponentIdForNode);
             }
+            mappedComponentIdPerNode.set(n, mappedComponentIdForNode);
             return true;
         });
-        return n -> componentIdMappings.getOrDefault(originComponentIdMapper.applyAsLong(n), 0L);
+
+        return mappedComponentIdPerNode::get;
     }
 
     interface SimilarityConsumer {
