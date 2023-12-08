@@ -287,10 +287,10 @@ public class Node2VecModel {
 
             //When |affinity| > 40, positiveSigmoid = 1. Double precision is not enough.
             //Make sure negativeSigmoid can never be 0 to avoid infinity loss.
-            double positiveSigmoid = Sigmoid.sigmoid(affinity) - EPSILON;
+            double positiveSigmoid = Sigmoid.sigmoid(affinity);
             double negativeSigmoid = 1 - positiveSigmoid;
 
-            lossSum -= positive ? Math.log(positiveSigmoid) : Math.log(negativeSigmoid);
+            lossSum -= positive ? Math.log(positiveSigmoid+EPSILON) : Math.log(negativeSigmoid+EPSILON);
 
             float gradient = positive ? (float) -negativeSigmoid : (float) positiveSigmoid;
             // we are doing gradient descent, so we go in the negative direction of the gradient here
