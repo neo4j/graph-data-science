@@ -41,50 +41,81 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class NodesSortedByComponentTest {
 
+    private LongUnaryOperator prepare7DistinctSizeComponents() {
+        return nodeId -> {
+            if (nodeId < 3) {
+                return 0L; // size 3
+            } else if (nodeId < 8) {
+                return 1L; // size 5
+            } else if (nodeId < 12) {
+                return 2L; // size 4
+            } else if (nodeId < 18) {
+                return 3L; // size 6
+            } else if (nodeId < 19) {
+                return 4L; // size 1
+            } else if (nodeId < 21) {
+                return 5L; // size 2
+            } else {
+                return 6L; // size 7
+            }
+        };
+    }
+
     @Test
     void shouldDetermineIndexUpperBound() {
         // nodeId -> componentId
-        var components = new LongUnaryOperator() {
-            @Override
-            public long applyAsLong(long nodeId) {
-                if (nodeId < 3) {
-                    return 0L; // size 3
-                } else if (nodeId < 8) {
-                    return 1L; // size 5
-                } else if (nodeId < 12) {
-                    return 2L; // size 4
-                } else if (nodeId < 18) {
-                    return 3L; // size 6
-                } else if (nodeId < 19) {
-                    return 4L; // size 1
-                } else if (nodeId < 21) {
-                    return 5L; // size 2
-                } else {
-                    return 6L; // size 7
-                }
-            }
-        };
-
-
+        var components = prepare7DistinctSizeComponents();
+        // componentId, upperBound
         var idxUpperBoundPerComponent = NodesSortedByComponent.computeIndexUpperBoundPerComponent(components, 28, 4);
-        // we cannot infer which component follows another, but the size must match for the component
+        // we cannot infer which component follows another, but the range must match in size for the component
         Map<Long, Long> componentPerIdxUpperBound = new HashMap<>(7);
         for (int i = 0; i < 7; i++) {
             componentPerIdxUpperBound.put(idxUpperBoundPerComponent.get(i), (long) i);
         }
-        assertEquals(0, idxUpperBoundPerComponent.get(7));
-        int lowerBound = 0;
+        assertThat(idxUpperBoundPerComponent.get(7)).isEqualTo(0L);
+        int previousUpperBound = -1;
         for (long key : componentPerIdxUpperBound.keySet().stream().sorted().toList()) {
-            switch ((int) (key - lowerBound)) {
-                case 1: assertEquals(4, componentPerIdxUpperBound.get(key));break;
-                case 2: assertEquals(5, componentPerIdxUpperBound.get(key));break;
-                case 3: assertEquals(0, componentPerIdxUpperBound.get(key));break;
-                case 4: assertEquals(2, componentPerIdxUpperBound.get(key));break;
-                case 5: assertEquals(1, componentPerIdxUpperBound.get(key));break;
-                case 6: assertEquals(3, componentPerIdxUpperBound.get(key));break;
-                case 7: assertEquals(6, componentPerIdxUpperBound.get(key));break;
+            switch ((int) (key - previousUpperBound)) {
+                case 1: assertThat(componentPerIdxUpperBound.get(key)).isEqualTo(4);break;
+                case 2: assertThat(componentPerIdxUpperBound.get(key)).isEqualTo(5);break;
+                case 3: assertThat(componentPerIdxUpperBound.get(key)).isEqualTo(0);break;
+                case 4: assertThat(componentPerIdxUpperBound.get(key)).isEqualTo(2);break;
+                case 5: assertThat(componentPerIdxUpperBound.get(key)).isEqualTo(1);break;
+                case 6: assertThat(componentPerIdxUpperBound.get(key)).isEqualTo(3);break;
+                case 7: assertThat(componentPerIdxUpperBound.get(key)).isEqualTo(6);break;
             }
-            lowerBound = (int) (key);
+            previousUpperBound = (int) (key);
+        }
+    }
+
+    @Test
+    void shouldComputeNodesSortedByComponent() {
+        // nodeId -> componentId
+        var components = prepare7DistinctSizeComponents();
+        // componentId, upperIdx of component
+        var upperBoundPerComponent = HugeAtomicLongArray.of(28, ParalleLongPageCreator.passThrough(4));
+        upperBoundPerComponent.set(0, 2);
+        upperBoundPerComponent.set(1, 7);
+        upperBoundPerComponent.set(2, 11);
+        upperBoundPerComponent.set(3, 17);
+        upperBoundPerComponent.set(4, 18);
+        upperBoundPerComponent.set(5, 20);
+        upperBoundPerComponent.set(6, 27);
+        var componentCoordinateArray = HugeAtomicLongArray.of(28, ParalleLongPageCreator.passThrough(4));
+        upperBoundPerComponent.copyTo(componentCoordinateArray, 28);
+
+        var nodesSortedByComponent = NodesSortedByComponent.computeNodesSortedByComponent(components,
+            componentCoordinateArray, 4);
+
+        // nodes may occur in arbitrary order within components, but with the given assignment, nodeIds must be within
+        // component index bounds
+        assertEquals(28, nodesSortedByComponent.size());
+        for (int i = 0; i < 27; i++) {
+            var currentComp = components.applyAsLong(nodesSortedByComponent.get(i));
+
+            assertThat(nodesSortedByComponent.get(i)).isGreaterThan(currentComp == 0 ?
+                -1 : upperBoundPerComponent.get(currentComp - 1));
+            assertThat(nodesSortedByComponent.get(i)).isLessThanOrEqualTo(upperBoundPerComponent.get(currentComp));
         }
     }
 
@@ -115,19 +146,28 @@ class NodesSortedByComponentTest {
 
         var upperBoundPerComponent = HugeAtomicLongArray.of(8, ParalleLongPageCreator.passThrough(4));
         // componentId, upperBound
-        upperBoundPerComponent.set(0, 3);
-        upperBoundPerComponent.set(1, 8);
+        upperBoundPerComponent.set(0, 2);
+        upperBoundPerComponent.set(1, 7);
 
         NodesSortedByComponent nodesSortedByComponentMock = Mockito.mock(NodesSortedByComponent.class);
         Mockito.doReturn(components).when(nodesSortedByComponentMock).getComponents();
         Mockito.doReturn(upperBoundPerComponent).when(nodesSortedByComponentMock).getUpperBoundPerComponent();
         Mockito.doReturn(nodesSorted).when(nodesSortedByComponentMock).getNodesSorted();
-        Mockito.doCallRealMethod().when(nodesSortedByComponentMock).iterator(1L,-1L);
 
-        Iterator<Long> iterator = nodesSortedByComponentMock.iterator(1L, -1L);
+        // first component
+        Mockito.doCallRealMethod().when(nodesSortedByComponentMock).iterator(0L,-1L);
+        Iterator<Long> iterator = nodesSortedByComponentMock.iterator(0L, -1L);
+        for (int nodeId = 0; nodeId < 3; nodeId++) {
+            assertTrue(iterator.hasNext());
+            assertThat(iterator.next()).isEqualTo(nodeId);
+        }
+        assertFalse(iterator.hasNext());
+        // second component
+        Mockito.doCallRealMethod().when(nodesSortedByComponentMock).iterator(1L,-1L);
+        iterator = nodesSortedByComponentMock.iterator(1L, -1L);
         for (int nodeId = 3; nodeId < 8; nodeId++) {
             assertTrue(iterator.hasNext());
-            assertEquals(nodeId, iterator.next());
+            assertThat(iterator.next()).isEqualTo(nodeId);
         }
         assertFalse(iterator.hasNext());
     }
@@ -141,7 +181,7 @@ class NodesSortedByComponentTest {
         ShuffleUtil.shuffleArray(nodesSorted, new SplittableRandom(92));
 
         var upperBoundPerComponent = HugeAtomicLongArray.of(1, ParalleLongPageCreator.passThrough(4));
-        upperBoundPerComponent.set(0, 20);
+        upperBoundPerComponent.set(0, 19);
 
         NodesSortedByComponent nodesSortedByComponentMock = Mockito.mock(NodesSortedByComponent.class);
         Mockito.doReturn(components).when(nodesSortedByComponentMock).getComponents();

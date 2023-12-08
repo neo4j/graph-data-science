@@ -43,9 +43,7 @@ public class NodesSortedByComponent {
     public NodesSortedByComponent(LongUnaryOperator components, long nodeCount, int concurrency) {
         this.components = components;
         this.upperBoundPerComponent = computeIndexUpperBoundPerComponent(components, nodeCount, concurrency);
-        var componentCoordinateArray = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(concurrency));
-        upperBoundPerComponent.copyTo(componentCoordinateArray, nodeCount);
-        this.nodesSorted = computeNodesSortedByComponent(components, componentCoordinateArray, concurrency);
+        this.nodesSorted = computeNodesSortedByComponent(components, upperBoundPerComponent, concurrency);
     }
 
     public PrimitiveIterator.OfLong iterator(long componentId, long offset) {
@@ -85,13 +83,14 @@ public class NodesSortedByComponent {
             }
         });
         AtomicLong atomicNodeSum = new AtomicLong();
-        // modify coordinate array to contain the end of a component's range in the order called
-        // i.e. comp1 containing 3 nodes, comp2 containing 20 nodes: {(comp1, 3), (comp2, 23)}
+        // modify coordinate array to contain the upper bound of the global index for each component
+        // i.e. comp1 containing 3 nodes, comp2 containing 20 nodes, comp1 randomly accessed prior to comp2:
+        // {(comp1, 2), (comp2, 22)}
         ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, componentId ->
         {
             if (upperBoundPerComponent.get(componentId) > 0) {
                 var nodeSum = atomicNodeSum.addAndGet(upperBoundPerComponent.get(componentId));
-                upperBoundPerComponent.set(componentId, nodeSum);
+                upperBoundPerComponent.set(componentId, nodeSum - 1);
             }
         });
 
@@ -99,20 +98,23 @@ public class NodesSortedByComponent {
     }
 
     static HugeLongArray computeNodesSortedByComponent(LongUnaryOperator components,
-        HugeAtomicLongArray componentCoordinateArray, int concurrency) {
+        HugeAtomicLongArray idxUpperBoundPerComponent, int concurrency) {
 
-        long nodeCount = componentCoordinateArray.size();
+        // initialized to its max possible size of 1 node <=> 1 component in a disconnected graph
+        long nodeCount = idxUpperBoundPerComponent.size();
         var nodesSortedByComponent = HugeLongArray.newArray(nodeCount);
+        var nodeIdxProviderArray = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(concurrency));
+        idxUpperBoundPerComponent.copyTo(nodeIdxProviderArray, nodeCount);
 
-        // fill nodesSortedByComponent with nodeId per unique index
-        // i.e. comp1 containing 3 nodes, comp2 containing 20 nodes, named in their order of seq processing:
+        // fill nodesSortedByComponent with nodeId per component-sorted, unique index
+        // i.e. comp1 containing 3 nodes, comp2 containing 20 nodes, named in order of processing:
         // {(0, n3), (1, n2), (2, n1), (3, n23), .., (22, n4)}
         ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, indexId ->
         {
             long nodeId = nodeCount - indexId - 1;
             long componentId = components.applyAsLong(nodeId);
-            long coordinate = componentCoordinateArray.getAndAdd(componentId, -1);
-            nodesSortedByComponent.set(coordinate - 1, nodeId);
+            long nodeIdx = nodeIdxProviderArray.getAndAdd(componentId, -1);
+            nodesSortedByComponent.set(nodeIdx, nodeId);
         });
 
         return nodesSortedByComponent;
@@ -132,10 +134,10 @@ public class NodesSortedByComponent {
         @Override
         public boolean hasNext() {
             if (offset < 0L) {
-                return runningIdx > 0 && getComponents().applyAsLong(getNodesSorted().get(runningIdx - 1)) == componentId;
+                return runningIdx > -1 && getComponents().applyAsLong(getNodesSorted().get(runningIdx)) == componentId;
             } else {
-                while (runningIdx > 0 && getComponents().applyAsLong(getNodesSorted().get(runningIdx - 1)) == componentId) {
-                    if (getNodesSorted().get(runningIdx - 1) < offset) {
+                while (runningIdx > -1 && getComponents().applyAsLong(getNodesSorted().get(runningIdx)) == componentId) {
+                    if (getNodesSorted().get(runningIdx) < offset) {
                         runningIdx--;
                     } else {
                         return true;
@@ -149,7 +151,7 @@ public class NodesSortedByComponent {
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
-            return getNodesSorted().get(--runningIdx);
+            return getNodesSorted().get(runningIdx--);
         }
 
     }
