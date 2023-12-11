@@ -21,6 +21,11 @@ package org.neo4j.gds.api.nodeproperties;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.DefaultValue;
+import org.neo4j.gds.utils.StringJoining;
+
+import java.util.Arrays;
+
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public enum ValueType {
     LONG {
@@ -188,17 +193,31 @@ public enum ValueType {
                 return value;
             }
         }
-        throw new IllegalArgumentException("Unexpected value: " + csvName);
+
+        throw new IllegalArgumentException(
+            formatWithLocale(
+                "Unknown value: %s, supported values are: %s",
+                csvName,
+                StringJoining.join(Arrays.stream(ValueType.values()).map(ValueType::csvName))
+            )
+        );
     }
 
     public interface Visitor<RESULT> {
         RESULT visitLong();
+
         RESULT visitDouble();
+
         RESULT visitString();
+
         RESULT visitLongArray();
+
         RESULT visitDoubleArray();
+
         RESULT visitFloatArray();
 
-        default @Nullable RESULT visitUnknown() { return null; }
+        default @Nullable RESULT visitUnknown() {
+            return null;
+        }
     }
 }
