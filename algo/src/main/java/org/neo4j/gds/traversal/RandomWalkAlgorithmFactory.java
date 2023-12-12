@@ -23,13 +23,10 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.degree.DegreeCentralityFactory;
-import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.ArrayList;
 
@@ -72,13 +69,6 @@ public class RandomWalkAlgorithmFactory<CONFIG extends RandomWalkBaseConfig> ext
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
-        var memoryUsagePerWalk = MemoryUsage.sizeOfLongArray(config.walkLength());
-        var sizeOfBuffer = MemoryUsage.sizeOfObjectArray(config.walkBufferSize());
-
-        var maxMemoryUsage = sizeOfBuffer + MemoryUsage.sizeOfArray(config.walkBufferSize(), memoryUsagePerWalk);
-
-        return MemoryEstimations.builder(RandomWalk.class.getSimpleName())
-            .fixed("random walk buffer", MemoryRange.of(sizeOfBuffer, maxMemoryUsage))
-            .build();
+        return new RandomWalkMemoryEstimateDefinition().memoryEstimation(config);
     }
 }
