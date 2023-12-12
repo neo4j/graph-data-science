@@ -22,9 +22,9 @@ package org.neo4j.gds.triangle;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
@@ -110,7 +110,7 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
 
         IntersectingTriangleCount intersectingTriangleCount = new IntersectingTriangleCountFactory<>().build(
             graph,
-            LocalClusteringCoefficientFactory.createTriangleCountConfig(configuration),
+            configuration.triangleCountConfig(),
             progressTracker
         );
 

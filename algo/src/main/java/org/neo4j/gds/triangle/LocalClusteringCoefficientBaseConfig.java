@@ -84,4 +84,10 @@ public interface LocalClusteringCoefficientBaseConfig extends AlgoBaseConfig, Se
         }
     }
 
+    @Configuration.Ignore
+    @Value.Derived
+    default TriangleCountStatsConfig triangleCountConfig() {
+        return ImmutableTriangleCountStatsConfig.builder().concurrency(concurrency()).build();
+    }
+
 }

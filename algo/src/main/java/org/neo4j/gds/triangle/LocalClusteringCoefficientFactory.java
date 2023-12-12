@@ -21,9 +21,7 @@ package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -52,23 +50,9 @@ public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoe
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        MemoryEstimations.Builder builder = MemoryEstimations
-            .builder(LocalClusteringCoefficient.class)
-            .perNode("local-clustering-coefficient", HugeDoubleArray::memoryEstimation);
-
-        if(null == configuration.seedProperty()) {
-            builder.add(
-                "computed-triangle-counts",
-                new IntersectingTriangleCountFactory<>().memoryEstimation(createTriangleCountConfig(configuration))
-            );
-        }
-
-        return builder.build();
+        return new LocalClusteringCoefficientMemoryEstimateDefinition().memoryEstimation(configuration);
     }
 
-    static TriangleCountStatsConfig createTriangleCountConfig(LocalClusteringCoefficientBaseConfig configuration) {
-        return ImmutableTriangleCountStatsConfig.builder().concurrency(configuration.concurrency()).build();
-    }
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
