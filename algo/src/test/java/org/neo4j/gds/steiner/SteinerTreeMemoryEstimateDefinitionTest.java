@@ -22,36 +22,27 @@ package org.neo4j.gds.steiner;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.assertions.MemoryEstimationAssert;
 
-import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-class SteinerTreeAlgorithmFactoryTest {
+class SteinerTreeMemoryEstimateDefinitionTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("memoryEstimationSetup")
     void memoryEstimation(boolean reroute, int minExpectedBytes,int maxExpectedBytes) {
-        var config = SteinerTreeStatsConfig.of(CypherMapWrapper.create(
-            Map.of(
-                "sourceNode", 0L,
-                "applyRerouting",reroute,
-                "relationshipWeightProperty", "foo"
-            )
-        ));
+        var config = mock(SteinerTreeBaseConfig.class);
+        when(config.applyRerouting()).thenReturn(reroute);
+        var memoryEstimation = new SteinerTreeMemoryEstimateDefinition();
 
-        var algorithmFactory = new SteinerTreeAlgorithmFactory<>();
 
-        assertMemoryEstimation(
-            () -> algorithmFactory.memoryEstimation(config),
-            10,
-            23,
-            4,
-            MemoryRange.of(minExpectedBytes,maxExpectedBytes)
-        );
+        MemoryEstimationAssert.assertThat(memoryEstimation.memoryEstimation(config))
+            .memoryRange(10, 23, 4)
+            .hasMin(minExpectedBytes)
+            .hasMax(maxExpectedBytes);
     }
 
     static Stream<Arguments> memoryEstimationSetup() {

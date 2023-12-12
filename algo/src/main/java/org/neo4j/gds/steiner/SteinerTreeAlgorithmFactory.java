@@ -29,7 +29,6 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class SteinerTreeAlgorithmFactory<CONFIG extends SteinerTreeBaseConfig> extends GraphAlgorithmFactory<ShortestPathsSteinerAlgorithm, CONFIG> {
@@ -77,6 +76,6 @@ public class SteinerTreeAlgorithmFactory<CONFIG extends SteinerTreeBaseConfig> e
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
-        return ShortestPathsSteinerAlgorithm.memoryEstimation(config.applyRerouting(), Optional.of(false));
+        return new SteinerTreeMemoryEstimateDefinition().memoryEstimation(config);
     }
 }
