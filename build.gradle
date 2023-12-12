@@ -23,6 +23,8 @@ ext {
 
     spotbugsReportsDir = "${buildDir}/reports/spotbugs/"
     SpotBugsTask = com.github.spotbugs.snom.SpotBugsTask
+    spotbugsEffort = com.github.spotbugs.snom.Effort.valueOf('LESS')
+    spotbugsReportLevel = com.github.spotbugs.snom.Confidence.valueOf('LOW')
 
     compatibilityModules = [
             'kernel-adapter': [

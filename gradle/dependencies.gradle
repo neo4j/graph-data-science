@@ -93,7 +93,7 @@ ext {
         'qala-datagen'         : '2.5.1',
         'sb-contrib'           : '7.6.0',
         'scala'                : scalas[neo4j_minor],
-        'spotbugsToolVersion'  : '4.8.0',
+        'spotbugsToolVersion'  : '4.8.2',
         'protobuf'             : '3.25.0',
     ]
     dep = [

@@ -9,8 +9,8 @@ if (shouldSpotbugs) {
 
             proj.spotbugs {
                 toolVersion = ver.spotbugsToolVersion
-                effort = 'less'
-                reportLevel = 'low'
+                effort = spotbugsEffort
+                reportLevel = spotbugsReportLevel
 
                 onlyAnalyze = [ 'org.neo4j.gds.*', 'com.neo4j.gds.*' ]
                 omitVisitors = ['FindSqlInjection', 'FindNonShortCircuit']
