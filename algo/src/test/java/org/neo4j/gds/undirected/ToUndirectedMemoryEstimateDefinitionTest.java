@@ -22,15 +22,18 @@ package org.neo4j.gds.undirected;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.assertions.MemoryEstimationAssert;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.TestMethodRunner;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 
 import java.util.stream.Stream;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-class ToUndirectedAlgorithmFactoryTest {
+class ToUndirectedMemoryEstimateDefinitionTest {
 
     static Stream<Arguments> compressions() {
         var compressedRunner = TestMethodRunner.runCompressedOrdered();
@@ -45,19 +48,19 @@ class ToUndirectedAlgorithmFactoryTest {
     @ParameterizedTest
     @MethodSource("compressions")
     void memoryEstimationWithUncompressedFeatureToggle(TestMethodRunner runner, MemoryRange expected) {
-        var factory = new ToUndirectedAlgorithmFactory();
-        var config = ToUndirectedConfigImpl.builder().relationshipType("T1").mutateRelationshipType("R").build();
+
+        var config = mock(ToUndirectedConfig.class);
+        when(config.relationshipType()).thenReturn("T1");
+        doCallRealMethod().when(config).internalRelationshipType();
 
         GraphDimensions graphDimensions = GraphDimensions.of(100_000, 100_000);
 
         runner.run(() -> {
-            var memoryEstimation = factory.memoryEstimation(config);
-
-            var actual = memoryEstimation
-                .estimate(graphDimensions, config.concurrency())
-                .memoryUsage();
-            assertThat(actual.min).isEqualTo(expected.min);
-            assertThat(actual.max).isEqualTo(expected.max);
+            var memoryEstimation = new ToUndirectedMemoryEstimateDefinition().memoryEstimation(config);
+            MemoryEstimationAssert.assertThat(memoryEstimation)
+                .memoryRange(graphDimensions, 4)
+                .hasMin(expected.min)
+                .hasMax(expected.max);
         });
     }
 
