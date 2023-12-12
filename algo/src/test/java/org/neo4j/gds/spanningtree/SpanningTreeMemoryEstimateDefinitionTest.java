@@ -20,23 +20,21 @@
 package org.neo4j.gds.spanningtree;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.assertions.MemoryEstimationAssert;
+import org.neo4j.gds.core.GraphDimensions;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
 
-class SpanningTreeAlgorithmFactoryTest {
+class SpanningTreeMemoryEstimateDefinitionTest {
+
     @Test
-    void shouldThrowIfNotUndirected() {
-        var graph = GdlFactory.of("(a)-[:foo{cost:1.0}]->(b)").build().getUnion();
-        var config = SpanningTreeStatsConfigImpl.builder().sourceNode(0).relationshipWeightProperty("cost").build();
-        var spanningTreeAlgorithmFactory = new SpanningTreeAlgorithmFactory<>();
-        assertThatThrownBy(() -> spanningTreeAlgorithmFactory.build(
-            graph,
-            config,
-            ProgressTracker.NULL_TRACKER
-        )).hasMessageContaining("undirected");
+    void shouldEstimateMemory() {
+
+        var config = mock(SpanningTreeBaseConfig.class);
+
+        var memoryEstimation = new SpanningTreeMemoryEstimateDefinition().memoryEstimation(config);
+        MemoryEstimationAssert.assertThat(memoryEstimation)
+            .memoryRange( GraphDimensions.of(10_000, 100_000), 1)
+            .hasSameMinAndMaxEqualTo(321544);
     }
-
-
 }
