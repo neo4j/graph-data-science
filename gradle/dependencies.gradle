@@ -75,7 +75,7 @@ ext {
         'hppc'                 : '0.7.3',
         'immutables'           : '2.10.0',
         'ipaddress'            : '5.3.3',
-        'jackson'              : '2.15.3',
+        'jackson'              : '2.16.0',
         'javapoet'             : '1.13.0',
         'jetbrains-annotations': '24.0.1',
         'jjwt'                 : '0.12.3',
