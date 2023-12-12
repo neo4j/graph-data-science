@@ -20,23 +20,21 @@
 package org.neo4j.gds.scc;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.assertions.MemoryEstimationAssert;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
-
-class SccAlgorithmFactoryTest {
+class SccMemoryEstimateDefinitionTest {
 
     @Test
     void shouldEstimateMemoryAccurately() {
-        var config = SccStreamConfigImpl.builder().build();
-        var factory = new SccAlgorithmFactory<>();
-        var estimate = factory.memoryEstimation(config)
-            .estimate(GraphDimensions.of(100, 6000), config.concurrency());
+        var config = mock(SccCommonBaseConfig.class);
+        var memoryEstimation = new SccMemoryEstimateDefinition().memoryEstimation(config);
 
-        var memoryUsage = estimate.memoryUsage();
-        assertThat(memoryUsage.min).isEqualTo(36348L);
-        assertThat(memoryUsage.max).isEqualTo(69132L);
+        MemoryEstimationAssert.assertThat(memoryEstimation)
+            .memoryRange(100, 6000, 1)
+            .hasMin(36348L)
+            .hasMax(69132L);
     }
 
 }
