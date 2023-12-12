@@ -22,10 +22,8 @@ package org.neo4j.gds.triangle;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -55,10 +53,7 @@ public class IntersectingTriangleCountFactory<CONFIG extends TriangleCountBaseCo
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return MemoryEstimations
-            .builder(IntersectingTriangleCount.class)
-            .perNode("triangle-counts", HugeAtomicLongArray::memoryEstimation)
-            .build();
+        return new IntersectingTriangleCountMemoryEstimateDefinition().memoryEstimation(configuration);
     }
 
     @Override
