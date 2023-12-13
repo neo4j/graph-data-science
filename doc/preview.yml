@@ -26,6 +26,12 @@ runtime:
 urls:
   html_extension_style: indexify
 
+antora:
+  extensions:
+  - require: "./extensions/custom-edit-url"
+    repo: https://github.com/neo4j/graph-data-science
+    start_path: doc
+
 asciidoc:
   extensions:
   - "@neo4j-documentation/remote-include"
@@ -40,7 +46,7 @@ asciidoc:
     page-canonical-root: /docs
     page-pagination: true
     page-no-canonical: true
-    page-origin-private: true
+    page-origin-private: false
     page-hide-toc: false
     page-mixpanel: 4bfb2414ab973c741b6f067bf06d5575
     # page-cdn: /static/assets
