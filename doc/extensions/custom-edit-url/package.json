@@ -1,0 +1,14 @@
+{
+  "name": "@neo4j-antora/antora-custom-edit-url",
+  "version": "0.1.0",
+  "description": "Update Edit this page URL",
+  "main": "custom-edit-url.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "antora"
+  ],
+  "author": "Neo4j",
+  "license": "MIT"
+}
