@@ -22,7 +22,9 @@ package org.neo4j.gds.paths;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.config.SourceNodeConfig;
-import org.neo4j.gds.config.TargetNodeConfig;
 
-public interface ShortestPathBaseConfig extends AlgoBaseConfig, SourceNodeConfig, TargetNodeConfig, RelationshipWeightConfig, TrackRelationshipsConfig {
+public interface ShortestPathBaseConfig extends AlgoBaseConfig,
+    SourceNodeConfig,
+    RelationshipWeightConfig,
+    TrackRelationshipsConfig {
 }

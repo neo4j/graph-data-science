@@ -29,7 +29,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
-import org.neo4j.gds.paths.ShortestPathBaseConfig;
+import org.neo4j.gds.paths.SourceTargetShortestPathBaseConfig;
 
 import java.util.Optional;
 
@@ -59,7 +59,8 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
         return Tasks.leaf(taskName, graph.relationshipCount());
     }
 
-    public static class SourceTargetDijkstraFactory<T extends ShortestPathBaseConfig> extends DijkstraFactory<T> {
+    public static class SourceTargetDijkstraFactory<T extends SourceTargetShortestPathBaseConfig> extends
+        DijkstraFactory<T> {
         @Override
         public Dijkstra build(
             Graph graph,

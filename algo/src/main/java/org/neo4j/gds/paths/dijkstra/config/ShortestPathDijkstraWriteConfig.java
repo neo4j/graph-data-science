@@ -23,13 +23,15 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.paths.ShortestPathBaseConfig;
+import org.neo4j.gds.paths.SourceTargetShortestPathBaseConfig;
 import org.neo4j.gds.paths.WritePathOptionsConfig;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface ShortestPathDijkstraWriteConfig extends ShortestPathBaseConfig, WriteRelationshipConfig, WritePathOptionsConfig {
+public interface ShortestPathDijkstraWriteConfig extends SourceTargetShortestPathBaseConfig,
+    WriteRelationshipConfig,
+    WritePathOptionsConfig {
 
     String TOTAL_COST_KEY = "totalCost";
     String NODE_IDS_KEY = "nodeIds";

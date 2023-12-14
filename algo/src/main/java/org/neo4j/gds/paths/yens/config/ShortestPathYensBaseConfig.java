@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.paths.yens.config;
 
-import org.neo4j.gds.paths.ShortestPathBaseConfig;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.paths.SourceTargetShortestPathBaseConfig;
 
 @ValueClass
 @SuppressWarnings("immutables:subtype")
-public interface ShortestPathYensBaseConfig extends ShortestPathBaseConfig {
+public interface ShortestPathYensBaseConfig extends SourceTargetShortestPathBaseConfig {
 
     // Number of shortest paths to compute
     @Configuration.IntegerRange(min = 1)

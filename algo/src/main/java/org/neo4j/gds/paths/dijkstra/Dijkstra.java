@@ -34,7 +34,7 @@ import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
 import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.PathResult;
-import org.neo4j.gds.paths.ShortestPathBaseConfig;
+import org.neo4j.gds.paths.SourceTargetShortestPathBaseConfig;
 
 import java.util.Optional;
 import java.util.function.LongToDoubleFunction;
@@ -78,7 +78,7 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
      */
     public static Dijkstra sourceTarget(
         Graph graph,
-        ShortestPathBaseConfig config,
+        SourceTargetShortestPathBaseConfig config,
         Optional<HeuristicFunction> heuristicFunction,
         ProgressTracker progressTracker
     ) {
