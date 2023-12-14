@@ -21,14 +21,10 @@ package org.neo4j.gds.paths.astar;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestProgressTracker;
-import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -40,7 +36,6 @@ import org.neo4j.gds.paths.astar.config.ImmutableShortestPathAStarStreamConfig;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -56,24 +51,6 @@ class AStarTest {
             .concurrency(1);
     }
 
-    private static Stream<Arguments> expectedMemoryEstimation() {
-        return Stream.of(
-            Arguments.of(1_000, 56_856L),
-            Arguments.of(1_000_000, 56_125_728L),
-            Arguments.of(1_000_000_000, 56_133_545_824L)
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("expectedMemoryEstimation")
-    void shouldComputeMemoryEstimation(int nodeCount, long expectedBytes) {
-        TestSupport.assertMemoryEstimation(
-            AStar::memoryEstimation,
-            nodeCount,
-            1,
-            MemoryRange.of(expectedBytes)
-        );
-    }
 
     /* Singapore to Chiba
      * Path nA (0NM) -> nB (29NM) -> nC (723NM) -> nD (895NM) -> nE (996NM) -> nF (1353NM)

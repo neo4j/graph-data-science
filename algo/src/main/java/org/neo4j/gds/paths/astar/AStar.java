@@ -22,13 +22,10 @@ package org.neo4j.gds.paths.astar;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongDoubleMap;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
-import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateDefinition;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
 import java.util.Optional;
@@ -77,13 +74,7 @@ public final class AStar extends Algorithm<PathFindingResult> {
         return new AStar(dijkstra);
     }
 
-    public static MemoryEstimation memoryEstimation() {
-        return MemoryEstimations.builder(AStar.class)
-            .add("Dijkstra", DijkstraMemoryEstimateDefinition.memoryEstimation(false))
-            .add("distanceCache", HugeLongDoubleMap.memoryEstimation())
-            .build();
-    }
-
+    
     @Override
     public PathFindingResult compute() {
         return dijkstra.compute();
