@@ -23,12 +23,12 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.paths.ShortestPathBaseConfig;
+import org.neo4j.gds.paths.SourceTargetShortestPathBaseConfig;
 
 @ValueClass
 @Configuration
 @SuppressWarnings("immutables:subtype")
-public interface ShortestPathDijkstraMutateConfig extends ShortestPathBaseConfig, MutateRelationshipConfig {
+public interface ShortestPathDijkstraMutateConfig extends SourceTargetShortestPathBaseConfig, MutateRelationshipConfig {
 
     static ShortestPathDijkstraMutateConfig of(CypherMapWrapper userInput) {
         return new ShortestPathDijkstraMutateConfigImpl(userInput);

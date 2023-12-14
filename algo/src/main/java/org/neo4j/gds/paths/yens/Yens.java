@@ -27,7 +27,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.PathResult;
-import org.neo4j.gds.paths.ShortestPathBaseConfig;
+import org.neo4j.gds.paths.SourceTargetShortestPathBaseConfig;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.ImmutableShortestPathDijkstraStreamConfig;
@@ -177,7 +177,7 @@ public final class Yens extends Algorithm<PathFindingResult> {
         return result.findFirst();
     }
 
-    static ShortestPathBaseConfig dijkstraConfig(long targetNode, boolean trackRelationships) {
+    static SourceTargetShortestPathBaseConfig dijkstraConfig(long targetNode, boolean trackRelationships) {
 
         return ImmutableShortestPathDijkstraStreamConfig
             .builder()

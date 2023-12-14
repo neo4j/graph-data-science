@@ -19,5 +19,9 @@
  */
 package org.neo4j.gds.paths;
 
-public interface AllShortestPathsBaseConfig extends ShortestPathBaseConfig {
+import org.neo4j.gds.config.TargetNodeConfig;
+
+public interface SourceTargetShortestPathBaseConfig extends
+    TargetNodeConfig,
+    ShortestPathBaseConfig {
 }
