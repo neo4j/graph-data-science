@@ -23,8 +23,6 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.ShortestPathBaseConfig;
@@ -67,11 +65,6 @@ public final class Yens extends Algorithm<PathFindingResult> {
         return new Yens(graph, newConfig, progressTracker);
     }
 
-    public static MemoryEstimation memoryEstimation(int k, boolean trackRelationships) {
-        return MemoryEstimations.builder(Yens.class)
-            .perThread("Yens Task", YensTask.memoryEstimation(k, trackRelationships))
-            .build();
-    }
 
     private Yens(Graph graph, ShortestPathYensBaseConfig config, ProgressTracker progressTracker) {
         super(progressTracker);

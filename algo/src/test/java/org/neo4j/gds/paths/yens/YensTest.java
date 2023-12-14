@@ -25,14 +25,11 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestProgressTracker;
-import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -65,36 +62,7 @@ class YensTest {
             .concurrency(concurrency);
     }
 
-    static Stream<Arguments> expectedMemoryEstimation() {
-        return Stream.of(
-            Arguments.of(1_000, 3, 1, 56_960L),
-            Arguments.of(1_000, 3, 4, 227_744L),
-
-            Arguments.of(1_000_000, 3, 1, 56_125_832L),
-            Arguments.of(1_000_000, 3, 4, 224_503_232L),
-
-            Arguments.of(1_000_000_000, 3, 1, 56_133_545_928L),
-            Arguments.of(1_000_000_000, 3, 4, 224_534_183_616L)
-
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("expectedMemoryEstimation")
-    void shouldComputeMemoryEstimation(
-        int nodeCount,
-        int k,
-        int concurrency,
-        long expectedBytes
-    ) {
-        TestSupport.assertMemoryEstimation(
-            () -> Yens.memoryEstimation(k, true),
-            nodeCount,
-            concurrency,
-            MemoryRange.of(expectedBytes)
-        );
-    }
-
+    
     // https://en.wikipedia.org/wiki/Yen%27s_algorithm#/media/File:Yen's_K-Shortest_Path_Algorithm,_K=3,_A_to_F.gif
     @GdlGraph(aggregation = Aggregation.SINGLE)
     private static final String DB_CYPHER =
