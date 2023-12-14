@@ -26,10 +26,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestProgressTracker;
-import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -68,29 +66,6 @@ final class DijkstraTest {
             .concurrency(1);
     }
 
-    private static Stream<Arguments> expectedMemoryEstimation() {
-        return Stream.of(
-            // trackRelationships = false
-            Arguments.of(1_000, false, 40_616),
-            Arguments.of(1_000_000, false, 40_125_488L),
-            Arguments.of(1_000_000_000, false, 40_131_104_128L),
-            // trackRelationships = true
-            Arguments.of(1_000, true, 56_832L),
-            Arguments.of(1_000_000, true, 56_125_704, 56_125_704L),
-            Arguments.of(1_000_000_000, true, 56_133_545_800L)
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("expectedMemoryEstimation")
-    void shouldComputeMemoryEstimation(int nodeCount, boolean trackRelationships, long expectedBytes) {
-        TestSupport.assertMemoryEstimation(
-            () -> Dijkstra.memoryEstimation(trackRelationships),
-            nodeCount,
-            1,
-            MemoryRange.of(expectedBytes)
-        );
-    }
 
     @Nested
     @TestInstance(value = TestInstance.Lifecycle.PER_CLASS)

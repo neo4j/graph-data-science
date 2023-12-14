@@ -25,12 +25,9 @@ import com.carrotsearch.hppc.LongArrayDeque;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
-import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
 import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.PathResult;
@@ -111,18 +108,6 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
             heuristicFunction,
             progressTracker
         );
-    }
-
-    public static MemoryEstimation memoryEstimation(boolean trackRelationships) {
-        var builder = MemoryEstimations.builder(Dijkstra.class)
-            .add("priority queue", HugeLongPriorityQueue.memoryEstimation())
-            .add("reverse path", HugeLongLongMap.memoryEstimation());
-        if (trackRelationships) {
-            builder.add("relationship ids", HugeLongLongMap.memoryEstimation());
-        }
-        return builder
-            .perNode("visited set", MemoryUsage::sizeOfBitset)
-            .build();
     }
 
     private Dijkstra(

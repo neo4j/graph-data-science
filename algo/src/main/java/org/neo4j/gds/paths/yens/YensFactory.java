@@ -37,7 +37,7 @@ public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> extends Grap
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        var initTask = DijkstraFactory.dijkstraProgressTask(graph);
+        var initTask = DijkstraFactory.dijkstraProgressTask("Dijkstra", graph);
         return Tasks.task(taskName(), initTask, Tasks.leaf("Path growing", config.k() - 1));
     }
 

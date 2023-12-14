@@ -22,22 +22,21 @@ package org.neo4j.gds.paths.dijkstra;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
+import org.neo4j.gds.paths.ShortestPathBaseConfig;
 import org.neo4j.gds.paths.SourceTargetShortestPathBaseConfig;
 
 import java.util.Optional;
 
-public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWeightConfig> extends GraphAlgorithmFactory<Dijkstra, T> {
+public abstract class DijkstraFactory<CONFIG extends ShortestPathBaseConfig> extends GraphAlgorithmFactory<Dijkstra, CONFIG> {
 
     @Override
-    public MemoryEstimation memoryEstimation(T configuration) {
-        return Dijkstra.memoryEstimation(false);
+    public MemoryEstimation memoryEstimation(CONFIG configuration) {
+        return new DijkstraMemoryEstimateDefinition().memoryEstimation(configuration);
     }
 
     @Override
@@ -46,13 +45,10 @@ public abstract class DijkstraFactory<T extends AlgoBaseConfig & RelationshipWei
     }
 
     @Override
-    public Task progressTask(Graph graph, T config) {
+    public Task progressTask(Graph graph, CONFIG config) {
         return dijkstraProgressTask(taskName(), graph);
     }
 
-    public static Task dijkstraProgressTask(Graph graph) {
-        return dijkstraProgressTask("Dijkstra", graph);
-    }
 
     @NotNull
     public static Task dijkstraProgressTask(String taskName, Graph graph) {
