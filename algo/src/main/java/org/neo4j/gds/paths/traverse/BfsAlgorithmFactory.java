@@ -21,15 +21,8 @@ package org.neo4j.gds.paths.traverse;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.collections.ha.HugeDoubleArray;
-import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -77,39 +70,6 @@ public class BfsAlgorithmFactory<CONFIG extends BfsBaseConfig> extends GraphAlgo
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        MemoryEstimations.Builder builder = MemoryEstimations.builder(BFS.class);
-
-        builder.perNode("visited ", HugeAtomicBitSet::memoryEstimation) //global variables
-            .perNode("traversedNodes", HugeLongArray::memoryEstimation)
-            .perNode("weights", HugeDoubleArray::memoryEstimation)
-            .perNode("minimumChunk", HugeAtomicLongArray::memoryEstimation);
-
-        //per thread
-        builder.rangePerGraphDimension("localNodes", (dimensions, concurrency) -> {
-            // lower-bound: each node is in exactly one localNode array
-            var lowerBound = MemoryUsage.sizeOfLongArrayList(dimensions.nodeCount() + dimensions.nodeCount() / 64);
-
-            //In the upper bound, we can consider two scenarios:
-            //  -each node except the starting will be added by every thread exactly once
-            //  -traversing each relationship creates an entry in any localNodes array of one of the threads
-            //We can take the minimum of these as a more accurate upper bound.
-            //Nonetheless, either of those scenarios is unlikely to happen because all nodes in all threads
-            //need to be added at the exact same step to force such memory usage in an extremely convoluted way
-            var maximumTotalSizeOfAggregatedLocalNodes = Math.min(
-                dimensions.relCountUpperBound(),
-                concurrency * (dimensions.nodeCount() - 1)
-            );
-
-            var upperBound = MemoryUsage.sizeOfLongArrayList(maximumTotalSizeOfAggregatedLocalNodes + dimensions.nodeCount() / 64);
-            //The  nodeCount()/64 refers to the  chunk separator in localNodes
-            return MemoryRange.of(lowerBound, Math.max(lowerBound, upperBound));
-        }).perGraphDimension("chunks", (dimensions, concurrency) ->
-            MemoryRange.of(dimensions.nodeCount() / 64)
-        );
-
-        builder.perNode("resultNodes", HugeLongArray::memoryEstimation);
-
-
-        return builder.build();
+        return new BfsMemoryEstimateDefinition().memoryEstimation(configuration);
     }
 }

@@ -21,39 +21,41 @@ package org.neo4j.gds.paths.traverse;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.neo4j.gds.config.SourceNodeConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.assertions.MemoryEstimationAssert;
 import org.neo4j.gds.core.GraphDimensions;
 
-import java.util.Map;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-class BFSAlgorithmFactoryTest {
+class BFSMemoryEstimateDefinitionTest {
 
     @ParameterizedTest
-    @CsvSource({"10_000,100_000,402_988,402_988,482_972", "100_000,1_000_000,4_026_890,4_026_890,4_826_874"})
+    @CsvSource(
+        {
+            "10_000,100_000,1,402_988,402_988",
+            "10_000,100_000,2,402_988,482_972",
+            "100_000,1_000_000,1,4_026_890,4_026_890",
+            "100_000,1_000_000,2,4_026_890,4_826_874"
+        }
+    )
     void testMemoryEstimation(
         long nodeCount,
         long relationshipCount,
+        int concurrency,
         long expectedMin,
-        long expectedMax,
-        long expectedMaxWithConcurrency2
+        long expectedMax
     ) {
-        var algorithmFactory = new BfsAlgorithmFactory<BfsStreamConfig>();
 
-        var userInput = CypherMapWrapper.create(Map.of(SourceNodeConfig.SOURCE_NODE_KEY, 0));
-
-        var memoryEstimation = algorithmFactory.memoryEstimation(BfsStreamConfig.of(userInput));
         var dimensions = GraphDimensions.builder().nodeCount(nodeCount).relCountUpperBound(relationshipCount).build();
-        var actual = memoryEstimation.estimate(dimensions, 1).memoryUsage();
 
-        assertThat(actual.min).isEqualTo(expectedMin);
-        assertThat(actual.max).isEqualTo(expectedMax);
+        var config = mock(BfsBaseConfig.class);
+        when(config.concurrency()).thenReturn(concurrency);
 
-        var actualWithConcurrency2 = memoryEstimation.estimate(dimensions, 2).memoryUsage();
+        var memoryEstimation = new BfsMemoryEstimateDefinition();
 
-        assertThat(actualWithConcurrency2.min).isEqualTo(expectedMin);
-        assertThat(actualWithConcurrency2.max).isEqualTo(expectedMaxWithConcurrency2);
+        MemoryEstimationAssert.assertThat(memoryEstimation.memoryEstimation(config))
+            .memoryRange(dimensions, concurrency)
+            .hasMin(expectedMin)
+            .hasMax(expectedMax);
     }
 }
