@@ -22,7 +22,6 @@ package org.neo4j.gds.scaleproperties;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.beta.generator.PropertyProducer;
@@ -32,7 +31,6 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -51,7 +49,6 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.INFO;
 
@@ -289,44 +286,5 @@ class ScalePropertiesTest {
                 "ScaleProperties :: Finished"
             );
     }
-
-    @Test
-    void shouldEstimateMemoryFromGraph() {
-        var config = ScalePropertiesStreamConfigImpl.builder()
-            .nodeProperties(List.of("bAndC", "longArrayB"))
-            .scaler("MEAN")
-            .build();
-
-        assertMemoryEstimation(
-            new ScalePropertiesFactory<>().memoryEstimation(config),
-            graphDimensions,
-            1,
-            MemoryRange.of(288)
-        );
-    }
-
-    @ParameterizedTest
-    @CsvSource(value = {
-        // BASE
-        "   1_000, 1_044_064",
-
-        // Should increase linearly with node count
-        "   2_000, 2_088_064"
-    })
-    void shouldEstimateMemoryFromCounts(
-        long nodeCount,
-        long expectedMemory
-    ) {
-        var config = ScalePropertiesStreamConfigImpl.builder()
-            .nodeProperties(List.of("DUMMY"))
-            .scaler("MEAN")
-            .build();
-
-        assertMemoryEstimation(
-            () -> new ScalePropertiesFactory<>().memoryEstimation(config),
-            nodeCount,
-            1,
-            MemoryRange.of(expectedMemory)
-        );
-    }
+    
 }

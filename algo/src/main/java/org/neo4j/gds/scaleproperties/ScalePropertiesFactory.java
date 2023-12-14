@@ -21,19 +21,14 @@ package org.neo4j.gds.scaleproperties;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.mem.MemoryUsage;
 
 public final class ScalePropertiesFactory<CONFIG extends ScalePropertiesBaseConfig> extends GraphAlgorithmFactory<ScaleProperties, CONFIG> {
 
-    private static final int ESTIMATED_DIMENSION_PER_PROPERTY = 128;
 
     public ScalePropertiesFactory() {
         super();
@@ -75,24 +70,6 @@ public final class ScalePropertiesFactory<CONFIG extends ScalePropertiesBaseConf
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        MemoryEstimations.Builder builder = MemoryEstimations.builder("Scale properties");
-
-        builder.perGraphDimension("Scaled properties", (graphDimensions, concurrency) -> {
-                int totalPropertyDimension = configuration
-                    .nodeProperties()
-                    .stream()
-                    .mapToInt(p -> graphDimensions
-                        .nodePropertyDimensions()
-                        .get(p)
-                        .orElse(ESTIMATED_DIMENSION_PER_PROPERTY))
-                    .sum();
-
-                return MemoryRange.of(HugeObjectArray.memoryEstimation(
-                    graphDimensions.nodeCount(),
-                    MemoryUsage.sizeOfDoubleArray(totalPropertyDimension)
-                ));
-            }
-        );
-        return builder.build();
+        return new ScalePropertiesMemoryEstimateDefinition().memoryEstimation(configuration);
     }
 }
