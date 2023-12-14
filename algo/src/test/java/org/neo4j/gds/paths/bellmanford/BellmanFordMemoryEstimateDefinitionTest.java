@@ -22,35 +22,28 @@ package org.neo4j.gds.paths.bellmanford;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.assertions.MemoryEstimationAssert;
 
-import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-class BellmanFordAlgorithmFactoryTest {
+class BellmanFordMemoryEstimateDefinitionTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("memoryEstimationSetup")
-    void memoryEstimation(String description, boolean mutateNegativeCycles, long expectedBytes) {
-        var config = BellmanFordMutateConfig.of(CypherMapWrapper.create(
-            Map.of(
-                "sourceNode", 0L,
-                "mutateNegativeCycles", mutateNegativeCycles,
-                "mutateRelationshipType", "foo"
-            )
-        ));
-        var algorithmFactory = new BellmanFordAlgorithmFactory<>();
+    void memoryEstimation(String description, boolean trackNegativeCycles, long expectedBytes) {
 
-        assertMemoryEstimation(
-            () -> algorithmFactory.memoryEstimation(config),
-            10,
-            23,
-            4,
-            MemoryRange.of(expectedBytes)
-        );
+
+        var config = mock(BellmanFordBaseConfig.class);
+        when(config.trackNegativeCycles()).thenReturn(trackNegativeCycles);
+
+        var memoryEstimation = new BellmanFordMemoryEstimateDefinition();
+
+        MemoryEstimationAssert.assertThat(memoryEstimation.memoryEstimation(config))
+            .memoryRange(10, 23, 4)
+            .hasSameMinAndMaxEqualTo(expectedBytes);
     }
 
     private static Stream<Arguments> memoryEstimationSetup() {
