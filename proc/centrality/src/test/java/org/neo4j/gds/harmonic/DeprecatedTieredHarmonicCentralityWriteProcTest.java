@@ -215,6 +215,7 @@ class DeprecatedTieredHarmonicCentralityWriteProcTest extends BaseProcTest {
             ),
             null,
             null,
+            null,
             DeprecatedProceduresMetricService.PASSTHROUGH
         );
     }

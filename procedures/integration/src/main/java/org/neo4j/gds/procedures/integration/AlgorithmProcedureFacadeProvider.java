@@ -32,6 +32,8 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStatsBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
+import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmStreamBusinessFacade;
+import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsFacade;
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
@@ -47,6 +49,7 @@ import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
+import org.neo4j.gds.procedures.embeddings.NodeEmbeddingsProcedureFacade;
 import org.neo4j.gds.procedures.similarity.SimilarityProcedureFacade;
 
 class AlgorithmProcedureFacadeProvider {
@@ -169,4 +172,22 @@ class AlgorithmProcedureFacadeProvider {
         );
 
     }
+
+    NodeEmbeddingsProcedureFacade createNodeEmbeddingsProcedureFacade() {
+        // algorithms facade
+        var nodeEmbeddingsAlgorithmsFacade = new NodeEmbeddingsAlgorithmsFacade(algorithmRunner);
+
+        // mode-specific facades
+
+        var streamBusinessFacade = new NodeEmbeddingsAlgorithmStreamBusinessFacade(nodeEmbeddingsAlgorithmsFacade);
+
+        // procedure facade
+        return new NodeEmbeddingsProcedureFacade(
+            configurationCreator,
+            returnColumns,
+            streamBusinessFacade
+        );
+
+    }
+
 }

@@ -21,8 +21,10 @@ package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -35,16 +37,16 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class Node2VecStreamProc extends BaseProc {
 
+    @Context
+    public GraphDataScience facade;
+    
     @Procedure(value = "gds.node2vec.stream", mode = READ)
     @Description(Node2VecCompanion.DESCRIPTION)
-    public Stream<StreamResult> stream(
+    public Stream<Node2VecStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new Node2VecStreamSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.nodeEmbeddingsProcedureFacade().node2VecStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.node2vec.stream.estimate", mode = READ)
@@ -64,7 +66,7 @@ public class Node2VecStreamProc extends BaseProc {
     @Description(Node2VecCompanion.DESCRIPTION)
     @Internal
     @Deprecated
-    public Stream<StreamResult> alphaStream(
+    public Stream<Node2VecStreamResult> alphaStream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
