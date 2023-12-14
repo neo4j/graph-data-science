@@ -22,9 +22,7 @@ package org.neo4j.gds.paths.traverse;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -75,13 +73,6 @@ public class DfsAlgorithmFactory<CONFIG extends DfsBaseConfig> extends GraphAlgo
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        MemoryEstimations.Builder builder = MemoryEstimations.builder(DFS.class);
-        builder.perNode("visited ", MemoryUsage::sizeOfBitset);
-        builder.perNode("nodes", MemoryUsage::sizeOfLongArrayList);
-        builder.perNode("sources", MemoryUsage::sizeOfLongArrayList);
-        builder.perNode("weights", MemoryUsage::sizeOfDoubleArrayList);
-        builder.perNode("resultNodes", MemoryUsage::sizeOfLongArray);
-
-        return builder.build();
+        return new DfsMemoryEstimateDefinition().memoryEstimation(configuration);
     }
 }
