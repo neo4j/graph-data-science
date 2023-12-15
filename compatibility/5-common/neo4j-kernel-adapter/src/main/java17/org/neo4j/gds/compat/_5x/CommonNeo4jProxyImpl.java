@@ -29,7 +29,6 @@ import org.neo4j.configuration.connectors.ConnectorPortRegister;
 import org.neo4j.configuration.connectors.ConnectorType;
 import org.neo4j.configuration.helpers.DatabaseNameValidator;
 import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.fabric.FabricDatabaseManager;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.compat.CompatCallableProcedure;
 import org.neo4j.gds.compat.CompatExecutionMonitor;
@@ -96,6 +95,8 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.KernelTransactionHandle;
 import org.neo4j.kernel.api.procedure.CallableProcedure;
 import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
+import org.neo4j.kernel.database.DatabaseReferenceImpl;
+import org.neo4j.kernel.database.DatabaseReferenceRepository;
 import org.neo4j.kernel.database.NormalizedDatabaseName;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
@@ -747,8 +748,11 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
 
     @Override
     public boolean isCompositeDatabase(GraphDatabaseService databaseService) {
-        var databaseManager = GraphDatabaseApiProxy.resolveDependency(databaseService, FabricDatabaseManager.class);
-        return databaseManager.isFabricDatabase(GraphDatabaseApiProxy.databaseId(databaseService));
+        var databaseId = GraphDatabaseApiProxy.databaseId(databaseService);
+        var repo = GraphDatabaseApiProxy.resolveDependency(databaseService, DatabaseReferenceRepository.class);
+        return repo.getCompositeDatabaseReferences().stream()
+            .map(DatabaseReferenceImpl.Internal::databaseId)
+            .anyMatch(databaseId::equals);
     }
 
     public abstract CursorContextFactory cursorContextFactory(Optional<PageCacheTracer> pageCacheTracer);
