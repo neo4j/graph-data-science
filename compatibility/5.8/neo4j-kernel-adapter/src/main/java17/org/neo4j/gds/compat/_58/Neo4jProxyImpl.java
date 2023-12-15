@@ -20,11 +20,13 @@
 package org.neo4j.gds.compat._58;
 
 import org.neo4j.common.DependencyResolver;
+import org.neo4j.fabric.FabricDatabaseManager;
 import org.neo4j.gds.compat.BoltTransactionRunner;
 import org.neo4j.gds.compat.CompatExecutionContext;
 import org.neo4j.gds.compat.GlobalProcedureRegistry;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat._5x.CommonNeo4jProxyImpl;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.PartitionedScan;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
@@ -176,5 +178,11 @@ public final class Neo4jProxyImpl extends CommonNeo4jProxyImpl {
                 stmt.close();
             }
         };
+    }
+
+    @Override
+    public boolean isCompositeDatabase(GraphDatabaseService databaseService) {
+        var databaseManager = GraphDatabaseApiProxy.resolveDependency(databaseService, FabricDatabaseManager.class);
+        return databaseManager.isFabricDatabase(GraphDatabaseApiProxy.databaseId(databaseService));
     }
 }
