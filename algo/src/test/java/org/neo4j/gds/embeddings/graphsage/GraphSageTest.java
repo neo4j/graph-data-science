@@ -32,6 +32,7 @@ import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.Aggregation;
@@ -42,7 +43,6 @@ import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.model.InjectModelCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.ModelCatalogExtension;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
@@ -161,7 +161,7 @@ class GraphSageTest {
             .build();
 
         var graphSage = new GraphSageAlgorithmFactory<>(modelCatalog).build(
-            orphanGraphStore,
+            orphanGraph,
             streamConfig,
             ProgressTracker.NULL_TRACKER
         );
@@ -235,7 +235,7 @@ class GraphSageTest {
 
         var log = Neo4jProxy.testLog();
         var graphSage = new GraphSageAlgorithmFactory<>(modelCatalog).build(
-            graphStore,
+            graph,
             streamConfig,
             log,
             EmptyTaskRegistryFactory.INSTANCE

@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
-import org.neo4j.gds.GraphStoreAlgorithmFactory;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.GraphAlgorithmFactory;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.config.MutateConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -38,7 +38,7 @@ import static org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver.res
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.ml.core.EmbeddingUtils.validateRelationshipWeightPropertyValue;
 
-public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> extends GraphStoreAlgorithmFactory<GraphSage, CONFIG> {
+public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> extends GraphAlgorithmFactory<GraphSage, CONFIG> {
 
     private final ModelCatalog modelCatalog;
 
@@ -47,8 +47,9 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
         this.modelCatalog = modelCatalog;
     }
 
+
     @Override
-    public GraphSage build(GraphStore graphStore, CONFIG configuration, ProgressTracker progressTracker) {
+    public GraphSage build(Graph graph, CONFIG configuration, ProgressTracker progressTracker) {
         var executorService = DefaultPool.INSTANCE;
         var model = resolveModel(
             modelCatalog,
@@ -56,13 +57,8 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
             configuration.modelName()
         );
 
-        var graph = graphStore.getGraph(
-            configuration.nodeLabelIdentifiers(graphStore),
-            configuration.internalRelationshipTypes(graphStore),
-            model.trainConfig().relationshipWeightProperty()
-        );
 
-        if(graph.hasRelationshipProperty()) {
+        if (graph.hasRelationshipProperty()) {
             validateRelationshipWeightPropertyValue(graph, configuration.concurrency(), executorService);
         }
 
@@ -95,8 +91,8 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
     }
 
     @Override
-    public Task progressTask(GraphStore graphStore, CONFIG config) {
-        return Tasks.leaf(taskName(), graphStore.getGraph(config.nodeLabelIdentifiers(graphStore)).nodeCount());
+    public Task progressTask(Graph graph, CONFIG config) {
+        return Tasks.leaf(taskName(), graph.nodeCount());
     }
 
     private MemoryEstimation withNodeCount(GraphSageTrainConfig config, long nodeCount, boolean mutate) {
@@ -133,4 +129,6 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
         }
         return builder.endField().build();
     }
+
+
 }

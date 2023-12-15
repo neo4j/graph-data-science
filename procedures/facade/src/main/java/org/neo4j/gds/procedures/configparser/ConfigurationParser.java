@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 public class ConfigurationParser {
     public static final ConfigurationParser EMPTY = new ConfigurationParser(DefaultsConfiguration.Empty,LimitsConfiguration.Empty);
@@ -121,7 +121,7 @@ public class ConfigurationParser {
 
     public <CONFIG extends AlgoBaseConfig> CONFIG produceConfig(
         Map<String, Object> configuration,
-        Function<CypherMapWrapper, CONFIG> configCreator,
+        BiFunction<String, CypherMapWrapper, CONFIG> configCreator,
         User user
     ) {
         return produceConfig(configuration, configCreator, user.getUsername());
@@ -129,11 +129,11 @@ public class ConfigurationParser {
 
     public <CONFIG extends AlgoBaseConfig> CONFIG produceConfig(
         Map<String, Object> configuration,
-        Function<CypherMapWrapper, CONFIG> configCreator,
+        BiFunction<String, CypherMapWrapper, CONFIG> configCreator,
         String username
     ) {
         var inputWithDefaults = applyDefaults(configuration, username);
-        var procConfig = configCreator.apply(CypherMapWrapper.create(inputWithDefaults));
+        var procConfig = configCreator.apply(username, CypherMapWrapper.create(inputWithDefaults));
         validateOriginalConfig(configuration, procConfig.configKeys());
         validateLimits(procConfig, username, inputWithDefaults);
         return procConfig;

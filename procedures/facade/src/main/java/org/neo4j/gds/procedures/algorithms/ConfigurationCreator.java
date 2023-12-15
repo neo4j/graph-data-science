@@ -26,6 +26,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.procedures.configparser.ConfigurationParser;
 
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class ConfigurationCreator {
@@ -43,16 +44,17 @@ public class ConfigurationCreator {
         this.user = user;
     }
 
+
     public <C extends AlgoBaseConfig> C createConfiguration(
         Map<String, Object> rawConfiguration,
-        Function<CypherMapWrapper, C> parser
+        BiFunction<String, CypherMapWrapper, C> parser
     ) {
         return configurationParser.produceConfig(rawConfiguration, parser, user);
     }
 
     public <C extends AlgoBaseConfig> C createConfigurationForStream(
         Map<String, Object> rawConfiguration,
-        Function<CypherMapWrapper, C> parser
+        BiFunction<String, CypherMapWrapper, C> parser
     ) {
         C configuration = createConfiguration(rawConfiguration, parser);
 
@@ -60,5 +62,21 @@ public class ConfigurationCreator {
         algorithmMetaDataSetter.set(configuration);
 
         return configuration;
+    }
+
+
+    public <C extends AlgoBaseConfig> C createConfiguration(
+        Map<String, Object> rawConfiguration,
+        Function<CypherMapWrapper, C> parser
+    ) {
+        return createConfiguration(rawConfiguration, (__, cypherMapWrapper) -> parser.apply(cypherMapWrapper));
+    }
+
+    public <C extends AlgoBaseConfig> C createConfigurationForStream(
+        Map<String, Object> rawConfiguration,
+        Function<CypherMapWrapper, C> parser
+    ) {
+        return createConfigurationForStream(rawConfiguration, (__, cypherMapWrapper) -> parser.apply(cypherMapWrapper));
+
     }
 }

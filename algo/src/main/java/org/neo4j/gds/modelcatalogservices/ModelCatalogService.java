@@ -29,4 +29,8 @@ public class ModelCatalogService {
         this.modelCatalog = modelCatalog;
     }
 
+    public ModelCatalog get() {
+        return modelCatalog;
+    }
+
 }

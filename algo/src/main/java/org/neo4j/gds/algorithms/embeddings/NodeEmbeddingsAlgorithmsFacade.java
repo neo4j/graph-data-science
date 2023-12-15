@@ -21,10 +21,22 @@ package org.neo4j.gds.algorithms.embeddings;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
+import org.neo4j.gds.embeddings.graphsage.ModelData;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecAlgorithmFactory;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 import org.neo4j.gds.modelcatalogservices.ModelCatalogService;
+
+import java.util.Optional;
+import java.util.function.Consumer;
 
 public class NodeEmbeddingsAlgorithmsFacade {
 
@@ -48,6 +60,35 @@ public class NodeEmbeddingsAlgorithmsFacade {
             config,
             config.relationshipWeightProperty(),
             new Node2VecAlgorithmFactory<>()
+        );
+    }
+
+    AlgorithmComputationResult<GraphSageResult> graphSage(
+        String graphName,
+        GraphSageBaseConfig config
+    ) {
+        Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model = GraphSageModelResolver.resolveModel(
+            modelCatalogService.get(),
+            config.username(),
+            config.modelName()
+        );
+
+        Consumer<GraphStore> validationCondition = (g) -> {
+            GraphSageTrainConfig trainConfig = model.trainConfig();
+            trainConfig.graphStoreValidation(
+                g,
+                config.nodeLabelIdentifiers(g),
+                config.internalRelationshipTypes(g)
+            );
+        };
+
+
+        return algorithmRunner.run(
+            graphName,
+            config,
+            model.trainConfig().relationshipWeightProperty(),
+            new GraphSageAlgorithmFactory<>(modelCatalogService.get()),
+            Optional.of(validationCondition)
         );
     }
 

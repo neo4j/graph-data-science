@@ -23,6 +23,7 @@ import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
@@ -51,7 +52,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
     public GraphDataScience apply(Context context) throws ProcedureException {
 
         var catalogFacade = catalogFacadeProvider.createCatalogFacade(context);
-
+        context.dependencyResolver().resolveDependency(GraphDatabaseService.class);
         var algorithmFacadeProvider = algorithmFacadeService.createAlgorithmFacadeProvider(context);
 
         var centralityProcedureFacade = algorithmFacadeProvider.createCentralityProcedureFacade();

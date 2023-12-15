@@ -24,10 +24,12 @@ import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsEstimateBusin
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsMutateBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
+import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageStreamResult;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecMutateResult;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecStreamResult;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecWriteResult;
@@ -130,6 +132,20 @@ public class NodeEmbeddingsProcedureFacade {
         var config = configurationCreator.createConfiguration(configuration, Node2VecWriteConfig::of);
 
         return Stream.of(estimateBusinessFacade.node2Vec(graphNameOrConfiguration, config));
+    }
+
+    public Stream<GraphSageStreamResult> graphSageStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var streamConfig = configurationCreator.createConfigurationForStream(configuration, GraphSageStreamConfig::of);
+
+        var computationResult = streamBusinessFacade.graphSage(
+            graphName,
+            streamConfig
+        );
+
+        return GraphSageComputationalResultTransformer.toStreamResult(computationResult);
     }
 
 }

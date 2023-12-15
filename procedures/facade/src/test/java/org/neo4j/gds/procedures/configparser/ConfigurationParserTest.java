@@ -31,7 +31,7 @@ import org.neo4j.gds.wcc.WccStreamConfig;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatException;
@@ -129,7 +129,8 @@ class ConfigurationParserTest {
             ),
             new LimitsConfiguration(Map.of("concurrency", LimitFactory.create(4L)), Collections.emptyMap())
         );
-        Function<CypherMapWrapper, WccStreamConfig> configCreator = WccStreamConfig::of;
+        BiFunction<String, CypherMapWrapper, WccStreamConfig> configCreator = (__, cypherMapWrapper) -> WccStreamConfig.of(
+            cypherMapWrapper);
         assertThat(configurationParser.produceConfig(Map.of(), configCreator, "foo").concurrency()).isEqualTo(3);
 
     }
@@ -144,7 +145,9 @@ class ConfigurationParserTest {
             ),
             new LimitsConfiguration(Map.of("concurrency", LimitFactory.create(4L)), Collections.emptyMap())
         );
-        Function<CypherMapWrapper, WccStreamConfig> configCreator = WccStreamConfig::of;
+        BiFunction<String, CypherMapWrapper, WccStreamConfig> configCreator = (__, cypherMapWrapper) -> WccStreamConfig.of(
+            cypherMapWrapper);
+
         assertThatException().isThrownBy(() -> configurationParser.produceConfig(
             Map.of("conurrency", 20),
             configCreator,
@@ -166,7 +169,8 @@ class ConfigurationParserTest {
                 Map.of("bogus", Map.of("concurrency", LimitFactory.create(1L)))
             )
         );
-        Function<CypherMapWrapper, WccStreamConfig> configCreator = WccStreamConfig::of;
+        BiFunction<String, CypherMapWrapper, WccStreamConfig> configCreator = (__, cypherMapWrapper) -> WccStreamConfig.of(
+            cypherMapWrapper);
         assertThat(configurationParser.produceConfig(Map.of(), configCreator, "bogus").concurrency()).isEqualTo(1);
 
     }
@@ -184,7 +188,8 @@ class ConfigurationParserTest {
                 Map.of("bogus", Map.of("concurrency", LimitFactory.create(1L)))
             )
         );
-        Function<CypherMapWrapper, WccStreamConfig> configCreator = WccStreamConfig::of;
+        BiFunction<String, CypherMapWrapper, WccStreamConfig> configCreator = (__, cypherMapWrapper) -> WccStreamConfig.of(
+            cypherMapWrapper);
         assertThatException().isThrownBy(() -> configurationParser.produceConfig(Map.of(), configCreator, "bogus"))
             .withMessage("Configuration parameter 'concurrency' with value '3' exceeds it's limit of '1'");
 

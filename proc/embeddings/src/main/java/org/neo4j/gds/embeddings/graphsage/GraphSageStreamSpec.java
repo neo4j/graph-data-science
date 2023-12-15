@@ -30,6 +30,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
+import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageStreamResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -39,7 +40,7 @@ import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPH_SAGE_D
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 @GdsCallable(name = "gds.beta.graphSage.stream", description = GRAPH_SAGE_DESCRIPTION, executionMode = STREAM)
-public class GraphSageStreamSpec implements AlgorithmSpec<GraphSage, GraphSageResult, GraphSageStreamConfig, Stream<StreamResult>, GraphSageAlgorithmFactory<GraphSageStreamConfig>> {
+public class GraphSageStreamSpec implements AlgorithmSpec<GraphSage, GraphSageResult, GraphSageStreamConfig, Stream<GraphSageStreamResult>, GraphSageAlgorithmFactory<GraphSageStreamConfig>> {
 
     @Override
     public String name() {
@@ -57,7 +58,7 @@ public class GraphSageStreamSpec implements AlgorithmSpec<GraphSage, GraphSageRe
     }
 
     @Override
-    public ComputationResultConsumer<GraphSage, GraphSageResult, GraphSageStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<GraphSage, GraphSageResult, GraphSageStreamConfig, Stream<GraphSageStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "GraphSage streaming failed",
             executionContext.log(),
@@ -66,7 +67,7 @@ public class GraphSageStreamSpec implements AlgorithmSpec<GraphSage, GraphSageRe
                     var graph = computationResult.graph();
                     var embeddings = result.embeddings();
                     return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
-                        .mapToObj(internalNodeId -> new StreamResult(
+                        .mapToObj(internalNodeId -> new GraphSageStreamResult(
                             graph.toOriginalNodeId(internalNodeId),
                             embeddings.get(internalNodeId)
                         ));
