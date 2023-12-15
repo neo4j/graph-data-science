@@ -20,10 +20,9 @@
 package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -40,18 +39,15 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class Node2VecWriteProc extends BaseProc {
 
     @Context
-    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
-
+    public GraphDataScience facade;
+    
     @Procedure(value = "gds.node2vec.write", mode = WRITE)
     @Description(Node2VecCompanion.DESCRIPTION)
-    public Stream<WriteResult> write(
+    public Stream<Node2VecWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new Node2VecWriteSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.nodeEmbeddingsProcedureFacade().node2VecWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.node2vec.write.estimate", mode = READ)
@@ -71,7 +67,7 @@ public class Node2VecWriteProc extends BaseProc {
     @Description(Node2VecCompanion.DESCRIPTION)
     @Internal
     @Deprecated
-    public Stream<WriteResult> betawrite(
+    public Stream<Node2VecWriteResult> betawrite(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -107,8 +103,4 @@ public class Node2VecWriteProc extends BaseProc {
         return estimate(graphNameOrConfiguration, algoConfiguration);
     }
 
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
-    }
 }
