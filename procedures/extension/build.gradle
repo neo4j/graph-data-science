@@ -32,6 +32,7 @@ dependencies {
     implementation project(':neo4j-api')
     implementation project(':neo4j-kernel-adapter')
     implementation project(':opengds-procedure-facade')
+    implementation project(':open-model-catalog')
     implementation project(':path-finding-algorithms')
     implementation project(':proc-catalog')
     implementation project(':proc-community')

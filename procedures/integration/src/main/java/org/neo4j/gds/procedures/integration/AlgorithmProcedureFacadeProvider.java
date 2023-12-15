@@ -59,6 +59,7 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.modelcatalogservices.ModelCatalogService;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
@@ -88,6 +89,7 @@ class AlgorithmProcedureFacadeProvider {
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationFlag terminationFlag;
     private final UserLogRegistryFactory userLogRegistryFactory;
+    private final ModelCatalogService modelCatalogService;
 
     AlgorithmProcedureFacadeProvider(
         Log log,
@@ -101,6 +103,7 @@ class AlgorithmProcedureFacadeProvider {
         WriteRelationshipService writeRelationshipService,
         AlgorithmRunner algorithmRunner,
         AlgorithmEstimator algorithmEstimator,
+        ModelCatalogService modelCatalogService,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
         RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
@@ -120,6 +123,7 @@ class AlgorithmProcedureFacadeProvider {
         this.writeRelationshipService = writeRelationshipService;
         this.algorithmRunner = algorithmRunner;
         this.algorithmEstimator = algorithmEstimator;
+        this.modelCatalogService = modelCatalogService;
 
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
         this.algorithmEstimationTemplate = algorithmEstimationTemplate;
@@ -247,7 +251,7 @@ class AlgorithmProcedureFacadeProvider {
 
     NodeEmbeddingsProcedureFacade createNodeEmbeddingsProcedureFacade() {
         // algorithms facade
-        var nodeEmbeddingsAlgorithmsFacade = new NodeEmbeddingsAlgorithmsFacade(algorithmRunner);
+        var nodeEmbeddingsAlgorithmsFacade = new NodeEmbeddingsAlgorithmsFacade(algorithmRunner, modelCatalogService);
 
         // mode-specific facades
 

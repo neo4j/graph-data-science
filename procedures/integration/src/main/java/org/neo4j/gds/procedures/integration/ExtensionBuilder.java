@@ -36,6 +36,7 @@ import org.neo4j.gds.mem.MemoryGauge;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
+import org.neo4j.gds.modelcatalogservices.ModelCatalogService;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.KernelTransactionAccessor;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
@@ -247,7 +248,8 @@ public final class ExtensionBuilder {
         ExporterBuildersProviderService exporterBuildersProviderService,
         Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator,
         MetricsFacade metricsFacade,
-        Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator
+        Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
+        ModelCatalogService modelCatalogService
     ) {
         var catalogFacadeProvider = createCatalogFacadeProvider(
             exporterBuildersProviderService,
@@ -258,7 +260,8 @@ public final class ExtensionBuilder {
         var algorithmFacadeService = createAlgorithmService(
             metricsFacade.algorithmMetrics(),
             exporterBuildersProviderService,
-            algorithmProcessingTemplateDecorator
+            algorithmProcessingTemplateDecorator,
+            modelCatalogService
         );
 
         return new GraphDataScienceProvider(
@@ -295,7 +298,8 @@ public final class ExtensionBuilder {
     private AlgorithmFacadeProviderFactory createAlgorithmService(
         AlgorithmMetricsService algorithmMetricsService,
         ExporterBuildersProviderService exporterBuildersProviderService,
-        Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator
+        Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
+        ModelCatalogService modelCatalogService
     ) {
         return new AlgorithmFacadeProviderFactory(
             log,
@@ -308,6 +312,7 @@ public final class ExtensionBuilder {
             databaseIdAccessor,
             exporterBuildersProviderService,
             kernelTransactionAccessor,
+            modelCatalogService,
             taskRegistryFactoryService,
             terminationFlagService,
             userAccessor,

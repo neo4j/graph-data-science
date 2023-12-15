@@ -41,6 +41,7 @@ import org.neo4j.gds.mem.MemoryGauge;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
+import org.neo4j.gds.modelcatalogservices.ModelCatalogService;
 import org.neo4j.gds.procedures.KernelTransactionAccessor;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.TerminationFlagService;
@@ -76,6 +77,7 @@ class AlgorithmFacadeProviderFactory {
     private final TerminationFlagService terminationFlagService;
     private final UserAccessor userAccessor;
     private final UserLogServices userLogServices;
+    private final ModelCatalogService modelCatalogService;
     private final Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator;
 
     //algorithm facade parameters
@@ -91,6 +93,7 @@ class AlgorithmFacadeProviderFactory {
         DatabaseIdAccessor databaseIdAccessor,
         ExporterBuildersProviderService exporterBuildersProviderService,
         KernelTransactionAccessor kernelTransactionAccessor,
+        ModelCatalogService modelCatalogService,
         TaskRegistryFactoryService taskRegistryFactoryService,
         TerminationFlagService terminationFlagService,
         UserAccessor userAccessor,
@@ -113,6 +116,7 @@ class AlgorithmFacadeProviderFactory {
         this.userLogServices = userLogServices;
         this.userAccessor = userAccessor;
         this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
+        this.modelCatalogService = modelCatalogService;
     }
 
 
@@ -233,7 +237,9 @@ class AlgorithmFacadeProviderFactory {
             relationshipStreamExporterBuilder,
             taskRegistryFactory,
             terminationFlag,
-            userLogRegistryFactory
+            userLogRegistryFactory,
+            algorithmEstimator,
+            modelCatalogService
         );
     }
 }

@@ -23,11 +23,13 @@ import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
+import org.neo4j.gds.core.model.OpenModelCatalogProvider;
 import org.neo4j.gds.core.write.NativeExportBuildersProvider;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
+import org.neo4j.gds.modelcatalogservices.ModelCatalogService;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.integration.ExporterBuildersProviderService;
 import org.neo4j.gds.procedures.integration.ExtensionBuilder;
@@ -73,6 +75,7 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         // metrics are a no-op in OpenGDS
         var algorithmMetricsService = new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar());
         var projectionMetricsService = new ProjectionMetricsService(new PassthroughExecutionMetricRegistrar());
+        var modelCatalogService = new ModelCatalogService(new OpenModelCatalogProvider().get(null));
 
         var metricsFacade = MetricsFacade.PASSTHROUGH_METRICS_FACADE;
 
@@ -84,7 +87,8 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
                     exporterBuildersProviderService,
                     businessFacadeDecorator,
                     metricsFacade,
-                    algorithmProcessingTemplateDecorator
+                    algorithmProcessingTemplateDecorator,
+                    modelCatalogService
                 )
             )
             .withComponent(

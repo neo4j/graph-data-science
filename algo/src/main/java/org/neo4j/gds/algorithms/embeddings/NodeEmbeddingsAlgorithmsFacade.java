@@ -24,13 +24,19 @@ import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.embeddings.node2vec.Node2VecAlgorithmFactory;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
+import org.neo4j.gds.modelcatalogservices.ModelCatalogService;
 
 public class NodeEmbeddingsAlgorithmsFacade {
 
     private final AlgorithmRunner algorithmRunner;
+    private final ModelCatalogService modelCatalogService;
 
-    public NodeEmbeddingsAlgorithmsFacade(AlgorithmRunner algorithmRunner) {
+    public NodeEmbeddingsAlgorithmsFacade(
+        AlgorithmRunner algorithmRunner,
+        ModelCatalogService modelCatalogService
+    ) {
         this.algorithmRunner = algorithmRunner;
+        this.modelCatalogService = modelCatalogService;
     }
 
     AlgorithmComputationResult<Node2VecResult> node2Vec(
@@ -44,7 +50,6 @@ public class NodeEmbeddingsAlgorithmsFacade {
             new Node2VecAlgorithmFactory<>()
         );
     }
-
 
 
 }
