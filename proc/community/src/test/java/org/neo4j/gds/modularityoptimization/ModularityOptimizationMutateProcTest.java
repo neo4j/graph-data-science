@@ -609,6 +609,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             ),
             null,
             null,
+            null,
             DeprecatedProceduresMetricService.PASSTHROUGH
         );
     }

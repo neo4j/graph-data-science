@@ -20,16 +20,19 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.function.ThrowingFunction;
+import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.utils.mem.GcListenerExtension;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.core.utils.progress.TaskStoreService;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.mem.MemoryGauge;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
@@ -46,10 +49,14 @@ import org.neo4j.graphdb.config.Configuration;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
+import org.neo4j.kernel.lifecycle.LifeSupport;
+import org.neo4j.kernel.lifecycle.Lifecycle;
 
+import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -74,32 +81,38 @@ public final class ExtensionBuilder {
     private final GlobalProcedures globalProcedures;
 
     // GDS state and services
-    private final TaskStoreService taskStoreService;
-    private final TaskRegistryFactoryService taskRegistryFactoryService;
-    private final UserLogServices userLogServices;
     private final ConfigurationParser configurationParser;
     private final GraphStoreCatalogService graphStoreCatalogService;
+    private final MemoryGauge memoryGauge;
+    private final TaskStoreService taskStoreService;
+    private final TaskRegistryFactoryService taskRegistryFactoryService;
     private final boolean useMaxMemoryEstimation;
+    private final UserLogServices userLogServices;
+    private final Lifecycle[] lifecycles;
 
     private ExtensionBuilder(
         Log log,
         GlobalProcedures globalProcedures,
-        TaskStoreService taskStoreService,
-        TaskRegistryFactoryService taskRegistryFactoryService,
-        UserLogServices userLogServices,
         ConfigurationParser configurationParser,
         GraphStoreCatalogService graphStoreCatalogService,
-        boolean useMaxMemoryEstimation
+        MemoryGauge memoryGauge,
+        TaskStoreService taskStoreService,
+        TaskRegistryFactoryService taskRegistryFactoryService,
+        boolean useMaxMemoryEstimation,
+        UserLogServices userLogServices,
+        Lifecycle... lifecycles
     ) {
         this.log = log;
         this.globalProcedures = globalProcedures;
 
-        this.taskStoreService = taskStoreService;
-        this.taskRegistryFactoryService = taskRegistryFactoryService;
-        this.userLogServices = userLogServices;
         this.configurationParser = configurationParser;
         this.graphStoreCatalogService = graphStoreCatalogService;
+        this.memoryGauge = memoryGauge;
+        this.taskStoreService = taskStoreService;
+        this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.useMaxMemoryEstimation = useMaxMemoryEstimation;
+        this.userLogServices = userLogServices;
+        this.lifecycles = lifecycles;
     }
 
     /**
@@ -129,15 +142,35 @@ public final class ExtensionBuilder {
         // Speaking of state, defaults and limits is a big shared thing also (or, will be)
         var configurationParser = new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance);
 
+        // Memory gauge integrates with the JVM
+        // First, it is state held in an AtomicLong
+        // Initialize with max available memory. Everything that is used at this point in time
+        //  _could_ be garbage and we want to err on the side of seeing more free heap.
+        // It also has the effect that we allow all operations that theoretically fit into memory
+        //  if the extension does never load.
+        AtomicLong freeMemoryAfterLastGc = new AtomicLong(Runtime.getRuntime().maxMemory());
+        // We make it available in a neat service
+        var memoryGauge = new MemoryGauge(freeMemoryAfterLastGc);
+        // in the short term, until we eradicate old usages, we also install the shared state in its old place
+        GcListenerExtension.setMemoryGauge(freeMemoryAfterLastGc);
+        // State is populated from a GC listener
+        Lifecycle gcListener = new GcListenerInstaller(
+            log,
+            ManagementFactory.getGarbageCollectorMXBeans(),
+            freeMemoryAfterLastGc
+        );
+
         return new ExtensionBuilder(
             log,
             globalProcedures,
-            taskStoreService,
-            taskRegistryFactoryService,
-            userLogServices,
             configurationParser,
             graphStoreCatalogService,
-            useMaxMemoryEstimation
+            memoryGauge,
+            taskStoreService,
+            taskRegistryFactoryService,
+            useMaxMemoryEstimation,
+            userLogServices,
+            gcListener
         );
     }
 
@@ -161,7 +194,7 @@ public final class ExtensionBuilder {
     /**
      * The finalisation of the builder registers components with Neo4j
      */
-    public void registerExtension() {
+    public Lifecycle registerExtension() {
         // Process the list of components to register
         registrations.forEach(Runnable::run);
 
@@ -193,6 +226,13 @@ public final class ExtensionBuilder {
             true
         );
         log.info("User Log Registry registered.");
+
+        // Lastly we sort out the lifecycles we need to have managed
+        var lifeSupport = new LifeSupport();
+        for (Lifecycle lifecycle : lifecycles) {
+            lifeSupport.add(lifecycle);
+        }
+        return lifeSupport;
     }
 
     /**
@@ -206,7 +246,8 @@ public final class ExtensionBuilder {
     public ThrowingFunction<Context, GraphDataScience, ProcedureException> gdsProvider(
         ExporterBuildersProviderService exporterBuildersProviderService,
         Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator,
-        MetricsFacade metricsFacade
+        MetricsFacade metricsFacade,
+        Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator
     ) {
         var catalogFacadeProvider = createCatalogFacadeProvider(
             exporterBuildersProviderService,
@@ -216,15 +257,14 @@ public final class ExtensionBuilder {
 
         var algorithmFacadeService = createAlgorithmService(
             metricsFacade.algorithmMetrics(),
-            exporterBuildersProviderService
+            exporterBuildersProviderService,
+            algorithmProcessingTemplateDecorator
         );
-
 
         return new GraphDataScienceProvider(
             log,
             catalogFacadeProvider,
             algorithmFacadeService,
-
             metricsFacade.deprecatedProcedures()
         );
     }
@@ -254,12 +294,14 @@ public final class ExtensionBuilder {
 
     private AlgorithmFacadeProviderFactory createAlgorithmService(
         AlgorithmMetricsService algorithmMetricsService,
-        ExporterBuildersProviderService exporterBuildersProviderService
+        ExporterBuildersProviderService exporterBuildersProviderService,
+        Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator
     ) {
         return new AlgorithmFacadeProviderFactory(
             log,
             configurationParser,
             graphStoreCatalogService,
+            memoryGauge,
             useMaxMemoryEstimation,
             algorithmMetaDataSetterService,
             algorithmMetricsService,
@@ -269,8 +311,8 @@ public final class ExtensionBuilder {
             taskRegistryFactoryService,
             terminationFlagService,
             userAccessor,
-            userLogServices
+            userLogServices,
+            algorithmProcessingTemplateDecorator
         );
     }
-
 }

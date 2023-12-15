@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 
@@ -36,16 +37,29 @@ public final class AStar extends Algorithm<PathFindingResult> {
 
     private final Dijkstra dijkstra;
 
-    private AStar(Dijkstra dijkstra) {
+    private AStar(Dijkstra dijkstra, TerminationFlag terminationFlag) {
         super(dijkstra.getProgressTracker());
         this.dijkstra = dijkstra;
-        this.terminationFlag = dijkstra.getTerminationFlag();
+        this.terminationFlag = terminationFlag;
+    }
+
+    /**
+     * @deprecated Use the one with termination flag
+     */
+    @Deprecated
+    public static AStar sourceTarget(
+        Graph graph,
+        ShortestPathAStarBaseConfig config,
+        ProgressTracker progressTracker
+    ) {
+        return sourceTarget(graph, config, progressTracker, TerminationFlag.RUNNING_TRUE);
     }
 
     public static AStar sourceTarget(
         Graph graph,
         ShortestPathAStarBaseConfig config,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         var latitudeProperty = config.latitudeProperty();
         var longitudeProperty = config.longitudeProperty();
@@ -70,8 +84,8 @@ public final class AStar extends Algorithm<PathFindingResult> {
         var heuristic = new HaversineHeuristic(latitudeProperties, longitudeProperties, targetNode);
 
         // Init dijkstra algorithm for computing shortest paths
-        var dijkstra = Dijkstra.sourceTarget(graph, config, Optional.of(heuristic), progressTracker);
-        return new AStar(dijkstra);
+        var dijkstra = Dijkstra.sourceTarget(graph, config, Optional.of(heuristic), progressTracker, terminationFlag);
+        return new AStar(dijkstra, terminationFlag);
     }
 
     

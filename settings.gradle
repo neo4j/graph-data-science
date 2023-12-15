@@ -89,6 +89,9 @@ project(':executor').projectDir = file('executor')
 include('graph-store-catalog-applications')
 project(':graph-store-catalog-applications').projectDir = file('applications/graph-store-catalog')
 
+include('path-finding-algorithms')
+project(':path-finding-algorithms').projectDir = file('applications/algorithms/path-finding')
+
 include 'procedure-collector'
 project(':procedure-collector').projectDir = file('procedure-collector')
 

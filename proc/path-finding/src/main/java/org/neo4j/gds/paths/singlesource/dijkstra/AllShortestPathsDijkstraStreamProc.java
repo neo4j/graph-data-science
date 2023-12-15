@@ -21,13 +21,14 @@ package org.neo4j.gds.paths.singlesource.dijkstra;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.executor.ProcedureExecutorSpec;
-import org.neo4j.gds.paths.StreamResult;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.pathfinding.PathFindingStreamResult;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -38,21 +39,16 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 
 public class AllShortestPathsDijkstraStreamProc extends BaseProc {
+    @Context
+    public GraphDataScience facade;
 
     @Procedure(name = "gds.allShortestPaths.dijkstra.stream", mode = READ)
     @Description(Dijkstra.DESCRIPTION_SOURCE_TARGET)
-    public Stream<StreamResult> stream(
+    public Stream<PathFindingStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var deltaStreamSpec = new AllShortestPathsDijkstraStreamSpec();
-        var pipelineSpec = new ProcedureExecutorSpec<Dijkstra, PathFindingResult, AllShortestPathsDijkstraStreamConfig>();
-
-        return new ProcedureExecutor<>(
-            deltaStreamSpec,
-            pipelineSpec,
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.pathFinding().singleSourceShortestPathDijkstraStream(graphName, configuration);
     }
 
     @Procedure(name = "gds.allShortestPaths.dijkstra.stream.estimate", mode = READ)

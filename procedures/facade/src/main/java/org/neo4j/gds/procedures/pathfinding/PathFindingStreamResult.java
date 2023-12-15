@@ -17,11 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths;
+package org.neo4j.gds.procedures.pathfinding;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.NodeLookup;
+import org.neo4j.gds.paths.PathResult;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.RelationshipType;
 
@@ -33,8 +34,7 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.paths.PathFactory.create;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@SuppressWarnings("unused")
-public final class StreamResult {
+public final class PathFindingStreamResult {
 
     public static final String COST_PROPERTY_NAME = "cost";
 
@@ -52,7 +52,7 @@ public final class StreamResult {
 
     public Path path;
 
-    private StreamResult(
+    PathFindingStreamResult(
         long index,
         long sourceNode,
         long targetNode,
@@ -79,7 +79,7 @@ public final class StreamResult {
             this.nodeLookup = nodeLookup;
         }
 
-        public StreamResult build(PathResult pathResult, boolean createCypherPath) {
+        public PathFindingStreamResult build(PathResult pathResult, boolean createCypherPath) {
             var nodeIds = pathResult.nodeIds();
             var costs = pathResult.costs();
             var pathIndex = pathResult.index();
@@ -104,7 +104,7 @@ public final class StreamResult {
 
             }
 
-            return new StreamResult(
+            return new PathFindingStreamResult(
                 pathIndex,
                 idMap.toOriginalNodeId(pathResult.sourceNode()),
                 idMap.toOriginalNodeId(pathResult.targetNode()),

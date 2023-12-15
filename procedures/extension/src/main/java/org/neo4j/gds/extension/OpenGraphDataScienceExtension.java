@@ -21,6 +21,7 @@ package org.neo4j.gds.extension;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
+import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.core.write.NativeExportBuildersProvider;
 import org.neo4j.gds.metrics.MetricsFacade;
@@ -35,7 +36,6 @@ import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.extension.ExtensionFactory;
 import org.neo4j.kernel.extension.context.ExtensionContext;
 import org.neo4j.kernel.lifecycle.Lifecycle;
-import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 import org.neo4j.logging.internal.LogService;
 
 import java.util.Optional;
@@ -58,7 +58,8 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
         var log = new LogAccessor().getLog(dependencies.logService(), getClass());
 
         var extensionBuilder = ExtensionBuilder.create(
-            log, dependencies.config(),
+            log,
+            dependencies.config(),
             dependencies.globalProcedures()
         );
 
@@ -67,19 +68,23 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
 
         // we have no extra checks to do in OpenGDS
         Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator = Optional.empty();
+        Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator = Optional.empty();
 
         // metrics are a no-op in OpenGDS
         var algorithmMetricsService = new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar());
         var projectionMetricsService = new ProjectionMetricsService(new PassthroughExecutionMetricRegistrar());
 
         var metricsFacade = MetricsFacade.PASSTHROUGH_METRICS_FACADE;
-        extensionBuilder
+
+        // build the extension and return any lifecycles we need managed
+        return extensionBuilder
             .withComponent(
                 GraphDataScience.class,
                 () -> extensionBuilder.gdsProvider(
                     exporterBuildersProviderService,
                     businessFacadeDecorator,
-                    metricsFacade
+                    metricsFacade,
+                    algorithmProcessingTemplateDecorator
                 )
             )
             .withComponent(
@@ -87,8 +92,6 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
                 () -> ctx -> metricsFacade
             )
             .registerExtension();
-
-        return new LifecycleAdapter();
     }
 
     public interface Dependencies {

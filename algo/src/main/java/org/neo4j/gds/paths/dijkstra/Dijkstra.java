@@ -32,6 +32,7 @@ import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
 import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.SourceTargetShortestPathBaseConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.function.LongToDoubleFunction;
@@ -71,24 +72,63 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
     private RelationshipFilter relationshipFilter = (sourceId, targetId, relationshipId) -> true;
 
     /**
-     * Configure Dijkstra to compute at most one source-target shortest path.
+     * @deprecated Use the other one, with termination flag
      */
+    @Deprecated
     public static Dijkstra sourceTarget(
         Graph graph,
         SourceTargetShortestPathBaseConfig config,
         Optional<HeuristicFunction> heuristicFunction,
         ProgressTracker progressTracker
     ) {
-        long sourceNode = graph.toMappedNodeId(config.sourceNode());
-        long targetNode = graph.toMappedNodeId(config.targetNode());
+        return sourceTarget(
+            graph,
+            config,
+            heuristicFunction,
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
+        );
+    }
+
+    /**
+     * Configure Dijkstra to compute at most one source-target shortest path.
+     */
+    public static Dijkstra sourceTarget(
+        Graph graph,
+        SourceTargetShortestPathBaseConfig configuration,
+        Optional<HeuristicFunction> heuristicFunction,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
+    ) {
+        long sourceNode = graph.toMappedNodeId(configuration.sourceNode());
+        long targetNode = graph.toMappedNodeId(configuration.targetNode());
 
         return new Dijkstra(
             graph,
             sourceNode,
             node -> node == targetNode ? EMIT_AND_STOP : CONTINUE,
-            config.trackRelationships(),
+            configuration.trackRelationships(),
             heuristicFunction,
-            progressTracker
+            progressTracker,
+            terminationFlag
+        );
+    }
+
+    /**
+     * @deprecated Use the other one with termination flag
+     */
+    public static Dijkstra singleSource(
+        Graph graph,
+        AllShortestPathsBaseConfig config,
+        Optional<HeuristicFunction> heuristicFunction,
+        ProgressTracker progressTracker
+    ) {
+        return singleSource(
+            graph,
+            config,
+            heuristicFunction,
+            progressTracker,
+            TerminationFlag.RUNNING_TRUE
         );
     }
 
@@ -99,25 +139,27 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
         Graph graph,
         AllShortestPathsBaseConfig config,
         Optional<HeuristicFunction> heuristicFunction,
-        ProgressTracker progressTracker
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         return new Dijkstra(graph,
             graph.toMappedNodeId(config.sourceNode()),
             node -> EMIT_AND_CONTINUE,
             config.trackRelationships(),
             heuristicFunction,
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
     }
 
-    private Dijkstra(
+    public Dijkstra(
         Graph graph,
         long sourceNode,
         TraversalPredicate traversalPredicate,
         boolean trackRelationships,
         Optional<HeuristicFunction> heuristicFunction,
-        ProgressTracker progressTracker
-    ) {
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag) {
         super(progressTracker);
         this.graph = graph;
         this.sourceNode = sourceNode;
@@ -131,6 +173,7 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
         this.relationships = trackRelationships ? new HugeLongLongMap() : null;
         this.visited = new BitSet();
         this.pathIndex = 0L;
+        this.terminationFlag = terminationFlag;
     }
 
     public Dijkstra withSourceNode(long sourceNode) {

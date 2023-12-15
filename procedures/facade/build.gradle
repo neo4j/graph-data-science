@@ -34,6 +34,7 @@ dependencies {
     implementation project(':ml-core')
     implementation project(':native-projection')
     implementation project(':neo4j-api')
+    implementation project(':path-finding-algorithms')
     implementation project(':proc-common')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')

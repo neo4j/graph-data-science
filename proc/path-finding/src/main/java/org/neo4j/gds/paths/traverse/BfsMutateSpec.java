@@ -25,14 +25,14 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.paths.MutateResult;
+import org.neo4j.gds.procedures.pathfinding.PathFindingMutateResult;
 
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 
 @GdsCallable(name = "gds.bfs.mutate", description = BfsStreamProc.DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
-public class BfsMutateSpec implements AlgorithmSpec<BFS, HugeLongArray, BfsMutateConfig, Stream<MutateResult>, BfsAlgorithmFactory<BfsMutateConfig>> {
+public class BfsMutateSpec implements AlgorithmSpec<BFS, HugeLongArray, BfsMutateConfig, Stream<PathFindingMutateResult>, BfsAlgorithmFactory<BfsMutateConfig>> {
     @Override
     public String name() {
         return "gds.bfs.mutate";
@@ -49,7 +49,7 @@ public class BfsMutateSpec implements AlgorithmSpec<BFS, HugeLongArray, BfsMutat
     }
 
     @Override
-    public ComputationResultConsumer<BFS, HugeLongArray, BfsMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<BFS, HugeLongArray, BfsMutateConfig, Stream<PathFindingMutateResult>> computationResultConsumer() {
         return new BfsMutateComputationResultConsumer();
     }
 }

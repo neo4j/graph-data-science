@@ -19,41 +19,24 @@
  */
 package org.neo4j.gds.core.utils.mem;
 
-import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.kernel.extension.ExtensionFactory;
-import org.neo4j.kernel.extension.context.ExtensionContext;
-import org.neo4j.kernel.lifecycle.Lifecycle;
-import org.neo4j.logging.internal.LogService;
-
-import java.lang.management.ManagementFactory;
 import java.util.concurrent.atomic.AtomicLong;
 
-@ServiceProvider
-public final class GcListenerExtension extends ExtensionFactory<GcListenerExtension.Dependencies> {
+/**
+ * @deprecated Migrate to using {@link org.neo4j.gds.mem.MemoryGauge}
+ */
+@Deprecated
+public final class GcListenerExtension {
     // Initialize with max available memory. Everything that is used at this point in time
     //  _could_ be garbage and we want to err on the side of seeing more free heap.
     // It also has the effect that we allow all operations that theoretically fit into memory
     //  if the extension does never load.
-    private static final AtomicLong freeMemoryAfterLastGc = new AtomicLong(Runtime.getRuntime().maxMemory());
-
-    public GcListenerExtension() {
-        super("gds.heap-control.gc-listener");
-    }
+    private static AtomicLong freeMemoryAfterLastGc = new AtomicLong(Runtime.getRuntime().maxMemory());
 
     public static long freeMemory() {
         return freeMemoryAfterLastGc.get();
     }
 
-    @Override
-    public Lifecycle newInstance(ExtensionContext context, Dependencies dependencies) {
-        return new GcListenerInstaller(
-            dependencies.logService(),
-            ManagementFactory.getGarbageCollectorMXBeans(),
-            freeMemoryAfterLastGc
-        );
-    }
-
-    interface Dependencies {
-        LogService logService();
+    public static void setMemoryGauge(AtomicLong freeMemoryAfterLastGc) {
+        GcListenerExtension.freeMemoryAfterLastGc = freeMemoryAfterLastGc;
     }
 }

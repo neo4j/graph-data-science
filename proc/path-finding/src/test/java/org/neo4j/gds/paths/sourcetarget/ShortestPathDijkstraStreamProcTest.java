@@ -31,7 +31,7 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.paths.PathFactory;
-import org.neo4j.gds.paths.StreamResult;
+import org.neo4j.gds.procedures.pathfinding.PathFindingStreamResult;
 import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.test.TestDatabaseManagementServiceBuilder;
 import org.neo4j.test.extension.ExtensionCallback;
@@ -125,7 +125,7 @@ class ShortestPathDijkstraStreamProcTest extends BaseProcTest {
                 tx::getNodeById,
                 ids0,
                 costs0,
-                RelationshipType.withName(formatWithLocale("PATH_0")), StreamResult.COST_PROPERTY_NAME
+                RelationshipType.withName(formatWithLocale("PATH_0")), PathFindingStreamResult.COST_PROPERTY_NAME
             );
             var expected = Map.of(
                 "index", 0L,

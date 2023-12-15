@@ -20,7 +20,6 @@
 package org.neo4j.gds.catalog;
 
 import org.neo4j.gds.applications.graphstorecatalog.NodePropertiesWriteResult;
-import org.neo4j.gds.executor.Preconditions;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -60,8 +59,6 @@ public class GraphWriteNodePropertiesProc {
         @Name(value = "nodeLabels", defaultValue = "['*']") Object nodeLabels,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        Preconditions.check();
-
         facade.deprecatedProcedures().called("gds.graph.writeNodeProperties");
         facade.log().warn("Procedure `gds.graph.writeNodeProperties` has been deprecated, please use `gds.graph.nodeProperties.write`.");
 

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.utils.mem;
 
-import org.neo4j.logging.Log;
+import org.neo4j.gds.logging.Log;
 
 import javax.management.Notification;
 import javax.management.NotificationFilter;

@@ -20,7 +20,7 @@
 package org.neo4j.gds.core.utils.mem;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.logging.NullLog;
+import org.neo4j.gds.logging.Log;
 
 import javax.management.Notification;
 import javax.management.NotificationFilter;
@@ -50,7 +50,7 @@ class GcListenerTest {
     @Test
     void testFilter() {
         NotificationFilter listener = new GcListener(
-            NullLog.getInstance(),
+            Log.noOpLog(),
             new AtomicLong(-1),
             new String[0],
             "some-name-42",
@@ -69,7 +69,7 @@ class GcListenerTest {
 
         AtomicLong actualFree = new AtomicLong(-1);
         NotificationListener listener = new GcListener(
-            NullLog.getInstance(),
+            Log.noOpLog(),
             actualFree,
             new String[]{"global"},
             "42",
@@ -95,7 +95,7 @@ class GcListenerTest {
     void testCombineMultipleUsages() throws OpenDataException {
         AtomicLong actualFree = new AtomicLong(-1);
         NotificationListener listener = new GcListener(
-            NullLog.getInstance(),
+            Log.noOpLog(),
             actualFree,
             new String[]{
                 "usedWithMax",

@@ -236,6 +236,7 @@ class K1ColoringStreamProcTest extends BaseProcTest {
                 ),
                 null,
                 null,
+                null,
                 DeprecatedProceduresMetricService.PASSTHROUGH
             );
             var someJobId = new JobId();

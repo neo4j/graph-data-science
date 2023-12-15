@@ -519,6 +519,7 @@ class WccWriteProcTest extends BaseProcTest {
                         ),
                         null,
                         null,
+                        null,
                         DeprecatedProceduresMetricService.PASSTHROUGH
                     );
 

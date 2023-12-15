@@ -17,18 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths;
+package org.neo4j.gds.procedures.pathfinding;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.StandardMutateResult;
 
 import java.util.Map;
 
-@SuppressWarnings("unused")
-public final class MutateResult extends StandardMutateResult {
+public final class PathFindingMutateResult extends StandardMutateResult {
     public final long relationshipsWritten;
 
-    private MutateResult(
+    PathFindingMutateResult(
         long preProcessingMillis,
         long computeMillis,
         long mutateMillis,
@@ -40,11 +39,10 @@ public final class MutateResult extends StandardMutateResult {
         this.relationshipsWritten = relationshipsWritten;
     }
 
-    public static class Builder extends AbstractResultBuilder<MutateResult> {
-
+    public static class Builder extends AbstractResultBuilder<PathFindingMutateResult> {
         @Override
-        public MutateResult build() {
-            return new MutateResult(
+        public PathFindingMutateResult build() {
+            return new PathFindingMutateResult(
                 preProcessingMillis,
                 computeMillis,
                 0L,

@@ -311,6 +311,7 @@ class WccStatsProcTest extends BaseProcTest {
             ),
             null,
             null,
+            null,
             DeprecatedProceduresMetricService.PASSTHROUGH
         );
     }

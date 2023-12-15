@@ -22,7 +22,7 @@ package org.neo4j.gds.paths.sourcetarget;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.paths.MutateResult;
+import org.neo4j.gds.procedures.pathfinding.PathFindingMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -37,7 +37,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class ShortestPathYensMutateProc extends BaseProc {
     @Procedure(name = "gds.shortestPath.yens.mutate", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<MutateResult> mutate(
+    public Stream<PathFindingMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

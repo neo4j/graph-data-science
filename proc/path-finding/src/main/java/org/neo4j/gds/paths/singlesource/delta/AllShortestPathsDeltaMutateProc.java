@@ -23,7 +23,7 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.executor.ProcedureExecutorSpec;
-import org.neo4j.gds.paths.MutateResult;
+import org.neo4j.gds.procedures.pathfinding.PathFindingMutateResult;
 import org.neo4j.gds.paths.delta.DeltaStepping;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaMutateConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
@@ -41,7 +41,7 @@ public class AllShortestPathsDeltaMutateProc extends BaseProc {
 
     @Procedure(name = "gds.allShortestPaths.delta.mutate", mode = READ)
     @Description(DeltaStepping.DESCRIPTION)
-    public Stream<MutateResult> stream(
+    public Stream<PathFindingMutateResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

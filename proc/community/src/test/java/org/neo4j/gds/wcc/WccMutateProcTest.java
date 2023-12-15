@@ -390,6 +390,7 @@ class WccMutateProcTest extends BaseProcTest {
                 ),
                 null,
                 null,
+                null,
                 DeprecatedProceduresMetricService.PASSTHROUGH
             );
 
@@ -528,6 +529,7 @@ class WccMutateProcTest extends BaseProcTest {
                 ),
                 null,
                 null,
+                null,
                 DeprecatedProceduresMetricService.PASSTHROUGH
             );
                 ProcedureMethodHelper.mutateMethods(procedure)
@@ -611,6 +613,7 @@ class WccMutateProcTest extends BaseProcTest {
                     null,
                     null
                 ),
+                null,
                 null,
                 null,
                 DeprecatedProceduresMetricService.PASSTHROUGH
@@ -704,6 +707,7 @@ class WccMutateProcTest extends BaseProcTest {
                             null,
                             null
                         ),
+                        null,
                         null,
                         null,
                         DeprecatedProceduresMetricService.PASSTHROUGH
