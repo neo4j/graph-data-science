@@ -20,7 +20,6 @@
 package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -36,18 +35,18 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class Node2VecWriteProc extends BaseProc {
+public class Node2VecWriteProc {
 
     @Context
     public GraphDataScience facade;
-    
+
     @Procedure(value = "gds.node2vec.write", mode = WRITE)
     @Description(Node2VecCompanion.DESCRIPTION)
     public Stream<Node2VecWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.nodeEmbeddingsProcedureFacade().node2VecWrite(graphName, configuration);
+        return facade.nodeEmbeddings().node2VecWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.node2vec.write.estimate", mode = READ)
@@ -56,11 +55,10 @@ public class Node2VecWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new Node2VecWriteSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.nodeEmbeddings().node2VecWriteEstimate(
+            graphNameOrConfiguration,
+            algoConfiguration
+        );
     }
 
     @Procedure(value = "gds.beta.node2vec.write", mode = WRITE, deprecatedBy = "gds.node2vec.write")
@@ -71,11 +69,10 @@ public class Node2VecWriteProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
+        facade
             .deprecatedProcedures().called("gds.beta.node2vec.write");
 
-        executionContext()
+        facade
             .log()
             .warn(
                 "Procedure `gds.beta.node2vec.write` has been deprecated, please use `gds.node2vec.write`.");
@@ -92,12 +89,9 @@ public class Node2VecWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.node2vec.write.estimate");
+        facade.deprecatedProcedures().called("gds.beta.node2vec.write.estimate");
 
-        executionContext()
-            .log()
+        facade.log()
             .warn(
                 "Procedure `gds.beta.node2vec.write.estimate` has been deprecated, please use `gds.node2vec.write.estimate`.");
         return estimate(graphNameOrConfiguration, algoConfiguration);

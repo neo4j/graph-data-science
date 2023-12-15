@@ -74,7 +74,7 @@ public class GraphDataScience {
         return similarityProcedureFacade;
     }
 
-    public NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade() {
+    public NodeEmbeddingsProcedureFacade nodeEmbeddings() {
         return nodeEmbeddingsProcedureFacade;
     }
 

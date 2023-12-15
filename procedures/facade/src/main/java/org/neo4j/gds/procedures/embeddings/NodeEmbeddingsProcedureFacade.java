@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.embeddings;
 
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmStreamBusinessFacade;
+import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsMutateBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
@@ -30,6 +31,7 @@ import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecMutateResult;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecStreamResult;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecWriteResult;
+import org.neo4j.gds.results.MemoryEstimateResult;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -38,6 +40,7 @@ public class NodeEmbeddingsProcedureFacade {
     // services
     private final ConfigurationCreator configurationCreator;
     private final ProcedureReturnColumns procedureReturnColumns;
+    private final NodeEmbeddingsAlgorithmsEstimateBusinessFacade estimateBusinessFacade;
     private final NodeEmbeddingsAlgorithmsMutateBusinessFacade mutateBusinessFacade;
     private final NodeEmbeddingsAlgorithmStreamBusinessFacade streamBusinessFacade;
     private final NodeEmbeddingsAlgorithmsWriteBusinessFacade writeBusinessFacade;
@@ -47,6 +50,7 @@ public class NodeEmbeddingsProcedureFacade {
     public NodeEmbeddingsProcedureFacade(
         ConfigurationCreator configurationCreator,
         ProcedureReturnColumns procedureReturnColumns,
+        NodeEmbeddingsAlgorithmsEstimateBusinessFacade estimateBusinessFacade,
         NodeEmbeddingsAlgorithmsMutateBusinessFacade mutateBusinessFacade,
         NodeEmbeddingsAlgorithmStreamBusinessFacade streamBusinessFacade,
         NodeEmbeddingsAlgorithmsWriteBusinessFacade writeBusinessFacade
@@ -56,6 +60,7 @@ public class NodeEmbeddingsProcedureFacade {
         this.streamBusinessFacade = streamBusinessFacade;
         this.mutateBusinessFacade = mutateBusinessFacade;
         this.writeBusinessFacade = writeBusinessFacade;
+        this.estimateBusinessFacade = estimateBusinessFacade;
     }
 
     public Stream<Node2VecStreamResult> node2VecStream(
@@ -100,6 +105,31 @@ public class NodeEmbeddingsProcedureFacade {
         return Stream.of(Node2VecComputationalResultTransformer.toWriteResult(computationResult));
     }
 
+    public Stream<MemoryEstimateResult> node2VecStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
+        var config = configurationCreator.createConfiguration(configuration, Node2VecStreamConfig::of);
 
+        return Stream.of(estimateBusinessFacade.node2Vec(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> node2VecMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
+        var config = configurationCreator.createConfiguration(configuration, Node2VecMutateConfig::of);
+
+        return Stream.of(estimateBusinessFacade.node2Vec(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> node2VecWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
+        var config = configurationCreator.createConfiguration(configuration, Node2VecWriteConfig::of);
+
+        return Stream.of(estimateBusinessFacade.node2Vec(graphNameOrConfiguration, config));
+    }
 
 }
