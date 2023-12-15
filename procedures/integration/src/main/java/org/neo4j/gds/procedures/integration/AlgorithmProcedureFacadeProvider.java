@@ -34,6 +34,7 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmStreamBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsFacade;
+import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsMutateBusinessFacade;
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
@@ -179,12 +180,19 @@ class AlgorithmProcedureFacadeProvider {
 
         // mode-specific facades
 
+        var mutateBusinessFacade = new NodeEmbeddingsAlgorithmsMutateBusinessFacade(
+            nodeEmbeddingsAlgorithmsFacade,
+            mutateNodePropertyService
+        );
+
         var streamBusinessFacade = new NodeEmbeddingsAlgorithmStreamBusinessFacade(nodeEmbeddingsAlgorithmsFacade);
+
 
         // procedure facade
         return new NodeEmbeddingsProcedureFacade(
             configurationCreator,
             returnColumns,
+            mutateBusinessFacade,
             streamBusinessFacade
         );
 

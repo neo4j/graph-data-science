@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.node2vec;
+package org.neo4j.gds.procedures.embeddings.node2vec;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.StandardMutateResult;
@@ -25,13 +25,13 @@ import org.neo4j.gds.results.StandardMutateResult;
 import java.util.List;
 import java.util.Map;
 
-public final class MutateResult extends StandardMutateResult {
+public final class Node2VecMutateResult extends StandardMutateResult {
 
     public final long nodeCount;
     public final long nodePropertiesWritten;
     public final List<Double> lossPerIteration;
 
-    private MutateResult(
+    public Node2VecMutateResult(
         long nodeCount,
         long nodePropertiesWritten,
         long preProcessingMillis,
@@ -46,13 +46,13 @@ public final class MutateResult extends StandardMutateResult {
         this.lossPerIteration = lossPerIteration;
     }
 
-    static class Builder extends AbstractResultBuilder<MutateResult> {
+    public static class Builder extends AbstractResultBuilder<Node2VecMutateResult> {
 
         private List<Double> lossPerIteration;
 
         @Override
-        public MutateResult build() {
-            return new MutateResult(
+        public Node2VecMutateResult build() {
+            return new Node2VecMutateResult(
                 nodeCount,
                 nodePropertiesWritten,
                 preProcessingMillis,
@@ -63,7 +63,7 @@ public final class MutateResult extends StandardMutateResult {
             );
         }
 
-        Builder withLossPerIteration(List<Double> lossPerIteration) {
+        public Builder withLossPerIteration(List<Double> lossPerIteration) {
             this.lossPerIteration = lossPerIteration;
             return this;
         }

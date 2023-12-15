@@ -20,9 +20,12 @@
 package org.neo4j.gds.procedures.embeddings;
 
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmStreamBusinessFacade;
+import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsMutateBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
+import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecMutateResult;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecStreamResult;
 
 import java.util.Map;
@@ -32,6 +35,7 @@ public class NodeEmbeddingsProcedureFacade {
     // services
     private final ConfigurationCreator configurationCreator;
     private final ProcedureReturnColumns procedureReturnColumns;
+    private final NodeEmbeddingsAlgorithmsMutateBusinessFacade mutateBusinessFacade;
     private final NodeEmbeddingsAlgorithmStreamBusinessFacade streamBusinessFacade;
 
     // business logic
@@ -39,11 +43,13 @@ public class NodeEmbeddingsProcedureFacade {
     public NodeEmbeddingsProcedureFacade(
         ConfigurationCreator configurationCreator,
         ProcedureReturnColumns procedureReturnColumns,
+        NodeEmbeddingsAlgorithmsMutateBusinessFacade mutateBusinessFacade,
         NodeEmbeddingsAlgorithmStreamBusinessFacade streamBusinessFacade
     ) {
         this.configurationCreator = configurationCreator;
         this.procedureReturnColumns = procedureReturnColumns;
         this.streamBusinessFacade = streamBusinessFacade;
+        this.mutateBusinessFacade = mutateBusinessFacade;
     }
 
     public Stream<Node2VecStreamResult> node2VecStream(
@@ -59,6 +65,21 @@ public class NodeEmbeddingsProcedureFacade {
 
         return Node2VecComputationalResultTransformer.toStreamResult(computationResult);
     }
+
+    public Stream<Node2VecMutateResult> node2VecMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var mutateConfig = configurationCreator.createConfiguration(configuration, Node2VecMutateConfig::of);
+
+        var computationResult = mutateBusinessFacade.node2Vec(
+            graphName,
+            mutateConfig
+        );
+
+        return Stream.of(Node2VecComputationalResultTransformer.toMutateResult(computationResult));
+    }
+
 
 
 }
