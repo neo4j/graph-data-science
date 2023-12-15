@@ -95,8 +95,6 @@ import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.KernelTransactionHandle;
 import org.neo4j.kernel.api.procedure.CallableProcedure;
 import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
-import org.neo4j.kernel.database.DatabaseReferenceImpl;
-import org.neo4j.kernel.database.DatabaseReferenceRepository;
 import org.neo4j.kernel.database.NormalizedDatabaseName;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
@@ -744,15 +742,6 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
         MapValue queryParameters
     ) {
         return contextFactory.newContext(tx, queryText, queryParameters, QueryExecutionConfiguration.DEFAULT_CONFIG);
-    }
-
-    @Override
-    public boolean isCompositeDatabase(GraphDatabaseService databaseService) {
-        var databaseId = GraphDatabaseApiProxy.databaseId(databaseService);
-        var repo = GraphDatabaseApiProxy.resolveDependency(databaseService, DatabaseReferenceRepository.class);
-        return repo.getCompositeDatabaseReferences().stream()
-            .map(DatabaseReferenceImpl.Internal::databaseId)
-            .anyMatch(databaseId::equals);
     }
 
     public abstract CursorContextFactory cursorContextFactory(Optional<PageCacheTracer> pageCacheTracer);
