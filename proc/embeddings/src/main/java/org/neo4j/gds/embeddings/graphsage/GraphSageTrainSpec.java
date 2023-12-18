@@ -28,6 +28,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageTrainResult;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.stream.Stream;
@@ -40,7 +41,7 @@ public class GraphSageTrainSpec implements AlgorithmSpec<
     GraphSageTrain,
     Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>,
     GraphSageTrainConfig,
-    Stream<TrainResult>,
+    Stream<GraphSageTrainResult>,
     GraphSageTrainAlgorithmFactory> {
     @Override
     public String name() {
@@ -58,7 +59,7 @@ public class GraphSageTrainSpec implements AlgorithmSpec<
     }
 
     @Override
-    public ComputationResultConsumer<GraphSageTrain, Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>, GraphSageTrainConfig, Stream<TrainResult>> computationResultConsumer() {
+    public ComputationResultConsumer<GraphSageTrain, Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>, GraphSageTrainConfig, Stream<GraphSageTrainResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             return computationResult.result().map(model -> {
                 var modelCatalog = executionContext.modelCatalog();
@@ -78,7 +79,7 @@ public class GraphSageTrainSpec implements AlgorithmSpec<
                         throw e;
                     }
                 }
-                return Stream.of(new TrainResult(model, computationResult.computeMillis()
+                return Stream.of(new GraphSageTrainResult(model, computationResult.computeMillis()
                 ));
             }).orElseGet(Stream::empty);
         };

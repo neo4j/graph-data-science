@@ -36,7 +36,7 @@ import org.neo4j.gds.mem.MemoryGauge;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
-import org.neo4j.gds.modelcatalogservices.ModelCatalogService;
+import org.neo4j.gds.modelcatalogservices.ModelCatalogServiceProvider;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.KernelTransactionAccessor;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
@@ -249,7 +249,7 @@ public final class ExtensionBuilder {
         Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator,
         MetricsFacade metricsFacade,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
-        ModelCatalogService modelCatalogService
+        ModelCatalogServiceProvider modelCatalogServiceProvider
     ) {
         var catalogFacadeProvider = createCatalogFacadeProvider(
             exporterBuildersProviderService,
@@ -261,7 +261,7 @@ public final class ExtensionBuilder {
             metricsFacade.algorithmMetrics(),
             exporterBuildersProviderService,
             algorithmProcessingTemplateDecorator,
-            modelCatalogService
+            modelCatalogServiceProvider
         );
 
         return new GraphDataScienceProvider(
@@ -299,8 +299,8 @@ public final class ExtensionBuilder {
         AlgorithmMetricsService algorithmMetricsService,
         ExporterBuildersProviderService exporterBuildersProviderService,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
-        ModelCatalogService modelCatalogService
-    ) {
+        ModelCatalogServiceProvider modelCatalogServiceProvider
+        ) {
         return new AlgorithmFacadeProviderFactory(
             log,
             configurationParser,
@@ -312,7 +312,7 @@ public final class ExtensionBuilder {
             databaseIdAccessor,
             exporterBuildersProviderService,
             kernelTransactionAccessor,
-            modelCatalogService,
+            modelCatalogServiceProvider,
             taskRegistryFactoryService,
             terminationFlagService,
             userAccessor,

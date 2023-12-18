@@ -20,10 +20,9 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageTrainResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -39,18 +38,15 @@ import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPH_SAGE_D
 public class GraphSageTrainProc extends BaseProc {
 
     @Context
-    public ModelCatalog modelCatalog;
+    public GraphDataScience facade;
 
     @Description(GRAPH_SAGE_DESCRIPTION)
     @Procedure(name = "gds.beta.graphSage.train", mode = Mode.READ)
-    public Stream<TrainResult> train(
+    public Stream<GraphSageTrainResult> train(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new GraphSageTrainSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.nodeEmbeddings().graphSageTrain(graphName, configuration);
     }
 
     @Description(ESTIMATE_DESCRIPTION)
@@ -65,9 +61,5 @@ public class GraphSageTrainProc extends BaseProc {
             transactionContext()
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
-
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withModelCatalog(modelCatalog);
-    }
+    
 }

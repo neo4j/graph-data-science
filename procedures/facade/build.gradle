@@ -31,6 +31,7 @@ dependencies {
     implementation project(':legacy-cypher-projection')
     implementation project(':logging')
     implementation project(':memory-usage')
+    implementation project(':ml-algo')
     implementation project(':ml-core')
     implementation project(':native-projection')
     implementation project(':neo4j-api')

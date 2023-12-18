@@ -29,6 +29,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecAlgorithmFactory;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
@@ -92,5 +93,17 @@ public class NodeEmbeddingsAlgorithmsFacade {
         );
     }
 
+    AlgorithmComputationResult<Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>> graphSageTrain(
+        String graphName,
+        GraphSageTrainConfig config
+    ) {
+        return algorithmRunner.run(
+            graphName,
+            config,
+            config.relationshipWeightProperty(),
+            new GraphSageTrainAlgorithmFactory(),
+            Optional.empty()
+        );
+    }
 
 }

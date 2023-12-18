@@ -36,6 +36,7 @@ import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmStreamBusiness
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsMutateBusinessFacade;
+import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsTrainBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
@@ -103,13 +104,13 @@ class AlgorithmProcedureFacadeProvider {
         WriteRelationshipService writeRelationshipService,
         AlgorithmRunner algorithmRunner,
         AlgorithmEstimator algorithmEstimator,
-        ModelCatalogService modelCatalogService,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
         RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
-        UserLogRegistryFactory userLogRegistryFactory
+        UserLogRegistryFactory userLogRegistryFactory,
+        ModelCatalogService modelCatalogService
     ) {
         this.log = log;
 
@@ -262,6 +263,12 @@ class AlgorithmProcedureFacadeProvider {
 
         var streamBusinessFacade = new NodeEmbeddingsAlgorithmStreamBusinessFacade(nodeEmbeddingsAlgorithmsFacade);
 
+        var trainBusinessFacade = new NodeEmbeddingsAlgorithmsTrainBusinessFacade(
+            nodeEmbeddingsAlgorithmsFacade,
+            modelCatalogService
+        );
+
+
         var writeBusinessFacade = new NodeEmbeddingsAlgorithmsWriteBusinessFacade(
             nodeEmbeddingsAlgorithmsFacade,
             writeNodePropertyService
@@ -276,6 +283,7 @@ class AlgorithmProcedureFacadeProvider {
             estimateBusinessFacade,
             mutateBusinessFacade,
             streamBusinessFacade,
+            trainBusinessFacade,
             writeBusinessFacade
         );
     }

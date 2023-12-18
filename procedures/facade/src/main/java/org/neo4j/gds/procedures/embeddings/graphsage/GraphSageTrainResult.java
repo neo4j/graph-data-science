@@ -17,9 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage;
+package org.neo4j.gds.procedures.embeddings.graphsage;
 
 import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
+import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 
 import java.util.HashMap;
@@ -28,13 +30,13 @@ import java.util.Map;
 import static org.neo4j.gds.model.ModelConfig.MODEL_NAME_KEY;
 import static org.neo4j.gds.model.ModelConfig.MODEL_TYPE_KEY;
 
-public class TrainResult {
+public class GraphSageTrainResult {
 
     public final Map<String, Object> modelInfo;
     public final Map<String, Object> configuration;
     public final long trainMillis;
 
-    TrainResult(
+    public GraphSageTrainResult(
         Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> trainedModel,
         long trainMillis
     ) {

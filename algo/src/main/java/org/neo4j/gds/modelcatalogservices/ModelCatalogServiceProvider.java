@@ -19,43 +19,21 @@
  */
 package org.neo4j.gds.modelcatalogservices;
 
-import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.graphdb.GraphDatabaseService;
 
-public class ModelCatalogService {
+public class ModelCatalogServiceProvider {
 
     private final ModelCatalog modelCatalog;
-    private final GraphDatabaseService graphDatabaseService;
-    private final Log log;
 
-    public ModelCatalogService(ModelCatalog modelCatalog, GraphDatabaseService graphDatabaseService, Log log) {
-        this.graphDatabaseService = graphDatabaseService;
+    public ModelCatalogServiceProvider(ModelCatalog modelCatalog) {
         this.modelCatalog = modelCatalog;
-        this.log = log;
     }
 
-    public void set(Model model) {
-        modelCatalog.set(model);
+    public ModelCatalogService createService(GraphDatabaseService graphDatabaseService, Log log) {
 
-    }
-
-    public ModelCatalog get() {
-        return modelCatalog;
-    }
-
-    public void storeModelToDisk(Model model) {
-        try {
-            // FIXME: This works but is not what we want to do!
-
-            modelCatalog.checkLicenseBeforeStoreModel(graphDatabaseService, "Store a model");
-            var modelDir = modelCatalog.getModelDirectory(graphDatabaseService);
-            modelCatalog.store(model.creator(), model.name(), modelDir);
-        } catch (Exception e) {
-            log.info("Failed to store model to disk after training.", e.getMessage());
-            throw e;
-        }
+        return new ModelCatalogService(modelCatalog,graphDatabaseService, log);
     }
 
 }

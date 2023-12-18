@@ -41,7 +41,7 @@ import org.neo4j.gds.mem.MemoryGauge;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
-import org.neo4j.gds.modelcatalogservices.ModelCatalogService;
+import org.neo4j.gds.modelcatalogservices.ModelCatalogServiceProvider;
 import org.neo4j.gds.procedures.KernelTransactionAccessor;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.TerminationFlagService;
@@ -77,9 +77,8 @@ class AlgorithmFacadeProviderFactory {
     private final TerminationFlagService terminationFlagService;
     private final UserAccessor userAccessor;
     private final UserLogServices userLogServices;
-    private final ModelCatalogService modelCatalogService;
+    private final ModelCatalogServiceProvider modelCatalogServiceProvider;
     private final Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator;
-
     //algorithm facade parameters
 
     AlgorithmFacadeProviderFactory(
@@ -93,7 +92,7 @@ class AlgorithmFacadeProviderFactory {
         DatabaseIdAccessor databaseIdAccessor,
         ExporterBuildersProviderService exporterBuildersProviderService,
         KernelTransactionAccessor kernelTransactionAccessor,
-        ModelCatalogService modelCatalogService,
+        ModelCatalogServiceProvider modelCatalogServiceProvider,
         TaskRegistryFactoryService taskRegistryFactoryService,
         TerminationFlagService terminationFlagService,
         UserAccessor userAccessor,
@@ -116,7 +115,7 @@ class AlgorithmFacadeProviderFactory {
         this.userLogServices = userLogServices;
         this.userAccessor = userAccessor;
         this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
-        this.modelCatalogService = modelCatalogService;
+        this.modelCatalogServiceProvider = modelCatalogServiceProvider;
     }
 
 
@@ -238,8 +237,7 @@ class AlgorithmFacadeProviderFactory {
             taskRegistryFactory,
             terminationFlag,
             userLogRegistryFactory,
-            algorithmEstimator,
-            modelCatalogService
+            modelCatalogServiceProvider.createService(graphDatabaseService, log)
         );
     }
 }

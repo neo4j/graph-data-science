@@ -20,9 +20,15 @@
 package org.neo4j.gds.procedures.embeddings;
 
 import org.neo4j.gds.algorithms.StreamComputationResult;
+import org.neo4j.gds.algorithms.TrainResult;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
+import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageStreamResult;
+import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageTrainResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -44,4 +50,10 @@ class GraphSageComputationalResultTransformer {
         }).orElseGet(Stream::empty);
     }
 
+    static GraphSageTrainResult toTrainResult(
+        TrainResult<Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>> trainResult
+    ) {
+
+        return new GraphSageTrainResult(trainResult.algorithmSpecificFields(), trainResult.trainMillis());
+    }
 }

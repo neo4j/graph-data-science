@@ -22,14 +22,17 @@ package org.neo4j.gds.procedures.embeddings;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmStreamBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsMutateBusinessFacade;
+import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsTrainBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageStreamResult;
+import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageTrainResult;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecMutateResult;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecStreamResult;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecWriteResult;
@@ -45,6 +48,8 @@ public class NodeEmbeddingsProcedureFacade {
     private final NodeEmbeddingsAlgorithmsEstimateBusinessFacade estimateBusinessFacade;
     private final NodeEmbeddingsAlgorithmsMutateBusinessFacade mutateBusinessFacade;
     private final NodeEmbeddingsAlgorithmStreamBusinessFacade streamBusinessFacade;
+    private final NodeEmbeddingsAlgorithmsTrainBusinessFacade trainBusinessFacade;
+
     private final NodeEmbeddingsAlgorithmsWriteBusinessFacade writeBusinessFacade;
 
     // business logic
@@ -55,12 +60,14 @@ public class NodeEmbeddingsProcedureFacade {
         NodeEmbeddingsAlgorithmsEstimateBusinessFacade estimateBusinessFacade,
         NodeEmbeddingsAlgorithmsMutateBusinessFacade mutateBusinessFacade,
         NodeEmbeddingsAlgorithmStreamBusinessFacade streamBusinessFacade,
+        NodeEmbeddingsAlgorithmsTrainBusinessFacade trainBusinessFacade,
         NodeEmbeddingsAlgorithmsWriteBusinessFacade writeBusinessFacade
     ) {
         this.configurationCreator = configurationCreator;
         this.procedureReturnColumns = procedureReturnColumns;
         this.streamBusinessFacade = streamBusinessFacade;
         this.mutateBusinessFacade = mutateBusinessFacade;
+        this.trainBusinessFacade = trainBusinessFacade;
         this.writeBusinessFacade = writeBusinessFacade;
         this.estimateBusinessFacade = estimateBusinessFacade;
     }
@@ -146,6 +153,20 @@ public class NodeEmbeddingsProcedureFacade {
         );
 
         return GraphSageComputationalResultTransformer.toStreamResult(computationResult);
+    }
+
+    public Stream<GraphSageTrainResult> graphSageTrain(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var trainConfig = configurationCreator.createConfigurationForStream(configuration, GraphSageTrainConfig::of);
+
+        var computationResult = trainBusinessFacade.graphSage(
+            graphName,
+            trainConfig
+        );
+
+        return Stream.of(GraphSageComputationalResultTransformer.toTrainResult(computationResult));
     }
 
 }
