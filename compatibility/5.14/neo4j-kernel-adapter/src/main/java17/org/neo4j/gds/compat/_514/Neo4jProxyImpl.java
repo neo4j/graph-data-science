@@ -27,6 +27,7 @@ import org.neo4j.gds.compat.GlobalProcedureRegistry;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat._5x.CommonNeo4jProxyImpl;
 import org.neo4j.gds.compat._5x.CompatAccessModeImpl;
+import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.PartitionedScan;
 import org.neo4j.internal.kernel.api.TokenSet;
@@ -44,6 +45,8 @@ import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
+import org.neo4j.kernel.database.DatabaseReferenceImpl;
+import org.neo4j.kernel.database.DatabaseReferenceRepository;
 import org.neo4j.kernel.impl.store.RecordStore;
 import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 import org.neo4j.procedure.Mode;
@@ -202,5 +205,14 @@ public final class Neo4jProxyImpl extends CommonNeo4jProxyImpl {
     public String neo4jArrowServerAddressHeader() {
         // TODO: replace this with a dependency to neo4j once we moved the corresponding piece to a public module
         return "ArrowPluginAddress";
+    }
+
+    @Override
+    public boolean isCompositeDatabase(GraphDatabaseService databaseService) {
+        var databaseId = GraphDatabaseApiProxy.databaseId(databaseService);
+        var repo = GraphDatabaseApiProxy.resolveDependency(databaseService, DatabaseReferenceRepository.class);
+        return repo.getCompositeDatabaseReferences().stream()
+            .map(DatabaseReferenceImpl.Internal::databaseId)
+            .anyMatch(databaseId::equals);
     }
 }

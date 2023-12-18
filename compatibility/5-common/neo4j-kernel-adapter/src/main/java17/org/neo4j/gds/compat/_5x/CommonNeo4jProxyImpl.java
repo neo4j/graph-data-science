@@ -29,7 +29,6 @@ import org.neo4j.configuration.connectors.ConnectorPortRegister;
 import org.neo4j.configuration.connectors.ConnectorType;
 import org.neo4j.configuration.helpers.DatabaseNameValidator;
 import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.fabric.FabricDatabaseManager;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.gds.compat.CompatCallableProcedure;
 import org.neo4j.gds.compat.CompatExecutionMonitor;
@@ -743,12 +742,6 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
         MapValue queryParameters
     ) {
         return contextFactory.newContext(tx, queryText, queryParameters, QueryExecutionConfiguration.DEFAULT_CONFIG);
-    }
-
-    @Override
-    public boolean isCompositeDatabase(GraphDatabaseService databaseService) {
-        var databaseManager = GraphDatabaseApiProxy.resolveDependency(databaseService, FabricDatabaseManager.class);
-        return databaseManager.isFabricDatabase(GraphDatabaseApiProxy.databaseId(databaseService));
     }
 
     public abstract CursorContextFactory cursorContextFactory(Optional<PageCacheTracer> pageCacheTracer);
