@@ -19,12 +19,14 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
+import org.neo4j.gds.algorithms.embeddings.EmbeddingNodePropertyValues;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecStreamResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -38,7 +40,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
     description = Node2VecCompanion.DESCRIPTION,
     executionMode = STREAM
 )
-public class Node2VecStreamSpec  implements AlgorithmSpec<Node2Vec, Node2VecModel.Result, Node2VecStreamConfig, Stream<StreamResult>, Node2VecAlgorithmFactory<Node2VecStreamConfig>> {
+public class Node2VecStreamSpec implements AlgorithmSpec<Node2Vec, Node2VecResult, Node2VecStreamConfig, Stream<Node2VecStreamResult>, Node2VecAlgorithmFactory<Node2VecStreamConfig>> {
     @Override
     public String name() {
         return "Node2VecStream";
@@ -55,7 +57,7 @@ public class Node2VecStreamSpec  implements AlgorithmSpec<Node2Vec, Node2VecMode
     }
 
     @Override
-    public ComputationResultConsumer<Node2Vec, Node2VecModel.Result, Node2VecStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Node2Vec, Node2VecResult, Node2VecStreamConfig, Stream<Node2VecStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Node2Vec streaming failed",
             executionContext.log(),
@@ -66,7 +68,7 @@ public class Node2VecStreamSpec  implements AlgorithmSpec<Node2Vec, Node2VecMode
                 return LongStream
                     .range(IdMap.START_NODE_ID, graph.nodeCount())
                     .filter(nodePropertyValues::hasValue)
-                    .mapToObj(nodeId -> new StreamResult(
+                    .mapToObj(nodeId -> new Node2VecStreamResult(
                         graph.toOriginalNodeId(nodeId),
                         nodePropertyValues.floatArrayValue(nodeId)
                     ));

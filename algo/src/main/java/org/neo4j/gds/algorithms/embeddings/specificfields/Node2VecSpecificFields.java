@@ -17,20 +17,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.node2vec;
+package org.neo4j.gds.algorithms.embeddings.specificfields;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class StreamResult {
-    public long nodeId;
-    public List<Double> embedding;
+public class Node2VecSpecificFields {
 
-    StreamResult(long nodeId, float[] embedding) {
-        this.nodeId = nodeId;
-        this.embedding = new ArrayList<>(embedding.length);
-        for (var f : embedding) {
-            this.embedding.add((double) f);
-        }
+    private final long nodeCount;
+    private final List<Double> lossPerIteration;
+
+    public static final Node2VecSpecificFields EMPTY = new Node2VecSpecificFields(0,List.of());
+
+    public Node2VecSpecificFields(
+        long nodeCount,
+        List<Double> lossPerIteration
+    ) {
+        this.nodeCount=nodeCount;
+        this.lossPerIteration=lossPerIteration;
     }
+
+    public long nodeCount() {
+        return nodeCount;
+    }
+
+    public List<Double> lossPerIteration(){return lossPerIteration;}
 }

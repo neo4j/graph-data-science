@@ -17,28 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.node2vec;
+package org.neo4j.gds.procedures.embeddings.node2vec;
 
-import org.neo4j.gds.api.properties.nodes.FloatArrayNodePropertyValues;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
-import org.neo4j.gds.ml.core.tensor.FloatVector;
+import java.util.ArrayList;
+import java.util.List;
 
-class EmbeddingNodePropertyValues implements FloatArrayNodePropertyValues {
-    private final HugeObjectArray<FloatVector> embeddings;
-    private final long nodeCount;
+public class Node2VecStreamResult {
+    public long nodeId;
+    public List<Double> embedding;
 
-    EmbeddingNodePropertyValues(HugeObjectArray<FloatVector> embeddings) {
-        this.embeddings = embeddings;
-        nodeCount = embeddings.size();
-    }
-
-    @Override
-    public float[] floatArrayValue(long nodeId) {
-        return embeddings.get(nodeId).data();
-    }
-
-    @Override
-    public long nodeCount() {
-        return nodeCount;
+    public Node2VecStreamResult(long nodeId, float[] embedding) {
+        this.nodeId = nodeId;
+        this.embedding = new ArrayList<>(embedding.length);
+        for (var f : embedding) {
+            this.embedding.add((double) f);
+        }
     }
 }

@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.node2vec;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
+import org.neo4j.gds.algorithms.embeddings.EmbeddingNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.EmptyFloatArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.FloatArrayNodePropertyValues;
 import org.neo4j.gds.core.write.NodeProperty;
@@ -30,6 +31,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecWriteResult;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -42,7 +44,7 @@ import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
     description = Node2VecCompanion.DESCRIPTION,
     executionMode = WRITE_NODE_PROPERTY
 )
-public class Node2VecWriteSpec implements AlgorithmSpec<Node2Vec, Node2VecModel.Result, Node2VecWriteConfig, Stream<WriteResult>, Node2VecAlgorithmFactory<Node2VecWriteConfig>> {
+public class Node2VecWriteSpec implements AlgorithmSpec<Node2Vec, Node2VecResult, Node2VecWriteConfig, Stream<Node2VecWriteResult>, Node2VecAlgorithmFactory<Node2VecWriteConfig>> {
     @Override
     public String name() {
         return "Node2VecWrite";
@@ -59,7 +61,7 @@ public class Node2VecWriteSpec implements AlgorithmSpec<Node2Vec, Node2VecModel.
     }
 
     @Override
-    public ComputationResultConsumer<Node2Vec, Node2VecModel.Result, Node2VecWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Node2Vec, Node2VecResult, Node2VecWriteConfig, Stream<Node2VecWriteResult>> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>(
             this::resultBuilder,
             this::nodePropertyList,
@@ -67,7 +69,7 @@ public class Node2VecWriteSpec implements AlgorithmSpec<Node2Vec, Node2VecModel.
         );
     }
 
-    private List<NodeProperty> nodePropertyList(ComputationResult<Node2Vec, Node2VecModel.Result, Node2VecWriteConfig> computationResult) {
+    private List<NodeProperty> nodePropertyList(ComputationResult<Node2Vec, Node2VecResult, Node2VecWriteConfig> computationResult) {
         return List.of(
             NodeProperty.of(
                 computationResult.config().writeProperty(),
@@ -77,20 +79,20 @@ public class Node2VecWriteSpec implements AlgorithmSpec<Node2Vec, Node2VecModel.
     }
 
     @NotNull
-    private static FloatArrayNodePropertyValues nodePropertyValues(ComputationResult<Node2Vec, Node2VecModel.Result, Node2VecWriteConfig> computationResult) {
+    private static FloatArrayNodePropertyValues nodePropertyValues(ComputationResult<Node2Vec, Node2VecResult, Node2VecWriteConfig> computationResult) {
         return computationResult.result()
             .map(result -> (FloatArrayNodePropertyValues) new EmbeddingNodePropertyValues(result.embeddings()))
             .orElse(EmptyFloatArrayNodePropertyValues.INSTANCE);
     }
 
-    private WriteResult.Builder resultBuilder(
-        ComputationResult<Node2Vec, Node2VecModel.Result, Node2VecWriteConfig> computeResult,
+    private Node2VecWriteResult.Builder resultBuilder(
+        ComputationResult<Node2Vec, Node2VecResult, Node2VecWriteConfig> computeResult,
         ExecutionContext executionContext
     ) {
-        var builder = new WriteResult.Builder();
+        var builder = new Node2VecWriteResult.Builder();
 
         computeResult.result()
-            .map(Node2VecModel.Result::lossPerIteration)
+            .map(Node2VecResult::lossPerIteration)
             .ifPresent(builder::withLossPerIteration);
 
         return builder;

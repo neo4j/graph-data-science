@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.node2vec;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
+import org.neo4j.gds.algorithms.embeddings.EmbeddingNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.EmptyFloatArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.FloatArrayNodePropertyValues;
 import org.neo4j.gds.core.write.NodeProperty;
@@ -30,6 +31,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecMutateResult;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -42,7 +44,7 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
     description = Node2VecCompanion.DESCRIPTION,
     executionMode = MUTATE_NODE_PROPERTY
 )
-public class Node2VecMutateSpec implements AlgorithmSpec<Node2Vec, Node2VecModel.Result, Node2VecMutateConfig, Stream<MutateResult>, Node2VecAlgorithmFactory<Node2VecMutateConfig>> {
+public class Node2VecMutateSpec implements AlgorithmSpec<Node2Vec, Node2VecResult, Node2VecMutateConfig, Stream<Node2VecMutateResult>, Node2VecAlgorithmFactory<Node2VecMutateConfig>> {
     @Override
     public String name() {
         return "Node2VecMutate";
@@ -59,7 +61,7 @@ public class Node2VecMutateSpec implements AlgorithmSpec<Node2Vec, Node2VecModel
     }
 
     @Override
-    public ComputationResultConsumer<Node2Vec, Node2VecModel.Result, Node2VecMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Node2Vec, Node2VecResult, Node2VecMutateConfig, Stream<Node2VecMutateResult>> computationResultConsumer() {
         return new MutatePropertyComputationResultConsumer<>(
             this::nodePropertyList,
             this::resultBuilder
@@ -67,7 +69,7 @@ public class Node2VecMutateSpec implements AlgorithmSpec<Node2Vec, Node2VecModel
     }
 
     private List<NodeProperty> nodePropertyList(
-        ComputationResult<Node2Vec, Node2VecModel.Result, Node2VecMutateConfig> computationResult
+        ComputationResult<Node2Vec, Node2VecResult, Node2VecMutateConfig> computationResult
     ) {
         return List.of(
             NodeProperty.of(
@@ -78,17 +80,17 @@ public class Node2VecMutateSpec implements AlgorithmSpec<Node2Vec, Node2VecModel
     }
 
     @NotNull
-    private static FloatArrayNodePropertyValues nodePropertyValues(ComputationResult<Node2Vec, Node2VecModel.Result, Node2VecMutateConfig> computationResult) {
+    private static FloatArrayNodePropertyValues nodePropertyValues(ComputationResult<Node2Vec, Node2VecResult, Node2VecMutateConfig> computationResult) {
         return computationResult.result()
             .map(result -> (FloatArrayNodePropertyValues) new EmbeddingNodePropertyValues(result.embeddings()))
             .orElse(EmptyFloatArrayNodePropertyValues.INSTANCE);
     }
 
-    private MutateResult.Builder resultBuilder(
-        ComputationResult<Node2Vec, Node2VecModel.Result, Node2VecMutateConfig> computeResult,
+    private Node2VecMutateResult.Builder resultBuilder(
+        ComputationResult<Node2Vec, Node2VecResult, Node2VecMutateConfig> computeResult,
         ExecutionContext executionContext
     ) {
-        var builder = new MutateResult.Builder();
+        var builder = new Node2VecMutateResult.Builder();
         computeResult.result().ifPresent(result -> {
             builder.withLossPerIteration(result.lossPerIteration());
         });

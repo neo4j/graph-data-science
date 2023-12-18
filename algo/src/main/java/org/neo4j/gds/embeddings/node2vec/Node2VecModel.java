@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -29,7 +28,6 @@ import org.neo4j.gds.ml.core.functions.Sigmoid;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.SplittableRandom;
@@ -123,7 +121,7 @@ public class Node2VecModel {
         contextEmbeddings = initializeEmbeddings(toOriginalId, nodeCount, embeddingDimension, random);
     }
 
-    Result train() {
+    Node2VecResult train() {
         progressTracker.beginSubTask();
         var learningRateAlpha = (initialLearningRate - minLearningRate) / iterations;
 
@@ -175,7 +173,7 @@ public class Node2VecModel {
         }
         progressTracker.endSubTask();
 
-        return ImmutableResult.of(centerEmbeddings, lossPerIteration);
+        return ImmutableNode2VecResult.of(centerEmbeddings, lossPerIteration);
     }
 
     private HugeObjectArray<FloatVector> initializeEmbeddings(LongUnaryOperator toOriginalNodeId, long nodeCount, int embeddingDimensions, Random random) {
@@ -309,10 +307,4 @@ public class Node2VecModel {
         }
     }
 
-    @ValueClass
-    public interface Result {
-        HugeObjectArray<FloatVector> embeddings();
-
-        List<Double> lossPerIteration();
-    }
 }

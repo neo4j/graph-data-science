@@ -608,6 +608,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
                 mock(CommunityAlgorithmsWriteBusinessFacade.class)
             ),
             null,
+            null,
             DeprecatedProceduresMetricService.PASSTHROUGH
         );
     }

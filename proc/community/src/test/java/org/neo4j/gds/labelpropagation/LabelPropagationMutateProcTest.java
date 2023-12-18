@@ -359,6 +359,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     null
                 ),
                 null,
+                null,
                 DeprecatedProceduresMetricService.PASSTHROUGH
             );
 
@@ -492,6 +493,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     null
                 ),
                 null,
+                null,
                 DeprecatedProceduresMetricService.PASSTHROUGH
             );
 
@@ -578,6 +580,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     null,
                     null
                 ),
+                null,
                 null,
                 DeprecatedProceduresMetricService.PASSTHROUGH
             );
@@ -669,6 +672,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     null,
                     null
                 ),
+                null,
                 null,
                 DeprecatedProceduresMetricService.PASSTHROUGH
             );

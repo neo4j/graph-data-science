@@ -56,12 +56,14 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         var centralityProcedureFacade = algorithmFacadeProvider.createCentralityProcedureFacade();
         var communityProcedureFacade = algorithmFacadeProvider.createCommunityProcedureFacade();
         var similarityProcedureFacade = algorithmFacadeProvider.createSimilarityProcedureFacade();
+        var nodeEmbeddingsProcedureFacade = algorithmFacadeProvider.createNodeEmbeddingsProcedureFacade();
 
         return new GraphDataScience(
             log,
             catalogFacade,
             centralityProcedureFacade,
             communityProcedureFacade,
+            nodeEmbeddingsProcedureFacade,
             similarityProcedureFacade,
             deprecatedProceduresMetricService
         );

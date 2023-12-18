@@ -23,9 +23,9 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.EmbeddingUtils;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.RandomWalkCompanion;
 
 import java.util.ArrayList;
@@ -35,7 +35,7 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class Node2Vec extends Algorithm<Node2VecModel.Result> {
+public class Node2Vec extends Algorithm<Node2VecResult> {
 
     private final Graph graph;
     private final int concurrency;
@@ -67,7 +67,7 @@ public class Node2Vec extends Algorithm<Node2VecModel.Result> {
     }
 
     @Override
-    public Node2VecModel.Result compute() {
+    public Node2VecResult compute() {
         progressTracker.beginSubTask("Node2Vec");
 
         if (graph.hasRelationshipProperty()) {
