@@ -20,9 +20,11 @@
 package org.neo4j.gds.algorithms.embeddings;
 
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
+import org.neo4j.gds.algorithms.embeddings.specificfields.DoubleNodeEmbeddingsPropertyValues;
 import org.neo4j.gds.algorithms.embeddings.specificfields.Node2VecSpecificFields;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
 
 public class NodeEmbeddingsAlgorithmsMutateBusinessFacade {
@@ -63,6 +65,42 @@ public class NodeEmbeddingsAlgorithmsMutateBusinessFacade {
                 mutateResultBuilder.algorithmSpecificFields(new Node2VecSpecificFields(nodeCount,result.lossPerIteration()));
             },
             () -> mutateResultBuilder.algorithmSpecificFields(Node2VecSpecificFields.EMPTY)
+        );
+
+        return mutateResultBuilder.build();
+    }
+
+    public NodePropertyMutateResult<Long> graphSage(
+        String graphName,
+        GraphSageMutateConfig configuration
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> nodeEmbeddingsAlgorithmsFacade.graphSage(graphName, configuration)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        var mutateResultBuilder = NodePropertyMutateResult.<Long>builder()
+            .computeMillis(intermediateResult.computeMilliseconds)
+            .postProcessingMillis(0L)
+            .configuration(configuration);
+
+        algorithmResult.result().ifPresentOrElse(
+            result -> {
+                var nodeCount = algorithmResult.graph().nodeCount();
+                var nodeProperties = new DoubleNodeEmbeddingsPropertyValues(result.embeddings());
+                var mutateResult = mutateNodePropertyService.mutate(
+                    configuration.mutateProperty(),
+                    nodeProperties,
+                    configuration.nodeLabelIdentifiers(algorithmResult.graphStore()),
+                    algorithmResult.graph(),
+                    algorithmResult.graphStore()
+                );
+                mutateResultBuilder.mutateMillis(mutateResult.mutateMilliseconds());
+                mutateResultBuilder.nodePropertiesWritten(mutateResult.nodePropertiesAdded());
+                mutateResultBuilder.algorithmSpecificFields(nodeCount);
+            },
+            () -> mutateResultBuilder.algorithmSpecificFields(0l)
         );
 
         return mutateResultBuilder.build();

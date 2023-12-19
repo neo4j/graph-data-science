@@ -20,10 +20,9 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -40,18 +39,16 @@ import static org.neo4j.procedure.Mode.READ;
 public class GraphSageMutateProc extends BaseProc {
 
     @Context
-    public ModelCatalog modelCatalog;
+    public GraphDataScience facade;
+
 
     @Procedure(value = "gds.beta.graphSage.mutate", mode = Mode.READ)
     @Description(GRAPH_SAGE_DESCRIPTION)
-    public Stream<MutateResult> mutate(
+    public Stream<GraphSageMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new GraphSageMutateSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.nodeEmbeddings().graphSageMutate(graphName, configuration);
     }
 
     @Procedure(value = "gds.beta.graphSage.mutate.estimate", mode = READ)
@@ -67,9 +64,5 @@ public class GraphSageMutateProc extends BaseProc {
         ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withModelCatalog(modelCatalog);
-    }
 
 }

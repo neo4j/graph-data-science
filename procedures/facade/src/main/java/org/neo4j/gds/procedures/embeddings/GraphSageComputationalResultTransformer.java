@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.embeddings;
 
+import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.TrainResult;
@@ -28,6 +29,7 @@ import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
+import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageMutateResult;
 import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageStreamResult;
 import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageTrainResult;
 import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageWriteResult;
@@ -50,6 +52,19 @@ class GraphSageComputationalResultTransformer {
                 ));
 
         }).orElseGet(Stream::empty);
+    }
+
+    static GraphSageMutateResult toMutateResult(NodePropertyMutateResult<Long> mutateResult) {
+
+        return new GraphSageMutateResult(
+            mutateResult.algorithmSpecificFields().longValue(),
+            mutateResult.nodePropertiesWritten(),
+            mutateResult.preProcessingMillis(),
+            mutateResult.computeMillis(),
+            mutateResult.mutateMillis(),
+            mutateResult.configuration().toMap()
+        );
+
     }
 
     static GraphSageWriteResult toWriteResult(NodePropertyWriteResult<Long> writeResult) {

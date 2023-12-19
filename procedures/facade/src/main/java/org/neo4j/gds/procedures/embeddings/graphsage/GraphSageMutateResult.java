@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage;
+package org.neo4j.gds.procedures.embeddings.graphsage;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
-public final class MutateResult {
+public final class GraphSageMutateResult {
 
     public final long nodePropertiesWritten;
     public final long mutateMillis;
@@ -32,7 +32,7 @@ public final class MutateResult {
     public final long computeMillis;
     public final Map<String, Object> configuration;
 
-    private MutateResult(
+    public GraphSageMutateResult(
         long nodeCount,
         long nodePropertiesWritten,
         long preProcessingMillis,
@@ -48,11 +48,11 @@ public final class MutateResult {
         this.configuration = config;
     }
 
-    static final class Builder extends AbstractResultBuilder<MutateResult> {
+    public static final class Builder extends AbstractResultBuilder<GraphSageMutateResult> {
 
         @Override
-        public MutateResult build() {
-            return new MutateResult(
+        public GraphSageMutateResult build() {
+            return new GraphSageMutateResult(
                 nodeCount,
                 nodePropertiesWritten,
                 preProcessingMillis,
