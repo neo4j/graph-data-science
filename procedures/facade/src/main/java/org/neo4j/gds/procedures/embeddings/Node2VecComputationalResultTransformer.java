@@ -22,7 +22,7 @@ package org.neo4j.gds.procedures.embeddings;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.algorithms.embeddings.EmbeddingNodePropertyValues;
+import org.neo4j.gds.algorithms.embeddings.FloatEmbeddingNodePropertyValues;
 import org.neo4j.gds.algorithms.embeddings.specificfields.Node2VecSpecificFields;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
@@ -40,7 +40,7 @@ class Node2VecComputationalResultTransformer {
     ) {
         return computationResult.result().map(node2VecResult -> {
             var graph = computationResult.graph();
-            var nodePropertyValues = new EmbeddingNodePropertyValues(node2VecResult.embeddings());
+            var nodePropertyValues = new FloatEmbeddingNodePropertyValues(node2VecResult.embeddings());
             return LongStream
                 .range(IdMap.START_NODE_ID, graph.nodeCount())
                 .filter(nodePropertyValues::hasValue)

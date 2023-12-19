@@ -21,7 +21,7 @@ package org.neo4j.gds.embeddings.node2vec;
 
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.MutatePropertyComputationResultConsumer;
-import org.neo4j.gds.algorithms.embeddings.EmbeddingNodePropertyValues;
+import org.neo4j.gds.algorithms.embeddings.FloatEmbeddingNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.EmptyFloatArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.FloatArrayNodePropertyValues;
 import org.neo4j.gds.core.write.NodeProperty;
@@ -82,7 +82,7 @@ public class Node2VecMutateSpec implements AlgorithmSpec<Node2Vec, Node2VecResul
     @NotNull
     private static FloatArrayNodePropertyValues nodePropertyValues(ComputationResult<Node2Vec, Node2VecResult, Node2VecMutateConfig> computationResult) {
         return computationResult.result()
-            .map(result -> (FloatArrayNodePropertyValues) new EmbeddingNodePropertyValues(result.embeddings()))
+            .map(result -> (FloatArrayNodePropertyValues) new FloatEmbeddingNodePropertyValues(result.embeddings()))
             .orElse(EmptyFloatArrayNodePropertyValues.INSTANCE);
     }
 

@@ -23,11 +23,11 @@ import org.neo4j.gds.api.properties.nodes.FloatArrayNodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.ml.core.tensor.FloatVector;
 
-public class EmbeddingNodePropertyValues implements FloatArrayNodePropertyValues {
+public class FloatEmbeddingNodePropertyValues implements FloatArrayNodePropertyValues {
     private final HugeObjectArray<FloatVector> embeddings;
     private final long nodeCount;
 
-    public EmbeddingNodePropertyValues(HugeObjectArray<FloatVector> embeddings) {
+    public FloatEmbeddingNodePropertyValues(HugeObjectArray<FloatVector> embeddings) {
         this.embeddings = embeddings;
         nodeCount = embeddings.size();
     }

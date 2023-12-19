@@ -50,7 +50,7 @@ public class NodeEmbeddingsAlgorithmsMutateBusinessFacade {
         algorithmResult.result().ifPresentOrElse(
             result -> {
                 var nodeCount = algorithmResult.graph().nodeCount();
-                var nodeProperties = new EmbeddingNodePropertyValues(result.embeddings());
+                var nodeProperties = new FloatEmbeddingNodePropertyValues(result.embeddings());
                 var mutateResult = mutateNodePropertyService.mutate(
                     configuration.mutateProperty(),
                     nodeProperties,

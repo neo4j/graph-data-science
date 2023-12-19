@@ -32,6 +32,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
+import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageWriteResult;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -41,7 +42,7 @@ import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.nodeProperty
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 
 @GdsCallable(name = "gds.beta.graphSage.write", description = GRAPH_SAGE_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
-public class GraphSageWriteSpec implements AlgorithmSpec<GraphSage, GraphSageResult, GraphSageWriteConfig, Stream<WriteResult>, GraphSageAlgorithmFactory<GraphSageWriteConfig>> {
+public class GraphSageWriteSpec implements AlgorithmSpec<GraphSage, GraphSageResult, GraphSageWriteConfig, Stream<GraphSageWriteResult>, GraphSageAlgorithmFactory<GraphSageWriteConfig>> {
 
     @Override
     public String name() {
@@ -59,7 +60,7 @@ public class GraphSageWriteSpec implements AlgorithmSpec<GraphSage, GraphSageRes
     }
 
     @Override
-    public ComputationResultConsumer<GraphSage, GraphSageResult, GraphSageWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<GraphSage, GraphSageResult, GraphSageWriteConfig, Stream<GraphSageWriteResult>> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>(
             this::resultBuilder,
             this::nodePropertyList,
@@ -72,11 +73,11 @@ public class GraphSageWriteSpec implements AlgorithmSpec<GraphSage, GraphSageRes
         return new GraphSageConfigurationValidation<>(executionContext.modelCatalog());
     }
 
-    private WriteResult.Builder resultBuilder(
+    private GraphSageWriteResult.Builder resultBuilder(
         ComputationResult<GraphSage, GraphSageResult, GraphSageWriteConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        return new WriteResult.Builder();
+        return new GraphSageWriteResult.Builder();
     }
 
     private List<NodeProperty> nodePropertyList(ComputationResult<GraphSage, GraphSageResult, GraphSageWriteConfig> computationResult) {

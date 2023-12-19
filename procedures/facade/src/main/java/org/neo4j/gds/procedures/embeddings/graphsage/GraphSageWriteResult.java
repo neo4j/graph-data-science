@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.graphsage;
+package org.neo4j.gds.procedures.embeddings.graphsage;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
-public final class WriteResult {
+public final class GraphSageWriteResult {
 
     public final long nodeCount;
     public final long nodePropertiesWritten;
@@ -32,7 +32,7 @@ public final class WriteResult {
     public final long writeMillis;
     public final Map<String, Object> configuration;
 
-    private WriteResult(
+    public GraphSageWriteResult(
         long nodeCount,
         long nodePropertiesWritten,
         long preProcessingMillis,
@@ -49,11 +49,11 @@ public final class WriteResult {
     }
 
     @SuppressWarnings("unused")
-    static class Builder extends AbstractResultBuilder<WriteResult> {
+    public static class Builder extends AbstractResultBuilder<GraphSageWriteResult> {
 
         @Override
-        public WriteResult build() {
-            return new WriteResult(
+        public GraphSageWriteResult build() {
+            return new GraphSageWriteResult(
                 nodeCount,
                 nodePropertiesWritten,
                 preProcessingMillis,

@@ -27,12 +27,14 @@ import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsWriteBusiness
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageStreamResult;
 import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageTrainResult;
+import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageWriteResult;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecMutateResult;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecStreamResult;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecWriteResult;
@@ -155,6 +157,19 @@ public class NodeEmbeddingsProcedureFacade {
         return GraphSageComputationalResultTransformer.toStreamResult(computationResult);
     }
 
+    public Stream<GraphSageWriteResult> graphSageWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var writeConfig = configurationCreator.createConfiguration(configuration, GraphSageWriteConfig::of);
+
+        var computationResult = writeBusinessFacade.graphSage(
+            graphName,
+            writeConfig
+        );
+
+        return Stream.of(GraphSageComputationalResultTransformer.toWriteResult(computationResult));
+    }
     public Stream<GraphSageTrainResult> graphSageTrain(
         String graphName,
         Map<String, Object> configuration

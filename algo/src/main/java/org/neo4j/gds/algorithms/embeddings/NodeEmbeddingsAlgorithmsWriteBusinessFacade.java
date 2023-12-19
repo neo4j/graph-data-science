@@ -20,9 +20,11 @@
 package org.neo4j.gds.algorithms.embeddings;
 
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
+import org.neo4j.gds.algorithms.embeddings.specificfields.DoubleNodeEmbeddingsPropertyValues;
 import org.neo4j.gds.algorithms.embeddings.specificfields.Node2VecSpecificFields;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
 
 public class NodeEmbeddingsAlgorithmsWriteBusinessFacade {
@@ -56,7 +58,7 @@ public class NodeEmbeddingsAlgorithmsWriteBusinessFacade {
         algorithmResult.result().ifPresentOrElse(
             result -> {
                 var nodeCount = algorithmResult.graph().nodeCount();
-                var nodeProperties = new EmbeddingNodePropertyValues(result.embeddings());
+                var nodeProperties = new FloatEmbeddingNodePropertyValues(result.embeddings());
                 var writeResult = writeNodePropertyService.write(
                     algorithmResult.graph(),
                     algorithmResult.graphStore(),
@@ -75,5 +77,44 @@ public class NodeEmbeddingsAlgorithmsWriteBusinessFacade {
 
         return writeResultBuilder.build();
     }
+
+    public NodePropertyWriteResult<Long> graphSage(
+        String graphName,
+        GraphSageWriteConfig configuration
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> nodeEmbeddingsAlgorithmsFacade.graphSage(graphName, configuration)
+        );
+        var algorithmResult = intermediateResult.algorithmResult;
+
+        var writeResultBuilder = NodePropertyWriteResult.<Long>builder()
+            .computeMillis(intermediateResult.computeMilliseconds)
+            .postProcessingMillis(0L)
+            .configuration(configuration);
+
+        algorithmResult.result().ifPresentOrElse(
+            result -> {
+                var nodeCount = algorithmResult.graph().nodeCount();
+                var nodeProperties = new DoubleNodeEmbeddingsPropertyValues(result.embeddings());
+                var writeResult = writeNodePropertyService.write(
+                    algorithmResult.graph(),
+                    algorithmResult.graphStore(),
+                    nodeProperties,
+                    configuration.writeConcurrency(),
+                    configuration.writeProperty(),
+                    "GraphSageWrite",
+                    configuration.arrowConnectionInfo()
+                );
+                writeResultBuilder.writeMillis(writeResult.writeMilliseconds());
+                writeResultBuilder.nodePropertiesWritten(writeResult.nodePropertiesWritten());
+                writeResultBuilder.algorithmSpecificFields(nodeCount);
+            },
+            () -> writeResultBuilder.algorithmSpecificFields(0l)
+        );
+
+        return writeResultBuilder.build();
+    }
+
 
 }

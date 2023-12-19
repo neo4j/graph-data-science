@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.embeddings;
 
+import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.TrainResult;
 import org.neo4j.gds.api.IdMap;
@@ -29,6 +30,7 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageStreamResult;
 import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageTrainResult;
+import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageWriteResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -50,6 +52,18 @@ class GraphSageComputationalResultTransformer {
         }).orElseGet(Stream::empty);
     }
 
+    static GraphSageWriteResult toWriteResult(NodePropertyWriteResult<Long> writeResult) {
+
+        return new GraphSageWriteResult(
+            writeResult.algorithmSpecificFields().longValue(),
+            writeResult.nodePropertiesWritten(),
+            writeResult.preProcessingMillis(),
+            writeResult.computeMillis(),
+            writeResult.writeMillis(),
+            writeResult.configuration().toMap()
+        );
+
+    }
     static GraphSageTrainResult toTrainResult(
         TrainResult<Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>> trainResult
     ) {

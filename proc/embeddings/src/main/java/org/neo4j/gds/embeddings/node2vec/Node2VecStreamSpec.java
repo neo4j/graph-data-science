@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
-import org.neo4j.gds.algorithms.embeddings.EmbeddingNodePropertyValues;
+import org.neo4j.gds.algorithms.embeddings.FloatEmbeddingNodePropertyValues;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -64,7 +64,7 @@ public class Node2VecStreamSpec implements AlgorithmSpec<Node2Vec, Node2VecResul
             () -> computationResult.result()
             .map(result -> {
                 var graph = computationResult.graph();
-                var nodePropertyValues = new EmbeddingNodePropertyValues(result.embeddings());
+                var nodePropertyValues = new FloatEmbeddingNodePropertyValues(result.embeddings());
                 return LongStream
                     .range(IdMap.START_NODE_ID, graph.nodeCount())
                     .filter(nodePropertyValues::hasValue)

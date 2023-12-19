@@ -24,7 +24,8 @@ import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -45,16 +46,16 @@ public class GraphSageWriteProc extends BaseProc {
     @Context
     public NodePropertyExporterBuilder nodePropertyExporterBuilder;
 
+    @Context
+    public GraphDataScience facade;
+
     @Procedure(name = "gds.beta.graphSage.write", mode = Mode.WRITE)
     @Description(GRAPH_SAGE_DESCRIPTION)
-    public Stream<WriteResult> write(
+    public Stream<GraphSageWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new GraphSageWriteSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.nodeEmbeddings().graphSageWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.beta.graphSage.write.estimate", mode = Mode.READ)
