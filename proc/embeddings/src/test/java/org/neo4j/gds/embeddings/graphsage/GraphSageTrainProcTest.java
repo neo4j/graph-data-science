@@ -21,7 +21,6 @@ package org.neo4j.gds.embeddings.graphsage;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -29,7 +28,6 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.NodeProjection;
 import org.neo4j.gds.PropertyMapping;
-import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -321,7 +319,6 @@ class GraphSageTrainProcTest extends BaseProcTest {
                                   "Requested labels: ['__ALL__']. Properties available on all requested labels: []");
     }
 
-    @Disabled("Until we figure out how to bypass org.neo4j.gds.ProcedureRunner")
     @Test
     void shouldValidateModelBeforeTraining() {
         var trainConfigParams = Map.of(
@@ -342,13 +339,17 @@ class GraphSageTrainProcTest extends BaseProcTest {
         );
         modelCatalog.set(model);
 
-        TestProcedureRunner.applyOnProcedure(
-            db,
-            GraphSageTrainProc.class,
-            proc -> assertThatThrownBy(() -> proc.train(GRAPH_NAME, trainConfigParams))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Model with name `%s` already exists.", MODEL_NAME)
-        );
+        String train = GdsCypher.call(GRAPH_NAME)
+            .algo("gds.beta.graphSage")
+            .trainMode()
+            .addParameter("concurrency", 1)
+            .addParameter("modelName", MODEL_NAME)
+            .addParameter("featureProperties", List.of("age"))
+            .addParameter("sudo", true)
+            .yields();
+
+        assertThatThrownBy(() -> runQuery(train))
+            .hasMessageContaining("Model with name `%s` already exists.", MODEL_NAME);
     }
 
     @ParameterizedTest

@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageTrainResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -33,9 +31,10 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.ProcedureConstants.ESTIMATE_DESCRIPTION;
 import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPH_SAGE_DESCRIPTION;
 
-public class GraphSageTrainProc extends BaseProc {
+public class GraphSageTrainProc {
 
     @Context
     public GraphDataScience facade;
@@ -55,11 +54,7 @@ public class GraphSageTrainProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new GraphSageTrainSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.nodeEmbeddings().graphSageTrainEstimate(graphNameOrConfiguration, algoConfiguration);
     }
     
 }

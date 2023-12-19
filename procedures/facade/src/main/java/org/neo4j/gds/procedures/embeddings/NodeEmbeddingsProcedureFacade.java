@@ -186,6 +186,34 @@ public class NodeEmbeddingsProcedureFacade {
 
         return Stream.of(GraphSageComputationalResultTransformer.toWriteResult(computationResult));
     }
+
+    public Stream<MemoryEstimateResult> graphSageStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
+        var config = configurationCreator.createConfiguration(configuration, GraphSageStreamConfig::of);
+
+        return Stream.of(estimateBusinessFacade.graphSage(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> graphSageMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
+        var config = configurationCreator.createConfiguration(configuration, GraphSageMutateConfig::of);
+
+        return Stream.of(estimateBusinessFacade.graphSage(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> graphSageWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
+        var config = configurationCreator.createConfiguration(configuration, GraphSageWriteConfig::of);
+
+        return Stream.of(estimateBusinessFacade.graphSage(graphNameOrConfiguration, config));
+    }
+
     public Stream<GraphSageTrainResult> graphSageTrain(
         String graphName,
         Map<String, Object> configuration
@@ -199,5 +227,15 @@ public class NodeEmbeddingsProcedureFacade {
 
         return Stream.of(GraphSageComputationalResultTransformer.toTrainResult(computationResult));
     }
+
+    public Stream<MemoryEstimateResult> graphSageTrainEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
+        var config = configurationCreator.createConfiguration(configuration, GraphSageTrainConfig::of);
+
+        return Stream.of(estimateBusinessFacade.graphSageTrain(graphNameOrConfiguration, config));
+    }
+
 
 }

@@ -20,9 +20,15 @@
 package org.neo4j.gds.algorithms.embeddings;
 
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecAlgorithmFactory;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
+
+import java.util.Optional;
 
 public class NodeEmbeddingsAlgorithmsEstimateBusinessFacade {
 
@@ -43,6 +49,30 @@ public class NodeEmbeddingsAlgorithmsEstimateBusinessFacade {
             configuration,
             configuration.relationshipWeightProperty(),
             new Node2VecAlgorithmFactory<>()
+        );
+    }
+
+    public <C extends GraphSageBaseConfig> MemoryEstimateResult graphSage(
+        Object graphNameOrConfiguration,
+        C configuration
+    ) {
+        return algorithmEstimator.estimate(
+            graphNameOrConfiguration,
+            configuration,
+            Optional.empty(),
+            new GraphSageAlgorithmFactory(null)
+        );
+    }
+
+    public <C extends GraphSageTrainConfig> MemoryEstimateResult graphSageTrain(
+        Object graphNameOrConfiguration,
+        C configuration
+    ) {
+        return algorithmEstimator.estimate(
+            graphNameOrConfiguration,
+            configuration,
+            configuration.relationshipWeightProperty(),
+            new GraphSageTrainAlgorithmFactory()
         );
     }
 }

@@ -19,11 +19,6 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -36,15 +31,10 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.ProcedureConstants.ESTIMATE_DESCRIPTION;
 import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPH_SAGE_DESCRIPTION;
 
-public class GraphSageWriteProc extends BaseProc {
-
-    @Context
-    public ModelCatalog modelCatalog;
-
-    @Context
-    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
+public class GraphSageWriteProc {
 
     @Context
     public GraphDataScience facade;
@@ -64,18 +54,9 @@ public class GraphSageWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new GraphSageWriteSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.nodeEmbeddings().graphSageWriteEstimate(graphNameOrConfiguration, algoConfiguration);
+
     }
 
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext()
-            .withNodePropertyExporterBuilder(nodePropertyExporterBuilder)
-            .withModelCatalog(modelCatalog);
-    }
 
 }
