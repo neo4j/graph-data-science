@@ -133,7 +133,7 @@ public class NodesSortedByComponent {
 
         @Override
         public boolean hasNext() {
-            if (offset < 0L) {
+            if (offset < 1L) {
                 return runningIdx > -1 && getComponents().applyAsLong(getNodesSorted().get(runningIdx)) == componentId;
             } else {
                 while (runningIdx > -1 && getComponents().applyAsLong(getNodesSorted().get(runningIdx)) == componentId) {

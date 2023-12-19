@@ -68,7 +68,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     private HugeObjectArray<long[]> neighbors;
     private HugeObjectArray<double[]> weights;
     private LongUnaryOperator components;
-    private SimilarityPairTriConsumer similarityConsumer;
 
     private final boolean weighted;
     private BiFunction<Long, Long, LongStream> targetNodeStream;
@@ -204,10 +203,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         progressTracker.beginSubTask();
 
         components = initComponents();
-        var nodesByComponent = new NodesSortedByComponent(components, graph.nodeCount(), concurrency);
-        targetNodeStream = (componentId, offset) -> StreamSupport.longStream(
-            nodesByComponent.spliterator(componentId, offset), true)
-            .filter(targetNodes::get);
 
         if (config.runWCC()) {
             progressTracker.beginSubTask();
@@ -275,31 +270,35 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     private LongUnaryOperator initComponents() {
         if (!config.isEnableComponentOptimization()) {
             // considering everything as within the same component
-            similarityConsumer = this::computeSimilarityForSingleComponent;
+            targetNodeStream = (componentId, offset) -> targetNodesStream(offset);
             return n -> 0;
         }
 
-        similarityConsumer = this::computeSimilarityForComponents;
-
+        LongUnaryOperator components;
         if (config.componentProperty() != null) {
             // extract component info from property
             NodePropertyValues nodeProperties = graph.nodeProperties(config.componentProperty());
-            return initComponentIdMapping(graph, nodeProperties::longValue);
+            components = initComponentIdMapping(graph, nodeProperties::longValue);
+        } else {
+            // run WCC to determine components
+            progressTracker.beginSubTask();
+            WccStreamConfig wccConfig = ImmutableWccStreamConfig
+                .builder()
+                .concurrency(concurrency)
+                .addAllRelationshipTypes(config.relationshipTypes())
+                .addAllNodeLabels(config.nodeLabels())
+                .build();
+
+            Wcc wcc = new WccAlgorithmFactory<>().build(graph, wccConfig, ProgressTracker.NULL_TRACKER);
+            DisjointSetStruct disjointSets = wcc.compute();
+            components = initComponentIdMapping(graph, disjointSets::setIdOf);
+            progressTracker.endSubTask();
         }
 
-        // run WCC to determine components
-        progressTracker.beginSubTask();
-        WccStreamConfig wccConfig = ImmutableWccStreamConfig
-            .builder()
-            .concurrency(concurrency)
-            .addAllRelationshipTypes(config.relationshipTypes())
-            .addAllNodeLabels(config.nodeLabels())
-            .build();
-
-        Wcc wcc = new WccAlgorithmFactory<>().build(graph, wccConfig, ProgressTracker.NULL_TRACKER);
-        DisjointSetStruct disjointSets = wcc.compute();
-        var components = initComponentIdMapping(graph, disjointSets::setIdOf);
-        progressTracker.endSubTask();
+        var nodesByComponent = new NodesSortedByComponent(components, graph.nodeCount(), concurrency);
+        targetNodeStream = (componentId, offset) -> StreamSupport.longStream(
+                nodesByComponent.spliterator(componentId, offset), true)
+            .filter(targetNodes::get);
         return components;
     }
 
@@ -333,16 +332,16 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             .forEach(sourceNodeId -> {
                 if (sourceNodeFilter.equals(NodeFilter.noOp)) {
                     targetNodeStream.apply(components.applyAsLong(sourceNodeId), sourceNodeId + 1)
-                        .forEach(targetNodeId -> similarityConsumer.accept(sourceNodeId, targetNodeId,
+                        .forEach(targetNodeId -> computeSimilarityFor(sourceNodeId, targetNodeId,
                             (source, target, similarity) -> {
                                 topKMap.put(source, target, similarity);
                                 topKMap.put(target, source, similarity);
                             }
                         ));
                 } else {
-                    targetNodeStream.apply(components.applyAsLong(sourceNodeId), -1L)
+                    targetNodeStream.apply(components.applyAsLong(sourceNodeId), 0L)
                         .filter(targetNodeId -> sourceNodeId != targetNodeId)
-                        .forEach(targetNodeId -> similarityConsumer.accept(sourceNodeId, targetNodeId, topKMap::put));
+                        .forEach(targetNodeId -> computeSimilarityFor(sourceNodeId, targetNodeId, topKMap::put));
                 }
             });
         progressTracker.endSubTask();
@@ -369,9 +368,9 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
                     // into these queues is not considered to be thread-safe.
                     // Hence, we need to ensure that down the stream, exactly one queue
                     // within the TopKMap processes all pairs for a single node.
-                    targetNodeStream.apply(components.applyAsLong(sourceNodeId), -1L)
+                    targetNodeStream.apply(components.applyAsLong(sourceNodeId), 0L)
                         .filter(targetNodeId -> sourceNodeId != targetNodeId)
-                        .forEach(targetNodeId -> similarityConsumer.accept(sourceNodeId, targetNodeId, topKMap::put))
+                        .forEach(targetNodeId -> computeSimilarityFor(sourceNodeId, targetNodeId, topKMap::put))
                 )
         );
 
@@ -387,11 +386,11 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             .forEach(sourceNodeId -> {
                 if (sourceNodeFilter.equals(NodeFilter.noOp)) {
                     targetNodeStream.apply(components.applyAsLong(sourceNodeId), sourceNodeId + 1)
-                        .forEach(targetNodeId -> similarityConsumer.accept(sourceNodeId, targetNodeId, topNList::add));
+                        .forEach(targetNodeId -> computeSimilarityFor(sourceNodeId, targetNodeId, topNList::add));
                 } else {
-                    targetNodeStream.apply(components.applyAsLong(sourceNodeId), -1L)
+                    targetNodeStream.apply(components.applyAsLong(sourceNodeId), 0L)
                         .filter(targetNodeId -> sourceNodeId != targetNodeId)
-                        .forEach(targetNodeId -> similarityConsumer.accept(sourceNodeId, targetNodeId, topNList::add));
+                        .forEach(targetNodeId -> computeSimilarityFor(sourceNodeId, targetNodeId, topNList::add));
                 }
             });
 
@@ -413,6 +412,10 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         return sourceNodesStream(0);
     }
 
+    private LongStream targetNodesStream(long offset) {
+        return new SetBitsIterable(targetNodes, offset).stream();
+    }
+
     private LongStream loggableAndTerminatableSourceNodeStream() {
         return checkProgress(sourceNodesStream());
     }
@@ -421,7 +424,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         return targetNodeStream.apply(components.applyAsLong(sourceNodeId), sourceNodeId + 1)
             .mapToObj(targetNodeId -> {
                 var resultHolder = new SimilarityResult[]{null};
-                similarityConsumer.accept(
+                computeSimilarityFor(
                     sourceNodeId,
                     targetNodeId,
                     (source, target, similarity) -> resultHolder[0] = new SimilarityResult(source, target, similarity)
@@ -454,7 +457,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         void accept(long sourceNodeId, long targetNodeId, double similarity);
     }
 
-    private void computeSimilarityForSingleComponent(long sourceNodeId, long targetNodeId, SimilarityConsumer consumer) {
+    private void computeSimilarityFor(long sourceNodeId, long targetNodeId, SimilarityConsumer consumer) {
         double similarity;
         var sourceNodeNeighbors = neighbors.get(sourceNodeId);
         var targetNodeNeighbors = neighbors.get(targetNodeId);
@@ -468,15 +471,6 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         if (!Double.isNaN(similarity)) {
             consumer.accept(sourceNodeId, targetNodeId, similarity);
         }
-    }
-
-    private void computeSimilarityForComponents(long sourceNodeId, long targetNodeId, SimilarityConsumer consumer) {
-        if (components.applyAsLong(sourceNodeId) != components.applyAsLong(targetNodeId)) {
-            consumer.accept(sourceNodeId, targetNodeId, 0);
-            return;
-        }
-
-        computeSimilarityForSingleComponent(sourceNodeId, targetNodeId, consumer);
     }
 
     private double computeWeightedSimilarity(
