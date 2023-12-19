@@ -26,10 +26,12 @@ When installing GDS manually, please refer to the below compatibility matrix:
 .Compatibility matrix (italicized version is in development)
 |===
 |GDS version | Neo4j version | Java Version
-.10+<.^|_GDS 2.6.x_ (preview)
+.11+<.^|_GDS 2.6.x_ (preview)
+|Neo4j 5.15.0
+.2+.^|Java 21 & Java 17
 |Neo4j 5.14.0
-.9+.^|Java 17
 |Neo4j 5.13.0
+.8+.^|Java 17
 |Neo4j 5.12.0
 |Neo4j 5.11.0
 |Neo4j 5.10.0
@@ -39,10 +41,12 @@ When installing GDS manually, please refer to the below compatibility matrix:
 |Neo4j 5.6.0
 |Neo4j 4.4.9 - 4.4.28
 .1+.^|Java 11
-.10+<.^|GDS 2.5.x
+.11+<.^|GDS 2.5.x
+|Neo4j 5.15.0
+.2+.^|Java 21 & Java 17
 |Neo4j 5.14.0
-.9+.^|Java 17
 |Neo4j 5.13.0
+.8+.^|Java 17
 |Neo4j 5.12.0
 |Neo4j 5.11.0
 |Neo4j 5.10.0
