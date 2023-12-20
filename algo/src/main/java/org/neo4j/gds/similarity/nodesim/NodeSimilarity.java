@@ -291,7 +291,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
             Wcc wcc = new WccAlgorithmFactory<>().build(graph, wccConfig, ProgressTracker.NULL_TRACKER);
             DisjointSetStruct disjointSets = wcc.compute();
-            components = initComponentIdMapping(graph, disjointSets::setIdOf);
+            components = disjointSets::setIdOf;
             progressTracker.endSubTask();
         }
 
