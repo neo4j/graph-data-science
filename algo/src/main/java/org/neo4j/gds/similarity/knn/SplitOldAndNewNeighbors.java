@@ -21,8 +21,8 @@ package org.neo4j.gds.similarity.knn;
 
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.LongArrayList;
-import org.neo4j.gds.core.concurrency.BiLongConsumer;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.concurrency.BiLongConsumer;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.SplittableRandom;
@@ -36,26 +36,58 @@ import java.util.SplittableRandom;
  *   Mark sampled items in B[v] as false;
  */
 final class SplitOldAndNewNeighbors implements BiLongConsumer {
+
+    static final class Factory {
+        private final int sampledK;
+        private final SplittableRandom random;
+        private final ProgressTracker progressTracker;
+
+        Factory(
+            int sampledK,
+            SplittableRandom random,
+            ProgressTracker progressTracker
+        ) {
+            this.sampledK = sampledK;
+            this.random = random;
+            this.progressTracker = progressTracker;
+        }
+
+        SplitOldAndNewNeighbors create(
+            Neighbors neighbors,
+            HugeObjectArray<LongArrayList> allOldNeighbors,
+            HugeObjectArray<LongArrayList> allNewNeighbors
+        ) {
+            return new SplitOldAndNewNeighbors(
+                neighbors,
+                allOldNeighbors,
+                allNewNeighbors,
+                sampledK,
+                random,
+                progressTracker
+            );
+        }
+    }
+
     private final SplittableRandom random;
-    private final HugeObjectArray<NeighborList> neighbors;
+    private final Neighbors neighbors;
     private final HugeObjectArray<LongArrayList> allOldNeighbors;
     private final HugeObjectArray<LongArrayList> allNewNeighbors;
     private final int sampledK;
     private final ProgressTracker progressTracker;
 
     SplitOldAndNewNeighbors(
-        SplittableRandom random,
-        HugeObjectArray<NeighborList> neighbors,
+        Neighbors neighbors,
         HugeObjectArray<LongArrayList> allOldNeighbors,
         HugeObjectArray<LongArrayList> allNewNeighbors,
         int sampledK,
+        SplittableRandom random,
         ProgressTracker progressTracker
     ) {
-        this.random = random;
         this.neighbors = neighbors;
         this.allOldNeighbors = allOldNeighbors;
         this.allNewNeighbors = allNewNeighbors;
         this.sampledK = sampledK;
+        this.random = random;
         this.progressTracker = progressTracker;
     }
 

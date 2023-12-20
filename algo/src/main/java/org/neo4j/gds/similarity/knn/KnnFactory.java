@@ -30,6 +30,7 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
+import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
 
 import java.util.List;
 import java.util.function.LongFunction;
@@ -48,21 +49,32 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
         return KNN_BASE_TASK_NAME;
     }
 
-    @Override
     public Knn build(
         Graph graph,
-        CONFIG configuration,
+        KnnParameters parameters,
         ProgressTracker progressTracker
     ) {
-        return Knn.createWithDefaults(
+        return Knn.create(
             graph,
-            configuration,
+            parameters,
+            SimilarityComputer.ofProperties(graph, parameters.nodePropertySpecs()),
+            new KnnNeighborFilterFactory(graph.nodeCount()),
             ImmutableKnnContext
                 .builder()
                 .progressTracker(progressTracker)
                 .executor(DefaultPool.INSTANCE)
                 .build()
         );
+    }
+
+    @Override
+    public Knn build(
+        Graph graph,
+        CONFIG configuration,
+        ProgressTracker progressTracker
+    ) {
+        var parameters = configuration.toParameters().finalize(graph.nodeCount());
+        return build(graph, parameters, progressTracker);
     }
 
     @Override
@@ -112,18 +124,17 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
         return MemoryEstimations.setup(
             taskName,
             (dim, concurrency) -> {
-                var boundedK = configuration.boundedK(dim.nodeCount());
-                var sampledK = configuration.sampledK(dim.nodeCount());
+                var k = configuration.k(dim.nodeCount());
 
                 LongFunction<MemoryRange> tempListEstimation = nodeCount -> MemoryRange.of(
                     HugeObjectArray.memoryEstimation(nodeCount, 0),
                     HugeObjectArray.memoryEstimation(
                         nodeCount,
-                        sizeOfInstance(LongArrayList.class) + sizeOfLongArray(sampledK)
+                        sizeOfInstance(LongArrayList.class) + sizeOfLongArray(k.sampledValue)
                     )
                 );
 
-                var neighborListEstimate = NeighborList.memoryEstimation(boundedK)
+                var neighborListEstimate = NeighborList.memoryEstimation(k.value)
                     .estimate(dim, concurrency)
                     .memoryUsage();
 
@@ -142,13 +153,13 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
                     .fixed(
                         "initial-random-neighbors (per thread)",
                         KnnFactory
-                            .initialSamplerMemoryEstimation(configuration.initialSampler(), boundedK)
+                            .initialSamplerMemoryEstimation(configuration.initialSampler(), k.value)
                             .times(concurrency)
                     )
                     .fixed(
                         "sampled-random-neighbors (per thread)",
                         MemoryRange.of(
-                            sizeOfIntArray(sizeOfOpenHashContainer(sampledK)) * concurrency
+                            sizeOfIntArray(sizeOfOpenHashContainer(k.sampledValue)) * concurrency
                         )
                     )
                     .build();

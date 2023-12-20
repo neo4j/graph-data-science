@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.similarity.knn;
 
-import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -29,39 +29,78 @@ import java.util.SplittableRandom;
  * Initial step in KNN calculation.
  */
 final class GenerateRandomNeighbors implements Runnable {
+
+    static final class Factory {
+        private final SimilarityFunction similarityFunction;
+        private final NeighbourConsumers neighbourConsumers;
+        private final int boundedK;
+        private final SplittableRandom random;
+        private final ProgressTracker progressTracker;
+
+        Factory(
+            SimilarityFunction similarityFunction,
+            NeighbourConsumers neighbourConsumers,
+            int boundedK,
+            SplittableRandom random,
+            ProgressTracker progressTracker
+        ) {
+            this.similarityFunction = similarityFunction;
+            this.neighbourConsumers = neighbourConsumers;
+            this.boundedK = boundedK;
+            this.random = random;
+            this.progressTracker = progressTracker;
+        }
+
+        @NotNull GenerateRandomNeighbors create(
+            Partition partition,
+            Neighbors neighbors,
+            KnnSampler sampler,
+            NeighborFilter neighborFilter
+        ) {
+            return new GenerateRandomNeighbors(
+                partition,
+                neighbors,
+                sampler,
+                neighborFilter,
+                similarityFunction,
+                neighbourConsumers,
+                boundedK,
+                random.split(),
+                progressTracker
+            );
+        }
+    }
+
+    private final Partition partition;
+    private final Neighbors neighbors;
     private final KnnSampler sampler;
+    private final NeighborFilter neighborFilter;
     private final SplittableRandom random;
     private final SimilarityFunction similarityFunction;
-    private final NeighborFilter neighborFilter;
-    private final HugeObjectArray<NeighborList> neighbors;
+    private final NeighbourConsumers neighbourConsumers;
     private final int boundedK;
     private final ProgressTracker progressTracker;
-    private final Partition partition;
-    private final NeighbourConsumers neighbourConsumers;
-
-    private long neighborsFound;
 
     GenerateRandomNeighbors(
-        KnnSampler sampler,
-        SplittableRandom random,
-        SimilarityFunction similarityFunction,
-        NeighborFilter neighborFilter,
-        HugeObjectArray<NeighborList> neighbors,
-        int boundedK,
         Partition partition,
-        ProgressTracker progressTracker,
-        NeighbourConsumers neighbourConsumers
+        Neighbors neighbors,
+        KnnSampler sampler,
+        NeighborFilter neighborFilter,
+        SimilarityFunction similarityFunction,
+        NeighbourConsumers neighbourConsumers,
+        int boundedK,
+        SplittableRandom random,
+        ProgressTracker progressTracker
     ) {
+        this.partition = partition;
+        this.neighbors = neighbors;
         this.sampler = sampler;
+        this.neighborFilter = neighborFilter;
         this.random = random;
         this.similarityFunction = similarityFunction;
-        this.neighborFilter = neighborFilter;
-        this.neighbors = neighbors;
+        this.neighbourConsumers = neighbourConsumers;
         this.boundedK = boundedK;
         this.progressTracker = progressTracker;
-        this.partition = partition;
-        this.neighborsFound = 0;
-        this.neighbourConsumers = neighbourConsumers;
     }
 
     @Override
@@ -88,12 +127,7 @@ final class GenerateRandomNeighbors implements Runnable {
             assert neighbors.size() >= Math.min(neighborFilter.lowerBoundOfPotentialNeighbours(nodeId), boundedK);
 
             this.neighbors.set(nodeId, neighbors);
-            neighborsFound += neighbors.size();
         });
         progressTracker.logProgress(partition.nodeCount());
-    }
-
-    long neighborsFound() {
-        return neighborsFound;
     }
 }

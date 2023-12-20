@@ -126,4 +126,22 @@ class RandomWalkKnnSampler implements KnnSampler {
 
         return samples;
     }
+
+    public static class Factory implements KnnSampler.Factory {
+        private final Graph graph;
+        private final Optional<Long> randomSeed;
+        private final int boundedK;
+        private final SplittableRandom random;
+
+        Factory(Graph graph, Optional<Long> randomSeed, int boundedK, SplittableRandom random) {
+            this.graph = graph;
+            this.randomSeed = randomSeed;
+            this.boundedK = boundedK;
+            this.random = random;
+        }
+
+        public KnnSampler create() {
+            return new RandomWalkKnnSampler(graph.concurrentCopy(), random.split(), randomSeed, boundedK);
+        }
+    }
 }

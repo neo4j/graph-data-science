@@ -29,6 +29,7 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
 
 class UniformKnnSampler implements KnnSampler {
 
+
     private final LongUniformSamplerFromRange uniformSamplerFromRange;
     private final long exclusiveMax;
 
@@ -56,5 +57,19 @@ class UniformKnnSampler implements KnnSampler {
             numberOfSamples,
             isInvalidSample
         );
+    }
+
+    static class Factory implements KnnSampler.Factory {
+        private final long nodeCount;
+        private final SplittableRandom random;
+
+        Factory(long nodeCount, SplittableRandom random) {
+            this.nodeCount = nodeCount;
+            this.random = random;
+        }
+
+        public KnnSampler create() {
+            return new UniformKnnSampler(random.split(), nodeCount);
+        }
     }
 }

@@ -26,6 +26,11 @@ import java.util.function.LongPredicate;
 import java.util.stream.Collectors;
 
 public interface KnnSampler {
+
+    interface Factory {
+        KnnSampler create();
+    }
+
     long[] sample(
         long nodeId,
         long lowerBoundOnValidSamplesInRange,

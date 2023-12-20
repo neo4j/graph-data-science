@@ -25,8 +25,10 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.similarity.knn.Knn;
 import org.neo4j.gds.similarity.knn.KnnContext;
+import org.neo4j.gds.similarity.knn.KnnNeighborFilterFactory;
 import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.knn.SimilarityFunction;
+import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
 
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -57,7 +59,7 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
 
     // a bit speculative, but we imagine this being used as entrypoint for seeding
     public static FilteredKnn createWithDefaultSeeding(Graph graph, FilteredKnnBaseConfig config, KnnContext context) {
-        var similarityFunction = Knn.defaultSimilarityFunction(graph, config.nodeProperties());
+        var similarityFunction = new SimilarityFunction(SimilarityComputer.ofProperties(graph, config.nodeProperties()));
 
         return create(graph, config, context, Optional.of(similarityFunction));
     }
@@ -71,9 +73,28 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
      */
     static FilteredKnn create(Graph graph, FilteredKnnBaseConfig config, KnnContext context, Optional<SimilarityFunction> optionalSimilarityFunction) {
         var targetNodeFilter = config.targetNodeFilter().toNodeFilter(graph);
-        var targetNodeFiltering = TargetNodeFiltering.create(graph.nodeCount(),config.boundedK(graph.nodeCount()), targetNodeFilter, graph, optionalSimilarityFunction, config.similarityCutoff());
-        var similarityFunction = optionalSimilarityFunction.orElse(Knn.defaultSimilarityFunction(graph, config.nodeProperties()));
-        var knn = Knn.createWithDefaultsAndInstrumentation(graph, config, context, targetNodeFiltering, similarityFunction);
+        var targetNodeFiltering = TargetNodeFiltering.create(graph.nodeCount(), config.k(graph.nodeCount()).value, targetNodeFilter, graph, optionalSimilarityFunction, config.similarityCutoff());
+        var similarityFunction = optionalSimilarityFunction.orElse(new SimilarityFunction(SimilarityComputer.ofProperties(
+            graph,
+            config.nodeProperties()
+        )));
+        var knn = new Knn(
+            graph,
+            context.progressTracker(),
+            context.executor(),
+            config.k(graph.nodeCount()),
+            config.concurrency(),
+            config.minBatchSize(),
+            config.maxIterations(),
+            config.similarityCutoff(),
+            config.perturbationRate(),
+            config.randomJoins(),
+            config.randomSeed(),
+            config.initialSampler(),
+            similarityFunction,
+            new KnnNeighborFilterFactory(graph.nodeCount()),
+            targetNodeFiltering
+        );
         var sourceNodeFilter = config.sourceNodeFilter().toNodeFilter(graph);
 
         return new FilteredKnn(context.progressTracker(), knn, targetNodeFiltering, sourceNodeFilter);

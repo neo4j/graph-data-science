@@ -86,24 +86,36 @@ public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, SingleT
         return 10;
     }
 
-    @Configuration.Ignore
-    default int sampledK(long nodeCount) {
-        // (int) is safe because value is at most `topK`, which is an int
-        // This could be violated if a sampleRate outside of [0,1] is used
-        // which is only possible from our tests
-        return Math.max(0, (int) Math.min((long) Math.ceil(this.sampleRate() * this.topK()), nodeCount - 1));
-    }
-
-    @Configuration.Ignore
-    default int boundedK(long nodeCount) {
-        // (int) is safe because value is at most `topK`, which is an int
-        return Math.max(0, (int) Math.min(this.topK(), nodeCount - 1));
-    }
-
     @Value.Default
     @Configuration.ConvertWith(method = "org.neo4j.gds.similarity.knn.KnnSampler.SamplerType#parse")
     @Configuration.ToMapValue("org.neo4j.gds.similarity.knn.KnnSampler.SamplerType#toString")
     default KnnSampler.SamplerType initialSampler() {
         return KnnSampler.SamplerType.UNIFORM;
     }
+
+    @Value.Default
+    @Configuration.Ignore
+    default K k(long nodeCount) {
+        return K.create(topK(), nodeCount, sampleRate(), deltaThreshold());
+    }
+
+    @Value.Default
+    @Configuration.Ignore
+    default KnnParametersSansNodeCount toParameters() {
+        return KnnParametersSansNodeCount.create(
+            concurrency(),
+            maxIterations(),
+            similarityCutoff(),
+            deltaThreshold(),
+            sampleRate(),
+            topK(),
+            perturbationRate(),
+            randomJoins(),
+            minBatchSize(),
+            initialSampler(),
+            randomSeed(),
+            nodeProperties()
+        );
+    }
+
 }

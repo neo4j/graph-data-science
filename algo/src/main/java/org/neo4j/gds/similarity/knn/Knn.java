@@ -20,274 +20,215 @@
 package org.neo4j.gds.similarity.knn;
 
 import com.carrotsearch.hppc.LongArrayList;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.LongStream;
 
-import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
-
 public class Knn extends Algorithm<KnnResult> {
-    private final Graph graph;
-    private final KnnBaseConfig config;
-    private final int concurrency;
-    private final NeighborFilterFactory neighborFilterFactory;
-    private final ExecutorService executorService;
-    private final SplittableRandom splittableRandom;
-    private final SimilarityFunction similarityFunction;
-    private final NeighbourConsumers neighborConsumers;
-
-    private long nodePairsConsidered;
-
-    public static Knn createWithDefaults(Graph graph, KnnBaseConfig config, KnnContext context) {
-        return createWithDefaultsAndInstrumentation(graph, config, context, NeighbourConsumers.no_op, defaultSimilarityFunction(graph, config.nodeProperties()));
-    }
-
-    public static SimilarityFunction defaultSimilarityFunction(Graph graph, List<KnnNodePropertySpec> nodeProperties) {
-        return defaultSimilarityFunction(SimilarityComputer.ofProperties(graph, nodeProperties));
-    }
-
-    private static SimilarityFunction defaultSimilarityFunction(SimilarityComputer similarityComputer) {
-        return new SimilarityFunction(similarityComputer);
-    }
-
-    @NotNull
-    public static Knn createWithDefaultsAndInstrumentation(
-        Graph graph,
-        KnnBaseConfig config,
-        KnnContext context,
-        NeighbourConsumers neighborConsumers,
-        SimilarityFunction similarityFunction
-    ) {
-        return new Knn(
-            context.progressTracker(),
-            graph,
-            config,
-            similarityFunction,
-            new KnnNeighborFilterFactory(graph.nodeCount()),
-            context.executor(),
-            getSplittableRandom(config.randomSeed()),
-            neighborConsumers
-        );
-    }
 
     public static Knn create(
         Graph graph,
-        KnnBaseConfig config,
+        KnnParameters parameters,
         SimilarityComputer similarityComputer,
         NeighborFilterFactory neighborFilterFactory,
         KnnContext context
     ) {
-        SplittableRandom splittableRandom = getSplittableRandom(config.randomSeed());
-        SimilarityFunction similarityFunction = defaultSimilarityFunction(similarityComputer);
+        var similarityFunction = new SimilarityFunction(similarityComputer);
         return new Knn(
-            context.progressTracker(),
             graph,
-            config,
+            context.progressTracker(),
+            context.executor(),
+            parameters.kHolder(),
+            parameters.concurrency(),
+            parameters.minBatchSize(),
+            parameters.maxIterations(),
+            parameters.similarityCutoff(),
+            parameters.perturbationRate(),
+            parameters.randomJoins(),
+            parameters.randomSeed(),
+            parameters.samplerType(),
             similarityFunction,
             neighborFilterFactory,
-            context.executor(),
-            splittableRandom,
             NeighbourConsumers.no_op
         );
     }
 
-    @NotNull
-    private static SplittableRandom getSplittableRandom(Optional<Long> randomSeed) {
-        return randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
-    }
+    private final Graph graph;
+    private final int concurrency;
+    private final int maxIterations;
+    private final double similarityCutoff;
+    private final int minBatchSize;
+    private final NeighborFilterFactory neighborFilterFactory;
+    private final ExecutorService executorService;
+    private final KnnSampler.Factory samplerFactory;
+    private final JoinNeighbors.Factory joinNeighborsFactory;
+    private final GenerateRandomNeighbors.Factory generateRandomNeighborsFactory;
+    private final SplitOldAndNewNeighbors.Factory splitOldAndNewNeighborsFactory;
+    private final long updateThreshold;
 
-    Knn(
-        ProgressTracker progressTracker,
+    public Knn(
         Graph graph,
-        KnnBaseConfig config,
+        ProgressTracker progressTracker,
+        ExecutorService executorService,
+        K k,
+        int concurrency,
+        int minBatchSize,
+        int maxIterations,
+        double similarityCutoff,
+        double perturbationRate,
+        int randomJoins,
+        Optional<Long> randomSeed,
+        KnnSampler.SamplerType initialSamplerType,
         SimilarityFunction similarityFunction,
         NeighborFilterFactory neighborFilterFactory,
-        ExecutorService executorService,
-        SplittableRandom splittableRandom,
         NeighbourConsumers neighborConsumers
     ) {
         super(progressTracker);
         this.graph = graph;
-        this.config = config;
-        this.concurrency = config.concurrency();
-        this.similarityFunction = similarityFunction;
+        this.concurrency = concurrency;
+        this.maxIterations = maxIterations;
+        this.similarityCutoff = similarityCutoff;
+        this.minBatchSize = minBatchSize;
         this.neighborFilterFactory = neighborFilterFactory;
         this.executorService = executorService;
-        this.splittableRandom = splittableRandom;
-        this.neighborConsumers = neighborConsumers;
+
+        this.updateThreshold = k.updateThreshold;
+
+        var splittableRandom = randomSeed.map(SplittableRandom::new).orElseGet(SplittableRandom::new);
+        switch (initialSamplerType) {
+            case UNIFORM:
+                this.samplerFactory = new UniformKnnSampler.Factory(graph.nodeCount(), splittableRandom);
+                break;
+            case RANDOMWALK:
+                this.samplerFactory = new RandomWalkKnnSampler.Factory(graph, randomSeed, k.value, splittableRandom);
+                break;
+            default:
+                throw new IllegalStateException("Invalid KnnSampler");
+        }
+        this.generateRandomNeighborsFactory = new GenerateRandomNeighbors.Factory(
+            similarityFunction,
+            neighborConsumers,
+            k.value,
+            splittableRandom,
+            progressTracker
+        );
+        this.splitOldAndNewNeighborsFactory = new SplitOldAndNewNeighbors.Factory(
+            k.sampledValue,
+            splittableRandom,
+            progressTracker
+        );
+        this.joinNeighborsFactory = new JoinNeighbors.Factory(
+            similarityFunction,
+            k.sampledValue,
+            perturbationRate,
+            randomJoins,
+            splittableRandom,
+            progressTracker
+        );
     }
 
     public ExecutorService executorService() {
-        return this.executorService;
+        return executorService;
     }
 
     @Override
     public KnnResult compute() {
-        this.progressTracker.beginSubTask();
-        HugeObjectArray<NeighborList> neighbors;
-        try (var ignored1 = ProgressTimer.start(this::logOverallTime)) {
-            try (var ignored2 = ProgressTimer.start(this::logInitTime)) {
-                this.progressTracker.beginSubTask();
-                neighbors = this.initializeRandomNeighbors();
-                this.progressTracker.endSubTask();
-            }
-            if (neighbors == null) {
-                return new EmptyResult();
-            }
-
-            var maxIterations = this.config.maxIterations();
-            var maxUpdates = (long) Math.ceil(this.config.sampleRate() * this.config.topK() * graph.nodeCount());
-            var updateThreshold = (long) Math.floor(this.config.deltaThreshold() * maxUpdates);
-
-            long updateCount;
-            int iteration = 0;
-            boolean didConverge = false;
-
-            this.progressTracker.beginSubTask();
-            for (; iteration < maxIterations; iteration++) {
-                int currentIteration = iteration;
-                try (var ignored3 = ProgressTimer.start(took -> this.logIterationTime(currentIteration + 1, took))) {
-                    updateCount = iteration(neighbors);
-                }
-                if (updateCount <= updateThreshold) {
-                    iteration++;
-                    didConverge = true;
-                    break;
-                }
-            }
-            if (config.similarityCutoff() > 0) {
-                var similarityCutoff = config.similarityCutoff();
-                var neighborFilterTasks = PartitionUtils.rangePartition(
-                    concurrency,
-                    neighbors.size(),
-                    partition -> (Runnable) () -> partition.consume(
-                        nodeId -> neighbors.get(nodeId).filterHighSimilarityResults(similarityCutoff)
-                    ),
-                    Optional.of(config.minBatchSize())
-                );
-                RunWithConcurrency.builder()
-                    .concurrency(concurrency)
-                    .tasks(neighborFilterTasks)
-                    .terminationFlag(terminationFlag)
-                    .executor(this.executorService)
-                    .run();
-            }
-            this.progressTracker.endSubTask();
-
-            this.progressTracker.endSubTask();
-            return ImmutableKnnResult.of(
-                neighbors,
-                iteration,
-                didConverge,
-                this.nodePairsConsidered,
-                graph.nodeCount()
-            );
+        if (graph.nodeCount() < 2) {
+            return new EmptyResult();
         }
+        progressTracker.beginSubTask();
+        progressTracker.beginSubTask();
+        var neighbors = initializeRandomNeighbors();
+        progressTracker.endSubTask();
+
+        long updateCount;
+        int iteration = 0;
+        boolean didConverge = false;
+
+        progressTracker.beginSubTask();
+        for (; iteration < maxIterations; iteration++) {
+            updateCount = iteration(neighbors);
+            if (updateCount <= updateThreshold) {
+                iteration++;
+                didConverge = true;
+                break;
+            }
+        }
+        if (similarityCutoff > 0) {
+            var neighborFilterTasks = PartitionUtils.rangePartition(
+                concurrency,
+                neighbors.size(),
+                partition -> (Runnable) () -> partition.consume(
+                    nodeId -> neighbors.filterHighSimilarityResult(nodeId, similarityCutoff)
+                ),
+                Optional.of(minBatchSize)
+            );
+            RunWithConcurrency.builder()
+                .concurrency(concurrency)
+                .tasks(neighborFilterTasks)
+                .terminationFlag(terminationFlag)
+                .executor(executorService)
+                .run();
+        }
+        progressTracker.endSubTask();
+
+        progressTracker.endSubTask();
+        return ImmutableKnnResult.of(
+            neighbors.data(),
+            iteration,
+            didConverge,
+            neighbors.neighborsFound() + neighbors.joinCounter(),
+            graph.nodeCount()
+        );
     }
 
-    private @Nullable HugeObjectArray<NeighborList> initializeRandomNeighbors() {
-        var k = this.config.topK();
-        // (int) is safe since it is at most k, which is an int
-        var boundedK = (int) Math.min(graph.nodeCount() - 1, k);
-
-        assert boundedK <= k && boundedK <= graph.nodeCount() - 1;
-
-        if (graph.nodeCount() < 2 || k == 0) {
-            return null;
-        }
-
-        var neighbors = HugeObjectArray.newArray(NeighborList.class, graph.nodeCount());
+    private Neighbors initializeRandomNeighbors() {
+        var neighbors = new Neighbors(graph.nodeCount());
 
         var randomNeighborGenerators = PartitionUtils.rangePartition(
             concurrency,
             graph.nodeCount(),
-            partition -> {
-                var localRandom = splittableRandom.split();
-                return new GenerateRandomNeighbors(
-                    initializeSampler(localRandom),
-                    localRandom,
-                    this.similarityFunction,
-                    this.neighborFilterFactory.create(),
-                    neighbors,
-                    boundedK,
-                    partition,
-                    progressTracker,
-                    neighborConsumers
-                );
-            },
-            Optional.of(config.minBatchSize())
+            partition -> generateRandomNeighborsFactory.create(
+                partition,
+                neighbors,
+                samplerFactory.create(),
+                neighborFilterFactory.create()
+            ),
+            Optional.of(minBatchSize)
         );
 
         RunWithConcurrency.builder()
             .concurrency(concurrency)
             .tasks(randomNeighborGenerators)
             .terminationFlag(terminationFlag)
-            .executor(this.executorService)
+            .executor(executorService)
             .run();
-
-        this.nodePairsConsidered += randomNeighborGenerators.stream().mapToLong(GenerateRandomNeighbors::neighborsFound).sum();
 
         return neighbors;
     }
 
-    private KnnSampler initializeSampler(SplittableRandom random) {
-        switch(config.initialSampler()) {
-            case UNIFORM: {
-                return new UniformKnnSampler(random, graph.nodeCount());
-            }
-            case RANDOMWALK: {
-                return new RandomWalkKnnSampler(
-                    graph.concurrentCopy(),
-                    random,
-                    config.randomSeed(),
-                    config.boundedK(graph.nodeCount())
-                );
-            }
-            default:
-                throw new IllegalStateException("Invalid KnnSampler");
-        }
-    }
-
-    private long iteration(HugeObjectArray<NeighborList> neighbors) {
-        // this is a sanity check
-        // we check for this before any iteration and return
-        // and just make sure that this invariant holds on every iteration
+    private long iteration(Neighbors neighbors) {
         var nodeCount = graph.nodeCount();
-        if (nodeCount < 2 || this.config.topK() == 0) {
-            return NeighborList.NOT_INSERTED;
-        }
-
-        var minBatchSize = this.config.minBatchSize();
-
-        var sampledK = this.config.sampledK(nodeCount);
 
         // TODO: init in ctor and reuse - benchmark against new allocations
         var allOldNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount);
         var allNewNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount);
 
         progressTracker.beginSubTask();
-        ParallelUtil.readParallel(concurrency, nodeCount, this.executorService, new SplitOldAndNewNeighbors(
-            this.splittableRandom,
+        ParallelUtil.readParallel(concurrency, nodeCount, executorService, splitOldAndNewNeighborsFactory.create(
             neighbors,
             allOldNeighbors,
-            allNewNeighbors,
-            sampledK,
-            progressTracker
+            allNewNeighbors
         ));
         progressTracker.endSubTask();
 
@@ -310,20 +251,14 @@ public class Knn extends Algorithm<KnnResult> {
         var neighborsJoiners = PartitionUtils.rangePartition(
             concurrency,
             nodeCount,
-            partition -> new JoinNeighbors(
-                this.splittableRandom.split(),
-                this.similarityFunction,
-                this.neighborFilterFactory.create(),
+            partition -> joinNeighborsFactory.create(
+                partition,
                 neighbors,
                 allOldNeighbors,
                 allNewNeighbors,
                 reverseOldNeighbors,
                 reverseNewNeighbors,
-                sampledK,
-                this.config.perturbationRate(),
-                this.config.randomJoins(),
-                partition,
-                progressTracker
+                neighborFilterFactory.create()
             ),
             Optional.of(minBatchSize)
         );
@@ -333,13 +268,11 @@ public class Knn extends Algorithm<KnnResult> {
             .concurrency(concurrency)
             .tasks(neighborsJoiners)
             .terminationFlag(terminationFlag)
-            .executor(this.executorService)
+            .executor(executorService)
             .run();
         progressTracker.endSubTask();
 
-        this.nodePairsConsidered += neighborsJoiners.stream().mapToLong(JoinNeighbors::nodePairsConsidered).sum();
-
-        return neighborsJoiners.stream().mapToLong(joiner -> joiner.updateCount).sum();
+        return neighborsJoiners.stream().mapToLong(JoinNeighbors::updateCount).sum();
     }
 
     private static void reverseOldAndNewNeighbors(
@@ -383,219 +316,6 @@ public class Knn extends Algorithm<KnnResult> {
                 oldReverse.add(nodeId);
             }
         }
-    }
-
-    static final class JoinNeighbors implements Runnable {
-        private final SplittableRandom random;
-        private final SimilarityFunction similarityFunction;
-        private final NeighborFilter neighborFilter;
-        private final HugeObjectArray<NeighborList> allNeighbors;
-        private final HugeObjectArray<LongArrayList> allOldNeighbors;
-        private final HugeObjectArray<LongArrayList> allNewNeighbors;
-        private final HugeObjectArray<LongArrayList> allReverseOldNeighbors;
-        private final HugeObjectArray<LongArrayList> allReverseNewNeighbors;
-        private final int sampledK;
-        private final int randomJoins;
-        private final ProgressTracker progressTracker;
-        private final long nodeCount;
-        private long updateCount;
-        private final Partition partition;
-        private long nodePairsConsidered;
-        private final double perturbationRate;
-
-        JoinNeighbors(
-            SplittableRandom random,
-            SimilarityFunction similarityFunction,
-            NeighborFilter neighborFilter,
-            HugeObjectArray<NeighborList> allNeighbors,
-            HugeObjectArray<LongArrayList> allOldNeighbors,
-            HugeObjectArray<LongArrayList> allNewNeighbors,
-            HugeObjectArray<LongArrayList> allReverseOldNeighbors,
-            HugeObjectArray<LongArrayList> allReverseNewNeighbors,
-            int sampledK,
-            double perturbationRate,
-            int randomJoins,
-            Partition partition,
-            ProgressTracker progressTracker
-        ) {
-            this.random = random;
-            this.similarityFunction = similarityFunction;
-            this.neighborFilter = neighborFilter;
-            this.allNeighbors = allNeighbors;
-            this.nodeCount = allNewNeighbors.size();
-            this.allOldNeighbors = allOldNeighbors;
-            this.allNewNeighbors = allNewNeighbors;
-            this.allReverseOldNeighbors = allReverseOldNeighbors;
-            this.allReverseNewNeighbors = allReverseNewNeighbors;
-            this.sampledK = sampledK;
-            this.randomJoins = randomJoins;
-            this.partition = partition;
-            this.progressTracker = progressTracker;
-            this.perturbationRate = perturbationRate;
-            this.updateCount = 0;
-            this.nodePairsConsidered = 0;
-        }
-
-        @Override
-        public void run() {
-            var startNode = partition.startNode();
-            long endNode = startNode + partition.nodeCount();
-
-            for (long nodeId = startNode; nodeId < endNode; nodeId++) {
-                // old[v] ∪ Sample(old′[v], ρK)
-                var oldNeighbors = allOldNeighbors.get(nodeId);
-                if (oldNeighbors != null) {
-                    combineNeighbors(allReverseOldNeighbors.get(nodeId), oldNeighbors);
-                }
-
-
-                // new[v] ∪ Sample(new′[v], ρK)
-                var newNeighbors = allNewNeighbors.get(nodeId);
-                if (newNeighbors != null) {
-                    combineNeighbors(allReverseNewNeighbors.get(nodeId), newNeighbors);
-
-                    this.updateCount += joinNewNeighbors(nodeId, oldNeighbors, newNeighbors);
-                }
-
-                // this isn't in the paper
-                randomJoins(nodeCount, nodeId);
-            }
-            progressTracker.logProgress(partition.nodeCount());
-        }
-
-        private long joinNewNeighbors(long nodeId, LongArrayList oldNeighbors, LongArrayList newNeighbors
-        ) {
-            long updateCount = 0;
-
-            var newNeighborElements = newNeighbors.buffer;
-            var newNeighborsCount = newNeighbors.elementsCount;
-            boolean similarityIsSymmetric = similarityFunction.isSymmetric();
-
-            for (int i = 0; i < newNeighborsCount; i++) {
-                var elem1 = newNeighborElements[i];
-                assert elem1 != nodeId;
-
-                // join(u1, nodeId), this isn't in the paper
-                updateCount += join(elem1, nodeId);
-
-                //  try out using the new neighbors between themselves / join(new_nbd, new_ndb)
-                for (int j = i + 1; j < newNeighborsCount; j++) {
-                    var elem2 = newNeighborElements[j];
-                    if (elem1 == elem2) {
-                        continue;
-                    }
-
-                    if (similarityIsSymmetric) {
-                        updateCount += joinSymmetric(elem1, elem2);
-                    } else {
-                        updateCount += join(elem1, elem2);
-                        updateCount += join(elem2, elem1);
-                    }
-                }
-
-                // try out joining the old neighbors with the new neighbor / join(new_nbd, old_ndb)
-                if (oldNeighbors != null) {
-                    for (var oldElemCursor : oldNeighbors) {
-                        var elem2 = oldElemCursor.value;
-
-                        if (elem1 == elem2) {
-                            continue;
-                        }
-
-                        if (similarityIsSymmetric) {
-                            updateCount += joinSymmetric(elem1, elem2);
-                        } else {
-                            updateCount += join(elem1, elem2);
-                            updateCount += join(elem2, elem1);
-                        }
-                    }
-                }
-            }
-            return updateCount;
-        }
-
-        private void combineNeighbors(@Nullable LongArrayList reversedNeighbors, LongArrayList neighbors) {
-            if (reversedNeighbors != null) {
-                var numberOfReverseNeighbors = reversedNeighbors.size();
-                for (var elem : reversedNeighbors) {
-                    if (random.nextInt(numberOfReverseNeighbors) < sampledK) {
-                        // TODO: this could add nodes twice, maybe? should this be a set?
-                        neighbors.add(elem.value);
-                    }
-                }
-            }
-        }
-
-        private void randomJoins(long nodeCount, long nodeId) {
-            for (int i = 0; i < randomJoins; i++) {
-                var randomNodeId = random.nextLong(nodeCount - 1);
-                // shifting the randomNode as the randomNode was picked from [0, n-1)
-                if (randomNodeId >= nodeId) {
-                    ++randomNodeId;
-                }
-                // random joins are not counted towards the actual update counter
-                join(nodeId, randomNodeId);
-            }
-        }
-
-        private long joinSymmetric(long node1, long node2) {
-            assert node1 != node2;
-
-            if (neighborFilter.excludeNodePair(node1, node2)) {
-                return 0;
-            }
-
-            nodePairsConsidered++;
-            var similarity = similarityFunction.computeSimilarity(node1, node2);
-
-            var neighbors1 = allNeighbors.get(node1);
-
-            var updates = 0L;
-
-            synchronized (neighbors1) {
-                updates += neighbors1.add(node2, similarity, random, perturbationRate);
-            }
-
-            var neighbors2 = allNeighbors.get(node2);
-
-            synchronized (neighbors2) {
-                updates += neighbors2.add(node1, similarity, random, perturbationRate);
-            }
-
-            return updates;
-        }
-
-        private long join(long node1, long node2) {
-            assert node1 != node2;
-
-            if (neighborFilter.excludeNodePair(node1, node2)) {
-                return 0;
-            }
-
-            var similarity = similarityFunction.computeSimilarity(node1, node2);
-            nodePairsConsidered++;
-            var neighbors = allNeighbors.get(node1);
-
-            synchronized (neighbors) {
-                return neighbors.add(node2, similarity, random, perturbationRate);
-            }
-        }
-
-        long nodePairsConsidered() {
-            return nodePairsConsidered;
-        }
-    }
-
-    private void logInitTime(long ms) {
-        progressTracker.logInfo(formatWithLocale("Graph init took %d ms", ms));
-    }
-
-    private void logIterationTime(int iteration, long ms) {
-        progressTracker.logInfo(formatWithLocale("Graph iteration %d took %d ms", iteration, ms));
-    }
-
-    private void logOverallTime(long ms) {
-        progressTracker.logInfo(formatWithLocale("Graph execution took %d ms", ms));
     }
 
     private static final class EmptyResult extends KnnResult {

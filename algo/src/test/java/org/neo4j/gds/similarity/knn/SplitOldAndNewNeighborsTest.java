@@ -76,11 +76,11 @@ class SplitOldAndNewNeighborsTest extends RandomNodeCountAndKValues {
         );
 
         var splitNeighbors = new SplitOldAndNewNeighbors(
-            new SplittableRandom(),
-            allNeighbors,
+            new Neighbors(allNeighbors),
             allOldNeighbors,
             allNewNeighbors,
             sampledK,
+            new SplittableRandom(),
             ProgressTracker.NULL_TRACKER
         );
         splitNeighbors.apply(0, nodeCount);
