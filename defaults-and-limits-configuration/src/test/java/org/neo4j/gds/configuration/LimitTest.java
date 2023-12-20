@@ -37,11 +37,6 @@ class LimitTest {
             protected boolean isViolatedInternal(Object inputValue) {
                 throw new UnsupportedOperationException("TODO");
             }
-
-            @Override
-            String getValueAsString() {
-                throw new UnsupportedOperationException("TODO");
-            }
         };
 
         try {
