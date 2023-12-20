@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SplittableRandom;
 import java.util.function.LongUnaryOperator;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -74,7 +75,7 @@ class NodesSortedByComponentTest {
         }
         assertThat(idxUpperBoundPerComponent.get(7)).isEqualTo(0L);
         int previousUpperBound = -1;
-        for (long key : componentPerIdxUpperBound.keySet().stream().sorted().toList()) {
+        for (long key : componentPerIdxUpperBound.keySet().stream().sorted().collect(Collectors.toList())) {
             switch ((int) (key - previousUpperBound)) {
                 case 1: assertThat(componentPerIdxUpperBound.get(key)).isEqualTo(4);break;
                 case 2: assertThat(componentPerIdxUpperBound.get(key)).isEqualTo(5);break;
