@@ -26,9 +26,12 @@ import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.shuffle.ShuffleUtil;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SplittableRandom;
@@ -102,22 +105,89 @@ class NodesSortedByComponentTest {
         upperBoundPerComponent.set(4, 18);
         upperBoundPerComponent.set(5, 20);
         upperBoundPerComponent.set(6, 27);
-        var componentCoordinateArray = HugeAtomicLongArray.of(28, ParalleLongPageCreator.passThrough(4));
-        upperBoundPerComponent.copyTo(componentCoordinateArray, 28);
 
         var nodesSortedByComponent = NodesSortedByComponent.computeNodesSortedByComponent(components,
-            componentCoordinateArray, 4);
+            upperBoundPerComponent, 4);
 
         // nodes may occur in arbitrary order within components, but with the given assignment, nodeIds must be within
         // component index bounds
         assertEquals(28, nodesSortedByComponent.size());
-        for (int i = 0; i < 27; i++) {
+        for (int i = 0; i < 28; i++) {
             var currentComp = components.applyAsLong(nodesSortedByComponent.get(i));
 
             assertThat(nodesSortedByComponent.get(i)).isGreaterThan(currentComp == 0 ?
                 -1 : upperBoundPerComponent.get(currentComp - 1));
             assertThat(nodesSortedByComponent.get(i)).isLessThanOrEqualTo(upperBoundPerComponent.get(currentComp));
         }
+    }
+
+    @Test
+    void shouldComputeNodesSortedByComponentsNotConsecutive() {
+        // nodeId -> componentId
+        LongUnaryOperator components = nodeId -> {
+            if (nodeId < 4) {
+                return 3; // size 4
+            } else if (nodeId < 6) {
+                return 5; // size 2
+            } else {
+                return 1; // size 5
+            }
+        };
+        // componentId, upperIdx of component
+        var upperBoundPerComponent = HugeAtomicLongArray.of(11, ParalleLongPageCreator.passThrough(4));
+        upperBoundPerComponent.set(3, 3);
+        upperBoundPerComponent.set(5, 10);
+        upperBoundPerComponent.set(1, 8);
+
+        var nodesSortedByComponent = NodesSortedByComponent.computeNodesSortedByComponent(components,
+            upperBoundPerComponent, 4);
+
+        // nodes may occur in arbitrary order within components, but with the given assignment, nodeIds must be within
+        // component index bounds
+        assertEquals(11, nodesSortedByComponent.size());
+        Collection<Long> values = new ArrayList<>();
+        int end = 0;
+        while (end < 11) {
+            int start = end;
+            if (nodesSortedByComponent.get(start) < 4) {
+                // next 4 nodes must be of component 3
+                end += 4;
+                values.addAll(List.of(0L, 1L, 2L, 3L));
+            } else if (nodesSortedByComponent.get(start) < 6) {
+                // next 2 nodes must be of component 5
+                end += 2;
+                values.addAll(List.of(4L, 5L));
+            } else {
+                // next 5 nodes must be of component 1
+                end += 5;
+                values.addAll(List.of(6L, 7L, 8L, 9L, 10L));
+            }
+            for (int i = start; i < end; i++) {
+                long nodeId = nodesSortedByComponent.get(i);
+                assertTrue(values.remove(nodeId));
+            }
+        }
+
+        NodesSortedByComponent nodesSortedByComponentMock = Mockito.mock(NodesSortedByComponent.class);
+        Mockito.doReturn(components).when(nodesSortedByComponentMock).getComponents();
+        Mockito.doReturn(upperBoundPerComponent).when(nodesSortedByComponentMock).getUpperBoundPerComponent();
+        Mockito.doReturn(nodesSortedByComponent).when(nodesSortedByComponentMock).getNodesSorted();
+
+        // no component with id 0
+        Mockito.doCallRealMethod().when(nodesSortedByComponentMock).iterator(0L,0L);
+        Iterator<Long> iterator = nodesSortedByComponentMock.iterator(0L, 0L);
+        assertFalse(iterator.hasNext());
+
+        // 5 nodes for component with id 1
+        Mockito.doCallRealMethod().when(nodesSortedByComponentMock).iterator(1L,0L);
+        iterator = nodesSortedByComponentMock.iterator(1L, 0L);
+        values.addAll(List.of(6L, 7L, 8L, 9L, 10L));
+        for (int i = 0; i < 5; i++) {
+            assertTrue(iterator.hasNext());
+            long nodeId = iterator.next();
+            assertTrue(values.remove(nodeId));
+        }
+        assertFalse(iterator.hasNext());
     }
 
     @Test
@@ -156,16 +226,16 @@ class NodesSortedByComponentTest {
         Mockito.doReturn(nodesSorted).when(nodesSortedByComponentMock).getNodesSorted();
 
         // first component
-        Mockito.doCallRealMethod().when(nodesSortedByComponentMock).iterator(0L,-1L);
-        Iterator<Long> iterator = nodesSortedByComponentMock.iterator(0L, -1L);
+        Mockito.doCallRealMethod().when(nodesSortedByComponentMock).iterator(0L,0L);
+        Iterator<Long> iterator = nodesSortedByComponentMock.iterator(0L, 0L);
         for (int nodeId = 0; nodeId < 3; nodeId++) {
             assertTrue(iterator.hasNext());
             assertThat(iterator.next()).isEqualTo(nodeId);
         }
         assertFalse(iterator.hasNext());
         // second component
-        Mockito.doCallRealMethod().when(nodesSortedByComponentMock).iterator(1L,-1L);
-        iterator = nodesSortedByComponentMock.iterator(1L, -1L);
+        Mockito.doCallRealMethod().when(nodesSortedByComponentMock).iterator(1L,0L);
+        iterator = nodesSortedByComponentMock.iterator(1L, 0L);
         for (int nodeId = 3; nodeId < 8; nodeId++) {
             assertTrue(iterator.hasNext());
             assertThat(iterator.next()).isEqualTo(nodeId);
