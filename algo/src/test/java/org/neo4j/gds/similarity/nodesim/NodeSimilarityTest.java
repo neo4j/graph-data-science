@@ -74,7 +74,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @GdlExtension
 final class NodeSimilarityTest {
 
-    // fixing idOffset to 0 as the expecatations hard-code ids
+    // fixing idOffset to 0 as the expectations hard-code ids
     @GdlGraph(graphNamePrefix = "natural", orientation = NATURAL, idOffset = 0)
     @GdlGraph(graphNamePrefix = "reverse", orientation = REVERSE, idOffset = 0)
     @GdlGraph(graphNamePrefix = "undirected", orientation = UNDIRECTED, idOffset = 0)
@@ -685,7 +685,6 @@ final class NodeSimilarityTest {
         MemoryRange weightsRange = MemoryRange.of(weightsRangeMin, weightsRangeMax);
 
         MemoryEstimations.Builder builder = MemoryEstimations.builder()
-            .fixed("components", 8000040)
             .fixed("node filter", nodeFilterRange)
             .fixed("vectors", vectorsRange)
             .fixed("weights", weightsRange)
@@ -743,7 +742,6 @@ final class NodeSimilarityTest {
         MemoryRange topNListRange = MemoryRange.of(topNListMin, topNListMax);
 
         MemoryEstimations.Builder builder = MemoryEstimations.builder()
-            .fixed("components", 8000040)
             .fixed("node filter", nodeFilterRange)
             .fixed("vectors", vectorsRange)
             .fixed("weights", weightsRange)
@@ -784,8 +782,8 @@ final class NodeSimilarityTest {
 
         MemoryTree actual = new NodeSimilarityFactory<>().memoryEstimation(config).estimate(dimensions, 1);
 
-        assertEquals(571432, actual.memoryUsage().min);
-        assertEquals(733032, actual.memoryUsage().max);
+        assertEquals(570592, actual.memoryUsage().min);
+        assertEquals(732192, actual.memoryUsage().max);
 
     }
 
@@ -874,6 +872,46 @@ final class NodeSimilarityTest {
         assertThat(log.getMessages(INFO))
             .extracting(removingThreadId())
             .contains(
+                "NodeSimilarity :: prepare :: Start",
+                "NodeSimilarity :: prepare :: Finished",
+                "NodeSimilarity :: compare node pairs :: Start",
+                "NodeSimilarity :: compare node pairs :: Finished"
+            );
+    }
+
+    @Test
+    void shouldLogProgressForWccOptimization() {
+        var graph = naturalGraph;
+        var config = ImmutableNodeSimilarityStreamConfig.builder()
+            .considerComponents(true)
+            .concurrency(4)
+            .build();
+        var progressTask = new NodeSimilarityFactory<>().progressTask(graph, config);
+        TestLog log = Neo4jProxy.testLog();
+        var progressTracker = new TestProgressTracker(
+            progressTask,
+            log,
+            4,
+            EmptyTaskRegistryFactory.INSTANCE
+        );
+
+        NodeSimilarity.create(
+            graph,
+            config,
+            DefaultPool.INSTANCE,
+            progressTracker
+        ).compute().streamResult().count();
+
+        List<AtomicLong> progresses = progressTracker.getProgresses();
+
+        // Should log progress for prepare and actual comparisons
+        assertThat(progresses).hasSize(6);
+
+        assertThat(log.getMessages(INFO))
+            .extracting(removingThreadId())
+            .contains(
+                "NodeSimilarity :: prepare :: WCC :: Start",
+                "NodeSimilarity :: prepare :: WCC :: Finished",
                 "NodeSimilarity :: prepare :: Start",
                 "NodeSimilarity :: prepare :: Finished",
                 "NodeSimilarity :: compare node pairs :: Start",
@@ -980,43 +1018,5 @@ final class NodeSimilarityTest {
     void shouldThrowIfUpperIsSmaller() {
         assertThatThrownBy(streamConfigBuilder().upperDegreeCutoff(3).degreeCutoff(4)::build)
             .hasMessageContaining("upperDegreeCutoff cannot be smaller than degreeCutoff");
-    }
-
-
-    @Test
-    void shouldOptimizeForDistinctComponents() {
-        var graph = naturalGraph;
-        var config = ImmutableNodeSimilarityStreamConfig.builder().isEnableComponentOptimization(true).degreeCutoff(0).concurrency(4).build();
-        var progressTask = new NodeSimilarityFactory<>().progressTask(graph, config);
-        TestLog log = Neo4jProxy.testLog();
-        var progressTracker = new TestProgressTracker(
-            progressTask,
-            log,
-            4,
-            EmptyTaskRegistryFactory.INSTANCE
-        );
-
-        NodeSimilarity.create(
-            graph,
-            config,
-            DefaultPool.INSTANCE,
-            progressTracker
-        ).compute().streamResult().count();
-
-        List<AtomicLong> progresses = progressTracker.getProgresses();
-
-        // Should log progress for prepare and actual comparisons
-        assertThat(progresses).hasSize(6);
-
-        assertThat(log.getMessages(INFO))
-            .extracting(removingThreadId())
-            .contains(
-                "NodeSimilarity :: prepare :: WCC :: Start",
-                "NodeSimilarity :: prepare :: WCC :: Finished",
-                "NodeSimilarity :: prepare :: Start",
-                "NodeSimilarity :: prepare :: Finished",
-                "NodeSimilarity :: compare node pairs :: Start",
-                "NodeSimilarity :: compare node pairs :: Finished"
-            );
     }
 }

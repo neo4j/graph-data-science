@@ -52,8 +52,8 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
 
     String COMPONENT_PROPERTY_KEY = "componentProperty";
 
-    String ENABLE_COMPONENT_OPTIMIZATION_KEY = "enableComponentOptimization";
-    boolean ENABLE_COMPONENT_OPTIMIZATION = false;
+    String CONSIDER_COMPONENTS_KEY = "considerComponents";
+    boolean CONSIDER_COMPONENTS = false;
 
     @Value.Default
     @Configuration.DoubleRange(min = 0, max = 1)
@@ -114,8 +114,8 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
     default @Nullable String componentProperty() { return null; }
 
     @Value.Default
-    @Configuration.Key(ENABLE_COMPONENT_OPTIMIZATION_KEY)
-    default boolean isEnableComponentOptimization() { return ENABLE_COMPONENT_OPTIMIZATION; }
+    @Configuration.Key(CONSIDER_COMPONENTS_KEY)
+    default boolean considerComponents() { return CONSIDER_COMPONENTS; }
 
     @Configuration.Ignore
     @Value.Derived
@@ -203,10 +203,7 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
 
     @Value.Derived
     default boolean runWCC() {
-        if (isEnableComponentOptimization() && componentProperty() == null) {
-            return true;
-        }
-        return false;
+        return considerComponents() && componentProperty() == null;
     }
 
 }

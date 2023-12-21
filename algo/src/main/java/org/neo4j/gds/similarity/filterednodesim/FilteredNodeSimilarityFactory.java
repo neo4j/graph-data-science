@@ -24,6 +24,7 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -74,7 +75,6 @@ public class FilteredNodeSimilarityFactory<CONFIG extends FilteredNodeSimilarity
         int topK = Math.abs(config.normalizedK());
 
         MemoryEstimations.Builder builder = MemoryEstimations.builder(NodeSimilarity.class.getSimpleName())
-            .perNode("components", HugeLongArray::memoryEstimation)
             .perNode("node filter", nodeCount -> sizeOfLongArray(BitSet.bits2words(nodeCount)))
             .add(
                 "vectors",
@@ -97,6 +97,13 @@ public class FilteredNodeSimilarityFactory<CONFIG extends FilteredNodeSimilarity
                         .rangePerNode("array", nodeCount -> MemoryRange.of(0, nodeCount * averageVectorSize))
                         .build();
                 }));
+        if (config.considerComponents()) {
+            builder.perNode("nodes sorted by component", HugeLongArray::memoryEstimation);
+            builder.perNode("upper bound per component", HugeAtomicLongArray::memoryEstimation);
+        }
+        if (config.considerComponents() && config.componentProperty() != null) {
+            builder.perNode("component mapping", HugeLongArray::memoryEstimation);
+        }
         if (config.computeToGraph() && !config.hasTopK()) {
             builder.add(
                 "similarity graph",
