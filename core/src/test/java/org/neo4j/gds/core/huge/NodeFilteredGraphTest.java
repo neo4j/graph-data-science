@@ -39,6 +39,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @GdlExtension
@@ -83,7 +84,8 @@ class NodeFilteredGraphTest {
         unfilteredGraph.forEachNode(nodeId -> {
             long filteredNodeId = filteredGraph.toFilteredNodeId(nodeId);
             if (unfilteredGraph.hasLabel(nodeId, filterLabel)) {
-                assertThat(filteredGraph.toOriginalNodeId(filteredNodeId)).isEqualTo(unfilteredGraph.toOriginalNodeId(nodeId));
+                assertThat(filteredGraph.toOriginalNodeId(filteredNodeId))
+                    .isEqualTo(unfilteredGraph.toOriginalNodeId(nodeId));
             } else {
                 assertThat(filteredNodeId).isEqualTo(IdMap.NOT_FOUND);
             }
@@ -228,6 +230,24 @@ class NodeFilteredGraphTest {
             return true;
         });
 
+    }
+
+    @Test
+    void throwDegreeInverseIfNotIndexed() {
+        var graph = GdlFactory.of("(a:A)-->(b:B)-->(:B)").build().getGraph(NodeLabel.of("B"));
+
+        assertThatThrownBy(() -> graph.degreeInverse(0))
+            .isInstanceOf(UnsupportedOperationException.class)
+            .hasMessageContaining("Cannot access inverse relationships as this graph is not inverse indexed.");
+    }
+
+    @Test
+    void throwForeachInverseRelationshipIfNotIndexed() {
+        var graph = GdlFactory.of("(a:A)-->(b:B)-->(:B)").build().getGraph(NodeLabel.of("B"));
+
+        assertThatThrownBy(() -> graph.forEachInverseRelationship(0, (sourceNodeId, targetNodeId) -> true))
+            .isInstanceOf(UnsupportedOperationException.class)
+            .hasMessageContaining("Cannot access inverse relationships as this graph is not inverse indexed.");
     }
 
     Function<String, Long> filteredIdFunction(Graph graph) {

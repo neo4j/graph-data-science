@@ -147,6 +147,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
 
     @Override
     public int degreeInverse(long nodeId) {
+        validateIndexInverse();
         int cachedDegree = this.degreeInverseCache.get(nodeId);
         if (cachedDegree != NO_DEGREE) {
             return cachedDegree;
@@ -253,6 +254,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
 
     @Override
     public void forEachInverseRelationship(long nodeId, RelationshipConsumer consumer) {
+        validateIndexInverse();
         super.forEachInverseRelationship(
             filteredIdMap.toRootNodeId(nodeId),
             (s, t) -> filterAndConsume(s, t, consumer)
@@ -265,6 +267,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
         double fallbackValue,
         RelationshipWithPropertyConsumer consumer
     ) {
+        validateIndexInverse();
         super.forEachInverseRelationship(
             filteredIdMap.toRootNodeId(nodeId),
             fallbackValue,
@@ -361,6 +364,14 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
             return null;
         }
         return new FilteredNodePropertyValues.FilteredToOriginalNodePropertyValues(properties, this);
+    }
+
+    private void validateIndexInverse() {
+        if (this.degreeInverseCache == null) {
+            throw new UnsupportedOperationException(
+                "Cannot access inverse relationships as this graph is not inverse indexed."
+            );
+        }
     }
 
     private boolean filterAndConsume(long source, long target, RelationshipConsumer consumer) {
