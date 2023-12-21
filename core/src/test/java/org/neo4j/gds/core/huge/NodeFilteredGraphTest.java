@@ -44,16 +44,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @GdlExtension
 class NodeFilteredGraphTest {
 
-    @GdlGraph(idOffset = 1337)
+    @GdlGraph(idOffset = 1337, indexInverse = true)
     static String GDL = " (x:Ignore)," +
                         " (a:Person)," +
                         " (b:Ignore:Person)," +
                         " (c:Ignore:Person)," +
                         " (d:Person)," +
                         " (e:Ignore)," +
+                        " (x)-->(d)," + // ignored for index inverse
                         " (a)-->(b)," +
                         " (a)-->(e)," +
                         " (b)-->(c)," +
+                        " (x)-->(c)," + // ignored for index inverse
                         " (b)-->(d)," +
                         " (c)-->(e)";
 
@@ -120,6 +122,32 @@ class NodeFilteredGraphTest {
         );
 
         assertThat(graph.degreeWithoutParallelRelationships(filteredIdFunction(graph).apply("a"))).isEqualTo(1L);
+    }
+
+    @Test
+    void filterDegreeInverse() {
+        var graph = graphStore.getGraph(
+            NodeLabel.of("Person"),
+            RelationshipType.ALL_RELATIONSHIPS,
+            Optional.empty()
+        );
+
+        assertThat(graph.degreeInverse(filteredIdFunction(graph).apply("d"))).isEqualTo(1L);
+    }
+
+    @Test
+    void foreachInverseRelationship() {
+        var graph = graphStore.getGraph(
+            NodeLabel.of("Person"),
+            RelationshipType.ALL_RELATIONSHIPS,
+            Optional.empty()
+        );
+
+        graph.forEachInverseRelationship(filteredIdFunction(graph).apply("d"), (source, target) -> {
+            assertThat(source).isEqualTo(filteredIdFunction(graph).apply("d"));
+            assertThat(target).isEqualTo(filteredIdFunction(graph).apply("b"));
+            return true;
+        });
     }
 
     @Test
