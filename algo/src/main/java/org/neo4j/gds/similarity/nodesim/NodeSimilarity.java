@@ -415,9 +415,9 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             return (componentId, offset) -> new SetBitsIterable(targetNodes, offset).stream();
         }
 
-        var nodesByComponent = new NodesSortedByComponent(components, graph.nodeCount(), concurrency);
+        var componentNodes = ComponentNodes.create(components, graph.nodeCount(), concurrency);
         return (componentId, offset) -> StreamSupport
-            .longStream(nodesByComponent.spliterator(componentId, offset), true)
+            .longStream(componentNodes.spliterator(componentId, offset), true)
             .filter(targetNodes::get);
     }
 

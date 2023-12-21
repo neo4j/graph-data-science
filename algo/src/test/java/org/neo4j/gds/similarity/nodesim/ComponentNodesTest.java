@@ -43,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class NodesSortedByComponentTest {
+class ComponentNodesTest {
 
     private LongUnaryOperator prepare7DistinctSizeComponents() {
         return nodeId -> {
@@ -70,7 +70,7 @@ class NodesSortedByComponentTest {
         // nodeId -> componentId
         var components = prepare7DistinctSizeComponents();
         // componentId, upperBound
-        var idxUpperBoundPerComponent = NodesSortedByComponent.computeIndexUpperBoundPerComponent(components, 28, 4);
+        var idxUpperBoundPerComponent = ComponentNodes.computeIndexUpperBoundPerComponent(components, 28, 4);
         // we cannot infer which component follows another, but the range must match in size for the component
         Map<Long, Long> componentPerIdxUpperBound = new HashMap<>(7);
         for (int i = 0; i < 7; i++) {
@@ -106,7 +106,7 @@ class NodesSortedByComponentTest {
         upperBoundPerComponent.set(5, 20);
         upperBoundPerComponent.set(6, 27);
 
-        var nodesSortedByComponent = NodesSortedByComponent.computeNodesSortedByComponent(components,
+        var nodesSortedByComponent = ComponentNodes.computeNodesSortedByComponent(components,
             upperBoundPerComponent, 4);
 
         // nodes may occur in arbitrary order within components, but with the given assignment, nodeIds must be within
@@ -139,7 +139,7 @@ class NodesSortedByComponentTest {
         upperBoundPerComponent.set(5, 10);
         upperBoundPerComponent.set(1, 8);
 
-        var nodesSortedByComponent = NodesSortedByComponent.computeNodesSortedByComponent(components,
+        var nodesSortedByComponent = ComponentNodes.computeNodesSortedByComponent(components,
             upperBoundPerComponent, 4);
 
         // nodes may occur in arbitrary order within components, but with the given assignment, nodeIds must be within
@@ -168,19 +168,19 @@ class NodesSortedByComponentTest {
             }
         }
 
-        NodesSortedByComponent nodesSortedByComponentMock = Mockito.mock(NodesSortedByComponent.class);
-        Mockito.doReturn(components).when(nodesSortedByComponentMock).getComponents();
-        Mockito.doReturn(upperBoundPerComponent).when(nodesSortedByComponentMock).getUpperBoundPerComponent();
-        Mockito.doReturn(nodesSortedByComponent).when(nodesSortedByComponentMock).getNodesSorted();
+        ComponentNodes componentNodesMock = Mockito.mock(ComponentNodes.class);
+        Mockito.doReturn(components).when(componentNodesMock).getComponents();
+        Mockito.doReturn(upperBoundPerComponent).when(componentNodesMock).getUpperBoundPerComponent();
+        Mockito.doReturn(nodesSortedByComponent).when(componentNodesMock).getNodesSorted();
 
         // no component with id 0
-        Mockito.doCallRealMethod().when(nodesSortedByComponentMock).iterator(0L,0L);
-        Iterator<Long> iterator = nodesSortedByComponentMock.iterator(0L, 0L);
+        Mockito.doCallRealMethod().when(componentNodesMock).iterator(0L,0L);
+        Iterator<Long> iterator = componentNodesMock.iterator(0L, 0L);
         assertFalse(iterator.hasNext());
 
         // 5 nodes for component with id 1
-        Mockito.doCallRealMethod().when(nodesSortedByComponentMock).iterator(1L,0L);
-        iterator = nodesSortedByComponentMock.iterator(1L, 0L);
+        Mockito.doCallRealMethod().when(componentNodesMock).iterator(1L,0L);
+        iterator = componentNodesMock.iterator(1L, 0L);
         values.addAll(List.of(6L, 7L, 8L, 9L, 10L));
         for (int i = 0; i < 5; i++) {
             assertTrue(iterator.hasNext());
@@ -220,22 +220,22 @@ class NodesSortedByComponentTest {
         upperBoundPerComponent.set(0, 2);
         upperBoundPerComponent.set(1, 7);
 
-        NodesSortedByComponent nodesSortedByComponentMock = Mockito.mock(NodesSortedByComponent.class);
-        Mockito.doReturn(components).when(nodesSortedByComponentMock).getComponents();
-        Mockito.doReturn(upperBoundPerComponent).when(nodesSortedByComponentMock).getUpperBoundPerComponent();
-        Mockito.doReturn(nodesSorted).when(nodesSortedByComponentMock).getNodesSorted();
+        ComponentNodes componentNodesMock = Mockito.mock(ComponentNodes.class);
+        Mockito.doReturn(components).when(componentNodesMock).getComponents();
+        Mockito.doReturn(upperBoundPerComponent).when(componentNodesMock).getUpperBoundPerComponent();
+        Mockito.doReturn(nodesSorted).when(componentNodesMock).getNodesSorted();
 
         // first component
-        Mockito.doCallRealMethod().when(nodesSortedByComponentMock).iterator(0L,0L);
-        Iterator<Long> iterator = nodesSortedByComponentMock.iterator(0L, 0L);
+        Mockito.doCallRealMethod().when(componentNodesMock).iterator(0L,0L);
+        Iterator<Long> iterator = componentNodesMock.iterator(0L, 0L);
         for (int nodeId = 0; nodeId < 3; nodeId++) {
             assertTrue(iterator.hasNext());
             assertThat(iterator.next()).isEqualTo(nodeId);
         }
         assertFalse(iterator.hasNext());
         // second component
-        Mockito.doCallRealMethod().when(nodesSortedByComponentMock).iterator(1L,0L);
-        iterator = nodesSortedByComponentMock.iterator(1L, 0L);
+        Mockito.doCallRealMethod().when(componentNodesMock).iterator(1L,0L);
+        iterator = componentNodesMock.iterator(1L, 0L);
         for (int nodeId = 3; nodeId < 8; nodeId++) {
             assertTrue(iterator.hasNext());
             assertThat(iterator.next()).isEqualTo(nodeId);
@@ -254,14 +254,14 @@ class NodesSortedByComponentTest {
         var upperBoundPerComponent = HugeAtomicLongArray.of(1, ParalleLongPageCreator.passThrough(4));
         upperBoundPerComponent.set(0, 19);
 
-        NodesSortedByComponent nodesSortedByComponentMock = Mockito.mock(NodesSortedByComponent.class);
-        Mockito.doReturn(components).when(nodesSortedByComponentMock).getComponents();
-        Mockito.doReturn(upperBoundPerComponent).when(nodesSortedByComponentMock).getUpperBoundPerComponent();
-        Mockito.doReturn(nodesSorted).when(nodesSortedByComponentMock).getNodesSorted();
-        Mockito.doCallRealMethod().when(nodesSortedByComponentMock).iterator(0L,11L);
+        ComponentNodes componentNodesMock = Mockito.mock(ComponentNodes.class);
+        Mockito.doReturn(components).when(componentNodesMock).getComponents();
+        Mockito.doReturn(upperBoundPerComponent).when(componentNodesMock).getUpperBoundPerComponent();
+        Mockito.doReturn(nodesSorted).when(componentNodesMock).getNodesSorted();
+        Mockito.doCallRealMethod().when(componentNodesMock).iterator(0L,11L);
 
         Set<Long> resultingNodes = new HashSet<>();
-        Iterator<Long> iterator = nodesSortedByComponentMock.iterator(0L, 11L);
+        Iterator<Long> iterator = componentNodesMock.iterator(0L, 11L);
         iterator.forEachRemaining(resultingNodes::add);
         assertThat(resultingNodes).containsExactlyInAnyOrder(11L, 12L, 13L, 14L, 15L, 16L, 17L, 18L, 19L);
     }

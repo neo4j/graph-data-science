@@ -35,15 +35,27 @@ import java.util.function.LongUnaryOperator;
 /**
  * Manages nodes sorted by component. Produces an iterator over all nodes in a given component.
  */
-public class NodesSortedByComponent {
+public final class ComponentNodes {
     private final LongUnaryOperator components;
     private final HugeAtomicLongArray upperBoundPerComponent;
     private final HugeLongArray nodesSorted;
 
-    public NodesSortedByComponent(LongUnaryOperator components, long nodeCount, int concurrency) {
+    private ComponentNodes(LongUnaryOperator components, HugeAtomicLongArray upperBoundPerComponent,
+        HugeLongArray nodesSorted) {
+
         this.components = components;
-        this.upperBoundPerComponent = computeIndexUpperBoundPerComponent(components, nodeCount, concurrency);
-        this.nodesSorted = computeNodesSortedByComponent(components, upperBoundPerComponent, concurrency);
+        this.upperBoundPerComponent = upperBoundPerComponent;
+        this.nodesSorted = nodesSorted;
+    }
+
+    public static ComponentNodes create(LongUnaryOperator components, long nodeCount, int concurrency) {
+        var upperBoundPerComponent = computeIndexUpperBoundPerComponent(components, nodeCount, concurrency);
+        var nodesSorted = computeNodesSortedByComponent(components, upperBoundPerComponent, concurrency);
+        return new ComponentNodes(
+            components,
+            upperBoundPerComponent,
+            nodesSorted
+        );
     }
 
     public PrimitiveIterator.OfLong iterator(long componentId, long offset) {
