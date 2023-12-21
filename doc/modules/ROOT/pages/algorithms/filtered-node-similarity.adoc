@@ -327,7 +327,7 @@ YIELD nodeCount, relationshipCount, bytesMin, bytesMax, requiredMemory
 [opts="header",cols="1,1,1,1,1"]
 |===
 | nodeCount | relationshipCount | bytesMin | bytesMax | requiredMemory
-| 9         | 9                 | 2496     | 2712     | "[2496 Bytes \... 2712 Bytes]"
+| 9         | 9                 | 2384     | 2600     | "[2384 Bytes \... 2600 Bytes]"
 |===
 --
 [[algorithms-filtered-node-similarity-examples-stream]]

@@ -188,9 +188,9 @@ class GraphGenerateProcTest extends BaseProcTest {
 
     private static Stream<Arguments> estimations() {
         return Stream.of(
-            Arguments.of(100, 2, MemoryRange.of(28_928, 32_128)),
-            Arguments.of(100, 4, MemoryRange.of(30_528, 35_328)),
-            Arguments.of(200, 4, MemoryRange.of(60_944, 70_544))
+            Arguments.of(100, 2, MemoryRange.of(28_088, 31_288)),
+            Arguments.of(100, 4, MemoryRange.of(29_688, 34_488)),
+            Arguments.of(200, 4, MemoryRange.of(59_304, 68_904))
         );
     }
 }
