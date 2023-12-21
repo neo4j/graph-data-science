@@ -268,7 +268,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     }
 
     private LongUnaryOperator initComponents() {
-        if (!config.isEnableComponentOptimization()) {
+        if (!config.considerComponents()) {
             // considering everything as within the same component
             targetNodeStream = (componentId, offset) -> targetNodesStream(offset);
             return n -> 0;

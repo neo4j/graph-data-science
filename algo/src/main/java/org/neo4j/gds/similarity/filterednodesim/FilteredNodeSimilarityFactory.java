@@ -97,11 +97,11 @@ public class FilteredNodeSimilarityFactory<CONFIG extends FilteredNodeSimilarity
                         .rangePerNode("array", nodeCount -> MemoryRange.of(0, nodeCount * averageVectorSize))
                         .build();
                 }));
-        if (config.isEnableComponentOptimization()) {
+        if (config.considerComponents()) {
             builder.perNode("nodes sorted by component", HugeLongArray::memoryEstimation);
             builder.perNode("upper bound per component", HugeAtomicLongArray::memoryEstimation);
         }
-        if (config.isEnableComponentOptimization() && config.componentProperty() != null) {
+        if (config.considerComponents() && config.componentProperty() != null) {
             builder.perNode("component mapping", HugeLongArray::memoryEstimation);
         }
         if (config.computeToGraph() && !config.hasTopK()) {

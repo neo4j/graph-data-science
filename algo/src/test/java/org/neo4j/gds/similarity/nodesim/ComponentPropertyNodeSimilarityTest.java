@@ -149,7 +149,7 @@ public class ComponentPropertyNodeSimilarityTest {
             .topK(TOP_K_DEFAULT)
             .writeProperty("writeProperty")
             .writeRelationshipType("writeRelationshipType")
-            .isEnableComponentOptimization(true)
+            .considerComponents(true)
             .componentProperty(componentPropertySet ? "compid" : null)
             .build();
 
@@ -193,7 +193,7 @@ public class ComponentPropertyNodeSimilarityTest {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
         var config = ImmutableNodeSimilarityStreamConfig.builder()
             .similarityCutoff(0.0)
-            .isEnableComponentOptimization(true)
+            .considerComponents(true)
             .componentProperty("compid")
             .concurrency(concurrency)
             .build();

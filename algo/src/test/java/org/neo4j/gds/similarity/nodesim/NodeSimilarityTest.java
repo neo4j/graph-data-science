@@ -883,7 +883,7 @@ final class NodeSimilarityTest {
     void shouldLogProgressForWccOptimization() {
         var graph = naturalGraph;
         var config = ImmutableNodeSimilarityStreamConfig.builder()
-            .isEnableComponentOptimization(true)
+            .considerComponents(true)
             .concurrency(4)
             .build();
         var progressTask = new NodeSimilarityFactory<>().progressTask(graph, config);
