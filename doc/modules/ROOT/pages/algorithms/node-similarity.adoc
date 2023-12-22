@@ -92,6 +92,7 @@ CALL gds.nodeSimilarity.stream(
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
+:instance: stream
 .Configuration
 [opts="header",cols="3,2,3m,2,8"]
 |===
@@ -130,7 +131,7 @@ YIELD
 ----
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
-
+:instance: stats
 .Configuration
 [opts="header",cols="3,2,3m,2,8"]
 |===
@@ -175,6 +176,7 @@ YIELD
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
+:instance: mutate
 .Configuration
 [opts="header",cols="3,2,3m,2,8"]
 |===
@@ -220,6 +222,7 @@ YIELD
 
 include::partial$/algorithms/common-configuration/common-parameters.adoc[]
 
+:instance: write
 .Configuration
 [opts="header",cols="3,2,3m,2,8"]
 |===
