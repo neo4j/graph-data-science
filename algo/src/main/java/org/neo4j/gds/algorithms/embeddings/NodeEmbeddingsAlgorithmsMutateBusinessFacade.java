@@ -20,10 +20,10 @@
 package org.neo4j.gds.algorithms.embeddings;
 
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
-import org.neo4j.gds.algorithms.embeddings.specificfields.DoubleNodeEmbeddingsPropertyValues;
 import org.neo4j.gds.algorithms.embeddings.specificfields.Node2VecSpecificFields;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
 
@@ -88,7 +88,7 @@ public class NodeEmbeddingsAlgorithmsMutateBusinessFacade {
         algorithmResult.result().ifPresentOrElse(
             result -> {
                 var nodeCount = algorithmResult.graph().nodeCount();
-                var nodeProperties = new DoubleNodeEmbeddingsPropertyValues(result.embeddings());
+                var nodeProperties = NodePropertyValuesAdapter.adapt(result.embeddings());
                 var mutateResult = mutateNodePropertyService.mutate(
                     configuration.mutateProperty(),
                     nodeProperties,

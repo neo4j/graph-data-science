@@ -20,10 +20,10 @@
 package org.neo4j.gds.algorithms.embeddings;
 
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
-import org.neo4j.gds.algorithms.embeddings.specificfields.DoubleNodeEmbeddingsPropertyValues;
 import org.neo4j.gds.algorithms.embeddings.specificfields.Node2VecSpecificFields;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
 
@@ -96,7 +96,7 @@ public class NodeEmbeddingsAlgorithmsWriteBusinessFacade {
         algorithmResult.result().ifPresentOrElse(
             result -> {
                 var nodeCount = algorithmResult.graph().nodeCount();
-                var nodeProperties = new DoubleNodeEmbeddingsPropertyValues(result.embeddings());
+                var nodeProperties = NodePropertyValuesAdapter.adapt(result.embeddings());
                 var writeResult = writeNodePropertyService.write(
                     algorithmResult.graph(),
                     algorithmResult.graphStore(),

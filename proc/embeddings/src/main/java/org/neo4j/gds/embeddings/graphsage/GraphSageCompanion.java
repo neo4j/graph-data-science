@@ -19,8 +19,9 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.EmptyDoubleArrayNodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 
 import java.util.Optional;
@@ -31,10 +32,10 @@ public final class GraphSageCompanion {
 
     private GraphSageCompanion() {}
 
-    static DoubleArrayNodePropertyValues nodePropertyValues(Optional<GraphSageResult> graphSageResult) {
+    static NodePropertyValues nodePropertyValues(Optional<GraphSageResult> graphSageResult) {
         return graphSageResult
             .map(GraphSageResult::embeddings)
-            .map(embeddings -> (DoubleArrayNodePropertyValues) new EmbeddingNodePropertyValues(embeddings))
+            .map(embeddings -> NodePropertyValuesAdapter.adapt(embeddings))
             .orElse(EmptyDoubleArrayNodePropertyValues.INSTANCE);
     }
 }
