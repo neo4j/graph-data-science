@@ -26,8 +26,8 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.AlgorithmMemoryEstimation;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.RequestScopedDependencies;
+import org.neo4j.gds.algorithms.validation.AfterLoadValidation;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -37,9 +37,9 @@ import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public final class AlgorithmRunner {
@@ -75,7 +75,7 @@ public final class AlgorithmRunner {
         Optional<String> relationshipProperty,
         GraphAlgorithmFactory<A, C> algorithmFactory
     ) {
-        return run(graphName, config, relationshipProperty, algorithmFactory, Optional.empty());
+        return run(graphName, config, relationshipProperty, algorithmFactory, List.of());
     }
 
     public <A extends Algorithm<R>, R, C extends AlgoBaseConfig> AlgorithmComputationResult<R> run(
@@ -83,7 +83,7 @@ public final class AlgorithmRunner {
         C config,
         Optional<String> relationshipProperty,
         GraphAlgorithmFactory<A, C> algorithmFactory,
-        Optional<Consumer<GraphStore>> graphStoreConsumer
+        List<AfterLoadValidation> afterLoadValidationsList
     ) {
         // TODO: Is this the best place to check for preconditions???
         PreconditionsProvider.preconditions().check();
@@ -100,7 +100,7 @@ public final class AlgorithmRunner {
         var graph = graphWithGraphStore.getLeft();
         var graphStore = graphWithGraphStore.getRight();
 
-        graphStoreConsumer.ifPresent(gsc -> gsc.accept(graphStore));
+        afterLoadValidationsList.forEach(afterLoadValidation -> afterLoadValidation.afterLoadValidations(graphStore));
 
         // No algorithm execution when the graph is empty
         if (graph.isEmpty()) {

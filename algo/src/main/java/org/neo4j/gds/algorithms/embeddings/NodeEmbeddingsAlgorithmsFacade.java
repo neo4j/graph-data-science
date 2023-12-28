@@ -21,7 +21,7 @@ package org.neo4j.gds.algorithms.embeddings;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.algorithms.validation.AfterLoadValidation;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
@@ -36,8 +36,7 @@ import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 import org.neo4j.gds.modelcatalogservices.ModelCatalogService;
 
-import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.List;
 
 public class NodeEmbeddingsAlgorithmsFacade {
 
@@ -74,7 +73,7 @@ public class NodeEmbeddingsAlgorithmsFacade {
             config.modelName()
         );
 
-        Consumer<GraphStore> validationCondition = (g) -> {
+        AfterLoadValidation validationCondition = (g) -> {
             GraphSageTrainConfig trainConfig = model.trainConfig();
             trainConfig.graphStoreValidation(
                 g,
@@ -82,14 +81,13 @@ public class NodeEmbeddingsAlgorithmsFacade {
                 config.internalRelationshipTypes(g)
             );
         };
-
-
+        
         return algorithmRunner.run(
             graphName,
             config,
             model.trainConfig().relationshipWeightProperty(),
             new GraphSageAlgorithmFactory<>(modelCatalogService.get()),
-            Optional.of(validationCondition)
+            List.of(validationCondition)
         );
     }
 
@@ -101,8 +99,7 @@ public class NodeEmbeddingsAlgorithmsFacade {
             graphName,
             config,
             config.relationshipWeightProperty(),
-            new GraphSageTrainAlgorithmFactory(),
-            Optional.empty()
+            new GraphSageTrainAlgorithmFactory()
         );
     }
 
