@@ -37,9 +37,4 @@ class LongLimit extends Limit {
 
         return l > value;
     }
-
-    @Override
-    public String getValueAsString() {
-        return String.valueOf(value);
-    }
 }

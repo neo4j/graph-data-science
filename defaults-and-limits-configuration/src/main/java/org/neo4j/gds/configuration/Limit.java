@@ -63,12 +63,6 @@ abstract class Limit {
      */
     protected abstract boolean isViolatedInternal(Object inputValue);
 
-    /**
-     * This is handy for creating error messages
-     */
-    @Deprecated
-    abstract String getValueAsString();
-
     String asErrorMessage(String key, Object value) {
         return formatWithLocale(
             "Configuration parameter '%s' with value '%s' exceeds it's limit of '%s'",
