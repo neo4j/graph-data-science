@@ -29,13 +29,13 @@ final class Neighbors {
     private LongAdder joinCounter;
 
     Neighbors(long nodeCount) {
-        this.neighbors = HugeObjectArray.newArray(NeighborList.class, nodeCount);
-        this.neighborsFound = new LongAdder();
-        this.joinCounter = new LongAdder();
+        this(HugeObjectArray.newArray(NeighborList.class, nodeCount));
     }
 
     Neighbors(HugeObjectArray<NeighborList> neighbors) {
         this.neighbors = neighbors;
+        this.neighborsFound = new LongAdder();
+        this.joinCounter = new LongAdder();
     }
 
     NeighborList get(long nodeId) {
