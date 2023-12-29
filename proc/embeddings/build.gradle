@@ -41,6 +41,7 @@ dependencies {
     testAnnotationProcessor project(':annotations')
 
     testCompileOnly group: 'org.immutables', name: 'builder', version: ver.'immutables'
+    testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 
     testImplementation project(':native-projection')
     testImplementation project(':open-model-catalog')

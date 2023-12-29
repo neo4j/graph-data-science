@@ -21,13 +21,17 @@ package org.neo4j.gds.similarity.knn;
 
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 
+import java.util.concurrent.atomic.LongAdder;
+
 final class Neighbors {
     private final HugeObjectArray<NeighborList> neighbors;
-    private long neighborsFound;
-    private long joinCounter;
+    private LongAdder neighborsFound;
+    private LongAdder joinCounter;
 
     Neighbors(long nodeCount) {
         this.neighbors = HugeObjectArray.newArray(NeighborList.class, nodeCount);
+        this.neighborsFound = new LongAdder();
+        this.joinCounter = new LongAdder();
     }
 
     Neighbors(HugeObjectArray<NeighborList> neighbors) {
@@ -44,7 +48,7 @@ final class Neighbors {
     }
     void set(long nodeId, NeighborList neighborList) {
         neighbors.set(nodeId, neighborList);
-        neighborsFound += neighborList.size();
+        neighborsFound.add(neighborList.size());
     }
 
     long size() {
@@ -52,15 +56,15 @@ final class Neighbors {
     }
 
     long neighborsFound() {
-        return neighborsFound;
+        return neighborsFound.longValue();
     }
 
     void incrementJoinCounter() {
-        joinCounter++;
+        joinCounter.increment();
     }
 
     long joinCounter() {
-        return joinCounter;
+        return joinCounter.longValue();
     }
 
     void filterHighSimilarityResult(long nodeId, double similarityCutoff) {

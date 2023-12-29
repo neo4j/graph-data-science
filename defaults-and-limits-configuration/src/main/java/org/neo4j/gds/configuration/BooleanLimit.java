@@ -66,11 +66,6 @@ class BooleanLimit extends Limit {
     }
 
     @Override
-    String getValueAsString() {
-        throw new UnsupportedOperationException("TODO");
-    }
-
-    @Override
     String asErrorMessage(String key, Object value) {
         return formatWithLocale(
             "Configuration parameter '%s' with value '%s' is in violation of it's set limit",

@@ -41,7 +41,7 @@ public final class PartialsIncludeProcessor extends IncludeProcessor {
         Path partial = resolvePartial(target);
         String partialText = readPartial(partial);
 
-        reader.push_include(partialText, target, null, Integer.MIN_VALUE, Collections.emptyMap());
+        reader.pushInclude(partialText, target, null, Integer.MIN_VALUE, Collections.emptyMap());
     }
 
     @NotNull

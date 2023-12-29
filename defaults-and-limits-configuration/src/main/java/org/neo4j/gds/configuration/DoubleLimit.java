@@ -37,9 +37,4 @@ class DoubleLimit extends Limit {
 
         return d > value;
     }
-
-    @Override
-    String getValueAsString() {
-        throw new UnsupportedOperationException("TODO");
-    }
 }

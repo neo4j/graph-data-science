@@ -20,7 +20,7 @@
 package org.neo4j.gds;
 
 import org.reflections.Reflections;
-import org.reflections.scanners.MethodAnnotationsScanner;
+import org.reflections.scanners.Scanners;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -36,7 +36,7 @@ public final class ProcedureAndFunctionScanner {
 
     private static final List<Reflections> reflections = PACKAGES_TO_SCAN
         .stream()
-        .map(pkg -> new Reflections(pkg, new MethodAnnotationsScanner()))
+        .map(pkg -> new Reflections(pkg, Scanners.MethodsAnnotated))
         .collect(Collectors.toList());
 
     private ProcedureAndFunctionScanner() {}

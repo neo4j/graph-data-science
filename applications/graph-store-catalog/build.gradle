@@ -12,6 +12,7 @@ dependencies {
     annotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains', name: 'annotations', version: ver.'jetbrains-annotations'
+    compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 
     // DependencyResolver, which we should get rid of
     compileOnly(group: 'org.neo4j', name: 'neo4j-common', version: ver.'neo4j') { transitive = false }
@@ -47,6 +48,8 @@ dependencies {
     implementation project(':subgraph-filtering')
     implementation project(':termination')
     implementation project(':transaction')
+
+    testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 
     testImplementation group: 'org.assertj', name: 'assertj-core', version: ver.'assertj'
     testImplementation platform(dep.junit5bom)
