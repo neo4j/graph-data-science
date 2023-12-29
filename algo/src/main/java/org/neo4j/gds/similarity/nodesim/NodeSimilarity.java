@@ -417,7 +417,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
         var componentNodes = ComponentNodes.create(components, graph.nodeCount(), concurrency);
         return (componentId, offset) -> StreamSupport
-            .longStream(componentNodes.spliterator(componentId, offset), true)
+            .longStream(componentNodes.spliterator(componentId, offset), false)
             .filter(targetNodes::get);
     }
 

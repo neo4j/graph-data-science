@@ -65,7 +65,7 @@ public final class ComponentNodes {
     public Spliterator.OfLong spliterator(long componentId, long offset) {
         return Spliterators.spliteratorUnknownSize(
             iterator(componentId, offset),
-            Spliterator.ORDERED | Spliterator.SORTED | Spliterator.IMMUTABLE | Spliterator.NONNULL | Spliterator.DISTINCT
+            Spliterator.NONNULL | Spliterator.DISTINCT
         );
     }
 
