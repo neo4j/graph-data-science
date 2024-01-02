@@ -28,7 +28,7 @@ import org.neo4j.gds.paths.bellmanford.BellmanFord;
 import org.neo4j.gds.paths.bellmanford.BellmanFordAlgorithmFactory;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.bellmanford.BellmanFordWriteConfig;
-import org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants;
+
 
 import java.util.stream.Stream;
 
