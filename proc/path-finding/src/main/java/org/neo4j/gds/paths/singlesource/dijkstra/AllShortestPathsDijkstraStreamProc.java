@@ -36,6 +36,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants.DIJKSTRA_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class AllShortestPathsDijkstraStreamProc extends BaseProc {
@@ -43,7 +44,7 @@ public class AllShortestPathsDijkstraStreamProc extends BaseProc {
     public GraphDataScience facade;
 
     @Procedure(name = "gds.allShortestPaths.dijkstra.stream", mode = READ)
-    @Description(Dijkstra.DESCRIPTION_SOURCE_TARGET)
+    @Description(DIJKSTRA_DESCRIPTION)
     public Stream<PathFindingStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

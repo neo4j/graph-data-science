@@ -28,6 +28,7 @@ import org.neo4j.gds.executor.ProcedureExecutorSpec;
 import org.neo4j.gds.paths.delta.DeltaStepping;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaWriteConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 import org.neo4j.procedure.Context;
@@ -38,6 +39,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants.DELTA_STEPPING_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
@@ -47,7 +49,7 @@ public class AllShortestPathsDeltaWriteProc extends BaseProc {
     public RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
 
     @Procedure(name = "gds.allShortestPaths.delta.write", mode = WRITE)
-    @Description(DeltaStepping.DESCRIPTION)
+    @Description(DELTA_STEPPING_DESCRIPTION)
     public Stream<StandardWriteRelationshipsResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

@@ -34,8 +34,9 @@ import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
+import static org.neo4j.gds.paths.sourcetarget.SinglePairShortestPathConstants.YENS_DESCRIPTION;
 
-@GdsCallable(name = "gds.shortestPath.yens.stream", description = YensConstants.DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.shortestPath.yens.stream", description = YENS_DESCRIPTION, executionMode = STREAM)
 public class ShortestPathYensStreamSpec implements AlgorithmSpec<Yens, PathFindingResult, ShortestPathYensStreamConfig, Stream<PathFindingStreamResult>, YensFactory<ShortestPathYensStreamConfig>> {
 
     @Override

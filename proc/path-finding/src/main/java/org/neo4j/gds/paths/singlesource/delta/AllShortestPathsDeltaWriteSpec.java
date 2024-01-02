@@ -29,13 +29,15 @@ import org.neo4j.gds.paths.delta.DeltaStepping;
 import org.neo4j.gds.paths.delta.DeltaSteppingFactory;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaWriteConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
+import static org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants.DELTA_STEPPING_DESCRIPTION;
 
-@GdsCallable(name = "gds.allShortestPaths.delta.write", description = DeltaStepping.DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
+@GdsCallable(name = "gds.allShortestPaths.delta.write", description = DELTA_STEPPING_DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
 public class AllShortestPathsDeltaWriteSpec implements AlgorithmSpec<DeltaStepping, PathFindingResult, AllShortestPathsDeltaWriteConfig, Stream<StandardWriteRelationshipsResult>, DeltaSteppingFactory<AllShortestPathsDeltaWriteConfig>> {
     @Override
     public String name() {

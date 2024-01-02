@@ -24,6 +24,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants;
 import org.neo4j.gds.procedures.pathfinding.PathFindingMutateResult;
 import org.neo4j.gds.paths.ShortestPathMutateResultConsumer;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
@@ -34,8 +35,9 @@ import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraMutateConfig;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
+import static org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants.DIJKSTRA_DESCRIPTION;
 
-@GdsCallable(name = "gds.allShortestPaths.dijkstra.mutate", description = Dijkstra.DESCRIPTION_SOURCE_TARGET, executionMode = MUTATE_RELATIONSHIP)
+@GdsCallable(name = "gds.allShortestPaths.dijkstra.mutate", description = DIJKSTRA_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
 public class AllShortestPathsDijkstraMutateSpec implements AlgorithmSpec<Dijkstra, PathFindingResult, AllShortestPathsDijkstraMutateConfig, Stream<PathFindingMutateResult>, DijkstraFactory.AllShortestPathsDijkstraFactory<AllShortestPathsDijkstraMutateConfig>> {
 
     @Override

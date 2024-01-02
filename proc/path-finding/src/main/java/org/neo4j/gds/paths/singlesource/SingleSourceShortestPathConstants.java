@@ -17,10 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.sourcetarget;
+package org.neo4j.gds.paths.singlesource;
 
-final class ShortestPathDijkstraProc {
-    static final String DIJKSTRA_DESCRIPTION = "The Dijkstra shortest path algorithm computes the shortest (weighted) path between a pair of nodes.";
+public interface SingleSourceShortestPathConstants {
+    String BELLMAN_FORD_DESCRIPTION =
+        "The Bellman-Ford shortest path algorithm computes the shortest (weighted) path between one node and any other node in the graph without negative cycles.";
 
-    private ShortestPathDijkstraProc() {}
+    String DELTA_STEPPING_DESCRIPTION = "The Delta Stepping shortest path algorithm computes the shortest (weighted) path between one node and any other node in the graph. " +
+        "The computation is run multi-threaded";
+
+    String DIJKSTRA_DESCRIPTION = "The Dijkstra shortest path algorithm computes the shortest (weighted) path between one node and any other node in the graph.";
 }

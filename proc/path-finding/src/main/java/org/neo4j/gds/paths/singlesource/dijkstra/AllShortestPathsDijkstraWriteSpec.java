@@ -29,13 +29,15 @@ import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraWriteConfig;
+import org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
+import static org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants.DIJKSTRA_DESCRIPTION;
 
-@GdsCallable(name = "gds.allShortestPaths.dijkstra.write", description = Dijkstra.DESCRIPTION_SOURCE_TARGET, executionMode = WRITE_RELATIONSHIP)
+@GdsCallable(name = "gds.allShortestPaths.dijkstra.write", description = DIJKSTRA_DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
 public class AllShortestPathsDijkstraWriteSpec implements AlgorithmSpec<Dijkstra, PathFindingResult, AllShortestPathsDijkstraWriteConfig, Stream<StandardWriteRelationshipsResult>, DijkstraFactory.AllShortestPathsDijkstraFactory<AllShortestPathsDijkstraWriteConfig>> {
 
     @Override

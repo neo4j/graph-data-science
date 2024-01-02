@@ -22,7 +22,7 @@ package org.neo4j.gds.paths.singlesource.bellmanford;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.paths.bellmanford.BellmanFord;
+import org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -31,12 +31,13 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants.BELLMAN_FORD_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class BellmanFordStreamProc extends BaseProc {
 
     @Procedure(name = "gds.bellmanFord.stream", mode = READ)
-    @Description(BellmanFord.DESCRIPTION)
+    @Description(BELLMAN_FORD_DESCRIPTION)
     public Stream<StreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

@@ -31,7 +31,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.paths.sourcetarget.ShortestPathAStarCompanion.ASTAR_DESCRIPTION;
+import static org.neo4j.gds.paths.sourcetarget.SinglePairShortestPathConstants.ASTAR_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class ShortestPathAStarMutateProc extends BaseProc {

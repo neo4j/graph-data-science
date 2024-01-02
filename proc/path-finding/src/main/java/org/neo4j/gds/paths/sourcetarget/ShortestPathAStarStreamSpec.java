@@ -34,7 +34,7 @@ import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.paths.sourcetarget.ShortestPathAStarCompanion.ASTAR_DESCRIPTION;
+import static org.neo4j.gds.paths.sourcetarget.SinglePairShortestPathConstants.ASTAR_DESCRIPTION;
 
 @GdsCallable(name = "gds.shortestPath.astar.stream", description = ASTAR_DESCRIPTION, executionMode = STREAM)
 public class ShortestPathAStarStreamSpec implements AlgorithmSpec<AStar, PathFindingResult, ShortestPathAStarStreamConfig, Stream<PathFindingStreamResult>, AStarFactory<ShortestPathAStarStreamConfig>> {

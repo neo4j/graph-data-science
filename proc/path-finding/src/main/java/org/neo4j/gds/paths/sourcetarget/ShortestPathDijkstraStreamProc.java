@@ -32,7 +32,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.paths.sourcetarget.ShortestPathDijkstraProc.DIJKSTRA_DESCRIPTION;
+import static org.neo4j.gds.paths.sourcetarget.SinglePairShortestPathConstants.DIJKSTRA_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class ShortestPathDijkstraStreamProc extends BaseProc {

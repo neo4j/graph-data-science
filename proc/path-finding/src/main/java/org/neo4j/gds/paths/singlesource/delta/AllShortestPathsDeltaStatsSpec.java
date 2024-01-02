@@ -28,13 +28,15 @@ import org.neo4j.gds.paths.delta.DeltaStepping;
 import org.neo4j.gds.paths.delta.DeltaSteppingFactory;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStatsConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants;
 import org.neo4j.gds.results.StandardStatsResult;
 
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
+import static org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants.DELTA_STEPPING_DESCRIPTION;
 
-@GdsCallable(name = "gds.allShortestPaths.delta.stats", description = DeltaStepping.DESCRIPTION, executionMode = STATS)
+@GdsCallable(name = "gds.allShortestPaths.delta.stats", description = DELTA_STEPPING_DESCRIPTION, executionMode = STATS)
 public class AllShortestPathsDeltaStatsSpec implements AlgorithmSpec<DeltaStepping, PathFindingResult, AllShortestPathsDeltaStatsConfig, Stream<StandardStatsResult>, DeltaSteppingFactory<AllShortestPathsDeltaStatsConfig>> {
 
     @Override

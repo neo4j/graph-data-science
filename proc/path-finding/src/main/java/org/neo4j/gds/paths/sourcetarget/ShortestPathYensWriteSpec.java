@@ -34,9 +34,9 @@ import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
-import static org.neo4j.gds.paths.sourcetarget.YensConstants.DESCRIPTION;
+import static org.neo4j.gds.paths.sourcetarget.SinglePairShortestPathConstants.YENS_DESCRIPTION;
 
-@GdsCallable(name = "gds.shortestPath.yens.write", description = DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
+@GdsCallable(name = "gds.shortestPath.yens.write", description = YENS_DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
 public class ShortestPathYensWriteSpec implements AlgorithmSpec<Yens, PathFindingResult, ShortestPathYensWriteConfig, Stream<StandardWriteRelationshipsResult>, YensFactory<ShortestPathYensWriteConfig>> {
     @Override
     public String name() {

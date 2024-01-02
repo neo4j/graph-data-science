@@ -28,13 +28,14 @@ import org.neo4j.gds.paths.bellmanford.BellmanFord;
 import org.neo4j.gds.paths.bellmanford.BellmanFordAlgorithmFactory;
 import org.neo4j.gds.paths.bellmanford.BellmanFordMutateConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
-import org.neo4j.gds.paths.delta.DeltaStepping;
+import org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants;
 
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
+import static org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants.BELLMAN_FORD_DESCRIPTION;
 
-@GdsCallable(name = "gds.bellmanFord.mutate", description = DeltaStepping.DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
+@GdsCallable(name = "gds.bellmanFord.mutate", description = BELLMAN_FORD_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
 public class BellmanFordMutateSpec implements AlgorithmSpec<BellmanFord, BellmanFordResult, BellmanFordMutateConfig, Stream<BellmanFordMutateResult>, BellmanFordAlgorithmFactory<BellmanFordMutateConfig>> {
 
     @Override

@@ -49,9 +49,6 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.paths.delta.TentativeDistances.NO_PREDECESSOR;
 
 public final class DeltaStepping extends Algorithm<PathFindingResult> {
-    public static final String DESCRIPTION = "The Delta Stepping shortest path algorithm computes the shortest (weighted) path between one node and any other node in the graph. " +
-                                             "The computation is run multi-threaded";
-
     private static final int NO_BIN = Integer.MAX_VALUE;
     private static final int BIN_SIZE_THRESHOLD = 1000;
     private static final int BATCH_SIZE = 64;

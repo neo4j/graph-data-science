@@ -34,7 +34,7 @@ import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.paths.sourcetarget.ShortestPathDijkstraProc.DIJKSTRA_DESCRIPTION;
+import static org.neo4j.gds.paths.sourcetarget.SinglePairShortestPathConstants.DIJKSTRA_DESCRIPTION;
 
 @GdsCallable(name = "gds.shortestPath.dijkstra.stream", description = DIJKSTRA_DESCRIPTION, executionMode = STREAM)
 public class ShortestPathDijkstraStreamSpec implements AlgorithmSpec<Dijkstra, PathFindingResult, ShortestPathDijkstraStreamConfig, Stream<PathFindingStreamResult>, DijkstraFactory.SourceTargetDijkstraFactory<ShortestPathDijkstraStreamConfig>> {

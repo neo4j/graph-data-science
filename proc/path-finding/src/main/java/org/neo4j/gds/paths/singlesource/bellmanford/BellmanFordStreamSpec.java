@@ -29,13 +29,15 @@ import org.neo4j.gds.paths.bellmanford.BellmanFordAlgorithmFactory;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.bellmanford.BellmanFordStreamConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants;
 
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
+import static org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants.BELLMAN_FORD_DESCRIPTION;
 
-@GdsCallable(name = "gds.bellmanFord.stream", description = BellmanFord.DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.bellmanFord.stream", description = BELLMAN_FORD_DESCRIPTION, executionMode = STREAM)
 public class BellmanFordStreamSpec implements
     AlgorithmSpec<BellmanFord, BellmanFordResult, BellmanFordStreamConfig, Stream<StreamResult>, BellmanFordAlgorithmFactory<BellmanFordStreamConfig>> {
 

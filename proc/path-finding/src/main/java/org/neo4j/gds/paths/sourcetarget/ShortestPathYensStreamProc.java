@@ -31,12 +31,12 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.paths.sourcetarget.YensConstants.DESCRIPTION;
+import static org.neo4j.gds.paths.sourcetarget.SinglePairShortestPathConstants.YENS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class ShortestPathYensStreamProc extends BaseProc {
     @Procedure(name = "gds.shortestPath.yens.stream", mode = READ)
-    @Description(DESCRIPTION)
+    @Description(YENS_DESCRIPTION)
     public Stream<PathFindingStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

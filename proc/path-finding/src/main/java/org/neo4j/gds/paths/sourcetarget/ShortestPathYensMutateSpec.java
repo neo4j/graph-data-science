@@ -34,9 +34,9 @@ import org.neo4j.gds.paths.yens.config.ShortestPathYensMutateConfig;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
-import static org.neo4j.gds.paths.sourcetarget.YensConstants.DESCRIPTION;
+import static org.neo4j.gds.paths.sourcetarget.SinglePairShortestPathConstants.YENS_DESCRIPTION;
 
-@GdsCallable(name = "gds.shortestPath.yens.mutate", description = DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
+@GdsCallable(name = "gds.shortestPath.yens.mutate", description = YENS_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
 public class ShortestPathYensMutateSpec implements AlgorithmSpec<Yens, PathFindingResult, ShortestPathYensMutateConfig, Stream<PathFindingMutateResult>, YensFactory<ShortestPathYensMutateConfig>> {
     @Override
     public String name() {

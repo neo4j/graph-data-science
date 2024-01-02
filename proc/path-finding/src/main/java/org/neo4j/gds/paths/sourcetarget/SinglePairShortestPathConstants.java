@@ -19,11 +19,13 @@
  */
 package org.neo4j.gds.paths.sourcetarget;
 
-final class ShortestPathAStarCompanion {
-    static final String ASTAR_DESCRIPTION =
+interface SinglePairShortestPathConstants {
+    String ASTAR_DESCRIPTION =
         "The A* shortest path algorithm computes the shortest path between a pair of nodes. " +
             "It uses the relationship weight property to compare path lengths. " +
             "In addition, this implementation uses the haversine distance as a heuristic to converge faster.";
 
-    private ShortestPathAStarCompanion() {}
+    String DIJKSTRA_DESCRIPTION = "The Dijkstra shortest path algorithm computes the shortest (weighted) path between a pair of nodes.";
+
+    String YENS_DESCRIPTION = "The Yen's shortest path algorithm computes the k shortest (weighted) paths between a pair of nodes.";
 }

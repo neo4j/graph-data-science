@@ -34,7 +34,7 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.paths.sourcetarget.YensConstants.DESCRIPTION;
+import static org.neo4j.gds.paths.sourcetarget.SinglePairShortestPathConstants.YENS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
@@ -43,7 +43,7 @@ public class ShortestPathYensWriteProc extends BaseProc {
     public RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
 
     @Procedure(name = "gds.shortestPath.yens.write", mode = WRITE)
-    @Description(DESCRIPTION)
+    @Description(YENS_DESCRIPTION)
     public Stream<StandardWriteRelationshipsResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

@@ -34,7 +34,7 @@ import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraMutateConfig;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
-import static org.neo4j.gds.paths.sourcetarget.ShortestPathDijkstraProc.DIJKSTRA_DESCRIPTION;
+import static org.neo4j.gds.paths.sourcetarget.SinglePairShortestPathConstants.DIJKSTRA_DESCRIPTION;
 
 @GdsCallable(name = "gds.shortestPath.dijkstra.mutate", description = DIJKSTRA_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
 public class ShortestPathDijkstraMutateSpec implements AlgorithmSpec<Dijkstra, PathFindingResult, ShortestPathDijkstraMutateConfig, Stream<PathFindingMutateResult>, DijkstraFactory.SourceTargetDijkstraFactory<ShortestPathDijkstraMutateConfig>> {

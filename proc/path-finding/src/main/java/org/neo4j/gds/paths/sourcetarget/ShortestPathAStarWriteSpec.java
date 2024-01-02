@@ -34,7 +34,7 @@ import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
-import static org.neo4j.gds.paths.sourcetarget.ShortestPathAStarCompanion.ASTAR_DESCRIPTION;
+import static org.neo4j.gds.paths.sourcetarget.SinglePairShortestPathConstants.ASTAR_DESCRIPTION;
 
 @GdsCallable(name = "gds.shortestPath.astar.write", description = ASTAR_DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
 public class ShortestPathAStarWriteSpec implements AlgorithmSpec<AStar, PathFindingResult, ShortestPathAStarWriteConfig, Stream<StandardWriteRelationshipsResult>, AStarFactory<ShortestPathAStarWriteConfig>> {

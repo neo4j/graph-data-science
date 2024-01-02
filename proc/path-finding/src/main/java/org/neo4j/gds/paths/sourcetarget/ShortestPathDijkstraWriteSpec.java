@@ -34,7 +34,7 @@ import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
-import static org.neo4j.gds.paths.sourcetarget.ShortestPathDijkstraProc.DIJKSTRA_DESCRIPTION;
+import static org.neo4j.gds.paths.sourcetarget.SinglePairShortestPathConstants.DIJKSTRA_DESCRIPTION;
 
 @GdsCallable(name = "gds.shortestPath.dijkstra.write", description = DIJKSTRA_DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
 public class ShortestPathDijkstraWriteSpec implements AlgorithmSpec<Dijkstra, PathFindingResult, ShortestPathDijkstraWriteConfig, Stream<StandardWriteRelationshipsResult>, DijkstraFactory.SourceTargetDijkstraFactory<ShortestPathDijkstraWriteConfig>> {

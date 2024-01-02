@@ -43,8 +43,6 @@ import static org.neo4j.gds.paths.dijkstra.Dijkstra.TraversalState.EMIT_AND_CONT
 import static org.neo4j.gds.paths.dijkstra.Dijkstra.TraversalState.EMIT_AND_STOP;
 
 public final class Dijkstra extends Algorithm<PathFindingResult> {
-    public static final String DESCRIPTION_SOURCE_TARGET = "The Dijkstra shortest path algorithm computes the shortest (weighted) path between one node and any other node in the graph.";
-
     private static final long NO_RELATIONSHIP = -1;
 
     private final Graph graph;

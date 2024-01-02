@@ -34,7 +34,7 @@ import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
-import static org.neo4j.gds.paths.sourcetarget.ShortestPathAStarCompanion.ASTAR_DESCRIPTION;
+import static org.neo4j.gds.paths.sourcetarget.SinglePairShortestPathConstants.ASTAR_DESCRIPTION;
 
 @GdsCallable(name = "gds.shortestPath.astar.mutate", description = ASTAR_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
 public class ShortestPathAStarMutateSpec implements AlgorithmSpec<AStar, PathFindingResult, ShortestPathAStarMutateConfig, Stream<PathFindingMutateResult>, AStarFactory<ShortestPathAStarMutateConfig>> {

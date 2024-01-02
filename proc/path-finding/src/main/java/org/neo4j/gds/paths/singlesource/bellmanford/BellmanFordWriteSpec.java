@@ -28,12 +28,14 @@ import org.neo4j.gds.paths.bellmanford.BellmanFord;
 import org.neo4j.gds.paths.bellmanford.BellmanFordAlgorithmFactory;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.bellmanford.BellmanFordWriteConfig;
+import org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants;
 
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
+import static org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants.BELLMAN_FORD_DESCRIPTION;
 
-@GdsCallable(name = "gds.bellmanFord.write", description = BellmanFord.DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
+@GdsCallable(name = "gds.bellmanFord.write", description = BELLMAN_FORD_DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
 public class BellmanFordWriteSpec implements AlgorithmSpec<BellmanFord, BellmanFordResult, BellmanFordWriteConfig, Stream<BellmanFordWriteResult>, BellmanFordAlgorithmFactory<BellmanFordWriteConfig>> {
     @Override
     public String name() {

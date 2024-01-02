@@ -22,7 +22,7 @@ package org.neo4j.gds.paths.singlesource.delta;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.paths.delta.DeltaStepping;
+import org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardStatsResult;
 import org.neo4j.procedure.Description;
@@ -32,12 +32,13 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants.DELTA_STEPPING_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class AllShortestPathsDeltaStatsProc extends BaseProc {
 
     @Procedure(name = "gds.allShortestPaths.delta.stats", mode = READ)
-    @Description(DeltaStepping.DESCRIPTION)
+    @Description(DELTA_STEPPING_DESCRIPTION)
     public Stream<StandardStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
