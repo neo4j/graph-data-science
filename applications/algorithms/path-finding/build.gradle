@@ -5,6 +5,7 @@ description = 'Neo4j Graph Data Science :: Path Finding Algorithms'
 group = 'org.neo4j.gds'
 
 dependencies {
+    compileOnly(group: 'org.neo4j', name: 'neo4j-common', version: ver.'neo4j') { transitive = false }
     compileOnly(group: 'org.neo4j', name: 'neo4j-logging', version: ver.'neo4j') { transitive = false }
     compileOnly(group: 'org.neo4j', name: 'neo4j-values', version: ver.'neo4j') { transitive = false }
 
