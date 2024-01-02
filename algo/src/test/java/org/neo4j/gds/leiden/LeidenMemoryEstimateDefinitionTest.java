@@ -30,8 +30,8 @@ class LeidenMemoryEstimateDefinitionTest {
 
     @ParameterizedTest(name = "Concurrency: {0}")
     @CsvSource({
-        "1, 19976368,25426368",
-        "4, 27248944,32698944"
+        "1, 18361384,25830376",
+        "4, 20789008,34314976"
     })
     void shouldEstimateMemory(int concurrency,long expectedMin, long expectedMax) {
         var config = mock(LeidenBaseConfig.class);

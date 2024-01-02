@@ -19,14 +19,18 @@
  */
 package org.neo4j.gds.leiden;
 
+import com.carrotsearch.hppc.LongDoubleHashMap;
+import com.carrotsearch.hppc.LongDoubleMap;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.gds.collections.ha.HugeDoubleArray;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
+import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -34,8 +38,13 @@ public class LocalMoveTask implements Runnable {
 
     static MemoryEstimation estimation() {
         return MemoryEstimations.builder()
-            .perNode("neighbor communities", HugeLongArray::memoryEstimation)
-            .perNode("neighbor weights", HugeDoubleArray::memoryEstimation)
+            .rangePerNode(
+                "community map",
+                (nodeCount) -> MemoryRange.of(
+                    MemoryUsage.sizeOfLongDoubleHashMap(50),
+                    MemoryUsage.sizeOfLongDoubleHashMap(Math.max(50, nodeCount))
+                )
+            )
             .add("local queue", HugeLongArrayQueue.memoryEstimation())
             .build();
     }
@@ -43,8 +52,7 @@ public class LocalMoveTask implements Runnable {
     private static final long LOCAL_QUEUE_BOUND = 1000;
     private final Graph graph;
     private final AtomicLong globalQueueIndex;
-    private final HugeLongArray encounteredCommunities;
-    private final HugeDoubleArray encounteredCommunitiesWeights;
+    private final LongDoubleMap reuseCommunityMap = new LongDoubleHashMap(50);
     private final HugeDoubleArray nodeVolumes;
 
     private final HugeLongArray globalQueue;
@@ -53,7 +61,6 @@ public class LocalMoveTask implements Runnable {
     private final HugeLongArrayQueue localQueue;
     private final HugeLongArray currentCommunities;
     private final HugeAtomicDoubleArray communityVolumes;
-    private long encounteredCommunityCounter = 0;
 
     private LocalMoveTaskPhase phase;
 
@@ -76,9 +83,6 @@ public class LocalMoveTask implements Runnable {
         this.globalQueue = globalQueue;
         this.globalQueueIndex = globalQueueIndex;
         this.globalQueueSize = globalQueueSize;
-        this.encounteredCommunities = HugeLongArray.newArray(graph.nodeCount());
-        this.encounteredCommunitiesWeights = HugeDoubleArray.newArray(graph.nodeCount());
-        encounteredCommunitiesWeights.setAll(c -> -1L);
 
         this.nodeVolumes = nodeVolumes;
         this.communityVolumes = communityVolumes;
@@ -138,17 +142,11 @@ public class LocalMoveTask implements Runnable {
 
     }
 
-    private void findCommunityRelationshipWeights(long nodeId) {
-        encounteredCommunityCounter = 0;
+    private void findCommunityRelationshipWeights(long nodeId, LongDoubleMap communityMap) {
         graph.forEachRelationship(nodeId, 1.0, (s, t, relationshipWeight) -> {
             long tCommunity = currentCommunities.get(t);
-            if (encounteredCommunitiesWeights.get(tCommunity) < 0) {
-                encounteredCommunities.set(encounteredCommunityCounter, tCommunity);
-                encounteredCommunityCounter++;
-                encounteredCommunitiesWeights.set(tCommunity, relationshipWeight);
-            } else {
-                encounteredCommunitiesWeights.addTo(tCommunity, relationshipWeight);
-            }
+
+            communityMap.addTo(tCommunity, relationshipWeight);
 
             return true;
         });
@@ -194,14 +192,16 @@ public class LocalMoveTask implements Runnable {
         double currentBestGain,
         double currentNodeVolume,
         long bestCommunityId,
-        long communityId
+        long communityId,
+        LongDoubleMap communityMap
     ) {
 
-        for (long i = 0; i < encounteredCommunityCounter; ++i) {
-            long candidateCommunityId = encounteredCommunities.get(i);
+        for (var entry : communityMap) {
 
-            double candidateCommunityRelationshipsWeight = encounteredCommunitiesWeights.get(candidateCommunityId);
-            encounteredCommunitiesWeights.set(candidateCommunityId, -1);
+            long candidateCommunityId = entry.key;
+
+            double candidateCommunityRelationshipsWeight = entry.value;
+
             if (candidateCommunityId == communityId) {
                 continue;
             }
@@ -230,23 +230,30 @@ public class LocalMoveTask implements Runnable {
         nodeInQueue.clear(nodeId);
         long currentNodeCommunityId = currentCommunities.get(nodeId);
         double currentNodeVolume = nodeVolumes.get(nodeId);
-
+        LongDoubleMap communityMap;
+        if (graph.degree(nodeId) <= 50) {
+            communityMap = reuseCommunityMap;
+            communityMap.clear();
+        } else {
+            communityMap = new LongDoubleHashMap(graph.degree(nodeId));
+        }
         // Remove the current node volume from its community volume
 
         double modifiedCommunityVolume = communityVolumes.get(currentNodeCommunityId) - currentNodeVolume;
 
-        findCommunityRelationshipWeights(nodeId);
+        findCommunityRelationshipWeights(nodeId, communityMap);
 
         // Compute the "modularity" for the current node and current community
         double currentBestGain =
-            Math.max(0, encounteredCommunitiesWeights.get(currentNodeCommunityId)) -
+            Math.max(0, communityMap.get(currentNodeCommunityId)) -
             currentNodeVolume * modifiedCommunityVolume * gamma;
 
         long bestCommunityId = findBestCommunity(
             currentBestGain,
             currentNodeVolume,
             currentNodeCommunityId,
-            currentNodeCommunityId
+            currentNodeCommunityId,
+            communityMap
         );
 
         tryToMoveNode(
