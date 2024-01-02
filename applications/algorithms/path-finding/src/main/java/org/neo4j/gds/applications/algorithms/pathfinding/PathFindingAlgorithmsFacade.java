@@ -26,6 +26,7 @@ import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateDefinition;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraMutateConfig;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
+import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraMutateConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
 
 import java.util.Optional;
@@ -70,6 +71,22 @@ public class PathFindingAlgorithmsFacade {
             () -> new AStarMemoryEstimateDefinition().memoryEstimation(configuration),
             graph -> pathFindingAlgorithms.singlePairShortestPathAStar(graph, configuration),
             Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT singlePairShortestPathDijkstraMutate(
+        GraphName graphName,
+        ShortestPathDijkstraMutateConfig configuration,
+        ResultBuilder<PathFindingResult, RESULT> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            "Dijkstra",
+            () -> new DijkstraMemoryEstimateDefinition().memoryEstimation(configuration),
+            graph -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
+            Optional.of(new ShortestPathMutateStep(configuration)),
             resultBuilder
         );
     }

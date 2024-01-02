@@ -30,6 +30,7 @@ import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraMutateConfig;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
+import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraMutateConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 
@@ -70,37 +71,51 @@ public class PathFindingProcedureFacade {
     }
 
     public Stream<PathFindingStreamResult> singlePairShortestPathAStarStream(
-        String graphNameAsString,
-        Map<String, Object> rawConfiguration
+        String graphName,
+        Map<String, Object> configuration
     ) {
         return runStreamAlgorithm(
-            graphNameAsString,
-            rawConfiguration,
+            graphName,
+            configuration,
             ShortestPathAStarStreamConfig::of,
             facade::singlePairShortestPathAStarStream
         );
     }
 
+    public Stream<PathFindingMutateResult> singlePairShortestPathDijkstraMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        return Stream.of(
+            runMutateAlgorithm(
+                graphName,
+                configuration,
+                ShortestPathDijkstraMutateConfig::of,
+                facade::singlePairShortestPathDijkstraMutate
+            )
+        );
+    }
+
     public Stream<PathFindingStreamResult> singlePairShortestPathDijkstraStream(
-        String graphNameAsString,
-        Map<String, Object> rawConfiguration
+        String graphName,
+        Map<String, Object> configuration
     ) {
         return runStreamAlgorithm(
-            graphNameAsString,
-            rawConfiguration,
+            graphName,
+            configuration,
             ShortestPathDijkstraStreamConfig::of,
             facade::singlePairShortestPathDijkstraStream
         );
     }
 
     public Stream<PathFindingMutateResult> singleSourceShortestPathDijkstraMutate(
-        String graphNameAsString,
-        Map<String, Object> rawConfiguration
+        String graphName,
+        Map<String, Object> configuration
     ) {
         return Stream.of(
             runMutateAlgorithm(
-                graphNameAsString,
-                rawConfiguration,
+                graphName,
+                configuration,
                 AllShortestPathsDijkstraMutateConfig::of,
                 facade::singleSourceShortestPathDijkstraMutate
             )
