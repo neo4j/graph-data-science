@@ -49,15 +49,30 @@ import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStreamBusinessFac
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
+import org.neo4j.gds.api.CloseableResourceRegistry;
+import org.neo4j.gds.api.NodeLookup;
+import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsFacade;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.embeddings.NodeEmbeddingsProcedureFacade;
+import org.neo4j.gds.procedures.pathfinding.PathFindingProcedureFacade;
 import org.neo4j.gds.procedures.similarity.SimilarityProcedureFacade;
+import org.neo4j.gds.termination.TerminationFlag;
 
 class AlgorithmProcedureFacadeProvider {
+    // Global scoped dependencies
+    private final Log log;
 
+    // Request scoped parameters
+    private final CloseableResourceRegistry closeableResourceRegistry;
     private final ConfigurationCreator configurationCreator;
+    private final NodeLookup nodeLookup;
     private final ProcedureCallContextReturnColumns returnColumns;
     private final MutateNodePropertyService mutateNodePropertyService;
     private final WriteNodePropertyService writeNodePropertyService;
@@ -65,18 +80,32 @@ class AlgorithmProcedureFacadeProvider {
     private final WriteRelationshipService writeRelationshipService;
     private final AlgorithmEstimator algorithmEstimator;
     private final AlgorithmRunner algorithmRunner;
+    private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
+    private final TaskRegistryFactory taskRegistryFactory;
+    private final TerminationFlag terminationFlag;
+    private final UserLogRegistryFactory userLogRegistryFactory;
 
     AlgorithmProcedureFacadeProvider(
+        Log log,
+        CloseableResourceRegistry closeableResourceRegistry,
         ConfigurationCreator configurationCreator,
+        NodeLookup nodeLookup,
         ProcedureCallContextReturnColumns returnColumns,
         MutateNodePropertyService mutateNodePropertyService,
         WriteNodePropertyService writeNodePropertyService,
         MutateRelationshipService mutateRelationshipService,
         WriteRelationshipService writeRelationshipService,
         AlgorithmRunner algorithmRunner,
-        AlgorithmEstimator algorithmEstimator
+        AlgorithmEstimator algorithmEstimator,
+        AlgorithmProcessingTemplate algorithmProcessingTemplate,
+        TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag,
+        UserLogRegistryFactory userLogRegistryFactory
     ) {
+        this.log = log;
+        this.closeableResourceRegistry = closeableResourceRegistry;
         this.configurationCreator = configurationCreator;
+        this.nodeLookup = nodeLookup;
         this.returnColumns = returnColumns;
         this.mutateNodePropertyService = mutateNodePropertyService;
         this.writeNodePropertyService = writeNodePropertyService;
@@ -85,6 +114,10 @@ class AlgorithmProcedureFacadeProvider {
         this.algorithmRunner = algorithmRunner;
         this.algorithmEstimator = algorithmEstimator;
 
+        this.algorithmProcessingTemplate = algorithmProcessingTemplate;
+        this.taskRegistryFactory = taskRegistryFactory;
+        this.terminationFlag = terminationFlag;
+        this.userLogRegistryFactory = userLogRegistryFactory;
     }
 
     CentralityProcedureFacade createCentralityProcedureFacade() {
@@ -176,6 +209,28 @@ class AlgorithmProcedureFacadeProvider {
 
     }
 
+    PathFindingProcedureFacade createPathFindingProcedureFacade() {
+        var pathFindingAlgorithms = new PathFindingAlgorithms(
+            log,
+            taskRegistryFactory,
+            terminationFlag,
+            userLogRegistryFactory
+        );
+
+        var pathFindingAlgorithmsFacade = new PathFindingAlgorithmsFacade(
+            algorithmProcessingTemplate,
+            pathFindingAlgorithms
+        );
+
+        return new PathFindingProcedureFacade(
+            closeableResourceRegistry,
+            configurationCreator,
+            nodeLookup,
+            returnColumns,
+            pathFindingAlgorithmsFacade
+        );
+    }
+
     NodeEmbeddingsProcedureFacade createNodeEmbeddingsProcedureFacade() {
         // algorithms facade
         var nodeEmbeddingsAlgorithmsFacade = new NodeEmbeddingsAlgorithmsFacade(algorithmRunner);
@@ -205,7 +260,5 @@ class AlgorithmProcedureFacadeProvider {
             streamBusinessFacade,
             writeBusinessFacade
         );
-
     }
-
 }

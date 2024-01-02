@@ -24,6 +24,7 @@ import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.catalog.CatalogFacade;
 import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
+import org.neo4j.gds.procedures.pathfinding.PathFindingProcedureFacade;
 import org.neo4j.gds.procedures.embeddings.NodeEmbeddingsProcedureFacade;
 import org.neo4j.gds.procedures.similarity.SimilarityProcedureFacade;
 
@@ -33,6 +34,7 @@ public class GraphDataScience {
     private final CommunityProcedureFacade communityProcedureFacade;
     private final CentralityProcedureFacade centralityProcedureFacade;
     private final SimilarityProcedureFacade similarityProcedureFacade;
+    private final PathFindingProcedureFacade pathFindingProcedureFacade;
     private final NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade;
     private final DeprecatedProceduresMetricService deprecatedProceduresMetricService;
 
@@ -42,6 +44,7 @@ public class GraphDataScience {
         CommunityProcedureFacade communityProcedureFacade,
         NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade,
         SimilarityProcedureFacade similarityProcedureFacade,
+        PathFindingProcedureFacade pathFindingProcedureFacade,
         DeprecatedProceduresMetricService deprecatedProceduresMetricService
     ) {
         this.log = log;
@@ -49,9 +52,9 @@ public class GraphDataScience {
         this.centralityProcedureFacade = centralityProcedureFacade;
         this.communityProcedureFacade = communityProcedureFacade;
         this.similarityProcedureFacade = similarityProcedureFacade;
+        this.pathFindingProcedureFacade = pathFindingProcedureFacade;
         this.nodeEmbeddingsProcedureFacade = nodeEmbeddingsProcedureFacade;
         this.deprecatedProceduresMetricService = deprecatedProceduresMetricService;
-
     }
 
     public Log log() {
@@ -74,10 +77,13 @@ public class GraphDataScience {
         return similarityProcedureFacade;
     }
 
+    public PathFindingProcedureFacade pathFinding() {
+        return pathFindingProcedureFacade;
+    }
+
     public NodeEmbeddingsProcedureFacade nodeEmbeddings() {
         return nodeEmbeddingsProcedureFacade;
     }
-
 
     public DeprecatedProceduresMetricService deprecatedProcedures() {
         return deprecatedProceduresMetricService;

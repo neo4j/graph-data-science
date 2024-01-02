@@ -32,7 +32,7 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.paths.PathFactory;
-import org.neo4j.gds.paths.StreamResult;
+import org.neo4j.gds.procedures.pathfinding.PathFindingStreamResult;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
 import org.neo4j.graphdb.RelationshipType;
 
@@ -136,21 +136,21 @@ class ShortestPathYensStreamProcTest extends BaseProcTest {
                 ids0,
                 costs0,
                 RelationshipType.withName("PATH_0"),
-                StreamResult.COST_PROPERTY_NAME
+                PathFindingStreamResult.COST_PROPERTY_NAME
             );
             var path1 = PathFactory.create(
                 tx::getNodeById,
                 ids1,
                 costs1,
                 RelationshipType.withName("PATH_1"),
-                StreamResult.COST_PROPERTY_NAME
+                PathFindingStreamResult.COST_PROPERTY_NAME
             );
             var path2 = PathFactory.create(
                 tx::getNodeById,
                 ids2,
                 costs2,
                 RelationshipType.withName("PATH_2"),
-                StreamResult.COST_PROPERTY_NAME
+                PathFindingStreamResult.COST_PROPERTY_NAME
             );
             var expected = List.of(
                 Map.of(

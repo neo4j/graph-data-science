@@ -24,7 +24,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.paths.MutateResult;
+import org.neo4j.gds.procedures.pathfinding.PathFindingMutateResult;
 import org.neo4j.gds.paths.ShortestPathMutateResultConsumer;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.yens.Yens;
@@ -37,7 +37,7 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 import static org.neo4j.gds.paths.sourcetarget.YensConstants.DESCRIPTION;
 
 @GdsCallable(name = "gds.shortestPath.yens.mutate", description = DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
-public class ShortestPathYensMutateSpec implements AlgorithmSpec<Yens, PathFindingResult, ShortestPathYensMutateConfig, Stream<MutateResult>, YensFactory<ShortestPathYensMutateConfig>> {
+public class ShortestPathYensMutateSpec implements AlgorithmSpec<Yens, PathFindingResult, ShortestPathYensMutateConfig, Stream<PathFindingMutateResult>, YensFactory<ShortestPathYensMutateConfig>> {
     @Override
     public String name() {
         return "YensMutate";
@@ -54,7 +54,7 @@ public class ShortestPathYensMutateSpec implements AlgorithmSpec<Yens, PathFindi
     }
 
     @Override
-    public ComputationResultConsumer<Yens, PathFindingResult, ShortestPathYensMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Yens, PathFindingResult, ShortestPathYensMutateConfig, Stream<PathFindingMutateResult>> computationResultConsumer() {
         return new ShortestPathMutateResultConsumer<>();
     }
 

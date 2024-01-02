@@ -23,12 +23,12 @@ import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.paths.MutateResult;
+import org.neo4j.gds.procedures.pathfinding.PathFindingMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
-public class BfsMutateComputationResultConsumer extends MutateComputationResultConsumer<BFS, HugeLongArray, BfsMutateConfig, MutateResult> {
+public class BfsMutateComputationResultConsumer extends MutateComputationResultConsumer<BFS, HugeLongArray, BfsMutateConfig, PathFindingMutateResult> {
     BfsMutateComputationResultConsumer() {
-        super((computationResult, executionContext) -> new MutateResult.Builder()
+        super((computationResult, executionContext) -> new PathFindingMutateResult.Builder()
             .withPreProcessingMillis(computationResult.preProcessingMillis())
             .withComputeMillis(computationResult.computeMillis())
             .withConfig(computationResult.config()));

@@ -24,7 +24,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
-import org.neo4j.gds.paths.MutateResult;
+import org.neo4j.gds.procedures.pathfinding.PathFindingMutateResult;
 import org.neo4j.gds.paths.ShortestPathMutateResultConsumer;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.DijkstraFactory;
@@ -37,7 +37,7 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 import static org.neo4j.gds.paths.sourcetarget.ShortestPathDijkstraProc.DIJKSTRA_DESCRIPTION;
 
 @GdsCallable(name = "gds.shortestPath.dijkstra.mutate", description = DIJKSTRA_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
-public class ShortestPathDijkstraMutateSpec implements AlgorithmSpec<Dijkstra, PathFindingResult, ShortestPathDijkstraMutateConfig, Stream<MutateResult>, DijkstraFactory.SourceTargetDijkstraFactory<ShortestPathDijkstraMutateConfig>> {
+public class ShortestPathDijkstraMutateSpec implements AlgorithmSpec<Dijkstra, PathFindingResult, ShortestPathDijkstraMutateConfig, Stream<PathFindingMutateResult>, DijkstraFactory.SourceTargetDijkstraFactory<ShortestPathDijkstraMutateConfig>> {
 
     @Override
     public String name() {
@@ -57,7 +57,7 @@ public class ShortestPathDijkstraMutateSpec implements AlgorithmSpec<Dijkstra, P
     }
 
     @Override
-    public ComputationResultConsumer<Dijkstra, PathFindingResult, ShortestPathDijkstraMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Dijkstra, PathFindingResult, ShortestPathDijkstraMutateConfig, Stream<PathFindingMutateResult>> computationResultConsumer() {
         return new ShortestPathMutateResultConsumer<>();
     }
 

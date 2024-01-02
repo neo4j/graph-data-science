@@ -25,7 +25,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.paths.ShortestPathStreamResultConsumer;
-import org.neo4j.gds.paths.StreamResult;
+import org.neo4j.gds.procedures.pathfinding.PathFindingStreamResult;
 import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.astar.AStarFactory;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
@@ -37,7 +37,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.paths.sourcetarget.ShortestPathAStarCompanion.ASTAR_DESCRIPTION;
 
 @GdsCallable(name = "gds.shortestPath.astar.stream", description = ASTAR_DESCRIPTION, executionMode = STREAM)
-public class ShortestPathAStarStreamSpec implements AlgorithmSpec<AStar, PathFindingResult, ShortestPathAStarStreamConfig, Stream<StreamResult>, AStarFactory<ShortestPathAStarStreamConfig>> {
+public class ShortestPathAStarStreamSpec implements AlgorithmSpec<AStar, PathFindingResult, ShortestPathAStarStreamConfig, Stream<PathFindingStreamResult>, AStarFactory<ShortestPathAStarStreamConfig>> {
 
     @Override
     public String name() {
@@ -55,7 +55,7 @@ public class ShortestPathAStarStreamSpec implements AlgorithmSpec<AStar, PathFin
     }
 
     @Override
-    public ComputationResultConsumer<AStar, PathFindingResult, ShortestPathAStarStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<AStar, PathFindingResult, ShortestPathAStarStreamConfig, Stream<PathFindingStreamResult>> computationResultConsumer() {
         return new ShortestPathStreamResultConsumer<>();
     }
 

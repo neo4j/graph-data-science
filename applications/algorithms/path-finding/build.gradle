@@ -1,0 +1,27 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Path Finding Algorithms'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    compileOnly(group: 'org.neo4j', name: 'neo4j-logging', version: ver.'neo4j') { transitive = false }
+
+    implementation project(':algo')
+    implementation project(':algo-common')
+    implementation project(':config-api')
+    implementation project(':core')
+    implementation project(':logging')
+    implementation project(':memory-usage')
+    implementation project(':metrics-api')
+    implementation project(':progress-tracking')
+    implementation project(':string-formatting')
+    implementation project(':termination')
+
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: ver.'assertj'
+    testImplementation platform(dep.junit5bom)
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: ver.'junit5bom'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: ver.'junit5bom'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: ver.'junit5bom'
+    testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: ver.'mockito-junit-jupiter'
+}

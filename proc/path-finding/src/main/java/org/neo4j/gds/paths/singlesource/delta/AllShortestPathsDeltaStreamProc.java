@@ -23,7 +23,7 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.executor.ProcedureExecutorSpec;
-import org.neo4j.gds.paths.StreamResult;
+import org.neo4j.gds.procedures.pathfinding.PathFindingStreamResult;
 import org.neo4j.gds.paths.delta.DeltaStepping;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
@@ -41,7 +41,7 @@ public class AllShortestPathsDeltaStreamProc extends BaseProc {
 
     @Procedure(name = "gds.allShortestPaths.delta.stream", mode = READ)
     @Description(DeltaStepping.DESCRIPTION)
-    public Stream<StreamResult> stream(
+    public Stream<PathFindingStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

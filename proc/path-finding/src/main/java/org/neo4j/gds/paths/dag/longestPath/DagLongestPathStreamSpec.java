@@ -28,7 +28,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.paths.ShortestPathStreamResultConsumer;
-import org.neo4j.gds.paths.StreamResult;
+import org.neo4j.gds.procedures.pathfinding.PathFindingStreamResult;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
 import java.util.stream.Stream;
@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 @GdsCallable(name = "gds.dag.longestPath.stream", description = DagLongestPathStreamProc.LONGEST_PATH_DESCRIPTION, executionMode = STREAM)
-public class DagLongestPathStreamSpec implements AlgorithmSpec<DagLongestPath, PathFindingResult, DagLongestPathStreamConfig, Stream<StreamResult>, DagLongestPathFactory<DagLongestPathStreamConfig>> {
+public class DagLongestPathStreamSpec implements AlgorithmSpec<DagLongestPath, PathFindingResult, DagLongestPathStreamConfig, Stream<PathFindingStreamResult>, DagLongestPathFactory<DagLongestPathStreamConfig>> {
 
     @Override
     public String name() {
@@ -54,7 +54,7 @@ public class DagLongestPathStreamSpec implements AlgorithmSpec<DagLongestPath, P
     }
 
     @Override
-    public ComputationResultConsumer<DagLongestPath, PathFindingResult, DagLongestPathStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<DagLongestPath, PathFindingResult, DagLongestPathStreamConfig, Stream<PathFindingStreamResult>> computationResultConsumer() {
         return new ShortestPathStreamResultConsumer<>();
     }
 

@@ -17,22 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.linkmodels.pipeline.predict;
+package org.neo4j.gds.mem;
 
-import org.junit.jupiter.api.Test;
+import java.util.concurrent.atomic.AtomicLong;
 
-import static org.assertj.core.api.Assertions.assertThatNoException;
+/**
+ * An oracle we ask for information about system memory.
+ * We inject an AtomicLong that is populated elsewhere, and read from that.
+ */
+public class MemoryGauge {
+    private final AtomicLong availableMemory;
 
-class MutateResultTest {
-
-    @Test
-    void shouldRecordResults() {
-        var resultWithHistogramBuilder = new MutateResult.Builder().withHistogram();
-        assertThatNoException().isThrownBy(() -> {
-            resultWithHistogramBuilder.recordHistogramValue(0.9);
-            resultWithHistogramBuilder.recordHistogramValue(5E-10);
-            resultWithHistogramBuilder.recordHistogramValue(5E-20);
-        });
+    public MemoryGauge(AtomicLong availableMemory) {
+        this.availableMemory = availableMemory;
     }
 
+    public long availableMemory() {
+        return availableMemory.get();
+    }
 }

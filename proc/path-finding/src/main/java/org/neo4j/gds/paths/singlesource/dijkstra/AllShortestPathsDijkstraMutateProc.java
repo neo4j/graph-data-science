@@ -21,13 +21,14 @@ package org.neo4j.gds.paths.singlesource.dijkstra;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.executor.ProcedureExecutorSpec;
-import org.neo4j.gds.paths.MutateResult;
+import org.neo4j.gds.procedures.pathfinding.PathFindingMutateResult;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraMutateConfig;
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -38,21 +39,16 @@ import java.util.stream.Stream;
 import static org.neo4j.procedure.Mode.READ;
 
 public class AllShortestPathsDijkstraMutateProc extends BaseProc {
+    @Context
+    public GraphDataScience facade;
 
     @Procedure(name = "gds.allShortestPaths.dijkstra.mutate", mode = READ)
     @Description(Dijkstra.DESCRIPTION_SOURCE_TARGET)
-    public Stream<MutateResult> mutate(
+    public Stream<PathFindingMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var mutateSpec = new AllShortestPathsDijkstraMutateSpec();
-        var pipelineSpec = new ProcedureExecutorSpec<Dijkstra, PathFindingResult, AllShortestPathsDijkstraMutateConfig>();
-
-        return new ProcedureExecutor<>(
-            mutateSpec,
-            pipelineSpec,
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.pathFinding().singleSourceShortestPathDijkstraMutate(graphName, configuration);
     }
 
     @Procedure(name = "gds.allShortestPaths.dijkstra.mutate.estimate", mode = READ)

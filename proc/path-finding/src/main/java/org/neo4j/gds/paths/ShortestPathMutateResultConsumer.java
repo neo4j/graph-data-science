@@ -30,14 +30,15 @@ import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.procedures.pathfinding.PathFindingMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
 
-public class ShortestPathMutateResultConsumer<ALGO extends Algorithm<PathFindingResult>, CONFIG extends AlgoBaseConfig & MutateRelationshipConfig> extends MutateComputationResultConsumer<ALGO, PathFindingResult, CONFIG, MutateResult> {
+public class ShortestPathMutateResultConsumer<ALGO extends Algorithm<PathFindingResult>, CONFIG extends AlgoBaseConfig & MutateRelationshipConfig> extends MutateComputationResultConsumer<ALGO, PathFindingResult, CONFIG, PathFindingMutateResult> {
 
     public ShortestPathMutateResultConsumer() {
-        super((computationResult, executionContext) -> new MutateResult.Builder()
+        super((computationResult, executionContext) -> new PathFindingMutateResult.Builder()
             .withPreProcessingMillis(computationResult.preProcessingMillis())
             .withComputeMillis(computationResult.computeMillis())
             .withConfig(computationResult.config()));

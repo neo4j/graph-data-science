@@ -25,6 +25,7 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.procedures.pathfinding.PathFindingStreamResult;
 
 import java.util.stream.Stream;
 
@@ -32,10 +33,10 @@ import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 
 public final class ShortestPathStreamResultConsumer<ALGO extends Algorithm<PathFindingResult>, CONFIG extends AlgoBaseConfig>
     implements
-    ComputationResultConsumer<ALGO, PathFindingResult, CONFIG, Stream<StreamResult>> {
+    ComputationResultConsumer<ALGO, PathFindingResult, CONFIG, Stream<PathFindingStreamResult>> {
 
     @Override
-    public Stream<StreamResult> consume(
+    public Stream<PathFindingStreamResult> consume(
         ComputationResult<ALGO, PathFindingResult, CONFIG> computationResult,
         ExecutionContext executionContext
     ) {
@@ -48,7 +49,7 @@ public final class ShortestPathStreamResultConsumer<ALGO extends Algorithm<PathF
                     var shouldReturnPath = executionContext.returnColumns()
                         .contains("path") && computationResult.graphStore().capabilities().canWriteToLocalDatabase();
 
-                    var resultBuilder = new StreamResult.Builder(graph, executionContext.nodeLookup());
+                    var resultBuilder = new PathFindingStreamResult.Builder(graph, executionContext.nodeLookup());
 
                     var resultStream = result.mapPaths(path -> resultBuilder.build(path, shouldReturnPath));
 
