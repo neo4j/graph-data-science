@@ -55,7 +55,6 @@ import java.util.Optional;
 import java.util.function.Function;
 
 class AlgorithmFacadeProviderFactory {
-
     // dull utilities
     private final FictitiousGraphStoreEstimationService fictitiousGraphStoreEstimationService = new FictitiousGraphStoreEstimationService();
 
@@ -121,22 +120,30 @@ class AlgorithmFacadeProviderFactory {
         var graphDatabaseService = context.graphDatabaseAPI();
         var kernelTransaction = kernelTransactionAccessor.getKernelTransaction(context);
 
-        // GDS services derived from Procedure Context
+        /*
+         * GDS services derived from Procedure Context.
+         * These come in layers, we can create some services readily,
+         * but others need some of our own products and come later.
+         * I have tried to mark those layers in comments below.
+         */
         var algorithmMetaDataSetter = algorithmMetaDataSetterService.getAlgorithmMetaDataSetter(kernelTransaction);
         var algorithmMemoryValidationService = new AlgorithmMemoryValidationService(log, useMaxMemoryEstimation);
         var closeableResourceRegistry = new TransactionCloseableResourceRegistry(kernelTransaction);
         var databaseId = databaseIdAccessor.getDatabaseId(context.graphDatabaseAPI());
+        var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(graphDatabaseService);
+        var exporterContext = new ExporterContext.ProcedureContextWrapper(context);
+        var memoryGuard = new DefaultMemoryGuard(log, useMaxMemoryEstimation, memoryGauge);
+        var mutateNodePropertyService = new MutateNodePropertyService(log);
+        var mutateRelationshipService = new MutateRelationshipService(log);
         var nodeLookup = new TransactionNodeLookup(kernelTransaction);
         var returnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
         var terminationFlag = terminationFlagService.createTerminationFlag(kernelTransaction);
         var user = userAccessor.getUser(context.securityContext());
-        var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(
-            databaseId,
-            user
-        );
+        var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
-        var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(graphDatabaseService);
-        var exporterContext = new ExporterContext.ProcedureContextWrapper(context);
+
+        // Second layer
+        var configurationCreator = new ConfigurationCreator(configurationParser, algorithmMetaDataSetter, user);
         var graphLoaderContext = GraphLoaderContextProvider.buildGraphLoaderContext(
             context,
             databaseId,
@@ -145,27 +152,38 @@ class AlgorithmFacadeProviderFactory {
             userLogRegistryFactory,
             log
         );
-        var writeNodePropertyService = new WriteNodePropertyService(
-            log,
-            exportBuildersProvider.nodePropertyExporterBuilder(exporterContext),
-            taskRegistryFactory,
-            terminationFlag
-        );
-
-        var writeRelationshipService = new WriteRelationshipService(
-            log,
-            exportBuildersProvider.relationshipExporterBuilder(exporterContext),
-            taskRegistryFactory,
-            terminationFlag
-        );
-        var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(graphLoaderContext, user);
+        var nodePropertyExporterBuilder = exportBuildersProvider.nodePropertyExporterBuilder(exporterContext);
+        var relationshipExporterBuilder = exportBuildersProvider.relationshipExporterBuilder(exporterContext);
+        var relationshipStreamExporterBuilder = exportBuildersProvider.relationshipStreamExporterBuilder(exporterContext);
         var requestScopedDependencies = RequestScopedDependencies.builder()
             .with(databaseId)
             .with(user)
             .with(terminationFlag)
             .build();
 
-        // the business
+        // Third layer
+        var writeNodePropertyService = new WriteNodePropertyService(
+            log,
+            nodePropertyExporterBuilder,
+            taskRegistryFactory,
+            terminationFlag
+        );
+        var writeRelationshipService = new WriteRelationshipService(
+            log,
+            relationshipExporterBuilder,
+            taskRegistryFactory,
+            terminationFlag
+        );
+        var databaseGraphStoreEstimationService = new DatabaseGraphStoreEstimationService(graphLoaderContext, user);
+
+        // Fourth layer
+        var algorithmEstimator = new AlgorithmEstimator(
+            graphStoreCatalogService,
+            fictitiousGraphStoreEstimationService,
+            databaseGraphStoreEstimationService,
+            databaseId,
+            user
+        );
         var algorithmRunner = new AlgorithmRunner(
             log,
             graphStoreCatalogService,
@@ -176,21 +194,7 @@ class AlgorithmFacadeProviderFactory {
             userLogRegistryFactory
         );
 
-        // business facades
-        var algorithmEstimator = new AlgorithmEstimator(
-            graphStoreCatalogService,
-            fictitiousGraphStoreEstimationService,
-            databaseGraphStoreEstimationService,
-            databaseId,
-            user
-        );
-
-        var mutateNodePropertyService = new MutateNodePropertyService(log);
-        var mutateRelationshipService = new MutateRelationshipService(log);
-        var configurationCreator = new ConfigurationCreator(configurationParser, algorithmMetaDataSetter, user);
-
-        var memoryGuard = new DefaultMemoryGuard(log, useMaxMemoryEstimation, memoryGauge);
-
+        // business facade
         AlgorithmProcessingTemplate algorithmProcessingTemplate = new DefaultAlgorithmProcessingTemplate(
             log,
             algorithmMetricsService,
@@ -217,6 +221,7 @@ class AlgorithmFacadeProviderFactory {
             algorithmRunner,
             algorithmEstimator,
             algorithmProcessingTemplate,
+            relationshipStreamExporterBuilder,
             taskRegistryFactory,
             terminationFlag,
             userLogRegistryFactory

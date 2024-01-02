@@ -32,7 +32,9 @@ import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraMutateConfig;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraMutateConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
+import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
+import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -108,6 +110,20 @@ public class PathFindingProcedureFacade {
         );
     }
 
+    public Stream<StandardWriteRelationshipsResult> singlePairShortestPathDijkstraWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        return Stream.of(
+            runWriteAlgorithm(
+                graphName,
+                configuration,
+                ShortestPathDijkstraWriteConfig::of,
+                facade::singlePairShortestPathDijkstraWrite
+            )
+        );
+    }
+
     public Stream<PathFindingMutateResult> singleSourceShortestPathDijkstraMutate(
         String graphName,
         Map<String, Object> configuration
@@ -171,7 +187,7 @@ public class PathFindingProcedureFacade {
      *     <li>Same input handling
      *     <li>Pick a different result marshaller - this is the big responsibility in this layer
      *     <li>Delegate to compute
-     *     <li>No stream closing hook
+     *     <li>No stream closing hook because we end up returning just a single element wrapped in a stream
      * </ul>
      *
      * So very much the same, but I didn't fancy trying to extract reuse today, for readability's sake
@@ -184,7 +200,28 @@ public class PathFindingProcedureFacade {
     ) {
         var graphName = GraphName.parse(graphNameAsString);
         var configuration = configurationCreator.createConfiguration(rawConfiguration, configurationSupplier);
+
+        // mutation
         var resultBuilder = new PathFindingResultBuilderForMutateMode(configuration);
+
+        return algorithm.compute(graphName, configuration, resultBuilder);
+    }
+
+    /**
+     * Writes are like mutate: the usual pre-processing, then the actual algorithm call,
+     * and finally post-processing: the side effect (the writes) and result rendering.
+     */
+    private <CONFIGURATION extends AlgoBaseConfig> StandardWriteRelationshipsResult runWriteAlgorithm(
+        String graphNameAsString,
+        Map<String, Object> rawConfiguration,
+        Function<CypherMapWrapper, CONFIGURATION> configurationSupplier,
+        AlgorithmHandle<CONFIGURATION, PathFindingResult, StandardWriteRelationshipsResult> algorithm
+    ) {
+        var graphName = GraphName.parse(graphNameAsString);
+        var configuration = configurationCreator.createConfiguration(rawConfiguration, configurationSupplier);
+
+        // write
+        var resultBuilder = new PathFindingResultBuilderForWriteMode(configuration);
 
         return algorithm.compute(graphName, configuration, resultBuilder);
     }

@@ -56,6 +56,7 @@ import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsFacade;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
@@ -81,6 +82,7 @@ class AlgorithmProcedureFacadeProvider {
     private final AlgorithmEstimator algorithmEstimator;
     private final AlgorithmRunner algorithmRunner;
     private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
+    private final RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationFlag terminationFlag;
     private final UserLogRegistryFactory userLogRegistryFactory;
@@ -98,6 +100,7 @@ class AlgorithmProcedureFacadeProvider {
         AlgorithmRunner algorithmRunner,
         AlgorithmEstimator algorithmEstimator,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
+        RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         UserLogRegistryFactory userLogRegistryFactory
@@ -115,6 +118,7 @@ class AlgorithmProcedureFacadeProvider {
         this.algorithmEstimator = algorithmEstimator;
 
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
+        this.relationshipStreamExporterBuilder = relationshipStreamExporterBuilder;
         this.taskRegistryFactory = taskRegistryFactory;
         this.terminationFlag = terminationFlag;
         this.userLogRegistryFactory = userLogRegistryFactory;
@@ -218,7 +222,11 @@ class AlgorithmProcedureFacadeProvider {
         );
 
         var pathFindingAlgorithmsFacade = new PathFindingAlgorithmsFacade(
+            log,
             algorithmProcessingTemplate,
+            relationshipStreamExporterBuilder,
+            taskRegistryFactory,
+            terminationFlag,
             pathFindingAlgorithms
         );
 

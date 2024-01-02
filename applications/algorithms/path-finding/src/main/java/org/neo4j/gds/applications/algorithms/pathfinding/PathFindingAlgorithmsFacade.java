@@ -20,6 +20,9 @@
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.paths.astar.AStarMemoryEstimateDefinition;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
 import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateDefinition;
@@ -28,6 +31,8 @@ import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraMutateConfig;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraMutateConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
+import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 
@@ -48,15 +53,29 @@ import java.util.Optional;
  * But importantly, this is where we decide which, if any, mutate or write hooks need to be injected.
  */
 public class PathFindingAlgorithmsFacade {
+    private final Log log;
+
     private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
+    private final RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
+    private final TaskRegistryFactory taskRegistryFactory;
+    private final TerminationFlag terminationFlag;
+
     private final PathFindingAlgorithms pathFindingAlgorithms;
 
     public PathFindingAlgorithmsFacade(
+        Log log,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
+        RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
+        TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag,
         PathFindingAlgorithms pathFindingAlgorithms
     ) {
+        this.log = log;
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
+        this.relationshipStreamExporterBuilder = relationshipStreamExporterBuilder;
+        this.terminationFlag = terminationFlag;
         this.pathFindingAlgorithms = pathFindingAlgorithms;
+        this.taskRegistryFactory = taskRegistryFactory;
     }
 
     public <RESULT> RESULT singlePairShortestPathAStarStream(
@@ -80,13 +99,15 @@ public class PathFindingAlgorithmsFacade {
         ShortestPathDijkstraMutateConfig configuration,
         ResultBuilder<PathFindingResult, RESULT> resultBuilder
     ) {
+        var mutateStep = new ShortestPathMutateStep(configuration);
+
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
             "Dijkstra",
             () -> new DijkstraMemoryEstimateDefinition().memoryEstimation(configuration),
             graph -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
-            Optional.of(new ShortestPathMutateStep(configuration)),
+            Optional.of(mutateStep),
             resultBuilder
         );
     }
@@ -103,6 +124,30 @@ public class PathFindingAlgorithmsFacade {
             () -> new DijkstraMemoryEstimateDefinition().memoryEstimation(configuration),
             graph -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
             Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT singlePairShortestPathDijkstraWrite(
+        GraphName graphName,
+        ShortestPathDijkstraWriteConfig configuration,
+        ResultBuilder<PathFindingResult, RESULT> resultBuilder
+    ) {
+        var writeStep = new ShortestPathWriteStep<>(
+            log,
+            relationshipStreamExporterBuilder,
+            taskRegistryFactory,
+            terminationFlag,
+            configuration
+        );
+
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            "Dijkstra",
+            () -> new DijkstraMemoryEstimateDefinition().memoryEstimation(configuration),
+            graph -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
+            Optional.of(writeStep),
             resultBuilder
         );
     }

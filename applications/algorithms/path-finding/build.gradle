@@ -6,11 +6,13 @@ group = 'org.neo4j.gds'
 
 dependencies {
     compileOnly(group: 'org.neo4j', name: 'neo4j-logging', version: ver.'neo4j') { transitive = false }
+    compileOnly(group: 'org.neo4j', name: 'neo4j-values', version: ver.'neo4j') { transitive = false }
 
     implementation project(':algo')
     implementation project(':algo-common')
     implementation project(':config-api')
     implementation project(':core')
+    implementation project(':core-write')
     implementation project(':logging')
     implementation project(':memory-usage')
     implementation project(':metrics-api')

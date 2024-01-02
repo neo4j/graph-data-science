@@ -39,7 +39,8 @@ public class GraphDataScience {
     private final DeprecatedProceduresMetricService deprecatedProceduresMetricService;
 
     public GraphDataScience(
-        Log log, CatalogFacade catalogFacade,
+        Log log,
+        CatalogFacade catalogFacade,
         CentralityProcedureFacade centralityProcedureFacade,
         CommunityProcedureFacade communityProcedureFacade,
         NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade,

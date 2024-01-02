@@ -23,7 +23,7 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 import org.neo4j.procedure.Context;
@@ -39,7 +39,9 @@ import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class ShortestPathDijkstraWriteProc extends BaseProc {
-    
+    @Context
+    public GraphDataScience facade;
+
     @Context
     public RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
 
@@ -49,10 +51,7 @@ public class ShortestPathDijkstraWriteProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new ShortestPathDijkstraWriteSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.pathFinding().singlePairShortestPathDijkstraWrite(graphName, configuration);
     }
 
     @Procedure(name = "gds.shortestPath.dijkstra.write.estimate", mode = READ)

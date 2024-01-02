@@ -65,8 +65,8 @@ public abstract class ResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> {
         this.nodePropertiesWritten = nodePropertiesWritten;
     }
 
-    public void withRelationshipsWritten(long relationshipPropertiesWritten) {
-        this.relationshipsWritten = relationshipPropertiesWritten;
+    public void withRelationshipsWritten(long relationshipsWritten) {
+        this.relationshipsWritten = relationshipsWritten;
     }
 
     /**
