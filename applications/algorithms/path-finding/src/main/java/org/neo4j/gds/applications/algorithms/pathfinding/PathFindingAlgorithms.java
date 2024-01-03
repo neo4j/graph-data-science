@@ -35,6 +35,7 @@ import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.paths.yens.Yens;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
@@ -100,6 +101,20 @@ public class PathFindingAlgorithms {
         var dijkstra = Dijkstra.sourceTarget(graph, configuration, Optional.empty(), progressTracker, terminationFlag);
 
         return dijkstra.compute();
+    }
+
+    PathFindingResult singlePairShortestPathYens(
+        Graph graph,
+        SourceTargetShortestPathBaseConfig configuration
+    ) {
+        var progressTracker = createProgressTracker(
+            configuration,
+            Tasks.leaf("Yens", graph.relationshipCount())
+        );
+
+        var yens = Yens.sourceTarget(graph, configuration, progressTracker, terminationFlag);
+
+        return yens.compute();
     }
 
     PathFindingResult singleSourceShortestPathDijkstra(

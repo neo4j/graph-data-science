@@ -23,7 +23,7 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 import org.neo4j.procedure.Context;
@@ -39,6 +39,8 @@ import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class ShortestPathAStarWriteProc extends BaseProc {
+    @Context
+    public GraphDataScience facade;
 
     @Context
     public RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
@@ -49,10 +51,7 @@ public class ShortestPathAStarWriteProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new ShortestPathAStarWriteSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.pathFinding().singlePairShortestPathAStarWrite(graphName, configuration);
     }
 
     @Procedure(name = "gds.shortestPath.astar.write.estimate", mode = READ)

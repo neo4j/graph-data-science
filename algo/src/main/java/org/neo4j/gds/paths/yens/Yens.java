@@ -31,6 +31,7 @@ import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.ImmutableShortestPathDijkstraStreamConfig;
 import org.neo4j.gds.paths.yens.config.ImmutableShortestPathYensBaseConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -43,12 +44,25 @@ public final class Yens extends Algorithm<PathFindingResult> {
     private final ShortestPathYensBaseConfig config;
 
     /**
+     * @deprecated Use the one with termination flag directly
+     */
+    @Deprecated
+    public static Yens sourceTarget(
+        Graph graph,
+        SourceTargetShortestPathBaseConfig config,
+        ProgressTracker progressTracker
+    ) {
+        return sourceTarget(graph, config, progressTracker, TerminationFlag.RUNNING_TRUE);
+    }
+
+    /**
      * Configure Yens to compute at most one source-target shortest path.
      */
     public static Yens sourceTarget(
         Graph graph,
-        ShortestPathYensBaseConfig config,
-        ProgressTracker progressTracker
+        SourceTargetShortestPathBaseConfig config,
+        ProgressTracker progressTracker,
+        TerminationFlag terminationFlag
     ) {
         // If the input graph is a multi-graph, we need to track
         // parallel relationships ids. This is necessary since shortest
@@ -62,17 +76,15 @@ public final class Yens extends Algorithm<PathFindingResult> {
             .trackRelationships(shouldTrackRelationships)
             .build();
 
-        return new Yens(graph, newConfig, progressTracker);
+        return new Yens(graph, newConfig, progressTracker, terminationFlag);
     }
 
-
-    private Yens(Graph graph, ShortestPathYensBaseConfig config, ProgressTracker progressTracker) {
+    private Yens(Graph graph, ShortestPathYensBaseConfig config, ProgressTracker progressTracker, TerminationFlag terminationFlag) {
         super(progressTracker);
         this.graph = graph;
         this.config = config;
-
+        this.terminationFlag = terminationFlag;
     }
-
 
     @Override
     public PathFindingResult compute() {

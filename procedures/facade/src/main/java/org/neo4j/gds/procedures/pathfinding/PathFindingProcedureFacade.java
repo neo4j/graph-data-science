@@ -26,13 +26,18 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsFacade;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
+import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraMutateConfig;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraMutateConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig;
+import org.neo4j.gds.paths.yens.config.ShortestPathYensMutateConfig;
+import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
+import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 
@@ -72,6 +77,20 @@ public class PathFindingProcedureFacade {
         this.facade = facade;
     }
 
+    public Stream<PathFindingMutateResult> singlePairShortestPathAStarMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        return Stream.of(
+            runMutateAlgorithm(
+                graphName,
+                configuration,
+                ShortestPathAStarMutateConfig::of,
+                facade::singlePairShortestPathAStarMutate
+            )
+        );
+    }
+
     public Stream<PathFindingStreamResult> singlePairShortestPathAStarStream(
         String graphName,
         Map<String, Object> configuration
@@ -81,6 +100,20 @@ public class PathFindingProcedureFacade {
             configuration,
             ShortestPathAStarStreamConfig::of,
             facade::singlePairShortestPathAStarStream
+        );
+    }
+
+    public Stream<StandardWriteRelationshipsResult> singlePairShortestPathAStarWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        return Stream.of(
+            runWriteAlgorithm(
+                graphName,
+                configuration,
+                ShortestPathAStarWriteConfig::of,
+                facade::singlePairShortestPathAStarWrite
+            )
         );
     }
 
@@ -124,6 +157,46 @@ public class PathFindingProcedureFacade {
         );
     }
 
+    public Stream<PathFindingMutateResult> singlePairShortestPathYensMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        return Stream.of(
+            runMutateAlgorithm(
+                graphName,
+                configuration,
+                ShortestPathYensMutateConfig::of,
+                facade::singlePairShortestPathYensMutate
+            )
+        );
+    }
+
+    public Stream<PathFindingStreamResult> singlePairShortestPathYensStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        return runStreamAlgorithm(
+            graphName,
+            configuration,
+            ShortestPathYensStreamConfig::of,
+            facade::singlePairShortestPathYensStream
+        );
+    }
+
+    public Stream<StandardWriteRelationshipsResult> singlePairShortestPathYensWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        return Stream.of(
+            runWriteAlgorithm(
+                graphName,
+                configuration,
+                ShortestPathYensWriteConfig::of,
+                facade::singlePairShortestPathYensWrite
+            )
+        );
+    }
+
     public Stream<PathFindingMutateResult> singleSourceShortestPathDijkstraMutate(
         String graphName,
         Map<String, Object> configuration
@@ -139,12 +212,12 @@ public class PathFindingProcedureFacade {
     }
 
     public Stream<PathFindingStreamResult> singleSourceShortestPathDijkstraStream(
-        String graphNameAsString,
-        Map<String, Object> rawConfiguration
+        String graphName,
+        Map<String, Object> configuration
     ) {
         return runStreamAlgorithm(
-            graphNameAsString,
-            rawConfiguration,
+            graphName,
+            configuration,
             AllShortestPathsDijkstraStreamConfig::of,
             facade::singleSourceShortestPathDijkstraStream
         );
