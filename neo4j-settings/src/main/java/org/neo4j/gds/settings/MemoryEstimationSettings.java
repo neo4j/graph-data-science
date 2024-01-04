@@ -21,7 +21,6 @@ package org.neo4j.gds.settings;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Description;
-import org.neo4j.configuration.DocumentedDefaultValue;
 import org.neo4j.configuration.SettingsDeclaration;
 import org.neo4j.graphdb.config.Setting;
 
@@ -32,7 +31,6 @@ import static org.neo4j.gds.compat.SettingProxy.newBuilder;
 public class MemoryEstimationSettings implements SettingsDeclaration {
 
     @Description("Use maximum memory estimation in procedure memory guard.")
-    @DocumentedDefaultValue("false")
     @SuppressWarnings("WeakerAccess")
     public static final Setting<Boolean> validate_using_max_memory_estimation = newBuilder(
         "gds.validate_using_max_memory_estimation",
