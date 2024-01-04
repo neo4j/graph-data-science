@@ -153,7 +153,7 @@ The example graph looks like this:
 image::example-graphs/node_property_pipeline_graph.svg[align="center"]
 
 .The following Cypher statement will create the example graph in the Neo4j database:
-[source, cypher, role=noplay setup-query, group=nc]
+[source, cypher, role=noplay setup-query, group=nr]
 ----
 CREATE
   (gold:House {color: 'Gold', sizePerStory: [15.5, 23.6, 33.1], price: 99.99}),
@@ -266,7 +266,7 @@ We can do that by passing in contextNodeLabels and contextRelationshipTypes when
 
 
 The following statement will project a graph containing the information about houses and their painters using a native projection and store it in the graph catalog under the name 'paintingGraph'.
-[source, cypher, role=noplay graph-project-query, group=nc]
+[source, cypher, role=noplay graph-project-query, group=nr]
 ----
 CALL gds.graph.project(
   'paintingGraph',
@@ -285,14 +285,14 @@ After the feature generation however, it is only the `House` nodes that are cons
 
 First, we create a new pipeline.
 
-[source, cypher, role=noplay setup-query,group=nc]
+[source, cypher, role=noplay setup-query,group=nr]
 ----
 CALL gds.alpha.pipeline.nodeRegression.create('pipe-with-context')
 ----
 
 Second, we add a node property step (in this case, a node embedding) with `Painter` as contextNodeLabels.
 
-[source, cypher, role=noplay setup-query,group=nc]
+[source, cypher, role=noplay setup-query,group=nr]
 ----
 CALL gds.alpha.pipeline.nodeRegression.addNodeProperty('pipe-with-context', 'fastRP', {
 embeddingDimension: 64,
@@ -304,14 +304,14 @@ contextNodeLabels: ['Painter']
 
 We add our embedding as a feature for the model:
 
-[source, cypher, role=noplay setup-query,group=nc]
+[source, cypher, role=noplay setup-query,group=nr]
 ----
 CALL gds.alpha.pipeline.nodeRegression.selectFeatures('pipe-with-context', ['embedding'])
 ----
 
 And we complete the pipeline setup by adding a random forest model candidate:
 
-[source, cypher, role=noplay setup-query,group=nc]
+[source, cypher, role=noplay setup-query,group=nr]
 ----
 CALL gds.alpha.pipeline.nodeRegression.addRandomForest('pipe-with-context', {numberOfDecisionTrees: 5})
 ----
@@ -319,7 +319,7 @@ CALL gds.alpha.pipeline.nodeRegression.addRandomForest('pipe-with-context', {num
 We are now ready to invoke the training of the newly created pipeline.
 
 [[noderegression-pipelines-examples-filtered-train-query]]
-[role=query-example,group=nc]
+[role=query-example,group=nr]
 --
 .The following will train a model using the context-configured pipeline:
 [source, cypher, role=noplay]
