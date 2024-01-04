@@ -21,7 +21,6 @@ package org.neo4j.gds.core.utils.progress;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Description;
-import org.neo4j.configuration.DocumentedDefaultValue;
 import org.neo4j.configuration.SettingsDeclaration;
 import org.neo4j.graphdb.config.Setting;
 
@@ -32,7 +31,6 @@ import static org.neo4j.gds.compat.SettingProxy.newBuilder;
 public final class ProgressFeatureSettings implements SettingsDeclaration {
 
     @Description("Enable progress logging tracking.")
-    @DocumentedDefaultValue("false")
     public static final Setting<Boolean> progress_tracking_enabled = newBuilder(
         "gds.progress_tracking_enabled",
         BOOL,
