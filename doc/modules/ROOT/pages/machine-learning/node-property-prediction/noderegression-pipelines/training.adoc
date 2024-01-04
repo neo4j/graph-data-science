@@ -295,10 +295,11 @@ Second, we add a node property step (in this case, a node embedding) with `Paint
 [source, cypher, role=noplay setup-query,group=nr]
 ----
 CALL gds.alpha.pipeline.nodeRegression.addNodeProperty('pipe-with-context', 'fastRP', {
-embeddingDimension: 64,
-iterationWeights: [0, 1],
-mutateProperty:'embedding',
-contextNodeLabels: ['Painter']
+  embeddingDimension: 64,
+  iterationWeights: [0, 1],
+  mutateProperty:'embedding',
+  contextNodeLabels: ['Painter'],
+  randomSeed: 1337
 })
 ----
 
@@ -344,7 +345,7 @@ RETURN
 [opts="header", cols="6, 2, 2, 2"]
 |===
 | winningModel                                                                                                                                | avgTrainScore | outerTrainScore    | testScore
-| {maxDepth=2147483647, methodName=RandomForest, minLeafSize=1, minSplitSize=2, numberOfDecisionTrees=5, numberOfSamplesRatio=1.0} | 849.7884240000002 | 901.3513857142859 | 824.8937999999998
+| {maxDepth=2147483647, methodName=RandomForest, minLeafSize=1, minSplitSize=2, numberOfDecisionTrees=5, numberOfSamplesRatio=1.0} | 758.087008266667 | 837.5558960000001 | 1192.523748
 |===
 --
 
