@@ -171,15 +171,15 @@ public final class Yens extends Algorithm<PathFindingResult> {
     }
 
     private Optional<PathResult> findFirstPath() {
-
         var dijkstra = Dijkstra.sourceTarget(
             graph,
             config,
             Optional.empty(),
-            progressTracker
+            progressTracker,
+            terminationFlag
         );
-        var result = dijkstra.compute();
-        return result.findFirst();
+
+        return dijkstra.compute().findFirst();
     }
 
     static SourceTargetShortestPathBaseConfig dijkstraConfig(long targetNode, boolean trackRelationships) {
