@@ -20,12 +20,12 @@
 package org.neo4j.gds.approxmaxkcut;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.approxmaxkcut.localsearch.LocalSearch;
 import org.neo4j.gds.collections.ha.HugeByteArray;
 import org.neo4j.gds.core.concurrency.AtomicDouble;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
+import java.util.List;
 import java.util.SplittableRandom;
 import java.util.concurrent.atomic.AtomicLongArray;
 import java.util.function.BooleanSupplier;
@@ -35,11 +35,13 @@ class VariableNeighborhoodSearch {
     private final Graph graph;
     private final SplittableRandom random;
     private final ApproxMaxKCut.Comparator comparator;
-    private final ApproxMaxKCutBaseConfig config;
     private final LocalSearch localSearch;
     private final HugeByteArray[] candidateSolutions;
     private final AtomicDouble[] costs;
     private final ProgressTracker progressTracker;
+    private final List<Long> minCommunitySizes;
+    private final byte k;
+    private final int vnsMaxNeighborhoodOrder;
     private HugeByteArray neighborSolution;
     private AtomicLongArray neighborCardinalities;
 
@@ -47,7 +49,9 @@ class VariableNeighborhoodSearch {
         Graph graph,
         SplittableRandom random,
         ApproxMaxKCut.Comparator comparator,
-        ApproxMaxKCutBaseConfig config,
+        int vnsMaxNeighborhoodOrder,
+        List<Long> minCommunitySizes,
+        byte k,
         LocalSearch localSearch,
         HugeByteArray[] candidateSolutions,
         AtomicDouble[] costs,
@@ -56,14 +60,16 @@ class VariableNeighborhoodSearch {
         this.graph = graph;
         this.random = random;
         this.comparator = comparator;
-        this.config = config;
+        this.vnsMaxNeighborhoodOrder = vnsMaxNeighborhoodOrder;
+        this.minCommunitySizes = minCommunitySizes;
+        this.k = k;
         this.localSearch = localSearch;
         this.candidateSolutions = candidateSolutions;
         this.costs = costs;
         this.progressTracker = progressTracker;
 
         this.neighborSolution = HugeByteArray.newArray(graph.nodeCount());
-        this.neighborCardinalities = new AtomicLongArray(config.k());
+        this.neighborCardinalities = new AtomicLongArray(k);
     }
 
     AtomicLongArray compute(int candidateIdx, AtomicLongArray currentCardinalities, BooleanSupplier running) {
@@ -75,7 +81,7 @@ class VariableNeighborhoodSearch {
 
         progressTracker.beginSubTask();
 
-        while ((currentOrder < config.vnsMaxNeighborhoodOrder()) && running.getAsBoolean()) {
+        while ((currentOrder < vnsMaxNeighborhoodOrder) && running.getAsBoolean()) {
             boolean perturbSuccess = true;
             bestCandidateSolution.copyTo(neighborSolution, graph.nodeCount());
             copyCardinalities(bestCardinalities, neighborCardinalities);
@@ -141,7 +147,7 @@ class VariableNeighborhoodSearch {
             long nodeToFlip = random.nextLong(0, graph.nodeCount());
             byte currentCommunity = solution.get(nodeToFlip);
 
-            if (cardinalities.get(currentCommunity) <= config.minCommunitySizes().get(currentCommunity)) {
+            if (cardinalities.get(currentCommunity) <= minCommunitySizes.get(currentCommunity)) {
                 // Flipping this node would invalidate the solution in terms of min community sizes.
                 retries++;
                 continue;
@@ -149,8 +155,7 @@ class VariableNeighborhoodSearch {
 
             // For `nodeToFlip`, move to a new random community not equal to its current community in
             // `neighboringSolution`.
-            byte rndNewCommunity = (byte) ((solution.get(nodeToFlip) + (random.nextInt(config.k() - 1) + 1))
-                                           % config.k());
+            byte rndNewCommunity = (byte) ((solution.get(nodeToFlip) + (random.nextInt(k - 1) + 1)) % k);
 
             solution.set(nodeToFlip, rndNewCommunity);
             cardinalities.decrementAndGet(currentCommunity);

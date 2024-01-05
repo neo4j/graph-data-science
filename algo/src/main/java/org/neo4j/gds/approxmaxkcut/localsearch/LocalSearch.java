@@ -21,7 +21,6 @@ package org.neo4j.gds.approxmaxkcut.localsearch;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCut;
-import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.collections.ha.HugeByteArray;
 import org.neo4j.gds.collections.haa.HugeAtomicByteArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
@@ -47,47 +46,54 @@ public class LocalSearch {
 
     private final Graph graph;
     private final ApproxMaxKCut.Comparator comparator;
-    private final ApproxMaxKCutBaseConfig config;
     private final ExecutorService executor;
     private final WeightTransformer weightTransformer;
     private final HugeAtomicDoubleArray nodeToCommunityWeights;
     private final HugeAtomicByteArray swapStatus;
     private final List<Partition> degreePartition;
     private final ProgressTracker progressTracker;
+    private final byte k;
+    private final int concurrency;
+    private final List<Long> minCommunitySizes;
 
     public LocalSearch(
         Graph graph,
         ApproxMaxKCut.Comparator comparator,
-        ApproxMaxKCutBaseConfig config,
+        int concurrency,
+        byte k,
+        List<Long> minCommunitySizes,
+        int minBatchSize,
+        boolean hasRelationshipWeightProperty,
         ExecutorService executor,
         ProgressTracker progressTracker
     ) {
         this.graph = graph;
         this.comparator = comparator;
-        this.config = config;
+        this.concurrency = concurrency;
+        this.k = k;
+        this.minCommunitySizes = minCommunitySizes;
         this.executor = executor;
         this.progressTracker = progressTracker;
 
         this.degreePartition = PartitionUtils.degreePartition(
             graph,
-            config.concurrency(),
+            concurrency,
             partition -> partition,
-            Optional.of(config.minBatchSize())
+            Optional.of(minBatchSize)
         );
 
         // Used to keep track of the costs for swapping a node to another community.
         // TODO: If we had pull-based traversal we could have a |V| sized int array here instead of the |V|*k sized
         //  double array.
         this.nodeToCommunityWeights = HugeAtomicDoubleArray.of(
-            graph.nodeCount() * config.k(),
-            ParallelDoublePageCreator.passThrough(
-                config.concurrency())
+            graph.nodeCount() * k,
+            ParallelDoublePageCreator.passThrough(concurrency)
         );
 
         // Used to keep track of whether we can swap a node into another community or not.
-        this.swapStatus = HugeAtomicByteArray.of(graph.nodeCount(), new ParallelBytePageCreator(config.concurrency()));
+        this.swapStatus = HugeAtomicByteArray.of(graph.nodeCount(), new ParallelBytePageCreator(concurrency));
 
-        this.weightTransformer = config.hasRelationshipWeightProperty() ? weight -> weight : unused -> 1.0D;
+        this.weightTransformer = hasRelationshipWeightProperty ? weight -> weight : unused -> 1.0D;
     }
 
 
@@ -118,7 +124,7 @@ public class LocalSearch {
                 .map(partition ->
                     new ComputeNodeToCommunityWeights(
                         graph.concurrentCopy(),
-                        config.k(),
+                        k,
                         DEFAULT_WEIGHT,
                         weightTransformer,
                         candidateSolution,
@@ -129,7 +135,7 @@ public class LocalSearch {
                 ).collect(Collectors.toList());
             progressTracker.beginSubTask();
             RunWithConcurrency.builder()
-                .concurrency(config.concurrency())
+                .concurrency(concurrency)
                 .tasks(nodeToCommunityWeightTasks)
                 .executor(executor)
                 .run();
@@ -141,7 +147,8 @@ public class LocalSearch {
                 .map(partition ->
                     new SwapForLocalImprovements(
                         graph.concurrentCopy(),
-                        config,
+                        minCommunitySizes,
+                        k,
                         comparator,
                         candidateSolution,
                         cardinalities,
@@ -154,7 +161,7 @@ public class LocalSearch {
                 ).collect(Collectors.toList());
             progressTracker.beginSubTask();
             RunWithConcurrency.builder()
-                .concurrency(config.concurrency())
+                .concurrency(concurrency)
                 .tasks(swapTasks)
                 .executor(executor)
                 .run();
@@ -177,7 +184,7 @@ public class LocalSearch {
             ).collect(Collectors.toList());
         progressTracker.beginSubTask();
         RunWithConcurrency.builder()
-            .concurrency(config.concurrency())
+            .concurrency(concurrency)
             .tasks(costTasks)
             .executor(executor)
             .run();

@@ -22,20 +22,21 @@ package org.neo4j.gds.approxmaxkcut.localsearch;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCut;
-import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.collections.ha.HugeByteArray;
 import org.neo4j.gds.collections.haa.HugeAtomicByteArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLongArray;
 
 final class SwapForLocalImprovements implements Runnable {
 
     private final Graph graph;
-    private final ApproxMaxKCutBaseConfig config;
+    private final byte k;
+    private final List<Long> minCommunitySizes;
     private final ApproxMaxKCut.Comparator comparator;
     private final HugeByteArray candidateSolution;
     private final AtomicLongArray cardinalities;
@@ -44,11 +45,11 @@ final class SwapForLocalImprovements implements Runnable {
     private final AtomicBoolean change;
     private final Partition partition;
     private final ProgressTracker progressTracker;
-    private final byte k;
 
     SwapForLocalImprovements(
         Graph graph,
-        ApproxMaxKCutBaseConfig config,
+        List<Long> minCommunitySizes,
+        byte k,
         ApproxMaxKCut.Comparator comparator,
         HugeByteArray candidateSolution,
         AtomicLongArray cardinalities,
@@ -59,14 +60,14 @@ final class SwapForLocalImprovements implements Runnable {
         ProgressTracker progressTracker
     ) {
         this.graph = graph;
-        this.config = config;
+        this.minCommunitySizes = minCommunitySizes;
+        this.k = k;
         this.comparator = comparator;
         this.candidateSolution = candidateSolution;
         this.cardinalities = cardinalities;
         this.nodeToCommunityWeights = nodeToCommunityWeights;
         this.swapStatus = swapStatus;
         this.change = change;
-        this.k = config.k();
         this.partition = partition;
         this.progressTracker = progressTracker;
     }
@@ -100,13 +101,13 @@ final class SwapForLocalImprovements implements Runnable {
             long updatedCardinality = cardinalities.getAndUpdate(
                 currentCommunity,
                 currentCount -> {
-                    if (currentCount > config.minCommunitySizes().get(currentCommunity)) {
+                    if (currentCount > minCommunitySizes.get(currentCommunity)) {
                         return currentCount - 1;
                     }
                     return currentCount;
                 }
             );
-            if (updatedCardinality == config.minCommunitySizes().get(currentCommunity)) {
+            if (updatedCardinality == minCommunitySizes.get(currentCommunity)) {
                 return;
             }
 

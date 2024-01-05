@@ -32,10 +32,10 @@ class ApproxMaxKCutMemoryEstimateDefinitionTest {
 
     @ParameterizedTest(name = "nodeCount: {0}, k: {1}")
     @CsvSource({
-        "10_000, 2, 200_264",
-        "10_000, 5, 440_264",
-        "40_000, 2, 800_264",
-        "40_000, 5, 1_760_264"
+        "10_000, 2, 200_272",
+        "10_000, 5, 440_272",
+        "40_000, 2, 800_272",
+        "40_000, 5, 1_760_272"
     })
     void memoryEstimationWithVNS(long nodeCount, byte k, long expectedMemory) {
         var configMock = mock(ApproxMaxKCutBaseConfig.class);
@@ -53,8 +53,8 @@ class ApproxMaxKCutMemoryEstimateDefinitionTest {
 
     @ParameterizedTest(name = "nodeCount: {0}, k: {1}")
     @CsvSource({
-        "10_000, 2, 190_224",
-        "40_000, 5, 1_720_224"
+        "10_000, 2, 190_232",
+        "40_000, 5, 1_720_232"
     })
     void memoryEstimationWithoutVNS(long nodeCount, byte k, long expectedMemory) {
         var configMock = mock(ApproxMaxKCutBaseConfig.class);
@@ -83,7 +83,7 @@ class ApproxMaxKCutMemoryEstimateDefinitionTest {
 
         MemoryEstimationAssert.assertThat(memoryEstimate)
             .memoryRange(10_000, 4)
-            .hasSameMinAndMaxEqualTo(430_224L);
+            .hasSameMinAndMaxEqualTo(430_232L);
     }
 
 }

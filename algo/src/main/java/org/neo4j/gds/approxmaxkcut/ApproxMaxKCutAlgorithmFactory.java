@@ -44,10 +44,23 @@ public class ApproxMaxKCutAlgorithmFactory<CONFIG extends ApproxMaxKCutBaseConfi
     @Override
     public ApproxMaxKCut build(
         Graph graph,
-        CONFIG configuration,
+        CONFIG config,
         ProgressTracker progressTracker
     ) {
-        return new ApproxMaxKCut(graph, DefaultPool.INSTANCE, configuration, progressTracker);
+        return new ApproxMaxKCut(
+            graph,
+            DefaultPool.INSTANCE,
+            config.k(),
+            config.iterations(),
+            config.vnsMaxNeighborhoodOrder(),
+            config.concurrency(),
+            config.minBatchSize(),
+            config.randomSeed(),
+            config.minCommunitySizes(),
+            config.hasRelationshipWeightProperty(),
+            config.minimize(),
+            progressTracker
+        );
     }
 
     @Override

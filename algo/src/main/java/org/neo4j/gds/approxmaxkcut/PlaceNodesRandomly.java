@@ -20,7 +20,6 @@
 package org.neo4j.gds.approxmaxkcut;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.collections.ha.HugeByteArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
@@ -41,57 +40,68 @@ import java.util.stream.IntStream;
 
 class PlaceNodesRandomly {
 
-    private final ApproxMaxKCutBaseConfig config;
+    private final int concurrency;
     private final SplittableRandom random;
     private final Graph graph;
     private final List<Long> rangePartitionActualBatchSizes;
     private final ExecutorService executor;
     private final ProgressTracker progressTracker;
+    private final List<Long> minCommunitySizes;
+    private final byte k;
+    private final int minBatchSize;
 
     PlaceNodesRandomly(
-        ApproxMaxKCutBaseConfig config,
+        int concurrency,
+        byte k,
+        List<Long> minCommunitySizes,
+        int minBatchSize,
         SplittableRandom random,
         Graph graph,
         ExecutorService executor,
         ProgressTracker progressTracker
     ) {
-        this.config = config;
+//        this.config = config;
+        this.concurrency = concurrency;
+        this.k = k;
+        this.minCommunitySizes = minCommunitySizes;
+        this.minBatchSize = minBatchSize;
         this.random = random;
         this.graph = graph;
         this.executor = executor;
         this.progressTracker = progressTracker;
 
         this.rangePartitionActualBatchSizes = PartitionUtils.rangePartitionActualBatchSizes(
-            config.concurrency(),
+            concurrency,
             graph.nodeCount(),
-            Optional.of(config.minBatchSize())
+            Optional.of(minBatchSize)
         );
     }
 
     void compute(HugeByteArray candidateSolution, AtomicLongArray currentCardinalities) {
-        assert graph.nodeCount() >= config.k();
+        assert graph.nodeCount() >= k;
 
         var minCommunitiesPerPartition = minCommunitySizesToPartitions(rangePartitionActualBatchSizes);
-        for (byte i = 0; i < config.k(); i++) {
-            currentCardinalities.set(i, config.minCommunitySizes().get(i));
+        for (byte i = 0; i < k; i++) {
+            currentCardinalities.set(i, minCommunitySizes.get(i));
         }
 
         var partitionIndex = new AtomicInteger(0);
         var tasks = PartitionUtils.rangePartition(
-            config.concurrency(),
+            concurrency,
             graph.nodeCount(),
             partition -> new AssignNodes(
-                random.split(),
+                this.random.split(),
                 candidateSolution,
                 currentCardinalities,
                 minCommunitiesPerPartition[partitionIndex.getAndIncrement()],
-                partition
+                partition,
+                this.k
             ),
-            Optional.of(config.minBatchSize())
+            Optional.of(minBatchSize)
         );
         progressTracker.beginSubTask();
         RunWithConcurrency.builder()
-            .concurrency(config.concurrency())
+            .concurrency(concurrency)
             .tasks(tasks)
             .executor(executor)
             .run();
@@ -104,17 +114,15 @@ class PlaceNodesRandomly {
         // Balance granularity of communities' min sizes over partition such that it's sufficiently random while not
         // requiring too many iterations.
         double SIZE_TO_CHUNK_FACTOR = batchSizes.size() * 8.0;
-        var chunkSizes = config
-            .minCommunitySizes()
-            .stream()
+        var chunkSizes = minCommunitySizes.stream()
             .mapToLong(minSz -> (long) Math.ceil(minSz / SIZE_TO_CHUNK_FACTOR))
             .toArray();
 
         var currPartitionCounts = new long[batchSizes.size()];
-        var remainingMinCommunitySizeCounts = new ArrayList<>(config.minCommunitySizes());
+        var remainingMinCommunitySizeCounts = new ArrayList<>(minCommunitySizes);
 
-        var minCommunitiesPerPartition = new long[config.concurrency()][];
-        Arrays.setAll(minCommunitiesPerPartition, i -> new long[config.k()]);
+        var minCommunitiesPerPartition = new long[concurrency][];
+        Arrays.setAll(minCommunitiesPerPartition, i -> new long[k]);
 
         var activePartitions = IntStream
             .range(0, batchSizes.size())
@@ -122,8 +130,8 @@ class PlaceNodesRandomly {
             .boxed()
             .collect(Collectors.toList());
         var activeCommunities = IntStream
-            .range(0, config.k())
-            .filter(community -> config.minCommunitySizes().get(community) > 0)
+            .range(0, k)
+            .filter(community -> minCommunitySizes.get(community) > 0)
             .boxed()
             .collect(Collectors.toList());
 
@@ -165,14 +173,15 @@ class PlaceNodesRandomly {
             SplittableRandom random, HugeByteArray candidateSolution,
             AtomicLongArray cardinalities,
             long[] minNodesPerCommunity,
-            Partition partition
+            Partition partition,
+            byte k
         ) {
             this.random = random;
             this.candidateSolution = candidateSolution;
             this.cardinalities = cardinalities;
             this.minNodesPerCommunity = minNodesPerCommunity;
             this.partition = partition;
-            this.k = config.k();
+            this.k = k;
         }
 
         @Override

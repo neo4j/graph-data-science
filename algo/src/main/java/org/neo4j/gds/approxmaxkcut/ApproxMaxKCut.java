@@ -21,12 +21,13 @@ package org.neo4j.gds.approxmaxkcut;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.approxmaxkcut.localsearch.LocalSearch;
 import org.neo4j.gds.collections.ha.HugeByteArray;
 import org.neo4j.gds.core.concurrency.AtomicDouble;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLongArray;
@@ -51,27 +52,41 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCutResult> {
 
     private final Graph graph;
     private final SplittableRandom random;
-    private final ApproxMaxKCutBaseConfig config;
     private final Comparator comparator;
     private final PlaceNodesRandomly placeNodesRandomly;
     private final LocalSearch localSearch;
     private final HugeByteArray[] candidateSolutions;
     private final AtomicDouble[] costs;
+    private final int vnsMaxNeighborhoodOrder;
+    private final List<Long> minCommunitySizes;
+    private final byte k;
+    private final int iterations;
     private VariableNeighborhoodSearch variableNeighborhoodSearch;
     private AtomicLongArray currentCardinalities;
 
     public ApproxMaxKCut(
         Graph graph,
         ExecutorService executor,
-        ApproxMaxKCutBaseConfig config,
+        byte k,
+        int iterations,
+        int vnsMaxNeighborhoodOrder,
+        int concurrency,
+        int minBatchSize,
+        Optional<Long> randomSeed,
+        List<Long> minCommunitySizes,
+        boolean hasRelationshipWeightProperty,
+        boolean minimize,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
-        this.random = new SplittableRandom(config.randomSeed().orElseGet(() -> new SplittableRandom().nextLong()));
+        this.random = new SplittableRandom(randomSeed.orElseGet(() -> new SplittableRandom().nextLong()));
         this.graph = graph;
-        this.config = config;
-        this.comparator = config.minimize() ? MINIMIZING : MAXIMIZING;
+        this.comparator = minimize ? MINIMIZING : MAXIMIZING;
 
+        this.k = k;
+        this.iterations = iterations;
+        this.minCommunitySizes = minCommunitySizes;
+        this.vnsMaxNeighborhoodOrder = vnsMaxNeighborhoodOrder;
         // We allocate two arrays in order to be able to compare results between iterations "GRASP style".
         this.candidateSolutions = new HugeByteArray[]{
             HugeByteArray.newArray(graph.nodeCount()),
@@ -82,13 +97,16 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCutResult> {
             new AtomicDouble(),
             new AtomicDouble(),
         };
-        costs[0].set(config.minimize() ? Double.MAX_VALUE : Double.MIN_VALUE);
-        costs[1].set(config.minimize() ? Double.MAX_VALUE : Double.MIN_VALUE);
+        costs[0].set(minimize ? Double.MAX_VALUE : Double.MIN_VALUE);
+        costs[1].set(minimize ? Double.MAX_VALUE : Double.MIN_VALUE);
 
-        this.currentCardinalities = new AtomicLongArray(config.k());
+        this.currentCardinalities = new AtomicLongArray(k);
 
         this.placeNodesRandomly = new PlaceNodesRandomly(
-            config,
+            concurrency,
+            k,
+            minCommunitySizes,
+            minBatchSize,
             random,
             graph,
             executor,
@@ -97,7 +115,11 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCutResult> {
         this.localSearch = new LocalSearch(
             graph,
             comparator,
-            config,
+            concurrency,
+            k,
+            minCommunitySizes,
+            minBatchSize,
+            hasRelationshipWeightProperty,
             executor,
             progressTracker
         );
@@ -115,12 +137,14 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCutResult> {
 
         progressTracker.beginSubTask();
 
-        if (config.vnsMaxNeighborhoodOrder() > 0) {
+        if (vnsMaxNeighborhoodOrder > 0) {
             this.variableNeighborhoodSearch = new VariableNeighborhoodSearch(
                 graph,
                 random,
                 comparator,
-                config,
+                vnsMaxNeighborhoodOrder,
+                minCommunitySizes,
+                k,
                 localSearch,
                 candidateSolutions,
                 costs,
@@ -128,7 +152,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCutResult> {
             );
         }
 
-        for (int i = 1; (i <= config.iterations()) && terminationFlag.running(); i++) {
+        for (int i = 1; (i <= iterations) && terminationFlag.running(); i++) {
             var currCandidateSolution = candidateSolutions[currIdx];
             var currCost = costs[currIdx];
 
@@ -136,7 +160,7 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCutResult> {
 
             if (!terminationFlag.running()) break;
 
-            if (config.vnsMaxNeighborhoodOrder() > 0) {
+            if (vnsMaxNeighborhoodOrder > 0) {
                 currentCardinalities = variableNeighborhoodSearch.compute(
                     currIdx,
                     currentCardinalities,

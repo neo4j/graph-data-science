@@ -167,7 +167,15 @@ final class ApproxMaxKCutTest {
         var approxMaxKCut = new ApproxMaxKCut(
             graph,
             DefaultPool.INSTANCE,
-            config,
+            config.k(),
+            config.iterations(),
+            config.vnsMaxNeighborhoodOrder(),
+            concurrency,
+            config.minBatchSize(),
+            config.randomSeed(),
+            config.minCommunitySizes(),
+            config.hasRelationshipWeightProperty(),
+            minimize,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -209,7 +217,15 @@ final class ApproxMaxKCutTest {
         var approxMaxKCut = new ApproxMaxKCut(
             maxGraph,
             DefaultPool.INSTANCE,
-            config,
+            config.k(),
+            config.iterations(),
+            config.vnsMaxNeighborhoodOrder(),
+            config.concurrency(),
+            config.minBatchSize(),
+            config.randomSeed(),
+            config.minCommunitySizes(),
+            config.hasRelationshipWeightProperty(),
+            config.minimize(),
             ProgressTracker.NULL_TRACKER
         );
 
