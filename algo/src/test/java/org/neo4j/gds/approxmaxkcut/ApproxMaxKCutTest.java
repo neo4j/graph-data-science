@@ -24,10 +24,11 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestSupport;
-import org.neo4j.gds.approxmaxkcut.config.ImmutableApproxMaxKCutBaseConfig;
+import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfigImpl;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -35,7 +36,9 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
+import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -143,38 +146,25 @@ final class ApproxMaxKCutTest {
         int vnsMaxNeighborhoodOrder,
         int concurrency
     ) {
-        var configBuilder = ImmutableApproxMaxKCutBaseConfig.builder()
-            .minimize(minimize)
-            .concurrency(concurrency)
-            .k((byte) 2)
-            .vnsMaxNeighborhoodOrder(vnsMaxNeighborhoodOrder)
-            // We should not need as many iterations if we do VNS.
-            .iterations(vnsMaxNeighborhoodOrder > 0 ? 100 : 25);
-
-        if (weighted) {
-            configBuilder.relationshipWeightProperty("weight");
-        }
-
-        if (concurrency > 1) {
-            configBuilder.minBatchSize(1);
-        } else {
-            configBuilder.randomSeed(42L);
-        }
-
-        var config = configBuilder.build();
-
+        var k = (byte) 2;
+        // We should not need as many iterations if we do VNS.
+        var iterations = vnsMaxNeighborhoodOrder > 0 ? 100 : 25;
+        var minBatchSize = concurrency > 1 ? 1 : ParallelUtil.DEFAULT_BATCH_SIZE;
+        var randomSeed = concurrency > 1 ? Optional.<Long>empty() : Optional.of(42L);
+        var minCommunitySizes = minimize ? Collections.nCopies(k, 1L) : Collections.nCopies(k, 0L);
         var graph = minimize ? minGraph : maxGraph;
+
         var approxMaxKCut = new ApproxMaxKCut(
             graph,
             DefaultPool.INSTANCE,
-            config.k(),
-            config.iterations(),
-            config.vnsMaxNeighborhoodOrder(),
+            k,
+            iterations,
+            vnsMaxNeighborhoodOrder,
             concurrency,
-            config.minBatchSize(),
-            config.randomSeed(),
-            config.minCommunitySizes(),
-            config.hasRelationshipWeightProperty(),
+            minBatchSize,
+            randomSeed,
+            minCommunitySizes,
+            weighted,
             minimize,
             ProgressTracker.NULL_TRACKER
         );
@@ -206,26 +196,22 @@ final class ApproxMaxKCutTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
     void respectMinCommunitySizes(int concurrency) {
-        var configBuilder = ImmutableApproxMaxKCutBaseConfig.builder()
-            .concurrency(concurrency)
-            .minCommunitySizes(LongStream.of(1, 6).boxed().collect(Collectors.toList()));
-        if (concurrency > 1) {
-            configBuilder.minBatchSize(1);
-        }
-        var config = configBuilder.build();
+        var minCommunitySizes = LongStream.of(1, 6).boxed().collect(Collectors.toList());
+        var minBatchSize = concurrency > 1 ? 1 : ParallelUtil.DEFAULT_BATCH_SIZE;
+        var k = (byte) 2;
 
         var approxMaxKCut = new ApproxMaxKCut(
             maxGraph,
             DefaultPool.INSTANCE,
-            config.k(),
-            config.iterations(),
-            config.vnsMaxNeighborhoodOrder(),
-            config.concurrency(),
-            config.minBatchSize(),
-            config.randomSeed(),
-            config.minCommunitySizes(),
-            config.hasRelationshipWeightProperty(),
-            config.minimize(),
+            k,
+            8,
+            0,
+            concurrency,
+            minBatchSize,
+            Optional.empty(),
+            minCommunitySizes,
+            false,
+            false,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -242,10 +228,9 @@ final class ApproxMaxKCutTest {
     @ParameterizedTest
     @ValueSource(ints = {0, 2})
     void progressLogging(int vnsMaxNeighborhoodOrder) {
-        var configBuilder = ImmutableApproxMaxKCutBaseConfig.builder();
-        configBuilder.vnsMaxNeighborhoodOrder(vnsMaxNeighborhoodOrder);
-
-        var config = configBuilder.build();
+        var config = ApproxMaxKCutBaseConfigImpl.builder()
+            .vnsMaxNeighborhoodOrder(vnsMaxNeighborhoodOrder)
+            .build();
 
         var log = Neo4jProxy.testLog();
         var approxMaxKCut = new ApproxMaxKCutAlgorithmFactory<>().build(

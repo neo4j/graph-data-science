@@ -23,7 +23,6 @@ import org.immutables.value.Value;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
@@ -35,26 +34,21 @@ import java.util.List;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface ApproxMaxKCutBaseConfig extends AlgoBaseConfig,
     RelationshipWeightConfig,
     SingleThreadedRandomSeedConfig {
 
-    @Value.Default
     @Configuration.IntegerRange(min = 2, max = Byte.MAX_VALUE)
     default byte k() {
         return 2;
     }
 
-    @Value.Default
     @Configuration.IntegerRange(min = 1)
     default int iterations() {
         return 8;
     }
 
-    @Value.Default
     @Configuration.IntegerRange(min = 0)
     default int vnsMaxNeighborhoodOrder() {
         return 0;
@@ -62,14 +56,12 @@ public interface ApproxMaxKCutBaseConfig extends AlgoBaseConfig,
 
     // Min k-cut capabilities not exposed in API yet.
     @Configuration.Ignore
-    @Value.Default
     default boolean minimize() {
         return false;
     }
 
     // Min k-cut capabilities not exposed in API yet.
     @Configuration.Ignore
-    @Value.Default
     default List<Long> minCommunitySizes() {
         if (minimize()) {
             return Collections.nCopies(k(), 1L);
@@ -98,7 +90,6 @@ public interface ApproxMaxKCutBaseConfig extends AlgoBaseConfig,
     }
 
     @Configuration.GraphStoreValidationCheck
-    @Value.Default
     default void validateMinCommunitySizesSum(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
