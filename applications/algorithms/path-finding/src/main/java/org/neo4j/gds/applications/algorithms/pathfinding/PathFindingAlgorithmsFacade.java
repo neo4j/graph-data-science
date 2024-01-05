@@ -23,6 +23,7 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.paths.SourceTargetShortestPathBaseConfig;
 import org.neo4j.gds.paths.astar.AStarMemoryEstimateDefinition;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
@@ -36,6 +37,7 @@ import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraMutateConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig;
 import org.neo4j.gds.paths.yens.YensMemoryEstimateDefinition;
+import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensMutateConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
@@ -160,6 +162,19 @@ public class PathFindingAlgorithmsFacade {
         );
     }
 
+    public MemoryEstimateResult singlePairShortestPathDijkstraEstimate(
+        SourceTargetShortestPathBaseConfig configuration,
+        Object graphNameOrConfiguration
+    ) {
+        var memoryEstimation = new DijkstraMemoryEstimateDefinition().memoryEstimation(configuration);
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
+    }
+
     public <RESULT> RESULT singlePairShortestPathDijkstraMutate(
         GraphName graphName,
         ShortestPathDijkstraMutateConfig configuration,
@@ -215,6 +230,19 @@ public class PathFindingAlgorithmsFacade {
             graph -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
             Optional.of(writeStep),
             resultBuilder
+        );
+    }
+
+    public MemoryEstimateResult singlePairShortestPathYensEstimate(
+        ShortestPathYensBaseConfig configuration,
+        Object graphNameOrConfiguration
+    ) {
+        var memoryEstimation = new YensMemoryEstimateDefinition().memoryEstimation(configuration);
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
         );
     }
 

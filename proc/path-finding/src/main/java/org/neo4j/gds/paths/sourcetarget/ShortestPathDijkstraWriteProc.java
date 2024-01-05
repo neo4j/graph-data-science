@@ -19,10 +19,6 @@
  */
 package org.neo4j.gds.paths.sourcetarget;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
@@ -34,16 +30,14 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.ProcedureConstants.ESTIMATE_DESCRIPTION;
 import static org.neo4j.gds.paths.sourcetarget.SinglePairShortestPathConstants.DIJKSTRA_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class ShortestPathDijkstraWriteProc extends BaseProc {
+public class ShortestPathDijkstraWriteProc {
     @Context
     public GraphDataScience facade;
-
-    @Context
-    public RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
 
     @Procedure(name = "gds.shortestPath.dijkstra.write", mode = WRITE)
     @Description(DIJKSTRA_DESCRIPTION)
@@ -60,16 +54,9 @@ public class ShortestPathDijkstraWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new ShortestPathDijkstraWriteSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.pathFinding().singlePairShortestPathDijkstraWriteEstimate(
+            graphNameOrConfiguration,
+            algoConfiguration
+        );
     }
-
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withRelationshipStreamExporterBuilder(relationshipStreamExporterBuilder);
-    }
-
 }

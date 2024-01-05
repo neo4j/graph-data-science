@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.paths.sourcetarget;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.pathfinding.PathFindingStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -32,10 +30,11 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.ProcedureConstants.ESTIMATE_DESCRIPTION;
 import static org.neo4j.gds.paths.sourcetarget.SinglePairShortestPathConstants.YENS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class ShortestPathYensStreamProc extends BaseProc {
+public class ShortestPathYensStreamProc {
     @Context
     public GraphDataScience facade;
 
@@ -54,10 +53,6 @@ public class ShortestPathYensStreamProc extends BaseProc {
         @Name(value = "graphName") Object graphName,
         @Name(value = "configuration") Map<String, Object> configuration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new ShortestPathYensStreamSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphName, configuration);
+        return facade.pathFinding().singlePairShortestPathYensStreamEstimate(graphName, configuration);
     }
 }

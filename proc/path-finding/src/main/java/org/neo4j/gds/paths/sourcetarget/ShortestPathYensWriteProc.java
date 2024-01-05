@@ -19,10 +19,6 @@
  */
 package org.neo4j.gds.paths.sourcetarget;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
@@ -34,16 +30,14 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.ProcedureConstants.ESTIMATE_DESCRIPTION;
 import static org.neo4j.gds.paths.sourcetarget.SinglePairShortestPathConstants.YENS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class ShortestPathYensWriteProc extends BaseProc {
+public class ShortestPathYensWriteProc {
     @Context
     public GraphDataScience facade;
-
-    @Context
-    public RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
 
     @Procedure(name = "gds.shortestPath.yens.write", mode = WRITE)
     @Description(YENS_DESCRIPTION)
@@ -60,15 +54,6 @@ public class ShortestPathYensWriteProc extends BaseProc {
         @Name(value = "graphName") Object graphName,
         @Name(value = "configuration") Map<String, Object> configuration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new ShortestPathYensWriteSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphName, configuration);
-    }
-
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withRelationshipStreamExporterBuilder(relationshipStreamExporterBuilder);
+        return facade.pathFinding().singlePairShortestPathYensWriteEstimate(graphName, configuration);
     }
 }

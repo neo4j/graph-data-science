@@ -150,6 +150,22 @@ public class PathFindingProcedureFacade {
         );
     }
 
+    public Stream<MemoryEstimateResult> singlePairShortestPathAStarWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = runEstimation(
+            algorithmConfiguration,
+            ShortestPathAStarWriteConfig::of,
+            configuration -> facade.singlePairShortestPathAStarEstimate(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
     public Stream<PathFindingMutateResult> singlePairShortestPathDijkstraMutate(
         String graphName,
         Map<String, Object> configuration
@@ -164,6 +180,22 @@ public class PathFindingProcedureFacade {
         );
     }
 
+    public Stream<MemoryEstimateResult> singlePairShortestPathDijkstraMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = runEstimation(
+            algorithmConfiguration,
+            ShortestPathDijkstraMutateConfig::of,
+            configuration -> facade.singlePairShortestPathDijkstraEstimate(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
     public Stream<PathFindingStreamResult> singlePairShortestPathDijkstraStream(
         String graphName,
         Map<String, Object> configuration
@@ -174,6 +206,22 @@ public class PathFindingProcedureFacade {
             ShortestPathDijkstraStreamConfig::of,
             facade::singlePairShortestPathDijkstraStream
         );
+    }
+
+    public Stream<MemoryEstimateResult> singlePairShortestPathDijkstraStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = runEstimation(
+            algorithmConfiguration,
+            ShortestPathDijkstraStreamConfig::of,
+            configuration -> facade.singlePairShortestPathDijkstraEstimate(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
     }
 
     public Stream<StandardWriteRelationshipsResult> singlePairShortestPathDijkstraWrite(
@@ -190,6 +238,22 @@ public class PathFindingProcedureFacade {
         );
     }
 
+    public Stream<MemoryEstimateResult> singlePairShortestPathDijkstraWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = runEstimation(
+            algorithmConfiguration,
+            ShortestPathDijkstraWriteConfig::of,
+            configuration -> facade.singlePairShortestPathDijkstraEstimate(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
     public Stream<PathFindingMutateResult> singlePairShortestPathYensMutate(
         String graphName,
         Map<String, Object> configuration
@@ -204,6 +268,22 @@ public class PathFindingProcedureFacade {
         );
     }
 
+    public Stream<MemoryEstimateResult> singlePairShortestPathYensMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = runEstimation(
+            algorithmConfiguration,
+            ShortestPathYensMutateConfig::of,
+            configuration -> facade.singlePairShortestPathYensEstimate(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
     public Stream<PathFindingStreamResult> singlePairShortestPathYensStream(
         String graphName,
         Map<String, Object> configuration
@@ -214,6 +294,22 @@ public class PathFindingProcedureFacade {
             ShortestPathYensStreamConfig::of,
             facade::singlePairShortestPathYensStream
         );
+    }
+
+    public Stream<MemoryEstimateResult> singlePairShortestPathYensStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = runEstimation(
+            algorithmConfiguration,
+            ShortestPathYensStreamConfig::of,
+            configuration -> facade.singlePairShortestPathYensEstimate(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
     }
 
     public Stream<StandardWriteRelationshipsResult> singlePairShortestPathYensWrite(
@@ -228,6 +324,22 @@ public class PathFindingProcedureFacade {
                 facade::singlePairShortestPathYensWrite
             )
         );
+    }
+
+    public Stream<MemoryEstimateResult> singlePairShortestPathYensWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = runEstimation(
+            algorithmConfiguration,
+            ShortestPathYensWriteConfig::of,
+            configuration -> facade.singlePairShortestPathYensEstimate(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
     }
 
     public Stream<PathFindingMutateResult> singleSourceShortestPathDijkstraMutate(
