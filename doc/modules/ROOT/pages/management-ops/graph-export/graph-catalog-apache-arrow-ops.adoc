@@ -88,7 +88,7 @@ To stream multiple node properties, the client needs to encode that information 
 {
     graph_name: "my_graph",
     database_name: "database_name",
-    procedure_name: "gds.graph.streamNodeProperties",
+    procedure_name: "gds.graph.nodeProperties.stream",
     configuration: {
         node_labels: ["*"],
         node_properties: ["foo", "bar", "baz"],
