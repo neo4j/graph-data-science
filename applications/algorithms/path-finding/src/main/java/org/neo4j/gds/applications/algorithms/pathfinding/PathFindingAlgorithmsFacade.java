@@ -24,6 +24,7 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.paths.astar.AStarMemoryEstimateDefinition;
+import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
@@ -38,6 +39,7 @@ import org.neo4j.gds.paths.yens.YensMemoryEstimateDefinition;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensMutateConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
@@ -62,6 +64,7 @@ public class PathFindingAlgorithmsFacade {
     private final Log log;
 
     private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
+    private final AlgorithmEstimationTemplate algorithmEstimationTemplate;
     private final RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationFlag terminationFlag;
@@ -71,6 +74,7 @@ public class PathFindingAlgorithmsFacade {
     public PathFindingAlgorithmsFacade(
         Log log,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
+        AlgorithmEstimationTemplate algorithmEstimationTemplate,
         RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
@@ -82,6 +86,20 @@ public class PathFindingAlgorithmsFacade {
         this.terminationFlag = terminationFlag;
         this.pathFindingAlgorithms = pathFindingAlgorithms;
         this.taskRegistryFactory = taskRegistryFactory;
+        this.algorithmEstimationTemplate = algorithmEstimationTemplate;
+    }
+
+    public MemoryEstimateResult singlePairShortestPathAStarEstimate(
+        ShortestPathAStarBaseConfig configuration,
+        Object graphNameOrConfiguration
+    ) {
+        var memoryEstimation = new AStarMemoryEstimateDefinition().memoryEstimation(configuration);
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
     }
 
     public <RESULT> RESULT singlePairShortestPathAStarMutate(

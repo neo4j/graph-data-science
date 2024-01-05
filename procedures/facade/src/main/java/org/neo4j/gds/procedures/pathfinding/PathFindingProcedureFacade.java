@@ -39,6 +39,7 @@ import org.neo4j.gds.paths.yens.config.ShortestPathYensMutateConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 
 import java.util.Map;
@@ -91,6 +92,22 @@ public class PathFindingProcedureFacade {
         );
     }
 
+    public Stream<MemoryEstimateResult> singlePairShortestPathAStarMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = runEstimation(
+            algorithmConfiguration,
+            ShortestPathAStarMutateConfig::of,
+            configuration -> facade.singlePairShortestPathAStarEstimate(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
     public Stream<PathFindingStreamResult> singlePairShortestPathAStarStream(
         String graphName,
         Map<String, Object> configuration
@@ -101,6 +118,22 @@ public class PathFindingProcedureFacade {
             ShortestPathAStarStreamConfig::of,
             facade::singlePairShortestPathAStarStream
         );
+    }
+
+    public Stream<MemoryEstimateResult> singlePairShortestPathAStarStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = runEstimation(
+            algorithmConfiguration,
+            ShortestPathAStarStreamConfig::of,
+            configuration -> facade.singlePairShortestPathAStarEstimate(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
     }
 
     public Stream<StandardWriteRelationshipsResult> singlePairShortestPathAStarWrite(
@@ -221,6 +254,22 @@ public class PathFindingProcedureFacade {
             AllShortestPathsDijkstraStreamConfig::of,
             facade::singleSourceShortestPathDijkstraStream
         );
+    }
+
+    /**
+     * Just a bit of reuse
+     */
+    private <CONFIGURATION extends AlgoBaseConfig> MemoryEstimateResult runEstimation(
+        Map<String, Object> algorithmConfiguration,
+        Function<CypherMapWrapper, CONFIGURATION> configurationParser,
+        Function<CONFIGURATION, MemoryEstimateResult> supplier
+    ) {
+        var configuration = configurationCreator.createConfiguration(
+            algorithmConfiguration,
+            configurationParser
+        );
+
+        return supplier.apply(configuration);
     }
 
     /**

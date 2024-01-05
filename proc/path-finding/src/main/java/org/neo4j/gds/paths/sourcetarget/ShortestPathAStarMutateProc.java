@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.paths.sourcetarget;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.pathfinding.PathFindingMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -32,10 +30,11 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.ProcedureConstants.ESTIMATE_DESCRIPTION;
 import static org.neo4j.gds.paths.sourcetarget.SinglePairShortestPathConstants.ASTAR_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class ShortestPathAStarMutateProc extends BaseProc {
+public class ShortestPathAStarMutateProc {
     @Context
     public GraphDataScience facade;
 
@@ -54,10 +53,9 @@ public class ShortestPathAStarMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new ShortestPathAStarMutateSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.pathFinding().singlePairShortestPathAStarMutateEstimate(
+            graphNameOrConfiguration,
+            algoConfiguration
+        );
     }
 }

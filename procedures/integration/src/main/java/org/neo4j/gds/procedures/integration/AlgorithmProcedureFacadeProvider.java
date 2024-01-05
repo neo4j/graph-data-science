@@ -51,6 +51,7 @@ import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.NodeLookup;
+import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsFacade;
@@ -82,6 +83,7 @@ class AlgorithmProcedureFacadeProvider {
     private final AlgorithmEstimator algorithmEstimator;
     private final AlgorithmRunner algorithmRunner;
     private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
+    private final AlgorithmEstimationTemplate algorithmEstimationTemplate;
     private final RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationFlag terminationFlag;
@@ -100,12 +102,14 @@ class AlgorithmProcedureFacadeProvider {
         AlgorithmRunner algorithmRunner,
         AlgorithmEstimator algorithmEstimator,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
+        AlgorithmEstimationTemplate algorithmEstimationTemplate,
         RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         UserLogRegistryFactory userLogRegistryFactory
     ) {
         this.log = log;
+
         this.closeableResourceRegistry = closeableResourceRegistry;
         this.configurationCreator = configurationCreator;
         this.nodeLookup = nodeLookup;
@@ -118,6 +122,7 @@ class AlgorithmProcedureFacadeProvider {
         this.algorithmEstimator = algorithmEstimator;
 
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
+        this.algorithmEstimationTemplate = algorithmEstimationTemplate;
         this.relationshipStreamExporterBuilder = relationshipStreamExporterBuilder;
         this.taskRegistryFactory = taskRegistryFactory;
         this.terminationFlag = terminationFlag;
@@ -224,6 +229,7 @@ class AlgorithmProcedureFacadeProvider {
         var pathFindingAlgorithmsFacade = new PathFindingAlgorithmsFacade(
             log,
             algorithmProcessingTemplate,
+            algorithmEstimationTemplate,
             relationshipStreamExporterBuilder,
             taskRegistryFactory,
             terminationFlag,

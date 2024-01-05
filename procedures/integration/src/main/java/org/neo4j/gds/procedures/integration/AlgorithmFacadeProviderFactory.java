@@ -30,6 +30,7 @@ import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
+import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.pathfinding.DefaultAlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.pathfinding.DefaultMemoryGuard;
@@ -194,7 +195,7 @@ class AlgorithmFacadeProviderFactory {
             userLogRegistryFactory
         );
 
-        // business facade
+        // business facades
         AlgorithmProcessingTemplate algorithmProcessingTemplate = new DefaultAlgorithmProcessingTemplate(
             log,
             algorithmMetricsService,
@@ -206,6 +207,13 @@ class AlgorithmFacadeProviderFactory {
 
         if (this.algorithmProcessingTemplateDecorator.isPresent())
             algorithmProcessingTemplate = this.algorithmProcessingTemplateDecorator.get().apply(algorithmProcessingTemplate);
+
+        var algorithmEstimationTemplate = new AlgorithmEstimationTemplate(
+            graphStoreCatalogService,
+            databaseId,
+            databaseGraphStoreEstimationService,
+            fictitiousGraphStoreEstimationService,
+            user);
 
         // procedure facade
         return new AlgorithmProcedureFacadeProvider(
@@ -221,6 +229,7 @@ class AlgorithmFacadeProviderFactory {
             algorithmRunner,
             algorithmEstimator,
             algorithmProcessingTemplate,
+            algorithmEstimationTemplate,
             relationshipStreamExporterBuilder,
             taskRegistryFactory,
             terminationFlag,

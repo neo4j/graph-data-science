@@ -75,9 +75,7 @@ public class GraphStoreCatalogService {
         User user,
         DatabaseId databaseId
     ) {
-        CatalogRequest catalogRequest = CatalogRequest.of(user, databaseId, config.usernameOverride());
-        var graphStoreWithConfig = get(catalogRequest, graphName);
-        var graphStore = graphStoreWithConfig.graphStore();
+        var graphStore = getGraphStore(graphName, config, user, databaseId);
         // TODO: Maybe validation of the graph store, where do this happen? Is this the right place?
 
         var nodeLabels = config.nodeLabelsFilter();
@@ -99,6 +97,12 @@ public class GraphStoreCatalogService {
 
         var graph = graphStore.getGraph(nodeLabels, relationshipTypes, relationshipProperty);
         return Pair.of(graph, graphStore);
+    }
+
+    public GraphStore getGraphStore(GraphName graphName, AlgoBaseConfig config, User user, DatabaseId databaseId) {
+        var catalogRequest = CatalogRequest.of(user, databaseId, config.usernameOverride());
+        var graphStoreWithConfig = get(catalogRequest, graphName);
+        return graphStoreWithConfig.graphStore();
     }
 
     /**
