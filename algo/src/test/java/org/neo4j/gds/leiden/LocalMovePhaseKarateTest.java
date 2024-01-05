@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.leiden;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
@@ -37,7 +36,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @GdlExtension
 class LocalMovePhaseKarateTest {
 
-    @SuppressFBWarnings("HSC_HUGE_SHARED_STRING_CONSTANT")
     @GdlGraph(orientation = Orientation.UNDIRECTED)
     private static final String DB_CYPHER = TestGraphs.KARATE_CLUB_GRAPH;
 

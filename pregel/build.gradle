@@ -14,7 +14,6 @@ dependencies {
     compileOnly group: 'org.immutables', name: 'builder', version: ver.'immutables'
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains', name: 'annotations', version: ver.'jetbrains-annotations'
-    compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 
     implementation project(':config-api')
     implementation project(":collections-memory-estimation")
@@ -29,7 +28,6 @@ dependencies {
     testAnnotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
 
     testCompileOnly group: 'org.immutables', name: 'builder', version: ver.'immutables'
-    testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 
     testImplementation project(':graph-schema-api')
     testImplementation project(':test-utils')
