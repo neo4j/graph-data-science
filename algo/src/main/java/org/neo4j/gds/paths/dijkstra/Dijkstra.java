@@ -115,6 +115,7 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
     /**
      * @deprecated Use the other one with termination flag
      */
+    @Deprecated
     public static Dijkstra singleSource(
         Graph graph,
         AllShortestPathsBaseConfig config,
