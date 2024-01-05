@@ -49,7 +49,6 @@ dependencies {
 
     // test infrastructure
     testCompileOnly group: 'org.immutables', name: 'value', version: ver.'immutables'
-    testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: ver.'junit5bom'
     testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: ver.'junit5bom'
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: ver.'junit5bom'

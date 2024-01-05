@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import org.eclipse.collections.api.tuple.primitive.IntObjectPair;
 import org.eclipse.collections.api.tuple.primitive.LongLongPair;
 import org.eclipse.collections.impl.tuple.Tuples;
@@ -74,7 +74,6 @@ class GraphSageTrainAlgorithmFactoryTest {
 
     private static final int SOME_REASONABLE_VALUE = 100;
 
-    @SuppressFBWarnings("HSC_HUGE_SHARED_STRING_CONSTANT")
     @GdlGraph
     private static final String GDL = GraphSageTestGraph.GDL;
 

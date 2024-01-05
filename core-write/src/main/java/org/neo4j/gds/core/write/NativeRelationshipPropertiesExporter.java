@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.write;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.GraphStore;
@@ -169,10 +169,6 @@ public class NativeRelationshipPropertiesExporter extends StatementApi implement
             }
         }
 
-        @SuppressFBWarnings(
-            value = "BED_BOGUS_EXCEPTION_DECLARATION",
-            justification = "`ConstraintValidationException` is actually thrown in 5.2.0"
-        )
         private void write(
             long source,
             long target,

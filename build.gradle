@@ -3,7 +3,6 @@ plugins {
     id 'com.github.johnrengelman.shadow'            version '8.1.0'                 apply false
     id 'ch.kk7.spawn'                               version '1.0.20180924200750'    apply false
     id 'de.thetaphi.forbiddenapis'                  version '3.6'                   apply false
-    id 'com.github.spotbugs'                        version '5.2.1'                 apply false
     id 'nebula.info-dependencies'                   version '11.4.1'                 apply false
     id 'com.google.protobuf'                        version '0.9.4'                apply false
     id 'me.champeau.mrjar'                          version "0.1"                   apply false
@@ -20,11 +19,6 @@ ext {
     publicDir = "${project.rootDir}"
 
     checkstyleReportsDir = "${buildDir}/reports/checkstyle/"
-
-    spotbugsReportsDir = "${buildDir}/reports/spotbugs/"
-    SpotBugsTask = com.github.spotbugs.snom.SpotBugsTask
-    spotbugsEffort = com.github.spotbugs.snom.Effort.valueOf('LESS')
-    spotbugsReportLevel = com.github.spotbugs.snom.Confidence.valueOf('LOW')
 
     compatibilityModules = [
             'kernel-adapter': [
@@ -77,16 +71,11 @@ allprojects {
         description = "Run all checkstyle related tasks"
     }
 
-    tasks.register("spotbugs") {
-        group = "verification"
-        description = "Run all spotbugs related tasks"
-    }
 }
 
 apply from: 'gradle/dependencies.gradle'
 apply from: 'gradle/defaults-java.gradle'
 apply from: 'gradle/forbidden-apis.gradle'
 apply from: 'gradle/checkstyle.gradle'
-apply from: 'gradle/spotbugs.gradle'
 apply from: 'gradle/spotless.gradle'
 apply from: 'gradle/pregel-bootstrap.gradle'
