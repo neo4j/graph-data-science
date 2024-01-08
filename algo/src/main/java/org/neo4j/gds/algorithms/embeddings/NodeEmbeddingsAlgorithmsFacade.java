@@ -73,12 +73,12 @@ public class NodeEmbeddingsAlgorithmsFacade {
             config.modelName()
         );
 
-        AfterLoadValidation validationCondition = (g) -> {
+        AfterLoadValidation validationCondition = (graphStore) -> {
             GraphSageTrainConfig trainConfig = model.trainConfig();
             trainConfig.graphStoreValidation(
-                g,
-                config.nodeLabelIdentifiers(g),
-                config.internalRelationshipTypes(g)
+                graphStore,
+                config.nodeLabelIdentifiers(graphStore),
+                config.internalRelationshipTypes(graphStore)
             );
         };
         
