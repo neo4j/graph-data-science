@@ -23,7 +23,9 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
 The Node Similarity algorithm compares a set of nodes based on the nodes they are connected to.
 Two nodes are considered similar if they share many of the same neighbors.
-Node Similarity computes pair-wise similarities based on either the Jaccard metric, also known as the Jaccard Similarity Score, or the Overlap coefficient, also known as the Szymkiewicz–Simpson coefficient.
+Node Similarity computes pair-wise similarities based on the Jaccard metric, also known as the Jaccard Similarity Score, the Overlap coefficient, also known as the Szymkiewicz–Simpson coefficient, and the Cosine Similarity score.
+The first two are most frequently associated with unweighted sets, whereas Cosine with weighted input.
+
 
 Given two sets `A` and `B`, the Jaccard Similarity is computed using the following formula:
 
@@ -36,6 +38,13 @@ The Overlap coefficient is computed using the following formula:
 image::nodesim-formulas/overlap_nodesim.svg[role="middle"]
 // This is the raw information for this image:
 // // O(A,B) = ∣A ∩ B∣ / min(|A|, |B|∣
+
+Formulas for the weighted case can be found  in the xref:algorithms-node-similarity-examples-weighted[weighted examples below].
+
+
+The cosine similarity score is computed using the following formula, where entries are implicitly given a weight of  `1` when A,B  are unweighted:
+
+image::nodesim-formulas/cos.svg[role="middle"]
 
 The input of this algorithm is a bipartite, connected graph containing two disjoint node sets.
 Each relationship starts from a node in the first node set and ends at a node in the second node set.
@@ -653,8 +662,8 @@ ORDER BY Person1
 [[algorithms-node-similarity-examples-weighted]]
 === Weighted Similarity
 
-Relationship properties can be used to modify the similarity induced by certain relationships.
-Weighted node similarity has as default the weighted Jaccard similarty, according to the formula:
+Relationship properties can be used to modify the similarity induced by certain relationships by taking their value as a way of measuring importance.
+By default,  Weighted node similarity uses weighted Jaccard similarity, according to the formula:
 
 image::nodesim-formulas/weighted_jaccard.svg[role="middle"]
 
@@ -664,6 +673,7 @@ It also supports weighted Overlap similarity, according to the formula:
 
 image::nodesim-formulas/weighted_overlap.svg[role="middle"]
 
+In addition, Cosine similarity can be used in the weighted case as mentioned in xref:algorithms-node-similarity-intro[introduction].
 
 [NOTE]
 ====
