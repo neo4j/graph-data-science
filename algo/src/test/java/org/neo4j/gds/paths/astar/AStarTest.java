@@ -31,7 +31,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.paths.astar.config.ImmutableShortestPathAStarStreamConfig;
+import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfigImpl;
 
 import java.util.List;
 import java.util.Set;
@@ -44,8 +44,8 @@ import static org.neo4j.gds.paths.PathTestUtil.expected;
 @GdlExtension
 class AStarTest {
 
-    private static ImmutableShortestPathAStarStreamConfig.Builder defaultSourceTargetConfigBuilder() {
-        return ImmutableShortestPathAStarStreamConfig.builder()
+    private static ShortestPathAStarStreamConfigImpl.Builder defaultSourceTargetConfigBuilder() {
+        return ShortestPathAStarStreamConfigImpl.builder()
             .latitudeProperty("latitude")
             .longitudeProperty("longitude")
             .concurrency(1);

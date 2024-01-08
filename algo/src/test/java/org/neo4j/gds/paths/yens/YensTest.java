@@ -39,7 +39,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.PathResult;
-import org.neo4j.gds.paths.yens.config.ImmutableShortestPathYensStreamConfig;
+import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfigImpl;
 import org.s1ck.gdl.GDLHandler;
 import org.s1ck.gdl.model.Edge;
 import org.s1ck.gdl.model.Vertex;
@@ -57,8 +57,8 @@ import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 @GdlExtension
 class YensTest {
 
-    static ImmutableShortestPathYensStreamConfig.Builder defaultSourceTargetConfigBuilder(int concurrency) {
-        return ImmutableShortestPathYensStreamConfig.builder()
+    static ShortestPathYensStreamConfigImpl.Builder defaultSourceTargetConfigBuilder(int concurrency) {
+        return ShortestPathYensStreamConfigImpl.builder()
             .concurrency(concurrency);
     }
 

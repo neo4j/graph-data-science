@@ -20,14 +20,11 @@
 package org.neo4j.gds.paths.astar.config;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.WritePathOptionsConfig;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface ShortestPathAStarWriteConfig extends ShortestPathAStarBaseConfig, WriteRelationshipConfig, WritePathOptionsConfig {
 
     static ShortestPathAStarWriteConfig of(CypherMapWrapper userInput) {

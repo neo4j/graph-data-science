@@ -34,7 +34,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.paths.delta.config.ImmutableAllShortestPathsDeltaStreamConfig;
+import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfigImpl;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 
 import java.util.Optional;
@@ -248,7 +248,7 @@ class BellmanFordTest {
             .build()
             .generate();
 
-        var config = ImmutableAllShortestPathsDeltaStreamConfig.builder()
+        var config = AllShortestPathsDeltaStreamConfigImpl.builder()
             .concurrency(concurrency)
             .sourceNode(start)
             .build();

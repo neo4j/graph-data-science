@@ -20,13 +20,10 @@
 package org.neo4j.gds.paths.dijkstra.config;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface AllShortestPathsDijkstraStreamConfig extends AllShortestPathsBaseConfig {
 
     static AllShortestPathsDijkstraStreamConfig of(CypherMapWrapper userInput) {

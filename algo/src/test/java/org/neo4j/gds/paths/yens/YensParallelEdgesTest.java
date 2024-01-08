@@ -26,15 +26,15 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.paths.yens.config.ImmutableShortestPathYensStreamConfig;
+import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfigImpl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @GdlExtension
 class YensParallelEdgesTest {
 
-    static ImmutableShortestPathYensStreamConfig.Builder defaultSourceTargetConfigBuilder() {
-        return ImmutableShortestPathYensStreamConfig.builder()
+    static ShortestPathYensStreamConfigImpl.Builder defaultSourceTargetConfigBuilder() {
+        return ShortestPathYensStreamConfigImpl.builder()
             .concurrency(1);
     }
 

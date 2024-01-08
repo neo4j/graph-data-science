@@ -19,23 +19,18 @@
  */
 package org.neo4j.gds.paths.bellmanford;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
 
 public interface BellmanFordBaseConfig extends AllShortestPathsBaseConfig {
 
-    @Value.Derived
     @Configuration.Ignore
     default boolean trackNegativeCycles() {
         return true;
     }
 
-    @Value.Derived
     @Configuration.Ignore
     default boolean trackPaths() {
         return true;
     }
-
-
 }

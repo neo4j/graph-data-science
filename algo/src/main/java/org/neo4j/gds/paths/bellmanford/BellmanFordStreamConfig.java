@@ -23,7 +23,6 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
-
 public interface BellmanFordStreamConfig extends BellmanFordBaseConfig {
 
     static BellmanFordStreamConfig of(CypherMapWrapper userInput) {

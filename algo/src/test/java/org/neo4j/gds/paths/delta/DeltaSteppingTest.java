@@ -43,7 +43,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.paths.delta.config.ImmutableAllShortestPathsDeltaStreamConfig;
+import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfigImpl;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 
 import java.util.List;
@@ -123,7 +123,7 @@ final class DeltaSteppingTest {
 
             var sourceNode = graph.toOriginalNodeId("a");
 
-            var config = ImmutableAllShortestPathsDeltaStreamConfig.builder()
+            var config = AllShortestPathsDeltaStreamConfigImpl.builder()
                 .concurrency(concurrency)
                 .sourceNode(sourceNode)
                 .delta(delta)
@@ -157,7 +157,7 @@ final class DeltaSteppingTest {
 
             var sourceNode = graph.toOriginalNodeId("c");
 
-            var config = ImmutableAllShortestPathsDeltaStreamConfig.builder()
+            var config = AllShortestPathsDeltaStreamConfigImpl.builder()
                 .concurrency(concurrency)
                 .sourceNode(sourceNode)
                 .delta(delta)
@@ -177,7 +177,7 @@ final class DeltaSteppingTest {
 
         @Test
         void shouldLogProgress() {
-            var config = ImmutableAllShortestPathsDeltaStreamConfig.builder()
+            var config = AllShortestPathsDeltaStreamConfigImpl.builder()
                 .concurrency(4)
                 .sourceNode(idFunction.of("c"))
                 .delta(5)
@@ -268,7 +268,7 @@ final class DeltaSteppingTest {
 
             var sourceNode = graph.toOriginalNodeId("n1");
 
-            var config = ImmutableAllShortestPathsDeltaStreamConfig.builder()
+            var config = AllShortestPathsDeltaStreamConfigImpl.builder()
                 .concurrency(concurrency)
                 .sourceNode(sourceNode)
                 .delta(delta)
@@ -328,7 +328,7 @@ final class DeltaSteppingTest {
 
             var sourceNode = graph.toOriginalNodeId("a");
 
-            var config = ImmutableAllShortestPathsDeltaStreamConfig.builder()
+            var config = AllShortestPathsDeltaStreamConfigImpl.builder()
                 .concurrency(concurrency)
                 .sourceNode(sourceNode)
                 .delta(delta)
@@ -365,7 +365,7 @@ final class DeltaSteppingTest {
             .build()
             .generate();
 
-        var config = ImmutableAllShortestPathsDeltaStreamConfig.builder()
+        var config = AllShortestPathsDeltaStreamConfigImpl.builder()
             .concurrency(concurrency)
             .sourceNode(start)
             .build();

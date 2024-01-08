@@ -36,8 +36,8 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.paths.ImmutablePathResult;
-import org.neo4j.gds.paths.dijkstra.config.ImmutableAllShortestPathsDijkstraStreamConfig;
-import org.neo4j.gds.paths.dijkstra.config.ImmutableShortestPathDijkstraStreamConfig;
+import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfigImpl;
+import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfigImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,13 +56,13 @@ final class DijkstraTest {
     @GdlGraph
     private static final String DUMMY = "()";
 
-    private static ImmutableShortestPathDijkstraStreamConfig.Builder defaultSourceTargetConfigBuilder() {
-        return ImmutableShortestPathDijkstraStreamConfig.builder()
+    private static ShortestPathDijkstraStreamConfigImpl.Builder defaultSourceTargetConfigBuilder() {
+        return ShortestPathDijkstraStreamConfigImpl.builder()
             .concurrency(1);
     }
 
-    private static ImmutableAllShortestPathsDijkstraStreamConfig.Builder defaultSingleSourceConfigBuilder() {
-        return ImmutableAllShortestPathsDijkstraStreamConfig.builder()
+    private static AllShortestPathsDijkstraStreamConfigImpl.Builder defaultSingleSourceConfigBuilder() {
+        return AllShortestPathsDijkstraStreamConfigImpl.builder()
             .concurrency(1);
     }
 

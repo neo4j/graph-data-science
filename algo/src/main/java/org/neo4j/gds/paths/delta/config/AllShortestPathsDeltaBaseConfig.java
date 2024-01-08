@@ -19,17 +19,12 @@
  */
 package org.neo4j.gds.paths.delta.config;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
 
-@ValueClass
-@SuppressWarnings("immutables:subtype")
 public interface AllShortestPathsDeltaBaseConfig extends AllShortestPathsBaseConfig {
 
     @Configuration.DoubleRange(min = 0, minInclusive = false)
-    @Value.Default
     default double delta() {
         return 2.0;
     }
