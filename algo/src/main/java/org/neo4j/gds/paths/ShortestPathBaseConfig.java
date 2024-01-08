@@ -25,6 +25,5 @@ import org.neo4j.gds.config.SourceNodeConfig;
 
 public interface ShortestPathBaseConfig extends AlgoBaseConfig,
     SourceNodeConfig,
-    RelationshipWeightConfig,
-    TrackRelationshipsConfig {
+    RelationshipWeightConfig {
 }
