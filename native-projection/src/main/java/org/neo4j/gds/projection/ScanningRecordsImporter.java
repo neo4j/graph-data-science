@@ -108,6 +108,7 @@ abstract class ScanningRecordsImporter<Record, T> {
                 )
             );
 
+        } finally {
             progressTracker.endSubTask("Store Scan");
         }
 
