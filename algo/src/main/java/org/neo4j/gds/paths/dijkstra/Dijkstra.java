@@ -76,12 +76,14 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
     public static Dijkstra sourceTarget(
         Graph graph,
         SourceTargetShortestPathBaseConfig config,
+        boolean trackRelationships,
         Optional<HeuristicFunction> heuristicFunction,
         ProgressTracker progressTracker
     ) {
         return sourceTarget(
             graph,
             config,
+            trackRelationships,
             heuristicFunction,
             progressTracker,
             TerminationFlag.RUNNING_TRUE
@@ -94,6 +96,7 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
     public static Dijkstra sourceTarget(
         Graph graph,
         SourceTargetShortestPathBaseConfig configuration,
+        boolean trackRelationships,
         Optional<HeuristicFunction> heuristicFunction,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
@@ -105,7 +108,7 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
             graph,
             sourceNode,
             node -> node == targetNode ? EMIT_AND_STOP : CONTINUE,
-            configuration.trackRelationships(),
+            trackRelationships,
             heuristicFunction,
             progressTracker,
             terminationFlag
@@ -119,12 +122,14 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
     public static Dijkstra singleSource(
         Graph graph,
         AllShortestPathsBaseConfig config,
+        boolean trackRelationships,
         Optional<HeuristicFunction> heuristicFunction,
         ProgressTracker progressTracker
     ) {
         return singleSource(
             graph,
             config,
+            trackRelationships,
             heuristicFunction,
             progressTracker,
             TerminationFlag.RUNNING_TRUE
@@ -137,6 +142,7 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
     public static Dijkstra singleSource(
         Graph graph,
         AllShortestPathsBaseConfig config,
+        boolean trackRelationships,
         Optional<HeuristicFunction> heuristicFunction,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
@@ -144,7 +150,7 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
         return new Dijkstra(graph,
             graph.toMappedNodeId(config.sourceNode()),
             node -> EMIT_AND_CONTINUE,
-            config.trackRelationships(),
+            trackRelationships,
             heuristicFunction,
             progressTracker,
             terminationFlag

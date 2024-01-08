@@ -160,7 +160,8 @@ public class YensTask implements Runnable {
 
         this.localDijkstra = Dijkstra.sourceTarget(
             localGraph,
-            Yens.dijkstraConfig(targetNode, trackRelationships),
+            Yens.dijkstraConfig(targetNode),
+            trackRelationships,
             Optional.empty(),
             ProgressTracker.NULL_TRACKER
         );

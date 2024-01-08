@@ -101,7 +101,7 @@ final class DijkstraTest {
                 .build();
 
             var paths = Dijkstra
-                .sourceTarget(graph, config, Optional.empty(), ProgressTracker.NULL_TRACKER)
+                .sourceTarget(graph, config, false, Optional.empty(), ProgressTracker.NULL_TRACKER)
                 .compute()
                 .pathSet();
 
@@ -118,7 +118,7 @@ final class DijkstraTest {
                 .build();
 
             var path = Dijkstra
-                .sourceTarget(graph, config, Optional.empty(), ProgressTracker.NULL_TRACKER)
+                .sourceTarget(graph, config, false, Optional.empty(), ProgressTracker.NULL_TRACKER)
                 .compute()
                 .findFirst()
                 .get();
@@ -140,7 +140,7 @@ final class DijkstraTest {
                 .build();
 
             var dijkstra = Dijkstra
-                .sourceTarget(graph, config, Optional.empty(), ProgressTracker.NULL_TRACKER)
+                .sourceTarget(graph, config, false, Optional.empty(), ProgressTracker.NULL_TRACKER)
                 .withRelationshipFilter(relationshipFilter);
             var paths = dijkstra
                 .compute()
@@ -161,11 +161,10 @@ final class DijkstraTest {
             var config = defaultSourceTargetConfigBuilder()
                 .sourceNode(graph.toOriginalNodeId("a"))
                 .targetNode(graph.toOriginalNodeId("f"))
-                .trackRelationships(true)
                 .build();
 
             var path = Dijkstra
-                .sourceTarget(graph, config, Optional.empty(), ProgressTracker.NULL_TRACKER)
+                .sourceTarget(graph, config, true, Optional.empty(), ProgressTracker.NULL_TRACKER)
                 .compute()
                 .findFirst()
                 .get();
@@ -205,7 +204,7 @@ final class DijkstraTest {
                 .sourceNode(sourceNode)
                 .build();
 
-            var paths = Dijkstra.singleSource(graph, config, Optional.empty(), ProgressTracker.NULL_TRACKER)
+            var paths = Dijkstra.singleSource(graph, config, false, Optional.empty(), ProgressTracker.NULL_TRACKER)
                 .compute()
                 .pathSet();
 
@@ -229,7 +228,7 @@ final class DijkstraTest {
                 .sourceNode(sourceNode)
                 .build();
 
-            var paths = Dijkstra.singleSource(graph, config, Optional.empty(), ProgressTracker.NULL_TRACKER)
+            var paths = Dijkstra.singleSource(graph, config, false, Optional.empty(), ProgressTracker.NULL_TRACKER)
                 .compute()
                 .pathSet();
 
@@ -248,7 +247,7 @@ final class DijkstraTest {
             var testLog = Neo4jProxy.testLog();
             var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
 
-            Dijkstra.sourceTarget(graph, config, Optional.empty(), progressTracker)
+            Dijkstra.sourceTarget(graph, config, false, Optional.empty(), progressTracker)
                 .compute()
                 .pathSet();
 
@@ -311,7 +310,7 @@ final class DijkstraTest {
                 .build();
 
             var path = Dijkstra
-                .sourceTarget(graph, config, Optional.empty(), ProgressTracker.NULL_TRACKER)
+                .sourceTarget(graph, config, false, Optional.empty(), ProgressTracker.NULL_TRACKER)
                 .compute()
                 .findFirst()
                 .get();
@@ -339,7 +338,7 @@ final class DijkstraTest {
                 .sourceNode(sourceNode)
                 .build();
 
-            var paths = Dijkstra.singleSource(graph, config, Optional.empty(), ProgressTracker.NULL_TRACKER)
+            var paths = Dijkstra.singleSource(graph, config, false, Optional.empty(), ProgressTracker.NULL_TRACKER)
                 .compute()
                 .pathSet();
 
@@ -387,7 +386,7 @@ final class DijkstraTest {
             };
 
             var path = Dijkstra
-                .sourceTarget(graph, config, Optional.of(heuristicFunction), ProgressTracker.NULL_TRACKER)
+                .sourceTarget(graph, config, false, Optional.of(heuristicFunction), ProgressTracker.NULL_TRACKER)
                 .compute()
                 .findFirst()
                 .get();

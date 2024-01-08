@@ -251,7 +251,6 @@ class BellmanFordTest {
         var config = ImmutableAllShortestPathsDeltaStreamConfig.builder()
             .concurrency(concurrency)
             .sourceNode(start)
-            .trackRelationships(true)
             .build();
 
         var bellmanFord = new BellmanFord(newGraph, ProgressTracker.NULL_TRACKER, start, true, true, 4)
@@ -259,7 +258,7 @@ class BellmanFordTest {
             .shortestPaths();
 
         var dijkstraAlgo = Dijkstra
-            .singleSource(newGraph, config, Optional.empty(), ProgressTracker.NULL_TRACKER)
+            .singleSource(newGraph, config, true, Optional.empty(), ProgressTracker.NULL_TRACKER)
             .compute();
 
         double[] bellman = new double[nodeCount];

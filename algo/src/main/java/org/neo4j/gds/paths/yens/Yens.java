@@ -29,7 +29,6 @@ import org.neo4j.gds.paths.SourceTargetShortestPathBaseConfig;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.ImmutableShortestPathDijkstraStreamConfig;
-import org.neo4j.gds.paths.yens.config.ImmutableShortestPathYensBaseConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -42,6 +41,7 @@ public final class Yens extends Algorithm<PathFindingResult> {
 
     private final Graph graph;
     private final ShortestPathYensBaseConfig config;
+    private final boolean trackRelationships;
 
     /**
      * @deprecated Use the one with termination flag directly
@@ -49,7 +49,7 @@ public final class Yens extends Algorithm<PathFindingResult> {
     @Deprecated
     public static Yens sourceTarget(
         Graph graph,
-        SourceTargetShortestPathBaseConfig config,
+        ShortestPathYensBaseConfig config,
         ProgressTracker progressTracker
     ) {
         return sourceTarget(graph, config, progressTracker, TerminationFlag.RUNNING_TRUE);
@@ -60,7 +60,7 @@ public final class Yens extends Algorithm<PathFindingResult> {
      */
     public static Yens sourceTarget(
         Graph graph,
-        SourceTargetShortestPathBaseConfig config,
+        ShortestPathYensBaseConfig config,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
@@ -68,22 +68,17 @@ public final class Yens extends Algorithm<PathFindingResult> {
         // parallel relationships ids. This is necessary since shortest
         // paths can visit the same nodes via different relationships.
         //If not, we need to track which is the next neighbor.
-
         boolean shouldTrackRelationships = graph.isMultiGraph();
-        var newConfig = ImmutableShortestPathYensBaseConfig
-            .builder()
-            .from(config)
-            .trackRelationships(shouldTrackRelationships)
-            .build();
 
-        return new Yens(graph, newConfig, progressTracker, terminationFlag);
+        return new Yens(graph, config, shouldTrackRelationships, progressTracker, terminationFlag);
     }
 
-    private Yens(Graph graph, ShortestPathYensBaseConfig config, ProgressTracker progressTracker, TerminationFlag terminationFlag) {
+    private Yens(Graph graph, ShortestPathYensBaseConfig config, boolean trackRelationships, ProgressTracker progressTracker, TerminationFlag terminationFlag) {
         super(progressTracker);
         this.graph = graph;
         this.config = config;
         this.terminationFlag = terminationFlag;
+        this.trackRelationships = trackRelationships;
     }
 
     @Override
@@ -163,7 +158,7 @@ public final class Yens extends Algorithm<PathFindingResult> {
                 kShortestPaths,
                 candidatePathsQueue,
                 currentSpurIndexId,
-                config.trackRelationships(),
+                trackRelationships,
                 config.k()
             ));
         }
@@ -174,6 +169,7 @@ public final class Yens extends Algorithm<PathFindingResult> {
         var dijkstra = Dijkstra.sourceTarget(
             graph,
             config,
+            trackRelationships,
             Optional.empty(),
             progressTracker,
             terminationFlag
@@ -182,13 +178,12 @@ public final class Yens extends Algorithm<PathFindingResult> {
         return dijkstra.compute().findFirst();
     }
 
-    static SourceTargetShortestPathBaseConfig dijkstraConfig(long targetNode, boolean trackRelationships) {
+    static SourceTargetShortestPathBaseConfig dijkstraConfig(long targetNode) {
 
         return ImmutableShortestPathDijkstraStreamConfig
             .builder()
             .sourceNode(targetNode) //this is irrelevant
             .targetNode(targetNode)
-            .trackRelationships(trackRelationships)
             .build();
     }
 

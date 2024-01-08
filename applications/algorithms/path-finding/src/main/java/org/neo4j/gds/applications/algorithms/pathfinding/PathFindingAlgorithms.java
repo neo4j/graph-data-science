@@ -99,7 +99,7 @@ public class PathFindingAlgorithms {
             Tasks.leaf("Dijkstra", graph.relationshipCount())
         );
 
-        var dijkstra = Dijkstra.sourceTarget(graph, configuration, Optional.empty(), progressTracker, terminationFlag);
+        var dijkstra = Dijkstra.sourceTarget(graph, configuration, configuration.trackRelationships(), Optional.empty(), progressTracker, terminationFlag);
 
         return dijkstra.compute();
     }
@@ -131,7 +131,7 @@ public class PathFindingAlgorithms {
             Tasks.leaf("Dijkstra", graph.relationshipCount())
         );
 
-        var dijkstra = Dijkstra.singleSource(graph, configuration, Optional.empty(), progressTracker, terminationFlag);
+        var dijkstra = Dijkstra.singleSource(graph, configuration, configuration.trackRelationships(), Optional.empty(), progressTracker, terminationFlag);
 
         return dijkstra.compute();
     }

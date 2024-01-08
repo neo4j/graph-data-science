@@ -84,7 +84,7 @@ public final class AStar extends Algorithm<PathFindingResult> {
         var heuristic = new HaversineHeuristic(latitudeProperties, longitudeProperties, targetNode);
 
         // Init dijkstra algorithm for computing shortest paths
-        var dijkstra = Dijkstra.sourceTarget(graph, config, Optional.of(heuristic), progressTracker, terminationFlag);
+        var dijkstra = Dijkstra.sourceTarget(graph, config, config.trackRelationships(), Optional.of(heuristic), progressTracker, terminationFlag);
         return new AStar(dijkstra, terminationFlag);
     }
 

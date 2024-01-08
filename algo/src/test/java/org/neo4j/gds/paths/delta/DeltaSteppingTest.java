@@ -368,7 +368,6 @@ final class DeltaSteppingTest {
         var config = ImmutableAllShortestPathsDeltaStreamConfig.builder()
             .concurrency(concurrency)
             .sourceNode(start)
-            .trackRelationships(true)
             .build();
         var deltaStepping = DeltaStepping.of(
             newGraph,
@@ -378,7 +377,7 @@ final class DeltaSteppingTest {
         ).compute();
 
         var dijkstraAlgo = Dijkstra
-            .singleSource(newGraph, config, Optional.empty(), ProgressTracker.NULL_TRACKER)
+            .singleSource(newGraph, config, true, Optional.empty(), ProgressTracker.NULL_TRACKER)
             .compute();
 
         double[] delta = new double[nodeCount];
