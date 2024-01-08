@@ -66,7 +66,7 @@ public abstract class DijkstraFactory<CONFIG extends ShortestPathBaseConfig> ext
             return Dijkstra.sourceTarget(
                 graph,
                 configuration,
-                configuration.trackRelationships(),
+                false,
                 Optional.empty(),
                 progressTracker
             );
@@ -83,7 +83,7 @@ public abstract class DijkstraFactory<CONFIG extends ShortestPathBaseConfig> ext
             return Dijkstra.singleSource(
                 graph,
                 configuration,
-                configuration.trackRelationships(),
+                false,
                 Optional.empty(),
                 progressTracker
             );
