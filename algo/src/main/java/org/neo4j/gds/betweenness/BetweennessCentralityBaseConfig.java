@@ -56,7 +56,6 @@ public interface BetweennessCentralityBaseConfig extends AlgoBaseConfig, Relatio
     }
 
     @Configuration.GraphStoreValidationCheck
-    @Value.Default
     default void checkNoMixedOrientations(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
