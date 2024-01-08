@@ -39,7 +39,6 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.DefaultPool;
