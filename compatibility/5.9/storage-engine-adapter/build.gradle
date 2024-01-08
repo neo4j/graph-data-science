@@ -58,7 +58,7 @@ if (ver.'neo4j'.startsWith('5.')) {
         java17CompileOnly group: 'org.immutables', name: 'value-annotations',           version: ver.'immutables'
         java17CompileOnly group: 'org.neo4j',      name: 'neo4j',                       version: neos.'5.9'
         java17CompileOnly group: 'org.neo4j',      name: 'neo4j-record-storage-engine', version: neos.'5.9'
-        java17CompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
+        
 
         java17Implementation project(':core')
         java17Implementation project(':storage-engine-adapter-api')

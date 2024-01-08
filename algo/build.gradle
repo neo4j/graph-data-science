@@ -14,7 +14,6 @@ dependencies {
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.immutables', name: 'builder', version: ver.'immutables'
     compileOnly group: 'org.jetbrains', name: 'annotations', version: ver.'jetbrains-annotations'
-    compileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 
     implementation group: 'org.apache.commons', name: 'commons-math3', version: ver.'commons-math3'
 
@@ -53,8 +52,6 @@ dependencies {
     // TEST DEPENDENCIES
     testAnnotationProcessor project(':annotations')
     testAnnotationProcessor project(':config-generator')
-
-    testCompileOnly group: 'com.github.spotbugs', name: 'spotbugs-annotations', version: ver.'spotbugsToolVersion'
 
     testImplementation project(':edition-api')
     testImplementation project(':test-utils')

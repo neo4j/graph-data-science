@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import org.assertj.core.data.Offset;
 import org.assertj.core.util.DoubleComparator;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,11 +60,9 @@ class GraphSageModelTrainerTest {
     private final int FEATURES_COUNT = 5;
     private final int EMBEDDING_DIMENSION = 64;
 
-    @SuppressFBWarnings("HSC_HUGE_SHARED_STRING_CONSTANT")
     @GdlGraph
     private static final String GDL = GraphSageTestGraph.GDL;
 
-    @SuppressFBWarnings
     @GdlGraph(orientation = Orientation.UNDIRECTED, graphNamePrefix = "array")
     private static final String ARRAY_GRAPH = "CREATE" +
                                               "  (a { features: [-1.0, 2.1] })" +

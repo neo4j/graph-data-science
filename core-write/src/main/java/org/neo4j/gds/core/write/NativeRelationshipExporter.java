@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.write;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
@@ -243,10 +243,6 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
             );
         }
 
-        @SuppressFBWarnings(
-            value = "BED_BOGUS_EXCEPTION_DECLARATION",
-            justification = "`ConstraintValidationException` is actually thrown in 5.2.0"
-        )
         private void exportProperty(double property, long relId) throws EntityNotFoundException, ConstraintValidationException {
             if (!Double.isNaN(property)) {
                 ops.relationshipSetProperty(
