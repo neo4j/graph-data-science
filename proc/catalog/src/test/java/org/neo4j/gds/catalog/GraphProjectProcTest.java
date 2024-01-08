@@ -38,11 +38,13 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.utils.progress.TaskStore;
 import org.neo4j.gds.test.TestProc;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -1377,6 +1379,19 @@ class GraphProjectProcTest extends BaseProcTest {
             assertFalse(result.columns().contains(NODE_PROJECTION_KEY));
             assertFalse(result.columns().contains(RELATIONSHIP_PROJECTION_KEY));
         });
+    }
+
+    @Test
+    void clearTasksOnFailure() {
+        runQuery("CREATE ({prop: \"stringProp\"}), ()");
+
+        assertThatThrownBy(() ->
+            runQuery("CALL gds.graph.project('g', '*', '*', {nodeProperties: \"prop\"}) YIELD nodeProjection"))
+            .isInstanceOf(Exception.class)
+            .hasMessageContaining("Loading of values of type String is currently not supported");;
+
+        var taskStore = GraphDatabaseApiProxy.resolveDependency(db, TaskStore.class);
+        assertTrue(taskStore.isEmpty());
     }
 
     private Graph relPropertyGraph(String graphName, RelationshipType relationshipType, String property) {
