@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.compat;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.kernel.impl.store.record.PropertyRecord;
 import org.neo4j.storageengine.api.StoragePropertyCursor;
@@ -32,10 +31,6 @@ public abstract class AbstractInMemoryPropertyCursor
 
     protected final CypherGraphStore graphStore;
     protected final TokenHolders tokenHolders;
-    @SuppressFBWarnings(
-        value = "UWF_UNWRITTEN_PUBLIC_OR_PROTECTED_FIELD",
-        justification = "Field will be initialized in the compat specific instances during initNodeProperties"
-    )
     protected DelegatePropertyCursor delegate;
 
     public AbstractInMemoryPropertyCursor(CypherGraphStore graphStore, TokenHolders tokenHolders) {

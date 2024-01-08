@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.assertj.core.data.Offset;
 import org.assertj.core.util.DoubleComparator;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,8 +33,8 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfigImpl;
 import org.neo4j.gds.extension.GdlExtension;
@@ -60,11 +59,9 @@ class GraphSageModelTrainerTest {
     private final int FEATURES_COUNT = 5;
     private final int EMBEDDING_DIMENSION = 64;
 
-    @SuppressFBWarnings("HSC_HUGE_SHARED_STRING_CONSTANT")
     @GdlGraph
     private static final String GDL = GraphSageTestGraph.GDL;
 
-    @SuppressFBWarnings
     @GdlGraph(orientation = Orientation.UNDIRECTED, graphNamePrefix = "array")
     private static final String ARRAY_GRAPH = "CREATE" +
                                               "  (a { features: [-1.0, 2.1] })" +
