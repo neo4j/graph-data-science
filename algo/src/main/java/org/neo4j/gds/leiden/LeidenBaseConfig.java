@@ -36,27 +36,22 @@ public interface LeidenBaseConfig extends
     SeedConfig,
     ToleranceConfig {
 
-    @Value.Default
     default double gamma() {
         return 1.0;
     }
 
-    @Value.Default
     default double theta() {
         return 0.01;
     }
 
-    @Value.Default
     default int maxLevels() {
         return 10;
     }
 
-    @Value.Default
     default boolean includeIntermediateCommunities() {
         return false;
     }
 
-    @Value.Default
     @Override
     @Configuration.DoubleRange(min = 0D)
     default double tolerance() {

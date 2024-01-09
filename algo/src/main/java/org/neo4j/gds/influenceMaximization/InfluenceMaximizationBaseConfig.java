@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.influenceMaximization;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
@@ -29,13 +28,11 @@ public interface InfluenceMaximizationBaseConfig extends AlgoBaseConfig, RandomS
     @Configuration.IntegerRange(min = 1)
     int seedSetSize();
 
-    @Value.Default
     @Configuration.DoubleRange(min = 0.01, max = 1)
     default double propagationProbability() {
         return 0.1;
     }
 
-    @Value.Default
     @Configuration.IntegerRange(min = 1)
     default int monteCarloSimulations() {
         return 100;

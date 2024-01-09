@@ -19,11 +19,9 @@
  */
 package org.neo4j.gds.dag.topologicalsort;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.config.AlgoBaseConfig;
 
 public interface TopologicalSortBaseConfig extends AlgoBaseConfig {
-    @Value.Default
     default boolean computeMaxDistanceFromSource() {
         return false;
     }
