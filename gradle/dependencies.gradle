@@ -87,7 +87,7 @@ ext {
         'junit-pioneer'        : '2.2.0',
         'junit5bom'            : '5.10.1',
         'log4j'                : log4js[neo4j_minor],
-        'memoryfilesystem'     : '2.7.0',
+        'memoryfilesystem'     : '2.8.0',
         'mockito'              : '4.11.0',
         'mockito-junit-jupiter': '5.8.0',
         'neo4j'                : properties.getOrDefault('neo4jVersion', neo4jDefault),
