@@ -373,8 +373,8 @@ class LocalClusteringCoefficientTest {
         return localClusteringCoefficient.compute();
     }
 
-    private ImmutableLocalClusteringCoefficientBaseConfig.Builder createConfig() {
-        return ImmutableLocalClusteringCoefficientBaseConfig.builder();
+    private LocalClusteringCoefficientBaseConfigImpl.Builder createConfig() {
+        return LocalClusteringCoefficientBaseConfigImpl.builder();
     }
 
     private static Graph fromGdl(String gdl, Orientation orientation) {

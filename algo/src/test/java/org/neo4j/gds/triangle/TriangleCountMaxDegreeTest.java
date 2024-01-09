@@ -37,7 +37,7 @@ class TriangleCountMaxDegreeTest {
            .direction(Direction.UNDIRECTED)
            .build().generate();
 
-      TriangleCountBaseConfig config = ImmutableTriangleCountBaseConfig
+      TriangleCountBaseConfig config = TriangleCountBaseConfigImpl
           .builder()
           .maxDegree(100)
           .build();

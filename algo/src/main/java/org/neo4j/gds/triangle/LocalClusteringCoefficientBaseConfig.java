@@ -19,12 +19,10 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConfigNodesValidations;
@@ -37,15 +35,12 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface LocalClusteringCoefficientBaseConfig extends AlgoBaseConfig, SeedConfig {
 
     String SEED_PROPERTY_KEY = "triangleCountProperty";
 
     @Override
-    @Value.Default
     @Configuration.ConvertWith(method = "validateProperty")
     @Configuration.Key(SEED_PROPERTY_KEY)
     default @Nullable String seedProperty() {
@@ -85,9 +80,8 @@ public interface LocalClusteringCoefficientBaseConfig extends AlgoBaseConfig, Se
     }
 
     @Configuration.Ignore
-    @Value.Derived
     default TriangleCountStatsConfig triangleCountConfig() {
-        return ImmutableTriangleCountStatsConfig.builder().concurrency(concurrency()).build();
+        return TriangleCountStatsConfigImpl.builder().concurrency(concurrency()).build();
     }
 
 }

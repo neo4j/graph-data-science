@@ -34,8 +34,8 @@ class LargeIntersectingTriangleCountTest {
 
     private static final long TRIANGLE_COUNT = 4;
 
-    ImmutableTriangleCountBaseConfig.Builder defaultConfigBuilder() {
-      return ImmutableTriangleCountBaseConfig.builder();
+    TriangleCountBaseConfigImpl.Builder defaultConfigBuilder() {
+      return TriangleCountBaseConfigImpl.builder();
     }
 
     @ParameterizedTest

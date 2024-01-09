@@ -347,8 +347,7 @@ class IntersectingTriangleCountTest {
             ", (n0)-[:REL]->(n6)"
         );
 
-        TriangleCountBaseConfig config = ImmutableTriangleCountBaseConfig
-            .builder()
+        TriangleCountBaseConfig config = TriangleCountBaseConfigImpl.builder()
             .maxDegree(3)
             .build();
 
@@ -379,8 +378,7 @@ class IntersectingTriangleCountTest {
             ", (n3)-[:REL]->(n6)"
         );
 
-        TriangleCountBaseConfig config = ImmutableTriangleCountBaseConfig
-            .builder()
+        TriangleCountBaseConfig config = TriangleCountBaseConfigImpl.builder()
             .maxDegree(3)
             .build();
 
@@ -447,8 +445,7 @@ class IntersectingTriangleCountTest {
             " ,(g)-[:T]->(e)"
         );
 
-        TriangleCountBaseConfig config = ImmutableTriangleCountBaseConfig
-            .builder()
+        TriangleCountBaseConfig config = TriangleCountBaseConfigImpl.builder()
             .maxDegree(2)
             .build();
 
@@ -480,8 +477,7 @@ class IntersectingTriangleCountTest {
             " ,(g)-[:T1]->(e)"
         );
 
-        TriangleCountBaseConfig config = ImmutableTriangleCountBaseConfig
-            .builder()
+        TriangleCountBaseConfig config = TriangleCountBaseConfigImpl.builder()
             .maxDegree(2)
             .build();
 
@@ -513,7 +509,7 @@ class IntersectingTriangleCountTest {
             UNDIRECTED
         );
 
-        var config = ImmutableTriangleCountBaseConfig.builder().build();
+        var config = TriangleCountBaseConfigImpl.builder().build();
         var result = compute(testGraph.graph(), config);
 
         assertThat(result.globalTriangles()).isEqualTo(0L);
@@ -526,7 +522,7 @@ class IntersectingTriangleCountTest {
     }
 
     private TriangleCountResult compute(Graph graph) {
-        TriangleCountStatsConfig config = ImmutableTriangleCountStatsConfig.builder().build();
+        TriangleCountStatsConfig config = TriangleCountStatsConfigImpl.builder().build();
         return compute(graph, config);
     }
 

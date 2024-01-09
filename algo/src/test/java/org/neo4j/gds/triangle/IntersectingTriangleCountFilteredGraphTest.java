@@ -70,7 +70,7 @@ class IntersectingTriangleCountFilteredGraphTest {
             Optional.empty()
         );
 
-        var config = ImmutableTriangleCountBaseConfig.builder().build();
+        var config = TriangleCountBaseConfigImpl.builder().build();
         var triangleCount = IntersectingTriangleCount.create(graph, config, DefaultPool.INSTANCE);
         var triangleCountResult = triangleCount.compute();
         assertThat(triangleCountResult.globalTriangles()).isEqualTo(1);
