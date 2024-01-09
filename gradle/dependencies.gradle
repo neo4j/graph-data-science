@@ -54,7 +54,7 @@ ext {
 
     ver = [
         doc                    : [
-            'asciidoctorj'        : '2.5.10',
+            'asciidoctorj'        : '2.5.11',
             'reflections'         : '0.10.2'
         ],
         'agrona'               : '1.20.0',
