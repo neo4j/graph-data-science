@@ -19,21 +19,18 @@
  */
 package org.neo4j.gds.similarity.filterednodesim;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.similarity.filtering.NodeFilterSpec;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfig;
 
 public interface FilteredNodeSimilarityBaseConfig extends NodeSimilarityBaseConfig {
 
-    @Value.Default
     @Configuration.ConvertWith(method = "org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory#create")
     @Configuration.ToMapValue("org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory#render")
     default NodeFilterSpec sourceNodeFilter() {
         return NodeFilterSpec.noOp;
     }
 
-    @Value.Default
     @Configuration.ConvertWith(method = "org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory#create")
     @Configuration.ToMapValue("org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory#render")
     default NodeFilterSpec targetNodeFilter() {

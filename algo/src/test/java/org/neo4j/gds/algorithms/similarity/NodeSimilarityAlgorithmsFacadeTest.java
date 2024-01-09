@@ -38,7 +38,7 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.similarity.SimilarityResult;
-import org.neo4j.gds.similarity.nodesim.ImmutableNodeSimilarityStreamConfig;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfigImpl;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -108,8 +108,7 @@ class NodeSimilarityAlgorithmsFacadeTest {
             .getGraphWithGraphStore(any(), any(), any(), any(), any());
 
         // mocking was getting increasingly hairy with the configuration... 🧔🏻
-        var config = ImmutableNodeSimilarityStreamConfig
-            .builder()
+        var config = NodeSimilarityStreamConfigImpl.builder()
             .similarityCutoff(0.0)
             .concurrency(4)
             .build();

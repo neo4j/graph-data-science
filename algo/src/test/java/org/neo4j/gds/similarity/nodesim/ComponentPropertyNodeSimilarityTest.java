@@ -143,8 +143,7 @@ public class ComponentPropertyNodeSimilarityTest {
             .relCountUpperBound(5_000_000)
             .build();
 
-        NodeSimilarityWriteConfig config = ImmutableNodeSimilarityWriteConfig
-            .builder()
+        NodeSimilarityWriteConfig config = NodeSimilarityWriteConfigImpl.builder()
             .similarityCutoff(0.0)
             .topK(TOP_K_DEFAULT)
             .writeProperty("writeProperty")
@@ -191,7 +190,7 @@ public class ComponentPropertyNodeSimilarityTest {
     @MethodSource("supportedLoadAndComputeDirections")
     void shouldOptimizeForDistinctComponentsProperty(Orientation orientation, int concurrency) {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
-        var config = ImmutableNodeSimilarityStreamConfig.builder()
+        var config = NodeSimilarityStreamConfigImpl.builder()
             .similarityCutoff(0.0)
             .considerComponents(true)
             .componentProperty("compid")

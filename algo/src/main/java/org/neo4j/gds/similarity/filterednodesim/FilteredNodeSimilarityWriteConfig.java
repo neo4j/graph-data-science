@@ -20,13 +20,10 @@
 package org.neo4j.gds.similarity.filterednodesim;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteConfig;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface FilteredNodeSimilarityWriteConfig extends FilteredNodeSimilarityBaseConfig, NodeSimilarityWriteConfig {
     static FilteredNodeSimilarityWriteConfig of(CypherMapWrapper userInput) {
         return new FilteredNodeSimilarityWriteConfigImpl(userInput);

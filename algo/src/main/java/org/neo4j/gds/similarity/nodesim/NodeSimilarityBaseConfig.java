@@ -55,70 +55,59 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
     String CONSIDER_COMPONENTS_KEY = "considerComponents";
     boolean CONSIDER_COMPONENTS = false;
 
-    @Value.Default
     @Configuration.DoubleRange(min = 0, max = 1)
     default double similarityCutoff() {
         return 1E-42;
     }
 
-    @Value.Default
     @Configuration.ConvertWith(method = "org.neo4j.gds.similarity.nodesim.MetricSimilarityComputer#parse")
     @Configuration.ToMapValue("org.neo4j.gds.similarity.nodesim.MetricSimilarityComputer#render")
     default MetricSimilarityComputer.MetricSimilarityComputerBuilder similarityMetric() {
         return new JaccardSimilarityComputer.Builder();
     }
 
-    @Value.Default
     @Configuration.IntegerRange(min = 1)
     default int degreeCutoff() {
         return 1;
     }
 
-    @Value.Default
     @Configuration.IntegerRange(min = 1)
     default int upperDegreeCutoff() {
         return Integer.MAX_VALUE;
     }
 
-    @Value.Default
     @Configuration.Key(TOP_K_KEY)
     @Configuration.IntegerRange(min = 1)
     default int topK() {
         return TOP_K_DEFAULT;
     }
 
-    @Value.Default
     @Configuration.Key(TOP_N_KEY)
     @Configuration.IntegerRange(min = 0)
     default int topN() {
         return TOP_N_DEFAULT;
     }
 
-    @Value.Default
     @Configuration.Key(BOTTOM_K_KEY)
     @Configuration.IntegerRange(min = 1)
     default int bottomK() {
         return BOTTOM_K_DEFAULT;
     }
 
-    @Value.Default
     @Configuration.Key(BOTTOM_N_KEY)
     @Configuration.IntegerRange(min = 0)
     default int bottomN() {
         return BOTTOM_N_DEFAULT;
     }
 
-    @Value.Default
     @Configuration.ConvertWith(method = "validatePropertyName")
     @Configuration.Key(COMPONENT_PROPERTY_KEY)
     default @Nullable String componentProperty() { return null; }
 
-    @Value.Default
     @Configuration.Key(CONSIDER_COMPONENTS_KEY)
     default boolean considerComponents() { return CONSIDER_COMPONENTS; }
 
     @Configuration.Ignore
-    @Value.Derived
     default int normalizedK() {
         return bottomK() != BOTTOM_K_DEFAULT
             ? -bottomK()
@@ -126,7 +115,6 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
     }
 
     @Configuration.Ignore
-    @Value.Derived
     default int normalizedN() {
         return bottomN() != BOTTOM_N_DEFAULT
             ? -bottomN()
@@ -134,19 +122,16 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
     }
 
     @Configuration.Ignore
-    @Value.Derived
     default boolean isParallel() {
         return concurrency() > 1;
     }
 
     @Configuration.Ignore
-    @Value.Derived
     default boolean hasTopK() {
         return normalizedK() != 0;
     }
 
     @Configuration.Ignore
-    @Value.Derived
     default boolean hasTopN() {
         return normalizedN() != 0;
     }
@@ -157,7 +142,6 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
     }
 
     @Configuration.Ignore
-    @Value.Derived
     default boolean computeToGraph() {
         return !computeToStream();
     }
@@ -201,7 +185,6 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
         }
     }
 
-    @Value.Derived
     default boolean runWCC() {
         return considerComponents() && componentProperty() == null;
     }

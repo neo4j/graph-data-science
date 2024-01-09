@@ -20,14 +20,11 @@
 package org.neo4j.gds.similarity.nodesim;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface NodeSimilarityWriteConfig extends NodeSimilarityBaseConfig, WritePropertyConfig, WriteRelationshipConfig {
 
     static NodeSimilarityWriteConfig of(CypherMapWrapper userInput) {

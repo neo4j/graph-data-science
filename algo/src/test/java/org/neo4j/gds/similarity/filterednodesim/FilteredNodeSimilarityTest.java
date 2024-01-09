@@ -72,7 +72,7 @@ class FilteredNodeSimilarityTest {
     void should() {
         var sourceNodeFilter = Stream.of("a", "b", "c").map(graph::toOriginalNodeId).collect(Collectors.toList());
 
-        var config = ImmutableFilteredNodeSimilarityStreamConfig.builder()
+        var config = FilteredNodeSimilarityStreamConfigImpl.builder()
             .sourceNodeFilter(NodeFilterSpecFactory.create(sourceNodeFilter))
             .build();
 
@@ -103,7 +103,7 @@ class FilteredNodeSimilarityTest {
     void shouldSurviveIoannisObjections() {
         var sourceNodeFilter = List.of(graph.toOriginalNodeId("d"));
 
-        var config = ImmutableFilteredNodeSimilarityStreamConfig.builder()
+        var config = FilteredNodeSimilarityStreamConfigImpl.builder()
             .sourceNodeFilter(NodeFilterSpecFactory.create(sourceNodeFilter))
             .concurrency(1)
             .build();
@@ -135,7 +135,7 @@ class FilteredNodeSimilarityTest {
     void shouldSurviveIoannisFurtherObjections() {
         var sourceNodeFilter = List.of(graph.toOriginalNodeId("d"));
 
-        var config = ImmutableFilteredNodeSimilarityStreamConfig.builder()
+        var config = FilteredNodeSimilarityStreamConfigImpl.builder()
             .sourceNodeFilter(NodeFilterSpecFactory.create(sourceNodeFilter))
             .concurrency(1)
             .topK(0)
@@ -170,7 +170,7 @@ class FilteredNodeSimilarityTest {
     void shouldLogProgressAccurately(int concurrency) {
         var sourceNodeFilter = List.of(graph.toOriginalNodeId("c"), graph.toOriginalNodeId("d"));
 
-        var config = ImmutableFilteredNodeSimilarityStreamConfig.builder()
+        var config = FilteredNodeSimilarityStreamConfigImpl.builder()
             .sourceNodeFilter(NodeFilterSpecFactory.create(sourceNodeFilter))
             .concurrency(concurrency)
             .topK(0)

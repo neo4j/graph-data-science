@@ -152,17 +152,15 @@ final class NodeSimilarityTest {
     private static final int COMPARED_ITEMS = 3;
     private static final int COMPARED_PERSONS = 4;
 
-    static ImmutableNodeSimilarityWriteConfig.Builder writeConfigBuilder() {
-        return ImmutableNodeSimilarityWriteConfig
-            .builder()
+    static NodeSimilarityWriteConfigImpl.Builder writeConfigBuilder() {
+        return NodeSimilarityWriteConfigImpl.builder()
             .writeProperty("writeProperty")
             .writeRelationshipType("writeRelationshipType")
             .similarityCutoff(0.0);
     }
 
-    static ImmutableNodeSimilarityStreamConfig.Builder streamConfigBuilder() {
-        return ImmutableNodeSimilarityStreamConfig
-            .builder()
+    static NodeSimilarityStreamConfigImpl.Builder streamConfigBuilder() {
+        return NodeSimilarityStreamConfigImpl.builder()
             .similarityCutoff(0.0);
     }
 
@@ -662,8 +660,7 @@ final class NodeSimilarityTest {
             .relCountUpperBound(5_000_000)
             .build();
 
-        NodeSimilarityWriteConfig config = ImmutableNodeSimilarityWriteConfig
-            .builder()
+        NodeSimilarityWriteConfig config = NodeSimilarityWriteConfigImpl.builder()
             .similarityCutoff(0.0)
             .topK(topK)
             .writeProperty("writeProperty")
@@ -714,8 +711,7 @@ final class NodeSimilarityTest {
             .relCountUpperBound(5_000_000)
             .build();
 
-        NodeSimilarityWriteConfig config = ImmutableNodeSimilarityWriteConfig
-            .builder()
+        NodeSimilarityWriteConfig config = NodeSimilarityWriteConfigImpl.builder()
             .similarityCutoff(0.0)
             .topN(100)
             .topK(topK)
@@ -771,8 +767,7 @@ final class NodeSimilarityTest {
             .relCountUpperBound(20_000)
             .build();
 
-        NodeSimilarityWriteConfig config = ImmutableNodeSimilarityWriteConfig
-            .builder()
+        NodeSimilarityWriteConfig config = NodeSimilarityWriteConfigImpl.builder()
             .similarityCutoff(0.0)
             .topK(Integer.MAX_VALUE)
             .topN(Integer.MAX_VALUE)
@@ -846,7 +841,7 @@ final class NodeSimilarityTest {
     @ValueSource(ints = {1, 2})
     void shouldLogProgress(int concurrency) {
         var graph = naturalGraph;
-        var config = ImmutableNodeSimilarityStreamConfig.builder().degreeCutoff(0).concurrency(concurrency).build();
+        var config = NodeSimilarityStreamConfigImpl.builder().degreeCutoff(0).concurrency(concurrency).build();
         var progressTask = new NodeSimilarityFactory<>().progressTask(graph, config);
         TestLog log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(
@@ -882,7 +877,7 @@ final class NodeSimilarityTest {
     @Test
     void shouldLogProgressForWccOptimization() {
         var graph = naturalGraph;
-        var config = ImmutableNodeSimilarityStreamConfig.builder()
+        var config = NodeSimilarityStreamConfigImpl.builder()
             .considerComponents(true)
             .concurrency(4)
             .build();
