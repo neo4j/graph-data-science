@@ -33,11 +33,11 @@ import org.neo4j.gds.core.utils.OriginalIdNodePropertyValues;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.modularityoptimization.ImmutableModularityOptimizationStreamConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimization;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationFactory;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfigImpl;
 
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -195,7 +195,7 @@ public final class Louvain extends Algorithm<LouvainResult> {
     }
 
     private ModularityOptimizationResult runModularityOptimization(Graph louvainGraph, NodePropertyValues seed) {
-        ModularityOptimizationStreamConfig modularityOptimizationConfig = ImmutableModularityOptimizationStreamConfig
+        ModularityOptimizationStreamConfig modularityOptimizationConfig = ModularityOptimizationStreamConfigImpl
             .builder()
             .maxIterations(maxIterations)
             .tolerance(tolerance)

@@ -27,10 +27,10 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -111,7 +111,7 @@ class FootballTest {
         int minBatchSize,
         Log log
     ) {
-        var config = ImmutableModularityOptimizationStreamConfig.builder()
+        var config = ModularityOptimizationStreamConfigImpl.builder()
             .maxIterations(maxIterations)
             .concurrency(concurrency)
             .batchSize(minBatchSize)

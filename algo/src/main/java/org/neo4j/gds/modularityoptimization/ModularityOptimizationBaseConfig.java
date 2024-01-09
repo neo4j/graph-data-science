@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.modularityoptimization;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConsecutiveIdsConfig;
 import org.neo4j.gds.config.IterationsConfig;
@@ -38,19 +37,16 @@ public interface ModularityOptimizationBaseConfig extends
 
     int DEFAULT_ITERATIONS = 10;
 
-    @Value.Default
     @Override
     default double tolerance() {
         return 0.0001;
     }
 
     @Override
-    @Value.Default
     default int maxIterations() {
         return DEFAULT_ITERATIONS;
     }
 
-    @Value.Default
     default int batchSize() {
         return ParallelUtil.DEFAULT_BATCH_SIZE;
     }

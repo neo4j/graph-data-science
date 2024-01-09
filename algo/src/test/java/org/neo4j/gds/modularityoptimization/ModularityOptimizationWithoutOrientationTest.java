@@ -208,7 +208,7 @@ class ModularityOptimizationWithoutOrientationTest {
     void testMemoryEstimation(int concurrency, long min, long max) {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(100_000L).build();
 
-        ModularityOptimizationStreamConfig config = ImmutableModularityOptimizationStreamConfig.builder().build();
+        ModularityOptimizationStreamConfig config = ModularityOptimizationStreamConfigImpl.builder().build();
         MemoryTree memoryTree = new ModularityOptimizationFactory<>()
             .memoryEstimation(config)
             .estimate(dimensions, concurrency);
@@ -244,7 +244,7 @@ class ModularityOptimizationWithoutOrientationTest {
         int minBatchSize,
         Log log
     ) {
-        var config = ImmutableModularityOptimizationStreamConfig.builder()
+        var config = ModularityOptimizationStreamConfigImpl.builder()
             .maxIterations(maxIterations)
             .concurrency(concurrency)
             .batchSize(minBatchSize)

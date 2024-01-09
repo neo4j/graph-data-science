@@ -201,7 +201,7 @@ class ModularityOptimizationTest {
         int minBatchSize,
         Log log
     ) {
-        var config = ImmutableModularityOptimizationStreamConfig.builder()
+        var config = ModularityOptimizationStreamConfigImpl.builder()
             .maxIterations(maxIterations)
             .concurrency(concurrency)
             .batchSize(minBatchSize)
