@@ -85,4 +85,6 @@ public interface StorageEngineProxyApi {
     void properties(StorageEntityCursor storageCursor, StoragePropertyCursor propertyCursor, int[] propertySelection);
 
     Edition dbmsEdition(GraphDatabaseService databaseService);
+
+    TokenHolders newTokenHolders();
 }

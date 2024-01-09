@@ -114,4 +114,8 @@ public final class StorageEngineProxy {
     public static Edition dbmsEdition(GraphDatabaseService databaseService) {
         return IMPL.dbmsEdition(databaseService);
     }
+
+    public static TokenHolders newTokenHolders() {
+        return IMPL.newTokenHolders();
+    }
 }
