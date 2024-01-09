@@ -20,14 +20,11 @@
 package org.neo4j.gds.steiner;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface SteinerTreeWriteConfig extends SteinerTreeBaseConfig, WriteRelationshipConfig, WritePropertyConfig {
 
     static SteinerTreeWriteConfig of(CypherMapWrapper userInput) {

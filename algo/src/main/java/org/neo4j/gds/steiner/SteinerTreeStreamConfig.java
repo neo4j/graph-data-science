@@ -20,13 +20,10 @@
 package org.neo4j.gds.steiner;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
-public interface SteinerTreeStreamConfig extends  SteinerTreeBaseConfig {
+public interface SteinerTreeStreamConfig extends SteinerTreeBaseConfig {
 
     static SteinerTreeStreamConfig of(CypherMapWrapper userInput) {
         return new SteinerTreeStreamConfigImpl(userInput);
