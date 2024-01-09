@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.training;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.model.ModelConfig;
@@ -27,7 +26,6 @@ import org.neo4j.gds.model.ModelConfig;
 @Configuration
 public interface TrainBaseConfig extends AlgoBaseConfig, ModelConfig {
 
-    @Value.Default
     default boolean storeModelToDisk() {
         return false;
     }

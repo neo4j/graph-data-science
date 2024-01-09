@@ -19,12 +19,10 @@
  */
 package org.neo4j.gds.ml.models;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 
 public interface PenaltyConfig {
 
-    @Value.Default
     @Configuration.DoubleRange(min = 0.0)
     default double penalty() {
         return 0.0;

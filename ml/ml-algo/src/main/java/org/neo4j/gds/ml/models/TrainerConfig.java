@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.models;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.ml.api.TrainingMethod;
@@ -33,7 +32,6 @@ public interface TrainerConfig extends ToMapConvertible {
     @Configuration.Ignore
     TrainingMethod method();
 
-    @Value.Derived
     @Configuration.Ignore
     default TunableTrainerConfig toTunableConfig() {
         return TunableTrainerConfig.of(toMap(), method());

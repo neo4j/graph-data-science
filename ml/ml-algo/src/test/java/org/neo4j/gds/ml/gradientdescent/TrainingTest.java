@@ -20,7 +20,6 @@
 package org.neo4j.gds.ml.gradientdescent;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.Variable;
@@ -47,10 +46,9 @@ class TrainingTest {
 
     @Test
     void parallel() {
-        var config = ImmutableTestTrainingConfig
-            .builder()
-            .patience(10)
+        var config = GradientDescentConfigImpl.builder()
             .maxEpochs(10)
+            .patience(10)
             .build();
 
         var training = new Training(config, ProgressTracker.NULL_TRACKER, LogLevel.INFO, 100L, TerminationFlag.RUNNING_TRUE);
@@ -71,8 +69,7 @@ class TrainingTest {
     void checksTerminationFlag() {
         TerminationFlag terminationFlag = () -> false;
 
-        var config = ImmutableTestTrainingConfig
-            .builder()
+        var config = GradientDescentConfigImpl.builder()
             .patience(10)
             .maxEpochs(10)
             .build();
@@ -125,14 +122,6 @@ class TrainingTest {
         @Override
         public Long modelData() {
             return Long.MIN_VALUE;
-        }
-    }
-
-    @ValueClass
-    @SuppressWarnings("immutables:subtype")
-    public interface TestTrainingConfig extends GradientDescentConfig {
-        static ImmutableTestTrainingConfig.Builder builder() {
-            return ImmutableTestTrainingConfig.builder();
         }
     }
 

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.models.mlp;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.api.TrainingMethod;
@@ -35,7 +34,6 @@ import java.util.Map;
 public interface MLPClassifierTrainConfig extends GradientDescentConfig, PenaltyConfig, ClassAwareTrainerConfig {
     MLPClassifierTrainConfig DEFAULT = of(Map.of());
 
-    @Value.Default
     default List<Integer> hiddenLayerSizes() {
         return List.of(100);
     }

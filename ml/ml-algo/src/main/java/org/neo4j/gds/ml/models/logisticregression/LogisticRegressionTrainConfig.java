@@ -31,7 +31,6 @@ import java.util.Map;
 
 
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface LogisticRegressionTrainConfig extends GradientDescentConfig, PenaltyConfig, ClassAwareTrainerConfig {
     LogisticRegressionTrainConfig DEFAULT = of(Map.of());
 

@@ -19,41 +19,38 @@
  */
 package org.neo4j.gds.ml.gradientdescent;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.config.ToleranceConfig;
 
+import java.util.Map;
+
+@Configuration
 public interface GradientDescentConfig extends ToleranceConfig, ToMapConvertible {
 
     int DEFAULT_BATCH_SIZE = 100;
     int MAX_EPOCHS = 100;
 
-    @Value.Default
     @Configuration.IntegerRange(min = 1)
     default int batchSize() {
         return DEFAULT_BATCH_SIZE;
     }
 
-    @Value.Default
     @Configuration.IntegerRange(min = 1)
     default int minEpochs() {
         return 1;
     }
 
-    @Value.Default
     @Configuration.IntegerRange(min = 1)
     default int patience() {
         return 1;
     }
 
-    @Value.Default
     @Configuration.IntegerRange(min = 1)
     default int maxEpochs() {
         return MAX_EPOCHS;
     }
 
-    @Value.Default
     @Configuration.DoubleRange(min = 0)
     default double tolerance() {
         return 1e-3;
@@ -62,4 +59,8 @@ public interface GradientDescentConfig extends ToleranceConfig, ToMapConvertible
     default double learningRate() {
         return 0.001;
     }
+
+    @Override
+    @Configuration.ToMap
+    Map<String, Object> toMap();
 }
