@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.k1coloring;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.IterationsConfig;
@@ -28,13 +27,11 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 public interface K1ColoringBaseConfig extends AlgoBaseConfig, IterationsConfig {
 
     @Override
-    @Value.Default
     @Configuration.IntegerRange(min = 1)
     default int maxIterations() {
         return 10;
     }
 
-    @Value.Default
     default int batchSize() {
         return ParallelUtil.DEFAULT_BATCH_SIZE;
     }

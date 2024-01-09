@@ -20,13 +20,10 @@
 package org.neo4j.gds.k1coloring;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface K1ColoringMutateConfig extends K1ColoringBaseConfig, MutateNodePropertyConfig {
     static K1ColoringMutateConfig of(CypherMapWrapper userInput) {
         return new K1ColoringMutateConfigImpl(userInput);

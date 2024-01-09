@@ -32,16 +32,16 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.k1coloring.ImmutableK1ColoringStreamConfig;
 import org.neo4j.gds.k1coloring.K1Coloring;
 import org.neo4j.gds.k1coloring.K1ColoringAlgorithmFactory;
 import org.neo4j.gds.k1coloring.K1ColoringStreamConfig;
+import org.neo4j.gds.k1coloring.K1ColoringStreamConfigImpl;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -173,7 +173,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     }
 
     private void computeColoring() {
-        K1ColoringStreamConfig k1Config = ImmutableK1ColoringStreamConfig
+        K1ColoringStreamConfig k1Config = K1ColoringStreamConfigImpl
             .builder()
             .concurrency(concurrency)
             .maxIterations(K1COLORING_MAX_ITERATIONS)

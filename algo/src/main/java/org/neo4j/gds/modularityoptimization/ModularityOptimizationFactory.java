@@ -29,9 +29,9 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.k1coloring.ImmutableK1ColoringStreamConfig;
 import org.neo4j.gds.k1coloring.K1ColoringAlgorithmFactory;
 import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
+import org.neo4j.gds.k1coloring.K1ColoringStreamConfigImpl;
 
 import java.util.List;
 
@@ -103,7 +103,7 @@ public class ModularityOptimizationFactory<CONFIG extends ModularityOptimization
     }
 
     private static K1ColoringBaseConfig createModularityConfig() {
-        return ImmutableK1ColoringStreamConfig
+        return K1ColoringStreamConfigImpl
             .builder()
             .maxIterations(K1COLORING_MAX_ITERATIONS)
             .build();

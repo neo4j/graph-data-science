@@ -20,14 +20,11 @@
 package org.neo4j.gds.k1coloring;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.CommunitySizeConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
-@ValueClass
-@SuppressWarnings("immutables:subtype")
 public interface K1ColoringWriteConfig extends K1ColoringBaseConfig, WritePropertyConfig, CommunitySizeConfig {
 
     static K1ColoringWriteConfig of(CypherMapWrapper config) {

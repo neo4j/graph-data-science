@@ -176,7 +176,7 @@ class K1ColoringTest {
 
         var concurrency = 4;
 
-        var config = ImmutableK1ColoringStreamConfig.builder()
+        var config = K1ColoringStreamConfigImpl.builder()
             .concurrency(concurrency)
             .maxIterations(10)
             .build();
