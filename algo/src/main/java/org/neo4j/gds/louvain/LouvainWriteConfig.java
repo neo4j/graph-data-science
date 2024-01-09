@@ -20,14 +20,11 @@
 package org.neo4j.gds.louvain;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.CommunitySizeConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface LouvainWriteConfig extends LouvainBaseConfig, WritePropertyConfig, CommunitySizeConfig {
 
     static LouvainWriteConfig of(CypherMapWrapper userInput) {

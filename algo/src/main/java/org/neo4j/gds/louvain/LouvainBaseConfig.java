@@ -36,26 +36,22 @@ public interface LouvainBaseConfig extends
     ToleranceConfig,
     IterationsConfig {
 
-    @Value.Default
     @Override
     @Configuration.DoubleRange(min = 0D)
     default double tolerance() {
         return 0.0001;
     }
 
-    @Value.Default
     @Override
     @Configuration.IntegerRange(min = 1)
     default int maxIterations() {
         return 10;
     }
 
-    @Value.Default
     default int maxLevels() {
         return 10;
     }
 
-    @Value.Default
     default boolean includeIntermediateCommunities() {
         return false;
     }

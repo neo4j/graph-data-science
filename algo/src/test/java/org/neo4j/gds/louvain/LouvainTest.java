@@ -61,8 +61,8 @@ import static org.neo4j.gds.graphbuilder.TransactionTerminationTestUtils.assertT
 @GdlExtension
 class LouvainTest {
 
-    static ImmutableLouvainStreamConfig.Builder defaultConfigBuilder() {
-        return ImmutableLouvainStreamConfig.builder()
+    static LouvainStreamConfigImpl.Builder defaultConfigBuilder() {
+        return LouvainStreamConfigImpl.builder()
             .maxLevels(10)
             .maxIterations(10)
             .tolerance(TOLERANCE_DEFAULT)
@@ -276,7 +276,7 @@ class LouvainTest {
         );
 
         var config =
-            ImmutableLouvainStreamConfig.builder()
+            LouvainStreamConfigImpl.builder()
                 .maxLevels(10)
                 .maxIterations(10)
                 .tolerance(2.0)
@@ -312,7 +312,7 @@ class LouvainTest {
         );
 
         var config =
-            ImmutableLouvainStreamConfig.builder()
+            LouvainStreamConfigImpl.builder()
                 .maxLevels(1)
                 .maxIterations(10)
                 .tolerance(TOLERANCE_DEFAULT)
@@ -449,7 +449,7 @@ class LouvainTest {
 
         var louvain = new Louvain(
             myGraph,
-            ImmutableLouvainStreamConfig.builder().build(),
+            LouvainStreamConfigImpl.builder().build(),
             false,
             10,
             10,
