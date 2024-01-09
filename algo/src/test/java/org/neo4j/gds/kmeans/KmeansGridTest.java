@@ -130,7 +130,7 @@ class KmeansGridTest {
     }
     @Test
     void shouldStabilize(){
-        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+        var kmeansConfig =KmeansStreamConfigImpl.builder()
             .nodeProperty("kmeans")
             .randomSeed(19L)
             .k(2)

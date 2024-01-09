@@ -102,7 +102,7 @@ class KmeansTest {
 
     @Test
     void shouldThrowOnNan() {
-        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+        var kmeansConfig = KmeansStreamConfigImpl.builder()
             .nodeProperty("kmeans")
             .concurrency(1)
             .randomSeed(19L)
@@ -117,7 +117,7 @@ class KmeansTest {
 
     @Test
     void shouldThrowOnDifferentDimensions() {
-        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+        var kmeansConfig = KmeansStreamConfigImpl.builder()
             .nodeProperty("kmeans")
             .concurrency(1)
             .randomSeed(19L)
@@ -132,7 +132,7 @@ class KmeansTest {
 
     @Test
     void shouldRun() {
-        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+        var kmeansConfig = KmeansStreamConfigImpl.builder()
             .nodeProperty("kmeans")
             .concurrency(1)
             .randomSeed(19L)
@@ -168,7 +168,7 @@ class KmeansTest {
 
     @Test
     void shouldRunOnFloatGraph() {
-        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+        var kmeansConfig = KmeansStreamConfigImpl.builder()
             .nodeProperty("kmeans")
             .concurrency(1)
             .randomSeed(19L)
@@ -191,7 +191,7 @@ class KmeansTest {
 
     @Test
     void shouldWorkOnLineGraphWithOneIteration() {
-        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+        var kmeansConfig = KmeansStreamConfigImpl.builder()
             .nodeProperty("kmeans")
             .concurrency(1)
             .randomSeed(19L)
@@ -210,7 +210,7 @@ class KmeansTest {
 
     @Test
     void shouldChangeOnLineGraphWithTwoIterations() {
-        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+        var kmeansConfig = KmeansStreamConfigImpl.builder()
             .nodeProperty("kmeans")
             .concurrency(1)
             .randomSeed(19L) //init clusters 0.21 and 3.8
@@ -232,7 +232,7 @@ class KmeansTest {
 
     @Test
     void shouldComputeSilhouetteCorrectly() {
-        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+        var kmeansConfig = KmeansStreamConfigImpl.builder()
             .nodeProperty("kmeans")
             .concurrency(1)
             .randomSeed(19L)
@@ -270,7 +270,7 @@ class KmeansTest {
 
     @Test
     void shouldNotWorkForRestartsAndSeeds() {
-        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+        var kmeansConfig = KmeansStreamConfigImpl.builder()
             .nodeProperty("kmeans")
             .concurrency(1)
             .randomSeed(19L)
@@ -289,7 +289,7 @@ class KmeansTest {
 
     @Test
     void shouldNotWorkForDifferentSeedAndK() {
-        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+        var kmeansConfig = KmeansStreamConfigImpl.builder()
             .nodeProperty("kmeans")
             .concurrency(1)
             .randomSeed(19L)
@@ -307,7 +307,7 @@ class KmeansTest {
 
     @Test
     void shouldNotWorkForSeedingWithWrongDimensions() {
-        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+        var kmeansConfig = KmeansStreamConfigImpl.builder()
             .nodeProperty("kmeans")
             .concurrency(1)
             .randomSeed(19L)
@@ -322,7 +322,7 @@ class KmeansTest {
 
     @Test
     void shouldNotWorkForSeedingWithNaN() {
-        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+        var kmeansConfig = KmeansStreamConfigImpl.builder()
             .nodeProperty("kmeans")
             .concurrency(1)
             .randomSeed(19L)
@@ -337,7 +337,7 @@ class KmeansTest {
 
     @Test
     void shouldWithSeededCentroids() {
-        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+        var kmeansConfig = KmeansStreamConfigImpl.builder()
             .nodeProperty("kmeans")
             .concurrency(1)
             .randomSeed(19L)
@@ -355,7 +355,7 @@ class KmeansTest {
 
     @Test
     void progressTracking() {
-        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+        var kmeansConfig = KmeansStreamConfigImpl.builder()
             .nodeProperty("kmeans")
             .concurrency(1)
             .randomSeed(19L)
@@ -398,7 +398,7 @@ class KmeansTest {
 
     @Test
     void progressTrackingWithRestarts() {
-        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+        var kmeansConfig = KmeansStreamConfigImpl.builder()
             .nodeProperty("kmeans")
             .concurrency(1)
             .randomSeed(19L)
@@ -457,7 +457,7 @@ class KmeansTest {
 
     @Test
     void progressTrackingWithSilhouette() {
-        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+        var kmeansConfig = KmeansStreamConfigImpl.builder()
             .nodeProperty("kmeans")
             .concurrency(1)
             .randomSeed(19L)
@@ -509,7 +509,7 @@ class KmeansTest {
     @ValueSource(strings = {"fail", "kfail"})
     void shouldThrowForMissingProperty(String property) {
 
-        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+        var kmeansConfig = KmeansStreamConfigImpl.builder()
             .nodeProperty(property)
             .concurrency(1)
             .randomSeed(19L)

@@ -49,7 +49,7 @@ class KmeansRestartsTest {
 
     @Test
     void shouldWorkWithoutRestarts() {
-        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+        var kmeansConfig = KmeansStreamConfigImpl.builder()
             .nodeProperty("kmeans")
             .concurrency(1)
             .maxIterations(1)
@@ -81,7 +81,7 @@ class KmeansRestartsTest {
 
     @Test
     void shouldChangeForWithRestarts() {
-        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+        var kmeansConfig = KmeansStreamConfigImpl.builder()
             .nodeProperty("kmeans")
             .concurrency(1)
             .randomSeed(11L)
@@ -119,7 +119,7 @@ class KmeansRestartsTest {
         //the seed forces to pick as centers:
         //in first iteration: optimally:   100.0 alone and one of the others two
         //in second iteration: 100.0 is not selected as a cluster center
-        var kmeansConfig = ImmutableKmeansStreamConfig.builder()
+        var kmeansConfig = KmeansStreamConfigImpl.builder()
             .nodeProperty("kmeans")
             .concurrency(1)
             .randomSeed(2L)

@@ -20,7 +20,6 @@
 package org.neo4j.gds.kmeans;
 
 
-import org.immutables.value.Value;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
@@ -38,30 +37,25 @@ public interface KmeansBaseConfig extends AlgoBaseConfig, IterationsConfig, Rand
 
     @Configuration.IntegerRange(min = 1)
     @Override
-    @Value.Default
     default int maxIterations() {
         return 10;
     }
 
-    @Value.Default
     @Configuration.IntegerRange(min = 1)
     default int k() {
         return 10;
     }
 
-    @Value.Default
     @Configuration.DoubleRange(min = 0, max = 1)
     default double deltaThreshold() {
         return 0.05;
     }
 
     @Configuration.IntegerRange(min = 1)
-    @Value.Default
     default int numberOfRestarts() {
         return 1;
     }
 
-    @Value.Default
     default boolean computeSilhouette() {
         return false;
     }
@@ -69,7 +63,6 @@ public interface KmeansBaseConfig extends AlgoBaseConfig, IterationsConfig, Rand
     String nodeProperty();
 
     @Configuration.GraphStoreValidationCheck
-    @Value.Default
     default void nodePropertyTypeValidation(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
@@ -89,20 +82,17 @@ public interface KmeansBaseConfig extends AlgoBaseConfig, IterationsConfig, Rand
         );
     }
 
-    @Value.Default
     @Configuration.ConvertWith(method = "org.neo4j.gds.kmeans.KmeansSampler.SamplerType#parse")
     @Configuration.ToMapValue("org.neo4j.gds.kmeans.KmeansSampler.SamplerType#toString")
     default KmeansSampler.SamplerType initialSampler() {
         return KmeansSampler.SamplerType.UNIFORM;
     }
 
-    @Value.Default
     default List<List<Double>> seedCentroids() {
         return List.of();
     }
 
     @Configuration.Ignore
-    @Value.Derived
     default boolean isSeeded() {
         return !seedCentroids().isEmpty();
     }
