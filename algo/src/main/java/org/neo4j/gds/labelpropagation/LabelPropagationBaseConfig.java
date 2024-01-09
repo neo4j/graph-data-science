@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.labelpropagation;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConsecutiveIdsConfig;
@@ -36,7 +35,6 @@ public interface LabelPropagationBaseConfig extends
     NodeWeightConfig,
     IterationsConfig {
 
-    @Value.Default
     @Override
     @Configuration.IntegerRange(min = 1)
     default int maxIterations() {

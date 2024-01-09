@@ -20,13 +20,10 @@
 package org.neo4j.gds.labelpropagation;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface LabelPropagationMutateConfig extends LabelPropagationBaseConfig, MutateNodePropertyConfig {
 
     static LabelPropagationMutateConfig of(CypherMapWrapper userInput) {

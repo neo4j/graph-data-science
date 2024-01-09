@@ -90,7 +90,7 @@ class LabelPropagationTest {
     void shouldUseOriginalNodeIdWhenSeedPropertyIsMissing() {
         LabelPropagation lp = new LabelPropagation(
             graph,
-            ImmutableLabelPropagationStreamConfig.builder().maxIterations(1).build(),
+            LabelPropagationStreamConfigImpl.builder().maxIterations(1).build(),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -112,7 +112,7 @@ class LabelPropagationTest {
     void shouldUseSeedProperty() {
         LabelPropagation lp = new LabelPropagation(
             graph,
-            ImmutableLabelPropagationStreamConfig
+            LabelPropagationStreamConfigImpl
                 .builder()
                 .seedProperty("seedId")
                 .maxIterations(1)

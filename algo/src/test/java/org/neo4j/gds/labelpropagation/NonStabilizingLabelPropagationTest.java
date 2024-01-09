@@ -61,7 +61,7 @@ class NonStabilizingLabelPropagationTest {
     void testLabelPropagationDoesStabilize() {
         LabelPropagation labelPropagation = new LabelPropagation(
             graph,
-            ImmutableLabelPropagationStreamConfig.builder().build(),
+            LabelPropagationStreamConfigImpl.builder().build(),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );

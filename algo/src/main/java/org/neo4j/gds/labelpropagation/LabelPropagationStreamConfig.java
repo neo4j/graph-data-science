@@ -20,13 +20,10 @@
 package org.neo4j.gds.labelpropagation;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.CommunitySizeConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface LabelPropagationStreamConfig extends LabelPropagationBaseConfig, CommunitySizeConfig {
 
     static LabelPropagationStreamConfig of(CypherMapWrapper userInput) {
