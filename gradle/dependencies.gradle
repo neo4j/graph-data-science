@@ -58,7 +58,7 @@ ext {
             'reflections'         : '0.10.2'
         ],
         'agrona'               : '1.20.0',
-        'assertj'              : '3.24.2',
+        'assertj'              : '3.25.1',
         'auto-common'          : '1.2.2',
         'auto-service'         : '1.1.1',
         'bouncycastle-prov'     : '1.77',
