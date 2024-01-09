@@ -43,7 +43,7 @@ public class DegreeCentralityFactory<CONFIG extends DegreeCentralityConfig> exte
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-        return new DegreeCentrality(graph, DefaultPool.INSTANCE, configuration, progressTracker);
+        return new DegreeCentrality(graph, DefaultPool.INSTANCE, configuration, configuration.minBatchSize(), progressTracker);
     }
 
     @Override

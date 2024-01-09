@@ -127,7 +127,7 @@ final class DegreeCentralityTest {
     @ParameterizedTest
     @MethodSource("degreeCentralityParameters")
     void shouldComputeCorrectResults(boolean weighted, Orientation orientation, Map<String, Double> expected, int concurrency) {
-        var configBuilder = ImmutableDegreeCentralityConfig.builder()
+        var configBuilder = DegreeCentralityConfigImpl.builder()
             .concurrency(concurrency)
             .orientation(orientation);
 
@@ -135,17 +135,15 @@ final class DegreeCentralityTest {
             configBuilder.relationshipWeightProperty("weight");
         }
 
-        // Permit the algo to use a smaller batch size to really run in parallel.
-        if (concurrency > 1) {
-            configBuilder.minBatchSize(1);
-        }
-
         var config = configBuilder.build();
+        // Permit the algo to use a smaller batch size to really run in parallel.
+        var minBatchSize = concurrency > 1 ? 1 : config.minBatchSize();
 
         var degreeCentrality = new DegreeCentrality(
             graph,
             DefaultPool.INSTANCE,
             config,
+            minBatchSize,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -160,7 +158,7 @@ final class DegreeCentralityTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void testProgressLogging(boolean weighted) {
-        var configBuilder = ImmutableDegreeCentralityConfig.builder();
+        var configBuilder = DegreeCentralityConfigImpl.builder();
         if (weighted) {
             configBuilder.relationshipWeightProperty("weight");
         }
@@ -173,6 +171,7 @@ final class DegreeCentralityTest {
             graph,
             DefaultPool.INSTANCE,
             config,
+            config.minBatchSize(),
             progressTracker
         );
 
@@ -189,7 +188,7 @@ final class DegreeCentralityTest {
     @ParameterizedTest
     @EnumSource(Orientation.class)
     void shouldSupportAllOrientations(Orientation orientation) {
-        var config = ImmutableDegreeCentralityConfig
+        var config = DegreeCentralityConfigImpl
             .builder()
             .orientation(orientation)
             .build();
@@ -198,6 +197,7 @@ final class DegreeCentralityTest {
             graph,
             DefaultPool.INSTANCE,
             config,
+            config.minBatchSize(),
             ProgressTracker.NULL_TRACKER
         );
 

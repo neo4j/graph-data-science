@@ -46,17 +46,20 @@ public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
     private final Graph graph;
     private final ExecutorService executor;
     private final DegreeCentralityConfig config;
+    private final int minBatchSize;
 
     public DegreeCentrality(
         Graph graph,
         ExecutorService executor,
         DegreeCentralityConfig config,
+        int minBatchSize,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
         this.executor = executor;
         this.config = config;
+        this.minBatchSize = minBatchSize;
     }
 
     @Override
@@ -157,7 +160,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
             graph,
             config.concurrency(),
             partition -> taskFunction.apply(partition, degrees),
-            Optional.of(config.minBatchSize())
+            Optional.of(minBatchSize)
         );
         RunWithConcurrency.builder()
             .concurrency(config.concurrency())
@@ -173,7 +176,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
             graph,
             config.concurrency(),
             partition -> taskFunction.apply(partition, degrees),
-            Optional.of(config.minBatchSize())
+            Optional.of(minBatchSize)
         );
         RunWithConcurrency.builder()
             .concurrency(config.concurrency())

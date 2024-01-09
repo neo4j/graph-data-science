@@ -30,9 +30,9 @@ class DegreeCentralityAlgorithmEstimateDefinitionTest {
 
     @ParameterizedTest
     @CsvSource({
-        "10_000, 32",
-        "500_000, 32",
-        "10_000_000, 32"
+        "10_000, 40",
+        "500_000, 40",
+        "10_000_000, 40"
     })
     void testMemoryEstimation(long nodeCount, long expectedMemory) {
         var configurationMock = mock(DegreeCentralityConfig.class);
@@ -45,9 +45,9 @@ class DegreeCentralityAlgorithmEstimateDefinitionTest {
 
     @ParameterizedTest
     @CsvSource({
-        "10_000, 1, 32",
-        "10_000, 2, 32",
-        "10_000, 128, 32"
+        "10_000, 1, 40",
+        "10_000, 2, 40",
+        "10_000, 128, 40"
     })
     void shouldGiveTheSameEstimationRegardlessOfTheConcurrency(long nodeCount, int concurrency, long expectedMemory) {
         var configurationMock = mock(DegreeCentralityConfig.class);
@@ -60,9 +60,9 @@ class DegreeCentralityAlgorithmEstimateDefinitionTest {
 
     @ParameterizedTest
     @CsvSource({
-        "10_000, 80_072",
-        "500_000, 4_000_072",
-        "10_000_000, 80_000_072"
+        "10_000, 80_080",
+        "500_000, 4_000_080",
+        "10_000_000, 80_000_080"
     })
     void testMemoryEstimationWithRelationshipWeight(long nodeCount, long expectedMemory) {
         var configurationMock = mock(DegreeCentralityConfig.class);
@@ -76,9 +76,9 @@ class DegreeCentralityAlgorithmEstimateDefinitionTest {
 
     @ParameterizedTest
     @CsvSource({
-        "10_000, 1, 80_072",
-        "10_000, 2, 80_072",
-        "10_000, 128, 80_072"
+        "10_000, 1, 80_080",
+        "10_000, 2, 80_080",
+        "10_000, 128, 80_080"
     })
     void shouldGiveTheSameEstimationRegardlessOfTheConcurrencyWeighted(long nodeCount, int concurrency, long expectedMemory) {
         var configurationMock = mock(DegreeCentralityConfig.class);

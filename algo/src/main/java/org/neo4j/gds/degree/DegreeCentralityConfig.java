@@ -19,19 +19,14 @@
  */
 package org.neo4j.gds.degree;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface DegreeCentralityConfig extends AlgoBaseConfig, RelationshipWeightConfig {
 
-    @Value.Default
     @Configuration.ConvertWith(method = "org.neo4j.gds.Orientation#parse")
     @Configuration.ToMapValue("org.neo4j.gds.Orientation#toString")
     default Orientation orientation() {

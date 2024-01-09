@@ -22,8 +22,8 @@ package org.neo4j.gds.traversal;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.degree.DegreeCentrality;
+import org.neo4j.gds.degree.DegreeCentralityConfigImpl;
 import org.neo4j.gds.degree.DegreeFunction;
-import org.neo4j.gds.degree.ImmutableDegreeCentralityConfig;
 import org.neo4j.gds.ml.core.samplers.RandomWalkSampler;
 
 import java.util.List;
@@ -48,7 +48,7 @@ public final class RandomWalkCompanion {
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
-        var degreeCentralityConfig = ImmutableDegreeCentralityConfig.builder()
+        var degreeCentralityConfig = DegreeCentralityConfigImpl.builder()
             .concurrency(concurrency)
             // DegreeCentrality internally decides its computation on the config. The actual property key is not relevant
             .relationshipWeightProperty("DUMMY")
@@ -58,6 +58,7 @@ public final class RandomWalkCompanion {
             graph,
             executorService,
             degreeCentralityConfig,
+            degreeCentralityConfig.minBatchSize(),
             progressTracker
         ).compute().degreeFunction();
 
