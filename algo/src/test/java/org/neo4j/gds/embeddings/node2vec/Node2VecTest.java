@@ -143,7 +143,7 @@ class Node2VecTest {
         }
 
         int embeddingDimension = 128;
-        Node2VecStreamConfig config = ImmutableNode2VecStreamConfig
+        Node2VecStreamConfig config = Node2VecStreamConfigImpl
             .builder()
             .embeddingDimension(embeddingDimension)
             .build();

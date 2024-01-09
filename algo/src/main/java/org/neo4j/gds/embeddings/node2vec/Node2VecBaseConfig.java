@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.EmbeddingDimensionConfig;
@@ -30,70 +29,59 @@ import java.util.List;
 
 public interface Node2VecBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConfig, RandomWalkBaseConfig {
 
-    @Value.Default
     @Configuration.IntegerRange(min = 2)
     default int windowSize() {
         return 10;
     }
 
-    @Value.Default
     @Configuration.IntegerRange(min = 1)
     default int negativeSamplingRate() {
         return 5;
     }
 
-    @Value.Default
     @Configuration.DoubleRange(min = 0.00001, minInclusive = false, max=1.0)
     default double positiveSamplingFactor() {
         return 0.001;
     }
 
-    @Value.Default
     @Configuration.DoubleRange(min = 0.00001, minInclusive = false, max=1.0)
     default double negativeSamplingExponent() {
         return 0.75;
     }
 
     @Override
-    @Value.Default
     @Configuration.IntegerRange(min = 1)
     default int embeddingDimension() {
         return 128;
     }
 
-    @Value.Default
     @Configuration.ConvertWith(method = "org.neo4j.gds.embeddings.node2vec.EmbeddingInitializer#parse", inverse = Configuration.ConvertWith.INVERSE_IS_TO_MAP)
     @Configuration.ToMapValue("org.neo4j.gds.embeddings.node2vec.EmbeddingInitializer#toString")
     default EmbeddingInitializer embeddingInitializer() {
         return EmbeddingInitializer.NORMALIZED;
     }
 
-    @Value.Default
     @Configuration.DoubleRange(min = 0.0, minInclusive = false)
     default double initialLearningRate() {
         return 0.025;
     }
 
-    @Value.Default
     @Configuration.DoubleRange(min = 0.0, minInclusive = false)
     default double minLearningRate() {
         return 0.0001;
     }
 
-    @Value.Default
     default int iterations() {
         return 1;
     }
 
     @Configuration.Ignore
-    @Value.Default
     @Override
     default List<Long> sourceNodes() {
         return List.of();
     }
 
     @Configuration.Ignore
-    @Value.Derived
     default WalkParameters walkParameters() {
         return new WalkParameters(
             walksPerNode(),
@@ -106,7 +94,6 @@ public interface Node2VecBaseConfig extends AlgoBaseConfig, EmbeddingDimensionCo
     }
 
     @Configuration.Ignore
-    @Value.Derived
     default TrainParameters trainParameters() {
         return new TrainParameters(
             initialLearningRate(),

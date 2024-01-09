@@ -20,13 +20,10 @@
 package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface Node2VecMutateConfig extends Node2VecBaseConfig, MutateNodePropertyConfig {
 
     static Node2VecMutateConfig of(CypherMapWrapper userInput) {
