@@ -66,7 +66,7 @@ class ClosenessCentralityDiscoTest {
 
         var algo = ClosenessCentrality.of(
             graph,
-            ImmutableClosenessCentralityStreamConfig.builder().concurrency(2).useWassermanFaust(true).build(),
+            ClosenessCentralityStreamConfigImpl.builder().concurrency(2).useWassermanFaust(true).build(),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );

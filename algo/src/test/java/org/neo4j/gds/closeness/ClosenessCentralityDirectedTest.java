@@ -87,7 +87,7 @@ class ClosenessCentralityDirectedTest {
 
         var algo = ClosenessCentrality.of(
             graph,
-            ImmutableClosenessCentralityStreamConfig.builder().build(),
+            ClosenessCentralityStreamConfigImpl.builder().build(),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -107,7 +107,7 @@ class ClosenessCentralityDirectedTest {
 
         var algo = ClosenessCentrality.of(
             graph,
-            ImmutableClosenessCentralityStreamConfig.builder().useWassermanFaust(true).build(),
+            ClosenessCentralityStreamConfigImpl.builder().useWassermanFaust(true).build(),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );

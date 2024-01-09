@@ -19,17 +19,12 @@
  */
 package org.neo4j.gds.closeness;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface ClosenessCentralityBaseConfig extends AlgoBaseConfig {
 
-    @Value.Default
     default boolean useWassermanFaust() {
         return false;
     }

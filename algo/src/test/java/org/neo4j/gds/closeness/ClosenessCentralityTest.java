@@ -92,7 +92,7 @@ class ClosenessCentralityTest {
 
         var algo = ClosenessCentrality.of(
             graph,
-            ImmutableClosenessCentralityStreamConfig.builder().build(),
+            ClosenessCentralityStreamConfigImpl.builder().build(),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -108,7 +108,7 @@ class ClosenessCentralityTest {
 
     @Test
     void shouldLogProgress() {
-        var config = ImmutableClosenessCentralityStreamConfig.builder().concurrency(4).build();
+        var config = ClosenessCentralityStreamConfigImpl.builder().concurrency(4).build();
         var progressTask = new ClosenessCentralityAlgorithmFactory<>().progressTask(graph, config);
         var testLog = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);

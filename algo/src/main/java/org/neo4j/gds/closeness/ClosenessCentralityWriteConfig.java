@@ -20,13 +20,10 @@
 package org.neo4j.gds.closeness;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface ClosenessCentralityWriteConfig extends ClosenessCentralityBaseConfig, WritePropertyConfig {
 
     static ClosenessCentralityWriteConfig of(CypherMapWrapper config) {
