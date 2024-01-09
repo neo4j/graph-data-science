@@ -20,14 +20,11 @@
 package org.neo4j.gds.spanningtree;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface SpanningTreeWriteConfig extends SpanningTreeBaseConfig, WritePropertyConfig, WriteRelationshipConfig {
     
     static SpanningTreeWriteConfig of(CypherMapWrapper userInput) {

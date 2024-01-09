@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.spanningtree;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
@@ -32,7 +31,6 @@ public interface SpanningTreeBaseConfig extends
     RelationshipWeightConfig,
     SourceNodeConfig {
 
-    @Value.Default
     @Configuration.ConvertWith(method = "org.neo4j.gds.spanningtree.SpanningTreeCompanion#parse")
     @Configuration.ToMapValue("org.neo4j.gds.spanningtree.SpanningTreeCompanion#toString")
     default DoubleUnaryOperator objective() {
