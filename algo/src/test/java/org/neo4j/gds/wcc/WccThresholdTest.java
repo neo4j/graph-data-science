@@ -102,8 +102,7 @@ class WccThresholdTest {
     }
 
     private void assertResults(double threshold, TestGraph graph, String[][] expectedComponents) {
-        WccStreamConfig wccConfig = ImmutableWccStreamConfig
-            .builder()
+        WccStreamConfig wccConfig = WccStreamConfigImpl.builder()
             .threshold(threshold)
             .relationshipWeightProperty("cost")
             .build();

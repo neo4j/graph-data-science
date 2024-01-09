@@ -36,9 +36,9 @@ import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarity;
 import org.neo4j.gds.similarity.nodesim.TopKMap;
 import org.neo4j.gds.similarity.nodesim.TopNList;
-import org.neo4j.gds.wcc.ImmutableWccStreamConfig;
 import org.neo4j.gds.wcc.WccAlgorithmFactory;
 import org.neo4j.gds.wcc.WccStreamConfig;
+import org.neo4j.gds.wcc.WccStreamConfigImpl;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
@@ -130,9 +130,7 @@ public class FilteredNodeSimilarityFactory<CONFIG extends FilteredNodeSimilarity
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
         if (config.runWCC()) {
-            WccStreamConfig wccStreamConfig = ImmutableWccStreamConfig
-                .builder()
-                .build();
+            WccStreamConfig wccStreamConfig = WccStreamConfigImpl.builder().build();
             return Tasks.task(
                 taskName(),
                 Tasks.task("prepare", new WccAlgorithmFactory<>().progressTask(graph, wccStreamConfig),

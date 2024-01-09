@@ -142,7 +142,7 @@ class WccTest {
     void seededWccOnUnionGraphs(Orientation orientation, String gdl, @SuppressWarnings("unused") String testName) {
         var graph = fromGdl(gdl, orientation);
 
-        var result = run(graph, ImmutableWccStreamConfig.builder()
+        var result = run(graph, WccStreamConfigImpl.builder()
             .seedProperty("componentId")
             .build());
 
@@ -175,7 +175,7 @@ class WccTest {
 
         new WccAlgorithmFactory<>().build(
             createTestGraph(Orientation.NATURAL),
-            ImmutableWccStreamConfig.builder().relationshipWeightProperty("weights").build(),
+            WccStreamConfigImpl.builder().relationshipWeightProperty("weights").build(),
             log,
             EmptyTaskRegistryFactory.INSTANCE
         );
@@ -193,7 +193,7 @@ class WccTest {
         var log = Neo4jProxy.testLog();
         var wcc = new WccAlgorithmFactory<>().build(
             graph,
-            ImmutableWccStreamConfig.builder().concurrency(2).build(),
+            WccStreamConfigImpl.builder().concurrency(2).build(),
             log,
             EmptyTaskRegistryFactory.INSTANCE
         );
@@ -240,7 +240,7 @@ class WccTest {
     }
 
     DisjointSetStruct run(Graph graph) {
-        return run(graph, ImmutableWccStreamConfig.builder().build());
+        return run(graph, WccStreamConfigImpl.builder().build());
     }
 
     DisjointSetStruct run(Graph graph, WccBaseConfig config) {
@@ -332,7 +332,7 @@ class WccTest {
         }
 
         private void assertResults(TestGraph graph) {
-            var config = ImmutableWccStreamConfig.builder().build();
+            var config = WccStreamConfigImpl.builder().build();
 
             var dss = new WccAlgorithmFactory<>()
                 .build(

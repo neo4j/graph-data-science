@@ -36,10 +36,10 @@ import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
-import org.neo4j.gds.wcc.ImmutableWccStreamConfig;
 import org.neo4j.gds.wcc.Wcc;
 import org.neo4j.gds.wcc.WccAlgorithmFactory;
 import org.neo4j.gds.wcc.WccStreamConfig;
+import org.neo4j.gds.wcc.WccStreamConfigImpl;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -252,11 +252,10 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
         // run WCC to determine components
         progressTracker.beginSubTask();
-        WccStreamConfig wccConfig = ImmutableWccStreamConfig
-            .builder()
+        WccStreamConfig wccConfig = WccStreamConfigImpl.builder()
             .concurrency(concurrency)
-            .addAllRelationshipTypes(config.relationshipTypes())
-            .addAllNodeLabels(config.nodeLabels())
+            .relationshipTypes(config.relationshipTypes())
+            .nodeLabels(config.nodeLabels())
             .build();
 
         Wcc wcc = new WccAlgorithmFactory<>().build(graph, wccConfig, ProgressTracker.NULL_TRACKER);

@@ -28,12 +28,10 @@ import org.neo4j.gds.config.SeedConfig;
 
 public interface WccBaseConfig extends AlgoBaseConfig, SeedConfig, ConsecutiveIdsConfig, RelationshipWeightConfig {
 
-    @Value.Default
     default double threshold() {
         return 0D;
     }
 
-    @Value.Default
     @Configuration.Ignore
     default boolean hasThreshold() {
         return !Double.isNaN(threshold()) && threshold() > 0;

@@ -73,7 +73,7 @@ class IncrementalWccTest {
     void shouldComputeComponentsFromSeedProperty() {
         Graph graph = createGraph();
 
-        WccStreamConfig config = ImmutableWccStreamConfig.builder()
+        WccStreamConfig config = WccStreamConfigImpl.builder()
             .concurrency(ConcurrencyConfig.DEFAULT_CONCURRENCY)
             .seedProperty(SEED_PROPERTY)
             .threshold(0D)
@@ -111,7 +111,7 @@ class IncrementalWccTest {
         );
 
         // When
-        WccStreamConfig config = ImmutableWccStreamConfig.builder()
+        WccStreamConfig config = WccStreamConfigImpl.builder()
             .seedProperty("seed")
             .build();
 
