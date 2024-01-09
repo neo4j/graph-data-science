@@ -19,49 +19,40 @@
  */
 package org.neo4j.gds.similarity.knn;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.IterationsConfig;
 import org.neo4j.gds.config.SingleThreadedRandomSeedConfig;
 
 import java.util.List;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, SingleThreadedRandomSeedConfig {
 
     @Configuration.ConvertWith(method = "org.neo4j.gds.similarity.knn.KnnNodePropertySpecParser#parse")
     @Configuration.ToMapValue("org.neo4j.gds.similarity.knn.KnnNodePropertySpecParser#render")
     List<KnnNodePropertySpec> nodeProperties();
 
-    @Value.Default
     @Configuration.IntegerRange(min = 1)
     default int topK() {
         return 10;
     }
 
-    @Value.Default
     @Configuration.DoubleRange(min = 0, max = 1, minInclusive = false)
     default double sampleRate() {
         return 0.5;
     }
 
-    @Value.Default
     @Configuration.DoubleRange(min = 0, max = 1)
     default double perturbationRate() {
         return 0.0;
     }
 
-    @Value.Default
     @Configuration.DoubleRange(min = 0, max = 1)
     default double deltaThreshold() {
         return 0.001;
     }
 
-    @Value.Default
     @Configuration.DoubleRange(min = 0, max = 1)
     default double similarityCutoff() {
         return 0;
@@ -69,37 +60,31 @@ public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, SingleT
 
     @Configuration.IntegerRange(min = 1)
     @Override
-    @Value.Default
     default int maxIterations() {
         return 100;
     }
 
-    @Value.Default
     @Configuration.Ignore
     default int minBatchSize() {
         return 1_000;
     }
 
-    @Value.Default
     @Configuration.IntegerRange(min = 0)
     default int randomJoins() {
         return 10;
     }
 
-    @Value.Default
     @Configuration.ConvertWith(method = "org.neo4j.gds.similarity.knn.KnnSampler.SamplerType#parse")
     @Configuration.ToMapValue("org.neo4j.gds.similarity.knn.KnnSampler.SamplerType#toString")
     default KnnSampler.SamplerType initialSampler() {
         return KnnSampler.SamplerType.UNIFORM;
     }
 
-    @Value.Default
     @Configuration.Ignore
     default K k(long nodeCount) {
         return K.create(topK(), nodeCount, sampleRate(), deltaThreshold());
     }
 
-    @Value.Default
     @Configuration.Ignore
     default KnnParametersSansNodeCount toParameters() {
         return KnnParametersSansNodeCount.create(

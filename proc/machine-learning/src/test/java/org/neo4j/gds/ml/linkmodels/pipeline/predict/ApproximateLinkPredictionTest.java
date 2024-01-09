@@ -28,7 +28,6 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -41,12 +40,15 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
-import org.neo4j.gds.similarity.knn.ImmutableKnnBaseConfig;
 import org.neo4j.gds.similarity.knn.KnnNodePropertySpec;
+import org.neo4j.gds.similarity.knn.KnnParametersSansNodeCount;
+import org.neo4j.gds.similarity.knn.KnnSampler;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -100,16 +102,20 @@ class ApproximateLinkPredictionTest {
             graphN,
             LPNodeFilter.of(graphN, graphN),
             LPNodeFilter.of(graphN, graphN),
-            ImmutableKnnBaseConfig.builder()
-                .randomSeed(1337L)
-                .concurrency(1)
-                .randomJoins(2)
-                .maxIterations(4)
-                .sampleRate(0.9)
-                .deltaThreshold(0)
-                .topK(topK)
-                .nodeProperties(List.of(new KnnNodePropertySpec("DUMMY")))
-                .build(),
+            KnnParametersSansNodeCount.create(
+                1,
+                4,
+                0.0,
+                0.0,
+                0.9,
+                topK,
+                0.0,
+                2,
+                1_000,
+                KnnSampler.SamplerType.UNIFORM,
+                Optional.of(1337L),
+                List.of(new KnnNodePropertySpec("DUMMY"))
+            ).finalize(graphN.nodeCount()),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         );
@@ -175,16 +181,20 @@ class ApproximateLinkPredictionTest {
                 graphN,
                 LPNodeFilter.of(graphN, graphN),
                 LPNodeFilter.of(graphN, graphN),
-                ImmutableKnnBaseConfig.builder()
-                    .randomSeed(1337L)
-                    .concurrency(1)
-                    .randomJoins(10)
-                    .maxIterations(10)
-                    .sampleRate(0.9)
-                    .deltaThreshold(0)
-                    .topK(1)
-                    .nodeProperties(List.of(new KnnNodePropertySpec("DUMMY")))
-                    .build(),
+                KnnParametersSansNodeCount.create(
+                    1,
+                    10,
+                    0.0,
+                    0.0,
+                    0.9,
+                    1,
+                    0.0,
+                    10,
+                    1_000,
+                    KnnSampler.SamplerType.UNIFORM,
+                    Optional.of(1337L),
+                    List.of(new KnnNodePropertySpec("DUMMY"))
+                ).finalize(graphN.nodeCount()),
                 ProgressTracker.NULL_TRACKER,
                 TerminationFlag.RUNNING_TRUE
             );
@@ -222,16 +232,20 @@ class ApproximateLinkPredictionTest {
             graphN,
             LPNodeFilter.of(graphN, graphN),
             LPNodeFilter.of(graphN, graphN),
-            ImmutableKnnBaseConfig.builder()
-                .randomSeed(42L)
-                .concurrency(1)
-                .randomJoins(10)
-                .maxIterations(10)
-                .sampleRate(0.9)
-                .deltaThreshold(0)
-                .topK(topK)
-                .nodeProperties(List.of(new KnnNodePropertySpec("DUMMY")))
-                .build(),
+            KnnParametersSansNodeCount.create(
+                1,
+                10,
+                0.0,
+                0.0,
+                0.9,
+                topK,
+                0.0,
+                10,
+                1_000,
+                KnnSampler.SamplerType.UNIFORM,
+                Optional.of(42L),
+                List.of(new KnnNodePropertySpec("DUMMY"))
+            ).finalize(graphN.nodeCount()),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         );
@@ -274,16 +288,20 @@ class ApproximateLinkPredictionTest {
             graph,
             sourceNodeLabelFilter,
             targetNodeLabelFilter,
-            ImmutableKnnBaseConfig.builder()
-                .randomSeed(42L)
-                .concurrency(1)
-                .randomJoins(10)
-                .maxIterations(10)
-                .sampleRate(0.9)
-                .deltaThreshold(0)
-                .topK(topK)
-                .nodeProperties(List.of(new KnnNodePropertySpec("DUMMY")))
-                .build(),
+            KnnParametersSansNodeCount.create(
+                1,
+                10,
+                0.0,
+                0.0,
+                0.9,
+                topK,
+                0.0,
+                10,
+                1_000,
+                KnnSampler.SamplerType.UNIFORM,
+                Optional.of(42L),
+                List.of(new KnnNodePropertySpec("DUMMY"))
+                ).finalize(graph.nodeCount()),
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
         );

@@ -31,9 +31,9 @@ import org.neo4j.gds.config.GraphNameConfig;
 import org.neo4j.gds.config.SingleThreadedRandomSeedConfig;
 import org.neo4j.gds.core.MissingParameterExceptions;
 import org.neo4j.gds.model.ModelConfig;
-import org.neo4j.gds.similarity.knn.ImmutableKnnBaseConfig;
-import org.neo4j.gds.similarity.knn.KnnBaseConfig;
+import org.neo4j.gds.similarity.knn.KnnBaseConfigImpl;
 import org.neo4j.gds.similarity.knn.KnnNodePropertySpec;
+import org.neo4j.gds.similarity.knn.KnnParametersSansNodeCount;
 import org.neo4j.gds.similarity.knn.KnnSampler;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -176,16 +176,15 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
 
     @Configuration.Ignore
     @Value.Derived
-    default KnnBaseConfig approximateConfig() {
+    default KnnParametersSansNodeCount approximateParameters() {
         if (!isApproximateStrategy()) {
             throw new IllegalStateException(formatWithLocale(
                 "Cannot derive approximateConfig when 'sampleRate' is 1.")
             );
         }
-        var knnBuilder = ImmutableKnnBaseConfig.builder()
+        var knnBuilder = KnnBaseConfigImpl.builder()
             .sampleRate(sampleRate())
             .nodeProperties(List.of(new KnnNodePropertySpec("NotUsedInLP")))
-            .minBatchSize(LinkPrediction.MIN_NODE_BATCH_SIZE)
             .concurrency(concurrency());
 
         topK().ifPresent(knnBuilder::topK);
@@ -195,7 +194,22 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
         derivedInitialSampler().ifPresent(knnBuilder::initialSampler);
         randomSeed().ifPresent(knnBuilder::randomSeed);
 
-        return knnBuilder.build();
+        var knnUserConfigAbomination = knnBuilder.build();
+
+        return KnnParametersSansNodeCount.create(
+            knnUserConfigAbomination.concurrency(),
+            knnUserConfigAbomination.maxIterations(),
+            knnUserConfigAbomination.similarityCutoff(),
+            knnUserConfigAbomination.deltaThreshold(),
+            knnUserConfigAbomination.sampleRate(),
+            knnUserConfigAbomination.topK(),
+            knnUserConfigAbomination.perturbationRate(),
+            knnUserConfigAbomination.randomJoins(),
+            LinkPrediction.MIN_NODE_BATCH_SIZE,
+            knnUserConfigAbomination.initialSampler(),
+            knnUserConfigAbomination.randomSeed(),
+            knnUserConfigAbomination.nodeProperties()
+        );
     }
 
     @Configuration.Ignore

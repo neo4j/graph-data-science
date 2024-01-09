@@ -103,15 +103,16 @@ public class LinkPredictionPredictPipelineExecutor extends PredictPipelineExecut
         GraphStore graphStore,
         LinkPredictionPredictPipelineBaseConfig config
     ) {
+        var nodeCount = graphStore.nodeCount();
         return Tasks.task(
             taskName,
             NodePropertyStepExecutor.tasks(pipeline.nodePropertySteps(), graphStore.relationshipCount()),
             config.isApproximateStrategy()
                 ? Tasks.task(
                 "Approximate link prediction",
-                KnnFactory.knnTaskTree(graphStore.getUnion().nodeCount(), config.approximateConfig().maxIterations())
+                KnnFactory.knnTaskTree(nodeCount, config.approximateParameters().finalize(nodeCount).maxIterations())
             )
-                : Tasks.leaf("Exhaustive link prediction", graphStore.getUnion().nodeCount() * graphStore.getUnion().nodeCount() / 2)
+                : Tasks.leaf("Exhaustive link prediction", nodeCount * nodeCount / 2)
         );
     }
 
@@ -190,7 +191,7 @@ public class LinkPredictionPredictPipelineExecutor extends PredictPipelineExecut
                 graph,
                 sourceNodeFilter,
                 targetNodeFilter,
-                config.approximateConfig(),
+                config.approximateParameters().finalize(graph.nodeCount()),
                 progressTracker,
                 terminationFlag
             );

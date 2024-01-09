@@ -24,7 +24,7 @@ import java.util.Optional;
 
 public class KnnParametersSansNodeCount {
 
-    static KnnParametersSansNodeCount create(
+    public static KnnParametersSansNodeCount create(
         int concurrency,
         int maxIterations,
         double similarityCutoff,

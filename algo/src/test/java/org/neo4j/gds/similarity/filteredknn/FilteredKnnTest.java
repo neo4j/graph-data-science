@@ -75,7 +75,7 @@ class FilteredKnnTest {
     void shouldRunJustLikeKnnWhenYouDoNotSpecifySourceNodeFilterOrTargetNodeFilter() {
         IdFunction idFunction = graph::toMappedNodeId;
 
-        var knnConfig = ImmutableFilteredKnnBaseConfig.builder()
+        var knnConfig = FilteredKnnBaseConfigImpl.builder()
             .nodeProperties(List.of(new KnnNodePropertySpec("knn")))
             .concurrency(1)
             .randomSeed(19L)

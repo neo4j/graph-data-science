@@ -70,7 +70,14 @@ public class FilteredKnnFactory<CONFIG extends FilteredKnnBaseConfig> extends Gr
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return KnnFactory.memoryEstimation(taskName(), FilteredKnn.class, configuration);
+        return KnnFactory.memoryEstimation(
+            taskName(),
+            FilteredKnn.class,
+            configuration.topK(),
+            configuration.sampleRate(),
+            configuration.deltaThreshold(),
+            configuration.initialSampler()
+        );
     }
 
     @Override

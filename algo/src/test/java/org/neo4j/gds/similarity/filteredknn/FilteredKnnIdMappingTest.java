@@ -55,7 +55,7 @@ public class FilteredKnnIdMappingTest {
         var lowestOriginalId = LongStream.range(0, graph.nodeCount()).map(graph::toOriginalNodeId).min().orElse(-1);
         assertThat(lowestOriginalId).isPositive();
 
-        var config = ImmutableFilteredKnnBaseConfig.builder()
+        var config = FilteredKnnBaseConfigImpl.builder()
             .nodeProperties(List.of(new KnnNodePropertySpec("knn")))
             .topK(3)
             .randomJoins(0)

@@ -108,11 +108,11 @@ public class KnnParameters {
         this.nodePropertySpecs = nodePropertySpecs;
     }
 
-    int concurrency() {
+    public int concurrency() {
         return concurrency;
     }
 
-    int maxIterations() {
+    public int maxIterations() {
         return maxIterations;
     }
 
@@ -120,11 +120,11 @@ public class KnnParameters {
         return similarityCutoff;
     }
 
-    K kHolder() {
+    public K kHolder() {
         return kHolder;
     }
 
-    double perturbationRate() {
+    public double perturbationRate() {
         return perturbationRate;
     }
 
@@ -136,11 +136,11 @@ public class KnnParameters {
         return minBatchSize;
     }
 
-    KnnSampler.SamplerType samplerType() {
+    public KnnSampler.SamplerType samplerType() {
         return samplerType;
     }
 
-    Optional<Long> randomSeed() {
+    public Optional<Long> randomSeed() {
         return randomSeed;
     }
 

@@ -21,7 +21,6 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -31,15 +30,17 @@ import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.similarity.knn.ImmutableKnnContext;
 import org.neo4j.gds.similarity.knn.Knn;
-import org.neo4j.gds.similarity.knn.KnnBaseConfig;
 import org.neo4j.gds.similarity.knn.KnnFactory;
+import org.neo4j.gds.similarity.knn.KnnParameters;
 import org.neo4j.gds.similarity.knn.KnnResult;
+import org.neo4j.gds.similarity.knn.KnnSampler;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
 public class ApproximateLinkPrediction extends LinkPrediction {
-    private final KnnBaseConfig knnConfig;
+    private final KnnParameters knnParameters;
     private final TerminationFlag terminationFlag;
 
     public ApproximateLinkPrediction(
@@ -48,7 +49,7 @@ public class ApproximateLinkPrediction extends LinkPrediction {
         Graph graph,
         LPNodeFilter sourceNodeFilter,
         LPNodeFilter targetNodeFilter,
-        KnnBaseConfig knnConfig,
+        KnnParameters knnParameters,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
@@ -58,16 +59,22 @@ public class ApproximateLinkPrediction extends LinkPrediction {
             graph,
             sourceNodeFilter,
             targetNodeFilter,
-            knnConfig.concurrency(),
+            knnParameters.concurrency(),
             progressTracker
         );
-        this.knnConfig = knnConfig;
+        this.knnParameters = knnParameters;
         this.terminationFlag = terminationFlag;
     }
 
     public static MemoryEstimation estimate(LinkPredictionPredictPipelineBaseConfig config) {
-        var knnConfig = config.approximateConfig();
-        var knnEstimation = new KnnFactory<>().memoryEstimation(knnConfig);
+        var knnEstimation = KnnFactory.memoryEstimation(
+            new KnnFactory<>().taskName(),
+            Knn.class,
+            config.topK().orElse(10),
+            config.sampleRate(),
+            config.thresholdOrDefault(),
+            config.derivedInitialSampler().orElse(KnnSampler.SamplerType.UNIFORM)
+        );
 
         return MemoryEstimations.builder(ApproximateLinkPrediction.class.getSimpleName())
             .add(knnEstimation)
@@ -78,7 +85,7 @@ public class ApproximateLinkPrediction extends LinkPrediction {
     LinkPredictionResult predictLinks(LinkPredictionSimilarityComputer linkPredictionSimilarityComputer) {
         var knn = Knn.create(
             graph,
-            knnConfig.toParameters().finalize(graph.nodeCount()),
+            knnParameters,
             linkPredictionSimilarityComputer,
             new LinkPredictionSimilarityComputer.LinkFilterFactory(
                 graph,

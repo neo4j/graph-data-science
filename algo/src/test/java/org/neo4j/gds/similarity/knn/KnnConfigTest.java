@@ -67,7 +67,7 @@ class KnnConfigTest {
 
     @Test
     void invalidRandomParameters() {
-        var configBuilder = ImmutableKnnBaseConfig.builder()
+        var configBuilder = KnnBaseConfigImpl.builder()
             .nodeProperties(List.of(new KnnNodePropertySpec("dummy")))
             .concurrency(4)
             .randomSeed(1337L);

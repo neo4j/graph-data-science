@@ -124,7 +124,7 @@ class KnnFactoryTest {
     }
 
     private KnnBaseConfig knnConfig(KnnSampler.SamplerType initialSampler) {
-        return ImmutableKnnBaseConfig.builder()
+        return KnnBaseConfigImpl.builder()
             .nodeProperties(KnnNodePropertySpecParser.parse("knn"))
             .initialSampler(initialSampler)
             .similarityCutoff(0.8)

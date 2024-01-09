@@ -79,7 +79,7 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return KnnFactory.memoryEstimation(taskName(), Knn.class, configuration);
+        return KnnFactory.memoryEstimation(taskName(), Knn.class, configuration.topK(), configuration.sampleRate(), configuration.deltaThreshold(), configuration.initialSampler());
     }
 
     public static MemoryRange initialSamplerMemoryEstimation(KnnSampler.SamplerType samplerType, long boundedK) {
@@ -116,15 +116,18 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
         );
     }
 
-    public static <CONFIG extends KnnBaseConfig>  MemoryEstimation memoryEstimation(
+    public static MemoryEstimation memoryEstimation(
         String taskName,
         Class<?> clazz,
-        CONFIG configuration
+        int topK,
+        double sampleRate,
+        double deltaThreshold,
+        KnnSampler.SamplerType initialSampler
     ) {
         return MemoryEstimations.setup(
             taskName,
             (dim, concurrency) -> {
-                var k = configuration.k(dim.nodeCount());
+                var k = K.create(topK, dim.nodeCount(), sampleRate, deltaThreshold);
 
                 LongFunction<MemoryRange> tempListEstimation = nodeCount -> MemoryRange.of(
                     HugeObjectArray.memoryEstimation(nodeCount, 0),
@@ -153,7 +156,7 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
                     .fixed(
                         "initial-random-neighbors (per thread)",
                         KnnFactory
-                            .initialSamplerMemoryEstimation(configuration.initialSampler(), k.value)
+                            .initialSamplerMemoryEstimation(initialSampler, k.value)
                             .times(concurrency)
                     )
                     .fixed(

@@ -117,7 +117,7 @@ class LinkPredictionPredictPipelineBaseConfigTest {
             )
         );
 
-        assertThatThrownBy(exhaustiveConfig::approximateConfig)
+        assertThatThrownBy(exhaustiveConfig::approximateParameters)
             .isInstanceOf(IllegalStateException.class)
             .hasMessage("Cannot derive approximateConfig when 'sampleRate' is 1.");
     }
@@ -136,12 +136,12 @@ class LinkPredictionPredictPipelineBaseConfigTest {
                     "graphName", "g"
                 )
             )
-        ).approximateConfig();
+        ).approximateParameters().finalize(1337);
 
         assertThat(approximateConfig.maxIterations()).isEqualTo(42);
-        assertThat(approximateConfig.sampleRate()).isEqualTo(0.4);
-        assertThat(approximateConfig.topK()).isEqualTo(10);
-        assertThat(approximateConfig.initialSampler()).isEqualTo(KnnSampler.SamplerType.RANDOMWALK);
+        assertThat(approximateConfig.kHolder().sampledValue).isEqualTo(4);
+        assertThat(approximateConfig.kHolder().value).isEqualTo(10);
+        assertThat(approximateConfig.samplerType()).isEqualTo(KnnSampler.SamplerType.RANDOMWALK);
         assertThat(approximateConfig.concurrency()).isEqualTo(1);
         assertThat(approximateConfig.perturbationRate()).isEqualTo(0.0);
         assertThat(approximateConfig.randomSeed()).isEqualTo(Optional.of(42L));

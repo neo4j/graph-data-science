@@ -19,37 +19,30 @@
  */
 package org.neo4j.gds.similarity.filteredknn;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.similarity.filtering.NodeFilterSpec;
 import org.neo4j.gds.similarity.knn.KnnBaseConfig;
 
 import java.util.Collection;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface FilteredKnnBaseConfig extends KnnBaseConfig {
 
-    @Value.Default
     @Configuration.ConvertWith(method = "org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory#create")
     @Configuration.ToMapValue("org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory#render")
     default NodeFilterSpec sourceNodeFilter() {
         return NodeFilterSpec.noOp;
     }
 
-    @Value.Default
     @Configuration.ConvertWith(method = "org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory#create")
     @Configuration.ToMapValue("org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory#render")
     default NodeFilterSpec targetNodeFilter() {
         return NodeFilterSpec.noOp;
     }
 
-    @Value.Default
     default boolean seedTargetNodes() {
         return false;
     }
