@@ -19,12 +19,10 @@
  */
 package org.neo4j.gds.conductance;
 
-import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
@@ -36,9 +34,7 @@ import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
 import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteCharacter;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface ConductanceBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig {
 
     @Configuration.ConvertWith(method = "validatePropertyName")
@@ -49,7 +45,6 @@ public interface ConductanceBaseConfig extends AlgoBaseConfig, RelationshipWeigh
     }
 
     @Configuration.GraphStoreValidationCheck
-    @Value.Default
     default void communityPropertyValidation(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,

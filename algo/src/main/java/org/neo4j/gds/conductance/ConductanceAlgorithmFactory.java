@@ -43,7 +43,7 @@ public class ConductanceAlgorithmFactory<CONFIG extends ConductanceBaseConfig> e
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-        return new Conductance(graph, DefaultPool.INSTANCE, configuration, progressTracker);
+        return new Conductance(graph, DefaultPool.INSTANCE, configuration, configuration.minBatchSize(), progressTracker);
     }
 
     @Override

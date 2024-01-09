@@ -118,7 +118,7 @@ final class ConductanceTest {
         Map<Long, Double> expectedConductances,
         int concurrency
     ) {
-        var configBuilder = ImmutableConductanceBaseConfig.builder()
+        var configBuilder = ConductanceBaseConfigImpl.builder()
             .concurrency(concurrency)
             .communityProperty("community");
 
@@ -126,16 +126,14 @@ final class ConductanceTest {
             configBuilder.relationshipWeightProperty("weight");
         }
 
-        if (concurrency > 1) {
-            configBuilder.minBatchSize(1);
-        }
-
         var config = configBuilder.build();
+        var minBatchSize = concurrency > 1 ? 1 : config.minBatchSize();
 
-        var conductance = new Conductance(
+            var conductance = new Conductance(
             orientation == Orientation.NATURAL ? naturalGraph : undirectedGraph,
             DefaultPool.INSTANCE,
             config,
+            minBatchSize,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -153,7 +151,7 @@ final class ConductanceTest {
 
     @Test
     void logProgress() {
-        var config = ImmutableConductanceBaseConfig.builder()
+        var config = ConductanceBaseConfigImpl.builder()
             .communityProperty("community")
             .concurrency(1)
             .build();

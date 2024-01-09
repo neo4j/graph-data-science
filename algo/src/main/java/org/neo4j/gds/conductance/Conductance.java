@@ -46,6 +46,7 @@ public class Conductance extends Algorithm<ConductanceResult> {
     private final Graph graph;
     private final ExecutorService executor;
     private final ConductanceBaseConfig config;
+    private final int minBatchSize;
     private final WeightTransformer weightTransformer;
     private final NodePropertyValues communityProperties;
 
@@ -53,12 +54,14 @@ public class Conductance extends Algorithm<ConductanceResult> {
         Graph graph,
         ExecutorService executor,
         ConductanceBaseConfig config,
+        int minBatchSize,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
         this.executor = executor;
         this.config = config;
+        this.minBatchSize = minBatchSize;
         this.weightTransformer = config.hasRelationshipWeightProperty() ? weight -> weight : unused -> 1.0D;
         this.communityProperties = graph.nodeProperties(config.communityProperty());
     }
@@ -100,7 +103,7 @@ public class Conductance extends Algorithm<ConductanceResult> {
             graph,
             config.concurrency(),
             partition -> new CountRelationships(graph.concurrentCopy(), partition),
-            Optional.of(config.minBatchSize())
+            Optional.of(minBatchSize)
         );
         RunWithConcurrency.builder()
             .concurrency(config.concurrency())
