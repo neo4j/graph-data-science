@@ -41,7 +41,10 @@ import org.neo4j.storageengine.api.StorageEngine;
 import org.neo4j.storageengine.api.StorageEntityCursor;
 import org.neo4j.storageengine.api.StoragePropertyCursor;
 import org.neo4j.storageengine.api.StorageRelationshipTraversalCursor;
+import org.neo4j.token.DelegatingTokenHolder;
+import org.neo4j.token.ReadOnlyTokenCreator;
 import org.neo4j.token.TokenHolders;
+import org.neo4j.token.api.TokenHolder;
 
 import static org.neo4j.configuration.GraphDatabaseSettings.db_format;
 
@@ -136,5 +139,14 @@ public class StorageEngineProxyImpl implements StorageEngineProxyApi {
     @Override
     public Edition dbmsEdition(GraphDatabaseService databaseService) {
         return GraphDatabaseApiProxy.dbmsInfo(databaseService).edition;
+    }
+
+    @Override
+    public TokenHolders newTokenHolders() {
+        return new TokenHolders(
+            new DelegatingTokenHolder(new ReadOnlyTokenCreator(), TokenHolder.TYPE_PROPERTY_KEY),
+            new DelegatingTokenHolder(new ReadOnlyTokenCreator(), TokenHolder.TYPE_LABEL),
+            new DelegatingTokenHolder(new ReadOnlyTokenCreator(), TokenHolder.TYPE_RELATIONSHIP_TYPE)
+        );
     }
 }

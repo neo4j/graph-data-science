@@ -24,15 +24,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.compat.StorageEngineProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.internal.recordstorage.InMemoryStorageEngineCompanion;
 import org.neo4j.storageengine.api.StorageEngine;
-import org.neo4j.token.DelegatingTokenHolder;
-import org.neo4j.token.ReadOnlyTokenCreator;
 import org.neo4j.token.TokenHolders;
-import org.neo4j.token.api.TokenHolder;
 
 public abstract class CypherTest extends BaseTest {
 
@@ -46,11 +44,7 @@ public abstract class CypherTest extends BaseTest {
 
         GraphStoreCatalog.set(GraphProjectConfig.emptyWithName("", GraphDatabaseApiProxy.databaseLayout(db).getDatabaseName()), graphStore);
 
-        this.tokenHolders = new TokenHolders(
-            new DelegatingTokenHolder(new ReadOnlyTokenCreator(), TokenHolder.TYPE_PROPERTY_KEY),
-            new DelegatingTokenHolder(new ReadOnlyTokenCreator(), TokenHolder.TYPE_LABEL),
-            new DelegatingTokenHolder(new ReadOnlyTokenCreator(), TokenHolder.TYPE_RELATIONSHIP_TYPE)
-        );
+        this.tokenHolders = StorageEngineProxy.newTokenHolders();
 
         this.storageEngine = InMemoryStorageEngineCompanion.create(GraphDatabaseApiProxy.databaseLayout(db), tokenHolders);
         this.storageEngine.schemaAndTokensLifecycle().init();
