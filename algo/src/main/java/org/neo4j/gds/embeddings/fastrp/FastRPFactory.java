@@ -48,6 +48,7 @@ public class FastRPFactory<CONFIG extends FastRPBaseConfig> extends GraphAlgorit
         return new FastRP(
             graph,
             configuration,
+            configuration.minBatchSize(),
             featureExtractors,
             progressTracker
         );

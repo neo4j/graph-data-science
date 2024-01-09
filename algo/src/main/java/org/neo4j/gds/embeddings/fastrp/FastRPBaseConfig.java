@@ -21,7 +21,6 @@ package org.neo4j.gds.embeddings.fastrp;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.EmbeddingDimensionConfig;
 import org.neo4j.gds.config.FeaturePropertiesConfig;
@@ -32,39 +31,32 @@ import java.util.List;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@ValueClass
-@SuppressWarnings("immutables:subtype")
+@Configuration
 public interface FastRPBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConfig, RelationshipWeightConfig, FeaturePropertiesConfig, RandomSeedConfig {
 
     List<Number> DEFAULT_ITERATION_WEIGHTS = List.of(0.0D, 1.0D, 1.0D);
 
-    @Value.Derived
     @Configuration.Ignore
     default int propertyDimension() {
         return (int) (embeddingDimension() * propertyRatio());
     }
 
-    @Value.Default
     @Configuration.DoubleRange(min = 0.0, max = 1.0)
     default double propertyRatio() {
         return 0.0;
     }
 
-    @Value.Default
     default List<Number> iterationWeights() {
         return DEFAULT_ITERATION_WEIGHTS;
     }
 
-    @Value.Default
     default Number nodeSelfInfluence() {return 0;}
 
     @Configuration.Ignore
-    @Value.Derived
     default int iterations() {
         return iterationWeights().size();
     }
 
-    @Value.Default
     default float normalizationStrength() {
         return 0.0f;
     }
@@ -95,10 +87,5 @@ public interface FastRPBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConf
                 ));
             }
         }
-    }
-
-    @Configuration.Ignore
-    static ImmutableFastRPBaseConfig.Builder builder() {
-        return ImmutableFastRPBaseConfig.builder();
     }
 }

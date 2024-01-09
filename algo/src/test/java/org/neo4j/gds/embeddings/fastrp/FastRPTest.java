@@ -64,11 +64,11 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 class FastRPTest {
 
     private static final int DEFAULT_EMBEDDING_DIMENSION = 128;
-    private static final FastRPBaseConfig DEFAULT_CONFIG = FastRPBaseConfig.builder()
+    private static final FastRPBaseConfig DEFAULT_CONFIG = FastRPBaseConfigImpl.builder()
         .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
         .propertyRatio(0.5)
         .featureProperties(List.of("f1", "f2", "f3"))
-        .addIterationWeight(1.0D)
+        .iterationWeights(List.of(1.0D))
         .randomSeed(42L)
         .build();
 
@@ -134,6 +134,7 @@ class FastRPTest {
         FastRP fastRP = new FastRP(
             graph,
             DEFAULT_CONFIG,
+            DEFAULT_CONFIG.minBatchSize(),
             defaultFeatureExtractors(graph),
             ProgressTracker.NULL_TRACKER
         );
@@ -163,6 +164,7 @@ class FastRPTest {
         FastRP fastRP = new FastRP(
             graph,
             DEFAULT_CONFIG,
+            DEFAULT_CONFIG.minBatchSize(),
             defaultFeatureExtractors(graph),
             ProgressTracker.NULL_TRACKER
         );
@@ -187,12 +189,12 @@ class FastRPTest {
     @Test
     void shouldAddInitialVectors() {
         var embeddingDimension = 6;
-        var config = FastRPBaseConfig.builder()
+        var config = FastRPBaseConfigImpl.builder()
             .embeddingDimension(embeddingDimension)
             .propertyRatio(0.5)
             .featureProperties(List.of("f1", "f2", "f3"))
             .nodeSelfInfluence(0.6)
-            .addIterationWeight(0.0D)
+            .iterationWeights(List.of(0.0D))
             .randomSeed(42L)
             .build();
 
@@ -205,6 +207,7 @@ class FastRPTest {
         FastRP fastRP = new FastRP(
             graph,
             config,
+            config.minBatchSize(),
             defaultFeatureExtractors(graph),
             ProgressTracker.NULL_TRACKER
         );
@@ -261,6 +264,7 @@ class FastRPTest {
         FastRP fastRP = new FastRP(
             graph,
             DEFAULT_CONFIG,
+            DEFAULT_CONFIG.minBatchSize(),
             defaultFeatureExtractors(graph),
             ProgressTracker.NULL_TRACKER
         );
@@ -310,17 +314,17 @@ class FastRPTest {
             Optional.empty()
         );
 
-        var configBuilder = FastRPBaseConfig.builder()
+        var configBuilder = FastRPBaseConfigImpl.builder()
             .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
             .propertyRatio(0.5)
             .featureProperties(List.of("f1", "f2", "f3"))
-            .addIterationWeight(1.0D)
-            .minBatchSize(1)
+            .iterationWeights(List.of(1.0D))
             .randomSeed(42L);
 
         FastRP concurrentFastRP = new FastRP(
             graph,
             configBuilder.concurrency(4).build(),
+            1,
             defaultFeatureExtractors(graph),
             ProgressTracker.NULL_TRACKER
         );
@@ -331,6 +335,7 @@ class FastRPTest {
         FastRP sequentialFastRP = new FastRP(
             graph,
             configBuilder.concurrency(1).build(),
+            1,
             defaultFeatureExtractors(graph),
             ProgressTracker.NULL_TRACKER
         );
@@ -352,8 +357,7 @@ class FastRPTest {
             Optional.of("weight")
         );
 
-        var weightedConfig = ImmutableFastRPBaseConfig
-            .builder()
+        var weightedConfig = FastRPBaseConfigImpl.Builder
             .from(DEFAULT_CONFIG)
             .relationshipWeightProperty("weight")
             .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
@@ -362,6 +366,7 @@ class FastRPTest {
         FastRP fastRP = new FastRP(
             graph,
             weightedConfig,
+            weightedConfig.minBatchSize(),
             defaultFeatureExtractors(graph),
             ProgressTracker.NULL_TRACKER
         );
@@ -390,13 +395,14 @@ class FastRPTest {
             List.of(RelationshipType.of("REL")),
             Optional.empty()
         );
-
+        var config = FastRPBaseConfigImpl.builder()
+                .embeddingDimension(512)
+                .iterationWeights(List.of(1.0D))
+                .build();
         var fastRP = new FastRP(
             graph,
-            FastRPBaseConfig.builder()
-                .embeddingDimension(512)
-                .addIterationWeight(1.0D)
-                .build(),
+            config,
+            config.minBatchSize(),
             List.of(),
             ProgressTracker.NULL_TRACKER
         );
@@ -439,6 +445,7 @@ class FastRPTest {
         FastRP fastRP = new FastRP(
             scalarGraph,
             DEFAULT_CONFIG,
+            DEFAULT_CONFIG.minBatchSize(),
             List.of(),
             ProgressTracker.NULL_TRACKER
         );
@@ -458,12 +465,12 @@ class FastRPTest {
             Optional.empty()
         );
 
-        var config = FastRPBaseConfig.builder()
+        var config = FastRPBaseConfigImpl.builder()
             .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
             .propertyRatio(0.5)
             .featureProperties(List.of("f1", "f2", "f3"))
             .nodeSelfInfluence(0.6)
-            .addIterationWeight(0.0D)
+            .iterationWeights(List.of(0.0D))
             .randomSeed(42L)
             .build();
 
@@ -520,13 +527,15 @@ class FastRPTest {
         @Test
         void shouldFailWhenNodePropertiesAreMissing() {
             Graph graph = graphStore.getGraph(NodeLabel.of("N"), RelationshipType.of("REL"), Optional.empty());
+            var config = FastRPBaseConfigImpl.builder()
+                    .embeddingDimension(64)
+                    .iterationWeights(List.of(1.0D, 1.0D, 1.0D, 1.0D))
+                    .featureProperties(List.of("prop"))
+                    .build();
             FastRP fastRP = new FastRP(
                 graph,
-                FastRPBaseConfig.builder()
-                    .embeddingDimension(64)
-                    .addIterationWeights(1.0D, 1.0D, 1.0D, 1.0D)
-                    .addFeatureProperty("prop")
-                    .build(),
+                config,
+                config.minBatchSize(),
                 FeatureExtraction.propertyExtractors(graph, List.of("prop")),
                 ProgressTracker.NULL_TRACKER
             );
@@ -548,16 +557,17 @@ class FastRPTest {
                 Optional.of("weight")
             );
 
-            var weightedConfig = FastRPBaseConfig.builder()
+            var weightedConfig = FastRPBaseConfigImpl.builder()
                 .relationshipWeightProperty("weight")
                 .embeddingDimension(DEFAULT_EMBEDDING_DIMENSION)
-                .addIterationWeight(1.0D)
+                .iterationWeights(List.of(1.0D))
                 .randomSeed(42L)
                 .build();
 
             FastRP fastRP = new FastRP(
                 graph,
                 weightedConfig,
+                weightedConfig.minBatchSize(),
                 List.of(),
                 ProgressTracker.NULL_TRACKER
             );
@@ -638,7 +648,7 @@ class FastRPTest {
         var firstGraph = GraphFactory.create(firstIdMap, firstRelationships);
         var secondGraph = GraphFactory.create(secondIdMap, secondRelationships);
 
-        var config = ImmutableFastRPBaseConfig
+        var config = FastRPBaseConfigImpl
             .builder()
             .embeddingDimension(embeddingDimension)
             .concurrency(1)
@@ -648,6 +658,7 @@ class FastRPTest {
         var firstEmbeddings = new FastRP(
             firstGraph,
             config,
+            config.minBatchSize(),
             List.of(),
             ProgressTracker.NULL_TRACKER
         ).compute().embeddings();
@@ -655,6 +666,7 @@ class FastRPTest {
         var secondEmbeddings = new FastRP(
             secondGraph,
             config,
+            config.minBatchSize(),
             List.of(),
             ProgressTracker.NULL_TRACKER
         ).compute().embeddings();
@@ -673,6 +685,7 @@ class FastRPTest {
         var fastRPArray = new FastRP(
             graph,
             DEFAULT_CONFIG,
+            DEFAULT_CONFIG.minBatchSize(),
             FeatureExtraction.propertyExtractors(graph, properties),
             ProgressTracker.NULL_TRACKER
         );

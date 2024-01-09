@@ -79,10 +79,11 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
     public FastRP(
         Graph graph,
         FastRPBaseConfig config,
+        int minBatchSize,
         List<FeatureExtractor> featureExtractors,
         ProgressTracker progressTracker
     ) {
-        this(graph, config, featureExtractors, progressTracker, config.randomSeed());
+        this(graph, config, featureExtractors, progressTracker, config.randomSeed(), minBatchSize);
     }
 
     public FastRP(
@@ -90,7 +91,8 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
         FastRPBaseConfig config,
         List<FeatureExtractor> featureExtractors,
         ProgressTracker progressTracker,
-        Optional<Long> randomSeed
+        Optional<Long> randomSeed,
+        int minBatchSize
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -99,7 +101,7 @@ public class FastRP extends Algorithm<FastRP.FastRPResult> {
         this.relationshipWeightFallback = this.relationshipWeightProperty.map(s -> Double.NaN).orElse(1.0);
         this.inputDimension = FeatureExtraction.featureCount(featureExtractors);
         this.randomSeed = improveSeed(randomSeed.orElseGet(System::nanoTime));
-        this.minBatchSize = config.minBatchSize();
+        this.minBatchSize = minBatchSize;
 
         this.propertyVectors = new float[inputDimension][config.propertyDimension()];
         this.embeddings = HugeObjectArray.newArray(float[].class, graph.nodeCount());
