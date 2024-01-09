@@ -33,7 +33,6 @@ import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -42,6 +41,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -469,7 +469,7 @@ class RandomWalkTest {
         @Test
         void progressLogging() throws InterruptedException {
 
-            var config = ImmutableRandomWalkStreamConfig.builder()
+            var config = RandomWalkStreamConfigImpl.builder()
                 .walkLength(10)
                 .concurrency(4)
                 .walksPerNode(1000)
@@ -519,7 +519,7 @@ class RandomWalkTest {
 
         @Test
         void shouldLeaveNoTasksBehind() {
-            var config = ImmutableRandomWalkStreamConfig.builder().build();
+            var config = RandomWalkStreamConfigImpl.builder().build();
             var factory = new RandomWalkAlgorithmFactory<RandomWalkStreamConfig>();
             var taskStore = new PerDatabaseTaskStore();
             var progressTracker = new TaskProgressTracker(

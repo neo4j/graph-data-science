@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.traversal;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RandomSeedConfig;
@@ -28,37 +27,31 @@ import org.neo4j.gds.config.SourceNodesConfig;
 
 public interface RandomWalkBaseConfig extends AlgoBaseConfig, RelationshipWeightConfig, RandomSeedConfig, SourceNodesConfig {
 
-    @Value.Default
     @Configuration.IntegerRange(min = 2)
     default int walkLength() {
         return 80;
     }
 
-    @Value.Default
     @Configuration.IntegerRange(min = 1)
     default int walksPerNode() {
         return 10;
     }
 
-    @Value.Default
     @Configuration.IntegerRange(min = 1)
     default int walkBufferSize() {
         return 1000;
     }
 
-    @Value.Default
     @Configuration.DoubleRange(min = 0.0)
     default double inOutFactor() {
         return 1.0;
     }
 
-    @Value.Default
     @Configuration.DoubleRange(min = 0.0)
     default double returnFactor() {
         return 1.0;
     }
 
-    @Value.Derived
     @Configuration.Ignore
     default WalkParameters walkParameters() {
         return new WalkParameters(

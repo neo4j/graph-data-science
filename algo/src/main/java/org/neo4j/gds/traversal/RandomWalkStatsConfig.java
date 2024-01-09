@@ -20,12 +20,9 @@
 package org.neo4j.gds.traversal;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface RandomWalkStatsConfig extends RandomWalkBaseConfig {
 
     static RandomWalkStatsConfig of(CypherMapWrapper userInput) {
