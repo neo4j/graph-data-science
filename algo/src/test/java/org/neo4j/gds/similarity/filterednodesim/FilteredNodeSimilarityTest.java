@@ -138,7 +138,7 @@ class FilteredNodeSimilarityTest {
         var config = FilteredNodeSimilarityStreamConfigImpl.builder()
             .sourceNodeFilter(NodeFilterSpecFactory.create(sourceNodeFilter))
             .concurrency(1)
-            .topK(0)
+            .topK(1)
             .topN(10)
             .build();
 
@@ -173,7 +173,7 @@ class FilteredNodeSimilarityTest {
         var config = FilteredNodeSimilarityStreamConfigImpl.builder()
             .sourceNodeFilter(NodeFilterSpecFactory.create(sourceNodeFilter))
             .concurrency(concurrency)
-            .topK(0)
+            .topK(1)
             .topN(10)
             .build();
         var progressTask = new FilteredNodeSimilarityFactory<>().progressTask(graph, config);

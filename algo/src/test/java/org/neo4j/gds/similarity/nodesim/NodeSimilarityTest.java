@@ -841,7 +841,7 @@ final class NodeSimilarityTest {
     @ValueSource(ints = {1, 2})
     void shouldLogProgress(int concurrency) {
         var graph = naturalGraph;
-        var config = NodeSimilarityStreamConfigImpl.builder().degreeCutoff(0).concurrency(concurrency).build();
+        var config = NodeSimilarityStreamConfigImpl.builder().degreeCutoff(1).concurrency(concurrency).build();
         var progressTask = new NodeSimilarityFactory<>().progressTask(graph, config);
         TestLog log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(
