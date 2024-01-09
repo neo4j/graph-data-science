@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.PropertyMappings.fromObject;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@SuppressWarnings("immutables:subtype")
 public interface ScalePropertiesBaseConfig extends AlgoBaseConfig {
 
     @Configuration.ConvertWith(method = "parsePropertyNames")
