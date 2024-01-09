@@ -19,10 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
-import org.immutables.value.Value;
-
 public interface BatchSizeConfig {
-    @Value.Default
     default int batchSize() {
         return 100;
     }

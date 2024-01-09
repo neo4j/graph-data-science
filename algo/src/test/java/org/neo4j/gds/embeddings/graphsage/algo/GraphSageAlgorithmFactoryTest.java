@@ -268,11 +268,11 @@ class GraphSageAlgorithmFactoryTest {
 
     @Test
     void memoryEstimationTreeStructure() {
-        var trainConfig = ImmutableGraphSageTrainConfig
+        var trainConfig = GraphSageTrainConfigImpl
             .builder()
             .modelUser("")
             .modelName("modelName")
-            .addFeatureProperties("a")
+            .featureProperties(List.of("a"))
             .sampleSizes(List.of(1, 2))
             .aggregator(Aggregator.AggregatorType.MEAN)
             .build();
@@ -318,11 +318,11 @@ class GraphSageAlgorithmFactoryTest {
 
     @Test
     void memoryEstimationMutateTreeStructure() {
-        var trainConfig = ImmutableGraphSageTrainConfig
+        var trainConfig = GraphSageTrainConfigImpl
             .builder()
             .modelUser("")
             .modelName("modelName")
-            .addFeatureProperties("a")
+            .featureProperties(List.of("a"))
             .sampleSizes(List.of(1, 2))
             .aggregator(Aggregator.AggregatorType.MEAN)
             .build();
@@ -471,7 +471,7 @@ class GraphSageAlgorithmFactoryTest {
                             embeddingDimensions.stream().flatMap(embeddingDimension ->
                                 degreesAsProperty.stream().flatMap(degreeAsProperty ->
                                     nodePropertySizes.stream().map(nodePropertySize -> {
-                                        var trainConfig = ImmutableGraphSageTrainConfig
+                                        var trainConfig = GraphSageTrainConfigImpl
                                             .builder()
                                             .modelName(modelName)
                                             .modelUser(userName)
@@ -498,7 +498,7 @@ class GraphSageAlgorithmFactoryTest {
                                         Function<ModelCatalog, GraphSageBaseConfig> streamConfigProvider = (modelCatalog) -> {
                                             modelCatalog.set(model);
 
-                                            return ImmutableGraphSageStreamConfig
+                                            return GraphSageStreamConfigImpl
                                                 .builder()
                                                 .concurrency(concurrency)
                                                 .modelName(modelName)
@@ -527,11 +527,11 @@ class GraphSageAlgorithmFactoryTest {
     void mutateHasPersistentPart() {
         var modelName = "modelName";
 
-        var trainConfig = ImmutableGraphSageTrainConfig
+        var trainConfig = GraphSageTrainConfigImpl
             .builder()
             .modelName(modelName)
             .modelUser("")
-            .addFeatureProperties("a")
+            .featureProperties(List.of("a"))
             .build();
 
         var model = Model.of(

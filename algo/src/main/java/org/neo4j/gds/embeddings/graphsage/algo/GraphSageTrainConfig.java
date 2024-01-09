@@ -23,7 +23,6 @@ import org.immutables.value.Value;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.EmbeddingDimensionConfig;
 import org.neo4j.gds.config.FeaturePropertiesConfig;
@@ -44,9 +43,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-@ValueClass
 @Configuration("GraphSageTrainConfigImpl")
-@SuppressWarnings("immutables:subtype")
 public interface GraphSageTrainConfig extends
     TrainBaseConfig,
     BatchSizeConfig,
@@ -63,12 +60,10 @@ public interface GraphSageTrainConfig extends
     List<String> featureProperties();
 
     @Override
-    @Value.Default
     default int embeddingDimension() {
         return 64;
     }
 
-    @Value.Default
     @Configuration.IntegerRange(min = 1)
     @Configuration.ConvertWith(method = "convertToIntSamples")
     default List<Integer> sampleSizes() {
@@ -86,14 +81,12 @@ public interface GraphSageTrainConfig extends
         }
     }
 
-    @Value.Default
     @Configuration.ConvertWith(method = "org.neo4j.gds.embeddings.graphsage.Aggregator.AggregatorType#parse")
     @Configuration.ToMapValue("org.neo4j.gds.embeddings.graphsage.Aggregator.AggregatorType#toString")
     default Aggregator.AggregatorType aggregator() {
         return Aggregator.AggregatorType.MEAN;
     }
 
-    @Value.Default
     @Configuration.ConvertWith(method = "org.neo4j.gds.embeddings.graphsage.ActivationFunction#parse")
     @Configuration.ToMapValue("org.neo4j.gds.embeddings.graphsage.ActivationFunction#toString")
     default ActivationFunction activationFunction() {
@@ -101,24 +94,20 @@ public interface GraphSageTrainConfig extends
     }
 
     @Override
-    @Value.Default
     default double tolerance() {
         return 1e-4;
     }
 
-    @Value.Default
     default double learningRate() {
         return 0.1;
     }
 
-    @Value.Default
     @Configuration.IntegerRange(min = 1)
     default int epochs() {
         return 1;
     }
 
     @Override
-    @Value.Default
     default int maxIterations() {
         return 10;
     }
@@ -133,7 +122,6 @@ public interface GraphSageTrainConfig extends
     }
 
     @Configuration.Ignore
-    @Value.Derived
     default int batchesPerIteration(long nodeCount) {
         var totalNumberOfBatches = numberOfBatches(nodeCount);
         var samplingRatio = maybeBatchSamplingRatio().orElse(Math.min(1.0, batchSize() * concurrency() / (double) nodeCount));
@@ -141,17 +129,14 @@ public interface GraphSageTrainConfig extends
     }
 
     @Configuration.Ignore
-    @Value.Derived
     default long numberOfBatches(long nodeCount) {
         return (long) Math.ceil(nodeCount / (double) batchSize());
     }
 
-    @Value.Default
     default int searchDepth() {
         return 5;
     }
 
-    @Value.Default
     default int negativeSampleWeight() {
         return 20;
     }
@@ -208,7 +193,6 @@ public interface GraphSageTrainConfig extends
     }
 
     @Configuration.GraphStoreValidationCheck
-    @Value.Default
     default void validateNonEmptyGraph(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,

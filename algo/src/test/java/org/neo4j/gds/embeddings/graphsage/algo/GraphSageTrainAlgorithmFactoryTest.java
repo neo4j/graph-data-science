@@ -393,11 +393,11 @@ class GraphSageTrainAlgorithmFactoryTest {
     @ParameterizedTest
     @ValueSource(booleans = {false, true})
     void memoryEstimationTreeStructure(boolean isMultiLabel) {
-        var builder = ImmutableGraphSageTrainConfig
+        var builder = GraphSageTrainConfigImpl
             .builder()
             .modelUser("userName")
             .modelName("modelName")
-            .addFeatureProperties("a")
+            .featureProperties(List.of("a"))
             .sampleSizes(List.of(1, 2))
             .aggregator(Aggregator.AggregatorType.MEAN);
         var config = isMultiLabel
@@ -627,7 +627,7 @@ class GraphSageTrainAlgorithmFactoryTest {
                                                         featurePropertySize,
                                                         nodeCount
                                                     );
-                                                    var config = ImmutableGraphSageTrainConfig
+                                                    var config = GraphSageTrainConfigImpl
                                                         .builder()
                                                         .modelName(modelName)
                                                         .modelUser(userName)
