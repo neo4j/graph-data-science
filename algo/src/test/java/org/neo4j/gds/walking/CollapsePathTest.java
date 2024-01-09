@@ -192,9 +192,9 @@ class CollapsePathTest {
             var mutateRelType = RelationshipType.of("HAS_FRIEND_OF_FRIEND");
 
             // when no `nodeLabels` specified
-            var config = ImmutableCollapsePathConfig.builder()
+            var config = CollapsePathConfigImpl.builder()
                 .mutateRelationshipType(mutateRelType.name)
-                .addPathTemplate(List.of(relType, relType))
+                .pathTemplates(List.of(List.of(relType, relType)))
                 .allowSelfLoops(false)
                 .build();
 
@@ -216,10 +216,10 @@ class CollapsePathTest {
             var mutateRelType = RelationshipType.of("HAS_FRIEND_OF_FRIEND");
 
             // when Person is specified for `nodeLabels`
-            var config = ImmutableCollapsePathConfig.builder()
-                .addNodeLabel("Person")
+            var config = CollapsePathConfigImpl.builder()
+                .nodeLabels(List.of("Person"))
                 .mutateRelationshipType(mutateRelType.name)
-                .addPathTemplate(List.of(relType, relType))
+                .pathTemplates(List.of(List.of(relType, relType)))
                 .allowSelfLoops(false)
                 .build();
 
