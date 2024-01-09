@@ -19,27 +19,21 @@
  */
 package org.neo4j.gds.paths.traverse;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.SourceNodeConfig;
 import org.neo4j.gds.config.TargetNodesConfig;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface BfsBaseConfig extends AlgoBaseConfig, SourceNodeConfig, TargetNodesConfig {
 
     long NO_MAX_DEPTH = -1L;
 
-    @Value.Default
     default long maxDepth() {
         return NO_MAX_DEPTH;
     }
 
     @Configuration.Ignore
-    @Value.Derived
     default boolean hasMaxDepth() {
         return maxDepth() != NO_MAX_DEPTH;
     }

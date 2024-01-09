@@ -20,12 +20,9 @@
 package org.neo4j.gds.paths.traverse;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface DfsStreamConfig extends DfsBaseConfig {
     static DfsStreamConfig of(CypherMapWrapper userInput) {
         return new DfsStreamConfigImpl(userInput);
