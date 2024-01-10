@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.kge;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.config.MutateRelationshipPropertyConfig;
@@ -29,7 +28,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 public interface KGEPredictMutateConfig extends KGEPredictBaseConfig, MutateRelationshipConfig,
     MutateRelationshipPropertyConfig {
 
-    @Value.Default
     @Override
     default String mutateProperty() {
         return "score";

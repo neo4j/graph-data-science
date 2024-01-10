@@ -47,7 +47,6 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface LinkPredictionPredictPipelineBaseConfig extends
     AlgoBaseConfig,
     GraphNameConfig,
@@ -56,7 +55,6 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
 
     double DEFAULT_THRESHOLD = 0.0;
 
-    @Value.Default
     @Configuration.DoubleRange(min = 0, max = 1, minInclusive = false)
     default double sampleRate() {
         return 1;
@@ -129,7 +127,6 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
 
     Optional<String> initialSampler();
 
-    @Value.Derived
     @Configuration.Ignore
     default Optional<KnnSampler.SamplerType> derivedInitialSampler() {
         return initialSampler().map(KnnSampler.SamplerType::parse);
@@ -175,7 +172,6 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
     }
 
     @Configuration.Ignore
-    @Value.Derived
     default KnnParametersSansNodeCount approximateParameters() {
         if (!isApproximateStrategy()) {
             throw new IllegalStateException(formatWithLocale(
@@ -213,13 +209,11 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
     }
 
     @Configuration.Ignore
-    @Value.Derived
     default double thresholdOrDefault() {
         return threshold().orElse(DEFAULT_THRESHOLD);
     }
 
     @Configuration.Ignore
-    @Value.Derived
     default boolean isApproximateStrategy() {
         return sampleRate() < 1;
     }

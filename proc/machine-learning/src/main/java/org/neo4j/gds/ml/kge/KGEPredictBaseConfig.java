@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.kge;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
@@ -32,21 +31,18 @@ import java.util.List;
 
 public interface KGEPredictBaseConfig extends AlgoBaseConfig {
 
-    @Value.Default
     @Configuration.ConvertWith(method = "org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory#create")
     @Configuration.ToMapValue("org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory#render")
     default NodeFilterSpec sourceNodeFilter() {
         return NodeFilterSpec.noOp;
     }
 
-    @Value.Default
     @Configuration.ConvertWith(method = "org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory#create")
     @Configuration.ToMapValue("org.neo4j.gds.similarity.filtering.NodeFilterSpecFactory#render")
     default NodeFilterSpec targetNodeFilter() {
         return NodeFilterSpec.noOp;
     }
 
-    @Value.Default
     @Configuration.Key(RELATIONSHIP_TYPES_KEY)
     default List<String> relationshipTypes() {
         return List.of();

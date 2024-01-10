@@ -19,17 +19,14 @@
  */
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface NodeClassificationPredictPipelineStreamConfig
     extends NodeClassificationPredictPipelineBaseConfig
 {
     @Override
-    @Value.Default
     default boolean includePredictedProbabilities() {
         return false;
     }

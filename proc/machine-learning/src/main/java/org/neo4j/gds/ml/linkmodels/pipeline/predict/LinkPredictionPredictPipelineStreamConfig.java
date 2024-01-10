@@ -23,7 +23,6 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface LinkPredictionPredictPipelineStreamConfig extends LinkPredictionPredictPipelineBaseConfig {
     
     static LinkPredictionPredictPipelineStreamConfig of(String username, CypherMapWrapper config) {

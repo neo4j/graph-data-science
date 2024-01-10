@@ -32,7 +32,6 @@ import java.util.Collection;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface NodeClassificationPredictPipelineMutateConfig extends
     NodeClassificationPredictPipelineMutateOrWriteConfig,
     MutateNodePropertyConfig {
@@ -57,7 +56,6 @@ public interface NodeClassificationPredictPipelineMutateConfig extends
     }
 
     @Configuration.GraphStoreValidationCheck
-    @Value.Default
     default void validatePredictedProbabilityPropertyDoesNotExist(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
