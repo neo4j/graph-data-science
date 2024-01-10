@@ -21,7 +21,6 @@ package org.neo4j.gds.config;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -30,13 +29,10 @@ import java.util.Collections;
 import java.util.Map;
 
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface GraphProjectFromGraphConfig extends GraphProjectConfig {
 
     @Configuration.Ignore
-    @Value.Parameter(false)
     default Map<String, Object> asProcedureResultConfigurationField() {
         var result = originalConfig().asProcedureResultConfigurationField();
         result.putAll(toMap());
@@ -60,14 +56,10 @@ public interface GraphProjectFromGraphConfig extends GraphProjectConfig {
     @Configuration.Parameter
     GraphProjectConfig originalConfig();
 
-    @Value.Default
-    @Value.Parameter(false)
     default int concurrency() {
         return ConcurrencyConfig.DEFAULT_CONCURRENCY;
     }
 
-    @Value.Default
-    @Value.Parameter(false)
     default Map<String, Object> parameters() {
         return Collections.emptyMap();
     }
@@ -77,7 +69,6 @@ public interface GraphProjectFromGraphConfig extends GraphProjectConfig {
         ConcurrencyValidatorService.validator().validate(concurrency(), "concurrency", ConcurrencyConfig.CONCURRENCY_LIMITATION);
     }
 
-    @Value.Default
     @Configuration.Ignore
     @Override
     default GraphStoreFactory.Supplier graphStoreFactory() {

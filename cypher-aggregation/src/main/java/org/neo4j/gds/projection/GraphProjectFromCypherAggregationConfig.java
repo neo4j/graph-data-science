@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.projection;
 
-import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.annotation.Configuration;
@@ -39,7 +38,6 @@ import static org.neo4j.gds.Orientation.NATURAL;
 public interface GraphProjectFromCypherAggregationConfig extends GraphProjectConfig {
 
     @Configuration.Ignore
-    @Value.Parameter(false)
     default Map<String, Object> asProcedureResultConfigurationField() {
         var result = cleansed(toMap(), outputFieldDenylist());
         result.put("query", query());
@@ -75,7 +73,6 @@ public interface GraphProjectFromCypherAggregationConfig extends GraphProjectCon
         );
     }
 
-    @org.immutables.value.Value.Derived
     @Configuration.Ignore
     default Set<String> outputFieldDenylist() {
         return Set.of(

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.config;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStoreFactory;
 
@@ -29,7 +28,6 @@ import java.util.Map;
 public interface GraphSampleProcConfig extends GraphProjectConfig, GraphNameConfig {
 
     @Configuration.Ignore
-    @Value.Parameter(false)
     default Map<String, Object> asProcedureResultConfigurationField() {
         var result = originalConfig().asProcedureResultConfigurationField();
         var cleansedSampleAlgoConfig = cleansed(
@@ -49,7 +47,6 @@ public interface GraphSampleProcConfig extends GraphProjectConfig, GraphNameConf
     @Configuration.Parameter
     GraphSampleAlgoConfig sampleAlgoConfig();
 
-    @Value.Default
     @Configuration.Ignore
     @Override
     default GraphStoreFactory.Supplier graphStoreFactory() {

@@ -41,6 +41,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
 
 class GraphProjectFromStoreConfigTest {
 
@@ -59,9 +60,10 @@ class GraphProjectFromStoreConfigTest {
         );
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
-            ImmutableGraphProjectFromStoreConfig.builder()
+            GraphProjectFromStoreConfigImpl.builder()
+                .username("")
                 .graphName("graph")
-                .relationshipProjections(ImmutableRelationshipProjections.of())
+                .relationshipProjections(RelationshipProjections.fromString(PROJECT_ALL))
                 .nodeProperties(propertyMappings)
                 .nodeProjections(nodeProjections)
                 .build()
@@ -89,7 +91,8 @@ class GraphProjectFromStoreConfigTest {
         );
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () ->
-            ImmutableGraphProjectFromStoreConfig.builder()
+            GraphProjectFromStoreConfigImpl.builder()
+                .username("")
                 .graphName("graph")
                 .relationshipProperties(propertyMappings)
                 .relationshipProjections(relProjections)
@@ -122,7 +125,8 @@ class GraphProjectFromStoreConfigTest {
             NodeProjection.builder().label("A").properties(propertyMappings2).build()
         );
 
-        GraphProjectFromStoreConfig graphProjectConfig = ImmutableGraphProjectFromStoreConfig.builder()
+        GraphProjectFromStoreConfig graphProjectConfig = GraphProjectFromStoreConfigImpl.builder()
+            .username("")
             .graphName("graph")
             .relationshipProjections(RelationshipProjections.ALL)
             .nodeProperties(propertyMappings1)
@@ -155,7 +159,8 @@ class GraphProjectFromStoreConfigTest {
                 .build()
         );
 
-        GraphProjectFromStoreConfig graphProjectConfig = ImmutableGraphProjectFromStoreConfig.builder()
+        GraphProjectFromStoreConfig graphProjectConfig = GraphProjectFromStoreConfigImpl.builder()
+            .username("")
             .graphName("graph")
             .nodeProjections(NodeProjections.all())
             .relationshipProperties(propertyMappings1)

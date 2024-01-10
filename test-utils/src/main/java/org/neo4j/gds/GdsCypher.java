@@ -32,8 +32,9 @@ import org.neo4j.cypherdsl.core.renderer.Renderer;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.Username;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
-import org.neo4j.gds.projection.ImmutableGraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -658,7 +659,8 @@ public abstract class GdsCypher {
             relProjections.put(ALL_RELATIONSHIPS, RelationshipProjection.ALL);
         }
 
-        return ImmutableGraphProjectFromStoreConfig.builder()
+        return GraphProjectFromStoreConfigImpl.builder()
+            .username(Username.EMPTY_USERNAME.username())
             .graphName(graphName.orElse(""))
             .nodeProjections(NodeProjections.create(nodeProjections))
             .relationshipProjections(ImmutableRelationshipProjections.builder().putAllProjections(relProjections).build())

@@ -35,7 +35,7 @@ import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
-import org.neo4j.gds.projection.ImmutableGraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -95,7 +95,8 @@ final class GraphInfoTest {
             .nodePropertyProducer(nodePropertyProducer)
             .build()
             .generate();
-        var storeConfig = ImmutableGraphProjectFromStoreConfig.builder()
+        var storeConfig = GraphProjectFromStoreConfigImpl.builder()
+            .username("")
             .graphName("foo")
             .nodeProjections(NodeProjections.ALL)
             .relationshipProjections(RelationshipProjections.ALL)

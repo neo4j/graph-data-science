@@ -79,7 +79,7 @@ import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.configparser.ConfigurationParser;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
-import org.neo4j.gds.projection.ImmutableGraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.lang.reflect.InvocationTargetException;
@@ -627,14 +627,16 @@ class WccMutateProcTest extends BaseProcTest {
                 runQuery("MATCH (n) DETACH DELETE n");
                 GraphStoreCatalog.removeAllLoadedGraphs();
 
-                var graphProjectConfig = ImmutableGraphProjectFromStoreConfig.of(
-                    TEST_USERNAME,
-                    GRAPH_NAME,
-                    ImmutableNodeProjections.of(
-                        Map.of(NodeLabel.of("X"), ImmutableNodeProjection.of("X", ImmutablePropertyMappings.of()))
-                    ),
-                    RelationshipProjections.ALL
-                );
+                var graphProjectConfig = GraphProjectFromStoreConfigImpl.builder()
+                    .username(TEST_USERNAME)
+                    .graphName(GRAPH_NAME)
+                    .nodeProjections(
+                        ImmutableNodeProjections.of(
+                            Map.of(NodeLabel.of("X"), ImmutableNodeProjection.of("X", ImmutablePropertyMappings.of()))
+                        )
+                    )
+                    .relationshipProjections(RelationshipProjections.ALL)
+                    .build();
                 GraphStoreCatalog.set(graphProjectConfig, graphLoader(graphProjectConfig).graphStore());
                 methods.forEach(method -> {
                     Map<String, Object> configMap = Map.of("mutateProperty", MUTATE_PROPERTY);
@@ -737,15 +739,17 @@ class WccMutateProcTest extends BaseProcTest {
         String graphName,
         RelationshipProjections rels
     ) {
-        return ImmutableGraphProjectFromStoreConfig.of(
-            TEST_USERNAME,
-            graphName,
-            NodeProjections.create(singletonMap(
-                ALL_NODES,
-                ImmutableNodeProjection.of(PROJECT_ALL, ImmutablePropertyMappings.of())
-            )),
-            rels
-        );
+        return GraphProjectFromStoreConfigImpl.builder()
+            .username(TEST_USERNAME)
+            .graphName(graphName)
+            .nodeProjections(
+                NodeProjections.create(singletonMap(
+                    ALL_NODES,
+                    ImmutableNodeProjection.of(PROJECT_ALL, ImmutablePropertyMappings.of())
+                ))
+            )
+            .relationshipProjections(rels)
+            .build();
     }
 
     @NotNull

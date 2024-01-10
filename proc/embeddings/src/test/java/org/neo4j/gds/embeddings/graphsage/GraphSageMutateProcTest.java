@@ -39,7 +39,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.extension.Neo4jModelCatalogExtension;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
-import org.neo4j.gds.projection.ImmutableGraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.graphdb.QueryExecutionException;
 
@@ -212,7 +212,8 @@ class GraphSageMutateProcTest extends BaseProcTest {
     private static Stream<Arguments> missingNodeProperties() {
         return Stream.of(
             Arguments.of(
-                ImmutableGraphProjectFromStoreConfig.builder()
+                GraphProjectFromStoreConfigImpl.builder()
+                    .username("")
                     .graphName("implicitWeightedGraph")
                     .nodeProjections(NodeProjections.single(
                         NodeLabel.of("King"),
@@ -229,7 +230,8 @@ class GraphSageMutateProcTest extends BaseProcTest {
                 List.of("King")
             ),
             Arguments.of(
-                ImmutableGraphProjectFromStoreConfig.builder()
+                GraphProjectFromStoreConfigImpl.builder()
+                    .username("")
                     .graphName("implicitWeightedGraph")
                     .nodeProjections(NodeProjections.single(
                         NodeLabel.of("King"),
@@ -247,12 +249,12 @@ class GraphSageMutateProcTest extends BaseProcTest {
                 List.of("King")
             ),
             Arguments.of(
-                ImmutableGraphProjectFromStoreConfig.of(
-                    "",
-                    "",
-                    NodeProjections.fromString(PROJECT_ALL),
-                    RelationshipProjections.fromString(PROJECT_ALL)
-                ),
+                GraphProjectFromStoreConfigImpl.builder()
+                    .graphName("")
+                    .username("")
+                    .nodeProjections(NodeProjections.fromString(PROJECT_ALL))
+                    .relationshipProjections(RelationshipProjections.fromString(PROJECT_ALL))
+                    .build(),
                 List.of("age", "birth_year", "death_year"),
                 List.of(),
                 List.of("__ALL__")

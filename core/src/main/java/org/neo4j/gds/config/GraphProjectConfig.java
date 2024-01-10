@@ -36,11 +36,9 @@ import java.util.Map;
 public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
 
     @Configuration.Ignore
-    @Value.Parameter(false)
     Map<String, Object> asProcedureResultConfigurationField();
 
     @Configuration.Ignore
-    @Value.Parameter(false)
     default Map<String, Object> cleansed(Map<String, Object> map, Collection<String> keysToIgnore) {
         Map<String, Object> result = new HashMap<>(map);
         map.forEach((key, value) -> {
@@ -58,17 +56,13 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
     String VALIDATE_RELATIONSHIPS_KEY = "validateRelationships";
 
     static GraphProjectConfig emptyWithName(String userName, String graphName) {
-        return ImmutableGraphCatalogConfig.builder()
+        return GraphCatalogConfigImpl.builder()
             .username(userName)
             .graphName(graphName)
-            .graphStoreFactory(loaderContext -> {
-                throw new UnsupportedOperationException("GraphStoreFactory not set");
-            })
             .build();
     }
 
     @Configuration.Parameter
-    @Value.Default
     default String username() {
         return Username.EMPTY_USERNAME.username();
     }
@@ -77,48 +71,41 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
     @Configuration.ConvertWith(method = "validateName")
     String graphName();
 
-    @Value.Default
-    @Value.Parameter(false)
     @Configuration.Key(READ_CONCURRENCY_KEY)
     default int readConcurrency() {
         return ConcurrencyConfig.DEFAULT_CONCURRENCY;
     }
 
-    @Value.Default
-    @Value.Parameter(false)
     @Configuration.Key(NODE_COUNT_KEY)
     default long nodeCount() {
         return -1;
     }
 
-    @Value.Default
-    @Value.Parameter(false)
     @Configuration.Key(RELATIONSHIP_COUNT_KEY)
     default long relationshipCount() {
         return -1;
     }
 
-    @Value.Parameter(false)
     @Configuration.Ignore
     default boolean isFictitiousLoading() {
         return nodeCount() > -1 || relationshipCount() > -1;
     }
 
-    @Value.Derived
-    @Value.Auxiliary
     default ZonedDateTime creationTime() {
         return TimeUtil.now();
     }
 
-    @Value.Default
-    @Value.Parameter(false)
     @Configuration.Key(VALIDATE_RELATIONSHIPS_KEY)
     default boolean validateRelationships() {
         return false;
     }
 
     @Configuration.Ignore
-    GraphStoreFactory.Supplier graphStoreFactory();
+    default GraphStoreFactory.Supplier graphStoreFactory() {
+        return loaderContext -> {
+            throw new UnsupportedOperationException("GraphStoreFactory not set");
+        };
+    }
 
     @Value.Check
     default void validateReadConcurrency() {

@@ -23,12 +23,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
-import org.neo4j.gds.legacycypherprojection.ImmutableGraphProjectFromCypherConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.utils.progress.JobId;
+import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
+import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfigImpl;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
-import org.neo4j.gds.projection.ImmutableGraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
 
 import java.util.Collections;
 import java.util.stream.Stream;
@@ -47,7 +47,7 @@ class GraphProjectConfigBuildersTest {
         return Stream.of(
             Arguments.arguments(
                 new StoreConfigBuilder().userName("foo").graphName("bar").jobId(jobId).build(),
-                ImmutableGraphProjectFromStoreConfig.builder().username("foo").graphName("bar")
+                GraphProjectFromStoreConfigImpl.builder().username("foo").graphName("bar")
                     .nodeProjections(NodeProjections.all())
                     .relationshipProjections(RelationshipProjections.ALL)
                     .nodeProperties(PropertyMappings.of())
@@ -57,7 +57,7 @@ class GraphProjectConfigBuildersTest {
             ),
             Arguments.arguments(
                 new StoreConfigBuilder().jobId(jobId).build(),
-                ImmutableGraphProjectFromStoreConfig.builder().username("").graphName("")
+                GraphProjectFromStoreConfigImpl.builder().username("").graphName("")
                     .nodeProjections(NodeProjections.single(ALL_NODES, NodeProjection.all()))
                     .relationshipProjections(ImmutableRelationshipProjections.builder()
                         .putProjection(ALL_RELATIONSHIPS, RelationshipProjection.ALL)
@@ -69,7 +69,7 @@ class GraphProjectConfigBuildersTest {
             ),
             Arguments.arguments(
                 new StoreConfigBuilder().addNodeLabel("Foo").addRelationshipType("BAR").jobId(jobId).build(),
-                ImmutableGraphProjectFromStoreConfig.builder().username("").graphName("")
+                GraphProjectFromStoreConfigImpl.builder().username("").graphName("")
                     .nodeProjections(NodeProjections.single(NodeLabel.of("Foo"), NodeProjection.of("Foo")))
                     .relationshipProjections(ImmutableRelationshipProjections.builder()
                         .putProjection(
@@ -88,7 +88,7 @@ class GraphProjectConfigBuildersTest {
                     .addRelationshipType("BAR")
                     .jobId(jobId)
                     .build(),
-                ImmutableGraphProjectFromStoreConfig.builder().username("").graphName("")
+                GraphProjectFromStoreConfigImpl.builder().username("").graphName("")
                     .nodeProjections(NodeProjections.single(NodeLabel.of("Foo"), NodeProjection.of("Foo")))
                     .relationshipProjections(ImmutableRelationshipProjections.builder()
                         .putProjection(
@@ -108,7 +108,7 @@ class GraphProjectConfigBuildersTest {
                     .globalProjection(Orientation.UNDIRECTED)
                     .jobId(jobId)
                     .build(),
-                ImmutableGraphProjectFromStoreConfig.builder().username("").graphName("")
+                GraphProjectFromStoreConfigImpl.builder().username("").graphName("")
                     .nodeProjections(NodeProjections.single(NodeLabel.of("Foo"), NodeProjection.of("Foo")))
                     .relationshipProjections(ImmutableRelationshipProjections.builder()
                         .putProjection(
@@ -129,7 +129,7 @@ class GraphProjectConfigBuildersTest {
                     .globalProjection(Orientation.UNDIRECTED)
                     .jobId(jobId)
                     .build(),
-                ImmutableGraphProjectFromStoreConfig.builder().username("").graphName("")
+                GraphProjectFromStoreConfigImpl.builder().username("").graphName("")
                     .nodeProjections(NodeProjections.single(NodeLabel.of("Foo"), NodeProjection.of("Foo")))
                     .relationshipProjections(ImmutableRelationshipProjections.builder()
                         .putProjection(
@@ -157,7 +157,7 @@ class GraphProjectConfigBuildersTest {
                     )))
                     .jobId(jobId)
                     .build(),
-                ImmutableGraphProjectFromStoreConfig.builder().username("").graphName("")
+                GraphProjectFromStoreConfigImpl.builder().username("").graphName("")
                     .nodeProjections(NodeProjections.single(
                             NodeLabel.of("Foo"),
                             NodeProjection.builder()
@@ -194,7 +194,7 @@ class GraphProjectConfigBuildersTest {
                 new CypherConfigBuilder()
                     .jobId(jobId)
                     .build(),
-                ImmutableGraphProjectFromCypherConfig.builder().username("").graphName("")
+                GraphProjectFromCypherConfigImpl.builder().username("").graphName("")
                     .nodeQuery(ALL_NODES_QUERY)
                     .relationshipQuery(ALL_RELATIONSHIPS_QUERY)
                     .jobId(jobId)
@@ -204,7 +204,7 @@ class GraphProjectConfigBuildersTest {
                 new CypherConfigBuilder().userName("foo").graphName("bar")
                     .jobId(jobId)
                     .build(),
-                ImmutableGraphProjectFromCypherConfig.builder().username("foo").graphName("bar")
+                GraphProjectFromCypherConfigImpl.builder().username("foo").graphName("bar")
                     .nodeQuery(ALL_NODES_QUERY)
                     .relationshipQuery(ALL_RELATIONSHIPS_QUERY)
                     .jobId(jobId)
@@ -216,7 +216,7 @@ class GraphProjectConfigBuildersTest {
                     .relationshipQuery("MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target")
                     .jobId(jobId)
                     .build(),
-                ImmutableGraphProjectFromCypherConfig.builder().username("foo").graphName("bar")
+                GraphProjectFromCypherConfigImpl.builder().username("foo").graphName("bar")
                     .nodeQuery("MATCH (n:Foo) RETURN id(n) AS id")
                     .relationshipQuery("MATCH (a)-->(b) RETURN id(a) AS source, id(b) AS target")
                     .jobId(jobId)

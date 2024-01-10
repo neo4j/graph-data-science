@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.config;
 
-import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.ImmutableNodeProjections;
 import org.neo4j.gds.ImmutableRelationshipProjections;
@@ -31,7 +30,6 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.core.Aggregation;
@@ -41,13 +39,10 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface RandomGraphGeneratorConfig extends GraphProjectConfig {
 
     @Configuration.Ignore
-    @Value.Parameter(false)
     default Map<String, Object> asProcedureResultConfigurationField() {
         return cleansed(toMap(), outputFieldDenylist());
     }
@@ -67,33 +62,28 @@ public interface RandomGraphGeneratorConfig extends GraphProjectConfig {
     @Configuration.Parameter
     long averageDegree();
 
-    @Value.Default
     @Configuration.ConvertWith(method = "org.neo4j.gds.core.Aggregation#parse")
     @Configuration.ToMapValue("org.neo4j.gds.core.Aggregation#toString")
     default Aggregation aggregation() {
         return Aggregation.NONE;
     }
 
-    @Value.Default
     @Configuration.ConvertWith(method = "org.neo4j.gds.Orientation#parse")
     @Configuration.ToMapValue("org.neo4j.gds.Orientation#toString")
     default Orientation orientation() {
         return Orientation.NATURAL;
     }
 
-    @Value.Default
     default boolean allowSelfLoops() {
         return false;
     }
 
-    @Value.Default
     @Configuration.ConvertWith(method = "org.neo4j.gds.beta.generator.RelationshipDistribution#parse")
     @Configuration.ToMapValue("org.neo4j.gds.beta.generator.RelationshipDistribution#toString")
     default RelationshipDistribution relationshipDistribution() {
         return RelationshipDistribution.UNIFORM;
     }
 
-    @Value.Default
     default @Nullable Long relationshipSeed() {
         return null;
     }
@@ -103,7 +93,6 @@ public interface RandomGraphGeneratorConfig extends GraphProjectConfig {
         return Collections.emptyMap();
     }
 
-    @Value.Default
     @Configuration.ToMapValue("org.neo4j.gds.NodeProjections#toObject")
     default NodeProjections nodeProjections() {
         return ImmutableNodeProjections.builder()
@@ -113,13 +102,11 @@ public interface RandomGraphGeneratorConfig extends GraphProjectConfig {
             .build();
     }
 
-    @Value.Default
     @Configuration.Ignore
     default RelationshipType relationshipType() {
         return RelationshipType.of("REL");
     }
 
-    @Value.Default
     @Configuration.ToMapValue("org.neo4j.gds.RelationshipProjections#toObject")
     default RelationshipProjections relationshipProjections() {
         return ImmutableRelationshipProjections.builder()
@@ -137,7 +124,6 @@ public interface RandomGraphGeneratorConfig extends GraphProjectConfig {
         throw new UnsupportedOperationException("RandomGraphGeneratorConfig requires explicit graph generation.");
     }
 
-    @Value.Derived
     @Configuration.Ignore
     default Set<String> outputFieldDenylist() {
         return Set.of(READ_CONCURRENCY_KEY,  NODE_COUNT_KEY, RELATIONSHIP_COUNT_KEY, "validateRelationships");

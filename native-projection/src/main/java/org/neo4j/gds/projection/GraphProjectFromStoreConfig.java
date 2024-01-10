@@ -28,7 +28,6 @@ import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.Configuration.ConvertWith;
 import org.neo4j.gds.annotation.Configuration.Key;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.GraphStoreFactory;
@@ -43,13 +42,10 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
 
     @Configuration.Ignore
-    @Value.Parameter(false)
     default Map<String, Object> asProcedureResultConfigurationField() {
         return cleansed(toMap(), outputFieldDenylist());
     }
@@ -69,16 +65,12 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
     @Configuration.ToMapValue("org.neo4j.gds.RelationshipProjections#toObject")
     RelationshipProjections relationshipProjections();
 
-    @Value.Default
-    @Value.Parameter(false)
     @Configuration.ConvertWith(method = "org.neo4j.gds.PropertyMappings#fromObject")
     @Configuration.ToMapValue("org.neo4j.gds.PropertyMappings#toObject")
     default PropertyMappings nodeProperties() {
         return PropertyMappings.of();
     }
 
-    @Value.Default
-    @Value.Parameter(false)
     @Configuration.ConvertWith(method = "org.neo4j.gds.PropertyMappings#fromObject")
     @Configuration.ToMapValue("org.neo4j.gds.PropertyMappings#toObject")
     default PropertyMappings relationshipProperties() {
@@ -159,8 +151,7 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
         // We have to trigger the validation of the aggregation here, since the projections might have been updated.
         normalizedRelationshipProjections.projections().values().forEach(RelationshipProjection::checkAggregation);
 
-        return ImmutableGraphProjectFromStoreConfig
-            .builder()
+        return GraphProjectFromStoreConfigImpl.Builder
             .from(this)
             .nodeProjections(normalizedNodeProjections)
             .nodeProperties(PropertyMappings.of())
@@ -186,7 +177,6 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
         }
     }
 
-    @Value.Derived
     @Configuration.Ignore
     default Set<String> outputFieldDenylist() {
         return Set.of(NODE_COUNT_KEY, RELATIONSHIP_COUNT_KEY);
@@ -214,7 +204,7 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
     }
 
     static GraphProjectFromStoreConfig all(String userName, String graphName) {
-        return ImmutableGraphProjectFromStoreConfig.builder()
+        return GraphProjectFromStoreConfigImpl.builder()
             .username(userName)
             .graphName(graphName)
             .nodeProjections(NodeProjections.all())

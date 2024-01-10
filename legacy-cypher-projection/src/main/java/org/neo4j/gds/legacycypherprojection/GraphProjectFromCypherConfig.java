@@ -19,9 +19,7 @@
  */
 package org.neo4j.gds.legacycypherprojection;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.GraphStoreFactory;
@@ -38,13 +36,10 @@ import java.util.Set;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface GraphProjectFromCypherConfig extends GraphProjectConfig {
 
     @Configuration.Ignore
-    @Value.Parameter(false)
     default Map<String, Object> asProcedureResultConfigurationField() {
         return cleansed(toMap(), outputFieldDenylist());
     }
@@ -71,15 +66,12 @@ public interface GraphProjectFromCypherConfig extends GraphProjectConfig {
     @Configuration.ConvertWith(method = "org.apache.commons.lang3.StringUtils#trimToNull")
     String relationshipQuery();
 
-    @Value.Default
     @Configuration.ToMapValue("org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig#listParameterKeys")
     default Map<String, Object> parameters() {
         return Collections.emptyMap();
     }
 
     @Override
-    @Value.Default
-    @Value.Parameter(false)
     default boolean validateRelationships() {
         return true;
     }
@@ -103,13 +95,10 @@ public interface GraphProjectFromCypherConfig extends GraphProjectConfig {
     }
 
     @Override
-    @Value.Default
-    @Value.Parameter(false)
     default boolean sudo() {
         return true;
     }
 
-    @Value.Derived
     @Configuration.Ignore
     default Set<String> outputFieldDenylist() {
         return Set.of(NODE_COUNT_KEY, RELATIONSHIP_COUNT_KEY);

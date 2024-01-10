@@ -25,9 +25,9 @@ import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
-import org.neo4j.gds.legacycypherprojection.ImmutableGraphProjectFromCypherConfig;
+import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfigImpl;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
-import org.neo4j.gds.projection.ImmutableGraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -121,7 +121,7 @@ public final class GraphProjectConfigBuilders {
             Map.Entry::getValue
         )));
 
-        return ImmutableGraphProjectFromStoreConfig.builder()
+        return GraphProjectFromStoreConfigImpl.builder()
             .username(userName.orElse(""))
             .graphName(graphName.orElse(""))
             .nodeProjections(np)
@@ -150,7 +150,7 @@ public final class GraphProjectConfigBuilders {
         Optional<Map<String, Object>> parameters
     ) {
 
-        return ImmutableGraphProjectFromCypherConfig.builder()
+        return GraphProjectFromCypherConfigImpl.builder()
             .username(userName.orElse(""))
             .graphName(graphName.orElse(""))
             .nodeQuery(nodeQuery.orElse(ALL_NODES_QUERY))

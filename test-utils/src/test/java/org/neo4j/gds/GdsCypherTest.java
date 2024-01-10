@@ -28,7 +28,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
-import org.neo4j.gds.projection.ImmutableGraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
 import org.neo4j.graphdb.Direction;
 
 import java.util.AbstractMap;
@@ -444,8 +444,7 @@ class GdsCypherTest {
             )
         );
 
-        GraphProjectFromStoreConfig parsedConfig = ImmutableGraphProjectFromStoreConfig
-            .builder()
+        GraphProjectFromStoreConfig parsedConfig = GraphProjectFromStoreConfigImpl.builder()
             .username("")
             .graphName("")
             .nodeProjections(NodeProjections.fromObject(configMap.get("nodeProjection")))
@@ -466,8 +465,7 @@ class GdsCypherTest {
             .addProperty("relProp", "RelationshipPropertyName", DefaultValue.of(1337), Aggregation.MAX)
             .build();
 
-        GraphProjectFromStoreConfig configFromBuilder = ImmutableGraphProjectFromStoreConfig
-            .builder()
+        GraphProjectFromStoreConfig configFromBuilder = GraphProjectFromStoreConfigImpl.builder()
             .username("")
             .graphName("")
             .nodeProjections(NodeProjections.create(Collections.singletonMap(

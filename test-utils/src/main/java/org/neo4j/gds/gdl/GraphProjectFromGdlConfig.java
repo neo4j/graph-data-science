@@ -26,12 +26,18 @@ import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.Username;
 
 @ValueClass
-@SuppressWarnings("immutables:subtype")
 public interface GraphProjectFromGdlConfig extends GraphProjectConfig {
 
     String gdlGraph();
+
+    @Value.Default
+    @Override
+    default String username() {
+        return Username.EMPTY_USERNAME.username();
+    }
 
     @Value.Default
     default Orientation orientation() {

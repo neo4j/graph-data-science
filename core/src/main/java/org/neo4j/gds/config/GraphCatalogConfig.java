@@ -19,23 +19,19 @@
  */
 package org.neo4j.gds.config;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 
 import java.util.Map;
 import java.util.Set;
 
-@ValueClass
+@Configuration
 public interface GraphCatalogConfig extends GraphProjectConfig {
 
     @Configuration.Ignore
-    @Value.Parameter(false)
     default Map<String, Object> asProcedureResultConfigurationField() {
         return cleansed(toMap(), outputFieldDenylist());
     }
 
-    @Value.Derived
     @Configuration.Ignore
     default Set<String> outputFieldDenylist() {
         return Set.of(NODE_COUNT_KEY, RELATIONSHIP_COUNT_KEY);

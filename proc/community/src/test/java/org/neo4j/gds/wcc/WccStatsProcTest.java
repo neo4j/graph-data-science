@@ -65,7 +65,7 @@ import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.configparser.ConfigurationParser;
-import org.neo4j.gds.projection.ImmutableGraphProjectFromStoreConfig;
+import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -242,14 +242,16 @@ class WccStatsProcTest extends BaseProcTest {
                 GraphStoreCatalog.removeAllLoadedGraphs();
 
                 var graphName = "graph";
-                var graphProjectConfig = ImmutableGraphProjectFromStoreConfig.of(
-                    TEST_USERNAME,
-                    graphName,
-                    ImmutableNodeProjections.of(
-                        Map.of(NodeLabel.of("X"), ImmutableNodeProjection.of("X", ImmutablePropertyMappings.of()))
-                    ),
-                    RelationshipProjections.ALL
-                );
+                var graphProjectConfig = GraphProjectFromStoreConfigImpl.builder()
+                    .username(TEST_USERNAME)
+                    .graphName(graphName)
+                    .nodeProjections(
+                        ImmutableNodeProjections.of(
+                            Map.of(NodeLabel.of("X"), ImmutableNodeProjection.of("X", ImmutablePropertyMappings.of()))
+                        )
+                    )
+                    .relationshipProjections(RelationshipProjections.ALL)
+                    .build();
                 var graphStore = graphLoader(graphProjectConfig).graphStore();
                 GraphStoreCatalog.set(graphProjectConfig, graphStore);
                 methods.forEach(method -> {

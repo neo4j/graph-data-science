@@ -84,7 +84,6 @@ import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.configparser.ConfigurationParser;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
-import org.neo4j.gds.projection.ImmutableGraphProjectFromStoreConfig;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.lang.reflect.InvocationTargetException;
@@ -442,14 +441,16 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
                 runQuery("MATCH (n) DETACH DELETE n");
                 GraphStoreCatalog.removeAllLoadedGraphs();
 
-                var graphProjectConfig = ImmutableGraphProjectFromStoreConfig.of(
-                    TEST_USERNAME,
-                    TEST_GRAPH_NAME,
-                    ImmutableNodeProjections.of(
-                        Map.of(NodeLabel.of("X"), ImmutableNodeProjection.of("X", ImmutablePropertyMappings.of()))
-                    ),
-                    RelationshipProjections.ALL
-                );
+                var graphProjectConfig = GraphProjectFromStoreConfigImpl.builder()
+                    .graphName(TEST_GRAPH_NAME)
+                    .username(TEST_USERNAME)
+                        .nodeProjections(
+                            ImmutableNodeProjections.of(
+                                Map.of(NodeLabel.of("X"), ImmutableNodeProjection.of("X", ImmutablePropertyMappings.of()))
+                            )
+                        )
+                    .relationshipProjections(RelationshipProjections.ALL)
+                    .build();
                 var graphStore = graphLoader(graphProjectConfig).graphStore();
                 GraphStoreCatalog.set(graphProjectConfig, graphStore);
                 methods.forEach(method -> {
@@ -552,13 +553,17 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
     }
 
     private GraphProjectFromStoreConfig withAllNodesAndRelationshipsProjectConfig(String graphName) {
-        return ImmutableGraphProjectFromStoreConfig.of(
-            TEST_USERNAME,
-            graphName,
-            NodeProjections.create(Map.of(
-                ALL_NODES, ImmutableNodeProjection.of(PROJECT_ALL, ImmutablePropertyMappings.of())
-            )), RelationshipProjections.ALL
-        );
+        return GraphProjectFromStoreConfigImpl.builder()
+            .username(TEST_USERNAME)
+            .graphName(graphName)
+                .nodeProjections(
+                    NodeProjections.create(Map.of(
+                        ALL_NODES,
+                        ImmutableNodeProjection.of(PROJECT_ALL, ImmutablePropertyMappings.of())
+                    ))
+                )
+            .relationshipProjections(RelationshipProjections.ALL)
+            .build();
     }
 
     private GraphDataScience createFacade() {

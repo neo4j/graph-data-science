@@ -68,7 +68,8 @@ class ScanningRelationshipsImporterTest extends BaseTest {
     @Test
     void shouldLoadInverseRelationships() {
         var relationshipType = RelationshipType.of("R");
-        var graphProjectConfig = ImmutableGraphProjectFromStoreConfig.builder()
+        var graphProjectConfig = GraphProjectFromStoreConfigImpl.builder()
+            .username("")
             .graphName("testGraph")
             .nodeProjections(NodeProjections.ALL)
             .relationshipProjections(
