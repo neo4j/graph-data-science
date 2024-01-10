@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.Configuration;
@@ -39,7 +38,6 @@ public interface GraphNodePropertiesConfig extends BaseConfig, ConcurrencyConfig
     Optional<String> graphName();
 
     @Configuration.Parameter
-    @Value.Default
     @Configuration.ConvertWith(method = "org.neo4j.gds.applications.graphstorecatalog.GraphNodePropertiesConfig#parseNodeLabels")
     default List<String> nodeLabels() {
         return Collections.singletonList(ElementProjection.PROJECT_ALL);

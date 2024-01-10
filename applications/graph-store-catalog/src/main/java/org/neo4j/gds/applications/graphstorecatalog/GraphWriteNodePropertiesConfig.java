@@ -21,7 +21,6 @@ package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -31,9 +30,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface GraphWriteNodePropertiesConfig extends GraphNodePropertiesConfig, WriteConfig {
 
     @Configuration.Parameter

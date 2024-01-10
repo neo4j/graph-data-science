@@ -20,16 +20,13 @@
 package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Map;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface WriteLabelConfig extends BaseConfig, WriteConfig {
 
     static WriteLabelConfig of(Map<String, Object> rawConfig) {

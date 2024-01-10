@@ -20,7 +20,6 @@
 package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.UserInputAsStringOrListOfString;
@@ -29,9 +28,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import java.util.List;
 import java.util.Optional;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface GraphDropNodePropertiesConfig extends BaseConfig, ConcurrencyConfig {
     @Configuration.Parameter
     Optional<String> graphName();

@@ -22,7 +22,6 @@ package org.neo4j.gds.applications.graphstorecatalog;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.utils.StringFormatting;
@@ -35,9 +34,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface GraphStreamRelationshipPropertiesConfig extends GraphStreamRelationshipsConfig {
 
     @Configuration.Parameter

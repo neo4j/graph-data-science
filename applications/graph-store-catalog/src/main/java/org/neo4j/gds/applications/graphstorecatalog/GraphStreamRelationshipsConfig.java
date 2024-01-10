@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
@@ -44,7 +43,6 @@ public interface GraphStreamRelationshipsConfig extends BaseConfig, ConcurrencyC
     Optional<String> graphName();
 
     @Configuration.Parameter
-    @Value.Default
     default List<String> relationshipTypes() {
         return Collections.singletonList(ElementProjection.PROJECT_ALL);
     }

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.Configuration;
@@ -41,8 +40,6 @@ public interface GraphExportNodePropertiesConfig extends GraphNodePropertiesConf
     @Configuration.ConvertWith(method = "org.neo4j.gds.applications.graphstorecatalog.GraphExportNodePropertiesConfig#parseNodeProperties")
     List<String> nodeProperties();
 
-    @Value.Default
-    @Value.Parameter(false)
     @Configuration.Key("listNodeLabels")
     default boolean listNodeLabels() {
         return LIST_NODE_LABELS_DEFAULT_VALUE;
