@@ -83,10 +83,11 @@ class DefaultAlgorithmProcessingTemplateTest {
             public Stream<String> build(
                 Graph graph,
                 GraphStore graphStore,
-                Optional<PathFindingResult> pathFindingResult
+                Optional<PathFindingResult> pathFindingResult,
+                AlgorithmProcessingTimings timings
             ) {
                 // we skip timings when no side effects requested
-                assertThat(postProcessingMillis).isEqualTo(-1);
+                assertThat(timings.postProcessingMillis).isEqualTo(-1);
 
                 return Stream.of(
                     "Huey",
@@ -150,7 +151,8 @@ class DefaultAlgorithmProcessingTemplateTest {
             public Long build(
                 Graph actualGraph,
                 GraphStore actualGraphStore,
-                Optional<PathFindingResult> actualResult
+                Optional<PathFindingResult> actualResult,
+                AlgorithmProcessingTimings timings
             ) {
                 assertThat(actualGraph).isEqualTo(graph);
                 assertThat(actualGraphStore).isEqualTo(graphStore);
@@ -204,34 +206,37 @@ class DefaultAlgorithmProcessingTemplateTest {
         ) {
             @Override
             <CONFIGURATION extends AlgoBaseConfig & RelationshipWeightConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> Pair<Graph, GraphStore> graphLoadAndValidationWithTiming(
+                AlgorithmProcessingTimingsBuilder timingsBuilder,
                 GraphName graphName,
                 CONFIGURATION configuration,
                 ResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
             ) {
-                resultBuilder.withPreProcessingMillis(23);
+                timingsBuilder.withPreProcessingMillis(23);
                 return Pair.of(mock(Graph.class), null);
             }
 
             @Override
             <RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> RESULT_FROM_ALGORITHM computeWithTiming(
+                AlgorithmProcessingTimingsBuilder timingsBuilder,
                 String humanReadableAlgorithmName,
                 AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
                 ResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder,
                 Graph graph
             ) {
-                resultBuilder.withComputeMillis(117);
+                timingsBuilder.withComputeMillis(117);
                 return null;
             }
 
             @Override
             <RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> void mutateOrWriteWithTiming(
                 Optional<MutateOrWriteStep<RESULT_FROM_ALGORITHM>> mutateOrWriteStep,
-                ResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder,
+                AlgorithmProcessingTimingsBuilder timingsBuilder,
                 Graph graph,
                 GraphStore graphStore,
-                RESULT_FROM_ALGORITHM resultFromAlgorithm
+                RESULT_FROM_ALGORITHM resultFromAlgorithm,
+                ResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
             ) {
-                resultBuilder.withPostProcessingMillis(87);
+                timingsBuilder.withPostProcessingMillis(87);
             }
         };
 
@@ -240,12 +245,13 @@ class DefaultAlgorithmProcessingTemplateTest {
             public Map<String, Long> build(
                 Graph graph,
                 GraphStore graphStore,
-                Optional<Void> unused
+                Optional<Void> unused,
+                AlgorithmProcessingTimings timings
             ) {
                 return Map.of(
-                    "preProcessingMillis", preProcessingMillis,
-                    "computeMillis", computeMillis,
-                    "postProcessingMillis", postProcessingMillis
+                    "preProcessingMillis", timings.preProcessingMillis,
+                    "computeMillis", timings.computeMillis,
+                    "postProcessingMillis", timings.postProcessingMillis
                 );
             }
         };

@@ -73,7 +73,10 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         Optional<MutateOrWriteStep<RESULT_FROM_ALGORITHM>> mutateOrWriteStep,
         ResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
     ) {
+        var timingsBuilder = new AlgorithmProcessingTimingsBuilder();
+
         Pair<Graph, GraphStore> graphWithGraphStore = graphLoadAndValidationWithTiming(
+            timingsBuilder,
             graphName,
             configuration,
             resultBuilder
@@ -82,18 +85,18 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         var graph = graphWithGraphStore.getLeft();
         var graphStore = graphWithGraphStore.getRight();
 
-        if (graph.isEmpty()) return resultBuilder.build(graph, graphStore, Optional.empty());
+        if (graph.isEmpty()) return resultBuilder.build(graph, graphStore, Optional.empty(), timingsBuilder.build());
 
         memoryGuard.assertAlgorithmCanRun(humanReadableAlgorithmName, configuration, graph, estimationFactory);
 
         // do the actual computation
-        var result = computeWithTiming(humanReadableAlgorithmName, algorithmComputation, resultBuilder, graph);
+        var result = computeWithTiming(timingsBuilder, humanReadableAlgorithmName, algorithmComputation, resultBuilder, graph);
 
         // do any side effects
-        mutateOrWriteWithTiming(mutateOrWriteStep, resultBuilder, graph, graphStore, result);
+        mutateOrWriteWithTiming(mutateOrWriteStep, timingsBuilder, graph, graphStore, result, resultBuilder);
 
         // inject dependencies to render results
-        return resultBuilder.build(graph, graphStore, Optional.ofNullable(result));
+        return resultBuilder.build(graph, graphStore, Optional.ofNullable(result), timingsBuilder.build());
     }
 
     /**
@@ -110,11 +113,12 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
      * </ul>
      */
     <CONFIGURATION extends AlgoBaseConfig & RelationshipWeightConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> Pair<Graph, GraphStore> graphLoadAndValidationWithTiming(
+        AlgorithmProcessingTimingsBuilder timingsBuilder,
         GraphName graphName,
         CONFIGURATION configuration,
         ResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
     ) {
-        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withPreProcessingMillis)) {
+        try (ProgressTimer ignored = ProgressTimer.start(timingsBuilder::withPreProcessingMillis)) {
             // tee up the graph we want to work on
             var graphWithGraphStore = graphStoreCatalogService.getGraphWithGraphStore(
                 graphName,
@@ -131,12 +135,13 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
     }
 
     <RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> RESULT_FROM_ALGORITHM computeWithTiming(
+        AlgorithmProcessingTimingsBuilder timingsBuilder,
         String humanReadableAlgorithmName,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
         ResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder,
         Graph graph
     ) {
-        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withComputeMillis)) {
+        try (ProgressTimer ignored = ProgressTimer.start(timingsBuilder::withComputeMillis)) {
             return computeWithMetric(humanReadableAlgorithmName, algorithmComputation, graph);
         }
     }
@@ -161,13 +166,14 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
 
     <RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> void mutateOrWriteWithTiming(
         Optional<MutateOrWriteStep<RESULT_FROM_ALGORITHM>> mutateOrWriteStep,
-        ResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder,
+        AlgorithmProcessingTimingsBuilder timingsBuilder,
         Graph graph,
         GraphStore graphStore,
-        RESULT_FROM_ALGORITHM result
+        RESULT_FROM_ALGORITHM result,
+        ResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
     ) {
         mutateOrWriteStep.ifPresent(step -> {
-            try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withPostProcessingMillis)) {
+            try (ProgressTimer ignored = ProgressTimer.start(timingsBuilder::withPostProcessingMillis)) {
                 step.execute(graph, graphStore, result, resultBuilder);
             }
         });

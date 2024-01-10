@@ -25,7 +25,7 @@ import org.neo4j.gds.api.GraphStore;
 import java.util.Optional;
 
 /**
- * This builder gathers data as part of algorithm processing. Timings and such.
+ * This builder gathers data as part of algorithm processing
  * You specialise it for use cases, but a lot of what it needs is generic,
  * and it is part of algorithm processing instrumentation.
  * In-layer generic usage includes injecting the Graph, hence it is a parameter to the build method.
@@ -35,27 +35,13 @@ import java.util.Optional;
  * where any given usage probably won't need all of them.
  */
 public abstract class ResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> {
-    // timings
-    protected long preProcessingMillis;
-    protected long computeMillis;
-    protected long postProcessingMillis = -1; // mutate or write timing
+    // a marker
+    private static final int NOT_AVAILABLE = -1;
 
     // union type: zero or more of these get populated by your own hooks
-    protected long nodeCount;
-    protected long nodePropertiesWritten;
-    protected long relationshipsWritten;
-
-    public void withPreProcessingMillis(long preProcessingMillis) {
-        this.preProcessingMillis = preProcessingMillis;
-    }
-
-    public void withComputeMillis(long computeMillis) {
-        this.computeMillis = computeMillis;
-    }
-
-    public void withPostProcessingMillis(long postProcessingMillis) {
-        this.postProcessingMillis = postProcessingMillis;
-    }
+    protected long nodeCount = NOT_AVAILABLE;
+    protected long nodePropertiesWritten = NOT_AVAILABLE;
+    protected long relationshipsWritten = NOT_AVAILABLE;
 
     public void withNodeCount(long nodeCount) {
         this.nodeCount = nodeCount;
@@ -78,6 +64,7 @@ public abstract class ResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> {
     public abstract RESULT_TO_CALLER build(
         Graph graph,
         GraphStore graphStore,
-        Optional<RESULT_FROM_ALGORITHM> result
+        Optional<RESULT_FROM_ALGORITHM> result,
+        AlgorithmProcessingTimings timings
     );
 }

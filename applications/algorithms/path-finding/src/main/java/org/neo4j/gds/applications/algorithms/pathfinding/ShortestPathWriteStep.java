@@ -25,7 +25,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.config.WriteRelationshipConfig;
-import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.ImmutableExportedRelationship;
@@ -124,22 +123,20 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
             var writeRelationshipType = configuration.writeRelationshipType();
 
             /*
-             * The actual export, with timing.
+             * The actual export.
              * Notice that originally we had a CloseableResourceRegistry thing going on here - no longer.
              * Because all we are doing is, processing a stream using the exporter, synchronously.
              * We are not handing it out to upper layers for sporadic consumption.
              * It is done right here, and when we complete, the stream is exhausted.
              * We still explicitly close the stream tho because, yeah, confusion I guess.
              */
-            try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withPostProcessingMillis)) {
-                var keys = createKeys(writeNodeIds, writeCosts);
-                var types = createTypes(writeNodeIds, writeCosts);
+            var keys = createKeys(writeNodeIds, writeCosts);
+            var types = createTypes(writeNodeIds, writeCosts);
 
-                var relationshipsWritten = relationshipStreamExporter.write(writeRelationshipType, keys, types);
+            var relationshipsWritten = relationshipStreamExporter.write(writeRelationshipType, keys, types);
 
-                // the final result is the side effect of writing to the database, plus this metadata
-                resultBuilder.withRelationshipsWritten(relationshipsWritten);
-            }
+            // the final result is the side effect of writing to the database, plus this metadata
+            resultBuilder.withRelationshipsWritten(relationshipsWritten);
         }
     }
 

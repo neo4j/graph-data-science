@@ -22,6 +22,7 @@ package org.neo4j.gds.procedures.pathfinding;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
+import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.pathfinding.ResultBuilder;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.graphdb.Path;
@@ -50,7 +51,8 @@ public class PathFindingResultBuilderForStreamMode extends ResultBuilder<PathFin
     public Stream<PathFindingStreamResult> build(
         Graph graph,
         GraphStore graphStore,
-        Optional<PathFindingResult> result
+        Optional<PathFindingResult> result,
+        AlgorithmProcessingTimings timings
     ) {
         if (result.isEmpty()) return Stream.of();
 

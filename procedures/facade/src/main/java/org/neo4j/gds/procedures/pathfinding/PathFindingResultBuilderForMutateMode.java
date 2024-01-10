@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.pathfinding;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.pathfinding.ResultBuilder;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
@@ -38,13 +39,14 @@ class PathFindingResultBuilderForMutateMode extends ResultBuilder<PathFindingRes
     public PathFindingMutateResult build(
         Graph graph,
         GraphStore graphStore,
-        Optional<PathFindingResult> pathFindingResult
+        Optional<PathFindingResult> pathFindingResult,
+        AlgorithmProcessingTimings timings
     ) {
         return new PathFindingMutateResult(
-            preProcessingMillis,
-            computeMillis,
+            timings.preProcessingMillis,
+            timings.computeMillis,
             0, // yeah, I don't understand it either :shrug:
-            postProcessingMillis,
+            timings.postProcessingMillis,
             relationshipsWritten,
             configuration.toMap()
         );
