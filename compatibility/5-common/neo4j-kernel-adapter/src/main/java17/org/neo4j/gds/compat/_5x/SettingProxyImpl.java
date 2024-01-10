@@ -51,7 +51,7 @@ public class SettingProxyImpl implements SettingProxyApi {
             case RAFT -> DatabaseMode.CORE;
             case REPLICA -> DatabaseMode.READ_REPLICA;
             case SINGLE -> DatabaseMode.SINGLE;
-            case VIRTUAL -> throw new UnsupportedOperationException("What's a virtual database anyway?");
+            case VIRTUAL -> DatabaseMode.VIRTUAL;
         };
     }
 
@@ -69,6 +69,7 @@ public class SettingProxyImpl implements SettingProxyApi {
                 case CORE -> TopologyGraphDbmsModel.HostedOnMode.RAFT;
                 case READ_REPLICA -> TopologyGraphDbmsModel.HostedOnMode.REPLICA;
                 case SINGLE -> TopologyGraphDbmsModel.HostedOnMode.SINGLE;
+                case VIRTUAL -> TopologyGraphDbmsModel.HostedOnMode.VIRTUAL;
             });
         } catch (NoSuchFieldException e) {
             throw new RuntimeException(

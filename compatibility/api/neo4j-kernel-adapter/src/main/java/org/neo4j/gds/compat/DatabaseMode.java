@@ -22,5 +22,6 @@ package org.neo4j.gds.compat;
 public enum DatabaseMode {
     SINGLE,
     CORE,
-    READ_REPLICA
+    READ_REPLICA,
+    VIRTUAL
 }
