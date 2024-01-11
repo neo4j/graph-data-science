@@ -19,20 +19,15 @@
  */
 package org.neo4j.gds.model.catalog;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.model.ModelConfig;
 
-@ValueClass
 @Configuration("TestTrainConfigImpl")
-@SuppressWarnings("immutables:subtype")
 public interface TestTrainConfig extends BaseConfig, ModelConfig {
 
     long serialVersionUID = 0x42L;
 
-    @Value.Default
     default String dummyConfigProperty() {
         return "dummyConfigProperty";
     }

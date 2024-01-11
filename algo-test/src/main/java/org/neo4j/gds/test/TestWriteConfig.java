@@ -20,14 +20,11 @@
 package org.neo4j.gds.test;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface TestWriteConfig extends TestConfig, WriteConfig, WritePropertyConfig {
     static TestWriteConfig of(CypherMapWrapper config) {
         return new TestWriteConfigImpl(config);

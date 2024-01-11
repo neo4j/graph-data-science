@@ -57,14 +57,14 @@ import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.termination.TerminationMonitor;
 import org.neo4j.gds.metrics.MetricsFacade;
-import org.neo4j.gds.test.ImmutableTestWriteConfig;
+import org.neo4j.gds.termination.TerminationMonitor;
 import org.neo4j.gds.test.TestAlgoResultBuilder;
 import org.neo4j.gds.test.TestAlgorithm;
 import org.neo4j.gds.test.TestAlgorithmResult;
 import org.neo4j.gds.test.TestResult;
 import org.neo4j.gds.test.TestWriteConfig;
+import org.neo4j.gds.test.TestWriteConfigImpl;
 import org.neo4j.gds.transaction.EmptyTransactionContext;
 
 import java.util.List;
@@ -102,7 +102,7 @@ class WriteNodePropertiesComputationResultConsumerTest extends BaseTest {
 
     @Test
     void shouldThrowWhenWriteModeDoesNotMatchPropertyState() {
-        var config = ImmutableTestWriteConfig.builder().writeProperty("writeProp").build();
+        var config = TestWriteConfigImpl.builder().writeProperty("writeProp").build();
 
         assertThatThrownBy(() -> executeWrite(config, PropertyState.REMOTE, WriteMode.LOCAL))
             .hasMessageContaining("propertyKey=foo, propertyState=REMOTE");
@@ -110,7 +110,7 @@ class WriteNodePropertiesComputationResultConsumerTest extends BaseTest {
 
     @Test
     void shouldThrowWhenArrowConnectionInfoIsMissing() {
-        var config = ImmutableTestWriteConfig.builder().writeProperty("writeProp").build();
+        var config = TestWriteConfigImpl.builder().writeProperty("writeProp").build();
 
         assertThatThrownBy(() -> executeWrite(config, PropertyState.REMOTE, WriteMode.REMOTE))
             .hasMessageContaining("Missing arrow connection info");
@@ -118,7 +118,7 @@ class WriteNodePropertiesComputationResultConsumerTest extends BaseTest {
 
     @Test
     void shouldThrowWhenArrowConnectionInfoIsGivenForLocalWriteBack() {
-        var config = ImmutableTestWriteConfig.builder()
+        var config = TestWriteConfigImpl.builder()
             .writeProperty("writeProp")
             .arrowConnectionInfo(ImmutableArrowConnectionInfo.of("localhost", 1337, "token", false))
             .build();
@@ -129,7 +129,7 @@ class WriteNodePropertiesComputationResultConsumerTest extends BaseTest {
 
     @Test
     void shouldThrowWhenWriteModeIsNone() {
-        var config = ImmutableTestWriteConfig.builder().writeProperty("writeProp").build();
+        var config = TestWriteConfigImpl.builder().writeProperty("writeProp").build();
 
         assertThatThrownBy(() -> executeWrite(config, PropertyState.PERSISTENT, WriteMode.NONE))
             .hasMessageContaining("cannot write back to a database");

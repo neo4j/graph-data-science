@@ -51,11 +51,11 @@ import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.nodeproperties.IdentityPropertyValues;
 import org.neo4j.gds.termination.TerminationMonitor;
-import org.neo4j.gds.test.ImmutableTestMutateConfig;
 import org.neo4j.gds.test.TestAlgoResultBuilder;
 import org.neo4j.gds.test.TestAlgorithm;
 import org.neo4j.gds.test.TestAlgorithmResult;
 import org.neo4j.gds.test.TestMutateConfig;
+import org.neo4j.gds.test.TestMutateConfigImpl;
 import org.neo4j.gds.test.TestResult;
 
 import java.util.List;
@@ -106,7 +106,7 @@ class MutatePropertyComputationResultConsumerTest {
         var computationResult = getComputationResult(
             graphStore,
             graphStore.getUnion(),
-            ImmutableTestMutateConfig.builder().mutateProperty("mutateProperty").build()
+            TestMutateConfigImpl.builder().mutateProperty("mutateProperty").build()
         );
 
         mutateResultConsumer.consume(computationResult, executionContext);
@@ -142,7 +142,7 @@ class MutatePropertyComputationResultConsumerTest {
         var computationResult = getComputationResult(
             graphStore,
             filteredGraph,
-            ImmutableTestMutateConfig.builder().addNodeLabel("A").mutateProperty(mutateProperty).build()
+            TestMutateConfigImpl.builder().nodeLabels(List.of("A")).mutateProperty(mutateProperty).build()
         );
 
         mutateResultConsumer.consume(computationResult, executionContext);

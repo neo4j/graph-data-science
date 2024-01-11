@@ -22,7 +22,6 @@ package org.neo4j.gds.core.model;
 import org.eclipse.collections.impl.Counter;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.core.model.Model.CustomInfo;
@@ -332,16 +331,9 @@ class OpenModelCatalogTest {
         assertEquals(0, modelCatalog.list(USERNAME).size());
     }
 
-    @ValueClass
     @Configuration("ModelCatalogTestTrainConfigImpl")
-    @SuppressWarnings("immutables:subtype")
     interface ModelCatalogTestTrainConfig extends BaseConfig, ModelConfig {
-
         long serialVersionUID = 0x42L;
-
-        static ModelCatalogTestTrainConfig of() {
-            return ImmutableModelCatalogTestTrainConfig.of("username", "modelName");
-        }
     }
 
 }

@@ -19,22 +19,16 @@
  */
 package org.neo4j.gds.test;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface TestConfig extends AlgoBaseConfig {
 
-    @Value.Default
     default int maxIterations() {
         return 20;
     }
 
-    @Value.Default
     default boolean throwInCompute() {
         return false;
     }
