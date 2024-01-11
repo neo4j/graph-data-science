@@ -20,29 +20,22 @@
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.paths.SourceTargetShortestPathBaseConfig;
 import org.neo4j.gds.paths.astar.AStarMemoryEstimateDefinition;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
-import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
 import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateDefinition;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraMutateConfig;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraMutateConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
-import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig;
 import org.neo4j.gds.paths.yens.YensMemoryEstimateDefinition;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensMutateConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
-import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 
@@ -62,32 +55,19 @@ import java.util.Optional;
  * We delegate downwards for the actual computations.
  * But importantly, this is where we decide which, if any, mutate or write hooks need to be injected.
  */
-public class PathFindingAlgorithmsFacade {
-    private final Log log;
-
+public class PathFindingAlgorithmsBusinessFacade {
     private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
     private final AlgorithmEstimationTemplate algorithmEstimationTemplate;
-    private final RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
-    private final TaskRegistryFactory taskRegistryFactory;
-    private final TerminationFlag terminationFlag;
 
     private final PathFindingAlgorithms pathFindingAlgorithms;
 
-    public PathFindingAlgorithmsFacade(
-        Log log,
+    public PathFindingAlgorithmsBusinessFacade(
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
-        RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
         PathFindingAlgorithms pathFindingAlgorithms
     ) {
-        this.log = log;
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
-        this.relationshipStreamExporterBuilder = relationshipStreamExporterBuilder;
-        this.terminationFlag = terminationFlag;
         this.pathFindingAlgorithms = pathFindingAlgorithms;
-        this.taskRegistryFactory = taskRegistryFactory;
         this.algorithmEstimationTemplate = algorithmEstimationTemplate;
     }
 
@@ -134,30 +114,6 @@ public class PathFindingAlgorithmsFacade {
             () -> new AStarMemoryEstimateDefinition().memoryEstimation(configuration),
             graph -> pathFindingAlgorithms.singlePairShortestPathAStar(graph, configuration),
             Optional.empty(),
-            resultBuilder
-        );
-    }
-
-    public <RESULT> RESULT singlePairShortestPathAStarWrite(
-        GraphName graphName,
-        ShortestPathAStarWriteConfig configuration,
-        ResultBuilder<PathFindingResult, RESULT> resultBuilder
-    ) {
-        var writeStep = new ShortestPathWriteStep<>(
-            log,
-            relationshipStreamExporterBuilder,
-            taskRegistryFactory,
-            terminationFlag,
-            configuration
-        );
-
-        return algorithmProcessingTemplate.processAlgorithm(
-            graphName,
-            configuration,
-            "AStar",
-            () -> new AStarMemoryEstimateDefinition().memoryEstimation(configuration),
-            graph -> pathFindingAlgorithms.singlePairShortestPathAStar(graph, configuration),
-            Optional.of(writeStep),
             resultBuilder
         );
     }
@@ -209,30 +165,6 @@ public class PathFindingAlgorithmsFacade {
         );
     }
 
-    public <RESULT> RESULT singlePairShortestPathDijkstraWrite(
-        GraphName graphName,
-        ShortestPathDijkstraWriteConfig configuration,
-        ResultBuilder<PathFindingResult, RESULT> resultBuilder
-    ) {
-        var writeStep = new ShortestPathWriteStep<>(
-            log,
-            relationshipStreamExporterBuilder,
-            taskRegistryFactory,
-            terminationFlag,
-            configuration
-        );
-
-        return algorithmProcessingTemplate.processAlgorithm(
-            graphName,
-            configuration,
-            "Dijkstra",
-            () -> new DijkstraMemoryEstimateDefinition().memoryEstimation(configuration),
-            graph -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
-            Optional.of(writeStep),
-            resultBuilder
-        );
-    }
-
     public MemoryEstimateResult singlePairShortestPathYensEstimate(
         ShortestPathYensBaseConfig configuration,
         Object graphNameOrConfiguration
@@ -276,30 +208,6 @@ public class PathFindingAlgorithmsFacade {
             () -> new YensMemoryEstimateDefinition().memoryEstimation(configuration),
             graph -> pathFindingAlgorithms.singlePairShortestPathYens(graph, configuration),
             Optional.empty(),
-            resultBuilder
-        );
-    }
-
-    public <RESULT> RESULT singlePairShortestPathYensWrite(
-        GraphName graphName,
-        ShortestPathYensWriteConfig configuration,
-        ResultBuilder<PathFindingResult, RESULT> resultBuilder
-    ) {
-        var writeStep = new ShortestPathWriteStep<>(
-            log,
-            relationshipStreamExporterBuilder,
-            taskRegistryFactory,
-            terminationFlag,
-            configuration
-        );
-
-        return algorithmProcessingTemplate.processAlgorithm(
-            graphName,
-            configuration,
-            "Yens",
-            () -> new YensMemoryEstimateDefinition().memoryEstimation(configuration),
-            graph -> pathFindingAlgorithms.singlePairShortestPathYens(graph, configuration),
-            Optional.of(writeStep),
             resultBuilder
         );
     }

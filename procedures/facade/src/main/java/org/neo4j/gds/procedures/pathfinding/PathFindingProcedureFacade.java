@@ -23,7 +23,8 @@ import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsFacade;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsBusinessFacade;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
@@ -61,14 +62,16 @@ public class PathFindingProcedureFacade {
     private final ProcedureReturnColumns procedureReturnColumns;
 
     // delegate
-    private final PathFindingAlgorithmsFacade facade;
+    private final PathFindingAlgorithmsBusinessFacade facade;
+    private final PathFindingAlgorithmsWriteModeBusinessFacade writeModeFacade;
 
     public PathFindingProcedureFacade(
         CloseableResourceRegistry closeableResourceRegistry,
         ConfigurationCreator configurationCreator,
         NodeLookup nodeLookup,
         ProcedureReturnColumns procedureReturnColumns,
-        PathFindingAlgorithmsFacade facade
+        PathFindingAlgorithmsBusinessFacade facade,
+        PathFindingAlgorithmsWriteModeBusinessFacade writeModeFacade
     ) {
         this.closeableResourceRegistry = closeableResourceRegistry;
         this.configurationCreator = configurationCreator;
@@ -76,6 +79,7 @@ public class PathFindingProcedureFacade {
         this.procedureReturnColumns = procedureReturnColumns;
 
         this.facade = facade;
+        this.writeModeFacade = writeModeFacade;
     }
 
     public Stream<PathFindingMutateResult> singlePairShortestPathAStarMutate(
@@ -145,7 +149,7 @@ public class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 ShortestPathAStarWriteConfig::of,
-                facade::singlePairShortestPathAStarWrite
+                writeModeFacade::singlePairShortestPathAStarWrite
             )
         );
     }
@@ -233,7 +237,7 @@ public class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 ShortestPathDijkstraWriteConfig::of,
-                facade::singlePairShortestPathDijkstraWrite
+                writeModeFacade::singlePairShortestPathDijkstraWrite
             )
         );
     }
@@ -321,7 +325,7 @@ public class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 ShortestPathYensWriteConfig::of,
-                facade::singlePairShortestPathYensWrite
+                writeModeFacade::singlePairShortestPathYensWrite
             )
         );
     }
