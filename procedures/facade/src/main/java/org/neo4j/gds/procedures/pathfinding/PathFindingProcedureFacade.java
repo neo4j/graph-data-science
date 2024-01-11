@@ -23,7 +23,9 @@ import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsBusinessFacade;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -62,7 +64,9 @@ public class PathFindingProcedureFacade {
     private final ProcedureReturnColumns procedureReturnColumns;
 
     // delegate
-    private final PathFindingAlgorithmsBusinessFacade facade;
+    private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeFacade;
+    private final PathFindingAlgorithmsMutateModeBusinessFacade mutateModeFacade;
+    private final PathFindingAlgorithmsStreamModeBusinessFacade streamModeFacade;
     private final PathFindingAlgorithmsWriteModeBusinessFacade writeModeFacade;
 
     public PathFindingProcedureFacade(
@@ -70,7 +74,9 @@ public class PathFindingProcedureFacade {
         ConfigurationCreator configurationCreator,
         NodeLookup nodeLookup,
         ProcedureReturnColumns procedureReturnColumns,
-        PathFindingAlgorithmsBusinessFacade facade,
+        PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeFacade,
+        PathFindingAlgorithmsMutateModeBusinessFacade mutateModeFacade,
+        PathFindingAlgorithmsStreamModeBusinessFacade streamModeFacade,
         PathFindingAlgorithmsWriteModeBusinessFacade writeModeFacade
     ) {
         this.closeableResourceRegistry = closeableResourceRegistry;
@@ -78,7 +84,9 @@ public class PathFindingProcedureFacade {
         this.nodeLookup = nodeLookup;
         this.procedureReturnColumns = procedureReturnColumns;
 
-        this.facade = facade;
+        this.estimationModeFacade = estimationModeFacade;
+        this.mutateModeFacade = mutateModeFacade;
+        this.streamModeFacade = streamModeFacade;
         this.writeModeFacade = writeModeFacade;
     }
 
@@ -91,7 +99,7 @@ public class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 ShortestPathAStarMutateConfig::of,
-                facade::singlePairShortestPathAStarMutate
+                mutateModeFacade::singlePairShortestPathAStarMutate
             )
         );
     }
@@ -103,7 +111,7 @@ public class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             ShortestPathAStarMutateConfig::of,
-            configuration -> facade.singlePairShortestPathAStarEstimate(
+            configuration -> estimationModeFacade.singlePairShortestPathAStarEstimate(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -120,7 +128,7 @@ public class PathFindingProcedureFacade {
             graphName,
             configuration,
             ShortestPathAStarStreamConfig::of,
-            facade::singlePairShortestPathAStarStream
+            streamModeFacade::singlePairShortestPathAStarStream
         );
     }
 
@@ -131,7 +139,7 @@ public class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             ShortestPathAStarStreamConfig::of,
-            configuration -> facade.singlePairShortestPathAStarEstimate(
+            configuration -> estimationModeFacade.singlePairShortestPathAStarEstimate(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -161,7 +169,7 @@ public class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             ShortestPathAStarWriteConfig::of,
-            configuration -> facade.singlePairShortestPathAStarEstimate(
+            configuration -> estimationModeFacade.singlePairShortestPathAStarEstimate(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -179,7 +187,7 @@ public class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 ShortestPathDijkstraMutateConfig::of,
-                facade::singlePairShortestPathDijkstraMutate
+                mutateModeFacade::singlePairShortestPathDijkstraMutate
             )
         );
     }
@@ -191,7 +199,7 @@ public class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             ShortestPathDijkstraMutateConfig::of,
-            configuration -> facade.singlePairShortestPathDijkstraEstimate(
+            configuration -> estimationModeFacade.singlePairShortestPathDijkstraEstimate(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -208,7 +216,7 @@ public class PathFindingProcedureFacade {
             graphName,
             configuration,
             ShortestPathDijkstraStreamConfig::of,
-            facade::singlePairShortestPathDijkstraStream
+            streamModeFacade::singlePairShortestPathDijkstraStream
         );
     }
 
@@ -219,7 +227,7 @@ public class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             ShortestPathDijkstraStreamConfig::of,
-            configuration -> facade.singlePairShortestPathDijkstraEstimate(
+            configuration -> estimationModeFacade.singlePairShortestPathDijkstraEstimate(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -249,7 +257,7 @@ public class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             ShortestPathDijkstraWriteConfig::of,
-            configuration -> facade.singlePairShortestPathDijkstraEstimate(
+            configuration -> estimationModeFacade.singlePairShortestPathDijkstraEstimate(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -267,7 +275,7 @@ public class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 ShortestPathYensMutateConfig::of,
-                facade::singlePairShortestPathYensMutate
+                mutateModeFacade::singlePairShortestPathYensMutate
             )
         );
     }
@@ -279,7 +287,7 @@ public class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             ShortestPathYensMutateConfig::of,
-            configuration -> facade.singlePairShortestPathYensEstimate(
+            configuration -> estimationModeFacade.singlePairShortestPathYensEstimate(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -296,7 +304,7 @@ public class PathFindingProcedureFacade {
             graphName,
             configuration,
             ShortestPathYensStreamConfig::of,
-            facade::singlePairShortestPathYensStream
+            streamModeFacade::singlePairShortestPathYensStream
         );
     }
 
@@ -307,7 +315,7 @@ public class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             ShortestPathYensStreamConfig::of,
-            configuration -> facade.singlePairShortestPathYensEstimate(
+            configuration -> estimationModeFacade.singlePairShortestPathYensEstimate(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -337,7 +345,7 @@ public class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             ShortestPathYensWriteConfig::of,
-            configuration -> facade.singlePairShortestPathYensEstimate(
+            configuration -> estimationModeFacade.singlePairShortestPathYensEstimate(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -355,7 +363,7 @@ public class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 AllShortestPathsDijkstraMutateConfig::of,
-                facade::singleSourceShortestPathDijkstraMutate
+                mutateModeFacade::singleSourceShortestPathDijkstraMutate
             )
         );
     }
@@ -368,7 +376,7 @@ public class PathFindingProcedureFacade {
             graphName,
             configuration,
             AllShortestPathsDijkstraStreamConfig::of,
-            facade::singleSourceShortestPathDijkstraStream
+            streamModeFacade::singleSourceShortestPathDijkstraStream
         );
     }
 

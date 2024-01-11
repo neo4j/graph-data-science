@@ -55,7 +55,9 @@ import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsBusinessFacade;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
@@ -232,9 +234,15 @@ class AlgorithmProcedureFacadeProvider {
             userLogRegistryFactory
         );
 
-        var pathFindingAlgorithmsFacade = new PathFindingAlgorithmsBusinessFacade(
+        var estimationModeFacade = new PathFindingAlgorithmsEstimationModeBusinessFacade(algorithmEstimationTemplate);
+
+        var mutateModeFacade = new PathFindingAlgorithmsMutateModeBusinessFacade(
             algorithmProcessingTemplate,
-            algorithmEstimationTemplate,
+            pathFindingAlgorithms
+        );
+
+        var streamModeFacade = new PathFindingAlgorithmsStreamModeBusinessFacade(
+            algorithmProcessingTemplate,
             pathFindingAlgorithms
         );
 
@@ -252,7 +260,9 @@ class AlgorithmProcedureFacadeProvider {
             configurationCreator,
             nodeLookup,
             returnColumns,
-            pathFindingAlgorithmsFacade,
+            estimationModeFacade,
+            mutateModeFacade,
+            streamModeFacade,
             writeModeFacade
         );
     }
