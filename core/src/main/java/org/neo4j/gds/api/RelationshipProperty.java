@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.api;
 
-import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
@@ -32,27 +31,22 @@ public interface RelationshipProperty {
 
     RelationshipPropertySchema propertySchema();
 
-    @Configuration.Ignore
     default String key() {
         return propertySchema().key();
     }
 
-    @Configuration.Ignore
     default ValueType valueType() {
         return propertySchema().valueType();
     }
 
-    @Configuration.Ignore
     default DefaultValue defaultValue() {
         return propertySchema().defaultValue();
     }
 
-    @Configuration.Ignore
     default PropertyState propertyState() {
         return propertySchema().state();
     }
 
-    @Configuration.Ignore
     default Aggregation aggregation() {
         return propertySchema().aggregation();
     }
