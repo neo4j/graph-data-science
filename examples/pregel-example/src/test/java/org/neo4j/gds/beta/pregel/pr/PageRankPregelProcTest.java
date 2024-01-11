@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.beta.pregel.pr;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
@@ -29,10 +30,10 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
-import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.Matchers.closeTo;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 import static org.neo4j.gds.TestSupport.assertCypherMemoryEstimation;
 import static org.neo4j.gds.beta.pregel.pr.PageRankPregel.PAGE_RANK;
 
@@ -75,24 +76,24 @@ class PageRankPregelProcTest extends BaseProcTest {
     @Inject
     private IdFunction idFunction;
 
-    private List<Map<String, Object>> expected;
+    private Map<Long, Double> expected;
 
     @BeforeEach
     void setup() throws Exception {
         registerProcedures(GraphProjectProc.class, PageRankPregelStreamProc.class, PageRankPregelMutateProc.class);
 
-        expected = List.of(
-            Map.of("nodeId", idFunction.of("a"), "score", closeTo(0.0276D, RESULT_ERROR)),
-            Map.of("nodeId", idFunction.of("b"), "score", closeTo(0.3483D, RESULT_ERROR)),
-            Map.of("nodeId", idFunction.of("c"), "score", closeTo(0.2650D, RESULT_ERROR)),
-            Map.of("nodeId", idFunction.of("d"), "score", closeTo(0.0330D, RESULT_ERROR)),
-            Map.of("nodeId", idFunction.of("e"), "score", closeTo(0.0682D, RESULT_ERROR)),
-            Map.of("nodeId", idFunction.of("f"), "score", closeTo(0.0330D, RESULT_ERROR)),
-            Map.of("nodeId", idFunction.of("g"), "score", closeTo(0.0136D, RESULT_ERROR)),
-            Map.of("nodeId", idFunction.of("h"), "score", closeTo(0.0136D, RESULT_ERROR)),
-            Map.of("nodeId", idFunction.of("i"), "score", closeTo(0.0136D, RESULT_ERROR)),
-            Map.of("nodeId", idFunction.of("j"), "score", closeTo(0.0136D, RESULT_ERROR)),
-            Map.of("nodeId", idFunction.of("k"), "score", closeTo(0.0136D, RESULT_ERROR))
+        expected = Map.ofEntries(
+            Map.entry(idFunction.of("a"), 0.0276D),
+            Map.entry(idFunction.of("b"), 0.3483D),
+            Map.entry(idFunction.of("c"), 0.2650D),
+            Map.entry(idFunction.of("d"), 0.0330D),
+            Map.entry(idFunction.of("e"), 0.0682D),
+            Map.entry(idFunction.of("f"), 0.0330D),
+            Map.entry(idFunction.of("g"), 0.0136D),
+            Map.entry(idFunction.of("h"), 0.0136D),
+            Map.entry(idFunction.of("i"), 0.0136D),
+            Map.entry(idFunction.of("j"), 0.0136D),
+            Map.entry(idFunction.of("k"), 0.0136D)
         );
     }
 
@@ -105,7 +106,17 @@ class PageRankPregelProcTest extends BaseProcTest {
             .addParameter("maxIterations", 10)
             .yields("nodeId", "values");
 
-        assertCypherResult(query + " RETURN nodeId, values.pagerank AS score", expected);
+        var rowCount = runQueryWithRowConsumer(
+            query + " RETURN nodeId as nodeId, values.pagerank AS score",
+            resultRow -> {
+                var nodeId = resultRow.getNumber("nodeId").longValue();
+                var expectedScore = expected.get(nodeId);
+                assertThat(resultRow.getNumber("score"))
+                    .asInstanceOf(DOUBLE).isCloseTo(expectedScore, Offset.offset(RESULT_ERROR));
+            }
+        );
+
+        assertThat(rowCount).isEqualTo(expected.size());
     }
 
     @Test
@@ -148,6 +159,16 @@ class PageRankPregelProcTest extends BaseProcTest {
             .addParameter("seedProperty", "value_" + PAGE_RANK)
             .yields("nodeId", "values");
 
-        assertCypherResult(query + " RETURN nodeId, values.pagerank AS score", expected);
+        var rowCount = runQueryWithRowConsumer(
+            query + " RETURN nodeId, values.pagerank AS score",
+            resultRow -> {
+                var nodeId = resultRow.getNumber("nodeId").longValue();
+                var expectedScore = expected.get(nodeId);
+                assertThat(resultRow.getNumber("score"))
+                    .asInstanceOf(DOUBLE).isCloseTo(expectedScore, Offset.offset(RESULT_ERROR));
+            }
+        );
+
+        assertThat(rowCount).isEqualTo(expected.size());
     }
 }
