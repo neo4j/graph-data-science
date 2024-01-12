@@ -35,6 +35,7 @@ import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraMutateConfig;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
+import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraWriteConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraMutateConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig;
@@ -368,6 +369,22 @@ public class PathFindingProcedureFacade {
         );
     }
 
+    public Stream<MemoryEstimateResult> singleSourceShortestPathDijkstraMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = runEstimation(
+            algorithmConfiguration,
+            AllShortestPathsDijkstraMutateConfig::of,
+            configuration -> estimationModeFacade.singleSourceShortestPathDijkstraEstimate(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
     public Stream<PathFindingStreamResult> singleSourceShortestPathDijkstraStream(
         String graphName,
         Map<String, Object> configuration
@@ -378,6 +395,52 @@ public class PathFindingProcedureFacade {
             AllShortestPathsDijkstraStreamConfig::of,
             streamModeFacade::singleSourceShortestPathDijkstraStream
         );
+    }
+
+    public Stream<MemoryEstimateResult> singleSourceShortestPathDijkstraStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = runEstimation(
+            algorithmConfiguration,
+            AllShortestPathsDijkstraStreamConfig::of,
+            configuration -> estimationModeFacade.singleSourceShortestPathDijkstraEstimate(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<StandardWriteRelationshipsResult> singleSourceShortestPathDijkstraWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        return Stream.of(
+            runWriteAlgorithm(
+                graphName,
+                configuration,
+                AllShortestPathsDijkstraWriteConfig::of,
+                writeModeFacade::singleSourceShortestPathDijkstraWrite
+            )
+        );
+    }
+
+    public Stream<MemoryEstimateResult> singleSourceShortestPathDijkstraWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = runEstimation(
+            algorithmConfiguration,
+            AllShortestPathsDijkstraWriteConfig::of,
+            configuration -> estimationModeFacade.singleSourceShortestPathDijkstraEstimate(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
     }
 
     /**

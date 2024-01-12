@@ -19,16 +19,7 @@
  */
 package org.neo4j.gds.paths.singlesource.dijkstra;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.executor.ProcedureExecutorSpec;
-import org.neo4j.gds.paths.dijkstra.Dijkstra;
-import org.neo4j.gds.paths.dijkstra.PathFindingResult;
-import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraWriteConfig;
-
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 import org.neo4j.procedure.Context;
@@ -39,29 +30,22 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.ProcedureConstants.ESTIMATE_DESCRIPTION;
 import static org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants.DIJKSTRA_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class AllShortestPathsDijkstraWriteProc extends BaseProc {
-
+public class AllShortestPathsDijkstraWriteProc {
     @Context
-    public RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
+    public GraphDataScience facade;
 
     @Procedure(name = "gds.allShortestPaths.dijkstra.write", mode = WRITE)
     @Description(DIJKSTRA_DESCRIPTION)
-    public Stream<StandardWriteRelationshipsResult> stream(
+    public Stream<StandardWriteRelationshipsResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var writeSpec = new AllShortestPathsDijkstraWriteSpec();
-        var pipelineSpec = new ProcedureExecutorSpec<Dijkstra, PathFindingResult, AllShortestPathsDijkstraWriteConfig>();
-
-        return new ProcedureExecutor<>(
-            writeSpec,
-            pipelineSpec,
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.pathFinding().singleSourceShortestPathDijkstraWrite(graphName, configuration);
     }
 
     @Procedure(name = "gds.allShortestPaths.dijkstra.write.estimate", mode = READ)
@@ -70,19 +54,9 @@ public class AllShortestPathsDijkstraWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        var writeSpec = new AllShortestPathsDijkstraWriteSpec();
-        var pipelineSpec = new ProcedureExecutorSpec<Dijkstra, PathFindingResult, AllShortestPathsDijkstraWriteConfig>();
-
-        return new MemoryEstimationExecutor<>(
-            writeSpec,
-            pipelineSpec,
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withRelationshipStreamExporterBuilder(relationshipStreamExporterBuilder);
+        return facade.pathFinding().singleSourceShortestPathDijkstraWriteEstimate(
+            graphNameOrConfiguration,
+            algoConfiguration
+        );
     }
 }

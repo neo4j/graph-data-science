@@ -19,14 +19,8 @@
  */
 package org.neo4j.gds.paths.singlesource.dijkstra;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutorSpec;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.pathfinding.PathFindingStreamResult;
-import org.neo4j.gds.paths.dijkstra.Dijkstra;
-import org.neo4j.gds.paths.dijkstra.PathFindingResult;
-import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -36,10 +30,11 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.ProcedureConstants.ESTIMATE_DESCRIPTION;
 import static org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants.DIJKSTRA_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class AllShortestPathsDijkstraStreamProc extends BaseProc {
+public class AllShortestPathsDijkstraStreamProc {
     @Context
     public GraphDataScience facade;
 
@@ -58,14 +53,9 @@ public class AllShortestPathsDijkstraStreamProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        var deltaStreamSpec = new AllShortestPathsDijkstraStreamSpec();
-        var pipelineSpec = new ProcedureExecutorSpec<Dijkstra, PathFindingResult, AllShortestPathsDijkstraStreamConfig>();
-
-        return new MemoryEstimationExecutor<>(
-            deltaStreamSpec,
-            pipelineSpec,
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.pathFinding().singleSourceShortestPathDijkstraStreamEstimate(
+            graphNameOrConfiguration,
+            algoConfiguration
+        );
     }
 }

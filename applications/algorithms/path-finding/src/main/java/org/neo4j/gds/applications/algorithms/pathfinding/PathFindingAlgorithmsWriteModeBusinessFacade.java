@@ -32,6 +32,7 @@ import org.neo4j.gds.paths.astar.AStarMemoryEstimateDefinition;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
 import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateDefinition;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraWriteConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig;
 import org.neo4j.gds.paths.yens.YensMemoryEstimateDefinition;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
@@ -115,6 +116,21 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             YENS,
             () -> new YensMemoryEstimateDefinition().memoryEstimation(configuration),
             graph -> pathFindingAlgorithms.singlePairShortestPathYens(graph, configuration),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT singleSourceShortestPathDijkstraWrite(
+        GraphName graphName,
+        AllShortestPathsDijkstraWriteConfig configuration,
+        ResultBuilder<PathFindingResult, RESULT> resultBuilder
+    ) {
+        return runAlgorithmAndWrite(
+            graphName,
+            configuration,
+            DIJKSTRA,
+            () -> new DijkstraMemoryEstimateDefinition().memoryEstimation(configuration),
+            graph -> pathFindingAlgorithms.singleSourceShortestPathDijkstra(graph, configuration),
             resultBuilder
         );
     }
