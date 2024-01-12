@@ -17,18 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.hashgnn;
+package org.neo4j.gds.procedures.embeddings.hashgnn;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
-public final class StreamResult {
+public final class HashGNNStreamResult {
     public final long nodeId;
     public final List<Double> embedding;
 
-    StreamResult(long nodeId, double[] embeddings) {
+    public HashGNNStreamResult(long nodeId, double[] embeddings) {
         this.nodeId = nodeId;
         this.embedding = Arrays.stream(embeddings).boxed().collect(Collectors.toList());
     }

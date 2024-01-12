@@ -32,6 +32,8 @@ import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNMutateConfig;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNStreamConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
@@ -39,6 +41,7 @@ import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.embeddings.fastrp.FastRPStreamResult;
 import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageStreamResult;
 import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageTrainResult;
+import org.neo4j.gds.procedures.embeddings.hashgnn.HashGNNStreamResult;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecMutateResult;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecStreamResult;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecWriteResult;
@@ -309,5 +312,52 @@ public class NodeEmbeddingsProcedureFacade {
 
         return Stream.of(estimateBusinessFacade.fastRP(graphNameOrConfiguration, config));
     }
+
+    public Stream<HashGNNStreamResult> HashGNNStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var streamConfig = configurationCreator.createConfigurationForStream(configuration, HashGNNStreamConfig::of);
+
+        var computationResult = streamBusinessFacade.hashGNN(
+            graphName,
+            streamConfig
+        );
+
+        return HashGNNComputationalResultTransformer.toStreamResult(computationResult);
+    }
+
+    public Stream<DefaultNodeEmbeddingMutateResult> HashGNNMutate(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var mutateConfig = configurationCreator.createConfiguration(configuration, HashGNNMutateConfig::of);
+
+        var computationResult = mutateBusinessFacade.hashGNN(
+            graphName,
+            mutateConfig
+        );
+
+        return Stream.of(DefaultNodeEmbeddingsComputationalResultTransformer.toMutateResult(computationResult));
+    }
+
+    public Stream<MemoryEstimateResult> HashGNNStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
+        var config = configurationCreator.createConfiguration(configuration, HashGNNStreamConfig::of);
+
+        return Stream.of(estimateBusinessFacade.hashGNN(graphNameOrConfiguration, config));
+    }
+
+    public Stream<MemoryEstimateResult> HashGNNMutateEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> configuration
+    ) {
+        var config = configurationCreator.createConfiguration(configuration, HashGNNMutateConfig::of);
+
+        return Stream.of(estimateBusinessFacade.hashGNN(graphNameOrConfiguration, config));
+    }
+
 
 }

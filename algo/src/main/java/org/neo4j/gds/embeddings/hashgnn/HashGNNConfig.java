@@ -29,7 +29,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import java.util.Map;
 import java.util.Optional;
 
-interface HashGNNConfig extends AlgoBaseConfig, FeaturePropertiesConfig, RandomSeedConfig {
+public interface HashGNNConfig extends AlgoBaseConfig, FeaturePropertiesConfig, RandomSeedConfig {
 
     @Configuration.IntegerRange(min = 1)
     int iterations();
