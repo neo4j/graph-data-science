@@ -16,7 +16,6 @@ dependencies {
     implementation project(':csv')
     implementation project(':executor')
     implementation project(':memory-usage')
-    implementation project(':opengds-procedure-facade')
     implementation project(':proc-common')
     implementation project(':proc-embeddings')
     implementation project(':progress-tracking')

@@ -21,15 +21,15 @@ package org.neo4j.gds;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.beta.generator.GraphGenerateProc;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.utils.RenamesCurrentThread;
 import org.neo4j.gds.core.utils.progress.JobId;
-import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
+import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
+import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.extension.FakeClockExtension;
 import org.neo4j.gds.extension.Inject;
-import org.neo4j.gds.procedures.embeddings.fastrp.FastRPStreamResult;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.time.FakeClock;
@@ -55,10 +55,11 @@ class ListProgressProcTest extends BaseProgressTest {
         GraphDatabaseApiProxy.registerProcedures(
             db,
             ListProgressProc.class,
-            GraphGenerateProc.class,
             BaseProgressTestProc.class,
-            ProgressLoggingTestFastRP.class
+            FinishedProc.class
         );
+
+
     }
 
     @Test
@@ -132,38 +133,50 @@ class ListProgressProcTest extends BaseProgressTest {
     @Test
     void progressLoggerShouldEmitProgressEventsOnActualAlgoButClearProgressEventsOnLogFinish() {
         try (var ignored = RenamesCurrentThread.renameThread("Test worker")) {
-            runQuery("CALL gds.graph.generate('foo', 100, 5)");
-            runQuery("CALL gds.test.fakerp('foo', {embeddingDimension: 42})");
+            runQuery("CALL gds.test.plfinished('foo')");
 
             assertCypherResult(
                 "CALL gds.listProgress() YIELD taskName, progress RETURN taskName, progress",
                 List.of(
-                    Map.of("taskName", "FastRP", "progress", "100%")
+                    Map.of("taskName", "foo", "progress", "100%")
                 )
             );
+
+
         }
     }
 
-    public static class ProgressLoggingTestFastRP extends FastRPStreamProc {
+    public static class FinishedProc extends BaseProc {
 
-        @Override
-        @Procedure("gds.test.fastrp")
-        public Stream<FastRPStreamResult> stream(
-            @Name(value = "graphName") String graphName,
-            @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
+        @Procedure("gds.test.plfinished")
+        public Stream<Bar> foo2(
+            @Name(value = "taskName") String taskName
         ) {
-            return super.stream(graphName, configuration);
-        }
-
-        @Procedure("gds.test.fakerp")
-        public Stream<FastRPStreamResult> fakeStream(
-            @Name(value = "graphName") String graphName,
-            @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-        ) {
+            var task = Tasks.task(taskName, Tasks.leaf("bar", 3), Tasks.leaf("bar", 3));
             var taskRegistry = taskRegistryFactory.newInstance(new JobId());
             this.taskRegistryFactory = jobId -> new NonReleasingTaskRegistry(taskRegistry);
-            return super.stream(graphName, configuration);
-        }
 
+            var taskProgressTracker = new TaskProgressTracker(task, Neo4jProxy.testLog(), 1, taskRegistryFactory);
+            taskProgressTracker.beginSubTask();
+
+            taskProgressTracker.beginSubTask();
+            taskProgressTracker.logProgress(1);
+            taskProgressTracker.logProgress(1);
+            taskProgressTracker.logProgress(1);
+
+            taskProgressTracker.endSubTask();
+
+            taskProgressTracker.beginSubTask();
+            taskProgressTracker.logProgress(1);
+            taskProgressTracker.logProgress(1);
+            taskProgressTracker.logProgress(1);
+
+            taskProgressTracker.endSubTask();
+
+            taskProgressTracker.endSubTask();
+
+
+            return Stream.empty();
+        }
     }
 }

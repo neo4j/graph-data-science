@@ -73,6 +73,8 @@ public abstract class BaseProgressTest extends BaseTest {
             taskProgressTracker.logProgress(1);
             return Stream.empty();
         }
+
+
     }
 
     public static class Bar {
