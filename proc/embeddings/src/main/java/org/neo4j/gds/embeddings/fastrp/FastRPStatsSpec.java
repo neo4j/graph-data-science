@@ -31,7 +31,7 @@ import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
 
 @GdsCallable(name = "gds.fastRP.stats", description = "Random Projection produces node embeddings via the fastrp algorithm", executionMode = STATS)
-public class FastRPStatsSpec implements AlgorithmSpec<FastRP, FastRP.FastRPResult, FastRPStatsConfig, Stream<StatsResult>, FastRPFactory<FastRPStatsConfig>> {
+public class FastRPStatsSpec implements AlgorithmSpec<FastRP, FastRPResult, FastRPStatsConfig, Stream<StatsResult>, FastRPFactory<FastRPStatsConfig>> {
     @Override
     public String name() {
         return "FastRPStats";
@@ -48,7 +48,7 @@ public class FastRPStatsSpec implements AlgorithmSpec<FastRP, FastRP.FastRPResul
     }
 
     @Override
-    public ComputationResultConsumer<FastRP, FastRP.FastRPResult, FastRPStatsConfig, Stream<StatsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<FastRP, FastRPResult, FastRPStatsConfig, Stream<StatsResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Stats call failed",
             executionContext.log(),

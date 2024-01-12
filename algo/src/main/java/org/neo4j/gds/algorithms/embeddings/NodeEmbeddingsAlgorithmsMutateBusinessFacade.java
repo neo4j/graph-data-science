@@ -27,6 +27,7 @@ import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
+import org.neo4j.gds.embeddings.fastrp.FastRPMutateConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
 
@@ -78,6 +79,26 @@ public class NodeEmbeddingsAlgorithmsMutateBusinessFacade {
             (result) -> new Long(intermediateResult.algorithmResult.graph().nodeCount()),
             intermediateResult.computeMilliseconds,
             () -> new Long(0)
+        );
+    }
+
+    public NodePropertyMutateResult<Long> fastRP(
+        String graphName,
+        FastRPMutateConfig configuration
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> nodeEmbeddingsAlgorithmsFacade.fastRP(graphName, configuration)
+        );
+
+        return mutateNodeProperty(
+            intermediateResult.algorithmResult,
+            configuration,
+            (result) -> NodePropertyValuesAdapter.adapt(result.embeddings()),
+            (result) -> new Long(intermediateResult.algorithmResult.graph().nodeCount()),
+            intermediateResult.computeMilliseconds,
+            () -> new Long(0)
+
         );
     }
 

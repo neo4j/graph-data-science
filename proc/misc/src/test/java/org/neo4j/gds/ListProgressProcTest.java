@@ -27,9 +27,9 @@ import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.utils.RenamesCurrentThread;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamProc;
-import org.neo4j.gds.embeddings.fastrp.StreamResult;
 import org.neo4j.gds.extension.FakeClockExtension;
 import org.neo4j.gds.extension.Inject;
+import org.neo4j.gds.procedures.embeddings.fastrp.FastRPStreamResult;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 import org.neo4j.time.FakeClock;
@@ -148,7 +148,7 @@ class ListProgressProcTest extends BaseProgressTest {
 
         @Override
         @Procedure("gds.test.fastrp")
-        public Stream<StreamResult> stream(
+        public Stream<FastRPStreamResult> stream(
             @Name(value = "graphName") String graphName,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
         ) {
@@ -156,7 +156,7 @@ class ListProgressProcTest extends BaseProgressTest {
         }
 
         @Procedure("gds.test.fakerp")
-        public Stream<StreamResult> fakeStream(
+        public Stream<FastRPStreamResult> fakeStream(
             @Name(value = "graphName") String graphName,
             @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
         ) {

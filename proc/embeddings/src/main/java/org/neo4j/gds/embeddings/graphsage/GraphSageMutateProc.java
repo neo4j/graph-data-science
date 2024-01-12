@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.procedures.GraphDataScience;
-import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageMutateResult;
+import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -42,7 +42,7 @@ public class GraphSageMutateProc {
 
     @Procedure(value = "gds.beta.graphSage.mutate", mode = Mode.READ)
     @Description(GRAPH_SAGE_DESCRIPTION)
-    public Stream<GraphSageMutateResult> mutate(
+    public Stream<DefaultNodeEmbeddingMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

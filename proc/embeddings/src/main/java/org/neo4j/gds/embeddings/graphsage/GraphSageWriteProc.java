@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.procedures.GraphDataScience;
-import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageWriteResult;
+import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingsWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -41,7 +41,7 @@ public class GraphSageWriteProc {
 
     @Procedure(name = "gds.beta.graphSage.write", mode = Mode.WRITE)
     @Description(GRAPH_SAGE_DESCRIPTION)
-    public Stream<GraphSageWriteResult> write(
+    public Stream<DefaultNodeEmbeddingsWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

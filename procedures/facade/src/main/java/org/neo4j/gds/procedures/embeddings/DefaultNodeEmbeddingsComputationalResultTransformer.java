@@ -19,37 +19,45 @@
  */
 package org.neo4j.gds.procedures.embeddings;
 
-import org.neo4j.gds.algorithms.StreamComputationResult;
+import org.neo4j.gds.algorithms.NodePropertyMutateResult;
+import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.TrainResult;
-import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
-import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageStreamResult;
 import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageTrainResult;
+import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingMutateResult;
+import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingsWriteResult;
 
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
+class DefaultNodeEmbeddingsComputationalResultTransformer {
 
-class GraphSageComputationalResultTransformer {
 
-    static Stream<GraphSageStreamResult> toStreamResult(
-        StreamComputationResult<GraphSageResult> computationResult
-    ) {
-        return computationResult.result().map(graphSageResult -> {
-            var graph = computationResult.graph();
-            var embeddings = graphSageResult.embeddings();
-            return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
-                .mapToObj(internalNodeId -> new GraphSageStreamResult(
-                    graph.toOriginalNodeId(internalNodeId),
-                    embeddings.get(internalNodeId)
-                ));
+    static DefaultNodeEmbeddingMutateResult toMutateResult(NodePropertyMutateResult<Long> mutateResult) {
 
-        }).orElseGet(Stream::empty);
+        return new DefaultNodeEmbeddingMutateResult(
+            mutateResult.algorithmSpecificFields().longValue(),
+            mutateResult.nodePropertiesWritten(),
+            mutateResult.preProcessingMillis(),
+            mutateResult.computeMillis(),
+            mutateResult.mutateMillis(),
+            mutateResult.configuration().toMap()
+        );
+
     }
-    
+
+    static DefaultNodeEmbeddingsWriteResult toWriteResult(NodePropertyWriteResult<Long> writeResult) {
+
+        return new DefaultNodeEmbeddingsWriteResult(
+            writeResult.algorithmSpecificFields().longValue(),
+            writeResult.nodePropertiesWritten(),
+            writeResult.preProcessingMillis(),
+            writeResult.computeMillis(),
+            writeResult.writeMillis(),
+            writeResult.configuration().toMap()
+        );
+
+    }
     static GraphSageTrainResult toTrainResult(
         TrainResult<Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>> trainResult
     ) {

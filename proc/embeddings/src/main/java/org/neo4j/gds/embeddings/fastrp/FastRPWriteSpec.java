@@ -28,6 +28,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingsWriteResult;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -35,7 +36,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.embeddings.fastrp.FastRPCompanion.DESCRIPTION;
 
 @GdsCallable(name = "gds.fastRP.write", description = DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
-public class FastRPWriteSpec implements AlgorithmSpec<FastRP, FastRP.FastRPResult, FastRPWriteConfig, Stream<WriteResult>, FastRPFactory<FastRPWriteConfig>> {
+public class FastRPWriteSpec implements AlgorithmSpec<FastRP, FastRPResult, FastRPWriteConfig, Stream<DefaultNodeEmbeddingsWriteResult>, FastRPFactory<FastRPWriteConfig>> {
     @Override
     public String name() {
         return "FastRPWrite";
@@ -52,7 +53,7 @@ public class FastRPWriteSpec implements AlgorithmSpec<FastRP, FastRP.FastRPResul
     }
 
     @Override
-    public ComputationResultConsumer<FastRP, FastRP.FastRPResult, FastRPWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<FastRP, FastRPResult, FastRPWriteConfig, Stream<DefaultNodeEmbeddingsWriteResult>> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>(
             this::resultBuilder,
             computationResult -> List.of(NodeProperty.of(
@@ -63,10 +64,10 @@ public class FastRPWriteSpec implements AlgorithmSpec<FastRP, FastRP.FastRPResul
         );
     }
 
-    private WriteResult.Builder resultBuilder(
-        ComputationResult<FastRP, FastRP.FastRPResult, FastRPWriteConfig> computeResult,
+    private DefaultNodeEmbeddingsWriteResult.Builder resultBuilder(
+        ComputationResult<FastRP, FastRPResult, FastRPWriteConfig> computeResult,
         ExecutionContext executionContext
     ) {
-        return new WriteResult.Builder();
+        return new DefaultNodeEmbeddingsWriteResult.Builder();
     }
 }

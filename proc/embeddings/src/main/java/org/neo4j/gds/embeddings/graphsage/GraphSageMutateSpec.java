@@ -32,7 +32,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
-import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageMutateResult;
+import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingMutateResult;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -42,7 +42,7 @@ import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.nodeProperty
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 
 @GdsCallable(name = "gds.beta.graphSage.mutate", description = GRAPH_SAGE_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class GraphSageMutateSpec implements AlgorithmSpec<GraphSage, GraphSageResult, GraphSageMutateConfig, Stream<GraphSageMutateResult>, GraphSageAlgorithmFactory<GraphSageMutateConfig>> {
+public class GraphSageMutateSpec implements AlgorithmSpec<GraphSage, GraphSageResult, GraphSageMutateConfig, Stream<DefaultNodeEmbeddingMutateResult>, GraphSageAlgorithmFactory<GraphSageMutateConfig>> {
 
     @Override
     public String name() {
@@ -60,7 +60,7 @@ public class GraphSageMutateSpec implements AlgorithmSpec<GraphSage, GraphSageRe
     }
 
     @Override
-    public ComputationResultConsumer<GraphSage, GraphSageResult, GraphSageMutateConfig, Stream<GraphSageMutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<GraphSage, GraphSageResult, GraphSageMutateConfig, Stream<DefaultNodeEmbeddingMutateResult>> computationResultConsumer() {
         return new MutatePropertyComputationResultConsumer<>(
             this::nodePropertyList,
             this::resultBuilder
@@ -72,11 +72,11 @@ public class GraphSageMutateSpec implements AlgorithmSpec<GraphSage, GraphSageRe
         return new GraphSageConfigurationValidation<>(executionContext.modelCatalog());
     }
 
-    private GraphSageMutateResult.Builder resultBuilder(
+    private DefaultNodeEmbeddingMutateResult.Builder resultBuilder(
         ComputationResult<GraphSage, GraphSageResult, GraphSageMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        return new GraphSageMutateResult.Builder();
+        return new DefaultNodeEmbeddingMutateResult.Builder();
     }
 
     private List<NodeProperty> nodePropertyList(ComputationResult<GraphSage, GraphSageResult, GraphSageMutateConfig> computationResult) {

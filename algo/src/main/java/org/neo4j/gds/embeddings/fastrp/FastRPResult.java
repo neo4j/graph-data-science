@@ -19,18 +19,16 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 
-public final class StreamResult {
-    public final long nodeId;
-    public final List<Double> embedding;
+public class FastRPResult {
+    private final HugeObjectArray<float[]> embeddings;
 
-    StreamResult(long nodeId, float[] embedding) {
-        this.nodeId = nodeId;
-        this.embedding = new ArrayList<>(embedding.length);
-        for (var f : embedding) {
-            this.embedding.add((double) f);
-        }
+    public FastRPResult(HugeObjectArray<float[]> embeddings) {
+        this.embeddings = embeddings;
+    }
+
+    public HugeObjectArray<float[]> embeddings() {
+        return embeddings;
     }
 }

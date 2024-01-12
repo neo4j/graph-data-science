@@ -23,6 +23,9 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.algorithms.validation.AfterLoadValidation;
 import org.neo4j.gds.core.model.Model;
+import org.neo4j.gds.embeddings.fastrp.FastRPBaseConfig;
+import org.neo4j.gds.embeddings.fastrp.FastRPFactory;
+import org.neo4j.gds.embeddings.fastrp.FastRPResult;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
@@ -100,6 +103,18 @@ public class NodeEmbeddingsAlgorithmsFacade {
             config,
             config.relationshipWeightProperty(),
             new GraphSageTrainAlgorithmFactory()
+        );
+    }
+
+    AlgorithmComputationResult<FastRPResult> fastRP(
+        String graphName,
+        FastRPBaseConfig config
+    ) {
+        return algorithmRunner.run(
+            graphName,
+            config,
+            config.relationshipWeightProperty(),
+            new FastRPFactory<>()
         );
     }
 

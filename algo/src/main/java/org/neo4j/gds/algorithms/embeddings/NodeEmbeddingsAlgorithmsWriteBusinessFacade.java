@@ -28,6 +28,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ArrowConnectionInfo;
+import org.neo4j.gds.embeddings.fastrp.FastRPWriteConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
 
@@ -94,6 +95,30 @@ public class NodeEmbeddingsAlgorithmsWriteBusinessFacade {
             configuration.writeConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo()
+        );
+    }
+
+    public NodePropertyWriteResult<Long> fastRP(
+        String graphName,
+        FastRPWriteConfig configuration
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> nodeEmbeddingsAlgorithmsFacade.fastRP(graphName, configuration)
+        );
+
+        return writeToDatabase(
+            intermediateResult.algorithmResult,
+            configuration,
+            (result) -> NodePropertyValuesAdapter.adapt(result.embeddings()),
+            (result) -> new Long(intermediateResult.algorithmResult.graph().nodeCount()),
+            intermediateResult.computeMilliseconds,
+            () -> new Long(0),
+            "FastRPWrite",
+            configuration.writeConcurrency(),
+            configuration.writeProperty(),
+            configuration.arrowConnectionInfo()
+
         );
     }
 
