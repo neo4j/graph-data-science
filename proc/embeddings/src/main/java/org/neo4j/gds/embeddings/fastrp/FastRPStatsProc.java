@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.embeddings.fastrp.FastRPStatsResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -33,18 +33,17 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.embeddings.fastrp.FastRPCompanion.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class FastRPStatsProc extends BaseProc {
+public class FastRPStatsProc {
 
+    @Context
+    public GraphDataScience facade;
     @Procedure(value = "gds.fastRP.stats", mode = READ)
     @Description("Random Projection produces node embeddings via the fastrp algorithm")
-    public Stream<StatsResult> stats(
+    public Stream<FastRPStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new FastRPStatsSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.nodeEmbeddings().fastRPStats(graphName, configuration);
 
     }
 
@@ -54,10 +53,6 @@ public class FastRPStatsProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new FastRPStatsSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.nodeEmbeddings().fastRPStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

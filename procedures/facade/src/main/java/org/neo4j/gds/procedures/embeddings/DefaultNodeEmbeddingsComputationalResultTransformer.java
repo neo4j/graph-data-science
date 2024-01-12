@@ -21,12 +21,6 @@ package org.neo4j.gds.procedures.embeddings;
 
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
-import org.neo4j.gds.algorithms.TrainResult;
-import org.neo4j.gds.core.model.Model;
-import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
-import org.neo4j.gds.embeddings.graphsage.ModelData;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
-import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageTrainResult;
 import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingMutateResult;
 import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingsWriteResult;
 
@@ -58,10 +52,6 @@ class DefaultNodeEmbeddingsComputationalResultTransformer {
         );
 
     }
-    static GraphSageTrainResult toTrainResult(
-        TrainResult<Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>> trainResult
-    ) {
 
-        return new GraphSageTrainResult(trainResult.algorithmSpecificFields(), trainResult.trainMillis());
-    }
+
 }
