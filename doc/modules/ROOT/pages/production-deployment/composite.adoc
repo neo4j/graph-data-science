@@ -110,6 +110,8 @@ NOTE: Currently only xref:management-ops/graph-creation/graph-project-cypher-pro
 Graph algorithms can then be executed on the composite database, similar to a single machine setup.
 This scenario is useful, if a graph that logically represents a single graph is distributed to different Composite shards.
 
+CAUTION: Procedure `write` modes are not supported when GDS is hosted on a composite database.
+
 [[composite-proxy-setup]]
 === Setup
 
