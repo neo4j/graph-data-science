@@ -19,13 +19,22 @@
  */
 package org.neo4j.gds.algorithms.embeddings;
 
+import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.embeddings.specificfields.Node2VecSpecificFields;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.ArrowConnectionInfo;
+import org.neo4j.gds.embeddings.fastrp.FastRPWriteConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
+
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class NodeEmbeddingsAlgorithmsWriteBusinessFacade {
 
@@ -48,72 +57,114 @@ public class NodeEmbeddingsAlgorithmsWriteBusinessFacade {
         var intermediateResult = AlgorithmRunner.runWithTiming(
             () -> nodeEmbeddingsAlgorithmsFacade.node2Vec(graphName, configuration)
         );
-        var algorithmResult = intermediateResult.algorithmResult;
 
-        var writeResultBuilder = NodePropertyWriteResult.<Node2VecSpecificFields>builder()
-            .computeMillis(intermediateResult.computeMilliseconds)
-            .postProcessingMillis(0L)
-            .configuration(configuration);
-
-        algorithmResult.result().ifPresentOrElse(
-            result -> {
-                var nodeCount = algorithmResult.graph().nodeCount();
-                var nodeProperties = new FloatEmbeddingNodePropertyValues(result.embeddings());
-                var writeResult = writeNodePropertyService.write(
-                    algorithmResult.graph(),
-                    algorithmResult.graphStore(),
-                    nodeProperties,
-                    configuration.writeConcurrency(),
-                    configuration.writeProperty(),
-                    "Node2VecWrite",
-                    configuration.arrowConnectionInfo()
-                );
-                writeResultBuilder.writeMillis(writeResult.writeMilliseconds());
-                writeResultBuilder.nodePropertiesWritten(writeResult.nodePropertiesWritten());
-                writeResultBuilder.algorithmSpecificFields(new Node2VecSpecificFields(nodeCount,result.lossPerIteration()));
-            },
-            () -> writeResultBuilder.algorithmSpecificFields(Node2VecSpecificFields.EMPTY)
+        return writeToDatabase(
+            intermediateResult.algorithmResult,
+            configuration,
+            (result) -> new FloatEmbeddingNodePropertyValues(result.embeddings()),
+            (result) -> new Node2VecSpecificFields(
+                intermediateResult.algorithmResult.graph().nodeCount(),
+                result.lossPerIteration()
+            ),
+            intermediateResult.computeMilliseconds,
+            () -> Node2VecSpecificFields.EMPTY,
+            "Node2VecWrite",
+            configuration.writeConcurrency(),
+            configuration.writeProperty(),
+            configuration.arrowConnectionInfo()
         );
-
-        return writeResultBuilder.build();
     }
 
     public NodePropertyWriteResult<Long> graphSage(
         String graphName,
         GraphSageWriteConfig configuration
     ) {
-        // 1. Run the algorithm and time the execution
+
         var intermediateResult = AlgorithmRunner.runWithTiming(
             () -> nodeEmbeddingsAlgorithmsFacade.graphSage(graphName, configuration)
         );
-        var algorithmResult = intermediateResult.algorithmResult;
 
-        var writeResultBuilder = NodePropertyWriteResult.<Long>builder()
-            .computeMillis(intermediateResult.computeMilliseconds)
-            .postProcessingMillis(0L)
-            .configuration(configuration);
+        return writeToDatabase(
+            intermediateResult.algorithmResult,
+            configuration,
+            (result) -> NodePropertyValuesAdapter.adapt(result.embeddings()),
+            (result) -> new Long(intermediateResult.algorithmResult.graph().nodeCount()),
+            intermediateResult.computeMilliseconds,
+            () -> new Long(0),
+            "GraphSageWrite",
+            configuration.writeConcurrency(),
+            configuration.writeProperty(),
+            configuration.arrowConnectionInfo()
+        );
+    }
 
-        algorithmResult.result().ifPresentOrElse(
-            result -> {
-                var nodeCount = algorithmResult.graph().nodeCount();
-                var nodeProperties = NodePropertyValuesAdapter.adapt(result.embeddings());
-                var writeResult = writeNodePropertyService.write(
-                    algorithmResult.graph(),
-                    algorithmResult.graphStore(),
-                    nodeProperties,
-                    configuration.writeConcurrency(),
-                    configuration.writeProperty(),
-                    "GraphSageWrite",
-                    configuration.arrowConnectionInfo()
-                );
-                writeResultBuilder.writeMillis(writeResult.writeMilliseconds());
-                writeResultBuilder.nodePropertiesWritten(writeResult.nodePropertiesWritten());
-                writeResultBuilder.algorithmSpecificFields(nodeCount);
-            },
-            () -> writeResultBuilder.algorithmSpecificFields(0l)
+    public NodePropertyWriteResult<Long> fastRP(
+        String graphName,
+        FastRPWriteConfig configuration
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> nodeEmbeddingsAlgorithmsFacade.fastRP(graphName, configuration)
         );
 
-        return writeResultBuilder.build();
+        return writeToDatabase(
+            intermediateResult.algorithmResult,
+            configuration,
+            (result) -> NodePropertyValuesAdapter.adapt(result.embeddings()),
+            (result) -> new Long(intermediateResult.algorithmResult.graph().nodeCount()),
+            intermediateResult.computeMilliseconds,
+            () -> new Long(0),
+            "FastRPWrite",
+            configuration.writeConcurrency(),
+            configuration.writeProperty(),
+            configuration.arrowConnectionInfo()
+
+        );
+    }
+
+    <RESULT, CONFIG extends AlgoBaseConfig, ASF> NodePropertyWriteResult<ASF> writeToDatabase(
+        AlgorithmComputationResult<RESULT> algorithmResult,
+        CONFIG configuration,
+        Function<RESULT, NodePropertyValues> nodePropertyValuesSupplier,
+        Function<RESULT, ASF> specificFieldsSupplier,
+        long computeMilliseconds,
+        Supplier<ASF> emptyASFSupplier,
+        String procedureName,
+        int writeConcurrency,
+        String writeProperty,
+        Optional<ArrowConnectionInfo> arrowConnectionInfo
+    ) {
+
+        return algorithmResult.result().map(result -> {
+
+            //get node properties
+            var nodePropertyValues = nodePropertyValuesSupplier.apply(result);
+
+
+            // 3. Write to database
+            var writeNodePropertyResult = writeNodePropertyService.write(
+                algorithmResult.graph(),
+                algorithmResult.graphStore(),
+                nodePropertyValues,
+                writeConcurrency,
+                writeProperty,
+                procedureName,
+                arrowConnectionInfo
+            );
+
+
+            var specificFields = specificFieldsSupplier.apply(result);
+
+            return NodePropertyWriteResult.<ASF>builder()
+                .computeMillis(computeMilliseconds)
+                .postProcessingMillis(0)
+                .nodePropertiesWritten(writeNodePropertyResult.nodePropertiesWritten())
+                .writeMillis(writeNodePropertyResult.writeMilliseconds())
+                .configuration(configuration)
+                .algorithmSpecificFields(specificFields)
+                .build();
+        }).orElseGet(() -> NodePropertyWriteResult.empty(emptyASFSupplier.get(), configuration));
+
     }
 
 

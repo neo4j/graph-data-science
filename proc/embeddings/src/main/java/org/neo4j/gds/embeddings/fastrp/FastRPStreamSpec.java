@@ -25,6 +25,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.embeddings.fastrp.FastRPStreamResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -33,7 +34,7 @@ import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 @GdsCallable(name = "gds.fastRP.stream", description = FastRPCompanion.DESCRIPTION, executionMode = STREAM)
-public class FastRPStreamSpec  implements AlgorithmSpec<FastRP, FastRP.FastRPResult, FastRPStreamConfig, Stream<StreamResult>, FastRPFactory<FastRPStreamConfig>> {
+public class FastRPStreamSpec implements AlgorithmSpec<FastRP, FastRPResult, FastRPStreamConfig, Stream<FastRPStreamResult>, FastRPFactory<FastRPStreamConfig>> {
     @Override
     public String name() {
         return "FastRPStream";
@@ -50,7 +51,7 @@ public class FastRPStreamSpec  implements AlgorithmSpec<FastRP, FastRP.FastRPRes
     }
 
     @Override
-    public ComputationResultConsumer<FastRP, FastRP.FastRPResult, FastRPStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<FastRP, FastRPResult, FastRPStreamConfig, Stream<FastRPStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),
@@ -61,7 +62,7 @@ public class FastRPStreamSpec  implements AlgorithmSpec<FastRP, FastRP.FastRPRes
                     return LongStream
                         .range(IdMap.START_NODE_ID, nodePropertyValues.nodeCount())
                         .filter(nodePropertyValues::hasValue)
-                        .mapToObj(nodeId -> new StreamResult(
+                        .mapToObj(nodeId -> new FastRPStreamResult(
                             graph.toOriginalNodeId(nodeId),
                             nodePropertyValues.floatArrayValue(nodeId)
                         ));

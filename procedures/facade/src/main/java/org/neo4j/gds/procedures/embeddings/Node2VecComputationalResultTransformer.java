@@ -64,16 +64,16 @@ class Node2VecComputationalResultTransformer {
         );
     }
 
-    static Node2VecWriteResult toWriteResult(NodePropertyWriteResult<Node2VecSpecificFields> mutateResult) {
+    static Node2VecWriteResult toWriteResult(NodePropertyWriteResult<Node2VecSpecificFields> writeResult) {
 
         return new Node2VecWriteResult(
-            mutateResult.algorithmSpecificFields().nodeCount(),
-            mutateResult.nodePropertiesWritten(),
-            mutateResult.preProcessingMillis(),
-            mutateResult.computeMillis(),
-            mutateResult.writeMillis(),
-            mutateResult.configuration().toMap(),
-            mutateResult.algorithmSpecificFields().lossPerIteration()
+            writeResult.algorithmSpecificFields().nodeCount(),
+            writeResult.nodePropertiesWritten(),
+            writeResult.preProcessingMillis(),
+            writeResult.computeMillis(),
+            writeResult.writeMillis(),
+            writeResult.configuration().toMap(),
+            writeResult.algorithmSpecificFields().lossPerIteration()
         );
     }
 }

@@ -21,8 +21,12 @@ package org.neo4j.gds.algorithms.embeddings;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
+import org.neo4j.gds.embeddings.fastrp.FastRPResult;
+import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfig;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNStreamConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecResult;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
 
@@ -50,6 +54,30 @@ public class NodeEmbeddingsAlgorithmStreamBusinessFacade {
         GraphSageStreamConfig config
     ) {
         var result = this.nodeEmbeddingsAlgorithmsFacade.graphSage(
+            graphName,
+            config
+        );
+
+        return createStreamComputationResult(result);
+    }
+
+    public StreamComputationResult<FastRPResult> fastRP(
+        String graphName,
+        FastRPStreamConfig config
+    ) {
+        var result = this.nodeEmbeddingsAlgorithmsFacade.fastRP(
+            graphName,
+            config
+        );
+
+        return createStreamComputationResult(result);
+    }
+
+    public StreamComputationResult<HashGNNResult> hashGNN(
+        String graphName,
+        HashGNNStreamConfig config
+    ) {
+        var result = this.nodeEmbeddingsAlgorithmsFacade.hashGNN(
             graphName,
             config
         );

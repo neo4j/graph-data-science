@@ -20,9 +20,8 @@
 package org.neo4j.gds.embeddings.fastrp;
 
 import org.neo4j.gds.api.properties.nodes.EmptyFloatArrayNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.FloatArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.executor.ComputationResult;
 
 final class FastRPCompanion {
@@ -31,33 +30,14 @@ final class FastRPCompanion {
 
     private FastRPCompanion() {}
 
-    static <CONFIG extends FastRPBaseConfig> NodePropertyValues nodeProperties(ComputationResult<FastRP, FastRP.FastRPResult, CONFIG> computationResult) {
+    static <CONFIG extends FastRPBaseConfig> NodePropertyValues nodeProperties(ComputationResult<FastRP, FastRPResult, CONFIG> computationResult) {
         return computationResult.result()
-            .map(result -> (FloatArrayNodePropertyValues) new EmbeddingNodePropertyValues(result.embeddings()))
+            .map(result -> NodePropertyValuesAdapter.adapt(result.embeddings()))
             .orElse(EmptyFloatArrayNodePropertyValues.INSTANCE);
     }
 
-    static NodePropertyValues nodeProperties(FastRP.FastRPResult result) {
-        return new EmbeddingNodePropertyValues(result.embeddings());
+    static NodePropertyValues nodeProperties(FastRPResult result) {
+        return NodePropertyValuesAdapter.adapt(result.embeddings());
     }
 
-    private static class EmbeddingNodePropertyValues implements FloatArrayNodePropertyValues {
-        private final HugeObjectArray<float[]> embeddings;
-        private final long nodeCount;
-
-        EmbeddingNodePropertyValues(HugeObjectArray<float[]> embeddings) {
-            this.embeddings = embeddings;
-            nodeCount = embeddings.size();
-        }
-
-        @Override
-        public float[] floatArrayValue(long nodeId) {
-            return embeddings.get(nodeId);
-        }
-
-        @Override
-        public long nodeCount() {
-            return nodeCount;
-        }
-    }
 }

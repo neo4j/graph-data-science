@@ -17,47 +17,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.fastrp;
+package org.neo4j.gds.procedures.embeddings.fastrp;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
-public final class WriteResult {
+public final class FastRPStatsResult {
 
     public final long nodeCount;
-    public final long nodePropertiesWritten;
     public final long preProcessingMillis;
     public final long computeMillis;
-    public final long writeMillis;
     public final Map<String, Object> configuration;
 
-    private WriteResult(
+    public FastRPStatsResult(
         long nodeCount,
-        long nodePropertiesWritten,
         long preProcessingMillis,
         long computeMillis,
-        long writeMillis,
-        Map<String, Object> configuration
+        Map<String, Object> config
     ) {
         this.nodeCount = nodeCount;
-        this.nodePropertiesWritten = nodePropertiesWritten;
         this.preProcessingMillis = preProcessingMillis;
         this.computeMillis = computeMillis;
-        this.writeMillis = writeMillis;
-        this.configuration = configuration;
+        this.configuration = config;
     }
 
-    static class Builder extends AbstractResultBuilder<WriteResult> {
+    public static final class Builder extends AbstractResultBuilder<FastRPStatsResult> {
 
         @Override
-        public WriteResult build() {
-            return new WriteResult(
+        public FastRPStatsResult build() {
+            return new FastRPStatsResult(
                 nodeCount,
-                nodePropertiesWritten,
                 preProcessingMillis,
                 computeMillis,
-                writeMillis,
                 config.toMap()
             );
         }

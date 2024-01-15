@@ -32,6 +32,7 @@ import org.neo4j.gds.algorithms.community.CommunityAlgorithmsMutateBusinessFacad
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStatsBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.community.CommunityAlgorithmsWriteBusinessFacade;
+import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmStatsBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmStreamBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsFacade;
@@ -280,6 +281,8 @@ class AlgorithmProcedureFacadeProvider {
 
         var streamBusinessFacade = new NodeEmbeddingsAlgorithmStreamBusinessFacade(nodeEmbeddingsAlgorithmsFacade);
 
+        var statsBusinessFacade = new NodeEmbeddingsAlgorithmStatsBusinessFacade(nodeEmbeddingsAlgorithmsFacade);
+
         var trainBusinessFacade = new NodeEmbeddingsAlgorithmsTrainBusinessFacade(
             nodeEmbeddingsAlgorithmsFacade,
             modelCatalogService
@@ -299,6 +302,7 @@ class AlgorithmProcedureFacadeProvider {
             returnColumns,
             estimateBusinessFacade,
             mutateBusinessFacade,
+            statsBusinessFacade,
             streamBusinessFacade,
             trainBusinessFacade,
             writeBusinessFacade

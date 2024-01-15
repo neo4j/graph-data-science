@@ -19,13 +19,22 @@
  */
 package org.neo4j.gds.algorithms.embeddings;
 
+import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.embeddings.specificfields.Node2VecSpecificFields;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
+import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.config.MutateNodePropertyConfig;
+import org.neo4j.gds.embeddings.fastrp.FastRPMutateConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNMutateConfig;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNResult;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
+
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class NodeEmbeddingsAlgorithmsMutateBusinessFacade {
     private final NodeEmbeddingsAlgorithmsFacade nodeEmbeddingsAlgorithmsFacade;
@@ -42,32 +51,18 @@ public class NodeEmbeddingsAlgorithmsMutateBusinessFacade {
         var intermediateResult = AlgorithmRunner.runWithTiming(
             () -> nodeEmbeddingsAlgorithmsFacade.node2Vec(graphName, configuration)
         );
-        var algorithmResult = intermediateResult.algorithmResult;
 
-        var mutateResultBuilder = NodePropertyMutateResult.<Node2VecSpecificFields>builder()
-            .computeMillis(intermediateResult.computeMilliseconds)
-            .postProcessingMillis(0L)
-            .configuration(configuration);
-
-        algorithmResult.result().ifPresentOrElse(
-            result -> {
-                var nodeCount = algorithmResult.graph().nodeCount();
-                var nodeProperties = new FloatEmbeddingNodePropertyValues(result.embeddings());
-                var mutateResult = mutateNodePropertyService.mutate(
-                    configuration.mutateProperty(),
-                    nodeProperties,
-                    configuration.nodeLabelIdentifiers(algorithmResult.graphStore()),
-                    algorithmResult.graph(),
-                    algorithmResult.graphStore()
-                );
-                mutateResultBuilder.mutateMillis(mutateResult.mutateMilliseconds());
-                mutateResultBuilder.nodePropertiesWritten(mutateResult.nodePropertiesAdded());
-                mutateResultBuilder.algorithmSpecificFields(new Node2VecSpecificFields(nodeCount,result.lossPerIteration()));
-            },
-            () -> mutateResultBuilder.algorithmSpecificFields(Node2VecSpecificFields.EMPTY)
+        return mutateNodeProperty(
+            intermediateResult.algorithmResult,
+            configuration,
+            (result) -> new FloatEmbeddingNodePropertyValues(result.embeddings()),
+            (result) -> new Node2VecSpecificFields(
+                intermediateResult.algorithmResult.graph().nodeCount(),
+                result.lossPerIteration()
+            ),
+            intermediateResult.computeMilliseconds,
+            () -> Node2VecSpecificFields.EMPTY
         );
-
-        return mutateResultBuilder.build();
     }
 
     public NodePropertyMutateResult<Long> graphSage(
@@ -78,32 +73,87 @@ public class NodeEmbeddingsAlgorithmsMutateBusinessFacade {
         var intermediateResult = AlgorithmRunner.runWithTiming(
             () -> nodeEmbeddingsAlgorithmsFacade.graphSage(graphName, configuration)
         );
-        var algorithmResult = intermediateResult.algorithmResult;
 
-        var mutateResultBuilder = NodePropertyMutateResult.<Long>builder()
-            .computeMillis(intermediateResult.computeMilliseconds)
-            .postProcessingMillis(0L)
-            .configuration(configuration);
-
-        algorithmResult.result().ifPresentOrElse(
-            result -> {
-                var nodeCount = algorithmResult.graph().nodeCount();
-                var nodeProperties = NodePropertyValuesAdapter.adapt(result.embeddings());
-                var mutateResult = mutateNodePropertyService.mutate(
-                    configuration.mutateProperty(),
-                    nodeProperties,
-                    configuration.nodeLabelIdentifiers(algorithmResult.graphStore()),
-                    algorithmResult.graph(),
-                    algorithmResult.graphStore()
-                );
-                mutateResultBuilder.mutateMillis(mutateResult.mutateMilliseconds());
-                mutateResultBuilder.nodePropertiesWritten(mutateResult.nodePropertiesAdded());
-                mutateResultBuilder.algorithmSpecificFields(nodeCount);
-            },
-            () -> mutateResultBuilder.algorithmSpecificFields(0l)
+        return mutateNodeProperty(
+            intermediateResult.algorithmResult,
+            configuration,
+            (result) -> NodePropertyValuesAdapter.adapt(result.embeddings()),
+            (result) -> new Long(intermediateResult.algorithmResult.graph().nodeCount()),
+            intermediateResult.computeMilliseconds,
+            () -> new Long(0)
         );
-
-        return mutateResultBuilder.build();
     }
 
+    public NodePropertyMutateResult<Long> fastRP(
+        String graphName,
+        FastRPMutateConfig configuration
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> nodeEmbeddingsAlgorithmsFacade.fastRP(graphName, configuration)
+        );
+
+        return mutateNodeProperty(
+            intermediateResult.algorithmResult,
+            configuration,
+            (result) -> NodePropertyValuesAdapter.adapt(result.embeddings()),
+            (result) -> new Long(intermediateResult.algorithmResult.graph().nodeCount()),
+            intermediateResult.computeMilliseconds,
+            () -> new Long(0)
+
+        );
+    }
+
+    public NodePropertyMutateResult<Long> hashGNN(
+        String graphName,
+        HashGNNMutateConfig configuration
+    ) {
+        // 1. Run the algorithm and time the execution
+        var intermediateResult = AlgorithmRunner.runWithTiming(
+            () -> nodeEmbeddingsAlgorithmsFacade.hashGNN(graphName, configuration)
+        );
+
+        return mutateNodeProperty(
+            intermediateResult.algorithmResult,
+            configuration,
+            HashGNNResult::embeddings,
+            (result) -> new Long(intermediateResult.algorithmResult.graph().nodeCount()),
+            intermediateResult.computeMilliseconds,
+            () -> new Long(0)
+
+        );
+    }
+
+    <RESULT, CONFIG extends MutateNodePropertyConfig, ASF> NodePropertyMutateResult<ASF> mutateNodeProperty(
+        AlgorithmComputationResult<RESULT> algorithmResult,
+        CONFIG configuration,
+        Function<RESULT, NodePropertyValues> nodePropertyValuesSupplier,
+        Function<RESULT, ASF> specificFieldsSupplier,
+        long computeMilliseconds,
+        Supplier<ASF> emptyASFSupplier
+    ) {
+        return algorithmResult.result().map(result -> {
+            //get node properties
+            var nodePropertyValues = nodePropertyValuesSupplier.apply(result);
+            // 3. Go and mutate the graph store
+            var addNodePropertyResult = mutateNodePropertyService.mutate(
+                configuration.mutateProperty(),
+                nodePropertyValues,
+                configuration.nodeLabelIdentifiers(algorithmResult.graphStore()),
+                algorithmResult.graph(), algorithmResult.graphStore()
+            );
+
+            var specificFields = specificFieldsSupplier.apply(result);
+
+            return NodePropertyMutateResult.<ASF>builder()
+                .computeMillis(computeMilliseconds)
+                .postProcessingMillis(0)
+                .nodePropertiesWritten(addNodePropertyResult.nodePropertiesAdded())
+                .mutateMillis(addNodePropertyResult.mutateMilliseconds())
+                .configuration(configuration)
+                .algorithmSpecificFields(specificFields)
+                .build();
+        }).orElseGet(() -> NodePropertyMutateResult.empty(emptyASFSupplier.get(), configuration));
+
+    }
 }

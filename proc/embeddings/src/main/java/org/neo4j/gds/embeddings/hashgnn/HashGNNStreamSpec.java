@@ -25,6 +25,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.embeddings.hashgnn.HashGNNStreamResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -34,7 +35,7 @@ import static org.neo4j.gds.embeddings.hashgnn.HashGNNProcCompanion.DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 @GdsCallable(name = "gds.hashgnn.stream", aliases = {"gds.beta.hashgnn.stream"}, description = DESCRIPTION, executionMode = STREAM)
-public class HashGNNStreamSpec implements AlgorithmSpec<HashGNN,HashGNNResult,HashGNNStreamConfig, Stream<StreamResult>,HashGNNFactory<HashGNNStreamConfig>> {
+public class HashGNNStreamSpec implements AlgorithmSpec<HashGNN, HashGNNResult, HashGNNStreamConfig, Stream<HashGNNStreamResult>, HashGNNFactory<HashGNNStreamConfig>> {
 
     @Override
     public String name() {
@@ -52,7 +53,7 @@ public class HashGNNStreamSpec implements AlgorithmSpec<HashGNN,HashGNNResult,Ha
     }
 
     @Override
-    public ComputationResultConsumer<HashGNN, HashGNNResult, HashGNNStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<HashGNN, HashGNNResult, HashGNNStreamConfig, Stream<HashGNNStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "HashGNN streaming failed",
             executionContext.log(),
@@ -61,7 +62,7 @@ public class HashGNNStreamSpec implements AlgorithmSpec<HashGNN,HashGNNResult,Ha
                     var graph = computationResult.graph();
                     return LongStream
                         .range(IdMap.START_NODE_ID, graph.nodeCount())
-                        .mapToObj(i -> new StreamResult(
+                        .mapToObj(i -> new HashGNNStreamResult(
                             graph.toOriginalNodeId(i),
                             result.embeddings().doubleArrayValue(i)
                         ));

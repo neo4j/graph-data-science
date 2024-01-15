@@ -17,14 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.hashgnn;
+package org.neo4j.gds.procedures.embeddings.results;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
-@SuppressWarnings("unused")
-public final class MutateResult  {
+public final class DefaultNodeEmbeddingMutateResult {
 
     public final long nodePropertiesWritten;
     public final long mutateMillis;
@@ -33,7 +32,7 @@ public final class MutateResult  {
     public final long computeMillis;
     public final Map<String, Object> configuration;
 
-    MutateResult(
+    public DefaultNodeEmbeddingMutateResult(
         long nodeCount,
         long nodePropertiesWritten,
         long preProcessingMillis,
@@ -49,11 +48,11 @@ public final class MutateResult  {
         this.configuration = config;
     }
 
-    static final class Builder extends AbstractResultBuilder<MutateResult> {
+    public static final class Builder extends AbstractResultBuilder<DefaultNodeEmbeddingMutateResult> {
 
         @Override
-        public MutateResult build() {
-            return new MutateResult(
+        public DefaultNodeEmbeddingMutateResult build() {
+            return new DefaultNodeEmbeddingMutateResult(
                 nodeCount,
                 nodePropertiesWritten,
                 preProcessingMillis,

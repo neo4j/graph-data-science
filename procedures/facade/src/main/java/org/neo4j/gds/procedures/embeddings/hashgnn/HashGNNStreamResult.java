@@ -17,20 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.fastrp;
+package org.neo4j.gds.procedures.embeddings.hashgnn;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public final class StreamResult {
+@SuppressWarnings("unused")
+public final class HashGNNStreamResult {
     public final long nodeId;
     public final List<Double> embedding;
 
-    StreamResult(long nodeId, float[] embedding) {
+    public HashGNNStreamResult(long nodeId, double[] embeddings) {
         this.nodeId = nodeId;
-        this.embedding = new ArrayList<>(embedding.length);
-        for (var f : embedding) {
-            this.embedding.add((double) f);
-        }
+        this.embedding = Arrays.stream(embeddings).boxed().collect(Collectors.toList());
     }
 }

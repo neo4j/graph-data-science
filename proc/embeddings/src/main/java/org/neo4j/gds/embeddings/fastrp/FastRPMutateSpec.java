@@ -27,6 +27,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingMutateResult;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -34,7 +35,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 
 @GdsCallable(name = "gds.fastRP.mutate", description = FastRPCompanion.DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class FastRPMutateSpec implements AlgorithmSpec<FastRP, FastRP.FastRPResult, FastRPMutateConfig, Stream<MutateResult>, FastRPFactory<FastRPMutateConfig>> {
+public class FastRPMutateSpec implements AlgorithmSpec<FastRP, FastRPResult, FastRPMutateConfig, Stream<DefaultNodeEmbeddingMutateResult>, FastRPFactory<FastRPMutateConfig>> {
     @Override
     public String name() {
         return "FastRPMutate";
@@ -51,7 +52,7 @@ public class FastRPMutateSpec implements AlgorithmSpec<FastRP, FastRP.FastRPResu
     }
 
     @Override
-    public ComputationResultConsumer<FastRP, FastRP.FastRPResult, FastRPMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<FastRP, FastRPResult, FastRPMutateConfig, Stream<DefaultNodeEmbeddingMutateResult>> computationResultConsumer() {
         return new MutatePropertyComputationResultConsumer<>(
             (computationResult) -> List.of(
                 NodeProperty.of(
@@ -63,10 +64,10 @@ public class FastRPMutateSpec implements AlgorithmSpec<FastRP, FastRP.FastRPResu
         );
     }
 
-    private MutateResult.Builder resultBuilder(
-        ComputationResult<FastRP, FastRP.FastRPResult, FastRPMutateConfig> computeResult,
+    private DefaultNodeEmbeddingMutateResult.Builder resultBuilder(
+        ComputationResult<FastRP, FastRPResult, FastRPMutateConfig> computeResult,
         ExecutionContext executionContext
     ) {
-        return new MutateResult.Builder();
+        return new DefaultNodeEmbeddingMutateResult.Builder();
     }
 }
