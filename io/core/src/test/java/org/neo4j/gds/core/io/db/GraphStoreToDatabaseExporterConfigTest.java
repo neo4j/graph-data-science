@@ -22,8 +22,6 @@ package org.neo4j.gds.core.io.db;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.Neo4jProxy;
 
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 class GraphStoreToDatabaseExporterConfigTest {
@@ -33,11 +31,11 @@ class GraphStoreToDatabaseExporterConfigTest {
         var config = ImmutableGraphStoreToDatabaseExporterConfig.builder()
             .dbName("test")
             .batchSize(1337)
-            .pageCacheMemory(Optional.of(100_000L))
             .highIO(true)
             .writeConcurrency(42)
             .build();
-        var pbiConfig = config.toBatchImporterConfig();
+        var parameters = config.toParameters().withPageCacheMemory(100_000L);
+        var pbiConfig = parameters.toBatchImporterConfig();
 
         assertThat(pbiConfig.batchSize()).isEqualTo(1337);
         assertThat(pbiConfig.highIO()).isTrue();

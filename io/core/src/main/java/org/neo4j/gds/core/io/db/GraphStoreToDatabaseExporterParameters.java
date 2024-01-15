@@ -33,12 +33,12 @@ public final class GraphStoreToDatabaseExporterParameters {
     private final String defaultRelationshipType;
     private final int writeConcurrency;
     private final int batchSize;
-    private Optional<Long> pageCacheMemory;
     private final boolean useBadCollector;
     private final boolean highIO;
     private final boolean force;
     private final long executionMonitorCheckMillis;
     private final boolean enableDebugLog;
+    private Optional<Long> pageCacheMemory;
 
     static GraphStoreToDatabaseExporterParameters create(
         String dbName,
@@ -47,7 +47,6 @@ public final class GraphStoreToDatabaseExporterParameters {
         String defaultRelationshipType,
         int writeConcurrency,
         int batchSize,
-        Optional<Long> pageCacheMemory,
         boolean useBadCollector,
         boolean highIO,
         boolean force,
@@ -61,7 +60,6 @@ public final class GraphStoreToDatabaseExporterParameters {
             defaultRelationshipType,
             writeConcurrency,
             batchSize,
-            pageCacheMemory,
             useBadCollector,
             highIO,
             force,
@@ -77,7 +75,6 @@ public final class GraphStoreToDatabaseExporterParameters {
         String defaultRelationshipType,
         int writeConcurrency,
         int batchSize,
-        Optional<Long> pageCacheMemory,
         boolean useBadCollector,
         boolean highIO,
         boolean force,
@@ -90,12 +87,12 @@ public final class GraphStoreToDatabaseExporterParameters {
         this.defaultRelationshipType = defaultRelationshipType;
         this.writeConcurrency = writeConcurrency;
         this.batchSize = batchSize;
-        this.pageCacheMemory = pageCacheMemory;
         this.useBadCollector = useBadCollector;
         this.highIO = highIO;
         this.force = force;
         this.executionMonitorCheckMillis = executionMonitorCheckMillis;
         this.enableDebugLog = enableDebugLog;
+        this.pageCacheMemory = Optional.empty();
     }
 
     String dbName() {
@@ -116,6 +113,11 @@ public final class GraphStoreToDatabaseExporterParameters {
 
     boolean enableDebugLog() {
         return enableDebugLog;
+    }
+
+    public GraphStoreToDatabaseExporterParameters withPageCacheMemory(long pageCacheMemory) {
+        this.pageCacheMemory = Optional.of(pageCacheMemory);
+        return this;
     }
 
     Configuration toBatchImporterConfig() {

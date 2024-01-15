@@ -37,27 +37,30 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
         GraphStore graphStore,
         GraphDatabaseService databaseService,
         GraphStoreToDatabaseExporterConfig config,
+        GraphStoreToDatabaseExporterParameters parameters,
         Log log,
         ProgressTracker progressTracker
     ) {
-        return of(graphStore, databaseService, config, Optional.empty(), log, progressTracker);
+        return of(graphStore, databaseService, config, parameters, Optional.empty(), log, progressTracker);
     }
 
     public static GraphStoreToDatabaseExporter of(
         GraphStore graphStore,
         GraphDatabaseService databaseService,
         GraphStoreToDatabaseExporterConfig config,
+        GraphStoreToDatabaseExporterParameters parameters,
         Optional<NeoNodeProperties> neoNodeProperties,
         Log log,
         ProgressTracker progressTracker
     ) {
-        return new GraphStoreToDatabaseExporter(graphStore, databaseService, config, neoNodeProperties, log, progressTracker);
+        return new GraphStoreToDatabaseExporter(graphStore, databaseService, config, parameters, neoNodeProperties, log, progressTracker);
     }
 
     private GraphStoreToDatabaseExporter(
         GraphStore graphStore,
         GraphDatabaseService databaseService,
         GraphStoreToDatabaseExporterConfig config,
+        GraphStoreToDatabaseExporterParameters parameters,
         Optional<NeoNodeProperties> neoNodeProperties,
         Log log,
         ProgressTracker progressTracker
@@ -66,7 +69,7 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
         var executionMonitor = new ProgressTrackerExecutionMonitor(
             graphStore,
             progressTracker,
-            config.toBatchImporterConfig()
+            parameters.toBatchImporterConfig()
         );
         this.parallelBatchImporter = GdsParallelBatchImporter.fromDb(databaseService, config, log, executionMonitor);
     }

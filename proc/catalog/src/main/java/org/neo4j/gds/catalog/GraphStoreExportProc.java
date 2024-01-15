@@ -93,6 +93,7 @@ public class GraphStoreExportProc extends BaseProc {
                     graphStore,
                     databaseService,
                     exportConfig,
+                    exportConfig.toParameters(),
                     neoNodeProperties(exportConfig, graphStore),
                     executionContext().log(),
                     progressTracker

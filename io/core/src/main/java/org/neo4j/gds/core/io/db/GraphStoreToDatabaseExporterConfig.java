@@ -26,9 +26,6 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.JobIdConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.io.GraphStoreExporterBaseConfig;
-import org.neo4j.internal.batchimport.IndexConfig;
-
-import java.util.Optional;
 
 @ValueClass
 @Configuration
@@ -51,13 +48,6 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
     @SuppressWarnings("immutables:untype")
     default long executionMonitorCheckMillis() {
         return 200;
-    }
-
-    @Value.Default
-    @Configuration.Ignore
-    @SuppressWarnings("immutables:untype")
-    default Optional<Long> pageCacheMemory() {
-        return Optional.empty();
     }
 
     @Value.Default
@@ -101,14 +91,7 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
     @Value.Default
     @Configuration.Ignore
     default org.neo4j.internal.batchimport.Configuration toBatchImporterConfig() {
-        var exportConfig = this;
-        return Neo4jProxy.batchImporterConfig(
-            exportConfig.batchSize(),
-            exportConfig.writeConcurrency(),
-            exportConfig.pageCacheMemory(),
-            exportConfig.highIO(),
-            IndexConfig.DEFAULT.withLabelIndex().withRelationshipTypeIndex()
-        );
+        return toParameters().toBatchImporterConfig();
     }
 
     @Value.Default
@@ -121,7 +104,6 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
             defaultRelationshipType(),
             writeConcurrency(),
             batchSize(),
-            pageCacheMemory(),
             useBadCollector(),
             highIO(),
             force(),
