@@ -54,7 +54,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public final class GdsParallelBatchImporter {
 
-    private final GraphStoreToDatabaseExporterConfig config;
+    private final GraphStoreToDatabaseExporterParameters parameters;
     private final Log log;
     private final ExecutionMonitor executionMonitor;
 
@@ -75,7 +75,7 @@ public final class GdsParallelBatchImporter {
         var logService = GraphDatabaseApiProxy.resolveDependency(databaseService, LogService.class);
         var databaseConfig = GraphDatabaseApiProxy.resolveDependency(databaseService, Config.class);
         return new GdsParallelBatchImporter(
-            config,
+            config.toParameters(),
             log,
             executionMonitor,
             dbms,
@@ -97,7 +97,7 @@ public final class GdsParallelBatchImporter {
         var logService = GraphDatabaseApiProxy.resolveDependency(databaseService, LogService.class);
         var databaseConfig = GraphDatabaseApiProxy.resolveDependency(databaseService, Config.class);
         return new GdsParallelBatchImporter(
-            config,
+            config.toParameters(),
             log,
             executionMonitor,
             dbms,
@@ -109,7 +109,7 @@ public final class GdsParallelBatchImporter {
     }
 
     private GdsParallelBatchImporter(
-        GraphStoreToDatabaseExporterConfig config,
+        GraphStoreToDatabaseExporterParameters parameters,
         Log log,
         ExecutionMonitor executionMonitor,
         DatabaseManagementService dbms,
@@ -118,7 +118,7 @@ public final class GdsParallelBatchImporter {
         LogService logService,
         Config databaseConfig
     ) {
-        this.config = config;
+        this.parameters = parameters;
         this.log = log;
         this.executionMonitor = executionMonitor;
         this.dbms = dbms;
@@ -133,7 +133,7 @@ public final class GdsParallelBatchImporter {
             .set(GraphDatabaseSettings.data_directory, databaseConfig.get(GraphDatabaseSettings.data_directory));
 
         Neo4jProxy.setAllowUpgrades(configBuilder, true);
-        Neo4jProxy.configureRecordFormat(configBuilder, config.recordFormat());
+        Neo4jProxy.configureRecordFormat(configBuilder, parameters.recordFormat());
 
         this.databaseConfig = configBuilder.build();
     }
@@ -143,7 +143,7 @@ public final class GdsParallelBatchImporter {
 
         var importTimer = ProgressTimer.start();
 
-        var databaseLayout = Neo4jProxy.databaseLayout(databaseConfig, config.dbName());
+        var databaseLayout = Neo4jProxy.databaseLayout(databaseConfig, parameters.dbName());
 
         validateWritableDirectories(databaseLayout);
         validateDatabaseDoesNotExist(databaseLayout);
@@ -151,7 +151,7 @@ public final class GdsParallelBatchImporter {
         var lifeSupport = new LifeSupport();
 
         try {
-            if (config.force()) {
+            if (parameters.force()) {
                 fs.deleteRecursively(databaseLayout.databaseDirectory());
                 fs.deleteRecursively(databaseLayout.getTransactionLogsDirectory());
             }
@@ -183,7 +183,7 @@ public final class GdsParallelBatchImporter {
                         )
                     );
                 } else {
-                    log.error("Unable to start database " + config.dbName());
+                    log.error("Unable to start database " + parameters.dbName());
                 }
             }
         } catch (IOException e) {
@@ -201,22 +201,22 @@ public final class GdsParallelBatchImporter {
     private void validateDatabaseDoesNotExist(GdsDatabaseLayout databaseLayout) {
         var metaDataPath = databaseLayout.metadataStore();
         var dbExists = Files.exists(metaDataPath) && Files.isReadable(metaDataPath);
-        if (dbExists && !config.force()) {
+        if (dbExists && !parameters.force()) {
             throw new IllegalArgumentException(
                 formatWithLocale(
                     "The database [%s] already exists. The graph export procedure can only create new databases.",
-                    config.dbName()
+                    parameters.dbName()
                 )
             );
         }
     }
 
-    private LogService getLogService() { return config.enableDebugLog()
+    private LogService getLogService() { return parameters.enableDebugLog()
         ? logService
         : NullLogService.getInstance(); }
 
     private Collector getCollector() {
-        return config.useBadCollector()
+        return parameters.useBadCollector()
             ? Collectors.badCollector(new LoggingOutputStream(log), 0)
             : Collector.EMPTY;
     }
@@ -233,13 +233,13 @@ public final class GdsParallelBatchImporter {
             databaseLayout,
             fs,
             PageCacheTracer.NULL,
-            config.toBatchImporterConfig(),
+            parameters.toBatchImporterConfig(),
             logService,
             executionMonitor,
             AdditionalInitialIds.EMPTY,
             databaseConfig,
             Neo4jProxy.recordFormatSelector(
-                config.dbName(),
+                parameters.dbName(),
                 databaseConfig,
                 fs,
                 logService,
@@ -251,7 +251,7 @@ public final class GdsParallelBatchImporter {
     }
 
     private boolean createAndStartDatabase() {
-        var databaseName = config.dbName();
+        var databaseName = parameters.dbName();
         dbms.createDatabase(databaseName);
         dbms.startDatabase(databaseName);
 

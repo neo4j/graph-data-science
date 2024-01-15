@@ -110,4 +110,25 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
             IndexConfig.DEFAULT.withLabelIndex().withRelationshipTypeIndex()
         );
     }
+
+    @Value.Default
+    @Configuration.Ignore
+    default GraphStoreToDatabaseExporterParameters toParameters() {
+        return GraphStoreToDatabaseExporterParameters.create(
+            dbName(),
+            recordFormat(),
+            additionalNodeProperties(),
+            defaultRelationshipType(),
+            writeConcurrency(),
+            batchSize(),
+            pageCacheMemory(),
+            useBadCollector(),
+            highIO(),
+            force(),
+            executionMonitorCheckMillis(),
+            enableDebugLog()
+        );
+    }
+
+
 }
