@@ -31,10 +31,11 @@ class GraphStoreToDatabaseExporterConfigTest {
         var config = ImmutableGraphStoreToDatabaseExporterConfig.builder()
             .dbName("test")
             .batchSize(1337)
-            .highIO(true)
             .writeConcurrency(42)
             .build();
-        var parameters = config.toParameters().withPageCacheMemory(100_000L);
+        var parameters = config.toParameters()
+            .withPageCacheMemory(100_000L)
+            .withHighIO(true);
         var pbiConfig = parameters.toBatchImporterConfig();
 
         assertThat(pbiConfig.batchSize()).isEqualTo(1337);

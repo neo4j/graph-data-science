@@ -34,9 +34,10 @@ public final class GraphStoreToDatabaseExporterParameters {
     private final int writeConcurrency;
     private final int batchSize;
     private final boolean useBadCollector;
-    private final boolean highIO;
     private final long executionMonitorCheckMillis;
     private final boolean enableDebugLog;
+
+    private boolean highIO;
     private boolean force;
     private Optional<Long> pageCacheMemory;
 
@@ -48,7 +49,6 @@ public final class GraphStoreToDatabaseExporterParameters {
         int writeConcurrency,
         int batchSize,
         boolean useBadCollector,
-        boolean highIO,
         long executionMonitorCheckMillis,
         boolean enableDebugLog
     ) {
@@ -60,7 +60,6 @@ public final class GraphStoreToDatabaseExporterParameters {
             writeConcurrency,
             batchSize,
             useBadCollector,
-            highIO,
             executionMonitorCheckMillis,
             enableDebugLog
         );
@@ -74,7 +73,6 @@ public final class GraphStoreToDatabaseExporterParameters {
         int writeConcurrency,
         int batchSize,
         boolean useBadCollector,
-        boolean highIO,
         long executionMonitorCheckMillis,
         boolean enableDebugLog
     ) {
@@ -85,10 +83,10 @@ public final class GraphStoreToDatabaseExporterParameters {
         this.writeConcurrency = writeConcurrency;
         this.batchSize = batchSize;
         this.useBadCollector = useBadCollector;
-        this.highIO = highIO;
         this.executionMonitorCheckMillis = executionMonitorCheckMillis;
         this.enableDebugLog = enableDebugLog;
 
+        this.highIO = false;
         this.force = false;
         this.pageCacheMemory = Optional.empty();
     }
@@ -120,6 +118,11 @@ public final class GraphStoreToDatabaseExporterParameters {
 
     public GraphStoreToDatabaseExporterParameters withForce(boolean force) {
         this.force = force;
+        return this;
+    }
+
+    public GraphStoreToDatabaseExporterParameters withHighIO(boolean highIO) {
+        this.highIO = highIO;
         return this;
     }
 
