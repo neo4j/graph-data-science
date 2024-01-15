@@ -45,7 +45,7 @@ public class FastRPWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.nodeEmbeddings().fastRPWrite(graphName, configuration);
+        return facade.nodeEmbeddings().fastRP().write(graphName, configuration);
     }
 
     @Procedure(value = "gds.fastRP.write.estimate", mode = READ)
@@ -54,7 +54,7 @@ public class FastRPWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.nodeEmbeddings().fastRPWriteEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.nodeEmbeddings().fastRP().writeEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
 }

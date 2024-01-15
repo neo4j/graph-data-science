@@ -43,7 +43,7 @@ public class FastRPStatsProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.nodeEmbeddings().fastRPStats(graphName, configuration);
+        return facade.nodeEmbeddings().fastRP().stats(graphName, configuration);
 
     }
 
@@ -53,6 +53,6 @@ public class FastRPStatsProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.nodeEmbeddings().fastRPStatsEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.nodeEmbeddings().fastRP().statsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

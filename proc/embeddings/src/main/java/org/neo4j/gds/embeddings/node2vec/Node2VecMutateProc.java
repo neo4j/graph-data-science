@@ -45,7 +45,7 @@ public class Node2VecMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.nodeEmbeddings().node2VecMutate(graphName, configuration);
+        return facade.nodeEmbeddings().node2Vec().mutate(graphName, configuration);
     }
 
     @Procedure(value = "gds.node2vec.mutate.estimate", mode = READ)
@@ -54,7 +54,7 @@ public class Node2VecMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.nodeEmbeddings().node2VecMutateEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.nodeEmbeddings().node2Vec().mutateEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(value = "gds.beta.node2vec.mutate", mode = READ, deprecatedBy = "gds.node2vec.mutate")

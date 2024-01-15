@@ -45,7 +45,7 @@ public class HashGNNStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.nodeEmbeddings().HashGNNStream(graphName, configuration);
+        return facade.nodeEmbeddings().hashGNN().stream(graphName, configuration);
     }
 
     @Internal
@@ -71,7 +71,7 @@ public class HashGNNStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.nodeEmbeddings().HashGNNStreamEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.nodeEmbeddings().hashGNN().streamEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Internal

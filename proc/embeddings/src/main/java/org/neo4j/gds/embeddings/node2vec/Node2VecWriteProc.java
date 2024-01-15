@@ -46,7 +46,7 @@ public class Node2VecWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.nodeEmbeddings().node2VecWrite(graphName, configuration);
+        return facade.nodeEmbeddings().node2Vec().write(graphName, configuration);
     }
 
     @Procedure(value = "gds.node2vec.write.estimate", mode = READ)
@@ -55,7 +55,7 @@ public class Node2VecWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.nodeEmbeddings().node2VecWriteEstimate(
+        return facade.nodeEmbeddings().node2Vec().writeEstimate(
             graphNameOrConfiguration,
             algoConfiguration
         );

@@ -44,7 +44,7 @@ public class FastRPStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.nodeEmbeddings().fastRPStream(graphName, configuration);
+        return facade.nodeEmbeddings().fastRP().stream(graphName, configuration);
     }
 
     @Procedure(value = "gds.fastRP.stream.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class FastRPStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.nodeEmbeddings().fastRPStreamEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.nodeEmbeddings().fastRP().streamEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

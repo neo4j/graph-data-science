@@ -27,9 +27,9 @@ import org.neo4j.gds.procedures.embeddings.hashgnn.HashGNNStreamResult;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class HashGNNComputationalResultTransformer {
+public class HashGNNComputationalResultTransformer {
 
-    static Stream<HashGNNStreamResult> toStreamResult(
+    public static Stream<HashGNNStreamResult> toStreamResult(
         StreamComputationResult<HashGNNResult> computationResult
     ) {
         return computationResult.result().map(hashGNNResult -> {

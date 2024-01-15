@@ -46,7 +46,7 @@ public class GraphSageMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.nodeEmbeddings().graphSageMutate(graphName, configuration);
+        return facade.nodeEmbeddings().graphSage().mutate(graphName, configuration);
     }
 
     @Procedure(value = "gds.beta.graphSage.mutate.estimate", mode = READ)
@@ -55,7 +55,7 @@ public class GraphSageMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.nodeEmbeddings().graphSageMutateEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.nodeEmbeddings().graphSage().mutateEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
 

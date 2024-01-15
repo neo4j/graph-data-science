@@ -31,9 +31,9 @@ import org.neo4j.gds.procedures.embeddings.fastrp.FastRPStreamResult;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class FastRPComputationalResultTransformer {
+public class FastRPComputationalResultTransformer {
 
-    static Stream<FastRPStreamResult> toStreamResult(
+    public static Stream<FastRPStreamResult> toStreamResult(
         StreamComputationResult<FastRPResult> computationResult
     ) {
         return computationResult.result().map(fastRPResult -> {
@@ -50,7 +50,7 @@ class FastRPComputationalResultTransformer {
         }).orElseGet(Stream::empty);
     }
 
-    static FastRPStatsResult toStatsResult(StatsResult<Long> statsResult, FastRPStatsConfig config) {
+    public static FastRPStatsResult toStatsResult(StatsResult<Long> statsResult, FastRPStatsConfig config) {
 
         return new FastRPStatsResult(
             statsResult.algorithmSpecificFields().longValue(),

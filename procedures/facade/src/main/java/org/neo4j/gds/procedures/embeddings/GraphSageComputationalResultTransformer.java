@@ -33,9 +33,9 @@ import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageTrainResult;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class GraphSageComputationalResultTransformer {
+public class GraphSageComputationalResultTransformer {
 
-    static Stream<GraphSageStreamResult> toStreamResult(
+    public static Stream<GraphSageStreamResult> toStreamResult(
         StreamComputationResult<GraphSageResult> computationResult
     ) {
         return computationResult.result().map(graphSageResult -> {
@@ -49,8 +49,8 @@ class GraphSageComputationalResultTransformer {
 
         }).orElseGet(Stream::empty);
     }
-    
-    static GraphSageTrainResult toTrainResult(
+
+    public static GraphSageTrainResult toTrainResult(
         TrainResult<Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics>> trainResult
     ) {
 

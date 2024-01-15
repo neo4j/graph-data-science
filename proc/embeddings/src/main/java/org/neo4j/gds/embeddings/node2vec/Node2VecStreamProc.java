@@ -45,7 +45,7 @@ public class Node2VecStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.nodeEmbeddings().node2VecStream(graphName, configuration);
+        return facade.nodeEmbeddings().node2Vec().stream(graphName, configuration);
     }
 
     @Procedure(value = "gds.node2vec.stream.estimate", mode = READ)
@@ -54,7 +54,7 @@ public class Node2VecStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.nodeEmbeddings().node2VecStreamEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.nodeEmbeddings().node2Vec().streamEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(value = "gds.beta.node2vec.stream", mode = READ, deprecatedBy = "gds.node2vec.stream")

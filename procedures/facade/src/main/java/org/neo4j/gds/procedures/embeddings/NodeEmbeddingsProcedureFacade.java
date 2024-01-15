@@ -26,48 +26,18 @@ import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsMutateBusines
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsTrainBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.embeddings.fastrp.FastRPMutateConfig;
-import org.neo4j.gds.embeddings.fastrp.FastRPStatsConfig;
-import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
-import org.neo4j.gds.embeddings.fastrp.FastRPWriteConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMutateConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageStreamConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageWriteConfig;
-import org.neo4j.gds.embeddings.hashgnn.HashGNNMutateConfig;
-import org.neo4j.gds.embeddings.hashgnn.HashGNNStreamConfig;
-import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
-import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
-import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
-import org.neo4j.gds.procedures.embeddings.fastrp.FastRPStatsResult;
-import org.neo4j.gds.procedures.embeddings.fastrp.FastRPStreamResult;
-import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageStreamResult;
-import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageTrainResult;
-import org.neo4j.gds.procedures.embeddings.hashgnn.HashGNNStreamResult;
-import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecMutateResult;
-import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecStreamResult;
-import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecWriteResult;
-import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingMutateResult;
-import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingsWriteResult;
-import org.neo4j.gds.results.MemoryEstimateResult;
-
-import java.util.Map;
-import java.util.stream.Stream;
+import org.neo4j.gds.procedures.embeddings.fastrp.FastRPProcedure;
+import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageProcedure;
+import org.neo4j.gds.procedures.embeddings.hashgnn.HashGNNProcedure;
+import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecProcedure;
 
 public class NodeEmbeddingsProcedureFacade {
-    // services
-    private final ConfigurationCreator configurationCreator;
-    private final ProcedureReturnColumns procedureReturnColumns;
-    private final NodeEmbeddingsAlgorithmsEstimateBusinessFacade estimateBusinessFacade;
-    private final NodeEmbeddingsAlgorithmsMutateBusinessFacade mutateBusinessFacade;
-    private final NodeEmbeddingsAlgorithmStatsBusinessFacade statsBusinessFacade;
 
-    private final NodeEmbeddingsAlgorithmStreamBusinessFacade streamBusinessFacade;
-    private final NodeEmbeddingsAlgorithmsTrainBusinessFacade trainBusinessFacade;
-
-    private final NodeEmbeddingsAlgorithmsWriteBusinessFacade writeBusinessFacade;
-
+    private final FastRPProcedure fastRP;
+    private final HashGNNProcedure hashGNN;
+    private final Node2VecProcedure node2Vec;
+    private final GraphSageProcedure graphSage;
     // business logic
 
     public NodeEmbeddingsProcedureFacade(
@@ -80,314 +50,55 @@ public class NodeEmbeddingsProcedureFacade {
         NodeEmbeddingsAlgorithmsTrainBusinessFacade trainBusinessFacade,
         NodeEmbeddingsAlgorithmsWriteBusinessFacade writeBusinessFacade
     ) {
-        this.configurationCreator = configurationCreator;
-        this.procedureReturnColumns = procedureReturnColumns;
-        this.statsBusinessFacade = statsBusinessFacade;
-        this.streamBusinessFacade = streamBusinessFacade;
-        this.mutateBusinessFacade = mutateBusinessFacade;
-        this.trainBusinessFacade = trainBusinessFacade;
-        this.writeBusinessFacade = writeBusinessFacade;
-        this.estimateBusinessFacade = estimateBusinessFacade;
-    }
 
-    public Stream<Node2VecStreamResult> node2VecStream(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var streamConfig = configurationCreator.createConfigurationForStream(configuration, Node2VecStreamConfig::of);
 
-        var computationResult = streamBusinessFacade.node2Vec(
-            graphName,
-            streamConfig
+        this.fastRP = new FastRPProcedure(
+            configurationCreator,
+            estimateBusinessFacade,
+            mutateBusinessFacade,
+            statsBusinessFacade,
+            streamBusinessFacade,
+            writeBusinessFacade
+        );
+        this.hashGNN = new HashGNNProcedure(
+            configurationCreator,
+            estimateBusinessFacade,
+            mutateBusinessFacade,
+            streamBusinessFacade
         );
 
-        return Node2VecComputationalResultTransformer.toStreamResult(computationResult);
-    }
-
-    public Stream<Node2VecMutateResult> node2VecMutate(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var mutateConfig = configurationCreator.createConfiguration(configuration, Node2VecMutateConfig::of);
-
-        var computationResult = mutateBusinessFacade.node2Vec(
-            graphName,
-            mutateConfig
+        this.node2Vec = new Node2VecProcedure(
+            configurationCreator,
+            estimateBusinessFacade,
+            mutateBusinessFacade,
+            streamBusinessFacade,
+            writeBusinessFacade
         );
 
-        return Stream.of(Node2VecComputationalResultTransformer.toMutateResult(computationResult));
-    }
-
-    public Stream<Node2VecWriteResult> node2VecWrite(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var writeConfig = configurationCreator.createConfiguration(configuration, Node2VecWriteConfig::of);
-
-        var computationResult = writeBusinessFacade.node2Vec(
-            graphName,
-            writeConfig
+        this.graphSage = new GraphSageProcedure(
+            configurationCreator,
+            estimateBusinessFacade,
+            mutateBusinessFacade,
+            streamBusinessFacade,
+            trainBusinessFacade,
+            writeBusinessFacade
         );
-
-        return Stream.of(Node2VecComputationalResultTransformer.toWriteResult(computationResult));
     }
 
-    public Stream<MemoryEstimateResult> node2VecStreamEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, Node2VecStreamConfig::of);
-
-        return Stream.of(estimateBusinessFacade.node2Vec(graphNameOrConfiguration, config));
+    public FastRPProcedure fastRP() {
+        return fastRP;
     }
 
-    public Stream<MemoryEstimateResult> node2VecMutateEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, Node2VecMutateConfig::of);
-
-        return Stream.of(estimateBusinessFacade.node2Vec(graphNameOrConfiguration, config));
+    public HashGNNProcedure hashGNN() {
+        return hashGNN;
     }
 
-    public Stream<MemoryEstimateResult> node2VecWriteEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, Node2VecWriteConfig::of);
-
-        return Stream.of(estimateBusinessFacade.node2Vec(graphNameOrConfiguration, config));
+    public Node2VecProcedure node2Vec() {
+        return node2Vec;
     }
 
-    public Stream<GraphSageStreamResult> graphSageStream(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var streamConfig = configurationCreator.createConfigurationForStream(configuration, GraphSageStreamConfig::of);
-
-        var computationResult = streamBusinessFacade.graphSage(
-            graphName,
-            streamConfig
-        );
-
-        return GraphSageComputationalResultTransformer.toStreamResult(computationResult);
-    }
-
-    public Stream<DefaultNodeEmbeddingMutateResult> graphSageMutate(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var mutateConfig = configurationCreator.createConfiguration(configuration, GraphSageMutateConfig::of);
-
-        var computationResult = mutateBusinessFacade.graphSage(
-            graphName,
-            mutateConfig
-        );
-
-        return Stream.of(DefaultNodeEmbeddingsComputationalResultTransformer.toMutateResult(computationResult));
-    }
-
-    public Stream<DefaultNodeEmbeddingsWriteResult> graphSageWrite(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var writeConfig = configurationCreator.createConfiguration(configuration, GraphSageWriteConfig::of);
-
-        var computationResult = writeBusinessFacade.graphSage(
-            graphName,
-            writeConfig
-        );
-
-        return Stream.of(DefaultNodeEmbeddingsComputationalResultTransformer.toWriteResult(computationResult));
-    }
-
-    public Stream<MemoryEstimateResult> graphSageStreamEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, GraphSageStreamConfig::of);
-
-        return Stream.of(estimateBusinessFacade.graphSage(graphNameOrConfiguration, config));
-    }
-
-    public Stream<MemoryEstimateResult> graphSageMutateEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, GraphSageMutateConfig::of);
-
-        return Stream.of(estimateBusinessFacade.graphSage(graphNameOrConfiguration, config));
-    }
-
-    public Stream<MemoryEstimateResult> graphSageWriteEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, GraphSageWriteConfig::of);
-
-        return Stream.of(estimateBusinessFacade.graphSage(graphNameOrConfiguration, config));
-    }
-
-    public Stream<GraphSageTrainResult> graphSageTrain(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var trainConfig = configurationCreator.createConfigurationForStream(configuration, GraphSageTrainConfig::of);
-
-        var computationResult = trainBusinessFacade.graphSage(
-            graphName,
-            trainConfig
-        );
-
-        return Stream.of(GraphSageComputationalResultTransformer.toTrainResult(computationResult));
-    }
-
-    public Stream<MemoryEstimateResult> graphSageTrainEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, GraphSageTrainConfig::of);
-
-        return Stream.of(estimateBusinessFacade.graphSageTrain(graphNameOrConfiguration, config));
-    }
-
-    public Stream<FastRPStreamResult> fastRPStream(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var streamConfig = configurationCreator.createConfigurationForStream(configuration, FastRPStreamConfig::of);
-
-        var computationResult = streamBusinessFacade.fastRP(
-            graphName,
-            streamConfig
-        );
-
-        return FastRPComputationalResultTransformer.toStreamResult(computationResult);
-    }
-
-    public Stream<FastRPStatsResult> fastRPStats(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var statsConfig = configurationCreator.createConfiguration(configuration, FastRPStatsConfig::of);
-
-        var computationResult = statsBusinessFacade.fastRP(
-            graphName,
-            statsConfig
-        );
-
-        return Stream.of(FastRPComputationalResultTransformer.toStatsResult(computationResult, statsConfig));
-    }
-
-    public Stream<DefaultNodeEmbeddingMutateResult> fastRPMutate(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var mutateConfig = configurationCreator.createConfiguration(configuration, FastRPMutateConfig::of);
-
-        var computationResult = mutateBusinessFacade.fastRP(
-            graphName,
-            mutateConfig
-        );
-
-        return Stream.of(DefaultNodeEmbeddingsComputationalResultTransformer.toMutateResult(computationResult));
-    }
-
-    public Stream<DefaultNodeEmbeddingsWriteResult> fastRPWrite(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var writeConfig = configurationCreator.createConfiguration(configuration, FastRPWriteConfig::of);
-
-        var computationResult = writeBusinessFacade.fastRP(
-            graphName,
-            writeConfig
-        );
-
-        return Stream.of(DefaultNodeEmbeddingsComputationalResultTransformer.toWriteResult(computationResult));
-    }
-
-    public Stream<MemoryEstimateResult> fastRPStreamEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, FastRPStreamConfig::of);
-
-        return Stream.of(estimateBusinessFacade.fastRP(graphNameOrConfiguration, config));
-    }
-
-    public Stream<MemoryEstimateResult> fastRPStatsEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, FastRPStatsConfig::of);
-
-        return Stream.of(estimateBusinessFacade.fastRP(graphNameOrConfiguration, config));
-    }
-
-
-    public Stream<MemoryEstimateResult> fastRPMutateEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, FastRPMutateConfig::of);
-
-        return Stream.of(estimateBusinessFacade.fastRP(graphNameOrConfiguration, config));
-    }
-
-    public Stream<MemoryEstimateResult> fastRPWriteEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, FastRPWriteConfig::of);
-
-        return Stream.of(estimateBusinessFacade.fastRP(graphNameOrConfiguration, config));
-    }
-
-    public Stream<HashGNNStreamResult> HashGNNStream(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var streamConfig = configurationCreator.createConfigurationForStream(configuration, HashGNNStreamConfig::of);
-
-        var computationResult = streamBusinessFacade.hashGNN(
-            graphName,
-            streamConfig
-        );
-
-        return HashGNNComputationalResultTransformer.toStreamResult(computationResult);
-    }
-
-    public Stream<DefaultNodeEmbeddingMutateResult> HashGNNMutate(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var mutateConfig = configurationCreator.createConfiguration(configuration, HashGNNMutateConfig::of);
-
-        var computationResult = mutateBusinessFacade.hashGNN(
-            graphName,
-            mutateConfig
-        );
-
-        return Stream.of(DefaultNodeEmbeddingsComputationalResultTransformer.toMutateResult(computationResult));
-    }
-
-    public Stream<MemoryEstimateResult> HashGNNStreamEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, HashGNNStreamConfig::of);
-
-        return Stream.of(estimateBusinessFacade.hashGNN(graphNameOrConfiguration, config));
-    }
-
-    public Stream<MemoryEstimateResult> HashGNNMutateEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, HashGNNMutateConfig::of);
-
-        return Stream.of(estimateBusinessFacade.hashGNN(graphNameOrConfiguration, config));
+    public GraphSageProcedure graphSage() {
+        return graphSage;
     }
 
 

@@ -33,9 +33,9 @@ import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecWriteResult;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class Node2VecComputationalResultTransformer {
+public class Node2VecComputationalResultTransformer {
 
-    static Stream<Node2VecStreamResult> toStreamResult(
+    public static Stream<Node2VecStreamResult> toStreamResult(
         StreamComputationResult<Node2VecResult> computationResult
     ) {
         return computationResult.result().map(node2VecResult -> {
@@ -51,7 +51,7 @@ class Node2VecComputationalResultTransformer {
         }).orElseGet(Stream::empty);
     }
 
-    static Node2VecMutateResult toMutateResult(NodePropertyMutateResult<Node2VecSpecificFields> mutateResult) {
+    public static Node2VecMutateResult toMutateResult(NodePropertyMutateResult<Node2VecSpecificFields> mutateResult) {
 
         return new Node2VecMutateResult(
             mutateResult.algorithmSpecificFields().nodeCount(),
@@ -64,7 +64,7 @@ class Node2VecComputationalResultTransformer {
         );
     }
 
-    static Node2VecWriteResult toWriteResult(NodePropertyWriteResult<Node2VecSpecificFields> writeResult) {
+    public static Node2VecWriteResult toWriteResult(NodePropertyWriteResult<Node2VecSpecificFields> writeResult) {
 
         return new Node2VecWriteResult(
             writeResult.algorithmSpecificFields().nodeCount(),
