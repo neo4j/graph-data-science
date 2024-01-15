@@ -71,7 +71,7 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter<Graph
             progressTracker,
             parameters.toBatchImporterConfig()
         );
-        this.parallelBatchImporter = GdsParallelBatchImporter.fromDb(databaseService, config, log, executionMonitor);
+        this.parallelBatchImporter = GdsParallelBatchImporter.fromDb(databaseService, parameters, log, executionMonitor);
     }
 
     @Override

@@ -59,12 +59,6 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
 
     @Value.Default
     @Configuration.Ignore
-    default boolean force() {
-        return false;
-    }
-
-    @Value.Default
-    @Configuration.Ignore
     default boolean highIO() {
         return false;
     }
@@ -106,7 +100,6 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
             batchSize(),
             useBadCollector(),
             highIO(),
-            force(),
             executionMonitorCheckMillis(),
             enableDebugLog()
         );

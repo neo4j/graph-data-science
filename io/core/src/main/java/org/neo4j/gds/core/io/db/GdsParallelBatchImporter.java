@@ -66,7 +66,7 @@ public final class GdsParallelBatchImporter {
 
     static GdsParallelBatchImporter fromDb(
         GraphDatabaseService databaseService,
-        GraphStoreToDatabaseExporterConfig config,
+        GraphStoreToDatabaseExporterParameters parameters,
         Log log,
         ExecutionMonitor executionMonitor
     ) {
@@ -75,7 +75,7 @@ public final class GdsParallelBatchImporter {
         var logService = GraphDatabaseApiProxy.resolveDependency(databaseService, LogService.class);
         var databaseConfig = GraphDatabaseApiProxy.resolveDependency(databaseService, Config.class);
         return new GdsParallelBatchImporter(
-            config.toParameters(),
+            parameters,
             log,
             executionMonitor,
             dbms,
@@ -88,7 +88,7 @@ public final class GdsParallelBatchImporter {
 
     public static GdsParallelBatchImporter fromDbms(
         DatabaseManagementService dbms,
-        GraphStoreToDatabaseExporterConfig config,
+        GraphStoreToDatabaseExporterParameters parameters,
         Log log,
         ExecutionMonitor executionMonitor
     ) {
@@ -97,7 +97,7 @@ public final class GdsParallelBatchImporter {
         var logService = GraphDatabaseApiProxy.resolveDependency(databaseService, LogService.class);
         var databaseConfig = GraphDatabaseApiProxy.resolveDependency(databaseService, Config.class);
         return new GdsParallelBatchImporter(
-            config.toParameters(),
+            parameters,
             log,
             executionMonitor,
             dbms,

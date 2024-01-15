@@ -35,9 +35,9 @@ public final class GraphStoreToDatabaseExporterParameters {
     private final int batchSize;
     private final boolean useBadCollector;
     private final boolean highIO;
-    private final boolean force;
     private final long executionMonitorCheckMillis;
     private final boolean enableDebugLog;
+    private boolean force;
     private Optional<Long> pageCacheMemory;
 
     static GraphStoreToDatabaseExporterParameters create(
@@ -49,7 +49,6 @@ public final class GraphStoreToDatabaseExporterParameters {
         int batchSize,
         boolean useBadCollector,
         boolean highIO,
-        boolean force,
         long executionMonitorCheckMillis,
         boolean enableDebugLog
     ) {
@@ -62,7 +61,6 @@ public final class GraphStoreToDatabaseExporterParameters {
             batchSize,
             useBadCollector,
             highIO,
-            force,
             executionMonitorCheckMillis,
             enableDebugLog
         );
@@ -77,7 +75,6 @@ public final class GraphStoreToDatabaseExporterParameters {
         int batchSize,
         boolean useBadCollector,
         boolean highIO,
-        boolean force,
         long executionMonitorCheckMillis,
         boolean enableDebugLog
     ) {
@@ -89,9 +86,10 @@ public final class GraphStoreToDatabaseExporterParameters {
         this.batchSize = batchSize;
         this.useBadCollector = useBadCollector;
         this.highIO = highIO;
-        this.force = force;
         this.executionMonitorCheckMillis = executionMonitorCheckMillis;
         this.enableDebugLog = enableDebugLog;
+
+        this.force = false;
         this.pageCacheMemory = Optional.empty();
     }
 
@@ -117,6 +115,11 @@ public final class GraphStoreToDatabaseExporterParameters {
 
     public GraphStoreToDatabaseExporterParameters withPageCacheMemory(long pageCacheMemory) {
         this.pageCacheMemory = Optional.of(pageCacheMemory);
+        return this;
+    }
+
+    public GraphStoreToDatabaseExporterParameters withForce(boolean force) {
+        this.force = force;
         return this;
     }
 
