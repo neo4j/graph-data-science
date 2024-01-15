@@ -55,6 +55,7 @@ import org.neo4j.graphdb.RelationshipType;
 import org.neo4j.graphdb.Result;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -66,6 +67,7 @@ import java.util.stream.StreamSupport;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.hamcrest.Matchers.any;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -776,6 +778,26 @@ class CypherAggregationTest extends BaseProcTest {
                 "CALL gds.wcc.stream(g.graphName) YIELD nodeId, componentId " +
                 "RETURN count(DISTINCT componentId) as numberOfComponents",
             List.of(Map.of("numberOfComponents", 2L))
+        );
+    }
+
+
+    @Test
+    void testReturnedConfig() {
+        var query = "MATCH (a:A)-[:REL]->(b) " +
+            "WITH gds.graph.project('g', a, b) AS g " +
+            "RETURN g.configuration AS config";
+        assertCypherResult(
+            query,
+            List.of(Map.of("config", Map.of(
+                "creationTime", any(ZonedDateTime.class),
+                "inverseIndexedRelationshipTypes", List.of(),
+                "jobId", any(String.class),
+                "logProgress", true,
+                "query", query,
+                "readConcurrency", 4,
+                "undirectedRelationshipTypes", List.of()
+            )))
         );
     }
 

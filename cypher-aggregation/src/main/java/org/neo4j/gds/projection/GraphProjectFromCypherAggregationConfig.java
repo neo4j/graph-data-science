@@ -78,7 +78,6 @@ public interface GraphProjectFromCypherAggregationConfig extends GraphProjectCon
         return Set.of(
             NODE_COUNT_KEY,
             RELATIONSHIP_COUNT_KEY,
-            READ_CONCURRENCY_KEY,
             SUDO_KEY,
             VALIDATE_RELATIONSHIPS_KEY
         );
