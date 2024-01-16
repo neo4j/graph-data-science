@@ -36,6 +36,7 @@ import org.neo4j.internal.helpers.collection.Iterators;
 import org.neo4j.storageengine.api.StorageProperty;
 import org.neo4j.storageengine.api.txstate.TxStateVisitor;
 import org.neo4j.token.TokenHolders;
+import org.neo4j.token.api.NamedToken;
 import org.neo4j.token.api.TokenNotFoundException;
 import org.neo4j.values.storable.Value;
 
@@ -47,14 +48,24 @@ public class InMemoryTransactionStateVisitor extends TxStateVisitor.Adapter {
 
     private final CypherGraphStore graphStore;
     private final TokenHolders tokenHolders;
+    private final boolean doRegisterNewTokens;
     private final IntObjectMap<UpdatableNodeProperty> nodePropertiesCache;
 
     public InMemoryTransactionStateVisitor(
         CypherGraphStore graphStore,
         TokenHolders tokenHolders
     ) {
+        this(graphStore, tokenHolders, true);
+    }
+
+    public InMemoryTransactionStateVisitor(
+        CypherGraphStore graphStore,
+        TokenHolders tokenHolders,
+        boolean doRegisterNewTokens
+    ) {
         this.graphStore = graphStore;
         this.tokenHolders = tokenHolders;
+        this.doRegisterNewTokens = doRegisterNewTokens;
         this.nodePropertiesCache = new IntObjectHashMap<>();
     }
 
@@ -111,7 +122,24 @@ public class InMemoryTransactionStateVisitor extends TxStateVisitor.Adapter {
 
     @Override
     public void visitCreatedLabelToken(long id, String name, boolean internal) {
-        graphStore.addNodeLabel(NodeLabel.of(name));
+        if (doRegisterNewTokens) {
+            tokenHolders.labelTokens().addToken(new NamedToken(name, (int) id, internal));
+            graphStore.addNodeLabel(NodeLabel.of(name));
+        }
+    }
+
+    @Override
+    public void visitCreatedPropertyKeyToken(long id, String name, boolean internal) {
+        if (doRegisterNewTokens) {
+            tokenHolders.propertyKeyTokens().addToken(new NamedToken(name, (int) id, internal));
+        }
+    }
+
+    @Override
+    public void visitCreatedRelationshipTypeToken(long id, String name, boolean internal) {
+        if (doRegisterNewTokens) {
+            tokenHolders.relationshipTypeTokens().addToken(new NamedToken(name, (int) id, internal));
+        }
     }
 
     private void visitAddedOrChangedNodeProperties(long nodeId, Iterator<StorageProperty> added, Iterator<StorageProperty> changed) {
