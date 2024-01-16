@@ -216,7 +216,7 @@ public final class GraphImporter {
             .nodeCount(graphStore.nodeCount())
             .relationshipCount(graphStore.relationshipCount())
             .projectMillis(projectMillis)
-            .configuration(this.config.toMap())
+            .configuration(this.config.asProcedureResultConfigurationField())
             .query(this.query)
             .build();
     }
