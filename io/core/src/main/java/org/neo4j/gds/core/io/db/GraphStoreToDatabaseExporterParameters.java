@@ -28,7 +28,6 @@ import java.util.Optional;
 
 public final class GraphStoreToDatabaseExporterParameters {
     private final String dbName;
-    private final String recordFormat;
     private final PropertyMappings additionalNodeProperties;
     private final String defaultRelationshipType;
     private final int writeConcurrency;
@@ -36,6 +35,7 @@ public final class GraphStoreToDatabaseExporterParameters {
     private final long executionMonitorCheckMillis;
     private final boolean enableDebugLog;
 
+    private String recordFormat;
     private boolean useBadCollector;
     private boolean highIO;
     private boolean force;
@@ -43,7 +43,6 @@ public final class GraphStoreToDatabaseExporterParameters {
 
     static GraphStoreToDatabaseExporterParameters create(
         String dbName,
-        String recordFormat,
         PropertyMappings additionalNodeProperties,
         String defaultRelationshipType,
         int writeConcurrency,
@@ -51,32 +50,33 @@ public final class GraphStoreToDatabaseExporterParameters {
         long executionMonitorCheckMillis,
         boolean enableDebugLog
     ) {
+        var defaultRecordFormat = Neo4jProxy.defaultRecordFormatSetting();
+        var defaultUseBadCollector = false;
         return new GraphStoreToDatabaseExporterParameters(
             dbName,
-            recordFormat,
             additionalNodeProperties,
             defaultRelationshipType,
             writeConcurrency,
             batchSize,
             executionMonitorCheckMillis,
             enableDebugLog,
-            false
+            defaultRecordFormat,
+            defaultUseBadCollector
         );
     }
 
     private GraphStoreToDatabaseExporterParameters(
         String dbName,
-        String recordFormat,
         PropertyMappings additionalNodeProperties,
         String defaultRelationshipType,
         int writeConcurrency,
         int batchSize,
         long executionMonitorCheckMillis,
         boolean enableDebugLog,
+        String recordFormat,
         boolean useBadCollector
     ) {
         this.dbName = dbName;
-        this.recordFormat = recordFormat;
         this.additionalNodeProperties = additionalNodeProperties;
         this.defaultRelationshipType = defaultRelationshipType;
         this.writeConcurrency = writeConcurrency;
@@ -84,6 +84,7 @@ public final class GraphStoreToDatabaseExporterParameters {
         this.executionMonitorCheckMillis = executionMonitorCheckMillis;
         this.enableDebugLog = enableDebugLog;
 
+        this.recordFormat = recordFormat;
         this.useBadCollector = useBadCollector;
 
         this.highIO = false;
@@ -128,6 +129,11 @@ public final class GraphStoreToDatabaseExporterParameters {
 
     public GraphStoreToDatabaseExporterParameters andAlsoWithUseBadCollector(boolean useBadCollector) {
         this.useBadCollector = useBadCollector;
+        return this;
+    }
+
+    public GraphStoreToDatabaseExporterParameters andAlsoWithRecordFormat(String recordFormat) {
+        this.recordFormat = recordFormat;
         return this;
     }
 

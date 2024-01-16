@@ -50,13 +50,6 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
         return 200;
     }
 
-    @Value.Default
-    @Configuration.Ignore
-    @SuppressWarnings("immutables:untype")
-    default String recordFormat() {
-        return Neo4jProxy.defaultRecordFormatSetting();
-    }
-
     @Value.Check
     default void validate() {
         Neo4jProxy.validateExternalDatabaseName(dbName());
@@ -81,7 +74,6 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
     default GraphStoreToDatabaseExporterParameters toParameters() {
         return GraphStoreToDatabaseExporterParameters.create(
             dbName(),
-            recordFormat(),
             additionalNodeProperties(),
             defaultRelationshipType(),
             writeConcurrency(),
