@@ -57,12 +57,6 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
         return Neo4jProxy.defaultRecordFormatSetting();
     }
 
-    @Value.Default
-    @Configuration.Ignore
-    default boolean useBadCollector() {
-        return false;
-    }
-
     @Value.Check
     default void validate() {
         Neo4jProxy.validateExternalDatabaseName(dbName());
@@ -92,7 +86,6 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
             defaultRelationshipType(),
             writeConcurrency(),
             batchSize(),
-            useBadCollector(),
             executionMonitorCheckMillis(),
             enableDebugLog()
         );

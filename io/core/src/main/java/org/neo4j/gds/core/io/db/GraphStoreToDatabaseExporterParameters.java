@@ -33,10 +33,10 @@ public final class GraphStoreToDatabaseExporterParameters {
     private final String defaultRelationshipType;
     private final int writeConcurrency;
     private final int batchSize;
-    private final boolean useBadCollector;
     private final long executionMonitorCheckMillis;
     private final boolean enableDebugLog;
 
+    private boolean useBadCollector;
     private boolean highIO;
     private boolean force;
     private Optional<Long> pageCacheMemory;
@@ -48,7 +48,6 @@ public final class GraphStoreToDatabaseExporterParameters {
         String defaultRelationshipType,
         int writeConcurrency,
         int batchSize,
-        boolean useBadCollector,
         long executionMonitorCheckMillis,
         boolean enableDebugLog
     ) {
@@ -59,9 +58,9 @@ public final class GraphStoreToDatabaseExporterParameters {
             defaultRelationshipType,
             writeConcurrency,
             batchSize,
-            useBadCollector,
             executionMonitorCheckMillis,
-            enableDebugLog
+            enableDebugLog,
+            false
         );
     }
 
@@ -72,9 +71,9 @@ public final class GraphStoreToDatabaseExporterParameters {
         String defaultRelationshipType,
         int writeConcurrency,
         int batchSize,
-        boolean useBadCollector,
         long executionMonitorCheckMillis,
-        boolean enableDebugLog
+        boolean enableDebugLog,
+        boolean useBadCollector
     ) {
         this.dbName = dbName;
         this.recordFormat = recordFormat;
@@ -82,9 +81,10 @@ public final class GraphStoreToDatabaseExporterParameters {
         this.defaultRelationshipType = defaultRelationshipType;
         this.writeConcurrency = writeConcurrency;
         this.batchSize = batchSize;
-        this.useBadCollector = useBadCollector;
         this.executionMonitorCheckMillis = executionMonitorCheckMillis;
         this.enableDebugLog = enableDebugLog;
+
+        this.useBadCollector = useBadCollector;
 
         this.highIO = false;
         this.force = false;
@@ -123,6 +123,11 @@ public final class GraphStoreToDatabaseExporterParameters {
 
     public GraphStoreToDatabaseExporterParameters withHighIO(boolean highIO) {
         this.highIO = highIO;
+        return this;
+    }
+
+    public GraphStoreToDatabaseExporterParameters andAlsoWithUseBadCollector(boolean useBadCollector) {
+        this.useBadCollector = useBadCollector;
         return this;
     }
 
