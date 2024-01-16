@@ -32,7 +32,6 @@ public final class GraphStoreToDatabaseExporterParameters {
     private final String defaultRelationshipType;
     private final int writeConcurrency;
     private final int batchSize;
-    private final long executionMonitorCheckMillis;
     private final boolean enableDebugLog;
 
     private String recordFormat;
@@ -47,7 +46,6 @@ public final class GraphStoreToDatabaseExporterParameters {
         String defaultRelationshipType,
         int writeConcurrency,
         int batchSize,
-        long executionMonitorCheckMillis,
         boolean enableDebugLog
     ) {
         var defaultRecordFormat = Neo4jProxy.defaultRecordFormatSetting();
@@ -58,7 +56,6 @@ public final class GraphStoreToDatabaseExporterParameters {
             defaultRelationshipType,
             writeConcurrency,
             batchSize,
-            executionMonitorCheckMillis,
             enableDebugLog,
             defaultRecordFormat,
             defaultUseBadCollector
@@ -71,7 +68,6 @@ public final class GraphStoreToDatabaseExporterParameters {
         String defaultRelationshipType,
         int writeConcurrency,
         int batchSize,
-        long executionMonitorCheckMillis,
         boolean enableDebugLog,
         String recordFormat,
         boolean useBadCollector
@@ -81,7 +77,6 @@ public final class GraphStoreToDatabaseExporterParameters {
         this.defaultRelationshipType = defaultRelationshipType;
         this.writeConcurrency = writeConcurrency;
         this.batchSize = batchSize;
-        this.executionMonitorCheckMillis = executionMonitorCheckMillis;
         this.enableDebugLog = enableDebugLog;
 
         this.recordFormat = recordFormat;

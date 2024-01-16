@@ -43,13 +43,6 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
         return false;
     }
 
-    @Value.Default
-    @Configuration.Ignore
-    @SuppressWarnings("immutables:untype")
-    default long executionMonitorCheckMillis() {
-        return 200;
-    }
-
     @Value.Check
     default void validate() {
         Neo4jProxy.validateExternalDatabaseName(dbName());
@@ -78,7 +71,6 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
             defaultRelationshipType(),
             writeConcurrency(),
             batchSize(),
-            executionMonitorCheckMillis(),
             enableDebugLog()
         );
     }
