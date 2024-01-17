@@ -17,7 +17,7 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 [[algorithms-bellman-single-source-intro]]
 == Introduction
 
-The xref:https://en.wikipedia.org/wiki/Bellman%E2%80%93Ford_algorithm[Bellman-Ford] Shortest Path algorithm
+The https://en.wikipedia.org/wiki/Bellman%E2%80%93Ford_algorithm[Bellman-Ford] Path algorithm
 computes the shortest path between nodes.
 
 In contrast to the xref:algorithms/dijkstra-single-source.adoc[Dijkstra algorithm] which works only for graphs with non-negative relationship weights, Bellman-Ford can also handle graphs with negative weights provided that the source cannot reach any node involved in a negative cycle.
@@ -31,7 +31,7 @@ As the full set of negative cycles can be too large to enumerate, each node will
 
 The ability to handle negative weights makes Bellman-Ford more versatile than Dijkstra, but also slower in practice.
 
-The Neo4j GDS Library provides an adaptation of the original Bellman-Ford algorithm called xref:https://en.wikipedia.org/wiki/Shortest_path_faster_algorithm[Shortest-Path Faster Algorithm (SPFA)].
+The Neo4j GDS Library provides an adaptation of the original Bellman-Ford algorithm called https://en.wikipedia.org/wiki/Shortest_path_faster_algorithm[Shortest-Path Faster Algorithm (SPFA)].
 SPFA significantly reduces the computational time of Bellman-Ford by working only on a subset of the nodes rather than iterating over the set of nodes at each step.
 In addition, the computations are parallelized to further speed-up computations.
 
