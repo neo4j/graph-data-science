@@ -40,7 +40,7 @@ public final class GraphStoreToDatabaseExporterParameters {
     private boolean force;
     private Optional<Long> pageCacheMemory;
 
-    static GraphStoreToDatabaseExporterParameters create(
+    public static GraphStoreToDatabaseExporterParameters create(
         String dbName,
         PropertyMappings additionalNodeProperties,
         String defaultRelationshipType,
