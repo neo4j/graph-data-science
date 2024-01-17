@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.io;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.BaseConfig;
@@ -28,23 +27,18 @@ import org.neo4j.gds.core.concurrency.ParallelUtil;
 
 public interface GraphStoreExporterBaseConfig extends BaseConfig {
 
-    @Value.Default
     default String defaultRelationshipType() {
         return RelationshipType.ALL_RELATIONSHIPS.name;
     }
 
-    @Value.Default
     default int writeConcurrency() {
         return ConcurrencyConfig.DEFAULT_CONCURRENCY;
     }
 
-    @Value.Default
     default int batchSize() {
         return ParallelUtil.DEFAULT_BATCH_SIZE;
     }
 
-    @Value.Default
-    @Value.Parameter(false)
     @Configuration.ConvertWith(method = "org.neo4j.gds.PropertyMappings#fromObject")
     @Configuration.ToMapValue("org.neo4j.gds.PropertyMappings#toObject")
     default org.neo4j.gds.PropertyMappings additionalNodeProperties() {

@@ -19,30 +19,25 @@
  */
 package org.neo4j.gds.core.io.file;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.io.GraphStoreExporterBaseConfig;
 
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface GraphStoreToFileExporterConfig extends GraphStoreExporterBaseConfig {
 
-    @Value.Default
     default boolean includeMetaData() {
         return false;
     }
 
     @Configuration.Parameter
-    @Value.Default
     default String username() {
         return Username.EMPTY_USERNAME.username();
     }
 
     String exportName();
 
-    @Value.Default
     default boolean useLabelMapping() {
         // the reason for default false (unlike BackupConfig) is to prevent a breaking change in CSV export
         return false;

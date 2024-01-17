@@ -24,16 +24,11 @@ import org.neo4j.gds.compat.Neo4jProxy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class GraphStoreToDatabaseExporterConfigTest {
+class GraphStoreToDatabaseExporterParametersTest {
 
     @Test
     void testToBatchImporterConfig() {
-        var config = ImmutableGraphStoreToDatabaseExporterConfig.builder()
-            .dbName("test")
-            .batchSize(1337)
-            .writeConcurrency(42)
-            .build();
-        var parameters = config.toParameters()
+        var parameters = GraphStoreToDatabaseExporterParameters.create("test", 42, 1337, false)
             .withPageCacheMemory(100_000L)
             .withHighIO(true);
         var pbiConfig = parameters.toBatchImporterConfig();

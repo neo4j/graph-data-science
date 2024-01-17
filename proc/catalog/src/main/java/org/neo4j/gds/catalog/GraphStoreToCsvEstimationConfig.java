@@ -19,16 +19,13 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
 
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface GraphStoreToCsvEstimationConfig extends GraphStoreToFileExporterConfig {
 
-    @Value.Default
     @Configuration.DoubleRange(min = 0.0, max = 1.0)
     default double samplingFactor() {
         return 0.001;

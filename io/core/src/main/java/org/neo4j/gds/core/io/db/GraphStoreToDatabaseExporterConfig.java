@@ -21,15 +21,12 @@ package org.neo4j.gds.core.io.db;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.JobIdConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.io.GraphStoreExporterBaseConfig;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBaseConfig, JobIdConfig {
 
     String DB_NAME_KEY = "dbName";
@@ -37,7 +34,6 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
     @Configuration.Key(DB_NAME_KEY)
     String dbName();
 
-    @Value.Default
     @Deprecated(forRemoval = true, since = "2.2")
     default boolean enableDebugLog() {
         return false;
@@ -56,13 +52,11 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
         return new GraphStoreToDatabaseExporterConfigImpl(normalizedConfig);
     }
 
-    @Value.Default
     @Configuration.Ignore
     default org.neo4j.internal.batchimport.Configuration toBatchImporterConfig() {
         return toParameters().toBatchImporterConfig();
     }
 
-    @Value.Default
     @Configuration.Ignore
     default GraphStoreToDatabaseExporterParameters toParameters() {
         return GraphStoreToDatabaseExporterParameters.create(
