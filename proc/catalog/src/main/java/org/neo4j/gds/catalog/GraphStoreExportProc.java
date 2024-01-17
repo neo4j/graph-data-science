@@ -29,12 +29,14 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.io.GraphStoreExporterBaseConfig;
+import org.neo4j.gds.core.io.GraphStoreExporterParameters;
 import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.io.db.GraphStoreToDatabaseExporter;
 import org.neo4j.gds.core.io.db.GraphStoreToDatabaseExporterConfig;
 import org.neo4j.gds.core.io.db.ProgressTrackerExecutionMonitor;
 import org.neo4j.gds.core.io.file.GraphStoreExporterUtil;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
+import org.neo4j.gds.core.io.file.GraphStoreToFileExporterParameters;
 import org.neo4j.gds.core.io.file.csv.estimation.CsvExportEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -161,10 +163,22 @@ public class GraphStoreExportProc extends BaseProc {
 
         var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(databaseService, Config.class);
 
+        var toFileExporterParameters = GraphStoreToFileExporterParameters.create(
+            exportConfig.exportName(),
+            exportConfig.username(),
+            exportConfig.includeMetaData(),
+            exportConfig.useLabelMapping()
+        );
+        var commonExporterParameters = GraphStoreExporterParameters.create(
+            exportConfig.defaultRelationshipType(),
+            exportConfig.batchSize(),
+            exportConfig.writeConcurrency()
+        );
         var result = GraphStoreExporterUtil.export(
             graphStore,
-            exportLocation(neo4jConfig, exportConfig),
-            exportConfig,
+            exportLocation(neo4jConfig, toFileExporterParameters.exportName()),
+            toFileExporterParameters,
+            commonExporterParameters,
             neoNodeProperties(exportConfig, graphStore),
             executionContext().taskRegistryFactory(),
             executionContext().log(),

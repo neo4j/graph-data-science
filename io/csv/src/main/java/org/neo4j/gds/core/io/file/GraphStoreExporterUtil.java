@@ -48,24 +48,14 @@ public final class GraphStoreExporterUtil {
     public static ExportToCsvResult export(
         GraphStore graphStore,
         Path path,
-        GraphStoreToFileExporterConfig config,
+        GraphStoreToFileExporterParameters toFileExporterParameters,
+        GraphStoreExporterParameters commonExporterParameters,
         Optional<NeoNodeProperties> neoNodeProperties,
         TaskRegistryFactory taskRegistryFactory,
         Log log,
         ExecutorService executorService
     ) {
         try {
-            var toFileExporterParameters = GraphStoreToFileExporterParameters.create(
-                config.exportName(),
-                config.username(),
-                config.includeMetaData(),
-                config.useLabelMapping()
-            );
-            var commonExporterParameters = GraphStoreExporterParameters.create(
-                config.defaultRelationshipType(),
-                config.batchSize(),
-                config.writeConcurrency()
-            );
             var exporter = GraphStoreToCsvExporter.create(
                 graphStore,
                 toFileExporterParameters,
@@ -82,7 +72,7 @@ public final class GraphStoreExporterUtil {
             var end = System.nanoTime();
 
             var tookMillis = TimeUnit.NANOSECONDS.toMillis(end - start);
-            log.info("[gds] Export completed for '%s' in %s ms", config.exportName(), tookMillis);
+            log.info("[gds] Export completed for '%s' in %s ms", toFileExporterParameters.exportName(), tookMillis);
             return ImmutableExportToCsvResult.of(
                 exportedProperties,
                 tookMillis
@@ -93,13 +83,13 @@ public final class GraphStoreExporterUtil {
         }
     }
 
-    public static Path exportLocation(Configuration neo4jConfig, GraphStoreToFileExporterConfig config) {
+    public static Path exportLocation(Configuration neo4jConfig, String exportName) {
         var rootPath = neo4jConfig.get(GdsSettings.exportLocation());
         var exportPath = rootPath != null ? rootPath.resolve(EXPORT_DIR) : null;
-        return exportPath(exportPath, config);
+        return exportPath(exportPath, exportName);
     }
 
-    public static Path exportPath(@Nullable Path rootPath, GraphStoreToFileExporterConfig config) {
+    public static Path exportPath(@Nullable Path rootPath, String exportName) {
         if (rootPath == null) {
             throw new RuntimeException(formatWithLocale(
                 "The configuration option '%s' must be set.",
@@ -109,13 +99,13 @@ public final class GraphStoreExporterUtil {
 
         DIRECTORY_IS_WRITABLE.validate(rootPath);
 
-        var resolvedExportPath = rootPath.resolve(config.exportName()).normalize();
+        var resolvedExportPath = rootPath.resolve(exportName).normalize();
         var resolvedParent = resolvedExportPath.getParent();
 
         if (resolvedParent == null || !resolvedParent.startsWith(rootPath)) {
             throw new IllegalArgumentException(formatWithLocale(
                 "Illegal parameter value for parameter exportName '%s'. It attempts to write into a forbidden directory.",
-                config.exportName()
+                exportName
             ));
         }
 

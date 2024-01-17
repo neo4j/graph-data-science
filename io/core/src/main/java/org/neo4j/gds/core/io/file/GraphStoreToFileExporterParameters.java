@@ -46,7 +46,7 @@ public final class GraphStoreToFileExporterParameters {
         this.useLabelMapping = useLabelMapping;
     }
 
-    String exportName() {
+    public String exportName() {
         return exportName;
     }
 
