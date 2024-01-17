@@ -205,8 +205,8 @@ final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
 
     private static long relCountUpperBoundForLabelAndType(Read dataRead, int labelId, int id) {
         return Math.max(
-            dataRead.countsForRelationshipWithoutTxState(labelId, id, ANY_LABEL),
-            dataRead.countsForRelationshipWithoutTxState(ANY_LABEL, id, labelId)
+            dataRead.estimateCountsForRelationships(labelId, id, ANY_LABEL),
+            dataRead.estimateCountsForRelationships(ANY_LABEL, id, labelId)
         );
     }
 
