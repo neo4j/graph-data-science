@@ -32,15 +32,12 @@ import java.util.Optional;
 import java.util.function.LongFunction;
 import java.util.stream.Collectors;
 
-public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseConfig> {
+public abstract class GraphStoreExporter {
 
     private final GraphStore graphStore;
-
-    protected final CONFIG config;
-
     private final Map<String, LongFunction<Object>> neoNodeProperties;
-
     private final Optional<NodeLabelMapping> nodeLabelMapping;
+    protected final GraphStoreExporterParameters parameters;
 
     public enum IdMappingType implements IdMapFunction {
         MAPPED {
@@ -85,12 +82,12 @@ public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseCo
 
     protected GraphStoreExporter(
         GraphStore graphStore,
-        CONFIG config,
+        GraphStoreExporterParameters parameters,
         Optional<NeoNodeProperties> neoNodeProperties,
         Optional<NodeLabelMapping> nodeLabelMapping
     ) {
         this.graphStore = graphStore;
-        this.config = config;
+        this.parameters = parameters;
         this.neoNodeProperties = neoNodeProperties
             .map(NeoNodeProperties::neoNodeProperties)
             .orElse(Map.of());
@@ -108,7 +105,7 @@ public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseCo
             neoNodeProperties,
             nodeLabelMapping
         );
-        var relationshipStore = RelationshipStore.of(graphStore, config.defaultRelationshipType());
+        var relationshipStore = RelationshipStore.of(graphStore, parameters.defaultRelationshipType());
         var graphProperties = graphStore
             .graphPropertyKeys()
             .stream()
@@ -121,8 +118,8 @@ public abstract class GraphStoreExporter<CONFIG extends GraphStoreExporterBaseCo
             relationshipStore,
             graphStore.capabilities(),
             graphProperties,
-            config.batchSize(),
-            config.writeConcurrency(),
+            parameters.batchSize(),
+            parameters.concurrency(),
             idMappingType()
         );
 

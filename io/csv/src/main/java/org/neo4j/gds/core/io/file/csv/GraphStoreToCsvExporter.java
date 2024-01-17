@@ -24,6 +24,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.io.GraphStoreExporterParameters;
 import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.io.NodeLabelMapping;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporter;
@@ -83,10 +84,12 @@ public final class GraphStoreToCsvExporter {
         Optional<NodeLabelMapping> nodeLabelMapping = config.useLabelMapping()
             ? Optional.of(new NodeLabelMapping(graphStore.nodeLabels()))
             : Optional.empty();
+        var exporterParameters = GraphStoreExporterParameters.create(config.defaultRelationshipType(), config.batchSize(), config.writeConcurrency());
 
         return new GraphStoreToFileExporter(
             graphStore,
             config,
+            exporterParameters,
             neoNodeProperties,
             nodeLabelMapping,
             () -> new UserInfoVisitor(exportPath),

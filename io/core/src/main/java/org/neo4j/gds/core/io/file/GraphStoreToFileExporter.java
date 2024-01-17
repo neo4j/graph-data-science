@@ -25,6 +25,7 @@ import org.neo4j.gds.compat.CompatInput;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.io.GraphStoreExporter;
+import org.neo4j.gds.core.io.GraphStoreExporterParameters;
 import org.neo4j.gds.core.io.GraphStoreInput;
 import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.io.NodeLabelMapping;
@@ -49,7 +50,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Supplier;
 
-public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFileExporterConfig> {
+public class GraphStoreToFileExporter extends GraphStoreExporter {
 
     private final VisitorProducer<NodeVisitor> nodeVisitorSupplier;
     private final VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier;
@@ -68,10 +69,12 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
     private final Log log;
     private final String rootTaskName;
     private final ExecutorService executorService;
+    private final GraphStoreToFileExporterConfig config;
 
     public GraphStoreToFileExporter(
         GraphStore graphStore,
         GraphStoreToFileExporterConfig config,
+        GraphStoreExporterParameters exporterParameters,
         Optional<NeoNodeProperties> neoNodeProperties,
         Optional<NodeLabelMapping> nodeLabelMapping,
         Supplier<SingleRowVisitor<String>> userInfoVisitorSupplier,
@@ -89,7 +92,8 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         String rootTaskName,
         ExecutorService executorService
     ) {
-        super(graphStore, config, neoNodeProperties, nodeLabelMapping);
+        super(graphStore, exporterParameters, neoNodeProperties, nodeLabelMapping);
+        this.config = config;
         this.nodeVisitorSupplier = nodeVisitorSupplier;
         this.relationshipVisitorSupplier = relationshipVisitorSupplier;
         this.graphPropertyVisitorSupplier = graphPropertyVisitorSupplier;
@@ -153,7 +157,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         }
 
         var task = Tasks.task(rootTaskName + " export", importTasks);
-        return new TaskProgressTracker(task, log, config.writeConcurrency(), taskRegistryFactory);
+        return new TaskProgressTracker(task, log, parameters.concurrency(), taskRegistryFactory);
     }
 
     private void exportNodes(
@@ -165,12 +169,12 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         var nodeInputIterator = nodeInput.iterator();
 
         var tasks = ParallelUtil.tasks(
-            config.writeConcurrency(),
+            parameters.concurrency(),
             (index) -> new ElementImportRunner<>(nodeVisitorSupplier.apply(index), nodeInputIterator, progressTracker)
         );
 
         RunWithConcurrency.builder()
-            .concurrency(config.writeConcurrency())
+            .concurrency(parameters.concurrency())
             .tasks(tasks)
             .executor(executorService)
             .run();
@@ -186,7 +190,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         var relationshipInputIterator = relationshipInput.iterator();
 
         var tasks = ParallelUtil.tasks(
-            config.writeConcurrency(),
+            parameters.concurrency(),
             (index) -> new ElementImportRunner<>(
                 relationshipVisitorSupplier.apply(index),
                 relationshipInputIterator,
@@ -195,7 +199,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
         );
 
         RunWithConcurrency.builder()
-            .concurrency(config.writeConcurrency())
+            .concurrency(parameters.concurrency())
             .tasks(tasks)
             .executor(executorService)
             .mayInterruptIfRunning(false)
@@ -213,7 +217,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             var graphPropertyInputIterator = graphPropertyInput.iterator();
 
             var tasks = ParallelUtil.tasks(
-                config.writeConcurrency(),
+                parameters.concurrency(),
                 (index) -> new ElementImportRunner<>(
                     graphPropertyVisitorSupplier.apply(index),
                     graphPropertyInputIterator,
@@ -222,7 +226,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter<GraphStoreToFil
             );
 
             RunWithConcurrency.builder()
-                .concurrency(config.writeConcurrency())
+                .concurrency(parameters.concurrency())
                 .tasks(tasks)
                 .executor(executorService)
                 .run();
