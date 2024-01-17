@@ -51,21 +51,4 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
         }).orElse(config);
         return new GraphStoreToDatabaseExporterConfigImpl(normalizedConfig);
     }
-
-    @Configuration.Ignore
-    default org.neo4j.internal.batchimport.Configuration toBatchImporterConfig() {
-        return toParameters().toBatchImporterConfig();
-    }
-
-    @Configuration.Ignore
-    default GraphStoreToDatabaseExporterParameters toParameters() {
-        return GraphStoreToDatabaseExporterParameters.create(
-            dbName(),
-            writeConcurrency(),
-            batchSize(),
-            enableDebugLog()
-        );
-    }
-
-
 }

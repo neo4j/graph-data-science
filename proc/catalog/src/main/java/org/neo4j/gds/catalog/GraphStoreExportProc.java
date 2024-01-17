@@ -33,6 +33,7 @@ import org.neo4j.gds.core.io.GraphStoreExporterParameters;
 import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.io.db.GraphStoreToDatabaseExporter;
 import org.neo4j.gds.core.io.db.GraphStoreToDatabaseExporterConfig;
+import org.neo4j.gds.core.io.db.GraphStoreToDatabaseExporterParameters;
 import org.neo4j.gds.core.io.db.ProgressTrackerExecutionMonitor;
 import org.neo4j.gds.core.io.file.GraphStoreExporterUtil;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
@@ -91,7 +92,12 @@ public class GraphStoreExportProc extends BaseProc {
                     executionContext().userLogRegistryFactory()
                 );
 
-                var toDatabaseExporterParameters = exportConfig.toParameters();
+                var toDatabaseExporterParameters = GraphStoreToDatabaseExporterParameters.create(
+                    exportConfig.dbName(),
+                    exportConfig.writeConcurrency(),
+                    exportConfig.batchSize(),
+                    exportConfig.enableDebugLog()
+                );
                 var commonExporterParameters = GraphStoreExporterParameters.create(
                     exportConfig.defaultRelationshipType(),
                     exportConfig.batchSize(),
@@ -102,7 +108,7 @@ public class GraphStoreExportProc extends BaseProc {
                     databaseService,
                     toDatabaseExporterParameters,
                     commonExporterParameters,
-                    neoNodeProperties(exportConfig, graphStore),
+                    neoNodeProperties(exportConfig.additionalNodeProperties(), graphStore),
                     executionContext().log(),
                     progressTracker
                 );
@@ -185,7 +191,7 @@ public class GraphStoreExportProc extends BaseProc {
             exportLocation(neo4jConfig, toFileExporterParameters.exportName()),
             toFileExporterParameters,
             commonExporterParameters,
-            neoNodeProperties(exportConfig, graphStore),
+            neoNodeProperties(exportConfig.additionalNodeProperties(), graphStore),
             executionContext().taskRegistryFactory(),
             executionContext().log(),
             DefaultPool.INSTANCE
@@ -253,13 +259,13 @@ public class GraphStoreExportProc extends BaseProc {
     }
 
     private Optional<NeoNodeProperties> neoNodeProperties(
-        GraphStoreExporterBaseConfig exportConfig,
+        PropertyMappings additionalNodeProperties,
         GraphStore graphStore
     ) {
         return NeoNodeProperties.of(
             graphStore,
             DatabaseTransactionContext.of(databaseService, procedureTransaction),
-            exportConfig.additionalNodeProperties(),
+            additionalNodeProperties,
             executionContext().log()
         );
     }
