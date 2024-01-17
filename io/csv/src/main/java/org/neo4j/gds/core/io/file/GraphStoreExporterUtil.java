@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.io.GraphStoreExporter;
+import org.neo4j.gds.core.io.GraphStoreExporterParameters;
 import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.io.file.csv.GraphStoreToCsvExporter;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -54,7 +55,27 @@ public final class GraphStoreExporterUtil {
         ExecutorService executorService
     ) {
         try {
-            var exporter = GraphStoreToCsvExporter.create(graphStore, config, path, neoNodeProperties, taskRegistryFactory, log, executorService);
+            var toFileExporterParameters = GraphStoreToFileExporterParameters.create(
+                config.exportName(),
+                config.username(),
+                config.includeMetaData(),
+                config.useLabelMapping()
+            );
+            var commonExporterParameters = GraphStoreExporterParameters.create(
+                config.defaultRelationshipType(),
+                config.batchSize(),
+                config.writeConcurrency()
+            );
+            var exporter = GraphStoreToCsvExporter.create(
+                graphStore,
+                toFileExporterParameters,
+                commonExporterParameters,
+                path,
+                neoNodeProperties,
+                taskRegistryFactory,
+                log,
+                executorService
+            );
 
             var start = System.nanoTime();
             var exportedProperties = exporter.run();

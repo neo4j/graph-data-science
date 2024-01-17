@@ -29,6 +29,7 @@ import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.io.NodeLabelMapping;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporter;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
+import org.neo4j.gds.core.io.file.GraphStoreToFileExporterParameters;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.NullLog;
@@ -47,8 +48,11 @@ public final class GraphStoreToCsvExporter {
         GraphStoreToFileExporterConfig config,
         Path exportPath
     ) {
+        var toFileExporterParameters = GraphStoreToFileExporterParameters.create(config.exportName(), config.username(), config.includeMetaData(), config.useLabelMapping());
+        var commonExporterParameters = GraphStoreExporterParameters.create(config.defaultRelationshipType(), config.batchSize(), config.writeConcurrency());
         return create(graphStore,
-            config,
+            toFileExporterParameters,
+            commonExporterParameters,
             exportPath,
             Optional.empty(),
             TaskRegistryFactory.empty(),
@@ -59,7 +63,8 @@ public final class GraphStoreToCsvExporter {
 
     public static GraphStoreToFileExporter create(
         GraphStore graphStore,
-        GraphStoreToFileExporterConfig config,
+        GraphStoreToFileExporterParameters toFileExporterParameters,
+        GraphStoreExporterParameters commonExporterParameters,
         Path exportPath,
         Optional<NeoNodeProperties> neoNodeProperties,
         TaskRegistryFactory taskRegistryFactory,
@@ -81,15 +86,14 @@ public final class GraphStoreToCsvExporter {
                 .forEach(label -> neoNodeSchema.getOrCreateLabel(label).addProperty(key, ValueType.STRING))
             ));
 
-        Optional<NodeLabelMapping> nodeLabelMapping = config.useLabelMapping()
+        Optional<NodeLabelMapping> nodeLabelMapping = toFileExporterParameters.useLabelMapping()
             ? Optional.of(new NodeLabelMapping(graphStore.nodeLabels()))
             : Optional.empty();
-        var exporterParameters = GraphStoreExporterParameters.create(config.defaultRelationshipType(), config.batchSize(), config.writeConcurrency());
 
         return new GraphStoreToFileExporter(
             graphStore,
-            config,
-            exporterParameters,
+            toFileExporterParameters,
+            commonExporterParameters,
             neoNodeProperties,
             nodeLabelMapping,
             () -> new UserInfoVisitor(exportPath),

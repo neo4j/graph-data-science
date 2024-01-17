@@ -52,6 +52,7 @@ import java.util.function.Supplier;
 
 public class GraphStoreToFileExporter extends GraphStoreExporter {
 
+    private final GraphStoreToFileExporterParameters toFileExporterParameters;
     private final VisitorProducer<NodeVisitor> nodeVisitorSupplier;
     private final VisitorProducer<RelationshipVisitor> relationshipVisitorSupplier;
     private final VisitorProducer<GraphPropertyVisitor> graphPropertyVisitorSupplier;
@@ -69,12 +70,11 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
     private final Log log;
     private final String rootTaskName;
     private final ExecutorService executorService;
-    private final GraphStoreToFileExporterConfig config;
 
     public GraphStoreToFileExporter(
         GraphStore graphStore,
-        GraphStoreToFileExporterConfig config,
-        GraphStoreExporterParameters exporterParameters,
+        GraphStoreToFileExporterParameters toFileExporterParameters,
+        GraphStoreExporterParameters commonExporterParameters,
         Optional<NeoNodeProperties> neoNodeProperties,
         Optional<NodeLabelMapping> nodeLabelMapping,
         Supplier<SingleRowVisitor<String>> userInfoVisitorSupplier,
@@ -92,8 +92,8 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
         String rootTaskName,
         ExecutorService executorService
     ) {
-        super(graphStore, exporterParameters, neoNodeProperties, nodeLabelMapping);
-        this.config = config;
+        super(graphStore, commonExporterParameters, neoNodeProperties, nodeLabelMapping);
+        this.toFileExporterParameters = toFileExporterParameters;
         this.nodeVisitorSupplier = nodeVisitorSupplier;
         this.relationshipVisitorSupplier = relationshipVisitorSupplier;
         this.graphPropertyVisitorSupplier = graphPropertyVisitorSupplier;
@@ -112,7 +112,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
 
     @Override
     protected void export(GraphStoreInput graphStoreInput) {
-        if (config.includeMetaData()) {
+        if (toFileExporterParameters.includeMetaData()) {
             exportUserName();
             exportGraphInfo(graphStoreInput);
             exportNodeSchema(graphStoreInput);
@@ -236,7 +236,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
 
     private void exportUserName() {
         try (var userInfoVisitor = userInfoVisitorSupplier.get()) {
-            userInfoVisitor.export(config.username());
+            userInfoVisitor.export(toFileExporterParameters.username());
         }
     }
 

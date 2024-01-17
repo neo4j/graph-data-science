@@ -49,12 +49,12 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter {
         GraphStore graphStore,
         GraphDatabaseService databaseService,
         GraphStoreToDatabaseExporterConfig config,
-        GraphStoreToDatabaseExporterParameters toDatabaseParameters,
+        GraphStoreToDatabaseExporterParameters toDatabaseExporterParameters,
         Optional<NeoNodeProperties> neoNodeProperties,
         Log log,
         ProgressTracker progressTracker
     ) {
-        var exporterParameters = GraphStoreExporterParameters.create(
+        var commonExporterParameters = GraphStoreExporterParameters.create(
             config.defaultRelationshipType(),
             config.batchSize(),
             config.writeConcurrency()
@@ -62,8 +62,8 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter {
         return new GraphStoreToDatabaseExporter(
             graphStore,
             databaseService,
-            toDatabaseParameters,
-            exporterParameters,
+            toDatabaseExporterParameters,
+            commonExporterParameters,
             neoNodeProperties,
             log,
             progressTracker
@@ -74,12 +74,12 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter {
         GraphStore graphStore,
         GraphDatabaseService databaseService,
         GraphStoreToDatabaseExporterParameters toDatabaseParameters,
-        GraphStoreExporterParameters exporterParameters,
+        GraphStoreExporterParameters commonExporterParameters,
         Optional<NeoNodeProperties> neoNodeProperties,
         Log log,
         ProgressTracker progressTracker
     ) {
-        super(graphStore, exporterParameters, neoNodeProperties, Optional.empty());
+        super(graphStore, commonExporterParameters, neoNodeProperties, Optional.empty());
         var executionMonitor = new ProgressTrackerExecutionMonitor(
             graphStore,
             progressTracker,
