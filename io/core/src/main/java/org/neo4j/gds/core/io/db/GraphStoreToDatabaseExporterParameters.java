@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.io.db;
 
-import org.neo4j.gds.PropertyMappings;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.IndexConfig;
@@ -28,8 +27,6 @@ import java.util.Optional;
 
 public final class GraphStoreToDatabaseExporterParameters {
     private final String dbName;
-    private final PropertyMappings additionalNodeProperties;
-    private final String defaultRelationshipType;
     private final int writeConcurrency;
     private final int batchSize;
     private final boolean enableDebugLog;
@@ -42,8 +39,6 @@ public final class GraphStoreToDatabaseExporterParameters {
 
     public static GraphStoreToDatabaseExporterParameters create(
         String dbName,
-        PropertyMappings additionalNodeProperties,
-        String defaultRelationshipType,
         int writeConcurrency,
         int batchSize,
         boolean enableDebugLog
@@ -52,8 +47,6 @@ public final class GraphStoreToDatabaseExporterParameters {
         var defaultUseBadCollector = false;
         return new GraphStoreToDatabaseExporterParameters(
             dbName,
-            additionalNodeProperties,
-            defaultRelationshipType,
             writeConcurrency,
             batchSize,
             enableDebugLog,
@@ -64,8 +57,6 @@ public final class GraphStoreToDatabaseExporterParameters {
 
     private GraphStoreToDatabaseExporterParameters(
         String dbName,
-        PropertyMappings additionalNodeProperties,
-        String defaultRelationshipType,
         int writeConcurrency,
         int batchSize,
         boolean enableDebugLog,
@@ -73,8 +64,6 @@ public final class GraphStoreToDatabaseExporterParameters {
         boolean useBadCollector
     ) {
         this.dbName = dbName;
-        this.additionalNodeProperties = additionalNodeProperties;
-        this.defaultRelationshipType = defaultRelationshipType;
         this.writeConcurrency = writeConcurrency;
         this.batchSize = batchSize;
         this.enableDebugLog = enableDebugLog;

@@ -67,8 +67,6 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
     default GraphStoreToDatabaseExporterParameters toParameters() {
         return GraphStoreToDatabaseExporterParameters.create(
             dbName(),
-            additionalNodeProperties(),
-            defaultRelationshipType(),
             writeConcurrency(),
             batchSize(),
             enableDebugLog()
