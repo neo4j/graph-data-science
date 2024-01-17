@@ -37,28 +37,23 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter {
     public static GraphStoreToDatabaseExporter of(
         GraphStore graphStore,
         GraphDatabaseService databaseService,
-        GraphStoreToDatabaseExporterConfig config,
-        GraphStoreToDatabaseExporterParameters parameters,
+        GraphStoreToDatabaseExporterParameters toDatabaseExporterParameters,
+        GraphStoreExporterParameters commonExporterParameters,
         Log log,
         ProgressTracker progressTracker
     ) {
-        return of(graphStore, databaseService, config, parameters, Optional.empty(), log, progressTracker);
+        return of(graphStore, databaseService, toDatabaseExporterParameters, commonExporterParameters, Optional.empty(), log, progressTracker);
     }
 
     public static GraphStoreToDatabaseExporter of(
         GraphStore graphStore,
         GraphDatabaseService databaseService,
-        GraphStoreToDatabaseExporterConfig config,
         GraphStoreToDatabaseExporterParameters toDatabaseExporterParameters,
+        GraphStoreExporterParameters commonExporterParameters,
         Optional<NeoNodeProperties> neoNodeProperties,
         Log log,
         ProgressTracker progressTracker
     ) {
-        var commonExporterParameters = GraphStoreExporterParameters.create(
-            config.defaultRelationshipType(),
-            config.batchSize(),
-            config.writeConcurrency()
-        );
         return new GraphStoreToDatabaseExporter(
             graphStore,
             databaseService,

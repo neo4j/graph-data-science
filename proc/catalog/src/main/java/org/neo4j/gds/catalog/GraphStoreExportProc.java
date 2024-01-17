@@ -91,11 +91,17 @@ public class GraphStoreExportProc extends BaseProc {
                     executionContext().userLogRegistryFactory()
                 );
 
+                var toDatabaseExporterParameters = exportConfig.toParameters();
+                var commonExporterParameters = GraphStoreExporterParameters.create(
+                    exportConfig.defaultRelationshipType(),
+                    exportConfig.batchSize(),
+                    exportConfig.writeConcurrency()
+                );
                 var exporter = GraphStoreToDatabaseExporter.of(
                     graphStore,
                     databaseService,
-                    exportConfig,
-                    exportConfig.toParameters(),
+                    toDatabaseExporterParameters,
+                    commonExporterParameters,
                     neoNodeProperties(exportConfig, graphStore),
                     executionContext().log(),
                     progressTracker
