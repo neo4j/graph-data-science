@@ -13,6 +13,8 @@ Similar to the procedures, GDS also supports exporting properties via Arrow Flig
 In this chapter, we assume that a Flight server has been set up and configured.
 To learn more about the installation, please refer to the xref:installation/configure-apache-arrow-server.adoc[installation chapter].
 
+Export commands are versioned to allow for future changes to the protocol.
+Please refer to the xref:management-ops/graph-creation/graph-project-apache-arrow.adoc#arrow-server-versioning[corresponding section] in the xref:management-ops/graph-creation/graph-project-apache-arrow.adoc[] documentation for more details on versioned commands.
 
 == Arrow Ticket format
 
@@ -41,13 +43,17 @@ To stream a single node property, the client needs to encode that information in
 
 ----
 {
-    graph_name: "my_graph",
-    database_name: "database_name",
-    procedure_name: "gds.graph.nodeProperty.stream",
-    configuration: {
-        node_labels: ["*"],
-        node_property: "foo",
-        list_node_labels: true
+    name: "GET_COMMAND",
+    version: "v1",
+    body: {
+        graph_name: "my_graph",
+        database_name: "database_name",
+        procedure_name: "gds.graph.nodeProperty.stream",
+        configuration: {
+            node_labels: ["*"],
+            node_property: "foo",
+            list_node_labels: true
+        }
     }
 }
 ----
@@ -86,13 +92,17 @@ To stream multiple node properties, the client needs to encode that information 
 
 ----
 {
-    graph_name: "my_graph",
-    database_name: "database_name",
-    procedure_name: "gds.graph.nodeProperties.stream",
-    configuration: {
-        node_labels: ["*"],
-        node_properties: ["foo", "bar", "baz"],
-        list_node_labels: true
+    name: "GET_COMMAND",
+    version: "v1",
+    body: {
+        graph_name: "my_graph",
+        database_name: "database_name",
+        procedure_name: "gds.graph.nodeProperties.stream",
+        configuration: {
+            node_labels: ["*"],
+            node_properties: ["foo", "bar", "baz"],
+            list_node_labels: true
+        }
     }
 }
 ----
@@ -128,12 +138,16 @@ To stream a single relationship property, the client needs to encode that inform
 
 ----
 {
-    graph_name: "my_graph",
-    database_name: "database_name",
-    procedure_name: "gds.graph.relationshipProperty.stream",
-    configuration: {
-        relationship_types: "REL",
-        relationship_property: "foo"
+    name: "GET_COMMAND",
+    version: "v1",
+    body: {
+        graph_name: "my_graph",
+        database_name: "database_name",
+        procedure_name: "gds.graph.relationshipProperty.stream",
+        configuration: {
+            relationship_types: "REL",
+            relationship_property: "foo"
+        }
     }
 }
 ----
@@ -172,12 +186,16 @@ To stream multiple relationship properties, the client needs to encode that info
 
 ----
 {
-    graph_name: "my_graph",
-    database_name: "database_name",
-    procedure_name: "gds.graph.relationshipProperties.stream",
-    configuration: {
-        relationship_types: "REL",
-        relationship_property: ["foo", "bar"]
+    name: "GET_COMMAND",
+    version: "v1",
+    body: {
+        graph_name: "my_graph",
+        database_name: "database_name",
+        procedure_name: "gds.graph.relationshipProperties.stream",
+        configuration: {
+            relationship_types: "REL",
+            relationship_property: ["foo", "bar"]
+        }
     }
 }
 ----
@@ -217,11 +235,15 @@ To stream the topology of one or more relationship types, the client needs to en
 
 ----
 {
-    graph_name: "my_graph",
-    database_name: "database_name",
-    procedure_name: "gds.graph.relationships.stream",
-    configuration: {
-        relationship_types: "REL"
+    name: "GET_COMMAND",
+    version: "v1",
+    body: {
+        graph_name: "my_graph",
+        database_name: "database_name",
+        procedure_name: "gds.graph.relationships.stream",
+        configuration: {
+            relationship_types: "REL"
+        }
     }
 }
 ----
@@ -262,12 +284,16 @@ For example, to stream the topology of one or more relationship types, the clien
 
 ----
 {
-    graph_name: "my_graph",
-    database_name: "database_name",
-    procedure_name: "gds.graph.relationships.stream",
-    concurrency: 2,
-    configuration: {
-        relationship_types: "REL"
+    name: "GET_COMMAND",
+    version: "v1",
+    body: {
+        graph_name: "my_graph",
+        database_name: "database_name",
+        procedure_name: "gds.graph.relationships.stream",
+        concurrency: 2,
+        configuration: {
+            relationship_types: "REL"
+        }
     }
 }
 ----
