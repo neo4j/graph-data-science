@@ -29,7 +29,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.io.GraphStoreExporterBaseConfig;
-import org.neo4j.gds.core.io.GraphStoreExporterParameters;
 import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.io.db.GraphStoreToDatabaseExporter;
 import org.neo4j.gds.core.io.db.GraphStoreToDatabaseExporterConfig;
@@ -92,22 +91,17 @@ public class GraphStoreExportProc extends BaseProc {
                     executionContext().userLogRegistryFactory()
                 );
 
-                var toDatabaseExporterParameters = GraphStoreToDatabaseExporterParameters.create(
+                var parameters = GraphStoreToDatabaseExporterParameters.create(
                     exportConfig.dbName(),
                     exportConfig.writeConcurrency(),
                     exportConfig.batchSize(),
-                    exportConfig.enableDebugLog()
-                );
-                var commonExporterParameters = GraphStoreExporterParameters.create(
-                    exportConfig.defaultRelationshipType(),
-                    exportConfig.batchSize(),
-                    exportConfig.writeConcurrency()
+                    exportConfig.enableDebugLog(),
+                    exportConfig.defaultRelationshipType()
                 );
                 var exporter = GraphStoreToDatabaseExporter.of(
                     graphStore,
                     databaseService,
-                    toDatabaseExporterParameters,
-                    commonExporterParameters,
+                    parameters,
                     neoNodeProperties(exportConfig.additionalNodeProperties(), graphStore),
                     executionContext().log(),
                     progressTracker
@@ -175,22 +169,19 @@ public class GraphStoreExportProc extends BaseProc {
 
         var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(databaseService, Config.class);
 
-        var toFileExporterParameters = GraphStoreToFileExporterParameters.create(
+        var exportParameters = GraphStoreToFileExporterParameters.create(
             exportConfig.exportName(),
             exportConfig.username(),
             exportConfig.includeMetaData(),
-            exportConfig.useLabelMapping()
-        );
-        var commonExporterParameters = GraphStoreExporterParameters.create(
+            exportConfig.useLabelMapping(),
             exportConfig.defaultRelationshipType(),
-            exportConfig.batchSize(),
-            exportConfig.writeConcurrency()
+            exportConfig.writeConcurrency(),
+            exportConfig.batchSize()
         );
         var result = GraphStoreExporterUtil.export(
             graphStore,
-            exportLocation(neo4jConfig, toFileExporterParameters.exportName()),
-            toFileExporterParameters,
-            commonExporterParameters,
+            exportLocation(neo4jConfig, exportParameters.exportName()),
+            exportParameters,
             neoNodeProperties(exportConfig.additionalNodeProperties(), graphStore),
             executionContext().taskRegistryFactory(),
             executionContext().log(),

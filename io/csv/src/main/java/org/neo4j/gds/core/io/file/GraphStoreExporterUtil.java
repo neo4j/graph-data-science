@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.io.GraphStoreExporter;
-import org.neo4j.gds.core.io.GraphStoreExporterParameters;
 import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.io.file.csv.GraphStoreToCsvExporter;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -48,8 +47,7 @@ public final class GraphStoreExporterUtil {
     public static ExportToCsvResult export(
         GraphStore graphStore,
         Path path,
-        GraphStoreToFileExporterParameters toFileExporterParameters,
-        GraphStoreExporterParameters commonExporterParameters,
+        GraphStoreToFileExporterParameters parameters,
         Optional<NeoNodeProperties> neoNodeProperties,
         TaskRegistryFactory taskRegistryFactory,
         Log log,
@@ -58,8 +56,7 @@ public final class GraphStoreExporterUtil {
         try {
             var exporter = GraphStoreToCsvExporter.create(
                 graphStore,
-                toFileExporterParameters,
-                commonExporterParameters,
+                parameters,
                 path,
                 neoNodeProperties,
                 taskRegistryFactory,
@@ -72,7 +69,7 @@ public final class GraphStoreExporterUtil {
             var end = System.nanoTime();
 
             var tookMillis = TimeUnit.NANOSECONDS.toMillis(end - start);
-            log.info("[gds] Export completed for '%s' in %s ms", toFileExporterParameters.exportName(), tookMillis);
+            log.info("[gds] Export completed for '%s' in %s ms", parameters.exportName(), tookMillis);
             return ImmutableExportToCsvResult.of(
                 exportedProperties,
                 tookMillis

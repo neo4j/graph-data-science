@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.io.db;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.IndexConfig;
@@ -29,6 +30,7 @@ public final class GraphStoreToDatabaseExporterParameters {
     private final String dbName;
     private final int writeConcurrency;
     private final int batchSize;
+    private final String defaultRelationshipType;
     private final boolean enableDebugLog;
 
     private String recordFormat;
@@ -41,7 +43,8 @@ public final class GraphStoreToDatabaseExporterParameters {
         String dbName,
         int writeConcurrency,
         int batchSize,
-        boolean enableDebugLog
+        boolean enableDebugLog,
+        @NotNull String defaultRelationshipType
     ) {
         var defaultRecordFormat = Neo4jProxy.defaultRecordFormatSetting();
         var defaultUseBadCollector = false;
@@ -49,6 +52,7 @@ public final class GraphStoreToDatabaseExporterParameters {
             dbName,
             writeConcurrency,
             batchSize,
+            defaultRelationshipType,
             enableDebugLog,
             defaultRecordFormat,
             defaultUseBadCollector
@@ -59,6 +63,7 @@ public final class GraphStoreToDatabaseExporterParameters {
         String dbName,
         int writeConcurrency,
         int batchSize,
+        String defaultRelationshipType,
         boolean enableDebugLog,
         String recordFormat,
         boolean useBadCollector
@@ -66,6 +71,7 @@ public final class GraphStoreToDatabaseExporterParameters {
         this.dbName = dbName;
         this.writeConcurrency = writeConcurrency;
         this.batchSize = batchSize;
+        this.defaultRelationshipType = defaultRelationshipType;
         this.enableDebugLog = enableDebugLog;
 
         this.recordFormat = recordFormat;
@@ -94,6 +100,18 @@ public final class GraphStoreToDatabaseExporterParameters {
 
     boolean enableDebugLog() {
         return enableDebugLog;
+    }
+
+    int writeConcurrency() {
+        return writeConcurrency;
+    }
+
+    int batchSize() {
+        return batchSize;
+    }
+
+    String defaultRelationshipType() {
+        return defaultRelationshipType;
     }
 
     public GraphStoreToDatabaseExporterParameters withPageCacheMemory(long pageCacheMemory) {

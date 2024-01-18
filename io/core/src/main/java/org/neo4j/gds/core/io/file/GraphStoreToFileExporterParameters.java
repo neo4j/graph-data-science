@@ -24,9 +24,20 @@ public final class GraphStoreToFileExporterParameters {
         String exportName,
         String username,
         boolean includeMetaData,
-        boolean useLabelMapping
+        boolean useLabelMapping,
+        String defaultRelationshipType,
+        int concurrency,
+        int batchSize
     ) {
-        return new GraphStoreToFileExporterParameters(exportName, username, includeMetaData, useLabelMapping);
+        return new GraphStoreToFileExporterParameters(
+            exportName,
+            username,
+            includeMetaData,
+            useLabelMapping,
+            defaultRelationshipType,
+            concurrency,
+            batchSize
+        );
     }
 
     private final String exportName;
@@ -34,16 +45,26 @@ public final class GraphStoreToFileExporterParameters {
     private final boolean includeMetaData;
     private final boolean useLabelMapping;
 
+    private final String defaultRelationshipType;
+    private final int concurrency;
+    private final int batchSize;
+
     private GraphStoreToFileExporterParameters(
         String exportName,
         String username,
         boolean includeMetaData,
-        boolean useLabelMapping
+        boolean useLabelMapping,
+        String defaultRelationshipType,
+        int concurrency,
+        int batchSize
     ) {
         this.exportName = exportName;
         this.username = username;
         this.includeMetaData = includeMetaData;
         this.useLabelMapping = useLabelMapping;
+        this.defaultRelationshipType = defaultRelationshipType;
+        this.concurrency = concurrency;
+        this.batchSize = batchSize;
     }
 
     public String exportName() {
@@ -60,5 +81,17 @@ public final class GraphStoreToFileExporterParameters {
 
     public boolean useLabelMapping() {
         return useLabelMapping;
+    }
+
+    public String defaultRelationshipType() {
+        return defaultRelationshipType;
+    }
+
+    int concurrency() {
+        return concurrency;
+    }
+
+    int batchSize() {
+        return batchSize;
     }
 }

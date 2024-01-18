@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.io.db;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.compat.Neo4jProxy;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,7 +29,13 @@ class GraphStoreToDatabaseExporterParametersTest {
 
     @Test
     void testToBatchImporterConfig() {
-        var parameters = GraphStoreToDatabaseExporterParameters.create("test", 42, 1337, false)
+        var parameters = GraphStoreToDatabaseExporterParameters.create(
+                "test",
+                42,
+                1337,
+                false,
+                RelationshipType.ALL_RELATIONSHIPS.name
+            )
             .withPageCacheMemory(100_000L)
             .withHighIO(true);
         var pbiConfig = parameters.toBatchImporterConfig();

@@ -37,7 +37,9 @@ public abstract class GraphStoreExporter {
     private final GraphStore graphStore;
     private final Map<String, LongFunction<Object>> neoNodeProperties;
     private final Optional<NodeLabelMapping> nodeLabelMapping;
-    protected final GraphStoreExporterParameters parameters;
+    private final String defaultRelationshipType;
+    protected final int concurrency;
+    private final int batchSize;
 
     public enum IdMappingType implements IdMapFunction {
         MAPPED {
@@ -82,12 +84,17 @@ public abstract class GraphStoreExporter {
 
     protected GraphStoreExporter(
         GraphStore graphStore,
-        GraphStoreExporterParameters parameters,
         Optional<NeoNodeProperties> neoNodeProperties,
-        Optional<NodeLabelMapping> nodeLabelMapping
+        Optional<NodeLabelMapping> nodeLabelMapping,
+        String defaultRelationshipType,
+        int concurrency,
+        int batchSize
+
     ) {
         this.graphStore = graphStore;
-        this.parameters = parameters;
+        this.defaultRelationshipType = defaultRelationshipType;
+        this.concurrency = concurrency;
+        this.batchSize = batchSize;
         this.neoNodeProperties = neoNodeProperties
             .map(NeoNodeProperties::neoNodeProperties)
             .orElse(Map.of());
@@ -105,7 +112,7 @@ public abstract class GraphStoreExporter {
             neoNodeProperties,
             nodeLabelMapping
         );
-        var relationshipStore = RelationshipStore.of(graphStore, parameters.defaultRelationshipType());
+        var relationshipStore = RelationshipStore.of(graphStore, defaultRelationshipType);
         var graphProperties = graphStore
             .graphPropertyKeys()
             .stream()
@@ -118,8 +125,8 @@ public abstract class GraphStoreExporter {
             relationshipStore,
             graphStore.capabilities(),
             graphProperties,
-            parameters.batchSize(),
-            parameters.concurrency(),
+            batchSize,
+            concurrency,
             idMappingType()
         );
 

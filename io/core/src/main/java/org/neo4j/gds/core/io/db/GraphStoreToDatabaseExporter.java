@@ -21,7 +21,6 @@ package org.neo4j.gds.core.io.db;
 
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.io.GraphStoreExporter;
-import org.neo4j.gds.core.io.GraphStoreExporterParameters;
 import org.neo4j.gds.core.io.GraphStoreInput;
 import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -37,19 +36,17 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter {
     public static GraphStoreToDatabaseExporter of(
         GraphStore graphStore,
         GraphDatabaseService databaseService,
-        GraphStoreToDatabaseExporterParameters toDatabaseExporterParameters,
-        GraphStoreExporterParameters commonExporterParameters,
+        GraphStoreToDatabaseExporterParameters parameters,
         Log log,
         ProgressTracker progressTracker
     ) {
-        return of(graphStore, databaseService, toDatabaseExporterParameters, commonExporterParameters, Optional.empty(), log, progressTracker);
+        return of(graphStore, databaseService, parameters, Optional.empty(), log, progressTracker);
     }
 
     public static GraphStoreToDatabaseExporter of(
         GraphStore graphStore,
         GraphDatabaseService databaseService,
-        GraphStoreToDatabaseExporterParameters toDatabaseExporterParameters,
-        GraphStoreExporterParameters commonExporterParameters,
+        GraphStoreToDatabaseExporterParameters parameters,
         Optional<NeoNodeProperties> neoNodeProperties,
         Log log,
         ProgressTracker progressTracker
@@ -57,8 +54,7 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter {
         return new GraphStoreToDatabaseExporter(
             graphStore,
             databaseService,
-            toDatabaseExporterParameters,
-            commonExporterParameters,
+            parameters,
             neoNodeProperties,
             log,
             progressTracker
@@ -68,19 +64,25 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter {
     private GraphStoreToDatabaseExporter(
         GraphStore graphStore,
         GraphDatabaseService databaseService,
-        GraphStoreToDatabaseExporterParameters toDatabaseParameters,
-        GraphStoreExporterParameters commonExporterParameters,
+        GraphStoreToDatabaseExporterParameters parameters,
         Optional<NeoNodeProperties> neoNodeProperties,
         Log log,
         ProgressTracker progressTracker
     ) {
-        super(graphStore, commonExporterParameters, neoNodeProperties, Optional.empty());
+        super(
+            graphStore,
+            neoNodeProperties,
+            Optional.empty(),
+            parameters.defaultRelationshipType(),
+            parameters.writeConcurrency(),
+            parameters.batchSize()
+        );
         var executionMonitor = new ProgressTrackerExecutionMonitor(
             graphStore,
             progressTracker,
-            toDatabaseParameters.toBatchImporterConfig()
+            parameters.toBatchImporterConfig()
         );
-        this.parallelBatchImporter = GdsParallelBatchImporter.fromDb(databaseService, toDatabaseParameters, log, executionMonitor);
+        this.parallelBatchImporter = GdsParallelBatchImporter.fromDb(databaseService, parameters, log, executionMonitor);
     }
 
     @Override

@@ -24,7 +24,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.io.GraphStoreExporterParameters;
 import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.io.NodeLabelMapping;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporter;
@@ -48,11 +47,17 @@ public final class GraphStoreToCsvExporter {
         GraphStoreToFileExporterConfig config,
         Path exportPath
     ) {
-        var toFileExporterParameters = GraphStoreToFileExporterParameters.create(config.exportName(), config.username(), config.includeMetaData(), config.useLabelMapping());
-        var commonExporterParameters = GraphStoreExporterParameters.create(config.defaultRelationshipType(), config.batchSize(), config.writeConcurrency());
+        var toFileExporterParameters = GraphStoreToFileExporterParameters.create(
+            config.exportName(),
+            config.username(),
+            config.includeMetaData(),
+            config.useLabelMapping(),
+            config.defaultRelationshipType(),
+            config.batchSize(),
+            config.writeConcurrency()
+        );
         return create(graphStore,
             toFileExporterParameters,
-            commonExporterParameters,
             exportPath,
             Optional.empty(),
             TaskRegistryFactory.empty(),
@@ -63,8 +68,7 @@ public final class GraphStoreToCsvExporter {
 
     public static GraphStoreToFileExporter create(
         GraphStore graphStore,
-        GraphStoreToFileExporterParameters toFileExporterParameters,
-        GraphStoreExporterParameters commonExporterParameters,
+        GraphStoreToFileExporterParameters parameters,
         Path exportPath,
         Optional<NeoNodeProperties> neoNodeProperties,
         TaskRegistryFactory taskRegistryFactory,
@@ -86,14 +90,13 @@ public final class GraphStoreToCsvExporter {
                 .forEach(label -> neoNodeSchema.getOrCreateLabel(label).addProperty(key, ValueType.STRING))
             ));
 
-        Optional<NodeLabelMapping> nodeLabelMapping = toFileExporterParameters.useLabelMapping()
+        Optional<NodeLabelMapping> nodeLabelMapping = parameters.useLabelMapping()
             ? Optional.of(new NodeLabelMapping(graphStore.nodeLabels()))
             : Optional.empty();
 
         return new GraphStoreToFileExporter(
             graphStore,
-            toFileExporterParameters,
-            commonExporterParameters,
+            parameters,
             neoNodeProperties,
             nodeLabelMapping,
             () -> new UserInfoVisitor(exportPath),

@@ -46,6 +46,7 @@ import java.nio.file.Path;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.neo4j.gds.core.io.file.GraphStoreExporterUtil.EXPORT_DIR;
@@ -359,8 +360,12 @@ class GraphStoreExportProcTest extends BaseProcTest {
             "})";
 
         runQueryWithRowConsumer(exportQuery, row -> {
-            assertThat(row.getNumber("bytesMin").longValue()).isBetween(0L, 100L);
-            assertThat(row.getNumber("bytesMax").longValue()).isBetween(0L, 100L);
+            assertThat(row.getNumber("bytesMin"))
+                .asInstanceOf(LONG)
+                .isBetween(50L, 150L);
+            assertThat(row.getNumber("bytesMax")).
+                asInstanceOf(LONG).
+                isBetween(50L, 150L);
         });
     }
 
