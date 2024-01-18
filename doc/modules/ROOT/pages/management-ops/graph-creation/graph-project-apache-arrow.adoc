@@ -1,11 +1,9 @@
-[.enterprise-edition.alpha]
+[.enterprise-edition]
 [[graph-project-apache-arrow]]
 = Apache Arrow projection
 :description: This chapter explains how to import data using Apache Arrow™ into the Graph Data Science library.
 :page-aliases: graph-project-apache-arrow.adoc
 
-
-include::partial$/operations-reference/alpha-note.adoc[]
 
 Projecting graphs via https://arrow.apache.org/[Apache Arrow] allows importing graph data which is stored outside of Neo4j.
 Apache Arrow is a language-agnostic in-memory, columnar data structure specification.

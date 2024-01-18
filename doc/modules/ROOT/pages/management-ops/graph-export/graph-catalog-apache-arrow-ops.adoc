@@ -4,7 +4,6 @@
 :description: This chapter explains how to export data using Apache Arrow™ in the Graph Data Science library.
 :page-aliases: graph-catalog-apache-arrow-ops
 
-include::partial$/operations-reference/alpha-note.adoc[]
 
 The graphs in the Neo4j Graph Data Science Library support properties for nodes and relationships.
 One way to export those properties is using Cypher procedures, as documented in xref:management-ops/graph-reads/graph-stream-nodes.adoc[] and xref:management-ops/graph-reads/graph-stream-relationships.adoc[].

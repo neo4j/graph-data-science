@@ -4,7 +4,6 @@
 :description: This chapter explains how to set up Apache Arrow™ in the Neo4j Graph Data Science library.
 :page-aliases: installation/installation-apache-arrow/
 
-include::partial$/operations-reference/alpha-note.adoc[]
 
 GDS supports importing graphs and exporting properties via https://arrow.apache.org/[Apache Arrow Flight].
 This chapter is dedicated to configuring the Arrow Flight Server as part of the Neo4j and GDS installation.
