@@ -43,9 +43,10 @@ public enum Neo4jVersion {
     V_5_13,
     V_5_14,
     V_5_15,
+    V_5_16,
     V_RC;
 
-    private static final int MINOR_DEV_VERSION = 16;
+    private static final int MINOR_DEV_VERSION = 17;
 
     @Override
     public String toString() {
@@ -72,6 +73,8 @@ public enum Neo4jVersion {
                 return "5.14";
             case V_5_15:
                 return "5.15";
+            case V_5_16:
+                return "5.16";
             case V_RC:
                 return "rc";
             default:
@@ -165,6 +168,8 @@ public enum Neo4jVersion {
                     return Neo4jVersion.V_5_14;
                 case 15:
                     return Neo4jVersion.V_5_15;
+                case 16:
+                    return Neo4jVersion.V_5_16;
                 default:
                     if (minorVersion >= MINOR_DEV_VERSION) {
                         return Neo4jVersion.V_RC;
