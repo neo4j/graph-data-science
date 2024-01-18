@@ -86,7 +86,7 @@ public final class InMemoryStorageEngineImpl implements StorageEngine {
     ) {
         this.databaseLayout = databaseLayout;
         this.graphStore = getGraphStoreFromCatalog(databaseLayout.getDatabaseName());
-        this.txStateVisitor = new InMemoryTransactionStateVisitor(graphStore, tokenHolders);
+        this.txStateVisitor = new InMemoryTransactionStateVisitor(graphStore, tokenHolders, false);
         this.commandCreationContext = new InMemoryCommandCreationContextImpl();
         this.tokenManager = new TokenManager(
             tokenHolders,
