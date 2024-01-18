@@ -102,16 +102,13 @@ class WccThresholdTest {
     }
 
     private void assertResults(double threshold, TestGraph graph, String[][] expectedComponents) {
-        WccStreamConfig wccConfig = WccStreamConfigImpl.builder()
-            .threshold(threshold)
-            .relationshipWeightProperty("cost")
-            .build();
+        var parameters = WccParameters.create(threshold, null, 4);
 
         DisjointSetStruct dss = new Wcc(
             graph,
             DefaultPool.INSTANCE,
             DEFAULT_BATCH_SIZE,
-            wccConfig,
+            parameters,
             ProgressTracker.NULL_TRACKER
         ).compute();
 

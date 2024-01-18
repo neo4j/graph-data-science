@@ -43,4 +43,9 @@ public interface WccBaseConfig extends AlgoBaseConfig, SeedConfig, ConsecutiveId
             throw new IllegalArgumentException("Specifying a threshold requires `relationshipWeightProperty` to be set.");
         }
     }
+
+    @Configuration.Ignore
+    default WccParameters toParameters() {
+        return WccParameters.create(threshold(), seedProperty(), concurrency());
+    }
 }

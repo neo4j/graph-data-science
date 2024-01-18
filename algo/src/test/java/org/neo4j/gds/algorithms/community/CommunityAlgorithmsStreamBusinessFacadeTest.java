@@ -40,6 +40,7 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.wcc.WccBaseConfig;
+import org.neo4j.gds.wcc.WccParameters;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -95,6 +96,7 @@ class CommunityAlgorithmsStreamBusinessFacadeTest {
 
             var config = mock(WccBaseConfig.class);
             when(config.concurrency()).thenReturn(4);
+            when(config.toParameters()).thenReturn(WccParameters.create(0D, null, 4));
             var logMock = mock(Log.class);
             when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
 
