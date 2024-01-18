@@ -58,8 +58,8 @@ See xref:management-ops/graph-creation/graph-project-apache-arrow.adoc#arrow-sen
 [[arrow-initialize-import-process]]
 == Initializing the import process
 
-An import process is initialized by sending a Flight action using the action type `V1/CREATE_GRAPH`.
-The action type contains the server version, which is currently `V1`.
+An import process is initialized by sending a Flight action using the action type `v1/CREATE_GRAPH`.
+The action type contains the server version, which is currently version 1 (`v1`).
 The action body is a JSON document containing metadata for the import process:
 
 ----
@@ -137,7 +137,7 @@ The client has to make sure that node ids are unique across all streams.
 NOTE: Sending duplicate node ids will result in an undefined behaviour.
 
 Once all node record batches are sent to the server, the client needs to indicate that node loading is done.
-This is achieved by sending another Flight action with the action type `V1/NODE_LOAD_DONE` and the following JSON document as action body:
+This is achieved by sending another Flight action with the action type `v1/NODE_LOAD_DONE` and the following JSON document as action body:
 
 ----
 {
@@ -240,7 +240,7 @@ Once completed, the server acknowledges the action by returning a JSON document 
 [[arrow-abort]]
 == Aborting an import process
 
-A started import process can be aborted by sending a Flight action using the action type `V1/ABORT`.
+A started import process can be aborted by sending a Flight action using the action type `v1/ABORT`.
 This will immediately cancel the running graph or database import process and remove all temporary data.
 
 The action body is a JSON document containing the name of the graph or database that is being imported:
@@ -262,7 +262,7 @@ The timeout can be configured via the `gds.arrow.abortion_timeout` setting, for 
 include::partial$/common-usage/not-on-aurads-note.adoc[]
 
 The xref:management-ops/graph-creation/graph-project-apache-arrow.adoc#arrow-client-server-protocol[Client-Server protocol] can also be used to create a new Neo4j database instead of an in-memory graph.
-To initialize a database import process, we need to change the initial action type to `V1/CREATE_DATABASE`.
+To initialize a database import process, we need to change the initial action type to `v1/CREATE_DATABASE`.
 The action body is a JSON document containing the configuration for the import process:
 
 ----
