@@ -12,8 +12,9 @@ Similar to the procedures, GDS also supports exporting properties via Arrow Flig
 In this chapter, we assume that a Flight server has been set up and configured.
 To learn more about the installation, please refer to the xref:installation/configure-apache-arrow-server.adoc[installation chapter].
 
-Export commands are versioned to allow for future changes to the protocol.
-Please refer to the xref:management-ops/graph-creation/graph-project-apache-arrow.adoc#arrow-server-versioning[corresponding section] in the xref:management-ops/graph-creation/graph-project-apache-arrow.adoc[] documentation for more details on versioned commands.
+Arrow export features are versioned to allow for future changes.
+Please refer to the xref:installation/configure-apache-arrow-server.adoc#arrow-server-versioning[corresponding section] in the xref:installation/configure-apache-arrow-server.adoc[] documentation for more details on versioned commands.
+
 
 == Arrow Ticket format
 

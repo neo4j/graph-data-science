@@ -17,32 +17,8 @@ In this chapter, we explain that protocol, message formats and schema constraint
 In this chapter, we assume that a Flight server has been set up and configured.
 To learn more about the installation, please refer to the xref:installation/configure-apache-arrow-server.adoc[installation chapter].
 
-[[arrow-server-versioning]]
-== Versioning
-
-Arrow features in GDS are versioned, which allows us to introduce new features without breaking existing ones.
-Communication with the server is based on sending commands from the client to the server.
-A command is a GDS-specific abstraction over Arrow Flight Actions, Descriptors and Tickets.
-
-Commands are sent by the client as UTF-8-encoded JSON documents.
-Each command is associated with additional meta-data, such as the version of the command.
-
-----
-{
-    name: "MY_COMMAND",
-    version: "v1",
-    body: {
-        ...
-    }
-}
-----
-
-[NOTE]
-
-Up until GDS 2.6, commands were not versioned as GDS Arrow features were still in alpha.
-In GDS 2.6, the GDS Arrow server supports both, versioned and prior alpha commands.
-Alpha commands are considered deprecated for deletion and will be removed in GDS 2.7.
-
+Graph projection features are versioned to allow for future changes.
+Please refer to the xref:installation/configure-apache-arrow-server.adoc#arrow-server-versioning[corresponding section] in the xref:installation/configure-apache-arrow-server.adoc[] documentation for more details on versioned commands.
 
 [[arrow-client-server-protocol]]
 == Client-Server protocol

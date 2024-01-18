@@ -120,3 +120,43 @@ YIELD
 | serverLocation           | String    | DEPRECATED: Always `NULL`.
 |===
 ======
+
+
+[[arrow-server-versioning]]
+== Versioning
+
+All features that the GDS Arrow Flight server exposes are versioned.
+This allows us to make changes to existing features, introduce new ones or remove deprecated ones without breaking existing clients.
+The versioning scheme is applied to the commands that the client sends to the server.
+A command is a GDS-specific abstraction over Arrow Flight Actions, Descriptors and Tickets.
+
+Commands are sent by the client as UTF-8-encoded JSON documents.
+Each command is associated with additional meta-data, such as the version of the command.
+
+----
+{
+    name: "MY_COMMAND",
+    version: "v1",
+    body: {
+        ...
+    }
+}
+----
+
+The only exception from that are Flight Actions, where the version is part of the action type.
+The version is always at the beginning of the action type, separated by a forward slash (`/`).
+
+----
+Action type: V1/CREATE_GRAPH
+Action body: {
+    ...
+}
+----
+
+All available actions can be requested from the GDS Arrow Flight Server by using the `LIST_ACTIONS` endpoint.
+
+[NOTE]
+
+Up until GDS 2.6, commands were not versioned as GDS Arrow features were still in alpha.
+In GDS 2.6, the GDS Arrow server supports both, versioned and prior alpha commands.
+Alpha commands are considered deprecated for deletion and will be removed in GDS 2.7.
