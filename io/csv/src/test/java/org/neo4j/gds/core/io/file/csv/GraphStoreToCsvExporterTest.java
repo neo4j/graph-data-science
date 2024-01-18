@@ -29,13 +29,16 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfigImpl;
+import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.io.file.GraphStoreToFileExporterParameters;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.logging.NullLog;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,6 +49,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -132,16 +136,17 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void exportTopology() {
-        var config = GraphStoreToFileExporterConfigImpl
-            .builder()
-            .exportName(tempDir.toString())
-            .writeConcurrency(1)
-            .username("")
-            .includeMetaData(true)
-            .build();
-
+        var parameters = GraphStoreToFileExporterParameters.create(
+            tempDir.toString(),
+            "",
+            true,
+            false,
+            RelationshipType.ALL_RELATIONSHIPS.name,
+            1,
+            10_000
+        );
         // export db
-        var exporter = GraphStoreToCsvExporter.create(graphStore, config, tempDir);
+        var exporter = GraphStoreToCsvExporter.create(graphStore, parameters, tempDir, Optional.empty(), TaskRegistryFactory.empty(), NullLog.getInstance(), DefaultPool.INSTANCE);
         exporter.run();
 
         var aLabel = NodeLabel.of("A");
@@ -232,13 +237,15 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void shouldExportGraphProperties() {
-        var config = GraphStoreToFileExporterConfigImpl
-            .builder()
-            .exportName(tempDir.toString())
-            .writeConcurrency(1)
-            .includeMetaData(false)
-            .username("")
-            .build();
+        var parameters = GraphStoreToFileExporterParameters.create(
+            tempDir.toString(),
+            "",
+            false,
+            false,
+            RelationshipType.ALL_RELATIONSHIPS.name,
+            1,
+            10_000
+        );
 
         var graphPropertyValues = new LongGraphPropertyValues() {
             @Override
@@ -254,7 +261,15 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
         graphStore.addGraphProperty("graphProp", graphPropertyValues);
 
-        var exporter = GraphStoreToCsvExporter.create(graphStore, config, tempDir);
+        var exporter = GraphStoreToCsvExporter.create(
+            graphStore,
+            parameters,
+            tempDir,
+            Optional.empty(),
+            TaskRegistryFactory.empty(),
+            NullLog.getInstance(),
+            DefaultPool.INSTANCE
+        );
         exporter.run();
 
         assertCsvFiles(List.of("graph_property_graphProp_0.csv", "graph_property_graphProp_header.csv"));
@@ -278,16 +293,26 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void exportMultithreaded() {
-        var config = GraphStoreToFileExporterConfigImpl
-            .builder()
-            .exportName(tempDir.toString())
-            .writeConcurrency(2)
-            .includeMetaData(true)
-            .username("")
-            .build();
+        var parameters = GraphStoreToFileExporterParameters.create(
+            tempDir.toString(),
+            "",
+            true,
+            false,
+            RelationshipType.ALL_RELATIONSHIPS.name,
+            2,
+            10_000
+        );
 
         // export db
-        var exporter = GraphStoreToCsvExporter.create(concurrentGraphStore, config, tempDir);
+        var exporter = GraphStoreToCsvExporter.create(
+            concurrentGraphStore,
+            parameters,
+            tempDir,
+            Optional.empty(),
+            TaskRegistryFactory.empty(),
+            NullLog.getInstance(),
+            DefaultPool.INSTANCE
+        );
         exporter.run();
 
         // Assert headers
@@ -347,13 +372,15 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void exportGraphPropertiesMultithreaded() throws IOException {
-        var config = GraphStoreToFileExporterConfigImpl
-            .builder()
-            .exportName(tempDir.toString())
-            .writeConcurrency(4)
-            .includeMetaData(false)
-            .username("")
-            .build();
+        var parameters = GraphStoreToFileExporterParameters.create(
+            tempDir.toString(),
+            "",
+            false,
+            false,
+            RelationshipType.ALL_RELATIONSHIPS.name,
+            4,
+            10_000
+        );
 
         var graphPropertyValues = new LongGraphPropertyValues() {
 
@@ -370,12 +397,20 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
         graphStore.addGraphProperty("graphProp", graphPropertyValues);
 
-        var exporter = GraphStoreToCsvExporter.create(graphStore, config, tempDir);
+        var exporter = GraphStoreToCsvExporter.create(
+            graphStore,
+            parameters,
+            tempDir,
+            Optional.empty(),
+            TaskRegistryFactory.empty(),
+            NullLog.getInstance(),
+            DefaultPool.INSTANCE
+        );
         exporter.run();
 
         assertCsvFiles(
             LongStream
-                .range(0, config.writeConcurrency())
+                .range(0, parameters.concurrency())
                 .mapToObj(
                     i -> formatWithLocale(
                         CsvGraphPropertyVisitor.GRAPH_PROPERTY_DATA_FILE_NAME_TEMPLATE,
@@ -413,13 +448,15 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void exportSchemaAndDatabaseId() {
-        var config = GraphStoreToFileExporterConfigImpl
-            .builder()
-            .exportName(tempDir.toString())
-            .writeConcurrency(1)
-            .includeMetaData(true)
-            .username("")
-            .build();
+        var parameters = GraphStoreToFileExporterParameters.create(
+            tempDir.toString(),
+            "",
+            true,
+            false,
+            RelationshipType.ALL_RELATIONSHIPS.name,
+            1,
+            10_000
+        );
 
         graphStore.addGraphProperty("graphProp", new LongGraphPropertyValues() {
             @Override
@@ -433,7 +470,15 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             }
         });
 
-        var exporter = GraphStoreToCsvExporter.create(graphStore, config, tempDir);
+        var exporter = GraphStoreToCsvExporter.create(
+            graphStore,
+            parameters,
+            tempDir,
+            Optional.empty(),
+            TaskRegistryFactory.empty(),
+            NullLog.getInstance(),
+            DefaultPool.INSTANCE
+        );
         exporter.run();
 
         assertCsvFiles(
@@ -602,15 +647,25 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void exportUsername() {
-        var config = GraphStoreToFileExporterConfigImpl
-            .builder()
-            .exportName(tempDir.toString())
-            .username("UserA")
-            .writeConcurrency(1)
-            .includeMetaData(true)
-            .build();
+        var parameters = GraphStoreToFileExporterParameters.create(
+            tempDir.toString(),
+            "UserA",
+            true,
+            false,
+            RelationshipType.ALL_RELATIONSHIPS.name,
+            1,
+            10_000
+        );
 
-        var exporter = GraphStoreToCsvExporter.create(graphStore, config, tempDir);
+        var exporter = GraphStoreToCsvExporter.create(
+            graphStore,
+            parameters,
+            tempDir,
+            Optional.empty(),
+            TaskRegistryFactory.empty(),
+            NullLog.getInstance(),
+            DefaultPool.INSTANCE
+        );
         exporter.run();
 
         assertThat(tempDir)
@@ -622,15 +677,25 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void exportSchemaWithoutProperties() {
-        var config = GraphStoreToFileExporterConfigImpl
-            .builder()
-            .exportName(tempDir.toString())
-            .writeConcurrency(1)
-            .includeMetaData(true)
-            .username("")
-            .build();
+        var parameters = GraphStoreToFileExporterParameters.create(
+            tempDir.toString(),
+            "",
+            true,
+            false,
+            RelationshipType.ALL_RELATIONSHIPS.name,
+            1,
+            10_000
+        );
 
-        var exporter = GraphStoreToCsvExporter.create(noPropertiesGraphStore, config, tempDir);
+        var exporter = GraphStoreToCsvExporter.create(
+            noPropertiesGraphStore,
+            parameters,
+            tempDir,
+            Optional.empty(),
+            TaskRegistryFactory.empty(),
+            NullLog.getInstance(),
+            DefaultPool.INSTANCE
+        );
         exporter.run();
 
         assertCsvFiles(List.of(NODE_SCHEMA_FILE_NAME, RELATIONSHIP_SCHEMA_FILE_NAME, GRAPH_INFO_FILE_NAME));
@@ -666,16 +731,26 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             .build()
             .build();
 
-        var config = GraphStoreToFileExporterConfigImpl
-            .builder()
-            .exportName(tempDir.toString())
-            .writeConcurrency(1)
-            .username("")
-            .includeMetaData(false)
-            .build();
+        var parameters = GraphStoreToFileExporterParameters.create(
+            tempDir.toString(),
+            "",
+            false,
+            false,
+            RelationshipType.ALL_RELATIONSHIPS.name,
+            1,
+            10_000
+        );
 
         // export db
-        var exporter = GraphStoreToCsvExporter.create(graphStore, config, tempDir);
+        var exporter = GraphStoreToCsvExporter.create(
+            graphStore,
+            parameters,
+            tempDir,
+            Optional.empty(),
+            TaskRegistryFactory.empty(),
+            NullLog.getInstance(),
+            DefaultPool.INSTANCE
+        );
         exporter.run();
 
         assertCsvFiles(
@@ -705,15 +780,25 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void shouldExportGraphCapabilities() {
-        var config = GraphStoreToFileExporterConfigImpl
-            .builder()
-            .exportName(tempDir.toString())
-            .writeConcurrency(1)
-            .includeMetaData(true)
-            .username("")
-            .build();
+        var parameters = GraphStoreToFileExporterParameters.create(
+            tempDir.toString(),
+            "",
+            true,
+            false,
+            RelationshipType.ALL_RELATIONSHIPS.name,
+            1,
+            10_000
+        );
 
-        var exporter = GraphStoreToCsvExporter.create(graphStore, config, tempDir);
+        var exporter = GraphStoreToCsvExporter.create(
+            graphStore,
+            parameters,
+            tempDir,
+            Optional.empty(),
+            TaskRegistryFactory.empty(),
+            NullLog.getInstance(),
+            DefaultPool.INSTANCE
+        );
         exporter.run();
 
         assertCsvFiles(List.of(GRAPH_CAPABILITIES_FILE_NAME));

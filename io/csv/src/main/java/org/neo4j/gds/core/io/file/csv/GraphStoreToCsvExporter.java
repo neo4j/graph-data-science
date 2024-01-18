@@ -19,19 +19,15 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
-import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.io.NodeLabelMapping;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporter;
-import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterParameters;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.logging.Log;
-import org.neo4j.logging.NullLog;
 
 import java.nio.file.Path;
 import java.util.Optional;
@@ -40,31 +36,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 public final class GraphStoreToCsvExporter {
-
-    @TestOnly
-    public static GraphStoreToFileExporter create(
-        GraphStore graphStore,
-        GraphStoreToFileExporterConfig config,
-        Path exportPath
-    ) {
-        var toFileExporterParameters = GraphStoreToFileExporterParameters.create(
-            config.exportName(),
-            config.username(),
-            config.includeMetaData(),
-            config.useLabelMapping(),
-            config.defaultRelationshipType(),
-            config.batchSize(),
-            config.writeConcurrency()
-        );
-        return create(graphStore,
-            toFileExporterParameters,
-            exportPath,
-            Optional.empty(),
-            TaskRegistryFactory.empty(),
-            NullLog.getInstance(),
-            DefaultPool.INSTANCE
-        );
-    }
 
     public static GraphStoreToFileExporter create(
         GraphStore graphStore,

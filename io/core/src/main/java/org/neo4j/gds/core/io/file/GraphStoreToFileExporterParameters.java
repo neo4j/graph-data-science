@@ -87,7 +87,7 @@ public final class GraphStoreToFileExporterParameters {
         return defaultRelationshipType;
     }
 
-    int concurrency() {
+    public int concurrency() {
         return concurrency;
     }
 

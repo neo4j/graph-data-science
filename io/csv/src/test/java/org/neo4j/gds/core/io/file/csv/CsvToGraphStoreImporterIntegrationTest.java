@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.GraphStore;
@@ -34,16 +35,19 @@ import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.properties.graph.DoubleArrayGraphPropertyValues;
 import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfig;
-import org.neo4j.gds.core.io.file.GraphStoreToFileExporterConfigImpl;
+import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.io.file.GraphStoreToFileExporterParameters;
 import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.loading.HighLimitIdMapBuilder;
 import org.neo4j.gds.core.loading.ImmutableStaticCapabilities;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.logging.NullLog;
 
 import java.nio.file.Path;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -99,7 +103,15 @@ class CsvToGraphStoreImporterIntegrationTest {
     void shouldImportProperties(int concurrency, boolean useLabelMapping) {
         var graphStore = GdlFactory.of(GRAPH_WITH_PROPERTIES).build();
 
-        GraphStoreToCsvExporter.create(graphStore, exportConfig(concurrency, useLabelMapping), graphLocation).run();
+        GraphStoreToCsvExporter.create(
+            graphStore,
+            exportParameters(concurrency, useLabelMapping),
+            graphLocation,
+            Optional.empty(),
+            TaskRegistryFactory.empty(),
+            NullLog.getInstance(),
+            DefaultPool.INSTANCE
+        ).run();
 
         var importer = new CsvToGraphStoreImporter(concurrency, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
@@ -118,7 +130,15 @@ class CsvToGraphStoreImporterIntegrationTest {
         addDoubleArrayGraphProperty(graphStore);
         addLongNamedGraphProperty(graphStore);
 
-        GraphStoreToCsvExporter.create(graphStore, exportConfig(concurrency, useLabelMapping), graphLocation).run();
+        GraphStoreToCsvExporter.create(
+            graphStore,
+            exportParameters(concurrency, useLabelMapping),
+            graphLocation,
+            Optional.empty(),
+            TaskRegistryFactory.empty(),
+            NullLog.getInstance(),
+            DefaultPool.INSTANCE
+        ).run();
         var importer = new CsvToGraphStoreImporter(concurrency, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run().graphStore();
 
@@ -146,7 +166,15 @@ class CsvToGraphStoreImporterIntegrationTest {
     void shouldImportGraphWithPropertiesAndUnderscoreLabels(int concurrency) {
         var graphStore = GdlFactory.of(GRAPH_WITH_UNDERSCORE_LABELS).build();
 
-        GraphStoreToCsvExporter.create(graphStore, exportConfig(concurrency, true /* will not work without label mapping */), graphLocation).run();
+        GraphStoreToCsvExporter.create(
+            graphStore,
+            exportParameters(concurrency, true /* will not work without label mapping */),
+            graphLocation,
+            Optional.empty(),
+            TaskRegistryFactory.empty(),
+            NullLog.getInstance(),
+            DefaultPool.INSTANCE
+        ).run();
 
         var importer = new CsvToGraphStoreImporter(concurrency, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
@@ -160,7 +188,15 @@ class CsvToGraphStoreImporterIntegrationTest {
     void shouldImportGraphWithNoLabels() {
         var graphStore = GdlFactory.of("()-[]->()").build();
 
-        GraphStoreToCsvExporter.create(graphStore, exportConfig(4, false), graphLocation).run();
+        GraphStoreToCsvExporter.create(
+            graphStore,
+            exportParameters(4, false),
+            graphLocation,
+            Optional.empty(),
+            TaskRegistryFactory.empty(),
+            NullLog.getInstance(),
+            DefaultPool.INSTANCE
+        ).run();
 
         var importer = new CsvToGraphStoreImporter(4, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
@@ -179,7 +215,15 @@ class CsvToGraphStoreImporterIntegrationTest {
             .build()
             .build();
 
-        GraphStoreToCsvExporter.create(graphStoreWithCapabilities, exportConfig(1, false), graphLocation).run();
+        GraphStoreToCsvExporter.create(
+            graphStoreWithCapabilities,
+            exportParameters(1, false),
+            graphLocation,
+            Optional.empty(),
+            TaskRegistryFactory.empty(),
+            NullLog.getInstance(),
+            DefaultPool.INSTANCE
+        ).run();
 
         var importer = new CsvToGraphStoreImporter(1, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
@@ -200,7 +244,15 @@ class CsvToGraphStoreImporterIntegrationTest {
             .build()
             .build();
 
-        GraphStoreToCsvExporter.create(graphStore, exportConfig(1, false), graphLocation).run();
+        GraphStoreToCsvExporter.create(
+            graphStore,
+            exportParameters(1, false),
+            graphLocation,
+            Optional.empty(),
+            TaskRegistryFactory.empty(),
+            NullLog.getInstance(),
+            DefaultPool.INSTANCE
+        ).run();
 
         var importer = new CsvToGraphStoreImporter(1, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
@@ -215,7 +267,15 @@ class CsvToGraphStoreImporterIntegrationTest {
             .build()
             .build());
 
-        GraphStoreToCsvExporter.create(graphStore, exportConfig(1, false), graphLocation).run();
+        GraphStoreToCsvExporter.create(
+            graphStore,
+            exportParameters(1, false),
+            graphLocation,
+            Optional.empty(),
+            TaskRegistryFactory.empty(),
+            NullLog.getInstance(),
+            DefaultPool.INSTANCE
+        ).run();
 
         var importer = new CsvToGraphStoreImporter(1, graphLocation, Neo4jProxy.testLog(), EmptyTaskRegistryFactory.INSTANCE);
         var userGraphStore = importer.run();
@@ -223,14 +283,16 @@ class CsvToGraphStoreImporterIntegrationTest {
         assertThat(userGraphStore.graphStore().databaseInfo()).isEqualTo(graphStore.databaseInfo());
     }
 
-    private GraphStoreToFileExporterConfig exportConfig(int concurrency, boolean useLabelMapping) {
-        return GraphStoreToFileExporterConfigImpl.builder()
-            .exportName("my-export")
-            .writeConcurrency(concurrency)
-            .username("")
-            .includeMetaData(true)
-            .useLabelMapping(useLabelMapping)
-            .build();
+    private GraphStoreToFileExporterParameters exportParameters(int concurrency, boolean useLabelMapping) {
+        return GraphStoreToFileExporterParameters.create(
+            "my-export",
+            "",
+            true,
+            useLabelMapping,
+            RelationshipType.ALL_RELATIONSHIPS.name,
+            concurrency,
+            10_000
+        );
     }
 
     private void addDoubleArrayGraphProperty(GraphStore graphStore) {
