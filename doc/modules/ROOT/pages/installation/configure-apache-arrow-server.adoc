@@ -159,4 +159,4 @@ All available actions can be requested from the GDS Arrow Flight Server by using
 
 Up until GDS 2.6, commands were not versioned as GDS Arrow features were still in alpha.
 In GDS 2.6, the GDS Arrow server supports both, versioned and prior alpha commands.
-Alpha commands are considered deprecated for deletion and will be removed in GDS 2.7.
+Alpha commands are considered deprecated for deletion and will be removed in a future release.
