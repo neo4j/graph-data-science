@@ -66,12 +66,12 @@ public final class Louvain extends Algorithm<LouvainResult> {
 
     public Louvain(
         Graph graph,
-        LouvainBaseConfig config,
-        boolean trackIntermediateCommunities,
-        int maxLevels,
+        int concurrency,
         int maxIterations,
         double tolerance,
-        int concurrency,
+        int maxLevels,
+        boolean trackIntermediateCommunities,
+        String seedProperty,
         ProgressTracker progressTracker,
         ExecutorService executorService
     ) {
@@ -79,7 +79,7 @@ public final class Louvain extends Algorithm<LouvainResult> {
         this.rootGraph = graph;
         this.maxIterations = maxIterations;
         this.concurrency = concurrency;
-        this.seedingValues = Optional.ofNullable(config.seedProperty()).map(graph::nodeProperties).orElse(null);
+        this.seedingValues = Optional.ofNullable(seedProperty).map(graph::nodeProperties).orElse(null);
         this.executorService = executorService;
         this.dendrogramManager = new LouvainDendrogramManager(
             graph.nodeCount(),

@@ -62,4 +62,16 @@ public interface LouvainBaseConfig extends
             throw new IllegalArgumentException("`includeIntermediateResults` and the `consecutiveIds` option cannot be used at the same time.");
         }
     }
+
+    @Configuration.Ignore
+    default LouvainParameters toParameters() {
+        return LouvainParameters.create(
+            concurrency(),
+            maxIterations(),
+            tolerance(),
+            maxLevels(),
+            includeIntermediateCommunities(),
+            seedProperty()
+        );
+    }
 }
