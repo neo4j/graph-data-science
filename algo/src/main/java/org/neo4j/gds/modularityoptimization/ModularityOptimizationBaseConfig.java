@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.modularityoptimization;
 
+import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConsecutiveIdsConfig;
 import org.neo4j.gds.config.IterationsConfig;
@@ -49,5 +50,10 @@ public interface ModularityOptimizationBaseConfig extends
 
     default int batchSize() {
         return ParallelUtil.DEFAULT_BATCH_SIZE;
+    }
+
+    @Configuration.Ignore
+    default ModularityOptimizationParameters toParameters() {
+        return ModularityOptimizationParameters.create(concurrency(), maxIterations(), batchSize(), tolerance());
     }
 }

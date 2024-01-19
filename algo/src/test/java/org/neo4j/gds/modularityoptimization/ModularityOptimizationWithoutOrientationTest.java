@@ -207,10 +207,7 @@ class ModularityOptimizationWithoutOrientationTest {
     @MethodSource("memoryEstimationTuples")
     void testMemoryEstimation(int concurrency, long min, long max) {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(100_000L).build();
-
-        ModularityOptimizationStreamConfig config = ModularityOptimizationStreamConfigImpl.builder().build();
-        MemoryTree memoryTree = new ModularityOptimizationFactory<>()
-            .memoryEstimation(config)
+        MemoryTree memoryTree = new ModularityOptimizationMemoryEstimateDefinition().memoryEstimation()
             .estimate(dimensions, concurrency);
         assertEquals(min, memoryTree.memoryUsage().min);
         assertEquals(max, memoryTree.memoryUsage().max);
@@ -218,9 +215,9 @@ class ModularityOptimizationWithoutOrientationTest {
 
     static Stream<Arguments> memoryEstimationTuples() {
         return Stream.of(
-            arguments(1, 5614040, 8413072),
-            arguments(4, 5617328, 14413336),
-            arguments(42, 5658976, 90416680)
+            arguments(1, 5614032, 8413064),
+            arguments(4, 5617320, 14413328),
+            arguments(42, 5658968, 90416672)
         );
     }
 
@@ -244,13 +241,7 @@ class ModularityOptimizationWithoutOrientationTest {
         int minBatchSize,
         Log log
     ) {
-        var config = ModularityOptimizationStreamConfigImpl.builder()
-            .maxIterations(maxIterations)
-            .concurrency(concurrency)
-            .batchSize(minBatchSize)
-            .build();
-
-        var task = new ModularityOptimizationFactory<>().progressTask(graph, config);
+        var task = ModularityOptimizationFactory.progressTask(graph, maxIterations);
         var progressTracker = new TestProgressTracker(task, log, concurrency, EmptyTaskRegistryFactory.INSTANCE);
 
         return new ModularityOptimization(

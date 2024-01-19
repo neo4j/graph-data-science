@@ -111,13 +111,7 @@ class FootballTest {
         int minBatchSize,
         Log log
     ) {
-        var config = ModularityOptimizationStreamConfigImpl.builder()
-            .maxIterations(maxIterations)
-            .concurrency(concurrency)
-            .batchSize(minBatchSize)
-            .build();
-
-        var task = new ModularityOptimizationFactory<>().progressTask(graph, config);
+        var task = ModularityOptimizationFactory.progressTask(graph, maxIterations);
         var progressTracker = new TestProgressTracker(task, log, concurrency, EmptyTaskRegistryFactory.INSTANCE);
 
         return new ModularityOptimization(

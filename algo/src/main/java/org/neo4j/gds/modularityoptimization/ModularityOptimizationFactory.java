@@ -22,8 +22,6 @@ package org.neo4j.gds.modularityoptimization;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.config.BaseConfig;
-import org.neo4j.gds.config.IterationsConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -45,8 +43,7 @@ public class ModularityOptimizationFactory<CONFIG extends ModularityOptimization
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-
-        return new ModularityOptimizationMemoryEstimateDefinition().memoryEstimation(configuration);
+        return new ModularityOptimizationMemoryEstimateDefinition().memoryEstimation();
     }
 
     @Override
@@ -61,22 +58,22 @@ public class ModularityOptimizationFactory<CONFIG extends ModularityOptimization
         ProgressTracker progressTracker
     ) {
         var seedProperty = configuration.seedProperty() != null ? graph.nodeProperties(configuration.seedProperty()) : null;
-        return build(graph, configuration, seedProperty, progressTracker);
+        return build(graph, configuration.toParameters(), seedProperty, progressTracker);
     }
 
     public ModularityOptimization build(
         Graph graph,
-        CONFIG configuration,
+        ModularityOptimizationParameters parameters,
         NodePropertyValues seedProperty,
         ProgressTracker progressTracker
     ) {
         return new ModularityOptimization(
             graph,
-            configuration.maxIterations(),
-            configuration.tolerance(),
+            parameters.maxIterations(),
+            parameters.tolerance(),
             seedProperty,
-            configuration.concurrency(),
-            configuration.batchSize(),
+            parameters.concurrency(),
+            parameters.batchSize(),
             DefaultPool.INSTANCE,
             progressTracker
         );
@@ -84,10 +81,10 @@ public class ModularityOptimizationFactory<CONFIG extends ModularityOptimization
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return modularityOptimizationProgressTask(graph, config);
+        return progressTask(graph, config.maxIterations());
     }
 
-    public static <T extends BaseConfig & IterationsConfig> Task modularityOptimizationProgressTask(Graph graph, T config) {
+    public static Task progressTask(Graph graph, int maxIterations) {
         return Tasks.task(
             MODULARITY_OPTIMIZATION_TASK_NAME,
             Tasks.task(
@@ -97,7 +94,7 @@ public class ModularityOptimizationFactory<CONFIG extends ModularityOptimization
             Tasks.iterativeDynamic(
                 "compute modularity",
                 () -> List.of(Tasks.leaf("optimizeForColor", graph.relationshipCount())),
-                config.maxIterations()
+                maxIterations
             )
         );
     }
