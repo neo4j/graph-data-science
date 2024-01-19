@@ -38,8 +38,7 @@ import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.wcc.Wcc;
 import org.neo4j.gds.wcc.WccAlgorithmFactory;
-import org.neo4j.gds.wcc.WccStreamConfig;
-import org.neo4j.gds.wcc.WccStreamConfigImpl;
+import org.neo4j.gds.wcc.WccParameters;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -253,13 +252,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
         // run WCC to determine components
         progressTracker.beginSubTask();
-        WccStreamConfig wccConfig = WccStreamConfigImpl.builder()
-            .concurrency(concurrency)
-            .relationshipTypes(config.relationshipTypes())
-            .nodeLabels(config.nodeLabels())
-            .build();
-
-        Wcc wcc = new WccAlgorithmFactory<>().build(graph, wccConfig, ProgressTracker.NULL_TRACKER);
+        var wccParameters = WccParameters.create(0D, null, concurrency);
+        Wcc wcc = new WccAlgorithmFactory<>().build(graph, wccParameters, ProgressTracker.NULL_TRACKER);
         DisjointSetStruct disjointSets = wcc.compute();
         progressTracker.endSubTask();
         return disjointSets::setIdOf;

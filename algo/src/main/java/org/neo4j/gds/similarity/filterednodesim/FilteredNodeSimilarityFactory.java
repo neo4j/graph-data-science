@@ -38,8 +38,6 @@ import org.neo4j.gds.similarity.nodesim.TopKMap;
 import org.neo4j.gds.similarity.nodesim.TopNList;
 import org.neo4j.gds.wcc.WccAlgorithmFactory;
 import org.neo4j.gds.wcc.WccMemoryEstimateDefinition;
-import org.neo4j.gds.wcc.WccStreamConfig;
-import org.neo4j.gds.wcc.WccStreamConfigImpl;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
@@ -103,10 +101,7 @@ public class FilteredNodeSimilarityFactory<CONFIG extends FilteredNodeSimilarity
             builder.perNode("upper bound per component", HugeAtomicLongArray::memoryEstimation);
 
             if (config.actuallyRunWCC()) {
-                WccStreamConfig internalWccConfig = WccStreamConfigImpl.builder()
-                    .concurrency(config.concurrency())
-                    .build();
-                builder.add("wcc", new WccMemoryEstimateDefinition().memoryEstimation(internalWccConfig));
+                builder.add("wcc", new WccMemoryEstimateDefinition().memoryEstimation(false));
             } else {
                 builder.perNode("component mapping", HugeLongArray::memoryEstimation);
             }
@@ -136,20 +131,21 @@ public class FilteredNodeSimilarityFactory<CONFIG extends FilteredNodeSimilarity
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        if (config.actuallyRunWCC()) {
-            WccStreamConfig wccStreamConfig = WccStreamConfigImpl.builder().build();
+        return Tasks.task(
+            taskName(),
+            progressTask(graph, config.actuallyRunWCC()),
+            Tasks.leaf("compare node pairs")
+        );
+    }
+
+    private Task progressTask(Graph graph, boolean runWcc) {
+        if (runWcc) {
             return Tasks.task(
-                taskName(),
-                Tasks.task("prepare", new WccAlgorithmFactory<>().progressTask(graph, wccStreamConfig),
-                    Tasks.leaf("initialize", graph.relationshipCount())),
-                Tasks.leaf("compare node pairs")
-            );
-        } else {
-            return Tasks.task(
-                taskName(),
-                Tasks.leaf("prepare", graph.relationshipCount()),
-                Tasks.leaf("compare node pairs")
+                "prepare",
+                new WccAlgorithmFactory<>().progressTask(graph),
+                Tasks.leaf("initialize", graph.relationshipCount())
             );
         }
+        return Tasks.leaf("prepare", graph.relationshipCount());
     }
 }
