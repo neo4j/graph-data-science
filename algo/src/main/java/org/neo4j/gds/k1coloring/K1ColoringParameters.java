@@ -19,25 +19,32 @@
  */
 package org.neo4j.gds.k1coloring;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.IterationsConfig;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
+public final class K1ColoringParameters {
 
-public interface K1ColoringBaseConfig extends AlgoBaseConfig, IterationsConfig {
-
-    @Override
-    @Configuration.IntegerRange(min = 1)
-    default int maxIterations() {
-        return 10;
+    static K1ColoringParameters create(int concurrency, int maxIterations, int batchSize) {
+        return new K1ColoringParameters(concurrency, maxIterations, batchSize);
     }
 
-    default int batchSize() {
-        return ParallelUtil.DEFAULT_BATCH_SIZE;
+    private final int concurrency;
+    private final int maxIterations;
+    private final int batchSize;
+
+
+    private K1ColoringParameters(int concurrency, int maxIterations, int batchSize) {
+        this.concurrency = concurrency;
+        this.maxIterations = maxIterations;
+        this.batchSize = batchSize;
     }
 
-    @Configuration.Ignore
-    default K1ColoringParameters toParameters() {
-        return K1ColoringParameters.create(concurrency(), maxIterations(), batchSize());
+    int concurrency() {
+        return concurrency;
+    }
+
+    int maxIterations() {
+        return maxIterations;
+    }
+
+    int batchSize() {
+        return batchSize;
     }
 }

@@ -40,20 +40,24 @@ public class K1ColoringAlgorithmFactory<T extends K1ColoringBaseConfig> extends 
         return K1_COLORING_TASK_NAME;
     }
 
+    public K1Coloring build(Graph graph, K1ColoringParameters parameters, ProgressTracker progressTracker) {
+        return new K1Coloring(
+            graph,
+            parameters.maxIterations(),
+            parameters.batchSize(),
+            parameters.concurrency(),
+            DefaultPool.INSTANCE,
+            progressTracker
+        );
+    }
+
     @Override
     public K1Coloring build(
         Graph graph,
         T configuration,
         ProgressTracker progressTracker
     ) {
-        return new K1Coloring(
-            graph,
-            configuration.maxIterations(),
-            configuration.batchSize(),
-            configuration.concurrency(),
-            DefaultPool.INSTANCE,
-            progressTracker
-        );
+        return build(graph, configuration.toParameters(), progressTracker);
     }
 
     @Override
