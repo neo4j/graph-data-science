@@ -21,7 +21,7 @@ package org.neo4j.gds.k1coloring;
 
 public final class K1ColoringParameters {
 
-    static K1ColoringParameters create(int concurrency, int maxIterations, int batchSize) {
+    public static K1ColoringParameters create(int concurrency, int maxIterations, int batchSize) {
         return new K1ColoringParameters(concurrency, maxIterations, batchSize);
     }
 
