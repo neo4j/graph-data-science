@@ -65,7 +65,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     private final int concurrency;
     private final int maxIterations;
     private final long nodeCount;
-    private final long minBatchSize;
+    private final int minBatchSize;
     private final double tolerance;
     private final Graph graph;
     private final NodePropertyValues seedProperty;
@@ -177,7 +177,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
             .builder()
             .concurrency(concurrency)
             .maxIterations(K1COLORING_MAX_ITERATIONS)
-            .batchSize((int) minBatchSize)
+            .batchSize(minBatchSize)
             .build();
 
         K1Coloring coloring = new K1ColoringAlgorithmFactory<>().build(graph, k1Config, progressTracker);
@@ -244,7 +244,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
                     seedProperty != null,
                     partition
                 ),
-            Optional.of((int) minBatchSize)
+            Optional.of(minBatchSize)
         );
 
         ParallelUtil.run(initTasks, executor);
@@ -379,7 +379,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
                 modularityColorArray,
                 progressTracker
             ),
-            Optional.of((int) minBatchSize)
+            Optional.of(minBatchSize)
         );
     }
 
