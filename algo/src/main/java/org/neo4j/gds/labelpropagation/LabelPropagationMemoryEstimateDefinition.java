@@ -32,8 +32,7 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
 public class LabelPropagationMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<LabelPropagationBaseConfig> {
 
-    @Override
-    public MemoryEstimation memoryEstimation(LabelPropagationBaseConfig configuration) {
+    public MemoryEstimation memoryEstimation() {
         return MemoryEstimations.builder(LabelPropagation.class)
             .perNode("labels", HugeLongArray::memoryEstimation)
             .perThread("votes", MemoryEstimations.builder()
@@ -53,6 +52,10 @@ public class LabelPropagationMemoryEstimateDefinition implements AlgorithmMemory
                     return MemoryRange.of(min, max);
                 }).build())
             .build();
+    }
+    @Override
+    public MemoryEstimation memoryEstimation(LabelPropagationBaseConfig configuration) {
+        return memoryEstimation();
     }
 
 }

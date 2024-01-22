@@ -23,6 +23,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.primitive.PrimitiveLongCollections;
 import org.neo4j.gds.collections.primitive.PrimitiveLongIterable;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
@@ -30,7 +31,6 @@ import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.NullPropertyMap.DoubleNullPropertyMap;
 import org.neo4j.gds.core.loading.NullPropertyMap.LongNullPropertyMap;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.ArrayList;
@@ -48,29 +48,29 @@ public class LabelPropagation extends Algorithm<LabelPropagationResult> {
     private final long nodeCount;
     private final NodePropertyValues nodePropertyValues;
     private final NodePropertyValues nodeWeights;
-    private final LabelPropagationBaseConfig config;
     private final ExecutorService executor;
 
     private final Graph graph;
+    private final LabelPropagationParameters parameters;
     private HugeLongArray labels;
     private final long maxLabelId;
     private int batchSize;
 
     public LabelPropagation(
         Graph graph,
-        LabelPropagationBaseConfig config,
+        LabelPropagationParameters parameters,
         ExecutorService executor,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
-        this.config = config;
+        this.parameters = parameters;
         this.executor = executor;
         this.batchSize = ParallelUtil.DEFAULT_BATCH_SIZE;
 
         NodePropertyValues seedProperty;
-        String seedPropertyKey = config.seedProperty();
+        String seedPropertyKey = parameters.seedProperty();
         if (seedPropertyKey != null && graph.availableNodeProperties().contains(seedPropertyKey)) {
             seedProperty = graph.nodeProperties(seedPropertyKey);
         } else {
@@ -79,7 +79,7 @@ public class LabelPropagation extends Algorithm<LabelPropagationResult> {
         this.nodePropertyValues = seedProperty;
 
         NodePropertyValues nodeWeightProperty;
-        String nodeWeightPropertyKey = config.nodeWeightProperty();
+        String nodeWeightPropertyKey = parameters.nodeWeightProperty();
         if (nodeWeightPropertyKey != null && graph.availableNodeProperties().contains(nodeWeightPropertyKey)) {
             nodeWeightProperty = graph.nodeProperties(nodeWeightPropertyKey);
         } else {
@@ -92,7 +92,7 @@ public class LabelPropagation extends Algorithm<LabelPropagationResult> {
 
     @Override
     public LabelPropagationResult compute() {
-        if (config.maxIterations() <= 0L) {
+        if (parameters.maxIterations() <= 0L) {
             throw new IllegalArgumentException("Must iterate at least 1 time");
         }
 
@@ -108,10 +108,10 @@ public class LabelPropagation extends Algorithm<LabelPropagationResult> {
         List<StepRunner> stepRunners = stepRunners();
 
         progressTracker.beginSubTask();
-        while (ranIterations < config.maxIterations()) {
+        while (ranIterations < parameters.maxIterations()) {
             progressTracker.beginSubTask();
             RunWithConcurrency.builder()
-                .concurrency(config.concurrency())
+                .concurrency(parameters.concurrency())
                 .tasks(stepRunners)
                 .waitTime(1L, MICROSECONDS)
                 .terminationFlag(terminationFlag)
@@ -159,7 +159,7 @@ public class LabelPropagation extends Algorithm<LabelPropagationResult> {
         }
         progressTracker.beginSubTask();
         RunWithConcurrency.builder()
-            .concurrency(config.concurrency())
+            .concurrency(parameters.concurrency())
             .tasks(tasks)
             .waitTime(1, MICROSECONDS)
             .terminationFlag(terminationFlag)
