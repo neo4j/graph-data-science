@@ -120,7 +120,7 @@ public class InMemoryStorageEngineFactory implements StorageEngineFactory {
     static final String IN_MEMORY_STORAGE_ENGINE_NAME = "in-memory-516";
 
     public InMemoryStorageEngineFactory() {
-        StorageEngineProxyApi.requireNeo4jVersion(Neo4jVersion.V_Dev, StorageEngineFactory.class);
+        StorageEngineProxyApi.requireNeo4jVersion(Neo4jVersion.V_5_16, StorageEngineFactory.class);
     }
 
     @Override

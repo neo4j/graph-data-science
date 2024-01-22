@@ -29,7 +29,7 @@ public class StorageEngineProxyFactoryImpl implements StorageEngineProxyFactory 
 
     @Override
     public boolean canLoad(Neo4jVersion version) {
-        return version == Neo4jVersion.V_Dev;
+        return version == Neo4jVersion.V_5_16;
     }
 
     @Override
