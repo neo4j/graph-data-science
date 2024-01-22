@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IntersectionConsumer;
@@ -58,19 +57,21 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
     private final Graph graph;
     private final RelationshipIntersectFactory intersectFactory;
     private final RelationshipIntersectConfig intersectConfig;
-    private final TriangleCountBaseConfig config;
     private final ExecutorService executorService;
     private final AtomicLong queue;
 
     // results
     private final HugeAtomicLongArray triangleCounts;
+    private final long maxDegree;
+    private final int concurrency;
     private long globalTriangleCount;
 
     private final LongAdder globalTriangleCounter;
 
     public static IntersectingTriangleCount create(
         Graph graph,
-        TriangleCountBaseConfig config,
+        int concurrency,
+        long maxDegree,
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
@@ -79,32 +80,25 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
             .orElseThrow(
                 () -> new IllegalArgumentException("No relationship intersect factory registered for graph: " + graph.getClass())
             );
-        return new IntersectingTriangleCount(graph, factory, config, executorService, progressTracker);
-    }
-
-    @TestOnly
-    public static IntersectingTriangleCount create(
-        Graph graph,
-        TriangleCountBaseConfig config,
-        ExecutorService executorService
-    ) {
-        return create(graph, config, executorService, ProgressTracker.NULL_TRACKER);
+        return new IntersectingTriangleCount(graph, factory, concurrency, maxDegree, executorService, progressTracker);
     }
 
     private IntersectingTriangleCount(
         Graph graph,
         RelationshipIntersectFactory intersectFactory,
-        TriangleCountBaseConfig config,
+        int concurrency,
+        long maxDegree,
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
         this.intersectFactory = intersectFactory;
-        this.intersectConfig = ImmutableRelationshipIntersectConfig.of(config.maxDegree());
-        this.config = config;
+        this.concurrency = concurrency;
+        this.maxDegree = maxDegree;
+        this.intersectConfig = ImmutableRelationshipIntersectConfig.of(maxDegree);
+        this.triangleCounts = HugeAtomicLongArray.of(graph.nodeCount(), ParalleLongPageCreator.passThrough(concurrency));
         this.executorService = executorService;
-        this.triangleCounts = HugeAtomicLongArray.of(graph.nodeCount(), ParalleLongPageCreator.passThrough(config.concurrency()));
         this.globalTriangleCounter = new LongAdder();
         this.queue = new AtomicLong();
     }
@@ -116,7 +110,7 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
         globalTriangleCounter.reset();
         // create tasks
         final Collection<? extends Runnable> tasks = ParallelUtil.tasks(
-            config.concurrency(),
+            concurrency,
             () -> new IntersectTask(intersectFactory.load(graph, intersectConfig))
         );
         // run
@@ -143,7 +137,7 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
         public void run() {
             long node;
             while ((node = queue.getAndIncrement()) < graph.nodeCount() && terminationFlag.running()) {
-                if (graph.degree(node) <= config.maxDegree()) {
+                if (graph.degree(node) <= maxDegree) {
                     intersect.intersectAll(node, this);
                 } else {
                     triangleCounts.set(node, EXCLUDED_NODE_TRIANGLE_COUNT);

@@ -19,20 +19,24 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
-import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+public final class TriangleCountParameters {
 
-public class IntersectingTriangleCountMemoryEstimateDefinition  implements AlgorithmMemoryEstimateDefinition<TriangleCountBaseConfig> {
-    public MemoryEstimation memoryEstimation() {
-        return MemoryEstimations
-            .builder(IntersectingTriangleCount.class)
-            .perNode("triangle-counts", HugeAtomicLongArray::memoryEstimation)
-            .build();
+    public static TriangleCountParameters create(int concurrency, long maxDegree) {
+        return new TriangleCountParameters(concurrency, maxDegree);
     }
-    @Override
-    public MemoryEstimation memoryEstimation(TriangleCountBaseConfig configuration) {
-        return memoryEstimation();
+    private final int concurrency;
+    private final long maxDegree;
+
+    private TriangleCountParameters(int concurrency, long maxDegree) {
+        this.concurrency = concurrency;
+        this.maxDegree = maxDegree;
+    }
+
+    public int concurrency() {
+        return concurrency;
+    }
+
+    public long maxDegree() {
+        return maxDegree;
     }
 }

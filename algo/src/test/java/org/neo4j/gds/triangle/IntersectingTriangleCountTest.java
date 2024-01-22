@@ -28,6 +28,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.stream.Stream;
 
@@ -347,11 +348,7 @@ class IntersectingTriangleCountTest {
             ", (n0)-[:REL]->(n6)"
         );
 
-        TriangleCountBaseConfig config = TriangleCountBaseConfigImpl.builder()
-            .maxDegree(3)
-            .build();
-
-        TriangleCountResult result = compute(graph, config);
+        TriangleCountResult result = compute(graph, 4, 3);
 
         assertEquals(1, result.globalTriangles());
         assertEquals(7, result.localTriangles().size());
@@ -378,11 +375,7 @@ class IntersectingTriangleCountTest {
             ", (n3)-[:REL]->(n6)"
         );
 
-        TriangleCountBaseConfig config = TriangleCountBaseConfigImpl.builder()
-            .maxDegree(3)
-            .build();
-
-        TriangleCountResult result = compute(graph, config);
+        TriangleCountResult result = compute(graph, 4, 3);
 
         assertEquals(1, result.globalTriangles());
         assertEquals(7, result.localTriangles().size());
@@ -445,11 +438,7 @@ class IntersectingTriangleCountTest {
             " ,(g)-[:T]->(e)"
         );
 
-        TriangleCountBaseConfig config = TriangleCountBaseConfigImpl.builder()
-            .maxDegree(2)
-            .build();
-
-        TriangleCountResult result = compute(graph, config);
+        TriangleCountResult result = compute(graph, 4, 2);
 
         assertEquals(EXCLUDED_NODE_TRIANGLE_COUNT, result.localTriangles().get(0)); // a (deg = 3)
         assertEquals(EXCLUDED_NODE_TRIANGLE_COUNT, result.localTriangles().get(1)); // b (deg = 3)
@@ -477,11 +466,7 @@ class IntersectingTriangleCountTest {
             " ,(g)-[:T1]->(e)"
         );
 
-        TriangleCountBaseConfig config = TriangleCountBaseConfigImpl.builder()
-            .maxDegree(2)
-            .build();
-
-        TriangleCountResult result = compute(graph, config);
+        TriangleCountResult result = compute(graph, 4, 2);
 
         assertEquals(EXCLUDED_NODE_TRIANGLE_COUNT, result.localTriangles().get(0)); // a (deg = 3)
         assertEquals(EXCLUDED_NODE_TRIANGLE_COUNT, result.localTriangles().get(1)); // b (deg = 3)
@@ -509,8 +494,7 @@ class IntersectingTriangleCountTest {
             UNDIRECTED
         );
 
-        var config = TriangleCountBaseConfigImpl.builder().build();
-        var result = compute(testGraph.graph(), config);
+        var result = compute(testGraph.graph(), 4, Long.MAX_VALUE);
 
         assertThat(result.globalTriangles()).isEqualTo(0L);
         assertThat(result.localTriangles())
@@ -522,12 +506,17 @@ class IntersectingTriangleCountTest {
     }
 
     private TriangleCountResult compute(Graph graph) {
-        TriangleCountStatsConfig config = TriangleCountStatsConfigImpl.builder().build();
-        return compute(graph, config);
+        return compute(graph, 4, Long.MAX_VALUE);
     }
 
-    private TriangleCountResult compute(Graph graph, TriangleCountBaseConfig config) {
-        return IntersectingTriangleCount.create(graph, config, DefaultPool.INSTANCE).compute();
+    private TriangleCountResult compute(Graph graph, int concurrency, long maxDegree) {
+        return IntersectingTriangleCount.create(
+            graph,
+            concurrency,
+            maxDegree,
+            DefaultPool.INSTANCE,
+            ProgressTracker.NULL_TRACKER
+        ).compute();
     }
 
     private static Graph fromGdl(String gdl) {

@@ -24,27 +24,24 @@ import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class TriangleCountMaxDegreeTest {
 
-  @Test
-  void shouldWorkWithMaxDegree(){
-       var graph= RandomGraphGenerator.builder().nodeCount(24).averageDegree(23).seed(101)
-           .relationshipDistribution(
-            RelationshipDistribution.RANDOM)
-           .direction(Direction.UNDIRECTED)
-           .build().generate();
+    @Test
+    void shouldWorkWithMaxDegree() {
+        var graph = RandomGraphGenerator.builder()
+            .nodeCount(24)
+            .averageDegree(23)
+            .seed(101)
+            .relationshipDistribution(RelationshipDistribution.RANDOM)
+            .direction(Direction.UNDIRECTED)
+            .build()
+            .generate();
 
-      TriangleCountBaseConfig config = TriangleCountBaseConfigImpl
-          .builder()
-          .maxDegree(100)
-          .build();
-
-    var tc = IntersectingTriangleCount.create(graph, config, DefaultPool.INSTANCE).compute();
+        var tc = IntersectingTriangleCount.create(graph, 4, 100, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER).compute();
         assertThat(tc.globalTriangles()).isEqualTo(1262L);
-
-  }
-
+    }
 }
