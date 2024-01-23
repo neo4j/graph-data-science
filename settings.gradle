@@ -167,9 +167,6 @@ project(':neo4j-kernel-adapter-5.8').projectDir = file('compatibility/5.8/neo4j-
 include('neo4j-kernel-adapter-5.9')
 project(':neo4j-kernel-adapter-5.9').projectDir = file('compatibility/5.9/neo4j-kernel-adapter')
 
-include('neo4j-kernel-adapter-5.10')
-project(':neo4j-kernel-adapter-5.10').projectDir = file('compatibility/5.10/neo4j-kernel-adapter')
-
 include('neo4j-kernel-adapter-5.11')
 project(':neo4j-kernel-adapter-5.11').projectDir = file('compatibility/5.11/neo4j-kernel-adapter')
 
@@ -268,21 +265,6 @@ project(':storage-engine-adapter').projectDir = file('compatibility/common/stora
 
 include('storage-engine-adapter-4.4')
 project(':storage-engine-adapter-4.4').projectDir = file('compatibility/4.4/storage-engine-adapter')
-
-include('storage-engine-adapter-5.6')
-project(':storage-engine-adapter-5.6').projectDir = file('compatibility/5.6/storage-engine-adapter')
-
-include('storage-engine-adapter-5.7')
-project(':storage-engine-adapter-5.7').projectDir = file('compatibility/5.7/storage-engine-adapter')
-
-include('storage-engine-adapter-5.8')
-project(':storage-engine-adapter-5.8').projectDir = file('compatibility/5.8/storage-engine-adapter')
-
-include('storage-engine-adapter-5.9')
-project(':storage-engine-adapter-5.9').projectDir = file('compatibility/5.9/storage-engine-adapter')
-
-include('storage-engine-adapter-5.10')
-project(':storage-engine-adapter-5.10').projectDir = file('compatibility/5.10/storage-engine-adapter')
 
 include('storage-engine-adapter-5.11')
 project(':storage-engine-adapter-5.11').projectDir = file('compatibility/5.11/storage-engine-adapter')
