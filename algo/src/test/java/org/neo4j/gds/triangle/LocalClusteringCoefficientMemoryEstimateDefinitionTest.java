@@ -26,23 +26,18 @@ import org.neo4j.gds.assertions.MemoryEstimationAssert;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 
-import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 class LocalClusteringCoefficientMemoryEstimateDefinitionTest {
 
     @ValueSource(longs = {1L, 10L, 100L, 10_000L})
     @ParameterizedTest
     void memoryEstimation(long nodeCount) {
-        var config = createConfig(false);
-
         GraphDimensions graphDimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
-        var memoryEstimation = new LocalClusteringCoefficientMemoryEstimateDefinition().memoryEstimation(config);
+        var memoryEstimation = new LocalClusteringCoefficientMemoryEstimateDefinition()
+            .memoryEstimationWithoutConfig(null);
 
         long triangleCountEstimate = 56 + 24 + nodeCount * 8 + 16;
         long hugeDoubleArray = 16 + nodeCount * 8 + 16;
-        long expected = 72 + hugeDoubleArray + triangleCountEstimate;
+        long expected = 80 + hugeDoubleArray + triangleCountEstimate;
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(graphDimensions, 1)
@@ -52,13 +47,12 @@ class LocalClusteringCoefficientMemoryEstimateDefinitionTest {
     @ValueSource(longs = {1L, 10L, 100L, 10_000L})
     @ParameterizedTest
     void memoryEstimationWithSeedProperty(long nodeCount) {
-        var config = createConfig(true);
-
         GraphDimensions graphDimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
-        var memoryEstimation = new LocalClusteringCoefficientMemoryEstimateDefinition().memoryEstimation(config);
+        var memoryEstimation = new LocalClusteringCoefficientMemoryEstimateDefinition()
+            .memoryEstimationWithoutConfig("foo");
 
         long hugeDoubleArray = 16 + nodeCount * 8 + 16;
-        long expected = 56 + hugeDoubleArray;
+        long expected = 64 + hugeDoubleArray;
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(graphDimensions, 1)
@@ -68,14 +62,13 @@ class LocalClusteringCoefficientMemoryEstimateDefinitionTest {
     @CsvSource({"1000000000, 8001220736", "100000000000, 800122070336"})
     @ParameterizedTest
     void memoryEstimationLargePages(long nodeCount, long sizeOfHugeArray) {
-        var config = createConfig(false);
-
         GraphDimensions graphDimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
-        var memoryEstimation = new LocalClusteringCoefficientMemoryEstimateDefinition().memoryEstimation(config);
+        var memoryEstimation = new LocalClusteringCoefficientMemoryEstimateDefinition()
+            .memoryEstimationWithoutConfig(null);
 
         long triangleCountEstimate = 56 + 32 + sizeOfHugeArray;
         long hugeDoubleArray = 24 + sizeOfHugeArray;
-        long expected = 72 + hugeDoubleArray + triangleCountEstimate;
+        long expected = 80 + hugeDoubleArray + triangleCountEstimate;
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(graphDimensions, 1)
@@ -85,25 +78,15 @@ class LocalClusteringCoefficientMemoryEstimateDefinitionTest {
     @CsvSource({"1000000000, 8001220736", "100000000000, 800122070336"})
     @ParameterizedTest
     void memoryEstimationLargePagesWithSeed(long nodeCount, long sizeOfHugeArray) {
-        var config = createConfig(true);
-
         GraphDimensions graphDimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
-        var memoryEstimation = new LocalClusteringCoefficientMemoryEstimateDefinition().memoryEstimation(config);
-
+        var memoryEstimation = new LocalClusteringCoefficientMemoryEstimateDefinition()
+            .memoryEstimationWithoutConfig("foo");
 
         long hugeDoubleArray = 24 + sizeOfHugeArray;
-        long expected = 56 + hugeDoubleArray;
+        long expected = 64 + hugeDoubleArray;
         
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(graphDimensions, 1)
             .hasSameMinAndMaxEqualTo(expected);
-    }
-
-    private LocalClusteringCoefficientBaseConfig createConfig(boolean seed) {
-        var config = mock(LocalClusteringCoefficientBaseConfig.class);
-        when(config.seedProperty()).thenReturn((seed) ? "foo" : null);
-
-        doCallRealMethod().when(config).triangleCountConfig();
-        return config;
     }
 }

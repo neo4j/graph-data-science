@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.triangle;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -35,17 +36,27 @@ public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoe
         return "LocalClusteringCoefficient";
     }
 
+    public LocalClusteringCoefficient build(
+        Graph graph,
+        LocalClusteringCoefficientParameters parameters,
+        ProgressTracker progressTracker
+    ) {
+        return new LocalClusteringCoefficient(
+            graph,
+            parameters.concurrency(),
+            parameters.maxDegree(),
+            parameters.seedProperty(),
+            progressTracker
+        );
+    }
+
     @Override
     public LocalClusteringCoefficient build(
         Graph graph,
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-        return new LocalClusteringCoefficient(
-            graph,
-            configuration,
-            progressTracker
-        );
+        return build(graph, configuration.toParameters(), progressTracker);
     }
 
     @Override
@@ -56,12 +67,15 @@ public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoe
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
+        return progressTask(graph, config.seedProperty());
+    }
+
+    public Task progressTask(Graph graph, @Nullable String seedProperty) {
         var tasks = new ArrayList<Task>();
-        if (config.seedProperty() == null) {
+        if (seedProperty == null) {
             tasks.add(IntersectingTriangleCountFactory.triangleCountProgressTask(graph));
         }
         tasks.add(Tasks.leaf("Calculate Local Clustering Coefficient", graph.nodeCount()));
-
         return Tasks.task(taskName(), tasks);
     }
 }

@@ -19,11 +19,13 @@
  */
 package org.neo4j.gds.triangle;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.utils.CloseableThreadLocal;
@@ -35,8 +37,8 @@ import java.util.function.LongToDoubleFunction;
 public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoefficientResult> {
 
     private final int concurrency;
+    private final long maxDegree;
     private final NodePropertyValues triangleCountProperty;
-    private final LocalClusteringCoefficientBaseConfig configuration;
 
     private final Graph graph;
 
@@ -46,16 +48,18 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
 
     LocalClusteringCoefficient(
         Graph graph,
-        LocalClusteringCoefficientBaseConfig configuration,
+        int concurrency,
+        long maxDegree,
+        @Nullable String seedProperty,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
+        this.concurrency = concurrency;
+        this.maxDegree = maxDegree;
 
-        this.configuration = configuration;
-        this.concurrency = configuration.concurrency();
         this.triangleCountProperty =
-            Optional.ofNullable(configuration.seedProperty())
+            Optional.ofNullable(seedProperty)
                 .map(graph::nodeProperties)
                 .orElse(null);
     }
@@ -107,10 +111,11 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
     }
 
     private HugeAtomicLongArray computeTriangleCounts() {
-
-        IntersectingTriangleCount intersectingTriangleCount = new IntersectingTriangleCountFactory<>().build(
+        var intersectingTriangleCount = IntersectingTriangleCount.create(
             graph,
-            configuration.triangleCountConfig(),
+            concurrency,
+            maxDegree,
+            DefaultPool.INSTANCE,
             progressTracker
         );
 
