@@ -27,23 +27,23 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 public class KSpanningTreeAlgorithmFactory<CONFIG extends KSpanningTreeBaseConfig> extends GraphAlgorithmFactory<KSpanningTree, CONFIG> {
 
-    @Override
-    public KSpanningTree build(
-        Graph graph,
-        KSpanningTreeBaseConfig configuration,
-        ProgressTracker progressTracker
-    ) {
+    public KSpanningTree build(Graph graph, KSpanningTreeParameters parameters, ProgressTracker progressTracker) {
         if (!graph.schema().isUndirected()) {
             throw new IllegalArgumentException(
                 "The K-Spanning Tree algorithm works only with undirected graphs. Please orient the edges properly");
         }
         return new KSpanningTree(
             graph,
-            configuration.objective(),
-            graph.toMappedNodeId(configuration.sourceNode()),
-            configuration.k(),
+            parameters.objective(),
+            graph.toMappedNodeId(parameters.sourceNode()),
+            parameters.k(),
             progressTracker
         );
+    }
+
+    @Override
+    public KSpanningTree build(Graph graph, KSpanningTreeBaseConfig configuration, ProgressTracker progressTracker) {
+        return build(graph, configuration.toParameters(), progressTracker);
     }
 
         @Override

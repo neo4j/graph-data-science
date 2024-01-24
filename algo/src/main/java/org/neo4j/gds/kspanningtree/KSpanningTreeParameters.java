@@ -17,21 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.spanningtree;
+package org.neo4j.gds.kspanningtree;
 
-import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.spanningtree.SpanningTreeParameters;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import java.util.function.DoubleUnaryOperator;
 
-class SpanningTreeAlgorithmFactoryTest {
-    @Test
-    void shouldThrowIfNotUndirected() {
-        var graph = GdlFactory.of("(a)-[:foo{cost:1.0}]->(b)").build().getUnion();
-        var parameters = SpanningTreeParameters.create(Prim.MIN_OPERATOR, 0);
-        var spanningTreeAlgorithmFactory = new SpanningTreeAlgorithmFactory<>();
-        assertThatThrownBy(() -> spanningTreeAlgorithmFactory.build(graph, parameters, ProgressTracker.NULL_TRACKER))
-            .hasMessageContaining("undirected");
+public final class KSpanningTreeParameters extends SpanningTreeParameters {
+
+    static KSpanningTreeParameters create(DoubleUnaryOperator objective, long sourceNode, long k) {
+        return new KSpanningTreeParameters(objective, sourceNode, k);
+    }
+
+    private final long k;
+
+    private KSpanningTreeParameters(DoubleUnaryOperator objective, long sourceNode, long k) {
+        super(objective, sourceNode);
+        this.k = k;
+    }
+
+    long k() {
+        return k;
     }
 }

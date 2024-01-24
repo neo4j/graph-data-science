@@ -19,19 +19,27 @@
  */
 package org.neo4j.gds.spanningtree;
 
-import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.gdl.GdlFactory;
+import java.util.function.DoubleUnaryOperator;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+public class SpanningTreeParameters {
+    static SpanningTreeParameters create(DoubleUnaryOperator objective, long sourceNode) {
+        return new SpanningTreeParameters(objective, sourceNode);
+    }
 
-class SpanningTreeAlgorithmFactoryTest {
-    @Test
-    void shouldThrowIfNotUndirected() {
-        var graph = GdlFactory.of("(a)-[:foo{cost:1.0}]->(b)").build().getUnion();
-        var parameters = SpanningTreeParameters.create(Prim.MIN_OPERATOR, 0);
-        var spanningTreeAlgorithmFactory = new SpanningTreeAlgorithmFactory<>();
-        assertThatThrownBy(() -> spanningTreeAlgorithmFactory.build(graph, parameters, ProgressTracker.NULL_TRACKER))
-            .hasMessageContaining("undirected");
+    private final DoubleUnaryOperator objective;
+
+    private final long sourceNode;
+
+    protected SpanningTreeParameters(DoubleUnaryOperator objective, long sourceNode) {
+        this.objective = objective;
+        this.sourceNode = sourceNode;
+    }
+
+    public long sourceNode() {
+        return sourceNode;
+    }
+
+    public DoubleUnaryOperator objective() {
+        return objective;
     }
 }
