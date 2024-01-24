@@ -71,6 +71,8 @@ public final class NodesFilter {
         var inputNodes = inputGraphStore.nodes();
 
         var nodesBuilder = GraphFactory.initNodesBuilder()
+            .idMapBuilderType(inputNodes.typeId())
+            .deduplicateIds(false)
             .concurrency(concurrency)
             .maxOriginalId(inputNodes.highestOriginalId())
             .hasLabelInformation(!inputGraphStore.nodeLabels().isEmpty())
