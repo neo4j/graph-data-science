@@ -85,9 +85,10 @@ class ClosenessCentralityDirectedTest {
     void testCentrality() {
         IdFunction idFunction = graph::toMappedNodeId;
 
-        var algo = ClosenessCentrality.of(
+        var algo = new ClosenessCentrality(
             graph,
-            ClosenessCentralityStreamConfigImpl.builder().build(),
+            4,
+            new DefaultCentralityComputer(),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -105,9 +106,10 @@ class ClosenessCentralityDirectedTest {
     void testCentralityWithWassermanFaust() {
         IdFunction idFunction = graph::toMappedNodeId;
 
-        var algo = ClosenessCentrality.of(
+        var algo = new ClosenessCentrality(
             graph,
-            ClosenessCentralityStreamConfigImpl.builder().useWassermanFaust(true).build(),
+            4,
+            new WassermanFaustCentralityComputer(graph.nodeCount()),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );

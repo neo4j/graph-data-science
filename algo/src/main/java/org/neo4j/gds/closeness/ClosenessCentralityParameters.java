@@ -19,18 +19,25 @@
  */
 package org.neo4j.gds.closeness;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.AlgoBaseConfig;
+public final class ClosenessCentralityParameters {
 
-@Configuration
-public interface ClosenessCentralityBaseConfig extends AlgoBaseConfig {
-
-    default boolean useWassermanFaust() {
-        return false;
+    static ClosenessCentralityParameters create(int concurrency, boolean useWassermanFaust) {
+        return new ClosenessCentralityParameters(concurrency, useWassermanFaust);
     }
 
-    @Configuration.Ignore
-    default ClosenessCentralityParameters toParameters() {
-        return ClosenessCentralityParameters.create(concurrency(), useWassermanFaust());
+    private final int concurrency;
+    private final boolean useWassermanFaust;
+
+    private ClosenessCentralityParameters(int concurrency, boolean useWassermanFaust) {
+        this.concurrency = concurrency;
+        this.useWassermanFaust = useWassermanFaust;
+    }
+
+    int concurrency() {
+        return concurrency;
+    }
+
+    boolean useWassermanFaust() {
+        return useWassermanFaust;
     }
 }
