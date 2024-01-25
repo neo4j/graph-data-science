@@ -131,13 +131,15 @@ class FilteredNodeSimilarityTest {
         assertThat(noOfResultsWithTargetNodeOutSideOfFilter).isGreaterThan(0);
     }
 
-    @Test
-    void shouldSurviveIoannisFurtherObjections() {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void shouldSurviveIoannisFurtherObjections(boolean enableWcc) {
         var sourceNodeFilter = List.of(graph.toOriginalNodeId("d"));
 
         var config = FilteredNodeSimilarityStreamConfigImpl.builder()
             .sourceNodeFilter(NodeFilterSpecFactory.create(sourceNodeFilter))
             .concurrency(1)
+            .considerComponents(enableWcc)
             .topK(1)
             .topN(10)
             .build();
