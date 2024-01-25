@@ -44,26 +44,28 @@ public class Conductance extends Algorithm<ConductanceResult> {
     private static final double DEFAULT_WEIGHT = 0.0D;
 
     private final Graph graph;
+    private final int concurrency;
     private final ExecutorService executor;
-    private final ConductanceBaseConfig config;
     private final int minBatchSize;
     private final WeightTransformer weightTransformer;
     private final NodePropertyValues communityProperties;
 
     public Conductance(
         Graph graph,
-        ExecutorService executor,
-        ConductanceBaseConfig config,
+        int concurrency,
         int minBatchSize,
+        boolean hasRelationshipWeightProperty,
+        String communityProperty,
+        ExecutorService executor,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
+        this.concurrency = concurrency;
         this.executor = executor;
-        this.config = config;
         this.minBatchSize = minBatchSize;
-        this.weightTransformer = config.hasRelationshipWeightProperty() ? weight -> weight : unused -> 1.0D;
-        this.communityProperties = graph.nodeProperties(config.communityProperty());
+        this.weightTransformer = hasRelationshipWeightProperty ? weight -> weight : unused -> 1.0D;
+        this.communityProperties = graph.nodeProperties(communityProperty);
     }
 
     @FunctionalInterface
@@ -79,8 +81,8 @@ public class Conductance extends Algorithm<ConductanceResult> {
         var relCountTasks = countRelationships();
 
         long maxCommunityId = maxCommunityId(relCountTasks);
-        long communitiesPerBatch = maxCommunityId / config.concurrency();
-        long communitiesRemainder = Math.floorMod(maxCommunityId, config.concurrency());
+        long communitiesPerBatch = maxCommunityId / concurrency;
+        long communitiesRemainder = Math.floorMod(maxCommunityId, concurrency);
 
         var accumulatedCounts = accumulateCounts(
             communitiesPerBatch,
@@ -101,12 +103,12 @@ public class Conductance extends Algorithm<ConductanceResult> {
 
         var tasks = PartitionUtils.degreePartition(
             graph,
-            config.concurrency(),
+            concurrency,
             partition -> new CountRelationships(graph.concurrentCopy(), partition),
             Optional.of(minBatchSize)
         );
         RunWithConcurrency.builder()
-            .concurrency(config.concurrency())
+            .concurrency(concurrency)
             .tasks(tasks)
             .executor(executor)
             .run();
@@ -149,9 +151,9 @@ public class Conductance extends Algorithm<ConductanceResult> {
             maxCommunityId
         );
 
-        var tasks = ParallelUtil.tasks(config.concurrency(), index -> () -> {
+        var tasks = ParallelUtil.tasks(concurrency, index -> () -> {
             final long startOffset = index * communitiesPerBatch;
-            final long endOffset = index == config.concurrency() - 1
+            final long endOffset = index == concurrency - 1
                 ? startOffset + communitiesPerBatch + communitiesRemainder
                 : startOffset + communitiesPerBatch;
 
@@ -181,7 +183,7 @@ public class Conductance extends Algorithm<ConductanceResult> {
         });
 
         RunWithConcurrency.builder()
-            .concurrency(config.concurrency())
+            .concurrency(concurrency)
             .tasks(tasks)
             .run();
 
@@ -207,9 +209,9 @@ public class Conductance extends Algorithm<ConductanceResult> {
         var internalCounts = relCounts.internalCounts();
         var externalCounts = relCounts.externalCounts();
 
-        var tasks = ParallelUtil.tasks(config.concurrency(), index -> () -> {
+        var tasks = ParallelUtil.tasks(concurrency, index -> () -> {
             final long startOffset = index * communitiesPerBatch;
-            final long endOffset = index == config.concurrency() - 1
+            final long endOffset = index == concurrency - 1
                 ? startOffset + communitiesPerBatch + communitiesRemainder
                 : startOffset + communitiesPerBatch;
             double conductanceSum = 0.0;
@@ -235,7 +237,7 @@ public class Conductance extends Algorithm<ConductanceResult> {
         });
 
         RunWithConcurrency.builder()
-            .concurrency(config.concurrency())
+            .concurrency(concurrency)
             .tasks(tasks)
             .run();
 

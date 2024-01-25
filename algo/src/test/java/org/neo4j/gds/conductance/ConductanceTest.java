@@ -29,6 +29,7 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -118,22 +119,14 @@ final class ConductanceTest {
         Map<Long, Double> expectedConductances,
         int concurrency
     ) {
-        var configBuilder = ConductanceBaseConfigImpl.builder()
-            .concurrency(concurrency)
-            .communityProperty("community");
-
-        if (weighted) {
-            configBuilder.relationshipWeightProperty("weight");
-        }
-
-        var config = configBuilder.build();
-        var minBatchSize = concurrency > 1 ? 1 : config.minBatchSize();
-
-            var conductance = new Conductance(
+        var minBatchSize = concurrency > 1 ? 1 : ParallelUtil.DEFAULT_BATCH_SIZE;
+        var conductance = new Conductance(
             orientation == Orientation.NATURAL ? naturalGraph : undirectedGraph,
-            DefaultPool.INSTANCE,
-            config,
+            4,
             minBatchSize,
+            weighted,
+            "community",
+            DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -151,25 +144,18 @@ final class ConductanceTest {
 
     @Test
     void logProgress() {
-        var config = ConductanceBaseConfigImpl.builder()
-            .communityProperty("community")
-            .concurrency(1)
-            .build();
-
+        var parameters = ConductanceParameters.create(1, ParallelUtil.DEFAULT_BATCH_SIZE, false, "community");
         var factory = new ConductanceAlgorithmFactory<>();
-
-        var progressTask = factory.progressTask(naturalGraph, config);
+        var progressTask = factory.progressTask(naturalGraph.nodeCount());
         var log = Neo4jProxy.testLog();
         var progressTracker = new TaskProgressTracker(
             progressTask,
             log,
-            config.concurrency(),
+            parameters.concurrency(),
             EmptyTaskRegistryFactory.INSTANCE
         );
 
-        factory
-            .build(naturalGraph, config, progressTracker)
-            .compute();
+        factory.build(naturalGraph, parameters, progressTracker).compute();
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
