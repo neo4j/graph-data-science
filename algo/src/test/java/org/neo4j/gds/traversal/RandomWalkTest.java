@@ -466,6 +466,31 @@ class RandomWalkTest {
         @Inject
         TestGraph graph;
 
+        @GdlGraph(graphNamePrefix = "weighted")
+        public static final String WEIGHTED_GDL =
+            "CREATE " +
+                "  (a:Node)" +
+                ", (b:Node)" +
+                ", (c:Node)" +
+                ", (d:Node)" +
+                ", (e:Node)" +
+                ", (f:Node)" +
+                ", (a)-[:REL{w:10}]->(b)" +
+                ", (a)-[:REL{w:10}]->(c)" +
+                ", (a)-[:REL{w:5}]->(d)" +
+                ", (b)-[:REL{w:5}]->(a)" +
+                ", (b)-[:REL{w:5}]->(e)" +
+                ", (c)-[:REL{w:5}]->(a)" +
+                ", (c)-[:REL{w:5}]->(d)" +
+                ", (c)-[:REL{w:5}]->(e)" +
+                ", (d)-[:REL{w:5}]->(a)" +
+                ", (d)-[:REL{w:5}]->(c)" +
+                ", (d)-[:REL{w:5}]->(e)" +
+                ", (e)-[:REL{w:5}]->(a)";
+
+        @Inject
+        private TestGraph weightedGraph;
+
         @Test
         void progressLogging() throws InterruptedException {
 
@@ -505,6 +530,60 @@ class RandomWalkTest {
                 .extracting(replaceTimings())
                 .containsExactly(
                     "RandomWalk :: Start",
+                    "RandomWalk :: create walks :: Start",
+                    "RandomWalk :: create walks 16%",
+                    "RandomWalk :: create walks 33%",
+                    "RandomWalk :: create walks 50%",
+                    "RandomWalk :: create walks 66%",
+                    "RandomWalk :: create walks 83%",
+                    "RandomWalk :: create walks 100%",
+                    "RandomWalk :: create walks :: Finished",
+                    "RandomWalk :: Finished"
+                );
+        }
+
+        @Test
+        void shouldLogProgressOnWeightedGraph() throws InterruptedException {
+
+            var config = RandomWalkStreamConfigImpl.builder()
+                .walkLength(10)
+                .concurrency(4)
+                .walksPerNode(1000)
+                .walkBufferSize(1000)
+                .returnFactor(0.1)
+                .inOutFactor(100000)
+                .randomSeed(87L)
+                .build();
+
+            var fact = new RandomWalkAlgorithmFactory<RandomWalkStreamConfig>();
+            var log = Neo4jProxy.testLog();
+            var taskStore = new PerDatabaseTaskStore();
+
+            var pt = new TestProgressTracker(
+                fact.progressTask(weightedGraph, config),
+                log,
+                config.concurrency(),
+                TaskRegistryFactory.local("rw", taskStore)
+            );
+
+            RandomWalk randomWalk = fact.build(weightedGraph, config, pt);
+
+            assertThatNoException().isThrownBy(() -> {
+                var randomWalksStream = randomWalk.compute();
+                // Make sure to consume the stream...
+                assertThat(randomWalksStream).hasSize(5000);
+            });
+
+            awaitEmptyTaskStore(taskStore);
+
+            assertThat(log.getMessages(TestLog.INFO))
+                .extracting(removingThreadId())
+                .extracting(replaceTimings())
+                .containsExactly(
+                    "RandomWalk :: Start",
+                    "RandomWalk :: DegreeCentrality :: Start",
+                    "RandomWalk :: DegreeCentrality 100%",
+                    "RandomWalk :: DegreeCentrality :: Finished",
                     "RandomWalk :: create walks :: Start",
                     "RandomWalk :: create walks 16%",
                     "RandomWalk :: create walks 33%",
