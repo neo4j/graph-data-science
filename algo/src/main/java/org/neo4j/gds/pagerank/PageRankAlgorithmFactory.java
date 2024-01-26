@@ -149,7 +149,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Gra
             configuration.concurrency(),
             Orientation.NATURAL,
             configuration.hasRelationshipWeightProperty(),
-            configuration.minBatchSize(),
+            10_000,
             ProgressTracker.NULL_TRACKER
         );
 

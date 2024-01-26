@@ -22,7 +22,6 @@ package org.neo4j.gds.config;
 import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
 
 public interface ConcurrencyConfig {
 
@@ -34,12 +33,6 @@ public interface ConcurrencyConfig {
     @Configuration.Key(CONCURRENCY_KEY)
     default int concurrency() {
         return DEFAULT_CONCURRENCY;
-    }
-
-    @Value.Default
-    @Configuration.Ignore
-    default int minBatchSize() {
-        return ParallelUtil.DEFAULT_BATCH_SIZE;
     }
 
     @Value.Check

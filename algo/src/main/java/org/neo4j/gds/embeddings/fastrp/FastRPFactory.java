@@ -69,7 +69,7 @@ public class FastRPFactory<CONFIG extends FastRPBaseConfig> extends GraphAlgorit
             graph,
             configuration.toParameters(),
             configuration.concurrency(),
-            configuration.minBatchSize(),
+            10_000,
             configuration.randomSeed(),
             progressTracker
         );

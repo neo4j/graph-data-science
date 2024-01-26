@@ -39,7 +39,7 @@ public interface DegreeCentralityConfig extends AlgoBaseConfig, RelationshipWeig
             concurrency(),
             orientation(),
             hasRelationshipWeightProperty(),
-            minBatchSize()
+            10_000
         );
     }
 }

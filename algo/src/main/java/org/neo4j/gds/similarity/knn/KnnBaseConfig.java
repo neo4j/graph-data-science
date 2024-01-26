@@ -64,11 +64,6 @@ public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, SingleT
         return 100;
     }
 
-    @Configuration.Ignore
-    default int minBatchSize() {
-        return 1_000;
-    }
-
     @Configuration.IntegerRange(min = 0)
     default int randomJoins() {
         return 10;
@@ -96,7 +91,7 @@ public interface KnnBaseConfig extends AlgoBaseConfig, IterationsConfig, SingleT
             topK(),
             perturbationRate(),
             randomJoins(),
-            minBatchSize(),
+            1_000,
             initialSampler(),
             randomSeed(),
             nodeProperties()

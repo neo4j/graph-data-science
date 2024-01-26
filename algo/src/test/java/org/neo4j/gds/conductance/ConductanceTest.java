@@ -29,7 +29,6 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -119,7 +118,7 @@ final class ConductanceTest {
         Map<Long, Double> expectedConductances,
         int concurrency
     ) {
-        var minBatchSize = concurrency > 1 ? 1 : ParallelUtil.DEFAULT_BATCH_SIZE;
+        var minBatchSize = concurrency > 1 ? 1 : 10_000;
         var conductance = new Conductance(
             orientation == Orientation.NATURAL ? naturalGraph : undirectedGraph,
             4,
@@ -144,7 +143,7 @@ final class ConductanceTest {
 
     @Test
     void logProgress() {
-        var parameters = ConductanceParameters.create(1, ParallelUtil.DEFAULT_BATCH_SIZE, false, "community");
+        var parameters = ConductanceParameters.create(1, 10_000, false, "community");
         var factory = new ConductanceAlgorithmFactory<>();
         var progressTask = factory.progressTask(naturalGraph.nodeCount());
         var log = Neo4jProxy.testLog();

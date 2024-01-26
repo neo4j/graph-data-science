@@ -52,11 +52,6 @@ public interface FastRPBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConf
 
     default Number nodeSelfInfluence() {return 0;}
 
-    @Configuration.Ignore
-    default int iterations() {
-        return iterationWeights().size();
-    }
-
     default float normalizationStrength() {
         return 0.0f;
     }

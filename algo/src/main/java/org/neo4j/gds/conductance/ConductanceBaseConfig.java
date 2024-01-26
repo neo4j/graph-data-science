@@ -70,6 +70,6 @@ public interface ConductanceBaseConfig extends AlgoBaseConfig, RelationshipWeigh
 
     @Configuration.Ignore
     default ConductanceParameters toParameters() {
-        return ConductanceParameters.create(concurrency(), minBatchSize(), hasRelationshipWeightProperty(), communityProperty());
+        return ConductanceParameters.create(concurrency(), 10_000, hasRelationshipWeightProperty(), communityProperty());
     }
 }
