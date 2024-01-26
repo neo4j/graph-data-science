@@ -78,42 +78,42 @@ public class FastRP extends Algorithm<FastRPResult> {
 
     public FastRP(
         Graph graph,
-        FastRPBaseConfig config,
+        FastRPParameters parameters,
         int minBatchSize,
         List<FeatureExtractor> featureExtractors,
         ProgressTracker progressTracker
     ) {
-        this(graph, config, featureExtractors, progressTracker, config.randomSeed(), minBatchSize);
+        this(graph, parameters, minBatchSize, featureExtractors, progressTracker, parameters.randomSeed());
     }
 
     public FastRP(
         Graph graph,
-        FastRPBaseConfig config,
+        FastRPParameters parameters,
+        int minBatchSize,
         List<FeatureExtractor> featureExtractors,
         ProgressTracker progressTracker,
-        Optional<Long> randomSeed,
-        int minBatchSize
+        Optional<Long> randomSeed
     ) {
         super(progressTracker);
         this.graph = graph;
         this.featureExtractors = featureExtractors;
-        this.relationshipWeightProperty = config.relationshipWeightProperty();
+        this.relationshipWeightProperty = parameters.relationshipWeightProperty();
         this.relationshipWeightFallback = this.relationshipWeightProperty.map(s -> Double.NaN).orElse(1.0);
         this.inputDimension = FeatureExtraction.featureCount(featureExtractors);
         this.randomSeed = improveSeed(randomSeed.orElseGet(System::nanoTime));
         this.minBatchSize = minBatchSize;
 
-        this.propertyVectors = new float[inputDimension][config.propertyDimension()];
+        this.propertyVectors = new float[inputDimension][parameters.propertyDimension()];
         this.embeddings = HugeObjectArray.newArray(float[].class, graph.nodeCount());
         this.embeddingA = HugeObjectArray.newArray(float[].class, graph.nodeCount());
         this.embeddingB = HugeObjectArray.newArray(float[].class, graph.nodeCount());
 
-        this.embeddingDimension = config.embeddingDimension();
-        this.baseEmbeddingDimension = config.embeddingDimension() - config.propertyDimension();
-        this.iterationWeights = config.iterationWeights();
-        this.nodeSelfInfluence = config.nodeSelfInfluence();
-        this.normalizationStrength = config.normalizationStrength();
-        this.concurrency = config.concurrency();
+        this.embeddingDimension = parameters.embeddingDimension();
+        this.baseEmbeddingDimension = parameters.embeddingDimension() - parameters.propertyDimension();
+        this.iterationWeights = parameters.iterationWeights();
+        this.nodeSelfInfluence = parameters.nodeSelfInfluence();
+        this.normalizationStrength = parameters.normalizationStrength();
+        this.concurrency = parameters.concurrency();
         this.embeddingCombiner = graph.hasRelationshipProperty()
             ? this::addArrayValuesWeighted
             : (lhs, rhs, ignoreWeight) -> addInPlace(lhs, rhs);

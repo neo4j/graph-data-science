@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
+import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -37,21 +38,24 @@ public class FastRPFactory<CONFIG extends FastRPBaseConfig> extends GraphAlgorit
         return "FastRP";
     }
 
+    public FastRP build(Graph graph, FastRPParameters parameters, ProgressTracker progressTracker) {
+        var featureExtractors = FeatureExtraction.propertyExtractors(graph, parameters.featureProperties());
+        return new FastRP(
+            graph,
+            parameters,
+            parameters.minBatchSize(),
+            featureExtractors,
+            progressTracker
+        );
+    }
+
     @Override
     public FastRP build(
         Graph graph,
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-        var featureExtractors = FeatureExtraction.propertyExtractors(graph, configuration.featureProperties());
-
-        return new FastRP(
-            graph,
-            configuration,
-            configuration.minBatchSize(),
-            featureExtractors,
-            progressTracker
-        );
+        return build(graph, configuration.toParameters(), progressTracker);
     }
 
     @Override
@@ -61,19 +65,21 @@ public class FastRPFactory<CONFIG extends FastRPBaseConfig> extends GraphAlgorit
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
+        return progressTask(graph, config.nodeSelfInfluence(), config.iterationWeights().size());
+    }
+
+    @NotNull
+    public Task progressTask(Graph graph, Number nodeSelfInfluence, int iterationWeightsSize) {
         var tasks = new ArrayList<Task>();
         tasks.add(Tasks.leaf("Initialize random vectors", graph.nodeCount()));
-        if (Float.compare(config.nodeSelfInfluence().floatValue(), 0.0f) != 0) {
+        if (Float.compare(nodeSelfInfluence.floatValue(), 0.0f) != 0) {
             tasks.add(Tasks.leaf("Apply node self-influence", graph.nodeCount()));
         }
         tasks.add(Tasks.iterativeFixed(
             "Propagate embeddings",
             () -> List.of(Tasks.leaf("Propagate embeddings task", graph.relationshipCount())),
-            config.iterationWeights().size()
+            iterationWeightsSize
         ));
-        return Tasks.task(
-            taskName(),
-            tasks
-        );
+        return Tasks.task(taskName(), tasks);
     }
 }
