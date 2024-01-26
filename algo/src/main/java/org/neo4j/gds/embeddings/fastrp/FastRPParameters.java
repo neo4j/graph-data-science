@@ -29,33 +29,25 @@ import java.util.Optional;
 public final class FastRPParameters {
 
     public static FastRPParameters create(
-        int concurrency,
-        int minBatchSize,
         List<String> featureProperties,
         List<Number> iterationWeights,
         int embeddingDimension,
         int propertyDimension,
         Optional<String> relationshipWeightProperty,
         float normalizationStrength,
-        Number nodeSelfInfluence,
-        Optional<Long> randomSeed
+        Number nodeSelfInfluence
     ) {
         return new FastRPParameters(
-            concurrency,
-            minBatchSize,
             featureProperties,
             iterationWeights,
             embeddingDimension,
             propertyDimension,
             relationshipWeightProperty,
             normalizationStrength,
-            nodeSelfInfluence,
-            randomSeed
+            nodeSelfInfluence
         );
     }
 
-    private final int concurrency;
-    private final int minBatchSize;
     private final List<String> featureProperties;
     private final List<Number> iterationWeights;
     private final int embeddingDimension;
@@ -63,22 +55,16 @@ public final class FastRPParameters {
     private final Optional<String> relationshipWeightProperty;
     private final float normalizationStrength;
     private final Number nodeSelfInfluence;
-    private final Optional<Long> randomSeed;
 
     private FastRPParameters(
-        int concurrency,
-        int minBatchSize,
         List<String> featureProperties,
         List<Number> iterationWeights,
         int embeddingDimension,
         int propertyDimension,
         Optional<String> relationshipWeightProperty,
         float normalizationStrength,
-        Number nodeSelfInfluence,
-        Optional<Long> randomSeed
+        Number nodeSelfInfluence
     ) {
-        this.concurrency = concurrency;
-        this.minBatchSize = minBatchSize;
         this.featureProperties = featureProperties;
         this.iterationWeights = iterationWeights;
         this.embeddingDimension = embeddingDimension;
@@ -86,15 +72,6 @@ public final class FastRPParameters {
         this.relationshipWeightProperty = relationshipWeightProperty;
         this.normalizationStrength = normalizationStrength;
         this.nodeSelfInfluence = nodeSelfInfluence;
-        this.randomSeed = randomSeed;
-    }
-
-    int concurrency() {
-        return concurrency;
-    }
-
-    public int minBatchSize() {
-        return minBatchSize;
     }
 
     public List<String> featureProperties() {
@@ -123,9 +100,5 @@ public final class FastRPParameters {
 
     Number nodeSelfInfluence() {
         return nodeSelfInfluence;
-    }
-
-    Optional<Long> randomSeed() {
-        return randomSeed;
     }
 }

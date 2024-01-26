@@ -79,16 +79,7 @@ public class FastRP extends Algorithm<FastRPResult> {
     public FastRP(
         Graph graph,
         FastRPParameters parameters,
-        int minBatchSize,
-        List<FeatureExtractor> featureExtractors,
-        ProgressTracker progressTracker
-    ) {
-        this(graph, parameters, minBatchSize, featureExtractors, progressTracker, parameters.randomSeed());
-    }
-
-    public FastRP(
-        Graph graph,
-        FastRPParameters parameters,
+        int concurrency,
         int minBatchSize,
         List<FeatureExtractor> featureExtractors,
         ProgressTracker progressTracker,
@@ -101,6 +92,7 @@ public class FastRP extends Algorithm<FastRPResult> {
         this.relationshipWeightFallback = this.relationshipWeightProperty.map(s -> Double.NaN).orElse(1.0);
         this.inputDimension = FeatureExtraction.featureCount(featureExtractors);
         this.randomSeed = improveSeed(randomSeed.orElseGet(System::nanoTime));
+        this.concurrency = concurrency;
         this.minBatchSize = minBatchSize;
 
         this.propertyVectors = new float[inputDimension][parameters.propertyDimension()];
@@ -113,7 +105,6 @@ public class FastRP extends Algorithm<FastRPResult> {
         this.iterationWeights = parameters.iterationWeights();
         this.nodeSelfInfluence = parameters.nodeSelfInfluence();
         this.normalizationStrength = parameters.normalizationStrength();
-        this.concurrency = parameters.concurrency();
         this.embeddingCombiner = graph.hasRelationshipProperty()
             ? this::addArrayValuesWeighted
             : (lhs, rhs, ignoreWeight) -> addInPlace(lhs, rhs);

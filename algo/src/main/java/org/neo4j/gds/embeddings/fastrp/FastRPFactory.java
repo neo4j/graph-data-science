@@ -30,6 +30,7 @@ import org.neo4j.gds.ml.core.features.FeatureExtraction;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class FastRPFactory<CONFIG extends FastRPBaseConfig> extends GraphAlgorithmFactory<FastRP, CONFIG> {
 
@@ -38,14 +39,23 @@ public class FastRPFactory<CONFIG extends FastRPBaseConfig> extends GraphAlgorit
         return "FastRP";
     }
 
-    public FastRP build(Graph graph, FastRPParameters parameters, ProgressTracker progressTracker) {
+    public FastRP build(
+        Graph graph,
+        FastRPParameters parameters,
+        int concurrency,
+        int minBatchSize,
+        Optional<Long> randomSeed,
+        ProgressTracker progressTracker
+    ) {
         var featureExtractors = FeatureExtraction.propertyExtractors(graph, parameters.featureProperties());
         return new FastRP(
             graph,
             parameters,
-            parameters.minBatchSize(),
+            concurrency,
+            minBatchSize,
             featureExtractors,
-            progressTracker
+            progressTracker,
+            randomSeed
         );
     }
 
@@ -55,7 +65,14 @@ public class FastRPFactory<CONFIG extends FastRPBaseConfig> extends GraphAlgorit
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-        return build(graph, configuration.toParameters(), progressTracker);
+        return build(
+            graph,
+            configuration.toParameters(),
+            configuration.concurrency(),
+            configuration.minBatchSize(),
+            configuration.randomSeed(),
+            progressTracker
+        );
     }
 
     @Override
