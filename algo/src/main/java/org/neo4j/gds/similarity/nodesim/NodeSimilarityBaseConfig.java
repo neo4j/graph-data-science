@@ -101,42 +101,9 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
     }
 
     @Configuration.Ignore
-    default int normalizedK() {
-        return bottomK() != BOTTOM_K_DEFAULT
-            ? -bottomK()
-            : topK();
-    }
-
-    @Configuration.Ignore
-    default int normalizedN() {
-        return bottomN() != BOTTOM_N_DEFAULT
-            ? -bottomN()
-            : topN();
-    }
-
-    @Configuration.Ignore
-    default boolean isParallel() {
-        return concurrency() > 1;
-    }
-
-    @Configuration.Ignore
-    default boolean hasTopK() {
-        return normalizedK() != 0;
-    }
-
-    @Configuration.Ignore
-    default boolean hasTopN() {
-        return normalizedN() != 0;
-    }
-
-    @Configuration.Ignore
+    @Deprecated(forRemoval = true) // Don't use configs for internal parameters
     default boolean computeToStream() {
         return false;
-    }
-
-    @Configuration.Ignore
-    default boolean computeToGraph() {
-        return !computeToStream();
     }
 
     @Value.Check
@@ -184,4 +151,32 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
         return useComponents().useComponents();
     }
 
+    @Configuration.Ignore
+    default NodeSimilarityParameters toParameters() {
+        // topK and bottomK are exclusive, user cannot set both.
+        // Any K value, top or bottom, is specified as a positive integer by user.
+        // Internally we represent top/bottom by sign, so the normalized K value is either topK unchanged or bottomK but with sign flipped.
+        // If the user set neither, we use topK.
+        // Therefore, we check if bottomK changed from default. If it didn't either the user set topK or neither.
+        // If bottomK changed, normalizedK is -bottomK. If it didn't, normalizedK is topK.
+        var bottomKSetByUser = bottomK() != BOTTOM_K_DEFAULT;
+        var normalizedK = bottomKSetByUser ? -bottomK() : topK();
+        // Same for topN/bottomN
+        var bottomNSetByUser = bottomN() != BOTTOM_N_DEFAULT;
+        var normalizedN = bottomNSetByUser ? -bottomN() : topN();
+
+        var componentUsage = useComponents();
+        return NodeSimilarityParameters.create(
+            concurrency(),
+            similarityMetric().build(similarityCutoff()),
+            degreeCutoff(),
+            upperDegreeCutoff(),
+            normalizedK,
+            normalizedN,
+            computeToStream(),
+            hasRelationshipWeightProperty(),
+            componentUsage.computeComponents(),
+            componentUsage.componentProperty()
+        );
+    };
 }

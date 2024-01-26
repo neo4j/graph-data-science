@@ -40,9 +40,22 @@ class NodeSimilarityTerminationTest {
 
         assertTerminates((terminationFlag) ->
             {
-                var nodeSimilarity = NodeSimilarity.create(
+                var parameters = NodeSimilarityParameters.create(
+                    1,
+                    new JaccardSimilarityComputer(1E-42),
+                    1,
+                    Integer.MAX_VALUE,
+                    10,
+                    0,
+                    true,
+                    false,
+                    false,
+                    null
+                );
+                var nodeSimilarity = new NodeSimilarity(
                     graph,
-                    NodeSimilarityTest.streamConfigBuilder().concurrency(1).build(),
+                    parameters,
+                    1,
                     DefaultPool.INSTANCE,
                     ProgressTracker.NULL_TRACKER
                 );

@@ -33,6 +33,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
+import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.wcc.WccAlgorithmFactory;
 import org.neo4j.gds.wcc.WccMemoryEstimateDefinition;
 
@@ -46,27 +47,42 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
         return "NodeSimilarity";
     }
 
+    public NodeSimilarity build(
+        Graph graph,
+        NodeSimilarityParameters parameters,
+        ProgressTracker progressTracker
+    ) {
+        return new NodeSimilarity(
+            graph,
+            parameters,
+            parameters.concurrency(),
+            DefaultPool.INSTANCE,
+            progressTracker,
+            NodeFilter.noOp,
+            NodeFilter.noOp
+        );
+    }
+
     @Override
     public NodeSimilarity build(
         Graph graph,
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-        var similarityComputer = configuration.similarityMetric().build(configuration.similarityCutoff());
-        return new NodeSimilarity(
-            graph,
-            configuration,
-            similarityComputer,
-            configuration.concurrency(),
-            DefaultPool.INSTANCE,
-            progressTracker
-        );
+        return build(graph, configuration.toParameters(), progressTracker);
     }
 
-    @Override
-    public MemoryEstimation memoryEstimation(CONFIG config) {
-        int topN = Math.abs(config.normalizedN());
-        int topK = Math.abs(config.normalizedK());
+    public MemoryEstimation memoryEstimation(
+        int normalizedK,
+        int normalizedN,
+        boolean enableComponentsOptimization,
+        boolean actuallyRunWCC,
+        boolean computeToGraph
+    ) {
+        int topN = Math.abs(normalizedN);
+        int topK = Math.abs(normalizedK);
+        boolean hasTopN = topN != 0;
+        boolean hasTopK = topK != 0;
 
         MemoryEstimations.Builder builder = MemoryEstimations.builder(NodeSimilarity.class.getSimpleName())
             .perNode("node filter", nodeCount -> sizeOfLongArray(BitSet.bits2words(nodeCount)))
@@ -91,30 +107,30 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
                     .rangePerNode("array", nodeCount -> MemoryRange.of(0, nodeCount * averageVectorSize))
                     .build();
             }));
-        if (config.enableComponentsOptimization()) {
+        if (enableComponentsOptimization) {
             builder.perNode("nodes sorted by component", HugeLongArray::memoryEstimation);
             builder.perNode("upper bound per component", HugeAtomicLongArray::memoryEstimation);
-            
-            if (config.actuallyRunWCC()) {
+
+            if (actuallyRunWCC) {
                 builder.add("wcc", new WccMemoryEstimateDefinition().memoryEstimation(false));
             } else {
                 builder.perNode("component mapping", HugeLongArray::memoryEstimation);
             }
         }
-        if (config.computeToGraph() && !config.hasTopK()) {
+        if (computeToGraph && !hasTopK) {
             builder.add(
                 "similarity graph",
                 SimilarityGraphBuilder.memoryEstimation(topK, topN)
             );
         }
-        if (config.hasTopK()) {
+        if (hasTopK) {
             builder.add(
                 "topK map",
                 MemoryEstimations.setup("", (dimensions, concurrency) ->
                     TopKMap.memoryEstimation(dimensions.nodeCount(), topK))
             );
         }
-        if (config.hasTopN()) {
+        if (hasTopN) {
             builder.add(
                 "topN list",
                 MemoryEstimations.setup("", (dimensions, concurrency) ->
@@ -124,24 +140,33 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
         return builder.build();
     }
 
-    @Override
-    public Task progressTask(Graph graph, CONFIG config) {
-        return Tasks.task(
-            taskName(),
-            prepareTask(graph, config.actuallyRunWCC()),
-            Tasks.leaf("compare node pairs")
+    public MemoryEstimation memoryEstimation(NodeSimilarityParameters parameters) {
+        return memoryEstimation(
+            parameters.normalizedK(),
+            parameters.normalizedN(),
+            parameters.useComponents(),
+            parameters.componentProperty() == null,
+            !parameters.computeToStream()
         );
     }
 
-    private Task prepareTask(Graph graph, boolean runWcc) {
-        if (runWcc) {
-            return Tasks.task(
-                "prepare",
-                new WccAlgorithmFactory<>().progressTask(graph),
-                Tasks.leaf("initialize", graph.relationshipCount())
-            );
-        }
-        return Tasks.leaf("prepare", graph.relationshipCount());
+    @Override
+    public MemoryEstimation memoryEstimation(CONFIG config) {
+        return memoryEstimation(config.toParameters());
     }
 
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        return progressTask(graph, config.actuallyRunWCC());
+    }
+
+    public Task progressTask(Graph graph, boolean runWCC) {
+        return Tasks.task(
+            taskName(),
+            runWCC
+                ? Tasks.task("prepare", new WccAlgorithmFactory<>().progressTask(graph), Tasks.leaf("initialize", graph.relationshipCount()))
+                : Tasks.leaf("prepare", graph.relationshipCount()),
+            Tasks.leaf("compare node pairs")
+        );
+    }
 }
