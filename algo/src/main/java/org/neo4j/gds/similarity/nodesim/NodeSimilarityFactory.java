@@ -50,12 +50,13 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
     public NodeSimilarity build(
         Graph graph,
         NodeSimilarityParameters parameters,
+        int concurrency,
         ProgressTracker progressTracker
     ) {
         return new NodeSimilarity(
             graph,
             parameters,
-            parameters.concurrency(),
+            concurrency,
             DefaultPool.INSTANCE,
             progressTracker,
             NodeFilter.noOp,
@@ -64,12 +65,8 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
     }
 
     @Override
-    public NodeSimilarity build(
-        Graph graph,
-        CONFIG configuration,
-        ProgressTracker progressTracker
-    ) {
-        return build(graph, configuration.toParameters(), progressTracker);
+    public NodeSimilarity build(Graph graph, CONFIG configuration, ProgressTracker progressTracker) {
+        return build(graph, configuration.toParameters(), configuration.concurrency(), progressTracker);
     }
 
     public MemoryEstimation memoryEstimation(

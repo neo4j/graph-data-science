@@ -52,7 +52,6 @@ import static org.assertj.core.api.Assertions.assertThat;
     @Test
     void shouldWorkWithUnionGraph(){
         var parameters = NodeSimilarityParameters.create(
-            1,
             new JaccardSimilarityComputer(1E-42),
             1,
             Integer.MAX_VALUE,

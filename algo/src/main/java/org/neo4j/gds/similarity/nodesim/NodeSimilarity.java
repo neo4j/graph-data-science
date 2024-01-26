@@ -149,7 +149,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             // but run on primitives.
             return computeTopN();
         } else {
-            return parameters.isParallel()
+            return concurrency > 1
                 ? computeParallel()
                 : computeSimilarityResultStream();
         }
@@ -162,7 +162,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         if (parameters.hasTopK() && !parameters.hasTopN()) {
             terminationFlag.assertRunning();
 
-            TopKMap topKMap = parameters.isParallel()
+            TopKMap topKMap = concurrency > 1
                 ? computeTopKMapParallel()
                 : computeTopKMap();
 

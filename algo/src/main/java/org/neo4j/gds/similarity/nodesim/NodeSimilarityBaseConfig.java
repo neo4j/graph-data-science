@@ -167,7 +167,6 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
 
         var componentUsage = useComponents();
         return NodeSimilarityParameters.create(
-            concurrency(),
             similarityMetric().build(similarityCutoff()),
             degreeCutoff(),
             upperDegreeCutoff(),

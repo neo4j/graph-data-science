@@ -278,7 +278,6 @@ final class NodeSimilarityTest {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
         var parameters = NodeSimilarityParameters.create(
-            concurrency,
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -312,7 +311,6 @@ final class NodeSimilarityTest {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
         var parameters = NodeSimilarityParameters.create(
-            concurrency,
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -346,7 +344,6 @@ final class NodeSimilarityTest {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
         var parameters = NodeSimilarityParameters.create(
-            concurrency,
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -381,7 +378,6 @@ final class NodeSimilarityTest {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
         var parameters = NodeSimilarityParameters.create(
-            concurrency,
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -419,7 +415,6 @@ final class NodeSimilarityTest {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
         var parameters = NodeSimilarityParameters.create(
-            concurrency,
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -454,7 +449,6 @@ final class NodeSimilarityTest {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
         var parameters = NodeSimilarityParameters.create(
-            concurrency,
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -498,7 +492,6 @@ final class NodeSimilarityTest {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
         var parameters = NodeSimilarityParameters.create(
-            concurrency,
             new JaccardSimilarityComputer(0.1),
             1,
             Integer.MAX_VALUE,
@@ -536,7 +529,6 @@ final class NodeSimilarityTest {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
         var parameters = NodeSimilarityParameters.create(
-            concurrency,
             new JaccardSimilarityComputer(0.0),
             2,
             Integer.MAX_VALUE,
@@ -572,7 +564,6 @@ final class NodeSimilarityTest {
     @MethodSource("concurrencies")
     void shouldComputeForUndirectedGraphs(int concurrency) {
         var parameters = NodeSimilarityParameters.create(
-            concurrency,
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -599,7 +590,6 @@ final class NodeSimilarityTest {
     @Test
     void shouldComputeForUnionGraphs() {
         var parameters = NodeSimilarityParameters.create(
-            1,
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -639,7 +629,6 @@ final class NodeSimilarityTest {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
         var parameters = NodeSimilarityParameters.create(
-            concurrency,
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -700,7 +689,6 @@ final class NodeSimilarityTest {
         Graph graph = fromGdl(DB_CYPHER + ", (:Unused)".repeat(1024), orientation);
 
         var parameters = NodeSimilarityParameters.create(
-            concurrency,
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -752,7 +740,6 @@ final class NodeSimilarityTest {
         Graph graph = fromGdl(gdl, orientation);
 
         var parameters = NodeSimilarityParameters.create(
-            concurrency,
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -794,7 +781,6 @@ final class NodeSimilarityTest {
         Graph graph = fromGdl(gdl, orientation);
 
         var parameters = NodeSimilarityParameters.create(
-            concurrency,
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -950,7 +936,6 @@ final class NodeSimilarityTest {
             EmptyTaskRegistryFactory.INSTANCE
         );
         var parameters = NodeSimilarityParameters.create(
-            concurrency,
             new JaccardSimilarityComputer(1E-42),
             1,
             Integer.MAX_VALUE,
@@ -1024,7 +1009,6 @@ final class NodeSimilarityTest {
             EmptyTaskRegistryFactory.INSTANCE
         );
         var parameters = NodeSimilarityParameters.create(
-            concurrency,
             new JaccardSimilarityComputer(1E-42),
             1,
             Integer.MAX_VALUE,
@@ -1064,7 +1048,6 @@ final class NodeSimilarityTest {
     void shouldLogProgressForWccOptimization() {
         var graph = naturalGraph;
         var parameters = NodeSimilarityParameters.create(
-            4,
             new JaccardSimilarityComputer(1E-42),
             1,
             Integer.MAX_VALUE,
@@ -1127,7 +1110,6 @@ final class NodeSimilarityTest {
         Graph graph = fromGdl(gdl);
 
         var parameters1 = NodeSimilarityParameters.create(
-            1,
             new OverlapSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -1155,7 +1137,6 @@ final class NodeSimilarityTest {
         assertThat(result).contains("0,1 0.500000");
 
         var parameters2 = NodeSimilarityParameters.create(
-            1,
             new OverlapSimilarityComputer(1E-42),
             1,
             Integer.MAX_VALUE,
@@ -1210,7 +1191,6 @@ final class NodeSimilarityTest {
     @MethodSource("degreeCutoffInput")
     void shouldWorkForAllDegreeBoundsCombinations(int lowBound, int upperBound, String... expectedOutput) {
         var parameters = NodeSimilarityParameters.create(
-            4,
             new JaccardSimilarityComputer(0.0),
             lowBound,
             upperBound,

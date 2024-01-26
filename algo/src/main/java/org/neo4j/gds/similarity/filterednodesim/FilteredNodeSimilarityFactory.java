@@ -54,6 +54,7 @@ public class FilteredNodeSimilarityFactory<CONFIG extends FilteredNodeSimilarity
     public NodeSimilarity build(
         Graph graph,
         NodeSimilarityParameters parameters,
+        int concurrency,
         NodeFilter sourceNodeFilter,
         NodeFilter targetNodeFilter,
         ProgressTracker progressTracker
@@ -61,7 +62,7 @@ public class FilteredNodeSimilarityFactory<CONFIG extends FilteredNodeSimilarity
         return new NodeSimilarity(
             graph,
             parameters,
-            parameters.concurrency(),
+            concurrency,
             DefaultPool.INSTANCE,
             progressTracker,
             sourceNodeFilter,
@@ -70,14 +71,17 @@ public class FilteredNodeSimilarityFactory<CONFIG extends FilteredNodeSimilarity
     }
 
     @Override
-    public NodeSimilarity build(
-        Graph graph,
-        CONFIG configuration,
-        ProgressTracker progressTracker
-    ) {
+    public NodeSimilarity build(Graph graph, CONFIG configuration, ProgressTracker progressTracker) {
         var sourceNodeFilter = configuration.sourceNodeFilter().toNodeFilter(graph);
         var targetNodeFilter = configuration.targetNodeFilter().toNodeFilter(graph);
-        return build(graph, configuration.toParameters(), sourceNodeFilter, targetNodeFilter, progressTracker);
+        return build(
+            graph,
+            configuration.toParameters(),
+            configuration.concurrency(),
+            sourceNodeFilter,
+            targetNodeFilter,
+            progressTracker
+        );
     }
 
     public MemoryEstimation memoryEstimation(

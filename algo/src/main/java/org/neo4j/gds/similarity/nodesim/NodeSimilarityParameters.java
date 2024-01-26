@@ -26,7 +26,6 @@ import org.neo4j.gds.annotation.Parameters;
 public final class NodeSimilarityParameters {
 
     public static NodeSimilarityParameters create(
-        int concurrency,
         MetricSimilarityComputer similarityComputer,
         int degreeCutoff,
         int upperDegreeCutoff,
@@ -38,7 +37,6 @@ public final class NodeSimilarityParameters {
         @Nullable String componentProperty
     ) {
         return new NodeSimilarityParameters(
-            concurrency,
             similarityComputer,
             degreeCutoff,
             upperDegreeCutoff,
@@ -51,7 +49,6 @@ public final class NodeSimilarityParameters {
         );
     }
 
-    private final int concurrency;
     private final MetricSimilarityComputer similarityComputer;
     private final int degreeCutoff;
     private final int upperDegreeCutoff;
@@ -63,7 +60,6 @@ public final class NodeSimilarityParameters {
     private final String componentProperty;
 
     private NodeSimilarityParameters(
-        int concurrency,
         MetricSimilarityComputer similarityComputer,
         int degreeCutoff,
         int upperDegreeCutoff,
@@ -74,7 +70,6 @@ public final class NodeSimilarityParameters {
         boolean useComponents,
         @Nullable String componentProperty
     ) {
-        this.concurrency = concurrency;
         this.similarityComputer = similarityComputer;
         this.degreeCutoff = degreeCutoff;
         this.upperDegreeCutoff = upperDegreeCutoff;
@@ -84,10 +79,6 @@ public final class NodeSimilarityParameters {
         this.hasRelationshipWeightProperty = hasRelationshipWeightProperty;
         this.useComponents = useComponents;
         this.componentProperty = componentProperty;
-    }
-
-    public int concurrency() {
-        return concurrency;
     }
 
     public MetricSimilarityComputer similarityComputer() {
@@ -124,10 +115,6 @@ public final class NodeSimilarityParameters {
 
     boolean hasTopN() {
         return normalizedN != 0;
-    }
-
-    boolean isParallel() {
-        return concurrency > 1;
     }
 
     // WCC specialization
