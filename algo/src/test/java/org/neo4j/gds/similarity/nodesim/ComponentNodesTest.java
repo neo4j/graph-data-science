@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SplittableRandom;
+import java.util.TreeSet;
+import java.util.function.LongPredicate;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
@@ -70,13 +72,18 @@ class ComponentNodesTest {
         // nodeId -> componentId
         var components = prepare7DistinctSizeComponents();
         // componentId, upperBound
-        var idxUpperBoundPerComponent = ComponentNodes.computeIndexUpperBoundPerComponent(components, 28, 4);
+        var idxUpperBoundPerComponent = ComponentNodes.computeIndexUpperBoundPerComponent(
+            components,
+            28,
+            (v) -> true,
+            4
+        );
         // we cannot infer which component follows another, but the range must match in size for the component
         Map<Long, Long> componentPerIdxUpperBound = new HashMap<>(7);
         for (int i = 0; i < 7; i++) {
             componentPerIdxUpperBound.put(idxUpperBoundPerComponent.get(i), (long) i);
         }
-        assertThat(idxUpperBoundPerComponent.get(7)).isEqualTo(0L);
+        assertThat(idxUpperBoundPerComponent.get(7)).isEqualTo(-1L);
         int previousUpperBound = -1;
         for (long key : componentPerIdxUpperBound.keySet().stream().sorted().collect(Collectors.toList())) {
             switch ((int) (key - previousUpperBound)) {
@@ -107,7 +114,8 @@ class ComponentNodesTest {
         upperBoundPerComponent.set(6, 27);
 
         var nodesSortedByComponent = ComponentNodes.computeNodesSortedByComponent(components,
-            upperBoundPerComponent, 4);
+            upperBoundPerComponent, (v) -> true, 4
+        );
 
         // nodes may occur in arbitrary order within components, but with the given assignment, nodeIds must be within
         // component index bounds
@@ -140,7 +148,10 @@ class ComponentNodesTest {
         upperBoundPerComponent.set(1, 8);
 
         var nodesSortedByComponent = ComponentNodes.computeNodesSortedByComponent(components,
-            upperBoundPerComponent, 4);
+            upperBoundPerComponent,
+            (v) -> true,
+            4
+        );
 
         // nodes may occur in arbitrary order within components, but with the given assignment, nodeIds must be within
         // component index bounds
@@ -265,4 +276,78 @@ class ComponentNodesTest {
         iterator.forEachRemaining(resultingNodes::add);
         assertThat(resultingNodes).containsExactlyInAnyOrder(11L, 12L, 13L, 14L, 15L, 16L, 17L, 18L, 19L);
     }
+
+    @Test
+    void shouldComputeUpperIndexWithTargetFilter() {
+        HugeLongArray components = HugeLongArray.of(0, 3, 0, 3, 5, 5, 5, 7);
+        LongPredicate includeFilter = (v) -> v >= 3;
+
+        var upperIndex = ComponentNodes.computeIndexUpperBoundPerComponent(
+            components::get,
+            components.size(),
+            includeFilter,
+            4
+        );
+        assertThat(upperIndex.get(0)).isEqualTo(-1L);
+        assertThat(upperIndex.get(1)).isEqualTo(-1L);
+        assertThat(upperIndex.get(2)).isEqualTo(-1L);
+        assertThat(upperIndex.get(4)).isEqualTo(-1L);
+        assertThat(upperIndex.get(6)).isEqualTo(-1L);
+
+        TreeSet<Long> treeSet = new TreeSet<>();
+        treeSet.add(-1L);
+        for (int i = 0; i < upperIndex.size(); ++i) {
+            if (upperIndex.get(i) > 0) {
+                treeSet.add(upperIndex.get(i));
+            }
+        }
+        //3
+        long upperBound3 = upperIndex.get(3);
+        long sizeOfThree = upperBound3 - treeSet.lower(upperBound3).longValue();
+        assertThat(sizeOfThree).isEqualTo(1);
+        //5
+        long upperBound5 = upperIndex.get(5);
+        long sizeOfFive = upperBound5 - treeSet.lower(upperBound5).longValue();
+        assertThat(sizeOfFive).isEqualTo(3);
+        //7
+        long upperBound7 = upperIndex.get(7);
+        long sizeOfSeven = upperBound7 - treeSet.lower(upperBound7).longValue();
+        assertThat(sizeOfSeven).isEqualTo(1);
+    }
+
+    @Test
+    void shouldGenerateValidIterators() {
+        HugeLongArray components = HugeLongArray.of(0, 3, 0, 3, 5, 5, 5, 7, 8, 8, 8);
+        LongPredicate includeFilter = (v) -> v >= 3 && v != 9;
+
+        var componentNodes = ComponentNodes.create(components::get, includeFilter, components.size(), 4);
+        assertThat(componentNodes.iterator(0, 0).hasNext()).isFalse();
+        assertThat(componentNodes.iterator(1, 0).hasNext()).isFalse();
+        assertThat(componentNodes.iterator(2, 0).hasNext()).isFalse();
+        assertThat(componentNodes.iterator(4, 0).hasNext()).isFalse();
+        assertThat(componentNodes.iterator(6, 0).hasNext()).isFalse();
+        assertThat(componentNodes.iterator(9, 0).hasNext()).isFalse();
+        assertThat(componentNodes.iterator(10, 0).hasNext()).isFalse();
+
+        var nodesOfThree = new ArrayList<Long>();
+        Iterator<Long> itr3 = componentNodes.iterator(3, 0);
+        itr3.forEachRemaining(nodesOfThree::add);
+        assertThat(nodesOfThree).containsExactly(3L);
+
+        var nodesOfFive = new ArrayList<Long>();
+        Iterator<Long> itr5 = componentNodes.iterator(5, 0);
+        itr5.forEachRemaining(nodesOfFive::add);
+        assertThat(nodesOfFive).containsExactlyInAnyOrder(4l, 5l, 6l);
+
+        var nodesOfSeven = new ArrayList<Long>();
+        Iterator<Long> itr7 = componentNodes.iterator(7, 0);
+        itr7.forEachRemaining(nodesOfSeven::add);
+        assertThat(nodesOfSeven).containsExactly(7L);
+
+        var nodesOfEight = new ArrayList<Long>();
+        Iterator<Long> itr8 = componentNodes.iterator(8, 0);
+        itr8.forEachRemaining(nodesOfEight::add);
+        assertThat(nodesOfEight).containsExactlyInAnyOrder(8L, 10L);
+    }
+
 }

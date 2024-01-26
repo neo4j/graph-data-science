@@ -205,15 +205,15 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         progressTracker.beginSubTask();
 
         components = initComponents();
-        sourceNodesStream = initSourceNodesStream();
-        targetNodesStream = initTargetNodesStream();
-
         if (config.runWCC()) {
             progressTracker.beginSubTask();
         }
-
         initNodeSpecificFields();
 
+        sourceNodesStream = initSourceNodesStream();
+
+        targetNodesStream = initTargetNodesStream();
+        
         if (config.runWCC()) {
             progressTracker.endSubTask();
         }
@@ -414,10 +414,9 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             return (componentId, offset) -> new SetBitsIterable(targetNodes, offset).stream();
         }
 
-        var componentNodes = ComponentNodes.create(components, graph.nodeCount(), concurrency);
+        var componentNodes = ComponentNodes.create(components, targetNodes::get, graph.nodeCount(), concurrency);
         return (componentId, offset) -> StreamSupport
-            .longStream(componentNodes.spliterator(componentId, offset), false)
-            .filter(targetNodes::get);
+            .longStream(componentNodes.spliterator(componentId, offset), false);
     }
 
     private LongStream loggableAndTerminableSourceNodeStream() {

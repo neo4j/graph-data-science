@@ -30,6 +30,7 @@ import java.util.PrimitiveIterator;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.LongPredicate;
 import java.util.function.LongUnaryOperator;
 
 /**
@@ -49,8 +50,28 @@ public final class ComponentNodes {
     }
 
     public static ComponentNodes create(LongUnaryOperator components, long nodeCount, int concurrency) {
-        var upperBoundPerComponent = computeIndexUpperBoundPerComponent(components, nodeCount, concurrency);
-        var nodesSorted = computeNodesSortedByComponent(components, upperBoundPerComponent, concurrency);
+        return create(components, (v) -> true, nodeCount, concurrency);
+    }
+
+    public static ComponentNodes create(
+        LongUnaryOperator components,
+        LongPredicate targetNodesFilter,
+        long nodeCount,
+        int concurrency
+    ) {
+        var upperBoundPerComponent = computeIndexUpperBoundPerComponent(
+            components,
+            nodeCount,
+            targetNodesFilter,
+            concurrency
+        );
+        var nodesSorted = computeNodesSortedByComponent(
+            components,
+            upperBoundPerComponent,
+            targetNodesFilter,
+            concurrency
+        );
+
         return new ComponentNodes(
             components,
             upperBoundPerComponent,
@@ -81,8 +102,12 @@ public final class ComponentNodes {
         return nodesSorted;
     }
 
-    static HugeAtomicLongArray computeIndexUpperBoundPerComponent(LongUnaryOperator components, long nodeCount,
-        int concurrency) {
+    static HugeAtomicLongArray computeIndexUpperBoundPerComponent(
+            LongUnaryOperator components,
+            long nodeCount,
+            LongPredicate includeNode,
+        int concurrency
+    ) {
 
         var upperBoundPerComponent = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(concurrency));
 
@@ -90,8 +115,10 @@ public final class ComponentNodes {
         // i.e. comp1 containing 3 nodes, comp2 containing 20 nodes: {(comp1, 3), (comp2, 20)}
         ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, nodeId -> {
             {
-                long componentId = components.applyAsLong(nodeId);
-                upperBoundPerComponent.getAndAdd(componentId, 1);
+                if (includeNode.test(nodeId)) {
+                    long componentId = components.applyAsLong(nodeId);
+                    upperBoundPerComponent.getAndAdd(componentId, 1);
+                }
             }
         });
         AtomicLong atomicNodeSum = new AtomicLong();
@@ -103,14 +130,20 @@ public final class ComponentNodes {
             if (upperBoundPerComponent.get(componentId) > 0) {
                 var nodeSum = atomicNodeSum.addAndGet(upperBoundPerComponent.get(componentId));
                 upperBoundPerComponent.set(componentId, nodeSum - 1);
+            } else { //component is unused, initilize to -1
+                upperBoundPerComponent.set(componentId, -1);
             }
         });
 
         return upperBoundPerComponent;
     }
 
-    static HugeLongArray computeNodesSortedByComponent(LongUnaryOperator components,
-        HugeAtomicLongArray idxUpperBoundPerComponent, int concurrency) {
+    static HugeLongArray computeNodesSortedByComponent(
+            LongUnaryOperator components,
+            HugeAtomicLongArray idxUpperBoundPerComponent,
+            LongPredicate includeNode,
+            int concurrency
+    ) {
 
         // initialized to its max possible size of 1 node <=> 1 component in a disconnected graph
         long nodeCount = idxUpperBoundPerComponent.size();
@@ -124,9 +157,11 @@ public final class ComponentNodes {
         ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, indexId ->
         {
             long nodeId = nodeCount - indexId - 1;
-            long componentId = components.applyAsLong(nodeId);
-            long nodeIdx = nodeIdxProviderArray.getAndAdd(componentId, -1);
-            nodesSortedByComponent.set(nodeIdx, nodeId);
+            if (includeNode.test(nodeId)) {
+                long componentId = components.applyAsLong(nodeId);
+                long nodeIdx = nodeIdxProviderArray.getAndAdd(componentId, -1);
+                nodesSortedByComponent.set(nodeIdx, nodeId);
+            }
         });
 
         return nodesSortedByComponent;
