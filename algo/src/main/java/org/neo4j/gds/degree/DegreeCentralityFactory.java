@@ -37,13 +37,21 @@ public class DegreeCentralityFactory<CONFIG extends DegreeCentralityConfig> exte
         return DEGREE_CENTRALITY_TASK_NAME;
     }
 
+    public DegreeCentrality build(Graph graph, DegreeCentralityParameters parameters, ProgressTracker progressTracker) {
+        return new DegreeCentrality(
+            graph,
+            DefaultPool.INSTANCE,
+            parameters.concurrency(),
+            parameters.orientation(),
+            parameters.hasRelationshipWeightProperty(),
+            parameters.minBatchSize(),
+            progressTracker
+        );
+    }
+
     @Override
-    public DegreeCentrality build(
-        Graph graph,
-        CONFIG configuration,
-        ProgressTracker progressTracker
-    ) {
-        return new DegreeCentrality(graph, DefaultPool.INSTANCE, configuration, configuration.minBatchSize(), progressTracker);
+    public DegreeCentrality build(Graph graph, CONFIG configuration, ProgressTracker progressTracker) {
+        return build(graph, configuration.toParameters(), progressTracker);
     }
 
     @Override

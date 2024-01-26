@@ -29,6 +29,7 @@ import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -127,22 +128,15 @@ final class DegreeCentralityTest {
     @ParameterizedTest
     @MethodSource("degreeCentralityParameters")
     void shouldComputeCorrectResults(boolean weighted, Orientation orientation, Map<String, Double> expected, int concurrency) {
-        var configBuilder = DegreeCentralityConfigImpl.builder()
-            .concurrency(concurrency)
-            .orientation(orientation);
-
-        if (weighted) {
-            configBuilder.relationshipWeightProperty("weight");
-        }
-
-        var config = configBuilder.build();
         // Permit the algo to use a smaller batch size to really run in parallel.
-        var minBatchSize = concurrency > 1 ? 1 : config.minBatchSize();
+        var minBatchSize = concurrency > 1 ? 1 : ParallelUtil.DEFAULT_BATCH_SIZE;
 
         var degreeCentrality = new DegreeCentrality(
             graph,
             DefaultPool.INSTANCE,
-            config,
+            concurrency,
+            orientation,
+            weighted,
             minBatchSize,
             ProgressTracker.NULL_TRACKER
         );
@@ -158,20 +152,19 @@ final class DegreeCentralityTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void testProgressLogging(boolean weighted) {
-        var configBuilder = DegreeCentralityConfigImpl.builder();
-        if (weighted) {
-            configBuilder.relationshipWeightProperty("weight");
-        }
-        var config = configBuilder.build();
+        var concurrency = 4;
+        var orientation = Orientation.NATURAL;
 
-        var progressTask = new DegreeCentralityFactory<>().progressTask(graph, config);
+        var progressTask = DegreeCentralityFactory.degreeCentralityProgressTask(graph);
         var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, log, 1, EmptyTaskRegistryFactory.INSTANCE);
         var degreeCentrality = new DegreeCentrality(
             graph,
             DefaultPool.INSTANCE,
-            config,
-            config.minBatchSize(),
+            concurrency,
+            orientation,
+            weighted,
+            ParallelUtil.DEFAULT_BATCH_SIZE,
             progressTracker
         );
 
@@ -188,16 +181,15 @@ final class DegreeCentralityTest {
     @ParameterizedTest
     @EnumSource(Orientation.class)
     void shouldSupportAllOrientations(Orientation orientation) {
-        var config = DegreeCentralityConfigImpl
-            .builder()
-            .orientation(orientation)
-            .build();
-
+        var concurrency = 4;
+        var hasRelationshipProperty = false;
         var degreeCentrality = new DegreeCentrality(
             graph,
             DefaultPool.INSTANCE,
-            config,
-            config.minBatchSize(),
+            concurrency,
+            orientation,
+            hasRelationshipProperty,
+            ParallelUtil.DEFAULT_BATCH_SIZE,
             ProgressTracker.NULL_TRACKER
         );
 
