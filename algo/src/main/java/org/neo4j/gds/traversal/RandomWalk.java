@@ -23,11 +23,11 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.QueueBasedSpliterator;
 import org.neo4j.gds.ml.core.EmbeddingUtils;
 import org.neo4j.gds.ml.core.samplers.RandomWalkSampler;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,7 +48,10 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
 
     private final int concurrency;
     private final ExecutorService executorService;
-    private final RandomWalkTaskSupplier taskSupplier;
+    private final Graph graph;
+    private final long randomSeed;
+    private final WalkParameters walkParameters;
+    private final List<Long> sourceNodes;
     private final ExternalTerminationFlag externalTerminationFlag;
     private final BlockingQueue<long[]> walks;
 
@@ -99,15 +102,33 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         this.executorService = executorService;
         this.walks = new ArrayBlockingQueue<>(walkBufferSize);
         this.externalTerminationFlag = new ExternalTerminationFlag(this);
-        long randomSeed = maybeRandomSeed.orElseGet(() -> new Random().nextLong());
+        this.graph = graph;
+        this.walkParameters = walkParameters;
+        this.sourceNodes = sourceNodes;
+        this.randomSeed = maybeRandomSeed.orElseGet(() -> new Random().nextLong());
+    }
+
+    @Override
+    public Stream<long[]> compute() {
+        progressTracker.beginSubTask("RandomWalk");
+        var taskSupplier = createRandomWalkTaskSupplier();
+
+        startWalkers(
+            taskSupplier,
+            () -> progressTracker.endSubTask("RandomWalk")
+        );
+        return streamWalks(walks);
+    }
+
+    RandomWalkTaskSupplier createRandomWalkTaskSupplier() {
+        var nextNodeSupplier = RandomWalkCompanion.nextNodeSupplier(graph, sourceNodes);
         RandomWalkSampler.CumulativeWeightSupplier cumulativeWeightSupplier = RandomWalkCompanion.cumulativeWeights(
             graph,
             concurrency,
             executorService,
             progressTracker
         );
-        var nextNodeSupplier = RandomWalkCompanion.nextNodeSupplier(graph, sourceNodes);
-        this.taskSupplier = new RandomWalkTaskSupplier(
+        return new RandomWalkTaskSupplier(
             graph::concurrentCopy,
             nextNodeSupplier,
             cumulativeWeightSupplier,
@@ -119,16 +140,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         );
     }
 
-    @Override
-    public Stream<long[]> compute() {
-        progressTracker.beginSubTask("RandomWalk");
-        startWalkers(
-            () -> progressTracker.endSubTask("RandomWalk")
-        );
-        return streamWalks(walks);
-    }
-
-    private void startWalkers(Runnable whenCompleteAction) {
+    private void startWalkers(RandomWalkTaskSupplier taskSupplier, Runnable whenCompleteAction) {
         var tasks = IntStream
             .range(0, this.concurrency)
             .mapToObj(i -> taskSupplier.get())

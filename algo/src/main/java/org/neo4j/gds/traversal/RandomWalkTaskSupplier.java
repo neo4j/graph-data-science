@@ -20,9 +20,9 @@
 package org.neo4j.gds.traversal;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.samplers.RandomWalkSampler;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.function.Supplier;
