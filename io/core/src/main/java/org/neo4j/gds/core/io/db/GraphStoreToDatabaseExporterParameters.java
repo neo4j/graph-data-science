@@ -20,12 +20,14 @@
 package org.neo4j.gds.core.io.db;
 
 import org.jetbrains.annotations.NotNull;
+import org.neo4j.gds.annotation.Parameters;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.IndexConfig;
 
 import java.util.Optional;
 
+@Parameters
 public final class GraphStoreToDatabaseExporterParameters {
     private final String dbName;
     private final int writeConcurrency;

@@ -20,7 +20,9 @@
 package org.neo4j.gds.triangle;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.annotation.Parameters;
 
+@Parameters
 public final class LocalClusteringCoefficientParameters {
     private final int concurrency;
     private final long maxDegree;

@@ -19,10 +19,12 @@
  */
 package org.neo4j.gds.kspanningtree;
 
+import org.neo4j.gds.annotation.Parameters;
 import org.neo4j.gds.spanningtree.SpanningTreeParameters;
 
 import java.util.function.DoubleUnaryOperator;
 
+@Parameters
 public final class KSpanningTreeParameters extends SpanningTreeParameters {
 
     static KSpanningTreeParameters create(DoubleUnaryOperator objective, long sourceNode, long k) {

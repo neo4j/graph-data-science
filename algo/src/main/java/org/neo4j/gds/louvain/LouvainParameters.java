@@ -20,7 +20,9 @@
 package org.neo4j.gds.louvain;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.annotation.Parameters;
 
+@Parameters
 public final class LouvainParameters {
     public static LouvainParameters create(
         int concurrency,

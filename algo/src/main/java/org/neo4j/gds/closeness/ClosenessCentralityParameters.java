@@ -19,6 +19,9 @@
  */
 package org.neo4j.gds.closeness;
 
+import org.neo4j.gds.annotation.Parameters;
+
+@Parameters
 public final class ClosenessCentralityParameters {
 
     static ClosenessCentralityParameters create(int concurrency, boolean useWassermanFaust) {

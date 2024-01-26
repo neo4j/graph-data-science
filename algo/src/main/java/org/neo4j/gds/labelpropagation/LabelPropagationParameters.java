@@ -20,7 +20,9 @@
 package org.neo4j.gds.labelpropagation;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.annotation.Parameters;
 
+@Parameters
 public final class LabelPropagationParameters {
 
     public static LabelPropagationParameters create(

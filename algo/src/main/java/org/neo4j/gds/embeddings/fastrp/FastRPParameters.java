@@ -19,9 +19,13 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
+import org.neo4j.gds.annotation.Parameters;
+
 import java.util.List;
 import java.util.Optional;
 
+
+@Parameters
 public final class FastRPParameters {
 
     public static FastRPParameters create(

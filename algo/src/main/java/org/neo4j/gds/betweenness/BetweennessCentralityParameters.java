@@ -19,8 +19,11 @@
  */
 package org.neo4j.gds.betweenness;
 
+import org.neo4j.gds.annotation.Parameters;
+
 import java.util.Optional;
 
+@Parameters
 public final class BetweennessCentralityParameters {
 
     public static BetweennessCentralityParameters create(

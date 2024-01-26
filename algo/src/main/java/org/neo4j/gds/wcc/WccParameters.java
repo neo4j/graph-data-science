@@ -19,6 +19,9 @@
  */
 package org.neo4j.gds.wcc;
 
+import org.neo4j.gds.annotation.Parameters;
+
+@Parameters
 public final class WccParameters {
 
     public static WccParameters create(

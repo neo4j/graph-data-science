@@ -19,6 +19,9 @@
  */
 package org.neo4j.gds.k1coloring;
 
+import org.neo4j.gds.annotation.Parameters;
+
+@Parameters
 public final class K1ColoringParameters {
 
     public static K1ColoringParameters create(int concurrency, int maxIterations, int batchSize) {

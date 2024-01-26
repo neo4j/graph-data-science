@@ -19,8 +19,11 @@
  */
 package org.neo4j.gds.steiner;
 
+import org.neo4j.gds.annotation.Parameters;
+
 import java.util.List;
 
+@Parameters
 public final class SteinerTreeParameters {
     static SteinerTreeParameters create(int concurrency, long sourceNode, List<Long> targetNodes, double delta, boolean applyRerouting) {
         return new SteinerTreeParameters(

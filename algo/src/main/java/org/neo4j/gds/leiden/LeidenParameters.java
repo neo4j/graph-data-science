@@ -20,9 +20,11 @@
 package org.neo4j.gds.leiden;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.annotation.Parameters;
 
 import java.util.Optional;
 
+@Parameters
 public final class LeidenParameters {
 
     static LeidenParameters create(

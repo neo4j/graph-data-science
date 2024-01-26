@@ -19,10 +19,13 @@
  */
 package org.neo4j.gds.similarity.knn;
 
+import org.neo4j.gds.annotation.Parameters;
+
 import java.util.List;
 import java.util.Optional;
 
-public class KnnParameters {
+@Parameters
+public final class KnnParameters {
 
     static KnnParameters create(
         long nodeCount,

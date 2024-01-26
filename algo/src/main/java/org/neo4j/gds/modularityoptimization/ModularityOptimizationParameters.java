@@ -19,6 +19,9 @@
  */
 package org.neo4j.gds.modularityoptimization;
 
+import org.neo4j.gds.annotation.Parameters;
+
+@Parameters
 public final class ModularityOptimizationParameters {
 
     public static ModularityOptimizationParameters create(

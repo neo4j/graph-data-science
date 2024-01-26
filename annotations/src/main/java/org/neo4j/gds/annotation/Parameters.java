@@ -17,25 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.embeddings.node2vec;
+package org.neo4j.gds.annotation;
 
-import org.neo4j.gds.annotation.Parameters;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-@Parameters
-public class WalkParameters extends org.neo4j.gds.traversal.WalkParameters {
-    final double negativeSamplingExponent;
-    final double positiveSamplingFactor;
-
-    public WalkParameters(
-        int walksPerNode,
-        int walkLength,
-        double returnFactor,
-        double inOutFactor,
-        double positiveSamplingFactor,
-        double negativeSamplingExponent
-    ) {
-        super(walksPerNode, walkLength, returnFactor, inOutFactor);
-        this.negativeSamplingExponent = negativeSamplingExponent;
-        this.positiveSamplingFactor = positiveSamplingFactor;
-    }
+@Retention(RetentionPolicy.SOURCE)
+@Target(ElementType.TYPE)
+public @interface Parameters {
 }

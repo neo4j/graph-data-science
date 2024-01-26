@@ -19,6 +19,9 @@
  */
 package org.neo4j.gds.conductance;
 
+import org.neo4j.gds.annotation.Parameters;
+
+@Parameters
 public final class ConductanceParameters {
     public static ConductanceParameters create(int concurrency, int minBatchSize, boolean hasRelationshipProperty, String communityProperty) {
         return new ConductanceParameters(concurrency, minBatchSize, hasRelationshipProperty, communityProperty);

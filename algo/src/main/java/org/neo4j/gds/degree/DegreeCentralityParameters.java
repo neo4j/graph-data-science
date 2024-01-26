@@ -20,7 +20,9 @@
 package org.neo4j.gds.degree;
 
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.annotation.Parameters;
 
+@Parameters
 public final class DegreeCentralityParameters {
     static DegreeCentralityParameters create(
         int concurrency,

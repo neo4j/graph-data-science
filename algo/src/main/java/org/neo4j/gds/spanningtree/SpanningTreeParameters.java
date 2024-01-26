@@ -19,8 +19,11 @@
  */
 package org.neo4j.gds.spanningtree;
 
+import org.neo4j.gds.annotation.Parameters;
+
 import java.util.function.DoubleUnaryOperator;
 
+@Parameters
 public class SpanningTreeParameters {
     static SpanningTreeParameters create(DoubleUnaryOperator objective, long sourceNode) {
         return new SpanningTreeParameters(objective, sourceNode);

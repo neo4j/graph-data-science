@@ -19,6 +19,9 @@
  */
 package org.neo4j.gds.triangle;
 
+import org.neo4j.gds.annotation.Parameters;
+
+@Parameters
 public final class TriangleCountParameters {
 
     public static TriangleCountParameters create(int concurrency, long maxDegree) {
