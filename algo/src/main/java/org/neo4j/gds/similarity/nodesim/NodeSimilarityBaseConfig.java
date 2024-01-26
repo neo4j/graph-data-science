@@ -185,6 +185,7 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
         }
     }
 
+    @Configuration.Ignore
     default boolean runWCC() {
         return considerComponents() && componentProperty() == null;
     }
