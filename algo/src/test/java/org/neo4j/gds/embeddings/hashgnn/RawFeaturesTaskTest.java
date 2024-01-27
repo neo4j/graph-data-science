@@ -20,8 +20,8 @@
 package org.neo4j.gds.embeddings.hashgnn;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -83,6 +83,7 @@ class RawFeaturesTaskTest {
                 nonBinaryGraph.toOriginalNodeId("b")
             ));
     }
+
     @Test
     void shouldPickCorrectFeatures() {
         var partition = new Partition(0, graph.nodeCount());
@@ -115,5 +116,4 @@ class RawFeaturesTaskTest {
         assertThat(features.get(idC).get(1)).isFalse();
         assertThat(features.get(idC).get(2)).isTrue();
     }
-
 }

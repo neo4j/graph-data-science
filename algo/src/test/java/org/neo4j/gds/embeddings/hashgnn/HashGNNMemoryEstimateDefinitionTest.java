@@ -27,12 +27,9 @@ import org.neo4j.gds.assertions.MemoryEstimationAssert;
 import org.neo4j.gds.core.GraphDimensions;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class HashGNNMemoryEstimateDefinitionTest {
 
@@ -50,25 +47,17 @@ class HashGNNMemoryEstimateDefinitionTest {
         "    10,  4,  10_000, 80_000, 1,   5_924_072, 86_324_072",
         // Should be unaffected by concurrency
         "    10,  4,  10_000, 20_000, 8,  5_924_072, 86_324_072",
-
     })
     void shouldEstimateMemory(
         int embeddingDensity,
-        int iterations,
+        int iterations, // seems iterations doesn't affect memory estimation. that's for someone else to investigate.
         long nodeCount,
         long relationshipCount,
         int concurrency,
         long expectedMinMemory,
         long expectedMaxMemory
     ) {
-
-        var config=mock(HashGNNConfig.class);
-        when(config.featureProperties()).thenReturn(List.of("f1","f2"));
-        when(config.embeddingDensity()).thenReturn(embeddingDensity);
-        when(config.iterations()).thenReturn(iterations);
-        when(config.outputDimension()).thenReturn(Optional.empty());
-
-        var memoryEstimation= new HashGNNMemoryEstimateDefinition().memoryEstimation(config);
+        var memoryEstimation = new HashGNNMemoryEstimateDefinition().memoryEstimation(embeddingDensity, false, Optional.empty(), Optional.empty(), Optional.empty());
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(nodeCount,relationshipCount,concurrency)
@@ -79,47 +68,57 @@ class HashGNNMemoryEstimateDefinitionTest {
 
     @Test
     void shouldEstimateMemoryWithOutputDimension(){
-//        Optional<Integer> maybeOutputDimension = Optional.of(outputDimension);
-        //10,  4,  10_000, 20_000, 8, 100, 12_404_072, 12_404_072
-        var config=mock(HashGNNConfig.class);
-        when(config.featureProperties()).thenReturn(List.of("f1","f2"));
-        when(config.embeddingDensity()).thenReturn(10);
-        when(config.iterations()).thenReturn(4);
-        when(config.outputDimension()).thenReturn(Optional.of(100));
-
-        var memoryEstimation= new HashGNNMemoryEstimateDefinition().memoryEstimation(config);
+        var memoryEstimation = new HashGNNMemoryEstimateDefinition().memoryEstimation(
+            10,
+            false,
+            Optional.of(100),
+            Optional.empty(),
+            Optional.empty()
+        );
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(10_000,20_000,8)
             .hasSameMinAndMaxEqualTo(12_404_072);
-
     }
-
 
     @Test
     void estimationShouldUseGeneratedDimensionIfOutputIsMissing() {
-        var inputDimension = 1000L;
+        var inputDimension = 1000;
         var inputRatio = 0.1;
         var graphDims = GraphDimensions.of((long) 1e6);
         var concurrency = 4;
 
+        var bigParameters = HashGNNParameters.create(
+            concurrency,
+            3,
+            100,
+            1,
+            List.of(),
+            false,
+            Optional.empty(),
+            Optional.empty(),
+            Optional.of(GenerateFeaturesConfigImpl.builder().dimension(inputDimension).densityLevel(1).build()),
+            Optional.empty()
+        );
         var bigEstimation = new HashGNNFactory<>()
-            .memoryEstimation(HashGNNStreamConfigImpl
-                .builder()
-                .generateFeatures(Map.of("dimension", inputDimension, "densityLevel", 1))
-                .iterations(3)
-                .embeddingDensity(100)
-                .build())
+            .memoryEstimation(bigParameters)
             .estimate(graphDims, concurrency)
             .memoryUsage();
 
+        var smallParameters = HashGNNParameters.create(
+            concurrency,
+            3,
+            100,
+            1,
+            List.of(),
+            false,
+            Optional.empty(),
+            Optional.empty(),
+            Optional.of(GenerateFeaturesConfigImpl.builder().dimension((int) (inputRatio * inputDimension)).densityLevel(1).build()),
+            Optional.empty()
+        );
         var smallEstimation = new HashGNNFactory<>()
-            .memoryEstimation(HashGNNStreamConfigImpl
-                .builder()
-                .generateFeatures(Map.of("dimension", (long) (inputRatio * inputDimension), "densityLevel", 1))
-                .iterations(3)
-                .embeddingDensity(100)
-                .build())
+            .memoryEstimation(smallParameters)
             .estimate(graphDims, concurrency)
             .memoryUsage();
 
@@ -133,6 +132,4 @@ class HashGNNMemoryEstimateDefinitionTest {
         var minOutputRatio = (double) smallEstimation.min / bigEstimation.min;
         assertThat(minOutputRatio).isCloseTo(0.42, Offset.offset(0.01));
     }
-
-
 }

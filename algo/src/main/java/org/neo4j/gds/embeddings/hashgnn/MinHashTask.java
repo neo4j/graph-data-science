@@ -73,7 +73,8 @@ class MinHashTask implements Runnable {
     static void compute(
         List<DegreePartition> degreePartition,
         List<Graph> graphs,
-        HashGNNConfig config,
+        int concurrency,
+        int embeddingDensity,
         int embeddingDimension,
         HugeObjectArray<HugeAtomicBitSet> currentEmbeddings,
         HugeObjectArray<HugeAtomicBitSet> previousEmbeddings,
@@ -84,9 +85,9 @@ class MinHashTask implements Runnable {
     ) {
         progressTracker.beginSubTask("Perform min-hashing");
 
-        progressTracker.setSteps(config.embeddingDensity() * graphs.get(0).nodeCount());
+        progressTracker.setSteps(embeddingDensity * graphs.get(0).nodeCount());
 
-        var tasks = IntStream.range(0, config.embeddingDensity())
+        var tasks = IntStream.range(0, embeddingDensity)
             .mapToObj(k -> degreePartition.stream().map(p ->
                 new MinHashTask(
                     k,
@@ -102,7 +103,7 @@ class MinHashTask implements Runnable {
             .flatMap(Function.identity())
             .collect(Collectors.toList());
         RunWithConcurrency.builder()
-            .concurrency(config.concurrency())
+            .concurrency(concurrency)
             .tasks(tasks)
             .terminationFlag(terminationFlag)
             .run();

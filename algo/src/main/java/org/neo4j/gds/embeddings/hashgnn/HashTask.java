@@ -23,9 +23,9 @@ package org.neo4j.gds.embeddings.hashgnn;
 import org.apache.commons.math3.primes.Primes;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.SplittableRandom;
@@ -65,16 +65,17 @@ class HashTask implements Runnable {
         int embeddingDimension,
         double scaledNeighborInfluence,
         int numberOfRelationshipTypes,
-        HashGNNConfig config,
+        int concurrency,
+        int embeddingDensity,
         long randomSeed,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker
     ) {
         progressTracker.beginSubTask("Precompute hashes");
 
-        progressTracker.setSteps(config.embeddingDensity());
+        progressTracker.setSteps(embeddingDensity);
 
-        var hashTasks = IntStream.range(0, config.embeddingDensity()).mapToObj(seedOffset ->
+        var hashTasks = IntStream.range(0, embeddingDensity).mapToObj(seedOffset ->
             new HashTask(
                 embeddingDimension,
                 scaledNeighborInfluence,
@@ -83,7 +84,7 @@ class HashTask implements Runnable {
                 progressTracker
             )).collect(Collectors.toList());
         RunWithConcurrency.builder()
-            .concurrency(config.concurrency())
+            .concurrency(concurrency)
             .tasks(hashTasks)
             .terminationFlag(terminationFlag)
             .run();

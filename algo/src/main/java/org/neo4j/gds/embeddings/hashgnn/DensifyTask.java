@@ -20,12 +20,12 @@
 package org.neo4j.gds.embeddings.hashgnn;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.SplittableRandom;
@@ -35,7 +35,7 @@ class DensifyTask implements Runnable {
     private static final int SPARSITY = 3;
     private static final double ENTRY_PROBABILITY = 1.0 / (2 * SPARSITY);
     private final Partition partition;
-    private final HashGNNConfig config;
+    private final int outputDimension;
     private final HugeObjectArray<double[]> denseFeatures;
     private final HugeObjectArray<HugeAtomicBitSet> binaryFeatures;
     private final float[][] projectionMatrix;
@@ -43,14 +43,14 @@ class DensifyTask implements Runnable {
 
     DensifyTask(
         Partition partition,
-        HashGNNConfig config,
+        int outputDimension,
         HugeObjectArray<double[]> denseFeatures,
         HugeObjectArray<HugeAtomicBitSet> binaryFeatures,
         float[][] projectionMatrix,
         ProgressTracker progressTracker
     ) {
         this.partition = partition;
-        this.config = config;
+        this.outputDimension = outputDimension;
         this.denseFeatures = denseFeatures;
         this.binaryFeatures = binaryFeatures;
         this.projectionMatrix = projectionMatrix;
@@ -60,7 +60,8 @@ class DensifyTask implements Runnable {
     static HugeObjectArray<double[]> compute(
         Graph graph,
         List<Partition> partition,
-        HashGNNConfig config,
+        int concurrency,
+        int outputDimension,
         SplittableRandom rng,
         HugeObjectArray<HugeAtomicBitSet> binaryFeatures,
         ProgressTracker progressTracker,
@@ -72,14 +73,14 @@ class DensifyTask implements Runnable {
 
         var projectionMatrix = projectionMatrix(
             rng,
-            config.outputDimension().orElseThrow(),
+            outputDimension,
             (int) binaryFeatures.get(0).size()
         );
 
         var tasks = partition.stream()
             .map(p -> new DensifyTask(
                 p,
-                config,
+                outputDimension,
                 denseFeatures,
                 binaryFeatures,
                 projectionMatrix,
@@ -87,7 +88,7 @@ class DensifyTask implements Runnable {
             ))
             .collect(Collectors.toList());
         RunWithConcurrency.builder()
-            .concurrency(config.concurrency())
+            .concurrency(concurrency)
             .tasks(tasks)
             .terminationFlag(terminationFlag)
             .run();
@@ -128,7 +129,7 @@ class DensifyTask implements Runnable {
 
         partition.consume(nodeId -> {
             var binaryVector = binaryFeatures.get(nodeId);
-            var denseVector = new double[config.outputDimension().orElseThrow()];
+            var denseVector = new double[outputDimension];
 
             binaryVector.forEachSetBit(bit -> {
                 final float[] row = projectionMatrix[(int) bit];

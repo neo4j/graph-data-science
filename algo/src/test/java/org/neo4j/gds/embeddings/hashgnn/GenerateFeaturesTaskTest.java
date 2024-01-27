@@ -25,12 +25,11 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -51,18 +50,16 @@ class GenerateFeaturesTaskTest {
 
         var partition = new Partition(0, graph.nodeCount());
         var totalFeatureCount = new MutableLong(0);
-        var config = HashGNNStreamConfigImpl
-            .builder()
-            .generateFeatures(Map.of("dimension", embeddingDimension, "densityLevel", densityLevel))
-            .iterations(1337)
-            .embeddingDensity(1337)
-            .randomSeed(42L)
+        var generateFeaturesConfig = GenerateFeaturesConfigImpl.builder()
+            .densityLevel(densityLevel)
+            .dimension(embeddingDimension)
             .build();
 
         var output = GenerateFeaturesTask.compute(
+            generateFeaturesConfig,
             graph,
             List.of(partition),
-            config,
+            4,
             42L,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE,

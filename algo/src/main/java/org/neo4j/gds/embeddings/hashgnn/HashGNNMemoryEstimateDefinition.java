@@ -32,13 +32,16 @@ import java.util.function.LongUnaryOperator;
 
 public class HashGNNMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<HashGNNConfig> {
 
-    @Override
-    public MemoryEstimation memoryEstimation(HashGNNConfig configuration) {
+    public MemoryEstimation memoryEstimation(
+        int embeddingDensity,
+        boolean heterogeneous,
+        Optional<Integer> outputDimension,
+        Optional<GenerateFeaturesConfig> generateFeatures,
+        Optional<BinarizeFeaturesConfig> binarizeFeatures
+    ) {
         int FUDGED_BINARY_DIMENSION = 1024;
-        int binaryDimension = configuration
-            .generateFeatures()
-            .map(GenerateFeaturesConfig::dimension)
-            .orElse(configuration.binarizeFeatures().map(BinarizeFeaturesConfig::dimension).orElse(FUDGED_BINARY_DIMENSION));
+        int binaryDimension = generateFeatures.map(GenerateFeaturesConfig::dimension)
+            .orElse(binarizeFeatures.map(BinarizeFeaturesConfig::dimension).orElse(FUDGED_BINARY_DIMENSION));
 
         MemoryEstimations.Builder builder = MemoryEstimations.builder(HashGNN.class.getSimpleName());
 
@@ -52,12 +55,11 @@ public class HashGNNMemoryEstimateDefinition implements AlgorithmMemoryEstimateD
         );
 
         builder.perGraphDimension("Hashes cache", (dims, concurrency) -> MemoryRange.of(
-            configuration.embeddingDensity() * HashTask.Hashes.memoryEstimation(
+            embeddingDensity * HashTask.Hashes.memoryEstimation(
                 binaryDimension,
-                configuration.heterogeneous() ? dims.relationshipCounts().size() : 1
+                heterogeneous ? dims.relationshipCounts().size() : 1
             )));
 
-        Optional<Integer> outputDimension = configuration.outputDimension();
         LongUnaryOperator denseResultEstimation = n -> HugeObjectArray.memoryEstimation(
             n,
             MemoryUsage.sizeOfDoubleArray(outputDimension.orElse(binaryDimension))
@@ -72,9 +74,20 @@ public class HashGNNMemoryEstimateDefinition implements AlgorithmMemoryEstimateD
                 denseResultEstimation.applyAsLong(n)
             ));
         }
-
-
         return builder.build();
     }
 
+    public MemoryEstimation memoryEstimation(HashGNNParameters parameters) {
+        var embeddingDensity = parameters.embeddingDensity();
+        var heterogeneous = parameters.heterogeneous();
+        var outputDimension = parameters.outputDimension();
+        var generateFeatures = parameters.generateFeatures();
+        var binarizeFeatures = parameters.binarizeFeatures();
+        return memoryEstimation(embeddingDensity, heterogeneous, outputDimension, generateFeatures, binarizeFeatures);
+    }
+
+    @Override
+    public MemoryEstimation memoryEstimation(HashGNNConfig configuration) {
+        return memoryEstimation(configuration.toParameters());
+    }
 }
