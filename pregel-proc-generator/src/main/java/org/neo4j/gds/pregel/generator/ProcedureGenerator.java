@@ -147,8 +147,16 @@ public class ProcedureGenerator {
                     .addMember("value", "$S", "configuration")
                     .addMember("defaultValue", "$S", "{}")
                     .build())
-                .build())
-            .addStatement("var specification = new $T()", typeNames.specification(gdsMode))
+                .build());
+
+        if (deprecatedBy.isPresent()) {
+            methodBuilder.addStatement(
+                "executionContext().metricsFacade().deprecatedProcedures().called($S)",
+                fullProcedureName
+            );
+        }
+
+        methodBuilder.addStatement("var specification = new $T()", typeNames.specification(gdsMode))
             .addStatement("var executor = new $T<>(specification, executionContext())", ProcedureExecutor.class)
             .addStatement("return executor.compute(graphName, configuration)");
         return methodBuilder.build();
@@ -186,8 +194,16 @@ public class ProcedureGenerator {
             .addAnnotation(AnnotationSpec.builder(Description.class)
                 .addMember("value", "$T.ESTIMATE_DESCRIPTION", BaseProc.class)
                 .build()
-            )
-            .addStatement("var specification = new $T()", typeNames.specification(gdsMode))
+            );
+
+        if (deprecatedBy.isPresent()) {
+            methodBuilder.addStatement(
+                "executionContext().metricsFacade().deprecatedProcedures().called($S)",
+                fullProcedureName
+            );
+        }
+
+        methodBuilder.addStatement("var specification = new $T()", typeNames.specification(gdsMode))
             .addStatement("var executor = new $T<>(specification, executionContext(), transactionContext())", MemoryEstimationExecutor.class)
             .addStatement("return executor.computeEstimate(graphNameOrConfiguration, algoConfiguration)");
         return methodBuilder.build();
