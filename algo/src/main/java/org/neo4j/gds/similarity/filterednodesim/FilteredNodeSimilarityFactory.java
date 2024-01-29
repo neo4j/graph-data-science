@@ -37,6 +37,7 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarity;
 import org.neo4j.gds.similarity.nodesim.TopKMap;
 import org.neo4j.gds.similarity.nodesim.TopNList;
 import org.neo4j.gds.wcc.WccAlgorithmFactory;
+import org.neo4j.gds.wcc.WccMemoryEstimateDefinition;
 import org.neo4j.gds.wcc.WccStreamConfig;
 import org.neo4j.gds.wcc.WccStreamConfigImpl;
 
@@ -97,12 +98,18 @@ public class FilteredNodeSimilarityFactory<CONFIG extends FilteredNodeSimilarity
                         .rangePerNode("array", nodeCount -> MemoryRange.of(0, nodeCount * averageVectorSize))
                         .build();
                 }));
-        if (config.considerComponents()) {
+        if (config.enableComponentsOptimization()) {
             builder.perNode("nodes sorted by component", HugeLongArray::memoryEstimation);
             builder.perNode("upper bound per component", HugeAtomicLongArray::memoryEstimation);
-        }
-        if (config.considerComponents() && config.componentProperty() != null) {
-            builder.perNode("component mapping", HugeLongArray::memoryEstimation);
+
+            if (config.actuallyRunWCC()) {
+                WccStreamConfig internalWccConfig = WccStreamConfigImpl.builder()
+                    .concurrency(config.concurrency())
+                    .build();
+                builder.add("wcc", new WccMemoryEstimateDefinition().memoryEstimation(internalWccConfig));
+            } else {
+                builder.perNode("component mapping", HugeLongArray::memoryEstimation);
+            }
         }
         if (config.computeToGraph() && !config.hasTopK()) {
             builder.add(
@@ -129,7 +136,7 @@ public class FilteredNodeSimilarityFactory<CONFIG extends FilteredNodeSimilarity
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        if (config.runWCC()) {
+        if (config.actuallyRunWCC()) {
             WccStreamConfig wccStreamConfig = WccStreamConfigImpl.builder().build();
             return Tasks.task(
                 taskName(),

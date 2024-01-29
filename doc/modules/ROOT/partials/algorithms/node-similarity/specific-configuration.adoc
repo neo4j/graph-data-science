@@ -21,5 +21,6 @@ If unspecified, the algorithm runs unweighted.
 | similarityMetric
 | String | JACCARD       | yes      |  The metric used to compute similarity.
 Can be either `JACCARD`, `OVERLAP` or `COSINE`.
-| [[consider-components-{instance}]] considerComponents                                       | Boolean | false   | yes      | If enabled applies an optimization which can increase performance for multi-component graphs. Makes use of the fact that nodes of distinct components always have a similarity of 0. If not already provided through xref:#component-property-{instance} [componentProperty], internally runs xref:algorithms/wcc.adoc[WCC].
-| [[component-property-{instance}]] componentProperty                                         | String  | null    | yes      | Name of the pre-computed node property to use for enabled xref:#consider-components-{instance} [component optimization] in case pre-computed values are available.
+| [[runwcc-{instance}]] runWcc                                       | Boolean | false   | yes      | If enabled, an optimization which can increase performance for multi-component graphs is applied:  nodes in  distinct components always have a similarity of 0 and we can avoid comparing them.
+As a pre-processing step xref:algorithms/wcc.adoc[WCC] is run to obtain the components.
+| [[component-property-{instance}]] componentProperty                                         | String  | null    | yes      | If the components are available as a node property, they can be passed via this parameter rather than running WCC as discussed in the above  xref:#runwcc-{instance} [component optimization].

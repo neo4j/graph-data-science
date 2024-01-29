@@ -297,7 +297,7 @@ class ComponentNodesTest {
         TreeSet<Long> treeSet = new TreeSet<>();
         treeSet.add(-1L);
         for (int i = 0; i < upperIndex.size(); ++i) {
-            if (upperIndex.get(i) > 0) {
+            if (upperIndex.get(i) >= 0) {
                 treeSet.add(upperIndex.get(i));
             }
         }
