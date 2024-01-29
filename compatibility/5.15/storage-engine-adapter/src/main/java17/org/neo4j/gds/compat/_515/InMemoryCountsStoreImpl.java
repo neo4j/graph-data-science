@@ -99,8 +99,12 @@ public class InMemoryCountsStoreImpl implements CountsStore {
 
     @Override
     public long estimateRelationshipCount(int startLabelId, int typeId, int endLabelId, CursorContext cursorContext) {
-        var type = tokenHolders.relationshipTypeGetName(typeId);
-        return graphStore.relationshipCount(RelationshipType.of(type));
+        if (typeId == -1) {
+            return graphStore.relationshipCount();
+        } else {
+            var type = tokenHolders.relationshipTypeGetName(typeId);
+            return graphStore.relationshipCount(RelationshipType.of(type));
+        }
     }
 
     @Override
