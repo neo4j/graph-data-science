@@ -8,7 +8,7 @@
     "start": "nodemon -e adoc --exec \"npm run build && npm run serve\"",
     "serve": "node server.js",
     "build": "antora preview.yml --stacktrace --log-format=pretty",
-    "build-verify": "antora --stacktrace --fetch preview.yml --log-format=json --log-level=info --log-file ./build/log/log.json",
+    "build-verify": "antora --stacktrace --fetch preview.yml --log-format=json --log-level=info --log-file ./build/log/log.json"
   },
   "keywords": [
     "antora",
