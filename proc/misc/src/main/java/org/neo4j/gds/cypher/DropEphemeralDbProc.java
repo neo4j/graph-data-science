@@ -43,6 +43,7 @@ public class DropEphemeralDbProc extends BaseProc {
 
     @Procedure(name = "gds.ephemeral.database.drop", mode = WRITE)
     @Description(DESCRIPTION)
+    @Deprecated(forRemoval = true)
     public Stream<DropEphemeralDbResult> dropInMemoryDatabase(
         @Name(value = "dbName") String dbName
     ) {

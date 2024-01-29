@@ -43,6 +43,7 @@ public class GraphCreateEphemeralDatabaseProc extends BaseProc {
 
     @Procedure(name = "gds.ephemeral.database.create", mode = READ)
     @Description(DESCRIPTION)
+    @Deprecated(forRemoval = true)
     public Stream<CreateEphemeralDbResult> createInMemoryDatabase(
         @Name(value = "dbName") String dbName,
         @Name(value = "graphName") String graphName

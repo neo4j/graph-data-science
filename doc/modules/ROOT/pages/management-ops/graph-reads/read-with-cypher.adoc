@@ -1,5 +1,5 @@
 [[cypher-on-gds]]
-= Running Cypher queries
+= Running Cypher queries (Deprecated)
 :description: This chapter explains how to execute Cypher queries on named graphs in the Neo4j Graph Data Science library.
 :page-aliases: management-ops/create-cypher-db, management-ops/graph-reads/create-cypher-db
 
