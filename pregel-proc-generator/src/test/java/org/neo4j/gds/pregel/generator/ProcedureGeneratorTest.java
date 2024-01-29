@@ -108,9 +108,14 @@ class ProcedureGeneratorTest {
     }
 
     @Test
-    void shouldMarkAsDeprecated() {
+    void shouldGenerateDeprecatedProcMethod() {
         var typeNames = new TypeNames("gds.bar", "Bar", ClassName.get("gds.bar", "BarConfig"));
-        var procedureGenerator = new ProcedureGenerator(typeNames, "gds.alpha.bar", Optional.empty(), Optional.of("gds.bar"));
+        var procedureGenerator = new ProcedureGenerator(
+            typeNames,
+            "gds.alpha.bar",
+            Optional.empty(),
+            Optional.of("gds.bar")
+        );
         var procedureMethodSpec = procedureGenerator.procMethod(GDSMode.MUTATE);
         assertThat(procedureMethodSpec.toString()).isEqualTo("" +
             "@org.neo4j.procedure.Internal" + NL +
@@ -130,6 +135,18 @@ class ProcedureGeneratorTest {
             "  var executor = new org.neo4j.gds.executor.ProcedureExecutor<>(specification, executionContext());" + NL +
             "  return executor.compute(graphName, configuration);" + NL +
             "}" + NL
+        );
+    }
+
+    @Test
+    void shouldGenerateDeprecatedEstimateMethod() {
+
+        var typeNames = new TypeNames("gds.bar", "Bar", ClassName.get("gds.bar", "BarConfig"));
+        var procedureGenerator = new ProcedureGenerator(
+            typeNames,
+            "gds.alpha.bar",
+            Optional.empty(),
+            Optional.of("gds.bar")
         );
         var estimateMethodSpec = procedureGenerator.procEstimateMethod(GDSMode.MUTATE);
         assertThat(estimateMethodSpec.toString()).isEqualTo("" +
