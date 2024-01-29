@@ -44,7 +44,7 @@ public enum Neo4jVersion {
     V_5_14,
     V_5_15,
     V_5_16,
-    V_Dev;
+    V_RC;
 
     private static final int MINOR_DEV_VERSION = 17;
 
@@ -95,7 +95,7 @@ public enum Neo4jVersion {
                     return Neo4jVersion.V_5_16;
                 default:
                     if (minorVersion >= MINOR_DEV_VERSION) {
-                        return Neo4jVersion.V_Dev;
+                        return Neo4jVersion.V_RC;
                     }
             }
         }
@@ -104,7 +104,7 @@ public enum Neo4jVersion {
     }
 
     public MajorMinorVersion semanticVersion() {
-        if (this == V_Dev) {
+        if (this == V_RC) {
             return ImmutableMajorMinorVersion.of(5, MINOR_DEV_VERSION);
         }
 
@@ -173,7 +173,7 @@ public enum Neo4jVersion {
                 return "5.15";
             case V_5_16:
                 return "5.16";
-            case V_Dev:
+            case V_RC:
                 return "dev";
             default:
                 throw new IllegalArgumentException("Unexpected value: " + this.name() + " (sad java 😞)");
