@@ -322,6 +322,14 @@ public final class Neo4jProxy {
         return IMPL.getHighestPossibleRelationshipCount(read, idGeneratorFactory);
     }
 
+    public static long estimateNodeCount(Read read, int label) {
+        return IMPL.estimateNodeCount(read, label);
+    }
+
+    public static long estimateRelationshipCount(Read read, int sourceLabel, int targetLabel, int type) {
+        return IMPL.estimateRelationshipCount(read, sourceLabel, targetLabel, type);
+    }
+
     public static String versionLongToString(long storeVersion) {
         return IMPL.versionLongToString(storeVersion);
     }
