@@ -225,6 +225,9 @@ public interface Neo4jProxyApi {
 
     long getHighestPossibleRelationshipCount(Read read, @Nullable IdGeneratorFactory idGeneratorFactory);
 
+    long estimateNodeCount(Read read, int label);
+    long estimateRelationshipCount(Read read, int sourceLabel, int targetLabel, int type);
+
     String versionLongToString(long storeVersion);
 
     TestLog testLog();

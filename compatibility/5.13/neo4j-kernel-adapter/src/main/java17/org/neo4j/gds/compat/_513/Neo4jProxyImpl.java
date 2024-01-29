@@ -30,6 +30,7 @@ import org.neo4j.gds.compat._5x.CompatAccessModeImpl;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.PartitionedScan;
+import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.TokenSet;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
@@ -213,5 +214,15 @@ public final class Neo4jProxyImpl extends CommonNeo4jProxyImpl {
         return repo.getCompositeDatabaseReferences().stream()
             .map(DatabaseReferenceImpl.Internal::databaseId)
             .anyMatch(databaseId::equals);
+    }
+
+    @Override
+    public long estimateNodeCount(Read read, int label) {
+        return read.countsForNodeWithoutTxState(label);
+    }
+
+    @Override
+    public long estimateRelationshipCount(Read read, int sourceLabel, int targetLabel, int type) {
+        return read.countsForRelationshipWithoutTxState(sourceLabel, type, targetLabel);
     }
 }
