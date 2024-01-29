@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -148,7 +149,7 @@ public class ComponentPropertyNodeSimilarityTest {
             .topK(TOP_K_DEFAULT)
             .writeProperty("writeProperty")
             .writeRelationshipType("writeRelationshipType")
-            .considerComponents(true)
+            .applyWcc(true)
             .componentProperty(componentPropertySet ? "compid" : null)
             .build();
 
@@ -175,6 +176,8 @@ public class ComponentPropertyNodeSimilarityTest {
             .fixed("similarityComputer", 8);
         if (componentPropertySet) {
             builder.fixed("component mapping", 8000040);
+        } else {
+            builder.fixed("wcc", 8000064);
         }
 
         long topKMapRangeMin = 248_000_016L;
@@ -182,8 +185,11 @@ public class ComponentPropertyNodeSimilarityTest {
         builder.fixed("topK map", MemoryRange.of(topKMapRangeMin, topKMapRangeMax));
 
         MemoryTree expected = builder.build().estimate(dimensions, 1);
+        SoftAssertions softAssertions = new SoftAssertions();
+        softAssertions.assertThat(expected.memoryUsage().max).isEqualTo(actual.memoryUsage().max);
+        softAssertions.assertThat(expected.memoryUsage().min).isEqualTo(actual.memoryUsage().min);
 
-        assertEquals(expected.memoryUsage(), actual.memoryUsage());
+        softAssertions.assertAll();
     }
 
     @ParameterizedTest(name = "orientation: {0}, concurrency: {1}")
@@ -192,7 +198,6 @@ public class ComponentPropertyNodeSimilarityTest {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
         var config = NodeSimilarityStreamConfigImpl.builder()
             .similarityCutoff(0.0)
-            .considerComponents(true)
             .componentProperty("compid")
             .concurrency(concurrency)
             .build();
