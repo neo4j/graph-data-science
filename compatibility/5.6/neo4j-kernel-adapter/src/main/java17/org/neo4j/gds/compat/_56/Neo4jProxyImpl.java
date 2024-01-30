@@ -32,6 +32,7 @@ import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.PartitionedScan;
+import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
@@ -239,5 +240,15 @@ public final class Neo4jProxyImpl extends CommonNeo4jProxyImpl {
     public boolean isCompositeDatabase(GraphDatabaseService databaseService) {
         var databaseManager = GraphDatabaseApiProxy.resolveDependency(databaseService, FabricDatabaseManager.class);
         return databaseManager.isFabricDatabase(GraphDatabaseApiProxy.databaseId(databaseService));
+    }
+
+    @Override
+    public long estimateNodeCount(Read read, int label) {
+        return read.countsForNodeWithoutTxState(label);
+    }
+
+    @Override
+    public long estimateRelationshipCount(Read read, int sourceLabel, int targetLabel, int type) {
+        return read.countsForRelationshipWithoutTxState(sourceLabel, type, targetLabel);
     }
 }

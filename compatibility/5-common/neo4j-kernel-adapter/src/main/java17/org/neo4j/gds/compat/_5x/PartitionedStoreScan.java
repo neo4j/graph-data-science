@@ -22,6 +22,7 @@ package org.neo4j.gds.compat._5x;
 import org.neo4j.common.EntityType;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.compat.CompatExecutionContext;
+import org.neo4j.gds.compat.Neo4jProxyApi;
 import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
@@ -49,6 +50,7 @@ public final class PartitionedStoreScan<C extends Cursor> implements StoreScan<C
     public static List<StoreScan<NodeLabelIndexCursor>> createScans(
         KernelTransaction transaction,
         int batchSize,
+        Neo4jProxyApi proxy,
         int... labelIds
     ) {
         var indexDescriptor = NodeLabelIndexLookupImpl.findUsableMatchingIndex(
@@ -66,11 +68,11 @@ public final class PartitionedStoreScan<C extends Cursor> implements StoreScan<C
         // and use that one as the driving partitioned index scan. The partitions
         // of all other partitioned index scans will be aligned to that one.
         int maxToken = labelIds[0];
-        long maxCount = read.countsForNodeWithoutTxState(labelIds[0]);
+        long maxCount = proxy.estimateNodeCount(read, labelIds[0]);
         int maxIndex = 0;
 
         for (int i = 1; i < labelIds.length; i++) {
-            long count = read.countsForNodeWithoutTxState(labelIds[i]);
+            long count = proxy.estimateNodeCount(read, labelIds[i]);
             if (count > maxCount) {
                 maxCount = count;
                 maxToken = labelIds[i];
