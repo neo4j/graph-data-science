@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.betweenness;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
@@ -28,10 +29,11 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.graphdb.QueryExecutionException;
 
-import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
 
 class BetweennessCentralityStreamProcTest extends BaseProcTest {
 
@@ -71,15 +73,26 @@ class BetweennessCentralityStreamProcTest extends BaseProcTest {
             .streamMode()
             .yields();
 
-        assertCypherResult(
-            query,
-            List.of(
-                Map.of("nodeId", idFunction.of("a"), "score", 0.0),
-                Map.of("nodeId", idFunction.of("b"), "score", 3.0),
-                Map.of("nodeId", idFunction.of("c"), "score", 4.0),
-                Map.of("nodeId", idFunction.of("d"), "score", 3.0),
-                Map.of("nodeId", idFunction.of("e"), "score", 0.0)
-            ));
+        var expectedResultMap = Map.of(
+            idFunction.of("a"), 0.0,
+            idFunction.of("b"), 3.0,
+            idFunction.of("c"), 4.0,
+            idFunction.of("d"), 3.0,
+            idFunction.of("e"), 0.0
+        );
+
+        var rowCount = runQueryWithRowConsumer(query, (resultRow) -> {
+
+            var nodeId = resultRow.getNumber("nodeId");
+            var expectedScore = expectedResultMap.get(nodeId);
+
+            assertThat(resultRow.getNumber("score")).asInstanceOf(DOUBLE).isCloseTo(
+                expectedScore,
+                Offset.offset(1e-6)
+            );
+            
+        });
+        assertThat(rowCount).isEqualTo(5l);
     }
 
     // FIXME: This should not be tested here
