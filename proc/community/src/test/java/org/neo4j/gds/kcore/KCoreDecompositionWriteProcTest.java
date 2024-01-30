@@ -29,7 +29,6 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
-import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -83,8 +82,19 @@ class KCoreDecompositionWriteProcTest extends BaseProcTest {
     @Test
     void shouldWrite(){
 
-        String query="CALL gds.kcore.write('graph', { writeProperty: 'coreValue'})";
 
+        String query="CALL gds.kcore.write('graph', { writeProperty: 'coreValue'})";
+        var expectedResultMap = Map.of(
+            idFunction.of("z"), 0L,
+            idFunction.of("a"), 1L,
+            idFunction.of("b"), 1L,
+            idFunction.of("c"), 2L,
+            idFunction.of("d"), 2L,
+            idFunction.of("e"), 2L,
+            idFunction.of("f"), 2L,
+            idFunction.of("g"), 2L,
+            idFunction.of("h"), 2L
+        );
         var rowCount = runQueryWithRowConsumer(query, row -> {
 
             assertThat(row.getNumber("preProcessingMillis"))
@@ -127,20 +137,15 @@ class KCoreDecompositionWriteProcTest extends BaseProcTest {
             .as("`write` mode should always return one row")
             .isEqualTo(1);
 
-        assertCypherResult(
+        var verificationRowCount = runQueryWithRowConsumer(
             "MATCH (n:node) RETURN id(n) AS nodeId, n.coreValue AS coreValue",
-            List.of(
-                Map.of("nodeId", idFunction.of("z"), "coreValue", 0L),
-                Map.of("nodeId", idFunction.of("a"), "coreValue", 1L),
-                Map.of("nodeId", idFunction.of("b"), "coreValue", 1L),
-                Map.of("nodeId", idFunction.of("c"), "coreValue", 2L),
-                Map.of("nodeId", idFunction.of("d"), "coreValue", 2L),
-                Map.of("nodeId", idFunction.of("e"), "coreValue", 2L),
-                Map.of("nodeId", idFunction.of("f"), "coreValue", 2L),
-                Map.of("nodeId", idFunction.of("g"), "coreValue", 2L),
-                Map.of("nodeId", idFunction.of("h"), "coreValue", 2L)
-            )
+            (resultRow) -> {
+                var nodeId = resultRow.getNumber("nodeId");
+                var expected = expectedResultMap.get(nodeId);
+                assertThat(resultRow.getNumber("coreValue")).asInstanceOf(LONG).isEqualTo(expected);
+            }
         );
+        assertThat(verificationRowCount).isEqualTo(9L);
     }
 
     @Test
