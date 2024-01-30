@@ -547,6 +547,16 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    public long estimateNodeCount(Read read, int label) {
+        return read.countsForNodeWithoutTxState(label);
+    }
+
+    @Override
+    public long estimateRelationshipCount(Read read, int sourceLabel, int targetLabel, int type) {
+        return read.countsForRelationshipWithoutTxState(sourceLabel, type, targetLabel);
+    }
+
+    @Override
     public String versionLongToString(long storeVersion) {
         return MetaDataStore.versionLongToString(storeVersion);
     }

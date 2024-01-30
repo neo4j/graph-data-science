@@ -177,7 +177,7 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
         int batchSize,
         boolean allowPartitionedScan
     ) {
-        return PartitionedStoreScan.createScans(transaction, batchSize, labelIds);
+        return PartitionedStoreScan.createScans(transaction, batchSize, this,  labelIds);
     }
 
     @Override
@@ -186,7 +186,7 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
         int batchSize,
         int... labelIds
     ) {
-        return PartitionedStoreScan.createScans(transaction, batchSize, labelIds);
+        return PartitionedStoreScan.createScans(transaction, batchSize, this,  labelIds);
     }
 
     @Override
@@ -264,7 +264,7 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
         int batchSize,
         boolean allowPartitionedScan
     ) {
-        return PartitionedStoreScan.createScans(transaction, batchSize, labelId).get(0);
+        return PartitionedStoreScan.createScans(transaction, batchSize, this, labelId).get(0);
     }
 
     @Override
