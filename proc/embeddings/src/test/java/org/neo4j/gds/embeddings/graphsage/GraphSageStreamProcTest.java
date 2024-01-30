@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -48,6 +47,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.InstanceOfAssertFactories.LIST;
 import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
 
 @Neo4jModelCatalogExtension
@@ -172,24 +172,13 @@ class GraphSageStreamProcTest extends BaseProcTest {
             .addParameter("concurrency", 1)
             .addParameter("modelName", modelName)
             .yields();
+        long[] nodeIds = idFunction.of("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o");
+        var rowCount = runQueryWithRowConsumer(streamQuery, (resultRow) -> {
+            assertThat(nodeIds).contains((long) resultRow.getNumber("nodeId"));
+            assertThat(resultRow.get("embedding")).asInstanceOf(LIST).hasSize(1);
+        });
 
-        assertCypherResult(streamQuery, List.of(
-            Map.of("nodeId", idFunction.of("a"), "embedding", Matchers.iterableWithSize(1)),
-            Map.of("nodeId", idFunction.of("b"), "embedding", Matchers.iterableWithSize(1)),
-            Map.of("nodeId", idFunction.of("c"), "embedding", Matchers.iterableWithSize(1)),
-            Map.of("nodeId", idFunction.of("d"), "embedding", Matchers.iterableWithSize(1)),
-            Map.of("nodeId", idFunction.of("e"), "embedding", Matchers.iterableWithSize(1)),
-            Map.of("nodeId", idFunction.of("f"), "embedding", Matchers.iterableWithSize(1)),
-            Map.of("nodeId", idFunction.of("g"), "embedding", Matchers.iterableWithSize(1)),
-            Map.of("nodeId", idFunction.of("h"), "embedding", Matchers.iterableWithSize(1)),
-            Map.of("nodeId", idFunction.of("i"), "embedding", Matchers.iterableWithSize(1)),
-            Map.of("nodeId", idFunction.of("j"), "embedding", Matchers.iterableWithSize(1)),
-            Map.of("nodeId", idFunction.of("k"), "embedding", Matchers.iterableWithSize(1)),
-            Map.of("nodeId", idFunction.of("l"), "embedding", Matchers.iterableWithSize(1)),
-            Map.of("nodeId", idFunction.of("m"), "embedding", Matchers.iterableWithSize(1)),
-            Map.of("nodeId", idFunction.of("n"), "embedding", Matchers.iterableWithSize(1)),
-            Map.of("nodeId", idFunction.of("o"), "embedding", Matchers.iterableWithSize(1))
-        ));
+        assertThat(rowCount).isEqualTo(15);
     }
 
     @ParameterizedTest(name = "Graph Properties: {2} - Algo Properties: {1}")
