@@ -20,13 +20,14 @@
 package org.neo4j.gds.algorithms.similarity;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
-import org.neo4j.gds.algorithms.similarity.specificfields.KnnSpecificFields;
 import org.neo4j.gds.algorithms.RelationshipWriteResult;
+import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
+import org.neo4j.gds.algorithms.similarity.specificfields.KnnSpecificFields;
 import org.neo4j.gds.algorithms.similarity.specificfields.SimilaritySpecificFields;
 import org.neo4j.gds.algorithms.similarity.specificfields.SimilaritySpecificFieldsWithDistribution;
-import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ArrowConnectionInfo;
+import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnWriteConfig;
@@ -174,7 +175,7 @@ public class SimilarityAlgorithmsWriteBusinessFacade {
 
     }
 
-    <RESULT, ASF extends SimilaritySpecificFields, CONFIG extends AlgoBaseConfig> RelationshipWriteResult<ASF> write(
+    <RESULT, ASF extends SimilaritySpecificFields, CONFIG extends AlgoBaseConfig & WriteRelationshipConfig> RelationshipWriteResult<ASF> write(
         AlgorithmComputationResult<RESULT> algorithmResult,
         CONFIG configuration,
         Function<RESULT, SimilarityGraphResult> similarityGraphResultSupplier,
@@ -212,6 +213,7 @@ public class SimilarityAlgorithmsWriteBusinessFacade {
                 algorithmResult.graphStore(),
                 rootIdMap,
                 taskName,
+                configuration.writeConcurrency(),
                 arrowConnectionInfo,
                 similarityDistributionBuilder.similarityConsumer()
             );

@@ -29,7 +29,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.similarity.SimilarityResult;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteConfig;
 
 import java.util.Optional;
@@ -61,7 +60,7 @@ class SimilarityAlgorithmsWriteBusinessFacadeTest {
     @Test
     void statsWithoutAlgorithmResult() {
 
-        var configurationMock = mock(NodeSimilarityMutateConfig.class);
+        var configurationMock = mock(NodeSimilarityWriteConfig.class);
         var algorithmResult = AlgorithmComputationResult.<Long>withoutAlgorithmResult(graph, graphStore);
 
         var businessFacade = new SimilarityAlgorithmsWriteBusinessFacade(null,null);
@@ -105,7 +104,7 @@ class SimilarityAlgorithmsWriteBusinessFacadeTest {
 
         var writeRelationshipService = mock(WriteRelationshipService.class);
 
-        when(writeRelationshipService.write(any(),any(),any(),any(),any(),any(),any(),any())).thenReturn(new WriteRelationshipResult(2,20));
+        when(writeRelationshipService.write(any(),any(),any(),any(),any(),any(),any(), any(),any())).thenReturn(new WriteRelationshipResult(2,20));
 
         var businessFacade = new SimilarityAlgorithmsWriteBusinessFacade(null,writeRelationshipService);
 

@@ -48,6 +48,7 @@ public final class Neo4jDatabaseRelationshipWriter {
         Log log,
         String taskName,
         TerminationFlag algorithmTerminationFlag,
+        int concurrency,
         Optional<ArrowConnectionInfo> arrowConnectionInfo,
         RelationshipWithPropertyConsumer relationshipConsumer
 
@@ -66,6 +67,7 @@ public final class Neo4jDatabaseRelationshipWriter {
                 .withGraph(graph)
                 .withTerminationFlag(algorithmTerminationFlag)
                 .withProgressTracker(progressTracker)
+                .withConcurrency(concurrency)
                 .withArrowConnectionInfo(
                     arrowConnectionInfo,
                     graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)

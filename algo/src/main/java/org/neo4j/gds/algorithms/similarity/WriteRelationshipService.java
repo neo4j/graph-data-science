@@ -56,27 +56,7 @@ public class WriteRelationshipService {
         GraphStore graphStore,
         IdMap rootIdMap,
         String taskName,
-        Optional<ArrowConnectionInfo> arrowConnectionInfo
-    ) {
-        return write(
-            writeRelationshipType,
-            writeProperty,
-            graph,
-            graphStore,
-            rootIdMap,
-            taskName,
-            arrowConnectionInfo,
-            (sourceNodeId, targetNodeId, property) -> true
-        );
-    }
-
-    public WriteRelationshipResult write(
-        String writeRelationshipType,
-        String writeProperty,
-        Graph graph,
-        GraphStore graphStore,
-        IdMap rootIdMap,
-        String taskName,
+        Integer concurrency,
         Optional<ArrowConnectionInfo> arrowConnectionInfo,
         RelationshipWithPropertyConsumer relationshipWithPropertyConsumer
     ) {
@@ -91,6 +71,7 @@ public class WriteRelationshipService {
             log,
             taskName,
             terminationFlag,
+            concurrency,
             arrowConnectionInfo,
             relationshipWithPropertyConsumer
         );
