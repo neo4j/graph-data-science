@@ -1,11 +1,6 @@
 ext {
     neos = [
         '4.4': properties.getOrDefault('neo4jVersion44', '4.4.30'),
-        '5.6': properties.getOrDefault('neo4jVersion56', '5.6.0'),
-        '5.7': properties.getOrDefault('neo4jVersion57', '5.7.0'),
-        '5.8': properties.getOrDefault('neo4jVersion58', '5.8.0'),
-        '5.9': properties.getOrDefault('neo4jVersion59', '5.9.0'),
-        '5.10': properties.getOrDefault('neo4jVersion510', '5.10.0'),
         '5.11': properties.getOrDefault('neo4jVersion511', '5.11.0'),
         '5.12': properties.getOrDefault('neo4jVersion512', '5.12.0'),
         '5.13': properties.getOrDefault('neo4jVersion513', '5.13.0'),
@@ -19,14 +14,7 @@ ext {
     neo4j_minor = properties.getOrDefault('neo4jVersion', neo4jDefault).toString().split('\\.')[0..1].join('.')
 
     scalas = [
-        '4.3': '2.12.13',
         '4.4': '2.12.13',
-        '5.0': '2.13.8',
-        '5.6': '2.13.8',
-        '5.7': '2.13.10',
-        '5.8': '2.13.10',
-        '5.9': '2.13.10',
-        '5.10': '2.13.10',
         '5.11': '2.13.11',
         '5.12': '2.13.11',
         '5.13': '2.13.11',
@@ -38,11 +26,6 @@ ext {
 
     log4js = [
         '4.4': '2.17.0',
-        '5.6': '2.19.0',
-        '5.7': '2.20.0',
-        '5.8': '2.20.0',
-        '5.9': '2.20.0',
-        '5.10': '2.20.0',
         '5.11': '2.20.0',
         '5.12': '2.20.0',
         '5.13': '2.20.0',

@@ -28,16 +28,6 @@ import java.util.stream.IntStream;
 
 public enum Neo4jVersion {
     V_4_4,
-    V_5_1,
-    V_5_2,
-    V_5_3,
-    V_5_4,
-    V_5_5,
-    V_5_6,
-    V_5_7,
-    V_5_8,
-    V_5_9,
-    V_5_10,
     V_5_11,
     V_5_12,
     V_5_13,
@@ -71,16 +61,6 @@ public enum Neo4jVersion {
             return Neo4jVersion.V_4_4;
         } else if (majorVersion == 5) {
             switch (minorVersion) {
-                case 6:
-                    return Neo4jVersion.V_5_6;
-                case 7:
-                    return Neo4jVersion.V_5_7;
-                case 8:
-                    return Neo4jVersion.V_5_8;
-                case 9:
-                    return Neo4jVersion.V_5_9;
-                case 10:
-                    return Neo4jVersion.V_5_10;
                 case 11:
                     return Neo4jVersion.V_5_11;
                 case 12:
@@ -151,16 +131,6 @@ public enum Neo4jVersion {
         switch (this) {
             case V_4_4:
                 return "4.4";
-            case V_5_6:
-                return "5.6";
-            case V_5_7:
-                return "5.7";
-            case V_5_8:
-                return "5.8";
-            case V_5_9:
-                return "5.9";
-            case V_5_10:
-                return "5.10";
             case V_5_11:
                 return "5.11";
             case V_5_12:
