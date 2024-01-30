@@ -25,12 +25,12 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
-import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.gds.utils.StatementApi;
@@ -38,7 +38,7 @@ import org.neo4j.internal.kernel.api.Write;
 import org.neo4j.internal.kernel.api.exceptions.EntityNotFoundException;
 import org.neo4j.internal.kernel.api.exceptions.schema.ConstraintValidationException;
 
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.LongUnaryOperator;
 
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
@@ -48,9 +48,9 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
     private final Graph graph;
     private final LongUnaryOperator toOriginalId;
     private final RelationshipPropertyTranslator propertyTranslator;
+    private final int concurrency;
     private final TerminationFlag terminationFlag;
     private final ProgressTracker progressTracker;
-    private final ExecutorService executorService;
 
     public static RelationshipExporterBuilder builder(
         TransactionContext transactionContext,
@@ -82,6 +82,7 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
         Graph graph,
         LongUnaryOperator toOriginalId,
         RelationshipPropertyTranslator propertyTranslator,
+        int concurrency,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker
     ) {
@@ -89,9 +90,9 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
         this.graph = graph;
         this.toOriginalId = toOriginalId;
         this.propertyTranslator = propertyTranslator;
+        this.concurrency = concurrency;
         this.terminationFlag = terminationFlag;
         this.progressTracker = progressTracker;
-        this.executorService = ExecutorServiceUtil.DEFAULT_SINGLE_THREAD_POOL;
     }
 
     @Override
@@ -119,8 +120,6 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
     }
 
     private void write(int relationshipTypeToken, int propertyKeyToken, @Nullable RelationshipWithPropertyConsumer afterWriteConsumer) {
-        // We use MIN_BATCH_SIZE since writing relationships
-        // is performed batch-wise, but single-threaded.
         var tasks = PartitionUtils.degreePartitionWithBatchSize(
             graph,
             NativeNodePropertyExporter.MIN_BATCH_SIZE,
@@ -134,7 +133,16 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
 
         progressTracker.beginSubTask();
         try {
-            tasks.forEach(runnable -> ParallelUtil.run(runnable, executorService));
+            RunWithConcurrency
+                .builder()
+                .concurrency(concurrency)
+                .tasks(tasks)
+                .maxWaitRetries(Integer.MAX_VALUE)
+                .waitTime(10L, TimeUnit.MICROSECONDS)
+                .terminationFlag(terminationFlag)
+                .executor(DefaultPool.INSTANCE)
+                .mayInterruptIfRunning(false)
+                .run();
         } finally {
             progressTracker.endSubTask();
         }

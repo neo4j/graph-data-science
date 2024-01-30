@@ -38,6 +38,7 @@ public abstract class RelationshipExporterBuilder {
     protected ProgressTracker progressTracker = ProgressTracker.NULL_TRACKER;
     protected RelationshipPropertyTranslator propertyTranslator = Values::doubleValue;
     protected Optional<ArrowConnectionInfo> arrowConnectionInfo = Optional.empty();
+    protected int concurrency = Runtime.getRuntime().availableProcessors();
     protected Optional<String> remoteDatabaseName; // coupled with arrowConnectionInfo, but should not appear in external API
 
     public abstract RelationshipExporter build();
@@ -79,6 +80,11 @@ public abstract class RelationshipExporterBuilder {
     public RelationshipExporterBuilder withArrowConnectionInfo(Optional<ArrowConnectionInfo> arrowConnectionInfo, Optional<String> remoteDatabaseName) {
         this.remoteDatabaseName = remoteDatabaseName;
         this.arrowConnectionInfo = arrowConnectionInfo;
+        return this;
+    }
+
+    public RelationshipExporterBuilder withConcurrency(int concurrency) {
+        this.concurrency = concurrency;
         return this;
     }
 
