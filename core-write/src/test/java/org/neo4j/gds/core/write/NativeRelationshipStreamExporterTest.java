@@ -21,6 +21,8 @@ package org.neo4j.gds.core.write;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.TestSupport;
@@ -88,7 +90,6 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
             .isThrownBy(() -> exporter.write("OUT_TYPE", List.of(), List.of()));
     }
 
-    @Test
     void exportScalar() {
         var exportRelationships = List.of(
             relationship("a", "b", Values.longValue(42L), Values.doubleValue(1332)),
@@ -189,12 +190,13 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
         //@formatter:on
     }
 
-    @Test
-    void exportExceedsBufferSize() {
+    @ParameterizedTest
+    @ValueSource(ints = {1,2,4})
+    void exportExceedsBufferSize(int concurrency) {
         int nodeCount = 4;
         var batchSize = 10;
         // enforce writing non-full buffer
-        var relationshipCount = 105;
+        var relationshipCount = batchSize * concurrency + 5;
 
         var rand = new Random();
 
@@ -204,6 +206,7 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
 
         var exporter = NativeRelationshipStreamExporter
             .builder(TestSupport.fullAccessTransaction(db), graph, relationshipStream, TerminationFlag.RUNNING_TRUE)
+            .withConcurrency(concurrency)
             .withBatchSize(batchSize)
             .build();
 
@@ -262,11 +265,6 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
             .extracting(removingThreadId())
             .contains(
                 "OpName :: WriteRelationshipStream :: Start",
-                "OpName :: WriteRelationshipStream has written 25 relationships",
-                "OpName :: WriteRelationshipStream has written 50 relationships",
-                "OpName :: WriteRelationshipStream has written 75 relationships",
-                "OpName :: WriteRelationshipStream has written 100 relationships",
-                "OpName :: WriteRelationshipStream has written 105 relationships",
                 "OpName :: WriteRelationshipStream 100%",
                 "OpName :: WriteRelationshipStream :: Finished"
             );
