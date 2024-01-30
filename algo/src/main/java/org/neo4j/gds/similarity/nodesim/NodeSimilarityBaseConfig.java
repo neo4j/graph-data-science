@@ -52,8 +52,7 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
 
     String COMPONENT_PROPERTY_KEY = "componentProperty";
 
-    String CONSIDER_COMPONENTS_KEY = "considerComponents";
-    boolean CONSIDER_COMPONENTS = false;
+    String APPLY_WCC = "applyWcc";
 
     @Configuration.DoubleRange(min = 0, max = 1)
     default double similarityCutoff() {
@@ -104,8 +103,8 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
     @Configuration.Key(COMPONENT_PROPERTY_KEY)
     default @Nullable String componentProperty() { return null; }
 
-    @Configuration.Key(CONSIDER_COMPONENTS_KEY)
-    default boolean considerComponents() { return CONSIDER_COMPONENTS; }
+    @Configuration.Key(APPLY_WCC)
+    default boolean applyWcc() {return false;}
 
     @Configuration.Ignore
     default int normalizedK() {
@@ -186,8 +185,13 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
     }
 
     @Configuration.Ignore
-    default boolean runWCC() {
-        return considerComponents() && componentProperty() == null;
+    default boolean actuallyRunWCC() {
+        return enableComponentsOptimization() && componentProperty() == null;
+    }
+
+    @Configuration.Ignore
+    default boolean enableComponentsOptimization() {
+        return applyWcc() || componentProperty() != null;
     }
 
 }

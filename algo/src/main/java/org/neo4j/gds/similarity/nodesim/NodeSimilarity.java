@@ -205,7 +205,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         progressTracker.beginSubTask();
 
         components = initComponents();
-        if (config.runWCC()) {
+        if (config.actuallyRunWCC()) {
             progressTracker.beginSubTask();
         }
         initNodeSpecificFields();
@@ -213,8 +213,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         sourceNodesStream = initSourceNodesStream();
 
         targetNodesStream = initTargetNodesStream();
-        
-        if (config.runWCC()) {
+
+        if (config.actuallyRunWCC()) {
             progressTracker.endSubTask();
         }
         progressTracker.endSubTask();
@@ -239,7 +239,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     }
 
     private LongUnaryOperator initComponents() {
-        if (!config.considerComponents()) {
+        if (!config.enableComponentsOptimization()) {
             // considering everything as within the same component
             return n -> 0;
         }
@@ -410,7 +410,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     }
 
     private BiFunction<Long, Long, LongStream> initTargetNodesStream() {
-        if (!config.considerComponents()) {
+        if (!config.enableComponentsOptimization()) {
             return (componentId, offset) -> new SetBitsIterable(targetNodes, offset).stream();
         }
 

@@ -34,6 +34,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.wcc.WccAlgorithmFactory;
+import org.neo4j.gds.wcc.WccMemoryEstimateDefinition;
 import org.neo4j.gds.wcc.WccStreamConfig;
 import org.neo4j.gds.wcc.WccStreamConfigImpl;
 
@@ -92,12 +93,18 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
                     .rangePerNode("array", nodeCount -> MemoryRange.of(0, nodeCount * averageVectorSize))
                     .build();
             }));
-        if (config.considerComponents()) {
+        if (config.enableComponentsOptimization()) {
             builder.perNode("nodes sorted by component", HugeLongArray::memoryEstimation);
             builder.perNode("upper bound per component", HugeAtomicLongArray::memoryEstimation);
-        }
-        if (config.considerComponents() && config.componentProperty() != null) {
-            builder.perNode("component mapping", HugeLongArray::memoryEstimation);
+            
+            if (config.actuallyRunWCC()) {
+                WccStreamConfig internalWccConfig = WccStreamConfigImpl.builder()
+                    .concurrency(config.concurrency())
+                    .build();
+                builder.add("wcc", new WccMemoryEstimateDefinition().memoryEstimation(internalWccConfig));
+            } else {
+                builder.perNode("component mapping", HugeLongArray::memoryEstimation);
+            }
         }
         if (config.computeToGraph() && !config.hasTopK()) {
             builder.add(
@@ -132,7 +139,7 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
     }
 
     private Task prepareTask(Graph graph, CONFIG config) {
-        if (config.runWCC()) {
+        if (config.actuallyRunWCC()) {
             WccStreamConfig wccStreamConfig = WccStreamConfigImpl.builder().build();
             return Tasks.task("prepare", new WccAlgorithmFactory<>().progressTask(graph, wccStreamConfig),
                 Tasks.leaf("initialize", graph.relationshipCount()));
