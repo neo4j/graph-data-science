@@ -110,6 +110,7 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
 
             // configure the exporter
             var relationshipStreamExporter = exporterBuilder
+                .withConcurrency(configuration.writeConcurrency())
                 .withArrowConnectionInfo(
                     configuration.arrowConnectionInfo(),
                     graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
