@@ -277,6 +277,7 @@ class LouvainWriteProcTest extends BaseProcTest {
             .algo("louvain")
             .writeMode()
             .addParameter("writeProperty", "writeProperty")
+            .addParameter("concurrency", 1)
             .addAllParameters(parameters)
             .yields("communityCount");
 
