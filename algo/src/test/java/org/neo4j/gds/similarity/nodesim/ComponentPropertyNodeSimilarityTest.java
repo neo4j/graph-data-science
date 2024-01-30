@@ -149,8 +149,7 @@ public class ComponentPropertyNodeSimilarityTest {
             .topK(TOP_K_DEFAULT)
             .writeProperty("writeProperty")
             .writeRelationshipType("writeRelationshipType")
-            .applyWcc(true)
-            .componentProperty(componentPropertySet ? "compid" : null)
+            .useComponents(componentPropertySet ? "compid" : true)
             .build();
 
         MemoryTree actual = new NodeSimilarityFactory<>().memoryEstimation(config).estimate(dimensions, 1);
@@ -198,7 +197,7 @@ public class ComponentPropertyNodeSimilarityTest {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
         var config = NodeSimilarityStreamConfigImpl.builder()
             .similarityCutoff(0.0)
-            .componentProperty("compid")
+            .useComponents("compid")
             .concurrency(concurrency)
             .build();
 

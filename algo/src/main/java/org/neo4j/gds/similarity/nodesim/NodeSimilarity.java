@@ -239,14 +239,15 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     }
 
     private LongUnaryOperator initComponents() {
-        if (!config.enableComponentsOptimization()) {
+        var componentsUsage = config.useComponents();
+        if (!componentsUsage.useComponents()) {
             // considering everything as within the same component
             return n -> 0;
         }
 
-        if (config.componentProperty() != null) {
+        if (componentsUsage.usePreComputedComponents()) {
             // extract component info from property
-            NodePropertyValues nodeProperties = graph.nodeProperties(config.componentProperty());
+            NodePropertyValues nodeProperties = graph.nodeProperties(componentsUsage.componentProperty());
             return initComponentIdMapping(graph, nodeProperties::longValue);
         }
 

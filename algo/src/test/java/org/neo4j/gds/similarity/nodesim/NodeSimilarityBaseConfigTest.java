@@ -35,7 +35,7 @@ class NodeSimilarityBaseConfigTest {
 
     @Test
     void shouldRequestWccIfEnabled(){
-        var config = NodeSimilarityStreamConfigImpl.builder().applyWcc(true).build();
+        var config = NodeSimilarityStreamConfigImpl.builder().useComponents(true).build();
 
         assertThat(config.actuallyRunWCC()).isTrue();
         assertThat(config.enableComponentsOptimization()).isTrue();
@@ -43,18 +43,9 @@ class NodeSimilarityBaseConfigTest {
 
     @Test
     void shouldNotRequestWccIfPropertyGiven(){
-        var config = NodeSimilarityStreamConfigImpl.builder().componentProperty("foo").build();
+        var config = NodeSimilarityStreamConfigImpl.builder().useComponents("foo").build();
 
         assertThat(config.actuallyRunWCC()).isFalse();
         assertThat(config.enableComponentsOptimization()).isTrue();
     }
-
-    @Test
-    void shouldNotRequestWccIfPropertyGivenAndWccProvided(){
-        var config = NodeSimilarityStreamConfigImpl.builder().applyWcc(true).componentProperty("foo").build();
-
-        assertThat(config.actuallyRunWCC()).isFalse();
-        assertThat(config.enableComponentsOptimization()).isTrue();
-    }
-
 }
