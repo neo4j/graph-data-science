@@ -49,6 +49,7 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
     private final LongUnaryOperator toOriginalId;
     private final RelationshipPropertyTranslator propertyTranslator;
     private final int concurrency;
+    private final long batchSize;
     private final TerminationFlag terminationFlag;
     private final ProgressTracker progressTracker;
 
@@ -83,6 +84,7 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
         LongUnaryOperator toOriginalId,
         RelationshipPropertyTranslator propertyTranslator,
         int concurrency,
+        long batchSize,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker
     ) {
@@ -91,6 +93,7 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
         this.toOriginalId = toOriginalId;
         this.propertyTranslator = propertyTranslator;
         this.concurrency = concurrency;
+        this.batchSize = batchSize;
         this.terminationFlag = terminationFlag;
         this.progressTracker = progressTracker;
     }
@@ -122,7 +125,7 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
     private void write(int relationshipTypeToken, int propertyKeyToken, @Nullable RelationshipWithPropertyConsumer afterWriteConsumer) {
         var tasks = PartitionUtils.degreePartitionWithBatchSize(
             graph,
-            NativeNodePropertyExporter.MIN_BATCH_SIZE,
+            batchSize,
             partition -> createBatchRunnable(
                 relationshipTypeToken,
                 propertyKeyToken,

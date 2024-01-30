@@ -39,6 +39,7 @@ public final class NativeRelationshipExporterBuilder extends RelationshipExporte
             toOriginalId,
             propertyTranslator,
             concurrency,
+            batchSize,
             terminationFlag,
             progressTracker
         );

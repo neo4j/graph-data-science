@@ -259,6 +259,7 @@ class NativeRelationshipExporterTest extends BaseTest {
         // export into new database
         return NativeRelationshipExporter
             .builder(TestSupport.fullAccessTransaction(db), fromGraph, RUNNING_TRUE)
+            .withBatchSize(1)
             .withConcurrency(concurrency)
             .build();
     }
