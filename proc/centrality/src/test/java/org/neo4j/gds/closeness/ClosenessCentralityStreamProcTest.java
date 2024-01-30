@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.closeness;
 
-import org.hamcrest.Matchers;
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
@@ -30,8 +30,10 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 
-import java.util.List;
 import java.util.Map;
+
+import static java.util.Map.entry;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class ClosenessCentralityStreamProcTest extends BaseProcTest {
 
@@ -86,7 +88,7 @@ class ClosenessCentralityStreamProcTest extends BaseProcTest {
     @Inject
     private IdFunction idFunction;
 
-    private List<Map<String, Object>> expectedCentralityResult;
+    private Map<Long, Double> expectedCentralityResult;
 
     @BeforeEach
     void setupGraph() throws Exception {
@@ -95,19 +97,20 @@ class ClosenessCentralityStreamProcTest extends BaseProcTest {
             GraphProjectProc.class
         );
 
-        expectedCentralityResult = List.of(
-            Map.of("nodeId", idFunction.of("n0"), "score", Matchers.closeTo(1.0, 0.01)),
-            Map.of("nodeId", idFunction.of("n1"), "score", Matchers.closeTo(0.588, 0.01)),
-            Map.of("nodeId", idFunction.of("n2"), "score", Matchers.closeTo(0.588, 0.01)),
-            Map.of("nodeId", idFunction.of("n3"), "score", Matchers.closeTo(0.588, 0.01)),
-            Map.of("nodeId", idFunction.of("n4"), "score", Matchers.closeTo(0.588, 0.01)),
-            Map.of("nodeId", idFunction.of("n5"), "score", Matchers.closeTo(0.588, 0.01)),
-            Map.of("nodeId", idFunction.of("n6"), "score", Matchers.closeTo(0.588, 0.01)),
-            Map.of("nodeId", idFunction.of("n7"), "score", Matchers.closeTo(0.588, 0.01)),
-            Map.of("nodeId", idFunction.of("n8"), "score", Matchers.closeTo(0.588, 0.01)),
-            Map.of("nodeId", idFunction.of("n9"), "score", Matchers.closeTo(0.588, 0.01)),
-            Map.of("nodeId", idFunction.of("n10"), "score", Matchers.closeTo(0.588, 0.01))
+        expectedCentralityResult = Map.ofEntries(
+            entry(idFunction.of("n0"), 1.0),
+            entry(idFunction.of("n1"), 0.588),
+            entry(idFunction.of("n2"), 0.588),
+            entry(idFunction.of("n3"), 0.588),
+            entry(idFunction.of("n4"), 0.588),
+            entry(idFunction.of("n5"), 0.588),
+            entry(idFunction.of("n6"), 0.588),
+            entry(idFunction.of("n7"), 0.588),
+            entry(idFunction.of("n8"), 0.588),
+            entry(idFunction.of("n9"), 0.588),
+            entry(idFunction.of("n10"), 0.588)
         );
+
         loadCompleteGraph(DEFAULT_GRAPH_NAME, Orientation.UNDIRECTED);
     }
 
@@ -118,7 +121,13 @@ class ClosenessCentralityStreamProcTest extends BaseProcTest {
             .streamMode()
             .yields("nodeId", "score");
 
-        assertCypherResult(query, expectedCentralityResult);
+        var rowCount = runQueryWithRowConsumer(query, row -> {
+                var nodeId = row.getNumber("nodeId").longValue();
+                var property = row.getNumber("score").doubleValue();
+                assertThat(expectedCentralityResult.get(nodeId)).isCloseTo(property, Offset.offset(0.01));
+            }
+        );
+        assertThat(rowCount).isEqualTo(11);
     }
     
 }
