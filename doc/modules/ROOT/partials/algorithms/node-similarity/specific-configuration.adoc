@@ -23,4 +23,4 @@ If unspecified, the algorithm runs unweighted.
 Can be either `JACCARD`, `OVERLAP` or `COSINE`.
 | [[runwcc-{instance}]] runWcc                                       | Boolean | false   | yes      | If enabled, an optimization which can increase performance for multi-component graphs is applied:  nodes in  distinct components always have a similarity of 0 and we can avoid comparing them.
 As a pre-processing step xref:algorithms/wcc.adoc[WCC] is run to obtain the components.
-| [[component-property-{instance}]] componentProperty                                         | String  | null    | yes      | If the components are available as a node property, they can be passed via this parameter rather than running WCC as discussed in the above  xref:#runwcc-{instance} [component optimization].
+| [[component-property-{instance}]] componentProperty                                         | String  | null    | yes      | Node property containing the ID of the graph components. If not available, use the `runWcc` configuration parameter instead.
