@@ -139,7 +139,7 @@ class FilteredNodeSimilarityTest {
         var config = FilteredNodeSimilarityStreamConfigImpl.builder()
             .sourceNodeFilter(NodeFilterSpecFactory.create(sourceNodeFilter))
             .concurrency(1)
-            .applyWcc(enableWcc)
+            .useComponents(enableWcc)
             .topK(1)
             .topN(10)
             .build();

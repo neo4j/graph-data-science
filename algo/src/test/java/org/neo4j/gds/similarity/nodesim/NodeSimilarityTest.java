@@ -878,7 +878,7 @@ final class NodeSimilarityTest {
     void shouldLogProgressForWccOptimization() {
         var graph = naturalGraph;
         var config = NodeSimilarityStreamConfigImpl.builder()
-            .applyWcc(true)
+            .useComponents(true)
             .concurrency(4)
             .build();
         var progressTask = new NodeSimilarityFactory<>().progressTask(graph, config);
