@@ -27,7 +27,6 @@ import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 public enum Neo4jVersion {
-    V_4_4,
     V_5_11,
     V_5_12,
     V_5_13,
@@ -57,9 +56,7 @@ public enum Neo4jVersion {
         var majorVersion = majorMinorVersion[0];
         var minorVersion = majorMinorVersion[1];
 
-        if (majorVersion == 4 && minorVersion == 4) {
-            return Neo4jVersion.V_4_4;
-        } else if (majorVersion == 5) {
+        if (majorVersion == 5) {
             switch (minorVersion) {
                 case 11:
                     return Neo4jVersion.V_5_11;
@@ -129,8 +126,6 @@ public enum Neo4jVersion {
     @Override
     public String toString() {
         switch (this) {
-            case V_4_4:
-                return "4.4";
             case V_5_11:
                 return "5.11";
             case V_5_12:

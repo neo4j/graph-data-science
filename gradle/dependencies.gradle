@@ -1,6 +1,5 @@
 ext {
     neos = [
-        '4.4': properties.getOrDefault('neo4jVersion44', '4.4.30'),
         '5.11': properties.getOrDefault('neo4jVersion511', '5.11.0'),
         '5.12': properties.getOrDefault('neo4jVersion512', '5.12.0'),
         '5.13': properties.getOrDefault('neo4jVersion513', '5.13.0'),
@@ -10,12 +9,10 @@ ext {
         '5.17': properties.getOrDefault('neo4jVersion516', '5.17.0'),
     ]
 
-    neo4jDefault = neos.'4.4'
+    neo4jDefault = neos.'5.16'
     neo4j_minor = properties.getOrDefault('neo4jVersion', neo4jDefault).toString().split('\\.')[0..1].join('.')
 
     scalas = [
-        '4.3': '2.12.13',
-        '4.4': '2.12.13',
         '5.11': '2.13.11',
         '5.12': '2.13.11',
         '5.13': '2.13.11',
@@ -26,7 +23,6 @@ ext {
     ]
 
     log4js = [
-        '4.4': '2.17.0',
         '5.11': '2.20.0',
         '5.12': '2.20.0',
         '5.13': '2.20.0',
@@ -98,6 +94,7 @@ def neo_deps = [
     'neo4j-common',
     'neo4j-concurrent',
     'neo4j-configuration',
+    'neo4j-cypher-runtime-util',
     'neo4j-diagnostics',
     'neo4j-fabric',
     'neo4j-graphdb-api',
@@ -116,19 +113,12 @@ def neo_deps = [
     'neo4j-resource',
     'neo4j-schema',
     'neo4j-ssl',
-    'neo4j-storage-engine-api',
     'neo4j-token-api',
     'neo4j-unsafe',
     'neo4j-values',
     'neo4j',
 ]
 
-def neo_deps_50 = neo_deps - ['neo4j-storage-engine-api', 'neo4j-cypher-runtime-util']
-
 ext.neodeps = {
-    if (ver.'neo4j'.startsWith('5.')) {
-        neo_deps_50.iterator()
-    } else {
-        neo_deps.iterator()
-    }
+    neo_deps.iterator()
 }

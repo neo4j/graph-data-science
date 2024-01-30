@@ -152,9 +152,6 @@ project(':neo4j-kernel-adapter').projectDir = file('compatibility/common/neo4j-k
 include('neo4j-kernel-adapter-5-common')
 project(':neo4j-kernel-adapter-5-common').projectDir = file('compatibility/5-common/neo4j-kernel-adapter')
 
-include('neo4j-kernel-adapter-4.4')
-project(':neo4j-kernel-adapter-4.4').projectDir = file('compatibility/4.4/neo4j-kernel-adapter')
-
 include('neo4j-kernel-adapter-5.6')
 project(':neo4j-kernel-adapter-5.6').projectDir = file('compatibility/5.6/neo4j-kernel-adapter')
 
@@ -262,9 +259,6 @@ project(':progress-tracking').projectDir = file('progress-tracking')
 
 include('storage-engine-adapter')
 project(':storage-engine-adapter').projectDir = file('compatibility/common/storage-engine-adapter')
-
-include('storage-engine-adapter-4.4')
-project(':storage-engine-adapter-4.4').projectDir = file('compatibility/4.4/storage-engine-adapter')
 
 include('storage-engine-adapter-5.11')
 project(':storage-engine-adapter-5.11').projectDir = file('compatibility/5.11/storage-engine-adapter')

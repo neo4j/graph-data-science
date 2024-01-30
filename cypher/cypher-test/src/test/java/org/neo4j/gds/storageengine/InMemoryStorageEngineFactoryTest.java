@@ -20,8 +20,6 @@
 package org.neo4j.gds.storageengine;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.compat.Neo4jVersion;
-import org.neo4j.gds.junit.annotation.EnableForNeo4jVersion;
 import org.neo4j.storageengine.api.StorageEngineFactory;
 
 import java.util.ServiceLoader;
@@ -31,7 +29,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class InMemoryStorageEngineFactoryTest {
 
-    @EnableForNeo4jVersion(Neo4jVersion.V_4_4)
     @Test
     void allStorageEnginesHaveUniqueNames() {
         var storageEngines = ServiceLoader

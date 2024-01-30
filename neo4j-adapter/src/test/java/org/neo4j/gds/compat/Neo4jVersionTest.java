@@ -35,9 +35,6 @@ class Neo4jVersionTest {
 
     @ParameterizedTest
     @CsvSource({
-        "4.4.0-drop04, V_4_4",
-        "4.4.0, V_4_4",
-        "4.4.14, V_4_4",
         "5.11.0, V_5_11",
         "5.12.0, V_5_12",
         "5.13.0, V_5_13",
@@ -88,8 +85,6 @@ class Neo4jVersionTest {
     @ParameterizedTest
     @CsvSource(
         {
-            "4.4.0-drop04, 4, 4",
-            "4.4.14, 4, 4",
             "5.11.0, 5, 11",
             "5.12.0, 5, 12",
             "5.13.0, 5, 13",
