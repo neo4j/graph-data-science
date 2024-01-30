@@ -34,11 +34,8 @@ class ModularityOptimizationMemoryEstimateDefinitionTest {
     @ParameterizedTest
     @MethodSource("memoryEstimationTuples")
     void testMemoryEstimation(int concurrency, long min, long max) {
-
         var config = mock(ModularityOptimizationBaseConfig.class);
-
         var memoryEstimation = new ModularityOptimizationMemoryEstimateDefinition().memoryEstimation(config);
-
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(100_000L,  concurrency)
             .hasMax(max)
@@ -47,9 +44,9 @@ class ModularityOptimizationMemoryEstimateDefinitionTest {
 
     static Stream<Arguments> memoryEstimationTuples() {
         return Stream.of(
-            arguments(1, 5614040, 8413072),
-            arguments(4, 5617328, 14413336),
-            arguments(42, 5658976, 90416680)
+            arguments(1, 5614032, 8413064),
+            arguments(4, 5617320, 14413328),
+            arguments(42, 5658968, 90416672)
         );
     }
 

@@ -32,7 +32,6 @@ import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -57,7 +56,12 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @ExtendWith(SoftAssertionsExtension.class)
 class LabelPropagationTest {
 
-    private static final LabelPropagationStreamConfig DEFAULT_CONFIG = LabelPropagationStreamConfig.of(CypherMapWrapper.empty());
+    private static final LabelPropagationParameters DEFAULT_PARAMETERS = LabelPropagationParameters.create(
+        4,
+        10,
+        null,
+        null
+    );
 
     // override idOffset for seedId to be actual neo4j ids
     @GdlGraph
@@ -90,7 +94,7 @@ class LabelPropagationTest {
     void shouldUseOriginalNodeIdWhenSeedPropertyIsMissing() {
         LabelPropagation lp = new LabelPropagation(
             graph,
-            LabelPropagationStreamConfigImpl.builder().maxIterations(1).build(),
+            LabelPropagationParameters.create(4, 1, null, null),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -112,11 +116,7 @@ class LabelPropagationTest {
     void shouldUseSeedProperty() {
         LabelPropagation lp = new LabelPropagation(
             graph,
-            LabelPropagationStreamConfigImpl
-                .builder()
-                .seedProperty("seedId")
-                .maxIterations(1)
-                .build(),
+            LabelPropagationParameters.create(4, 1, null, "seedId"),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -153,7 +153,7 @@ class LabelPropagationTest {
     private void testLPClustering(TestGraph graph, int batchSize) {
         LabelPropagation lp = new LabelPropagation(
             graph,
-            DEFAULT_CONFIG,
+            DEFAULT_PARAMETERS,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -212,18 +212,18 @@ class LabelPropagationTest {
 
     @Test
     void shouldLogProgress() {
-        var progressTask = new LabelPropagationFactory<>().progressTask(graph, DEFAULT_CONFIG);
+        var progressTask = new LabelPropagationFactory<>().progressTask(graph.relationshipCount(), DEFAULT_PARAMETERS.maxIterations());
         var log = Neo4jProxy.testLog();
         var testTracker = new TestProgressTracker(
             progressTask,
             log,
-            DEFAULT_CONFIG.concurrency(),
+            DEFAULT_PARAMETERS.concurrency(),
             EmptyTaskRegistryFactory.INSTANCE
         );
 
         var lp = new LabelPropagation(
             graph,
-            DEFAULT_CONFIG,
+            DEFAULT_PARAMETERS,
             DefaultPool.INSTANCE,
             testTracker
         );
@@ -238,8 +238,8 @@ class LabelPropagationTest {
 
         assertTrue(log.containsMessage(TestLog.INFO, ":: Start"));
         LongStream.range(1, result.ranIterations() + 1).forEach(iteration -> {
-            assertTrue(log.containsMessage(TestLog.INFO, formatWithLocale("Iteration %d of %d :: Start", iteration, DEFAULT_CONFIG.maxIterations())));
-            assertTrue(log.containsMessage(TestLog.INFO, formatWithLocale("Iteration %d of %d :: Start", iteration, DEFAULT_CONFIG.maxIterations())));
+            assertTrue(log.containsMessage(TestLog.INFO, formatWithLocale("Iteration %d of %d :: Start", iteration, DEFAULT_PARAMETERS.maxIterations())));
+            assertTrue(log.containsMessage(TestLog.INFO, formatWithLocale("Iteration %d of %d :: Start", iteration, DEFAULT_PARAMETERS.maxIterations())));
         });
         assertTrue(log.containsMessage(TestLog.INFO, ":: Finished"));
     }

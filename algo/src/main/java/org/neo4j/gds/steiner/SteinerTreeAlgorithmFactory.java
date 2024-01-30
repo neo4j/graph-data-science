@@ -28,33 +28,33 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Collectors;
 
 public class SteinerTreeAlgorithmFactory<CONFIG extends SteinerTreeBaseConfig> extends GraphAlgorithmFactory<ShortestPathsSteinerAlgorithm, CONFIG> {
 
-    private List<Long> getTargetNodes(Graph graph, CONFIG configuration) {
-        return configuration.targetNodes().stream()
-            .map(graph::safeToMappedNodeId)
-            .collect(Collectors.toList());
-    }
-
-    @Override
     public ShortestPathsSteinerAlgorithm build(
-        Graph graphOrGraphStore,
-        CONFIG configuration,
+        Graph graph,
+        SteinerTreeParameters parameters,
         ProgressTracker progressTracker
     ) {
+        var mappedTargetNodes = parameters.targetNodes().stream()
+            .map(graph::safeToMappedNodeId)
+            .collect(Collectors.toList());
         return new ShortestPathsSteinerAlgorithm(
-            graphOrGraphStore,
-            graphOrGraphStore.toMappedNodeId(configuration.sourceNode()),
-            getTargetNodes(graphOrGraphStore, configuration),
-            configuration.delta(),
-            configuration.concurrency(),
-            configuration.applyRerouting(),
+            graph,
+            graph.toMappedNodeId(parameters.sourceNode()),
+            mappedTargetNodes,
+            parameters.delta(),
+            parameters.concurrency(),
+            parameters.applyRerouting(),
             DefaultPool.INSTANCE,
             progressTracker
         );
+    }
+
+    @Override
+    public ShortestPathsSteinerAlgorithm build(Graph graph, CONFIG configuration, ProgressTracker progressTracker) {
+        return build(graph, configuration.toParameters(), progressTracker);
     }
 
     @Override
@@ -62,16 +62,19 @@ public class SteinerTreeAlgorithmFactory<CONFIG extends SteinerTreeBaseConfig> e
         return "SteinerTree";
     }
 
-    @Override
-    public Task progressTask(Graph graph, CONFIG config) {
-        var targetNodesSize = config.targetNodes().size();
+    public Task progressTask(Graph graph, int targetNodesSize, boolean applyRerouting) {
         var subtasks = new ArrayList<Task>();
         subtasks.add(Tasks.leaf("Traverse", targetNodesSize));
-        if (config.applyRerouting()) {
+        if (applyRerouting) {
             long nodeCount = graph.nodeCount();
             subtasks.add(Tasks.leaf("Reroute", nodeCount));
         }
         return Tasks.task(taskName(), subtasks);
+    }
+
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        return progressTask(graph, config.targetNodes().size(), config.applyRerouting());
     }
 
     @Override

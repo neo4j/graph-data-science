@@ -53,46 +53,21 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
     private final HugeAtomicIntArray component;
     private final CentralityComputer centralityComputer;
 
-    public static ClosenessCentrality of(
+    ClosenessCentrality(
         Graph graph,
-        ClosenessCentralityBaseConfig config,
-        ExecutorService executorService,
-        ProgressTracker progressTracker
-    ) {
-        var nodeCount = graph.nodeCount();
-        var centralityComputer = config.useWassermanFaust()
-            ? new WassermanFaustCentralityComputer(nodeCount)
-            : new DefaultCentralityComputer();
-        return new ClosenessCentrality(
-            graph,
-            nodeCount,
-            config.concurrency(),
-            centralityComputer,
-            HugeAtomicIntArray.of(nodeCount, ParallelIntPageCreator.of(config.concurrency())),
-            HugeAtomicIntArray.of(nodeCount, ParallelIntPageCreator.of(config.concurrency())),
-            executorService,
-            progressTracker
-        );
-    }
-
-    private ClosenessCentrality(
-        Graph graph,
-        long nodeCount,
         int concurrency,
         CentralityComputer centralityComputer,
-        HugeAtomicIntArray farness,
-        HugeAtomicIntArray component,
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
-        this.nodeCount = nodeCount;
+        this.nodeCount = graph.nodeCount();
         this.concurrency = concurrency;
         this.executorService = executorService;
         this.centralityComputer = centralityComputer;
-        this.farness = farness;
-        this.component = component;
+        this.farness = HugeAtomicIntArray.of(nodeCount, ParallelIntPageCreator.of(concurrency));
+        this.component = HugeAtomicIntArray.of(nodeCount, ParallelIntPageCreator.of(concurrency));
     }
 
     @Override

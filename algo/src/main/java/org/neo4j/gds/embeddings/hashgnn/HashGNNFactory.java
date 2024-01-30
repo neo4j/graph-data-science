@@ -36,17 +36,25 @@ public class HashGNNFactory<CONFIG extends HashGNNConfig> extends GraphAlgorithm
         return "HashGNN";
     }
 
+    public HashGNN build(
+        Graph graph,
+        HashGNNParameters parameters,
+        ProgressTracker progressTracker
+    ) {
+        return new HashGNN(
+            graph,
+            parameters,
+            progressTracker
+        );
+    }
+
     @Override
     public HashGNN build(
         Graph graph,
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-        return new HashGNN(
-            graph,
-            configuration,
-            progressTracker
-        );
+        return build(graph, configuration.toParameters(), progressTracker);
     }
 
     @Override
@@ -88,8 +96,12 @@ public class HashGNNFactory<CONFIG extends HashGNNConfig> extends GraphAlgorithm
         );
     }
 
+    public MemoryEstimation memoryEstimation(HashGNNParameters parameters) {
+        return new HashGNNMemoryEstimateDefinition().memoryEstimation(parameters);
+    }
+
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
-        return new HashGNNMemoryEstimateDefinition().memoryEstimation(config);
+        return memoryEstimation(config.toParameters());
     }
 }

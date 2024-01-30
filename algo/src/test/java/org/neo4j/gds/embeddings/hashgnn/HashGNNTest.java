@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.SplittableRandom;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -96,15 +97,19 @@ class HashGNNTest {
     @Test
     void binaryLowNeighborInfluence() {
         int embeddingDensity = 4;
-        var config = HashGNNStreamConfigImpl
-            .builder()
-            .featureProperties(List.of("f1", "f2"))
-            .embeddingDensity(embeddingDensity)
-            .neighborInfluence(0.01)
-            .iterations(10)
-            .randomSeed(42L)
-            .build();
-        var result = new HashGNN(binaryGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
+        var parameters = HashGNNParameters.create(
+            4,
+            10,
+            embeddingDensity,
+            0.01,
+            List.of("f1", "f2"),
+            false,
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.of(42L)
+        );
+        var result = new HashGNN(binaryGraph, parameters, ProgressTracker.NULL_TRACKER).compute().embeddings();
         //dimension should be equal to dimension of feature input which is 3
         assertThat(result.doubleArrayValue(binaryGraph.toMappedNodeId(binaryIdFunction.of("a")))).containsExactly(1.0, 0.0, 0.0);
         assertThat(result.doubleArrayValue(binaryGraph.toMappedNodeId(binaryIdFunction.of("b")))).containsExactly(0.0, 1.0, 1.0);
@@ -113,15 +118,19 @@ class HashGNNTest {
 
     @Test
     void binaryHighEmbeddingDensityHighNeighborInfluence() {
-        var config = HashGNNStreamConfigImpl
-            .builder()
-            .featureProperties(List.of("f1", "f2"))
-            .embeddingDensity(200)
-            .neighborInfluence(100)
-            .iterations(10)
-            .randomSeed(42L)
-            .build();
-        var result = new HashGNN(binaryGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
+        var parameters = HashGNNParameters.create(
+            4,
+            10,
+            200,
+            100,
+            List.of("f1", "f2"),
+            false,
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.of(42L)
+        );
+        var result = new HashGNN(binaryGraph, parameters, ProgressTracker.NULL_TRACKER).compute().embeddings();
         //dimension should be equal to dimension of feature input which is 3
         assertThat(result.doubleArrayValue(binaryGraph.toMappedNodeId(binaryIdFunction.of("a")))).containsExactly(1.0, 0.0, 0.0);
         assertThat(result.doubleArrayValue(binaryGraph.toMappedNodeId(binaryIdFunction.of("b")))).containsExactly(1.0, 0.0, 1.0);
@@ -142,26 +151,21 @@ class HashGNNTest {
     @ParameterizedTest
     @MethodSource("determinismParams")
     void shouldBeDeterministic(int concurrency, boolean binarize, boolean dimReduce) {
-        var configBuilder = HashGNNStreamConfigImpl
-            .builder()
-            .featureProperties(List.of("f1", "f2"))
-            .embeddingDensity(2)
-            .concurrency(concurrency)
-            .iterations(1)
-            .randomSeed(43L);
+        var parameters = HashGNNParameters.create(
+            concurrency,
+            1,
+            2,
+            1,
+            List.of("f1", "f2"),
+            false,
+            dimReduce ? Optional.of(1) : Optional.empty(),
+            binarize ? Optional.of(BinarizeFeaturesConfigImpl.builder().dimension(12).build()) : Optional.empty(),
+            Optional.empty(),
+            Optional.of(43L)
+        );
 
-        if (binarize) {
-            configBuilder.binarizeFeatures(Map.of("dimension", 12));
-        }
-
-        if (dimReduce) {
-            configBuilder.outputDimension(1);
-        }
-
-        var config = configBuilder.build();
-
-        var result1 = new HashGNN(binaryGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
-        var result2 = new HashGNN(binaryGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
+        var result1 = new HashGNN(binaryGraph, parameters, ProgressTracker.NULL_TRACKER).compute().embeddings();
+        var result2 = new HashGNN(binaryGraph, parameters, ProgressTracker.NULL_TRACKER).compute().embeddings();
 
         for (int i = 0; i < result1.nodeCount(); i++) {
             assertThat(result1.doubleArrayValue(i)).containsExactly(result2.doubleArrayValue(i));
@@ -176,18 +180,23 @@ class HashGNNTest {
         // not all random seeds will give b a unique feature
         // this intends to test that if b has a unique feature before the first iteration, then it also has it after the first iteration
         // however we simulate what is before the first iteration by running with neighborInfluence 0
-        var configBuilder = HashGNNStreamConfigImpl
-            .builder()
-            .featureProperties(List.of("f1", "f2"))
-            .embeddingDensity(embeddingDensity)
-            .binarizeFeatures(Map.of("dimension", binarizationDimension))
-            .iterations(1)
-            .randomSeed(42L);
-        var configBefore = configBuilder.neighborInfluence(0).build();
-        var resultBefore = new HashGNN(doubleGraph, configBefore, ProgressTracker.NULL_TRACKER).compute().embeddings();
+        Function<Double, HashGNNParameters> parametersMaker = (neighborInfluence) -> HashGNNParameters.create(
+            4,
+            1,
+            embeddingDensity,
+            neighborInfluence,
+            List.of("f1", "f2"),
+            false,
+            Optional.empty(),
+            Optional.of(BinarizeFeaturesConfigImpl.builder().dimension(binarizationDimension).build()),
+            Optional.empty(),
+            Optional.of(42L)
+        );
+        var parametersBefore = parametersMaker.apply(0.0);
+        var resultBefore = new HashGNN(doubleGraph, parametersBefore, ProgressTracker.NULL_TRACKER).compute().embeddings();
 
-        var config = configBuilder.neighborInfluence(1.0).build();
-        var result = new HashGNN(doubleGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
+        var parameters = parametersMaker.apply(1.0);
+        var result = new HashGNN(doubleGraph, parameters, ProgressTracker.NULL_TRACKER).compute().embeddings();
         // because of equal neighbor and self influence and high embeddingDensity, we expect the node `b` to have the union of features of its neighbors plus some of its own features
         // the neighbors are expected to have the same features as their initial projection
 
@@ -215,21 +224,23 @@ class HashGNNTest {
         int embeddingDensity = 100;
         int binarizationDimension = 8;
 
-        var configBuilder = HashGNNStreamConfigImpl
-            .builder()
-            .featureProperties(List.of("f1", "f2"))
-            .embeddingDensity(embeddingDensity)
-            .binarizeFeatures(Map.of("dimension", binarizationDimension))
-            .iterations(1)
-            .randomSeed(42L);
-        var configBefore = configBuilder.neighborInfluence(0).build();
-        var resultBefore = new HashGNN(doubleGraph, configBefore, ProgressTracker.NULL_TRACKER).compute().embeddings();
+        Function<Double, HashGNNParameters> parametersMaker = (neighborInfluence) ->  HashGNNParameters.create(
+            4,
+            1,
+            embeddingDensity,
+            neighborInfluence,
+            List.of("f1", "f2"),
+            false,
+            Optional.empty(),
+            Optional.of(BinarizeFeaturesConfigImpl.builder().dimension(binarizationDimension).build()),
+            Optional.empty(),
+            Optional.of(42L)
+        );
+        var parametersBefore = parametersMaker.apply(0.0);
+        var resultBefore = new HashGNN(doubleGraph, parametersBefore, ProgressTracker.NULL_TRACKER).compute().embeddings();
 
-
-        var config = configBuilder
-            .neighborInfluence(1000)
-            .build();
-        var result = new HashGNN(doubleGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
+        var parameters = parametersMaker.apply(1000.0);
+        var result = new HashGNN(doubleGraph, parameters, ProgressTracker.NULL_TRACKER).compute().embeddings();
         // because of high neighbor influence and high embeddingDensity, we expect the node `b` to have the union of features of its neighbors
         // the neighbors are expected to have the same features as their initial projection
 
@@ -259,7 +270,7 @@ class HashGNNTest {
             .randomSeed(42L)
             .outputDimension(42)
             .build();
-        var result = new HashGNN(binaryGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
+        var result = new HashGNN(binaryGraph, config.toParameters(), ProgressTracker.NULL_TRACKER).compute().embeddings();
         //dimension should be equal to dimension of feature input which is 3
         assertThat(result.doubleArrayValue(0).length).isEqualTo(42);
         assertThat(result.doubleArrayValue(1).length).isEqualTo(42);
@@ -380,8 +391,8 @@ class HashGNNTest {
             .randomSeed(42L)
             .build();
 
-        var firstEmbeddings = new HashGNN(firstGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
-        var secondEmbeddings = new HashGNN(secondGraph, config, ProgressTracker.NULL_TRACKER).compute().embeddings();
+        var firstEmbeddings = new HashGNN(firstGraph, config.toParameters(), ProgressTracker.NULL_TRACKER).compute().embeddings();
+        var secondEmbeddings = new HashGNN(secondGraph, config.toParameters(), ProgressTracker.NULL_TRACKER).compute().embeddings();
 
         double cosineSum = 0;
         for (long originalNodeId = 0; originalNodeId < nodeCount; originalNodeId++) {

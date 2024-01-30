@@ -19,6 +19,9 @@
  */
 package org.neo4j.gds.core.io.file;
 
+import org.neo4j.gds.annotation.Parameters;
+
+@Parameters
 public final class GraphStoreToFileExporterParameters {
     public static GraphStoreToFileExporterParameters create(
         String exportName,

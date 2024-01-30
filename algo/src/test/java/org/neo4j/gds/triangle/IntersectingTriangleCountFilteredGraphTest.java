@@ -25,6 +25,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -70,8 +71,13 @@ class IntersectingTriangleCountFilteredGraphTest {
             Optional.empty()
         );
 
-        var config = TriangleCountBaseConfigImpl.builder().build();
-        var triangleCount = IntersectingTriangleCount.create(graph, config, DefaultPool.INSTANCE);
+        var triangleCount = IntersectingTriangleCount.create(
+            graph,
+            4,
+            Long.MAX_VALUE,
+            DefaultPool.INSTANCE,
+            ProgressTracker.NULL_TRACKER
+        );
         var triangleCountResult = triangleCount.compute();
         assertThat(triangleCountResult.globalTriangles()).isEqualTo(1);
         var triangles = triangleCountResult.localTriangles();

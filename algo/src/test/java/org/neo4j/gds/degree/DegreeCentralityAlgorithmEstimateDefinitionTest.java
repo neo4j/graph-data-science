@@ -22,37 +22,31 @@ package org.neo4j.gds.degree;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.neo4j.gds.assertions.MemoryEstimationAssert.assertThat;
 
 class DegreeCentralityAlgorithmEstimateDefinitionTest {
 
     @ParameterizedTest
     @CsvSource({
-        "10_000, 40",
-        "500_000, 40",
-        "10_000_000, 40"
+        "10_000, 48",
+        "500_000, 48",
+        "10_000_000, 48"
     })
     void testMemoryEstimation(long nodeCount, long expectedMemory) {
-        var configurationMock = mock(DegreeCentralityConfig.class);
-
-        var memoryEstimation = new DegreeCentralityAlgorithmEstimateDefinition().memoryEstimation(configurationMock);
+        var memoryEstimation = new DegreeCentralityAlgorithmEstimateDefinition().memoryEstimation(false);
         assertThat(memoryEstimation)
             .memoryRange(nodeCount, 4)
-                .hasSameMinAndMaxEqualTo(expectedMemory);
+            .hasSameMinAndMaxEqualTo(expectedMemory);
     }
 
     @ParameterizedTest
     @CsvSource({
-        "10_000, 1, 40",
-        "10_000, 2, 40",
-        "10_000, 128, 40"
+        "10_000, 1, 48",
+        "10_000, 2, 48",
+        "10_000, 128, 48"
     })
     void shouldGiveTheSameEstimationRegardlessOfTheConcurrency(long nodeCount, int concurrency, long expectedMemory) {
-        var configurationMock = mock(DegreeCentralityConfig.class);
-
-        var memoryEstimation = new DegreeCentralityAlgorithmEstimateDefinition().memoryEstimation(configurationMock);
+        var memoryEstimation = new DegreeCentralityAlgorithmEstimateDefinition().memoryEstimation(false);
         assertThat(memoryEstimation)
             .memoryRange(nodeCount, concurrency)
             .hasSameMinAndMaxEqualTo(expectedMemory);
@@ -60,15 +54,12 @@ class DegreeCentralityAlgorithmEstimateDefinitionTest {
 
     @ParameterizedTest
     @CsvSource({
-        "10_000, 80_080",
-        "500_000, 4_000_080",
-        "10_000_000, 80_000_080"
+        "10_000, 80_088",
+        "500_000, 4_000_088",
+        "10_000_000, 80_000_088"
     })
     void testMemoryEstimationWithRelationshipWeight(long nodeCount, long expectedMemory) {
-        var configurationMock = mock(DegreeCentralityConfig.class);
-        when(configurationMock.hasRelationshipWeightProperty()).thenReturn(true);
-
-        var memoryEstimation = new DegreeCentralityAlgorithmEstimateDefinition().memoryEstimation(configurationMock);
+        var memoryEstimation = new DegreeCentralityAlgorithmEstimateDefinition().memoryEstimation(true);
         assertThat(memoryEstimation)
             .memoryRange(nodeCount, 4)
             .hasSameMinAndMaxEqualTo(expectedMemory);
@@ -76,18 +67,14 @@ class DegreeCentralityAlgorithmEstimateDefinitionTest {
 
     @ParameterizedTest
     @CsvSource({
-        "10_000, 1, 80_080",
-        "10_000, 2, 80_080",
-        "10_000, 128, 80_080"
+        "10_000, 1, 80_088",
+        "10_000, 2, 80_088",
+        "10_000, 128, 80_088"
     })
     void shouldGiveTheSameEstimationRegardlessOfTheConcurrencyWeighted(long nodeCount, int concurrency, long expectedMemory) {
-        var configurationMock = mock(DegreeCentralityConfig.class);
-        when(configurationMock.hasRelationshipWeightProperty()).thenReturn(true);
-
-        var memoryEstimation = new DegreeCentralityAlgorithmEstimateDefinition().memoryEstimation(configurationMock);
+        var memoryEstimation = new DegreeCentralityAlgorithmEstimateDefinition().memoryEstimation(true);
         assertThat(memoryEstimation)
             .memoryRange(nodeCount, concurrency)
             .hasSameMinAndMaxEqualTo(expectedMemory);
     }
-
 }

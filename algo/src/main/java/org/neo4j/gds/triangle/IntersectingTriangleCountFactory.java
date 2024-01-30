@@ -37,23 +37,28 @@ public class IntersectingTriangleCountFactory<CONFIG extends TriangleCountBaseCo
         return INTERSECTING_TRIANGLE_COUNT_TASK_NAME;
     }
 
-    @Override
-    public IntersectingTriangleCount build(
-        Graph graph,
-        CONFIG configuration,
-        ProgressTracker progressTracker
-    ) {
+    public IntersectingTriangleCount build(Graph graph, TriangleCountParameters parameters, ProgressTracker progressTracker) {
         return IntersectingTriangleCount.create(
             graph,
-            configuration,
+            parameters.concurrency(),
+            parameters.maxDegree(),
             DefaultPool.INSTANCE,
             progressTracker
         );
     }
 
     @Override
+    public IntersectingTriangleCount build(
+        Graph graph,
+        CONFIG configuration,
+        ProgressTracker progressTracker
+    ) {
+        return build(graph, configuration.toParameters(), progressTracker);
+    }
+
+    @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return new IntersectingTriangleCountMemoryEstimateDefinition().memoryEstimation(configuration);
+        return new IntersectingTriangleCountMemoryEstimateDefinition().memoryEstimation();
     }
 
     @Override

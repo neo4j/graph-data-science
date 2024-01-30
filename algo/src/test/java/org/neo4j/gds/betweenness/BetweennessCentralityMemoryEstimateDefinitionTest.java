@@ -22,8 +22,6 @@ package org.neo4j.gds.betweenness;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.neo4j.gds.assertions.MemoryEstimationAssert.assertThat;
 
 class BetweennessCentralityMemoryEstimateDefinitionTest {
@@ -35,11 +33,7 @@ class BetweennessCentralityMemoryEstimateDefinitionTest {
         "42, 219_211_528"
     })
     void testMemoryEstimation(int concurrency, long expectedBytes) {
-
-        var configurationMock = mock(BetweennessCentralityBaseConfig.class);
-
-        var memoryEstimation = new BetweennessCentralityMemoryEstimateDefinition().memoryEstimation(configurationMock);
-
+        var memoryEstimation = new BetweennessCentralityMemoryEstimateDefinition().memoryEstimation(false);
         assertThat(memoryEstimation)
             .memoryRange(100_000L, concurrency)
             .hasSameMinAndMaxEqualTo(expectedBytes);
@@ -52,15 +46,9 @@ class BetweennessCentralityMemoryEstimateDefinitionTest {
         "42, 270_141_736"
     })
     void testMemoryEstimationWithRelationshipWeight(int concurrency, long expectedBytes) {
-
-        var configurationMock = mock(BetweennessCentralityBaseConfig.class);
-        when(configurationMock.hasRelationshipWeightProperty()).thenReturn(true);
-
-        var memoryEstimation = new BetweennessCentralityMemoryEstimateDefinition().memoryEstimation(configurationMock);
-
+        var memoryEstimation = new BetweennessCentralityMemoryEstimateDefinition().memoryEstimation(true);
         assertThat(memoryEstimation)
             .memoryRange(100_000L, concurrency)
             .hasSameMinAndMaxEqualTo(expectedBytes);
     }
-
 }

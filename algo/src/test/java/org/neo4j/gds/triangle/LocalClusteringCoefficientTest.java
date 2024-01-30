@@ -41,7 +41,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.neo4j.gds.Orientation.UNDIRECTED;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 // TODO: Add tests for seeded property
@@ -49,10 +48,10 @@ class LocalClusteringCoefficientTest {
 
     private static Stream<Arguments> noTriangleQueries() {
         return Stream.of(
-            Arguments.of(fromGdl("CREATE ()-[:T]->()-[:T]->()", UNDIRECTED), "line"),
-            Arguments.of(fromGdl("CREATE (), (), ()", UNDIRECTED), "no rels"),
-            Arguments.of(fromGdl("CREATE ()-[:T]->(), ()", UNDIRECTED), "one rel"),
-            Arguments.of(fromGdl("CREATE (a1)-[:T]->()-[:T]->(a1), ()", UNDIRECTED), "back and forth")
+            Arguments.of(TestSupport.fromGdl("CREATE ()-[:T]->()-[:T]->()", Orientation.UNDIRECTED).graph(), "line"),
+            Arguments.of(TestSupport.fromGdl("CREATE (), (), ()", Orientation.UNDIRECTED).graph(), "no rels"),
+            Arguments.of(TestSupport.fromGdl("CREATE ()-[:T]->(), ()", Orientation.UNDIRECTED).graph(), "one rel"),
+            Arguments.of(TestSupport.fromGdl("CREATE (a1)-[:T]->()-[:T]->(a1), ()", Orientation.UNDIRECTED).graph(), "back and forth")
         );
     }
 
@@ -75,8 +74,8 @@ class LocalClusteringCoefficientTest {
         for (int i = 0; i < nbrOfTriangles; ++i) {
             gdl.append(formatWithLocale("(a%d)-[:T]->()-[:T]->()-[:T]->(a%d) ", i, i));
         }
-
-        LocalClusteringCoefficientResult result = compute(fromGdl(gdl.toString(), UNDIRECTED));
+        var graph = TestSupport.fromGdl(gdl.toString(), Orientation.UNDIRECTED).graph();
+        LocalClusteringCoefficientResult result = compute(graph);
 
         assertEquals(1, result.averageClusteringCoefficient());
         assertEquals(3 * nbrOfTriangles, result.localClusteringCoefficients().size());
@@ -87,8 +86,7 @@ class LocalClusteringCoefficientTest {
 
     @Test
     void clique5() {
-        var graph = fromGdl(
-            "CREATE " +
+        var graph = TestSupport.fromGdl("CREATE " +
             " (a1)-[:T]->(a2), " +
             " (a1)-[:T]->(a3), " +
             " (a1)-[:T]->(a4), " +
@@ -98,9 +96,7 @@ class LocalClusteringCoefficientTest {
             " (a2)-[:T]->(a5), " +
             " (a3)-[:T]->(a4), " +
             " (a3)-[:T]->(a5), " +
-            " (a4)-[:T]->(a5)",
-            UNDIRECTED
-        );
+            " (a4)-[:T]->(a5)", Orientation.UNDIRECTED).graph();
 
         LocalClusteringCoefficientResult result = compute(graph);
 
@@ -113,12 +109,9 @@ class LocalClusteringCoefficientTest {
 
     @Test
     void twoAdjacentTriangles() {
-        var graph = fromGdl(
-            "CREATE " +
+        var graph = TestSupport.fromGdl("CREATE " +
             "  (a)-[:T]->()-[:T]->()-[:T]->(a) " +
-            ", (a)-[:T]->()-[:T]->()-[:T]->(a)",
-            UNDIRECTED
-        );
+            ", (a)-[:T]->()-[:T]->()-[:T]->(a)", Orientation.UNDIRECTED).graph();
 
         LocalClusteringCoefficientResult result = compute(graph);
 
@@ -140,13 +133,10 @@ class LocalClusteringCoefficientTest {
 
     @Test
     void twoTrianglesWithLine() {
-        var graph = fromGdl(
-            "CREATE " +
+        var graph = TestSupport.fromGdl("CREATE " +
             "  (a)-[:T]->(b)-[:T]->(c)-[:T]->(a) " +
             ", (q)-[:T]->(r)-[:T]->(t)-[:T]->(q) " +
-            ", (a)-[:T]->(q)",
-            UNDIRECTED
-        );
+            ", (a)-[:T]->(q)", Orientation.UNDIRECTED).graph();
 
         LocalClusteringCoefficientResult result = compute(graph);
 
@@ -167,7 +157,7 @@ class LocalClusteringCoefficientTest {
 
     @Test
     void selfLoop() {
-        var graph = fromGdl("CREATE (a)-[:T]->(a)-[:T]->(a)-[:T]->(a)", UNDIRECTED);
+        var graph = TestSupport.fromGdl("CREATE (a)-[:T]->(a)-[:T]->(a)-[:T]->(a)", Orientation.UNDIRECTED).graph();
 
         LocalClusteringCoefficientResult result = compute(graph);
 
@@ -179,7 +169,8 @@ class LocalClusteringCoefficientTest {
     @Test
     void triangleWithSelfLoop() {
         // a self loop adds one to the degree
-        var graph = fromGdl("CREATE (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)-[:T]->(a)", UNDIRECTED);
+        var graph = TestSupport.fromGdl("CREATE (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)-[:T]->(a)", Orientation.UNDIRECTED)
+            .graph();
 
         LocalClusteringCoefficientResult result = compute(graph);
 
@@ -192,12 +183,9 @@ class LocalClusteringCoefficientTest {
 
     @Test
     void triangleWithParallelRelationship() {
-        var graph = fromGdl(
-            "CREATE" +
+        var graph = TestSupport.fromGdl("CREATE" +
             " (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
-            ",(a)-[:T]->(b)",
-            UNDIRECTED
-        );
+            ",(a)-[:T]->(b)", Orientation.UNDIRECTED).graph();
 
         LocalClusteringCoefficientResult result = compute(graph);
 
@@ -210,12 +198,9 @@ class LocalClusteringCoefficientTest {
 
     @Test
     void triangleWithTwoParallelRelationships() {
-        var graph = fromGdl(
-            "CREATE" +
+        var graph = TestSupport.fromGdl("CREATE" +
             " (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
-            ",(a)-[:T]->(b)-[:T]->(c)",
-            UNDIRECTED
-        );
+            ",(a)-[:T]->(b)-[:T]->(c)", Orientation.UNDIRECTED).graph();
 
         LocalClusteringCoefficientResult result = compute(graph);
 
@@ -228,12 +213,9 @@ class LocalClusteringCoefficientTest {
 
     @Test
     void parallelTriangles() {
-        var graph = fromGdl(
-            "CREATE" +
+        var graph = TestSupport.fromGdl("CREATE" +
             " (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
-            ",(a)-[:T]->(b)-[:T]->(c)-[:T]->(a)",
-            UNDIRECTED
-        );
+            ",(a)-[:T]->(b)-[:T]->(c)-[:T]->(a)", Orientation.UNDIRECTED).graph();
 
         LocalClusteringCoefficientResult result = compute(graph);
 
@@ -246,13 +228,10 @@ class LocalClusteringCoefficientTest {
 
     @Test
     void parallelTrianglesWithExtraParallelRelationship() {
-        var graph = fromGdl(
-            "CREATE" +
+        var graph = TestSupport.fromGdl("CREATE" +
             " (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
             ",(a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
-            ",(a)-[:T]->(b)",
-            UNDIRECTED
-        );
+            ",(a)-[:T]->(b)", Orientation.UNDIRECTED).graph();
 
         LocalClusteringCoefficientResult result = compute(graph);
 
@@ -265,13 +244,10 @@ class LocalClusteringCoefficientTest {
 
     @Test
     void triangleWithParallelRelationshipAndExtraNode() {
-        var graph = fromGdl(
-            "CREATE" +
+        var graph = TestSupport.fromGdl("CREATE" +
             " (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
             ",(a)-[:T]->(b)" +
-            ",(d)-[:T]->(a)",
-            UNDIRECTED
-        );
+            ",(d)-[:T]->(a)", Orientation.UNDIRECTED).graph();
 
         LocalClusteringCoefficientResult result = compute(graph);
 
@@ -286,30 +262,23 @@ class LocalClusteringCoefficientTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void progressLogging(boolean useSeed) {
-        var graph = fromGdl(
-            "CREATE" +
+        var graph = TestSupport.fromGdl("CREATE" +
             " (a {triangles: 2})" +
             " (b {triangles: 2})" +
             " (c {triangles: 1})" +
             " (d {triangles: 1})" +
             " (a)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
             ",(a)-[:T]->(b)" +
-            ",(d)-[:T]->(a)",
-            UNDIRECTED
-        );
+            ",(d)-[:T]->(a)", Orientation.UNDIRECTED).graph();
 
         var factory = new LocalClusteringCoefficientFactory<>();
-        var config = useSeed
-            ? createConfig().seedProperty("triangles").build()
-            : createConfig().build();
+        var seedProperty = useSeed ? "triangles" : null;
 
-        var progressTask = factory.progressTask(graph, config);
+        var progressTask = factory.progressTask(graph, seedProperty);
         var log = Neo4jProxy.testLog();
         var progressTracker = new TaskProgressTracker(progressTask, log, 4, EmptyTaskRegistryFactory.INSTANCE);
 
-        factory
-            .build(graph, config, progressTracker)
-            .compute();
+        new LocalClusteringCoefficient(graph, 4, Long.MAX_VALUE, seedProperty, progressTracker).compute();
 
         log.assertContainsMessage(TestLog.INFO, "LocalClusteringCoefficient :: Start");
         if (!useSeed) {
@@ -331,17 +300,14 @@ class LocalClusteringCoefficientTest {
 
     @Test
     void manyTrianglesAndOtherThings() {
-        var graph = fromGdl(
-            "CREATE" +
+        var graph = TestSupport.fromGdl("CREATE" +
             " (a)-[:T]->(b)-[:T]->(b)-[:T]->(c)-[:T]->(a)" +
             ", (c)-[:T]->(d)-[:T]->(e)-[:T]->(f)-[:T]->(d)" +
             ", (f)-[:T]->(g)-[:T]->(h)-[:T]->(f)" +
             ", (h)-[:T]->(i)-[:T]->(j)-[:T]->(k)-[:T]->(e)" +
             ", (k)-[:T]->(l)" +
             ", (k)-[:T]->(m)-[:T]->(n)-[:T]->(j)" +
-            ", (o)",
-            UNDIRECTED
-        );
+            ", (o)", Orientation.UNDIRECTED).graph();
 
         LocalClusteringCoefficientResult result = compute(graph);
 
@@ -367,17 +333,11 @@ class LocalClusteringCoefficientTest {
     private LocalClusteringCoefficientResult compute(Graph graph) {
         var localClusteringCoefficient = new LocalClusteringCoefficient(
             graph,
-            createConfig().build(),
+            4,
+            Long.MAX_VALUE,
+            null,
             ProgressTracker.NULL_TRACKER
         );
         return localClusteringCoefficient.compute();
-    }
-
-    private LocalClusteringCoefficientBaseConfigImpl.Builder createConfig() {
-        return LocalClusteringCoefficientBaseConfigImpl.builder();
-    }
-
-    private static Graph fromGdl(String gdl, Orientation orientation) {
-        return TestSupport.fromGdl(gdl, orientation).graph();
     }
 }

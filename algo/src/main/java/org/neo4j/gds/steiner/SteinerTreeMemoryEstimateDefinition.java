@@ -29,8 +29,7 @@ import org.neo4j.gds.mem.MemoryUsage;
 
 public class SteinerTreeMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<SteinerTreeBaseConfig> {
 
-    @Override
-    public MemoryEstimation memoryEstimation(SteinerTreeBaseConfig configuration) {
+    public MemoryEstimation memoryEstimation(boolean applyRerouting) {
         var memoryEstimationBuilder = MemoryEstimations.builder()
             .perNode("terminal bitset", MemoryUsage::sizeOfBitset)
             .perNode("parent", HugeLongArray::memoryEstimation)
@@ -38,12 +37,16 @@ public class SteinerTreeMemoryEstimateDefinition implements AlgorithmMemoryEstim
 
             .add(SteinerBasedDeltaStepping.memoryEstimation());
 
-        if (configuration.applyRerouting()) {
+        if (applyRerouting) {
             memoryEstimationBuilder.perNode("queue", HugeLongArrayQueue::memoryEstimation);
             memoryEstimationBuilder.add(SimpleRerouter.estimation());
         }
 
         return memoryEstimationBuilder.build();
     }
-    
+
+    @Override
+    public MemoryEstimation memoryEstimation(SteinerTreeBaseConfig configuration) {
+        return memoryEstimation(configuration.applyRerouting());
+    }
 }

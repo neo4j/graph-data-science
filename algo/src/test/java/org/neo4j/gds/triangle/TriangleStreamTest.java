@@ -101,7 +101,7 @@ class TriangleStreamTest {
         AtomicInteger allAppearances = new AtomicInteger();
 
         TriangleStream.create(graph, DefaultPool.INSTANCE, concurrency)
-                .compute()
+            .compute()
             .forEach(r -> {
                 if (r.nodeA == centerId || r.nodeB == centerId || r.nodeC == centerId) {
                     centerAppearances.getAndIncrement();

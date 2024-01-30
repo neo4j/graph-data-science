@@ -32,8 +32,11 @@ public class ModularityOptimizationMemoryEstimateDefinition implements Algorithm
 
     @Override
     public MemoryEstimation memoryEstimation(ModularityOptimizationBaseConfig configuration) {
+        return memoryEstimation();
+    }
 
-      return   MemoryEstimations.builder(ModularityOptimization.class)
+    public MemoryEstimation memoryEstimation() {
+        return MemoryEstimations.builder(ModularityOptimization.class)
             .perNode("currentCommunities", HugeLongArray::memoryEstimation)
             .perNode("nextCommunities", HugeLongArray::memoryEstimation)
             .perNode("cumulativeNodeWeights", HugeDoubleArray::memoryEstimation)
@@ -57,7 +60,5 @@ public class ModularityOptimizationMemoryEstimateDefinition implements Algorithm
                 .build()
             )
             .build();
-
     }
-
 }

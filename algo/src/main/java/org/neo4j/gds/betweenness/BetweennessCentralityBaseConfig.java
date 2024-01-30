@@ -85,4 +85,14 @@ public interface BetweennessCentralityBaseConfig extends AlgoBaseConfig, Relatio
             ));
         }
     }
+
+    @Configuration.Ignore
+    default BetweennessCentralityParameters toParameters() {
+        return BetweennessCentralityParameters.create(
+            concurrency(),
+            samplingSize(),
+            samplingSeed(),
+            hasRelationshipWeightProperty()
+        );
+    }
 }

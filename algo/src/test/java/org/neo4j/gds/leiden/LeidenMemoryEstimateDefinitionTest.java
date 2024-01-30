@@ -23,9 +23,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 class LeidenMemoryEstimateDefinitionTest {
 
     @ParameterizedTest(name = "Concurrency: {0}")
@@ -34,16 +31,11 @@ class LeidenMemoryEstimateDefinitionTest {
         "4, 20789008,34314976"
     })
     void shouldEstimateMemory(int concurrency,long expectedMin, long expectedMax) {
-        var config = mock(LeidenBaseConfig.class);
-
-        when(config.maxLevels()).thenReturn(3);
-
-        var estimate = new LeidenAlgorithmFactory<>().memoryEstimation(config);
+        var estimate = new LeidenMemoryEstimateDefinition().memoryEstimation(null, false, 3);
         
         MemoryEstimationAssert.assertThat(estimate)
             .memoryRange(10_1000,100_000,concurrency)
             .hasMin(expectedMin)
             .hasMax(expectedMax);
     }
-
 }

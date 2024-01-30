@@ -22,6 +22,7 @@ package org.neo4j.gds.pagerank;
 import com.carrotsearch.hppc.LongScatterSet;
 import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.GraphAlgorithmFactory;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.Pregel;
@@ -33,7 +34,6 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.degree.DegreeCentrality;
-import org.neo4j.gds.degree.DegreeCentralityConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.concurrent.atomic.LongAdder;
@@ -143,16 +143,13 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Gra
         Graph graph,
         CONFIG configuration
     ) {
-        var config = new DegreeCentralityConfigImpl.Builder()
-            .concurrency(configuration.concurrency())
-            .relationshipWeightProperty(configuration.relationshipWeightProperty())
-            .build();
-
         var degreeCentrality = new DegreeCentrality(
             graph,
             DefaultPool.INSTANCE,
-            config,
-            config.minBatchSize(),
+            configuration.concurrency(),
+            Orientation.NATURAL,
+            configuration.hasRelationshipWeightProperty(),
+            10_000,
             ProgressTracker.NULL_TRACKER
         );
 

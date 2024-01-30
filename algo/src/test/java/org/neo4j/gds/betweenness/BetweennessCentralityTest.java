@@ -28,7 +28,6 @@ import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -47,8 +46,6 @@ import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
 
 class BetweennessCentralityTest {
-
-    private static final BetweennessCentralityStreamConfig DEFAULT_CONFIG = BetweennessCentralityStreamConfig.of(CypherMapWrapper.empty());
 
     private static final String DIAMOND =
         "CREATE " +
@@ -173,17 +170,17 @@ class BetweennessCentralityTest {
 
     @Test
     void testShouldLogProgress() {
-        var config = BetweennessCentralityStreamConfigImpl.builder().samplingSize(2L).build();
+        var parameters = BetweennessCentralityParameters.create(4, Optional.of(2L), Optional.empty(), false);
         var factory = new BetweennessCentralityFactory<>();
         var log = Neo4jProxy.testLog();
         var testGraph = fromGdl(DIAMOND, "diamond");
         var progressTracker = new TestProgressTracker(
-            factory.progressTask(testGraph, config),
+            factory.progressTask(testGraph, parameters.samplingSize()),
             log,
             4,
             EmptyTaskRegistryFactory.INSTANCE
         );
-        factory.build(testGraph, config, progressTracker).compute();
+        factory.build(testGraph, parameters, progressTracker).compute();
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
@@ -198,17 +195,17 @@ class BetweennessCentralityTest {
 
     @Test
     void testShouldLogProgressNoSampling() {
-        var config = BetweennessCentralityStreamConfigImpl.builder().build();
+        var parameters = BetweennessCentralityParameters.create(4, Optional.empty(), Optional.empty(), false);
         var factory = new BetweennessCentralityFactory<>();
         var log = Neo4jProxy.testLog();
         var testGraph = fromGdl(DIAMOND, "diamond");
         var progressTracker = new TestProgressTracker(
-            factory.progressTask(testGraph, config),
+            factory.progressTask(testGraph, parameters.samplingSize()),
             log,
             4,
             EmptyTaskRegistryFactory.INSTANCE
         );
-        factory.build(testGraph, config, progressTracker).compute();
+        factory.build(testGraph, parameters, progressTracker).compute();
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())

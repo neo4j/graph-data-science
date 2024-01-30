@@ -31,24 +31,27 @@ import org.neo4j.gds.modularityoptimization.ModularityOptimizationFactory;
 import java.util.List;
 
 public class LouvainAlgorithmFactory<CONFIG extends LouvainBaseConfig> extends GraphAlgorithmFactory<Louvain, CONFIG> {
+    public Louvain build(Graph graph, LouvainParameters parameters, ProgressTracker progressTracker) {
+        return new Louvain(
+            graph,
+            parameters.concurrency(),
+            parameters.maxIterations(),
+            parameters.tolerance(),
+            parameters.maxLevels(),
+            parameters.includeIntermediateCommunities(),
+            parameters.seedProperty(),
+            progressTracker,
+            DefaultPool.INSTANCE
+        );
+    }
+
     @Override
     public Louvain build(
         Graph graph,
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-
-        return new Louvain(
-            graph,
-            configuration,
-            configuration.includeIntermediateCommunities(),
-            configuration.maxLevels(),
-            configuration.maxIterations(),
-            configuration.tolerance(),
-            configuration.concurrency(),
-            progressTracker,
-            DefaultPool.INSTANCE
-        );
+        return build(graph, configuration.toParameters(), progressTracker);
     }
 
     @Override
@@ -56,13 +59,17 @@ public class LouvainAlgorithmFactory<CONFIG extends LouvainBaseConfig> extends G
         return "Louvain";
     }
 
-    @Override
-    public Task progressTask(Graph graph, CONFIG config) {
+    public Task progressTask(Graph graph, int maxIterations, int maxLevels) {
         return Tasks.iterativeDynamic(
             taskName(),
-            () -> List.of(ModularityOptimizationFactory.modularityOptimizationProgressTask(graph, config)),
-            config.maxLevels()
+            () -> List.of(ModularityOptimizationFactory.progressTask(graph, maxIterations)),
+            maxLevels
         );
+    }
+
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        return progressTask(graph, config.maxIterations(), config.maxLevels());
     }
 
     @Override

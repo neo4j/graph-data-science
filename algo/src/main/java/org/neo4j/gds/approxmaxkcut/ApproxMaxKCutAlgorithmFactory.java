@@ -54,7 +54,7 @@ public class ApproxMaxKCutAlgorithmFactory<CONFIG extends ApproxMaxKCutBaseConfi
             config.iterations(),
             config.vnsMaxNeighborhoodOrder(),
             config.concurrency(),
-            config.minBatchSize(),
+            10_000,
             config.randomSeed(),
             config.minCommunitySizes(),
             config.hasRelationshipWeightProperty(),

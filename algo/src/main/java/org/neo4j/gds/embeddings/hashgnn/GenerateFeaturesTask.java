@@ -21,12 +21,12 @@ package org.neo4j.gds.embeddings.hashgnn;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Random;
@@ -60,9 +60,10 @@ class GenerateFeaturesTask implements Runnable {
     }
 
     static HugeObjectArray<HugeAtomicBitSet> compute(
+        GenerateFeaturesConfig generateFeatures,
         Graph graph,
         List<Partition> partition,
-        HashGNNConfig config,
+        int concurrency,
         long randomSeed,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag,
@@ -77,13 +78,13 @@ class GenerateFeaturesTask implements Runnable {
                 p,
                 graph,
                 randomSeed,
-                config.generateFeatures().orElseThrow(),
+                generateFeatures,
                 output,
                 progressTracker
             ))
             .collect(Collectors.toList());
         RunWithConcurrency.builder()
-            .concurrency(config.concurrency())
+            .concurrency(concurrency)
             .tasks(tasks)
             .terminationFlag(terminationFlag)
             .run();

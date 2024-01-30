@@ -28,19 +28,22 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 public class SpanningTreeAlgorithmFactory<CONFIG extends SpanningTreeBaseConfig> extends GraphAlgorithmFactory<Prim, CONFIG> {
 
-    @Override
-    public Prim build(Graph graphOrGraphStore, CONFIG configuration, ProgressTracker progressTracker) {
-        if (!graphOrGraphStore.schema().isUndirected()) {
+    public Prim build(Graph graph, SpanningTreeParameters parameters, ProgressTracker progressTracker) {
+        if (!graph.schema().isUndirected()) {
             throw new IllegalArgumentException(
                 "The Spanning Tree algorithm works only with undirected graphs. Please orient the edges properly");
         }
         return new Prim(
-            graphOrGraphStore,
-            configuration.objective(),
-            graphOrGraphStore.toMappedNodeId(configuration.sourceNode()),
+            graph,
+            parameters.objective(),
+            graph.toMappedNodeId(parameters.sourceNode()),
             progressTracker
         );
+    }
 
+    @Override
+    public Prim build(Graph graph, CONFIG configuration, ProgressTracker progressTracker) {
+        return build(graph, configuration.toParameters(), progressTracker);
     }
 
     @Override
@@ -52,8 +55,13 @@ public class SpanningTreeAlgorithmFactory<CONFIG extends SpanningTreeBaseConfig>
     public MemoryEstimation memoryEstimation(CONFIG config) {
         return new SpanningTreeMemoryEstimateDefinition().memoryEstimation(config);
     }
-    public Task progressTask(Graph graph, CONFIG config) {
+
+    public Task progressTask(Graph graph) {
         return Tasks.leaf(taskName(), graph.relationshipCount());
     }
 
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        return progressTask(graph);
+    }
 }

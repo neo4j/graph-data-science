@@ -27,8 +27,6 @@ import org.neo4j.gds.assertions.MemoryEstimationAssert;
 
 import java.util.stream.Stream;
 
-import static org.mockito.Mockito.mock;
-
 class LabelPropagationMemoryEstimateDefinitionTest {
 
 
@@ -43,29 +41,21 @@ class LabelPropagationMemoryEstimateDefinitionTest {
     @ParameterizedTest
     @MethodSource("expectedMemoryEstimation")
     void shouldComputeMemoryEstimation(int concurrency, long expectedMinBytes, long expectedMaxBytes) {
-
-        var config = mock(LabelPropagationBaseConfig.class);
-        var memoryEstimation = new LabelPropagationMemoryEstimateDefinition().memoryEstimation(config);
-
+        var memoryEstimation = new LabelPropagationMemoryEstimateDefinition().memoryEstimation();
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryRange( 100_000L,concurrency)
+            .memoryRange(100_000L, concurrency)
             .hasMin(expectedMinBytes)
             .hasMax(expectedMaxBytes);
-
     }
 
     @Test
     void shouldBoundMemEstimationToMaxSupportedDegree() {
         var largeNodeCount = ((long) Integer.MAX_VALUE + (long) Integer.MAX_VALUE);
-
-        var config = mock(LabelPropagationBaseConfig.class);
-        var memoryEstimation = new LabelPropagationMemoryEstimateDefinition().memoryEstimation(config);
+        var memoryEstimation = new LabelPropagationMemoryEstimateDefinition().memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(largeNodeCount, 1)
             .max()
             .isPositive();
-
     }
-
 }

@@ -38,7 +38,7 @@ class IntersectingTriangleCountMemoryEstimateDefinitionTest {
         GraphDimensions graphDimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
 
         long hugeAtomicLongArray = 24 + nodeCount * 8 + 16;
-        long expected = 64 + hugeAtomicLongArray;
+        long expected = 72 + hugeAtomicLongArray;
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(graphDimensions, 1)
@@ -54,7 +54,7 @@ class IntersectingTriangleCountMemoryEstimateDefinitionTest {
         GraphDimensions graphDimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
         
         long hugeAtomicLongArray = 32 + sizeOfHugeArray;
-        long expected = 64 + hugeAtomicLongArray;
+        long expected = 72 + hugeAtomicLongArray;
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(graphDimensions, 1)

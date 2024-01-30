@@ -25,11 +25,14 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 
 public class IntersectingTriangleCountMemoryEstimateDefinition  implements AlgorithmMemoryEstimateDefinition<TriangleCountBaseConfig> {
-    @Override
-    public MemoryEstimation memoryEstimation(TriangleCountBaseConfig configuration) {
+    public MemoryEstimation memoryEstimation() {
         return MemoryEstimations
             .builder(IntersectingTriangleCount.class)
             .perNode("triangle-counts", HugeAtomicLongArray::memoryEstimation)
             .build();
+    }
+    @Override
+    public MemoryEstimation memoryEstimation(TriangleCountBaseConfig configuration) {
+        return memoryEstimation();
     }
 }

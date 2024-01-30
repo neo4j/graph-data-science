@@ -36,4 +36,9 @@ public interface SteinerTreeBaseConfig extends AlgoBaseConfig, SourceNodeConfig,
     default double delta() {
         return 2.0;
     }
+
+    @Configuration.Ignore
+    default SteinerTreeParameters toParameters() {
+        return SteinerTreeParameters.create(concurrency(), sourceNode(), targetNodes(), delta(), applyRerouting());
+    }
 }

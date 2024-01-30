@@ -35,4 +35,9 @@ public interface K1ColoringBaseConfig extends AlgoBaseConfig, IterationsConfig {
     default int batchSize() {
         return ParallelUtil.DEFAULT_BATCH_SIZE;
     }
+
+    @Configuration.Ignore
+    default K1ColoringParameters toParameters() {
+        return K1ColoringParameters.create(concurrency(), maxIterations(), batchSize());
+    }
 }

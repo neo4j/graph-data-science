@@ -26,6 +26,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
@@ -34,10 +35,7 @@ import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.modularityoptimization.ModularityOptimization;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationFactory;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfig;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationStreamConfigImpl;
 
 import java.util.Optional;
 import java.util.OptionalLong;
@@ -68,12 +66,12 @@ public final class Louvain extends Algorithm<LouvainResult> {
 
     public Louvain(
         Graph graph,
-        LouvainBaseConfig config,
-        boolean trackIntermediateCommunities,
-        int maxLevels,
+        int concurrency,
         int maxIterations,
         double tolerance,
-        int concurrency,
+        int maxLevels,
+        boolean trackIntermediateCommunities,
+        String seedProperty,
         ProgressTracker progressTracker,
         ExecutorService executorService
     ) {
@@ -81,7 +79,7 @@ public final class Louvain extends Algorithm<LouvainResult> {
         this.rootGraph = graph;
         this.maxIterations = maxIterations;
         this.concurrency = concurrency;
-        this.seedingValues = Optional.ofNullable(config.seedProperty()).map(graph::nodeProperties).orElse(null);
+        this.seedingValues = Optional.ofNullable(seedProperty).map(graph::nodeProperties).orElse(null);
         this.executorService = executorService;
         this.dendrogramManager = new LouvainDendrogramManager(
             graph.nodeCount(),
@@ -195,25 +193,19 @@ public final class Louvain extends Algorithm<LouvainResult> {
     }
 
     private ModularityOptimizationResult runModularityOptimization(Graph louvainGraph, NodePropertyValues seed) {
-        ModularityOptimizationStreamConfig modularityOptimizationConfig = ModularityOptimizationStreamConfigImpl
-            .builder()
-            .maxIterations(maxIterations)
-            .tolerance(tolerance)
-            .concurrency(concurrency)
-            .batchSize(DEFAULT_BATCH_SIZE)
-            .build();
-
-        ModularityOptimization modularityOptimization = new ModularityOptimizationFactory<>()
-            .build(
-                louvainGraph,
-                modularityOptimizationConfig,
-                seed,
-                progressTracker
-            );
+        ModularityOptimization modularityOptimization = new ModularityOptimization(
+            louvainGraph,
+            maxIterations,
+            tolerance,
+            seed,
+            concurrency,
+            DEFAULT_BATCH_SIZE,
+            DefaultPool.INSTANCE,
+            progressTracker
+        );
         modularityOptimization.setTerminationFlag(terminationFlag);
 
-        var modularityOptimizationResult = modularityOptimization.compute();
-        return modularityOptimizationResult;
+        return modularityOptimization.compute();
     }
 
     private Graph summarizeGraph(

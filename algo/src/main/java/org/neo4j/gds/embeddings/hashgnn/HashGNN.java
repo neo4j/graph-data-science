@@ -24,8 +24,8 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -47,15 +47,15 @@ public class HashGNN extends Algorithm<HashGNNResult> {
     private final long randomSeed;
     private final Graph graph;
     private final SplittableRandom rng;
-    private final HashGNNConfig config;
+    private final HashGNNParameters parameters;
     private final MutableLong currentTotalFeatureCount = new MutableLong();
 
-    public HashGNN(Graph graph, HashGNNConfig config, ProgressTracker progressTracker) {
+    public HashGNN(Graph graph, HashGNNParameters parameters, ProgressTracker progressTracker) {
         super(progressTracker);
         this.graph = graph;
-        this.config = config;
+        this.parameters = parameters;
 
-        long tempRandomSeed = config.randomSeed().orElse((new SplittableRandom().nextLong()));
+        long tempRandomSeed = this.parameters.randomSeed().orElse((new SplittableRandom().nextLong()));
         this.randomSeed = new SplittableRandom(tempRandomSeed).nextLong();
         this.rng = new SplittableRandom(randomSeed);
     }
@@ -67,12 +67,12 @@ public class HashGNN extends Algorithm<HashGNNResult> {
         var degreePartition = PartitionUtils.degreePartition(
             graph,
             // Since degree only very approximately reflect the min hash task workload per node we decrease the partition sizes.
-            Math.toIntExact(Math.min(config.concurrency() * DEGREE_PARTITIONS_PER_THREAD, graph.nodeCount())),
+            Math.toIntExact(Math.min(parameters.concurrency() * DEGREE_PARTITIONS_PER_THREAD, graph.nodeCount())),
             Function.identity(),
             Optional.of(1)
         );
         var rangePartition = PartitionUtils.rangePartition(
-            config.concurrency(),
+            parameters.concurrency(),
             graph.nodeCount(),
             Function.identity(),
             Optional.of(1)
@@ -80,7 +80,7 @@ public class HashGNN extends Algorithm<HashGNNResult> {
 
         Graph graphCopy = graph.concurrentCopy();
         GraphSchema schema = graph.schema();
-        List<Graph> graphs = config.heterogeneous()
+        List<Graph> graphs = parameters.heterogeneous()
             ? schema.relationshipSchema().availableTypes()
             .stream()
             .map(rt -> graph.relationshipTypeFilteredGraph(Set.of(rt)))
@@ -109,7 +109,7 @@ public class HashGNN extends Algorithm<HashGNNResult> {
 
         progressTracker.beginSubTask("Propagate embeddings");
 
-        for (int iteration = 0; iteration < config.iterations(); iteration++) {
+        for (int iteration = 0; iteration < parameters.iterations(); iteration++) {
             terminationFlag.assertRunning();
 
             var currentEmbeddings = iteration % 2 == 0 ? embeddingsA : embeddingsB;
@@ -118,15 +118,16 @@ public class HashGNN extends Algorithm<HashGNNResult> {
                 currentEmbeddings.get(i).clear();
             }
 
-            double scaledNeighborInfluence = graph.relationshipCount() == 0 ? 1.0 : (currentTotalFeatureCount.doubleValue() / graph.nodeCount()) * config.neighborInfluence() / upperBoundNeighborExpectedBits;
+            double scaledNeighborInfluence = graph.relationshipCount() == 0 ? 1.0 : (currentTotalFeatureCount.doubleValue() / graph.nodeCount()) * parameters.neighborInfluence() / upperBoundNeighborExpectedBits;
             currentTotalFeatureCount.setValue(0);
 
             var hashes = HashTask.compute(
                 embeddingDimension,
                 scaledNeighborInfluence,
                 graphs.size(),
-                config,
-                randomSeed + config.embeddingDensity() * iteration,
+                parameters.concurrency(),
+                parameters.embeddingDensity(),
+                randomSeed + parameters.embeddingDensity() * iteration,
                 terminationFlag,
                 progressTracker
             );
@@ -134,7 +135,8 @@ public class HashGNN extends Algorithm<HashGNNResult> {
             MinHashTask.compute(
                 degreePartition,
                 graphs,
-                config,
+                parameters.concurrency(),
+                parameters.embeddingDensity(),
                 embeddingDimension,
                 currentEmbeddings,
                 previousEmbeddings,
@@ -154,31 +156,66 @@ public class HashGNN extends Algorithm<HashGNNResult> {
 
         progressTracker.endSubTask("Propagate embeddings");
 
-        var binaryOutputVectors = (config.iterations() - 1) % 2 == 0 ? embeddingsA : embeddingsB;
+        var binaryOutputVectors = (parameters.iterations() - 1) % 2 == 0 ? embeddingsA : embeddingsB;
 
-        NodePropertyValues outputVectors;
-        if (config.outputDimension().isPresent()) {
+        NodePropertyValues outputVectors = parameters.outputDimension().map(it -> {
             var denseVectors = DensifyTask.compute(
                 graph,
                 rangePartition,
-                config,
+                parameters.concurrency(),
+                it,
                 rng,
                 binaryOutputVectors,
                 progressTracker,
                 terminationFlag
             );
-
-            outputVectors = EmbeddingsToNodePropertyValues.fromDense(denseVectors);
-        } else {
-            outputVectors = EmbeddingsToNodePropertyValues.fromBinary(binaryOutputVectors, embeddingDimension);
-        }
+            return (NodePropertyValues) EmbeddingsToNodePropertyValues.fromDense(denseVectors);
+        }).orElseGet(() -> EmbeddingsToNodePropertyValues.fromBinary(binaryOutputVectors, embeddingDimension));
 
         progressTracker.endSubTask("HashGNN");
 
         return new HashGNNResult(outputVectors);
     }
 
-
+    private HugeObjectArray<HugeAtomicBitSet> constructInputEmbeddings(List<Partition> partition) {
+        // User input parsing proves that if FeatureProperties is empty
+        // then GenerateFeatures is not
+        if (parameters.featureProperties().isEmpty()) {
+            return GenerateFeaturesTask.compute(
+                parameters.generateFeatures().get(),
+                graph,
+                partition,
+                parameters.concurrency(),
+                randomSeed,
+                progressTracker,
+                terminationFlag,
+                currentTotalFeatureCount
+            );
+        }
+        return parameters.binarizeFeatures().map(it ->
+            BinarizeTask.compute(
+                graph,
+                partition,
+                parameters.concurrency(),
+                parameters.featureProperties(),
+                it,
+                rng,
+                progressTracker,
+                terminationFlag,
+                currentTotalFeatureCount
+            )
+        ).orElseGet(() ->
+            RawFeaturesTask.compute(
+                parameters.concurrency(),
+                parameters.featureProperties(),
+                progressTracker,
+                graph,
+                partition,
+                terminationFlag,
+                currentTotalFeatureCount
+            )
+        );
+    }
 
     static final class MinAndArgmin {
         public int min;
@@ -187,41 +224,6 @@ public class HashGNN extends Algorithm<HashGNNResult> {
         MinAndArgmin() {
             this.min = -1;
             this.argMin = Integer.MAX_VALUE;
-        }
-    }
-
-    private HugeObjectArray<HugeAtomicBitSet> constructInputEmbeddings(List<Partition> partition) {
-        if (!config.featureProperties().isEmpty()) {
-            if (config.binarizeFeatures().isPresent()) {
-                return BinarizeTask.compute(
-                    graph,
-                    partition,
-                    config,
-                    rng,
-                    progressTracker,
-                    terminationFlag,
-                    currentTotalFeatureCount
-                );
-            } else {
-                return RawFeaturesTask.compute(
-                    config,
-                    progressTracker,
-                    graph,
-                    partition,
-                    terminationFlag,
-                    currentTotalFeatureCount
-                );
-            }
-        } else {
-            return GenerateFeaturesTask.compute(
-                graph,
-                partition,
-                config,
-                randomSeed,
-                progressTracker,
-                terminationFlag,
-                currentTotalFeatureCount
-            );
         }
     }
 }

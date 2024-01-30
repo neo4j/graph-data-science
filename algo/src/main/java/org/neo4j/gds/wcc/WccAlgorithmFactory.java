@@ -39,6 +39,20 @@ public final class WccAlgorithmFactory<CONFIG extends WccBaseConfig> extends Gra
         return "WCC";
     }
 
+    public Wcc build(
+        Graph graph,
+        WccParameters parameters,
+        ProgressTracker progressTracker
+    ) {
+        return new Wcc(
+            graph,
+            DefaultPool.INSTANCE,
+            ParallelUtil.DEFAULT_BATCH_SIZE,
+            parameters,
+            progressTracker
+        );
+    }
+
     @Override
     public Wcc build(
         Graph graph,
@@ -48,22 +62,24 @@ public final class WccAlgorithmFactory<CONFIG extends WccBaseConfig> extends Gra
         if (configuration.hasRelationshipWeightProperty() && configuration.threshold() == 0) {
             progressTracker.logWarning("Specifying a `relationshipWeightProperty` has no effect unless `threshold` is also set.");
         }
-        return new Wcc(
-            graph,
-            DefaultPool.INSTANCE,
-            ParallelUtil.DEFAULT_BATCH_SIZE,
-            configuration,
-            progressTracker
-        );
+        return build(graph, configuration.toParameters(), progressTracker);
     }
 
-    @Override
-    public Task progressTask(Graph graph, CONFIG config) {
+    public Task progressTask(Graph graph) {
         return Tasks.leaf(taskName(), graph.relationshipCount());
     }
 
     @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        return progressTask(graph);
+    }
+
+    public MemoryEstimation memoryEstimation(boolean isIncremental) {
+        return new WccMemoryEstimateDefinition().memoryEstimation(isIncremental);
+    }
+
+    @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
-        return new WccMemoryEstimateDefinition().memoryEstimation(config);
+        return memoryEstimation(config.isIncremental());
     }
 }

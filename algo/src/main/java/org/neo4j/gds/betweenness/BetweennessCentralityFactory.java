@@ -27,6 +27,8 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
+import java.util.Optional;
+
 public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBaseConfig> extends GraphAlgorithmFactory<BetweennessCentrality, CONFIG> {
 
     @Override
@@ -34,20 +36,19 @@ public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBa
         return "BetweennessCentrality";
     }
 
-    @Override
     public BetweennessCentrality build(
         Graph graph,
-        CONFIG configuration,
+        BetweennessCentralityParameters parameters,
         ProgressTracker progressTracker
     ) {
-        var samplingSize = configuration.samplingSize();
-        var samplingSeed = configuration.samplingSeed();
+        var samplingSize = parameters.samplingSize();
+        var samplingSeed = parameters.samplingSeed();
 
         var strategy = samplingSize.isPresent() && samplingSize.get() < graph.nodeCount()
             ? new RandomDegreeSelectionStrategy(samplingSize.get(), samplingSeed)
             : new FullSelectionStrategy();
 
-        ForwardTraverser.Factory traverserFactory = configuration.hasRelationshipWeightProperty()
+        ForwardTraverser.Factory traverserFactory = parameters.hasRelationshipWeightProperty()
             ? ForwardTraverser.Factory.weighted()
             : ForwardTraverser.Factory.unweighted();
 
@@ -56,9 +57,14 @@ public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBa
             strategy,
             traverserFactory,
             DefaultPool.INSTANCE,
-            configuration.concurrency(),
+            parameters.concurrency(),
             progressTracker
         );
+    }
+
+    @Override
+    public BetweennessCentrality build(Graph graph, CONFIG configuration, ProgressTracker progressTracker) {
+        return build(graph, configuration.toParameters(), progressTracker);
     }
 
     @Override
@@ -66,8 +72,11 @@ public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBa
         return new BetweennessCentralityMemoryEstimateDefinition().memoryEstimation(configuration);
     }
 
+    public Task progressTask(Graph graph, Optional<Long> samplingSize) {
+        return Tasks.leaf(taskName(), samplingSize.orElse(graph.nodeCount()));
+    }
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return Tasks.leaf(taskName(), config.samplingSize().orElse(graph.nodeCount()));
+        return progressTask(graph, config.samplingSize());
     }
 }

@@ -27,16 +27,13 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
+import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class LargeIntersectingTriangleCountTest {
 
     private static final long TRIANGLE_COUNT = 4;
-
-    TriangleCountBaseConfigImpl.Builder defaultConfigBuilder() {
-      return TriangleCountBaseConfigImpl.builder();
-    }
 
     @ParameterizedTest
     @ValueSource(ints = {1, 4})
@@ -49,8 +46,10 @@ class LargeIntersectingTriangleCountTest {
         var mappedCenterId = graph.toMappedNodeId(centerId);
         var result = IntersectingTriangleCount.create(
             graph,
-            defaultConfigBuilder().concurrency(concurrency).build(),
-            DefaultPool.INSTANCE
+            concurrency,
+            Long.MAX_VALUE,
+            DefaultPool.INSTANCE,
+            ProgressTracker.NULL_TRACKER
         ).compute();
 
         assertThat(result.globalTriangles()).isEqualTo(TRIANGLE_COUNT);

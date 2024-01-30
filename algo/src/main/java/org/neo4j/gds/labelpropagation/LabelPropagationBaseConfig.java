@@ -40,4 +40,9 @@ public interface LabelPropagationBaseConfig extends
     default int maxIterations() {
         return 10;
     }
+
+    @Configuration.Ignore
+    default LabelPropagationParameters toParameters() {
+        return LabelPropagationParameters.create(concurrency(), maxIterations(), nodeWeightProperty(), seedProperty());
+    }
 }

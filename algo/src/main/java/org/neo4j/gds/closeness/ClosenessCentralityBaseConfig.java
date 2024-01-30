@@ -28,4 +28,9 @@ public interface ClosenessCentralityBaseConfig extends AlgoBaseConfig {
     default boolean useWassermanFaust() {
         return false;
     }
+
+    @Configuration.Ignore
+    default ClosenessCentralityParameters toParameters() {
+        return ClosenessCentralityParameters.create(concurrency(), useWassermanFaust());
+    }
 }

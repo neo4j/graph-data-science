@@ -52,7 +52,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  */
 public class Wcc extends Algorithm<DisjointSetStruct> {
 
-    private final WccBaseConfig config;
+    private final WccParameters parameters;
     private final NodePropertyValues initialComponents;
     private final ExecutorService executorService;
     private final long batchSize;
@@ -63,20 +63,20 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
         Graph graph,
         ExecutorService executor,
         int minBatchSize,
-        WccBaseConfig config,
+        WccParameters parameters,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
-        this.config = config;
-        this.initialComponents = config.isIncremental()
-            ? graph.nodeProperties(config.seedProperty())
+        this.parameters = parameters;
+        this.initialComponents = parameters.isIncremental()
+            ? graph.nodeProperties(parameters.seedProperty())
             : null;
         this.executorService = executor;
 
         this.batchSize = ParallelUtil.adjustedBatchSize(
             graph.nodeCount(),
-            config.concurrency(),
+            parameters.concurrency(),
             minBatchSize,
             Integer.MAX_VALUE
         );
@@ -85,7 +85,7 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
             throw new IllegalArgumentException(formatWithLocale(
                 "Too many nodes (%d) to run WCC with the given concurrency (%d) and batchSize (%d)",
                 graph.nodeCount(),
-                config.concurrency(),
+                parameters.concurrency(),
                 batchSize
             ));
         }
@@ -97,16 +97,16 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
 
         long nodeCount = graph.nodeCount();
 
-        var disjointSetStruct = config.isIncremental()
-            ? new HugeAtomicDisjointSetStruct(nodeCount, initialComponents, config.concurrency())
-            : new HugeAtomicDisjointSetStruct(nodeCount, config.concurrency());
+        var disjointSetStruct = parameters.isIncremental()
+            ? new HugeAtomicDisjointSetStruct(nodeCount, initialComponents, parameters.concurrency())
+            : new HugeAtomicDisjointSetStruct(nodeCount, parameters.concurrency());
 
         if (graph.characteristics().isUndirected() || graph.characteristics().isInverseIndexed()) {
             new SampledStrategyBuilder()
                 .graph(graph)
                 .disjointSetStruct(disjointSetStruct)
                 .threshold(threshold())
-                .concurrency(config.concurrency())
+                .concurrency(parameters.concurrency())
                 .terminationFlag(terminationFlag)
                 .progressTracker(progressTracker)
                 .executorService(executorService)
@@ -135,6 +135,6 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
     }
 
     private Optional<Double> threshold() {
-        return config.hasThreshold() ? Optional.of(config.threshold()) : Optional.empty();
+        return parameters.hasThreshold() ? Optional.of(parameters.threshold()) : Optional.empty();
     }
 }

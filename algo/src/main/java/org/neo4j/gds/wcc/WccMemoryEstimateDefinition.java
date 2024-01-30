@@ -28,10 +28,13 @@ public class WccMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefin
 
     @Override
     public MemoryEstimation memoryEstimation(WccBaseConfig configuration) {
-        return MemoryEstimations
-            .builder(Wcc.class.getSimpleName())
-            .add("dss", HugeAtomicDisjointSetStruct.memoryEstimation(configuration.isIncremental()))
-            .build();
+        return memoryEstimation(configuration.isIncremental());
     }
 
+    public MemoryEstimation memoryEstimation(boolean isIncremental) {
+        return MemoryEstimations
+            .builder(Wcc.class.getSimpleName())
+            .add("dss", HugeAtomicDisjointSetStruct.memoryEstimation(isIncremental))
+            .build();
+    }
 }

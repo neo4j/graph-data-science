@@ -28,13 +28,16 @@ import org.neo4j.gds.mem.MemoryUsage;
 
 public class SpanningTreeMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<SpanningTreeBaseConfig> {
 
-    @Override
-    public MemoryEstimation memoryEstimation(SpanningTreeBaseConfig configuration) {
+    public MemoryEstimation memoryEstimation() {
         return MemoryEstimations.builder(Prim.class)
             .perNode("Parent array", HugeLongArray::memoryEstimation)
             .add("Priority queue", HugeLongPriorityQueue.memoryEstimation())
             .perNode("visited", MemoryUsage::sizeOfBitset)
             .build();
     }
-    
+
+    @Override
+    public MemoryEstimation memoryEstimation(SpanningTreeBaseConfig configuration) {
+        return memoryEstimation();
+    }
 }

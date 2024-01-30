@@ -36,4 +36,9 @@ public interface SpanningTreeBaseConfig extends
     default DoubleUnaryOperator objective() {
         return Prim.MIN_OPERATOR;
     }
+
+    @Configuration.Ignore
+    default SpanningTreeParameters toParameters() {
+        return SpanningTreeParameters.create(objective(), sourceNode());
+    }
 }

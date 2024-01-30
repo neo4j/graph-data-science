@@ -26,20 +26,14 @@ import org.neo4j.gds.assertions.MemoryEstimationAssert;
 
 import java.util.stream.Stream;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 class SteinerTreeMemoryEstimateDefinitionTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("memoryEstimationSetup")
     void memoryEstimation(boolean reroute, int minExpectedBytes,int maxExpectedBytes) {
-        var config = mock(SteinerTreeBaseConfig.class);
-        when(config.applyRerouting()).thenReturn(reroute);
-        var memoryEstimation = new SteinerTreeMemoryEstimateDefinition();
+        var memoryEstimation = new SteinerTreeMemoryEstimateDefinition().memoryEstimation(reroute);
 
-
-        MemoryEstimationAssert.assertThat(memoryEstimation.memoryEstimation(config))
+        MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(10, 23, 4)
             .hasMin(minExpectedBytes)
             .hasMax(maxExpectedBytes);
@@ -51,5 +45,4 @@ class SteinerTreeMemoryEstimateDefinitionTest {
             Arguments.of(false, 840, 1_248)
         );
     }
-
 }

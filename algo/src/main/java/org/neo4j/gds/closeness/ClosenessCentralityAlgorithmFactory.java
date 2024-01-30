@@ -29,18 +29,23 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 public class ClosenessCentralityAlgorithmFactory<CONFIG extends ClosenessCentralityBaseConfig> extends
     GraphAlgorithmFactory<ClosenessCentrality, CONFIG> {
-    @Override
-    public ClosenessCentrality build(
-        Graph graph,
-        CONFIG configuration,
-        ProgressTracker progressTracker
-    ) {
-        return ClosenessCentrality.of(
+
+    public ClosenessCentrality build(Graph graph, ClosenessCentralityParameters parameters, ProgressTracker progressTracker) {
+        var centralityComputer = parameters.useWassermanFaust()
+            ? new WassermanFaustCentralityComputer(graph.nodeCount())
+            : new DefaultCentralityComputer();
+        return new ClosenessCentrality(
             graph,
-            configuration,
+            parameters.concurrency(),
+            centralityComputer,
             DefaultPool.INSTANCE,
             progressTracker
         );
+    }
+
+    @Override
+    public ClosenessCentrality build(Graph graph, CONFIG configuration, ProgressTracker progressTracker) {
+        return build(graph, configuration.toParameters(), progressTracker);
     }
 
     @Override
@@ -48,12 +53,16 @@ public class ClosenessCentralityAlgorithmFactory<CONFIG extends ClosenessCentral
         return "ClosenessCentrality";
     }
 
-    @Override
-    public Task progressTask(Graph graph, CONFIG config) {
+    public Task progressTask(long nodeCount) {
         return Tasks.task(
             taskName(),
             Tasks.leaf("Farness computation"),
-            Tasks.leaf("Closeness computation", graph.nodeCount())
+            Tasks.leaf("Closeness computation", nodeCount)
         );
+    }
+
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        return progressTask(graph.nodeCount());
     }
 }

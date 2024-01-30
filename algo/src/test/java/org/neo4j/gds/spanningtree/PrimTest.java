@@ -121,12 +121,12 @@ class PrimTest {
     @ParameterizedTest
     @MethodSource("parametersMaximum")
     void testMaximum(String nodeId, String parentA, String parentB, String parentC, String parentD, String parentE) {
-        var mst = (new Prim(
+        var mst = new Prim(
             graph,
             Prim.MAX_OPERATOR,
             idFunction.of(nodeId),
             ProgressTracker.NULL_TRACKER
-        ).compute());
+        ).compute();
         assertThat(mst.totalWeight()).isEqualTo(17L);
         assertTreeIsCorrect(mst, parentA, parentB, parentC, parentD, parentE);
     }
@@ -134,31 +134,28 @@ class PrimTest {
     @ParameterizedTest
     @MethodSource("parametersMinimum")
     void testMinimum(String nodeId, String parentA, String parentB, String parentC, String parentD, String parentE) {
-        var mst = (new Prim(
+        var mst = new Prim(
             graph,
             Prim.MIN_OPERATOR,
             idFunction.of(nodeId),
             ProgressTracker.NULL_TRACKER
-        ).compute());
+        ).compute();
         assertThat(mst.totalWeight()).isEqualTo(12L);
         assertTreeIsCorrect(mst, parentA, parentB, parentC, parentD, parentE);
     }
 
     @Test
     void shouldLogProgress() {
-        var config = SpanningTreeStatsConfigImpl.builder().
-            sourceNode(graph.toOriginalNodeId("a")).
-            relationshipWeightProperty("cost").
-            build();
+        var parameters = SpanningTreeParameters.create(Prim.MIN_OPERATOR, graph.toOriginalNodeId("a"));
         var factory = new SpanningTreeAlgorithmFactory<>();
         var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(
-            factory.progressTask(graph, config),
+            factory.progressTask(graph),
             log,
             1,
             EmptyTaskRegistryFactory.INSTANCE
         );
-        factory.build(graph, config, progressTracker).compute();
+        factory.build(graph, parameters, progressTracker).compute();
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
             .extracting(replaceTimings())
@@ -205,6 +202,4 @@ class PrimTest {
             return idFunction.of(expectedParent);
         }
     }
-
-
 }

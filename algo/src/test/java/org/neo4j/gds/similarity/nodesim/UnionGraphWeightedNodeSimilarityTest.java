@@ -51,14 +51,25 @@ import static org.assertj.core.api.Assertions.assertThat;
 
     @Test
     void shouldWorkWithUnionGraph(){
+        var parameters = NodeSimilarityParameters.create(
+            new JaccardSimilarityComputer(1E-42),
+            1,
+            Integer.MAX_VALUE,
+            1,
+            0,
+            true,
+            true,
+            false,
+            null
+        );
 
-        var config = NodeSimilarityStreamConfigImpl.builder()
-            .relationshipWeightProperty("w")
-            .concurrency(1)
-            .topN(1)
-            .build();
-        
-        var nodeSimilarity = NodeSimilarity.create(graph, config, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
+        var nodeSimilarity = new NodeSimilarity(
+            graph,
+            parameters,
+            1,
+            DefaultPool.INSTANCE,
+            ProgressTracker.NULL_TRACKER
+        );
         var result = nodeSimilarity.compute().streamResult().findFirst().get();
 
         //input should be  (0 + 10 + 0)/ (5 + 10 + 8) = 10/23

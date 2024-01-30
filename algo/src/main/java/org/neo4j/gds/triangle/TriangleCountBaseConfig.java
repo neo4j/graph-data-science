@@ -65,4 +65,9 @@ public interface TriangleCountBaseConfig extends AlgoBaseConfig {
     static TriangleCountBaseConfig of(CypherMapWrapper userInput) {
         return new TriangleCountBaseConfigImpl(userInput);
     }
+
+    @Configuration.Ignore
+    default TriangleCountParameters toParameters() {
+        return TriangleCountParameters.create(concurrency(), maxDegree());
+    }
 }

@@ -19,6 +19,9 @@
  */
 package org.neo4j.gds.embeddings.node2vec;
 
+import org.neo4j.gds.annotation.Parameters;
+
+@Parameters
 public class WalkParameters extends org.neo4j.gds.traversal.WalkParameters {
     final double negativeSamplingExponent;
     final double positiveSamplingFactor;

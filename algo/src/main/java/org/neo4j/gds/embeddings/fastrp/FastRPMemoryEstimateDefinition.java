@@ -27,19 +27,27 @@ import org.neo4j.gds.mem.MemoryUsage;
 
 public final class FastRPMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<FastRPBaseConfig> {
 
-    @Override
-    public MemoryEstimation memoryEstimation(FastRPBaseConfig configuration) {
-        var sizeOfEmbeddingArray = MemoryUsage.sizeOfFloatArray(configuration.embeddingDimension());
+    public MemoryEstimation memoryEstimation(int embeddingDimension, int featurePropertiesSize, int propertyDimension) {
+        var sizeOfEmbeddingArray = MemoryUsage.sizeOfFloatArray(embeddingDimension);
         return MemoryEstimations
             .builder(FastRP.class.getSimpleName())
             .fixed(
                 "propertyVectors",
-                MemoryUsage.sizeOfFloatArray((long) configuration.featureProperties().size() * configuration.propertyDimension())
+                MemoryUsage.sizeOfFloatArray((long) featurePropertiesSize * propertyDimension)
             )
             .perNode("embeddings", nodeCount -> HugeObjectArray.memoryEstimation(nodeCount, sizeOfEmbeddingArray))
             .perNode("embeddingsA", nodeCount -> HugeObjectArray.memoryEstimation(nodeCount, sizeOfEmbeddingArray))
             .perNode("embeddingsB", nodeCount -> HugeObjectArray.memoryEstimation(nodeCount, sizeOfEmbeddingArray))
             .build();
+    }
+
+    @Override
+    public MemoryEstimation memoryEstimation(FastRPBaseConfig configuration) {
+        return memoryEstimation(
+            configuration.embeddingDimension(),
+            configuration.featureProperties().size(),
+            configuration.propertyDimension()
+        );
     }
 
 }

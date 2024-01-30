@@ -36,6 +36,7 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
@@ -329,16 +330,11 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
         var sourceId = graph.toOriginalNodeId("a0");
         var target1 = graph.toOriginalNodeId("a3");
         var target2 = graph.toOriginalNodeId("a4");
-
-        var config = SteinerTreeStatsConfigImpl
-            .builder()
-            .sourceNode(sourceId)
-            .targetNodes(List.of(target1, target2))
-            .build();
+        var targetNodes = List.of(target1, target2);
 
         var steinerTreeAlgorithmFactory = new SteinerTreeAlgorithmFactory<>();
         var log = Neo4jProxy.testLog();
-        Task baseTask = steinerTreeAlgorithmFactory.progressTask(graph, config);
+        var baseTask = steinerTreeAlgorithmFactory.progressTask(graph, targetNodes.size(), false);
         var progressTracker = new TestProgressTracker(
             baseTask,
             log,
@@ -346,8 +342,16 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             EmptyTaskRegistryFactory.INSTANCE
         );
 
-
-        steinerTreeAlgorithmFactory.build(graph, config, progressTracker).compute();
+        new ShortestPathsSteinerAlgorithm(
+            graph,
+            graph.toMappedNodeId(sourceId),
+            targetNodes.stream().map(graph::safeToMappedNodeId).collect(Collectors.toList()),
+            2.0,
+            4,
+            false,
+            DefaultPool.INSTANCE,
+            progressTracker
+        ).compute();
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
@@ -369,17 +373,12 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
         var sourceId = graph.toOriginalNodeId("a0");
         var target1 = graph.toOriginalNodeId("a3");
         var target2 = graph.toOriginalNodeId("a4");
-
-        var config = SteinerTreeStatsConfigImpl
-            .builder()
-            .sourceNode(sourceId)
-            .applyRerouting(true)
-            .targetNodes(List.of(target1, target2))
-            .build();
+        var targetNodes = List.of(target1, target2);
+        var applyRerouting = true;
 
         var steinerTreeAlgorithmFactory = new SteinerTreeAlgorithmFactory<>();
         var log = Neo4jProxy.testLog();
-        Task baseTask = steinerTreeAlgorithmFactory.progressTask(graph, config);
+        Task baseTask = steinerTreeAlgorithmFactory.progressTask(graph, targetNodes.size(), applyRerouting);
         var progressTracker = new TestProgressTracker(
             baseTask,
             log,
@@ -387,7 +386,16 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             EmptyTaskRegistryFactory.INSTANCE
         );
 
-        steinerTreeAlgorithmFactory.build(graph, config, progressTracker).compute();
+        new ShortestPathsSteinerAlgorithm(
+            graph,
+            graph.toMappedNodeId(sourceId),
+            targetNodes.stream().map(graph::safeToMappedNodeId).collect(Collectors.toList()),
+            2.0,
+            4,
+            applyRerouting,
+            DefaultPool.INSTANCE,
+            progressTracker
+        ).compute();
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
@@ -412,21 +420,15 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
 
     @Test
     void shouldLogProgressWithInverseRerouting() {
-
         var sourceId = invGraph.toOriginalNodeId("a0");
         var target1 = invGraph.toOriginalNodeId("a3");
         var target2 = invGraph.toOriginalNodeId("a4");
-
-        var config = SteinerTreeStatsConfigImpl
-            .builder()
-            .sourceNode(sourceId)
-            .applyRerouting(true)
-            .targetNodes(List.of(target1, target2))
-            .build();
+        var targetNodes = List.of(target1, target2);
+        var applyRerouting = true;
 
         var steinerTreeAlgorithmFactory = new SteinerTreeAlgorithmFactory<>();
         var log = Neo4jProxy.testLog();
-        Task baseTask = steinerTreeAlgorithmFactory.progressTask(invGraph, config);
+        Task baseTask = steinerTreeAlgorithmFactory.progressTask(invGraph, targetNodes.size(), applyRerouting);
         var progressTracker = new TestProgressTracker(
             baseTask,
             log,
@@ -434,7 +436,16 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             EmptyTaskRegistryFactory.INSTANCE
         );
 
-        steinerTreeAlgorithmFactory.build(invGraph, config, progressTracker).compute();
+        new ShortestPathsSteinerAlgorithm(
+            invGraph,
+            invGraph.toMappedNodeId(sourceId),
+            targetNodes.stream().map(invGraph::safeToMappedNodeId).collect(Collectors.toList()),
+            2.0,
+            4,
+            applyRerouting,
+            DefaultPool.INSTANCE,
+            progressTracker
+        ).compute();
 
         assertThat(log.getMessages(TestLog.INFO))
             .extracting(removingThreadId())
@@ -479,7 +490,6 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
         assertThat(steinerResultWithReroute.totalCost()).isEqualTo(25.0);
         assertThat(steinerResultWithReroute.effectiveNodeCount()).isEqualTo(8);
         assertThat(steinerResultWithReroute.effectiveTargetNodesCount()).isEqualTo(4);
-
     }
 
     @Test

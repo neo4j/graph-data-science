@@ -51,7 +51,6 @@ import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.Orientation.REVERSE;
 import static org.neo4j.gds.TestSupport.crossArguments;
 import static org.neo4j.gds.TestSupport.toArguments;
-import static org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfig.TOP_K_DEFAULT;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
@@ -144,15 +143,9 @@ public class ComponentPropertyNodeSimilarityTest {
             .relCountUpperBound(5_000_000)
             .build();
 
-        NodeSimilarityWriteConfig config = NodeSimilarityWriteConfigImpl.builder()
-            .similarityCutoff(0.0)
-            .topK(TOP_K_DEFAULT)
-            .writeProperty("writeProperty")
-            .writeRelationshipType("writeRelationshipType")
-            .useComponents(componentPropertySet ? "compid" : true)
-            .build();
-
-        MemoryTree actual = new NodeSimilarityFactory<>().memoryEstimation(config).estimate(dimensions, 1);
+        MemoryTree actual = new NodeSimilarityFactory<>()
+            .memoryEstimation(10, 0, true, !componentPropertySet, true)
+            .estimate(dimensions, 1);
 
         long nodeFilterRangeMin = 125_016L;
         long nodeFilterRangeMax = 125_016L;
@@ -195,15 +188,23 @@ public class ComponentPropertyNodeSimilarityTest {
     @MethodSource("supportedLoadAndComputeDirections")
     void shouldOptimizeForDistinctComponentsProperty(Orientation orientation, int concurrency) {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
-        var config = NodeSimilarityStreamConfigImpl.builder()
-            .similarityCutoff(0.0)
-            .useComponents("compid")
-            .concurrency(concurrency)
-            .build();
 
-        var nodeSimilarity = NodeSimilarity.create(
+        var parameters = NodeSimilarityParameters.create(
+            new JaccardSimilarityComputer(0.0),
+            1,
+            Integer.MAX_VALUE,
+            10,
+            0,
+            true,
+            false,
+            true,
+            "compid"
+        );
+
+        var nodeSimilarity = new NodeSimilarity(
             graph,
-            config,
+            parameters,
+            concurrency,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );

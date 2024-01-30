@@ -20,13 +20,10 @@
 package org.neo4j.gds.embeddings.hashgnn;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-
-import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,14 +33,6 @@ class DensifyTaskTest {
         var nodeCount = 3;
 
         var partition = new Partition(0, nodeCount);
-        var config = HashGNNStreamConfigImpl
-            .builder()
-            .featureProperties(List.of("f1", "f2"))
-            .embeddingDensity(4)
-            .binarizeFeatures(Map.of("dimension", 4))
-            .outputDimension(5)
-            .iterations(100)
-            .build();
         var denseFeatures = HugeObjectArray.newArray(double[].class, nodeCount);
         var binaryFeatures = HugeObjectArray.newArray(HugeAtomicBitSet.class, nodeCount);
         binaryFeatures.set(0, HugeAtomicBitSet.create(3));
@@ -66,7 +55,7 @@ class DensifyTaskTest {
 
         new DensifyTask(
             partition,
-            config,
+            5,
             denseFeatures,
             binaryFeatures,
             projectionMatrix,

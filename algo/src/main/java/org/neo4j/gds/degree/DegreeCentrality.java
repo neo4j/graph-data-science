@@ -21,6 +21,7 @@ package org.neo4j.gds.degree;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
@@ -45,20 +46,26 @@ public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
 
     private final Graph graph;
     private final ExecutorService executor;
-    private final DegreeCentralityConfig config;
+    private final int concurrency;
+    private final Orientation orientation;
+    private final boolean hasRelationshipWeightProperty;
     private final int minBatchSize;
 
     public DegreeCentrality(
         Graph graph,
         ExecutorService executor,
-        DegreeCentralityConfig config,
+        int concurrency,
+        Orientation orientation,
+        boolean hasRelationshipWeightProperty,
         int minBatchSize,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
         this.executor = executor;
-        this.config = config;
+        this.concurrency = concurrency;
+        this.orientation = orientation;
+        this.hasRelationshipWeightProperty = hasRelationshipWeightProperty;
         this.minBatchSize = minBatchSize;
     }
 
@@ -66,7 +73,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
     public DegreeCentralityResult compute() {
         progressTracker.beginSubTask();
 
-        var result = config.hasRelationshipWeightProperty()
+        var result = hasRelationshipWeightProperty
             ? computeWeighted()
             : computeUnweighted();
 
@@ -76,7 +83,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
     }
 
     private DegreeFunction computeUnweighted() {
-        switch (config.orientation()) {
+        switch (orientation) {
             case NATURAL:
                 progressTracker.logProgress(graph.nodeCount());
                 return graph::degree;
@@ -102,13 +109,13 @@ public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
             default:
                 throw new IllegalArgumentException(formatWithLocale(
                     "Orientation %s is not supported",
-                    config.orientation()
+                    orientation
                 ));
         }
     }
 
     private DegreeFunction computeWeighted() {
-        switch (config.orientation()) {
+        switch (orientation) {
             case NATURAL:
                 return computeDegree((partition, degrees) -> new NaturalWeightedDegreeTask(
                     graph.concurrentCopy(),
@@ -139,7 +146,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
             default:
                 throw new IllegalArgumentException(formatWithLocale(
                     "Orientation %s is not supported",
-                    config.orientation()
+                    orientation
                 ));
         }
     }
@@ -158,12 +165,12 @@ public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
         var degrees = HugeDoubleArray.newArray(graph.nodeCount());
         var tasks = PartitionUtils.degreePartition(
             graph,
-            config.concurrency(),
+            concurrency,
             partition -> taskFunction.apply(partition, degrees),
             Optional.of(minBatchSize)
         );
         RunWithConcurrency.builder()
-            .concurrency(config.concurrency())
+            .concurrency(concurrency)
             .tasks(tasks)
             .executor(executor)
             .run();
@@ -171,15 +178,15 @@ public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
     }
 
     private DegreeFunction computeDegreeAtomic(TaskFunctionAtomic taskFunction) {
-        var degrees = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(config.concurrency()));
+        var degrees = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency));
         var tasks = PartitionUtils.degreePartition(
             graph,
-            config.concurrency(),
+            concurrency,
             partition -> taskFunction.apply(partition, degrees),
             Optional.of(minBatchSize)
         );
         RunWithConcurrency.builder()
-            .concurrency(config.concurrency())
+            .concurrency(concurrency)
             .tasks(tasks)
             .executor(executor)
             .run();

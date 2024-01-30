@@ -84,7 +84,7 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
             context.executor(),
             config.k(graph.nodeCount()),
             config.concurrency(),
-            config.minBatchSize(),
+            1_000,
             config.maxIterations(),
             config.similarityCutoff(),
             config.perturbationRate(),

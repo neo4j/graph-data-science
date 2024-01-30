@@ -61,15 +61,6 @@ import static org.neo4j.gds.graphbuilder.TransactionTerminationTestUtils.assertT
 @GdlExtension
 class LouvainTest {
 
-    static LouvainStreamConfigImpl.Builder defaultConfigBuilder() {
-        return LouvainStreamConfigImpl.builder()
-            .maxLevels(10)
-            .maxIterations(10)
-            .tolerance(TOLERANCE_DEFAULT)
-            .includeIntermediateCommunities(true)
-            .concurrency(1);
-    }
-
     @GdlGraph(orientation = Orientation.UNDIRECTED, idOffset = 0)
     private static final String DB_CYPHER =
         "CREATE" +
@@ -131,21 +122,18 @@ class LouvainTest {
             RelationshipType.listOf("TYPE_OUT"),
             Optional.empty()
         );
-
         IdFunction mappedId = name -> graph.toMappedNodeId(idFunction.of(name));
 
-        var config = defaultConfigBuilder().build();
-        Louvain algorithm = new Louvain(
+        var algorithm = new Louvain(
             graph,
-            config,
-            config.includeIntermediateCommunities(),
-            config.maxLevels(),
-            config.maxIterations(),
-            config.tolerance(),
-            config.concurrency(),
+            1,
+            10,
+            TOLERANCE_DEFAULT,
+            10,
+            true,
+            null,
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE
-
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -183,18 +171,16 @@ class LouvainTest {
 
         IdFunction mappedId = name -> graphStore.getGraph(NodeLabel.of("Node")).toMappedNodeId(idFunction.of(name));
 
-        var config = defaultConfigBuilder().build();
-        Louvain algorithm = new Louvain(
+        var algorithm = new Louvain(
             graph,
-            config,
-            config.includeIntermediateCommunities(),
-            config.maxLevels(),
-            config.maxIterations(),
-            config.tolerance(),
-            config.concurrency(),
+            1,
+            10,
+            TOLERANCE_DEFAULT,
+            10,
+            true,
+            null,
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE
-
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -232,18 +218,16 @@ class LouvainTest {
 
         IdFunction mappedId = name -> graphStore.getGraph(NodeLabel.of("Node")).toMappedNodeId(idFunction.of(name));
 
-        var config = defaultConfigBuilder().seedProperty("seed").build();
-        Louvain algorithm = new Louvain(
+        var algorithm = new Louvain(
             graph,
-            config,
-            config.includeIntermediateCommunities(),
-            config.maxLevels(),
-            config.maxIterations(),
-            config.tolerance(),
-            config.concurrency(),
+            1,
+            10,
+            TOLERANCE_DEFAULT,
+            10,
+            true,
+            "seed",
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE
-
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -275,23 +259,14 @@ class LouvainTest {
             Optional.empty()
         );
 
-        var config =
-            LouvainStreamConfigImpl.builder()
-                .maxLevels(10)
-                .maxIterations(10)
-                .tolerance(2.0)
-                .includeIntermediateCommunities(false)
-                .concurrency(1)
-                .build();
-
-        Louvain algorithm = new Louvain(
+        var algorithm = new Louvain(
             graph,
-            config,
-            config.includeIntermediateCommunities(),
-            config.maxLevels(),
-            config.maxIterations(),
-            config.tolerance(),
-            config.concurrency(),
+            1,
+            10,
+            2.0,
+            10,
+            false,
+            null,
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE
 
@@ -311,23 +286,14 @@ class LouvainTest {
             Optional.empty()
         );
 
-        var config =
-            LouvainStreamConfigImpl.builder()
-                .maxLevels(1)
-                .maxIterations(10)
-                .tolerance(TOLERANCE_DEFAULT)
-                .includeIntermediateCommunities(false)
-                .concurrency(1)
-                .build();
-
-        Louvain algorithm = new Louvain(
+        var algorithm = new Louvain(
             graph,
-            config,
-            config.includeIntermediateCommunities(),
-            config.maxLevels(),
-            config.maxIterations(),
-            config.tolerance(),
-            config.concurrency(),
+            1,
+            10,
+            TOLERANCE_DEFAULT,
+            1,
+            false,
+            null,
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE
         );
@@ -347,20 +313,18 @@ class LouvainTest {
             .build()
             .generate();
 
-        var config = defaultConfigBuilder().concurrency(2).build();
         assertTerminates((terminationFlag) ->
             {
-                Louvain louvain = new Louvain(
+                var louvain = new Louvain(
                     graph,
-                    config,
-                    config.includeIntermediateCommunities(),
-                    config.maxLevels(),
-                    config.maxIterations(),
-                    config.tolerance(),
-                    config.concurrency(),
+                    2,
+                    10,
+                    TOLERANCE_DEFAULT,
+                    10,
+                    false,
+                    null,
                     ProgressTracker.NULL_TRACKER,
                     DefaultPool.INSTANCE
-
                 );
                 louvain.setTerminationFlag(terminationFlag);
                 louvain.compute();
@@ -375,29 +339,23 @@ class LouvainTest {
             RelationshipType.listOf("TYPE_OUT"),
             Optional.empty()
         );
-
-        var config = defaultConfigBuilder().build();
-
-        var progressTask = new LouvainAlgorithmFactory<>().progressTask(graph, config);
+        var concurrency = 4;
+        var maxIterations = 10;
+        var maxLevels = 10;
+        var progressTask = new LouvainAlgorithmFactory<>().progressTask(graph, maxIterations, maxLevels);
         var log = Neo4jProxy.testLog();
-        var progressTracker = new TaskProgressTracker(
-            progressTask,
-            log,
-            config.concurrency(),
-            EmptyTaskRegistryFactory.INSTANCE
-        );
+        var progressTracker = new TaskProgressTracker(progressTask, log, concurrency, EmptyTaskRegistryFactory.INSTANCE);
 
-        Louvain louvain = new Louvain(
+        var louvain = new Louvain(
             graph,
-            config,
-            config.includeIntermediateCommunities(),
-            config.maxLevels(),
-            config.maxIterations(),
-            config.tolerance(),
-            config.concurrency(),
+            concurrency,
+            maxIterations,
+            TOLERANCE_DEFAULT,
+            maxLevels,
+            false,
+            null,
             progressTracker,
             DefaultPool.INSTANCE
-
         );
 
         louvain.compute();
@@ -414,18 +372,16 @@ class LouvainTest {
             Optional.of("weight")
         );
 
-        var config = defaultConfigBuilder().seedProperty("seed2").build();
-        Louvain algorithm = new Louvain(
+        var algorithm = new Louvain(
             graph,
-            config,
-            config.includeIntermediateCommunities(),
-            config.maxLevels(),
-            config.maxIterations(),
-            config.tolerance(),
-            config.concurrency(),
+            4,
+            10,
+            TOLERANCE_DEFAULT,
+            10,
+            false,
+            "seed2",
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE
-
         );
         algorithm.setTerminationFlag(TerminationFlag.RUNNING_TRUE);
 
@@ -449,12 +405,12 @@ class LouvainTest {
 
         var louvain = new Louvain(
             myGraph,
-            LouvainStreamConfigImpl.builder().build(),
-            false,
-            10,
+            4,
             10,
             TOLERANCE_DEFAULT,
-            4,
+            10,
+            false,
+            null,
             ProgressTracker.NULL_TRACKER,
             DefaultPool.INSTANCE
         );

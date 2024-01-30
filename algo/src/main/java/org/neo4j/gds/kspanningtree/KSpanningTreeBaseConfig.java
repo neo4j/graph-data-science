@@ -26,4 +26,8 @@ import org.neo4j.gds.spanningtree.SpanningTreeBaseConfig;
 public interface KSpanningTreeBaseConfig extends SpanningTreeBaseConfig {
     long k();
 
+    @Configuration.Ignore
+    default KSpanningTreeParameters toParameters() {
+        return KSpanningTreeParameters.create(objective(), sourceNode(), k());
+    }
 }

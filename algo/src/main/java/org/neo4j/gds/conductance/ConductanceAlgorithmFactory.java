@@ -37,22 +37,37 @@ public class ConductanceAlgorithmFactory<CONFIG extends ConductanceBaseConfig> e
         return "Conductance";
     }
 
+    public Conductance build(Graph graph, ConductanceParameters parameters, ProgressTracker progressTracker) {
+        return new Conductance(
+            graph,
+            parameters.concurrency(),
+            parameters.minBatchSize(),
+            parameters.hasRelationshipWeightProperty(),
+            parameters.communityProperty(),
+            DefaultPool.INSTANCE,
+            progressTracker
+        );
+    }
+
     @Override
     public Conductance build(
         Graph graph,
-        CONFIG configuration,
+        CONFIG config,
         ProgressTracker progressTracker
     ) {
-        return new Conductance(graph, DefaultPool.INSTANCE, configuration, configuration.minBatchSize(), progressTracker);
+        return build(graph, config.toParameters(), progressTracker);
+    }
+    public Task progressTask(long nodeCount) {
+        return Tasks.task(
+            taskName(),
+            Tasks.leaf("count relationships", nodeCount),
+            Tasks.leaf("accumulate counts"),
+            Tasks.leaf("perform conductance computations")
+        );
     }
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return Tasks.task(
-            taskName(),
-            Tasks.leaf("count relationships", graph.nodeCount()),
-            Tasks.leaf("accumulate counts"),
-            Tasks.leaf("perform conductance computations")
-        );
+        return progressTask(graph.nodeCount());
     }
 }

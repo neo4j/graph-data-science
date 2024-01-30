@@ -21,15 +21,15 @@ package org.neo4j.gds.embeddings.hashgnn;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.concurrency.RunWithConcurrency;
-import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
+import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.features.FeatureConsumer;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.features.FeatureExtractor;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.SplittableRandom;
@@ -72,7 +72,9 @@ class BinarizeTask implements Runnable {
     static HugeObjectArray<HugeAtomicBitSet> compute(
         Graph graph,
         List<Partition> partition,
-        HashGNNConfig config,
+        int concurrency,
+        List<String> featureProperties,
+        BinarizeFeaturesConfig binarizationConfig,
         SplittableRandom rng,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag,
@@ -80,12 +82,7 @@ class BinarizeTask implements Runnable {
     ) {
         progressTracker.beginSubTask("Binarize node property features");
 
-        var binarizationConfig = config.binarizeFeatures().orElseThrow();
-
-        var featureExtractors = FeatureExtraction.propertyExtractors(
-            graph,
-            config.featureProperties()
-        );
+        var featureExtractors = FeatureExtraction.propertyExtractors(graph, featureProperties);
 
         var inputDimension = FeatureExtraction.featureCount(featureExtractors);
         var propertyEmbeddings = embedProperties(binarizationConfig.dimension(), rng, inputDimension);
@@ -103,7 +100,7 @@ class BinarizeTask implements Runnable {
             ))
             .collect(Collectors.toList());
         RunWithConcurrency.builder()
-            .concurrency(config.concurrency())
+            .concurrency(concurrency)
             .tasks(tasks)
             .terminationFlag(terminationFlag)
             .run();

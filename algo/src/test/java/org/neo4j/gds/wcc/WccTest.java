@@ -31,6 +31,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -142,9 +143,7 @@ class WccTest {
     void seededWccOnUnionGraphs(Orientation orientation, String gdl, @SuppressWarnings("unused") String testName) {
         var graph = fromGdl(gdl, orientation);
 
-        var result = run(graph, WccStreamConfigImpl.builder()
-            .seedProperty("componentId")
-            .build());
+        var result = run(graph, WccParameters.create(0D, "componentId", 4));
 
         var seen = new LongHashSet();
 
@@ -191,12 +190,15 @@ class WccTest {
         var graph = createTestGraph(orientation);
 
         var log = Neo4jProxy.testLog();
-        var wcc = new WccAlgorithmFactory<>().build(
-            graph,
-            WccStreamConfigImpl.builder().concurrency(2).build(),
+        var factory = new WccAlgorithmFactory<>();
+        var parameters = WccParameters.create(0D, null, 2);
+        var progressTracker = new TestProgressTracker(
+            factory.progressTask(graph),
             log,
+            parameters.concurrency(),
             EmptyTaskRegistryFactory.INSTANCE
         );
+        var wcc = factory.build(graph, parameters, progressTracker);
         wcc.compute();
 
         var messagesInOrder = log.getMessages(INFO);
@@ -240,19 +242,19 @@ class WccTest {
     }
 
     DisjointSetStruct run(Graph graph) {
-        return run(graph, WccStreamConfigImpl.builder().build());
+        return run(graph, WccParameters.create(0D, null, 4));
     }
 
-    DisjointSetStruct run(Graph graph, WccBaseConfig config) {
-        return run(graph, config, communitySize() / config.concurrency());
+    DisjointSetStruct run(Graph graph, WccParameters parameters) {
+        return run(graph, parameters, communitySize() / parameters.concurrency());
     }
 
-    DisjointSetStruct run(Graph graph, WccBaseConfig config, int concurrency) {
+    DisjointSetStruct run(Graph graph, WccParameters parameters, int concurrency) {
         return new Wcc(
             graph,
             DefaultPool.INSTANCE,
             communitySize() / concurrency,
-            config,
+            parameters,
             ProgressTracker.NULL_TRACKER
         ).compute();
     }
@@ -332,7 +334,7 @@ class WccTest {
         }
 
         private void assertResults(TestGraph graph) {
-            var config = WccStreamConfigImpl.builder().build();
+            var config = WccParameters.create(0D, null, 4);
 
             var dss = new WccAlgorithmFactory<>()
                 .build(

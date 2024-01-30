@@ -32,4 +32,14 @@ public interface DegreeCentralityConfig extends AlgoBaseConfig, RelationshipWeig
     default Orientation orientation() {
         return Orientation.NATURAL;
     }
+
+    @Configuration.Ignore
+    default DegreeCentralityParameters toParameters() {
+        return DegreeCentralityParameters.create(
+            concurrency(),
+            orientation(),
+            hasRelationshipWeightProperty(),
+            10_000
+        );
+    }
 }

@@ -29,14 +29,9 @@ class SpanningTreeAlgorithmFactoryTest {
     @Test
     void shouldThrowIfNotUndirected() {
         var graph = GdlFactory.of("(a)-[:foo{cost:1.0}]->(b)").build().getUnion();
-        var config = SpanningTreeStatsConfigImpl.builder().sourceNode(0).relationshipWeightProperty("cost").build();
+        var parameters = SpanningTreeParameters.create(Prim.MIN_OPERATOR, 0);
         var spanningTreeAlgorithmFactory = new SpanningTreeAlgorithmFactory<>();
-        assertThatThrownBy(() -> spanningTreeAlgorithmFactory.build(
-            graph,
-            config,
-            ProgressTracker.NULL_TRACKER
-        )).hasMessageContaining("undirected");
+        assertThatThrownBy(() -> spanningTreeAlgorithmFactory.build(graph, parameters, ProgressTracker.NULL_TRACKER))
+            .hasMessageContaining("undirected");
     }
-
-
 }

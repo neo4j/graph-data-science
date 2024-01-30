@@ -90,9 +90,10 @@ class ClosenessCentralityTest {
     void testGetCentrality() {
         IdFunction idFunction = graph::toMappedNodeId;
 
-        var algo = ClosenessCentrality.of(
+        var algo = new ClosenessCentrality(
             graph,
-            ClosenessCentralityStreamConfigImpl.builder().build(),
+            4,
+            new DefaultCentralityComputer(),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -108,14 +109,14 @@ class ClosenessCentralityTest {
 
     @Test
     void shouldLogProgress() {
-        var config = ClosenessCentralityStreamConfigImpl.builder().concurrency(4).build();
-        var progressTask = new ClosenessCentralityAlgorithmFactory<>().progressTask(graph, config);
+        var progressTask = new ClosenessCentralityAlgorithmFactory<>().progressTask(graph.nodeCount());
         var testLog = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
 
-        var algo = ClosenessCentrality.of(
+        var algo = new ClosenessCentrality(
             graph,
-            config,
+            4,
+            new DefaultCentralityComputer(),
             DefaultPool.INSTANCE,
             progressTracker
         );

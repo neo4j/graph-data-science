@@ -64,9 +64,10 @@ class ClosenessCentralityDiscoTest {
     void testHuge() {
         IdFunction idFunction = graph::toMappedNodeId;
 
-        var algo = ClosenessCentrality.of(
+        var algo = new ClosenessCentrality(
             graph,
-            ClosenessCentralityStreamConfigImpl.builder().concurrency(2).useWassermanFaust(true).build(),
+            2,
+            new WassermanFaustCentralityComputer(graph.nodeCount()),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );

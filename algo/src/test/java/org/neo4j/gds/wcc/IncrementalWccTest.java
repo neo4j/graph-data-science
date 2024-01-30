@@ -73,14 +73,10 @@ class IncrementalWccTest {
     void shouldComputeComponentsFromSeedProperty() {
         Graph graph = createGraph();
 
-        WccStreamConfig config = WccStreamConfigImpl.builder()
-            .concurrency(ConcurrencyConfig.DEFAULT_CONCURRENCY)
-            .seedProperty(SEED_PROPERTY)
-            .threshold(0D)
-            .build();
+        var parameters = WccParameters.create( 0D, SEED_PROPERTY, ConcurrencyConfig.DEFAULT_CONCURRENCY);
 
         // We expect that UF connects pairs of communities
-        DisjointSetStruct result = run(graph, config);
+        DisjointSetStruct result = run(graph, parameters);
         assertEquals(COMMUNITY_COUNT / 2, getSetCount(result));
 
         graph.forEachNode((nodeId) -> {
@@ -111,23 +107,21 @@ class IncrementalWccTest {
         );
 
         // When
-        WccStreamConfig config = WccStreamConfigImpl.builder()
-            .seedProperty("seed")
-            .build();
+        var parameters = WccParameters.create(0D, "seed", ConcurrencyConfig.DEFAULT_CONCURRENCY);
 
-        DisjointSetStruct result = run(graph, config);
+        DisjointSetStruct result = run(graph, parameters);
 
         // Then
         LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
             .forEach(node -> assertEquals(42, result.setIdOf(node)));
     }
 
-    private DisjointSetStruct run(Graph graph, WccBaseConfig config) {
+    private DisjointSetStruct run(Graph graph, WccParameters parameters) {
         return new Wcc(
             graph,
             DefaultPool.INSTANCE,
             COMMUNITY_SIZE / ConcurrencyConfig.DEFAULT_CONCURRENCY,
-            config,
+            parameters,
             ProgressTracker.NULL_TRACKER
         ).compute();
     }

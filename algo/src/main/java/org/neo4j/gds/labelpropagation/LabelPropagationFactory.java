@@ -36,18 +36,26 @@ public class LabelPropagationFactory<CONFIG extends LabelPropagationBaseConfig> 
         return "LabelPropagation";
     }
 
+    public LabelPropagation build(
+        Graph graph,
+        LabelPropagationParameters parameters,
+        ProgressTracker progressTracker
+    ) {
+        return new LabelPropagation(
+            graph,
+            parameters,
+            DefaultPool.INSTANCE,
+            progressTracker
+        );
+    }
+
     @Override
     public LabelPropagation build(
         Graph graph,
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-        return new LabelPropagation(
-            graph,
-            configuration,
-            DefaultPool.INSTANCE,
-            progressTracker
-        );
+        return build(graph, configuration.toParameters(), progressTracker);
     }
 
     @Override
@@ -55,16 +63,20 @@ public class LabelPropagationFactory<CONFIG extends LabelPropagationBaseConfig> 
         return new LabelPropagationMemoryEstimateDefinition().memoryEstimation(config);
     }
 
-    @Override
-    public Task progressTask(Graph graph, CONFIG config) {
+    public Task progressTask(long relationshipCount, int maxIterations) {
         return Tasks.task(
             taskName(),
-            Tasks.leaf("Initialization", graph.relationshipCount()),
+            Tasks.leaf("Initialization", relationshipCount),
             Tasks.iterativeDynamic(
                 "Assign labels",
-                () -> List.of(Tasks.leaf("Iteration", graph.relationshipCount())),
-                config.maxIterations()
+                () -> List.of(Tasks.leaf("Iteration", relationshipCount)),
+                maxIterations
             )
         );
+    }
+
+    @Override
+    public Task progressTask(Graph graph, CONFIG config) {
+        return progressTask(graph.relationshipCount(), config.maxIterations());
     }
 }

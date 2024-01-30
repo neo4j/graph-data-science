@@ -41,6 +41,10 @@ public class LouvainMemoryEstimateDefinition implements AlgorithmMemoryEstimateD
 
     @Override
     public MemoryEstimation memoryEstimation(LouvainBaseConfig configuration) {
+        return memoryEstimation(configuration.includeIntermediateCommunities(), configuration.maxLevels());
+    }
+
+    public MemoryEstimation memoryEstimation(boolean includeIntermediateCommunities, int maxLevels) {
         return MemoryEstimations.builder(Louvain.class)
             .add(
                 "modularityOptimization()",
@@ -76,10 +80,7 @@ public class LouvainMemoryEstimateDefinition implements AlgorithmMemoryEstimateD
             })
             .rangePerNode("dendrograms", (nodeCount) -> MemoryRange.of(
                 HugeLongArray.memoryEstimation(nodeCount),
-                HugeLongArray.memoryEstimation(nodeCount) * (configuration.includeIntermediateCommunities() ? configuration.maxLevels() : Math.min(
-                    2,
-                    configuration.maxLevels()
-                ))
+                HugeLongArray.memoryEstimation(nodeCount) * (includeIntermediateCommunities ? maxLevels : Math.min(2, maxLevels))
             ))
             .build();
     }

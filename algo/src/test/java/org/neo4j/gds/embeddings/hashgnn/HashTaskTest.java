@@ -20,34 +20,25 @@
 package org.neo4j.gds.embeddings.hashgnn;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-
-import java.util.List;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class HashTaskTest {
     @Test
     void shouldHash() {
-        int ITERATIONS = 10;
         int EMBEDDING_DENSITY = 10;
         int NEIGHBOR_HASH_REPEATS = 3;
         int NUMBER_OF_RELATIONSHIPS = 3;
         int EMBEDDING_DIMENSION = 10;
 
-        var config = HashGNNStreamConfigImpl
-            .builder()
-            .featureProperties(List.of("f1", "f2"))
-            .iterations(ITERATIONS)
-            .embeddingDensity(EMBEDDING_DENSITY)
-            .build();
-
         var hashes = HashTask.compute(
             EMBEDDING_DIMENSION,
             NEIGHBOR_HASH_REPEATS,
             NUMBER_OF_RELATIONSHIPS,
-            config,
+            4,
+            EMBEDDING_DENSITY,
             42,
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER

@@ -29,7 +29,6 @@ import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -55,7 +54,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -68,7 +66,6 @@ import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.TestSupport.toArguments;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.INFO;
-import static org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfig.TOP_K_DEFAULT;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @GdlExtension
@@ -151,18 +148,6 @@ final class NodeSimilarityTest {
 
     private static final int COMPARED_ITEMS = 3;
     private static final int COMPARED_PERSONS = 4;
-
-    static NodeSimilarityWriteConfigImpl.Builder writeConfigBuilder() {
-        return NodeSimilarityWriteConfigImpl.builder()
-            .writeProperty("writeProperty")
-            .writeRelationshipType("writeRelationshipType")
-            .similarityCutoff(0.0);
-    }
-
-    static NodeSimilarityStreamConfigImpl.Builder streamConfigBuilder() {
-        return NodeSimilarityStreamConfigImpl.builder()
-            .similarityCutoff(0.0);
-    }
 
     private static String resultString(long node1, long node2, double similarity) {
         return formatWithLocale("%d,%d %f", node1, node2, similarity);
@@ -280,7 +265,7 @@ final class NodeSimilarityTest {
     }
 
     static Stream<Arguments> topKAndConcurrencies() {
-        Stream<Integer> topKStream = Stream.of(TOP_K_DEFAULT, 100);
+        Stream<Integer> topKStream = Stream.of(10, 100);
         return TestSupport.crossArguments(
             toArguments(() -> topKStream),
             toArguments(NodeSimilarityTest::concurrencies)
@@ -292,9 +277,21 @@ final class NodeSimilarityTest {
     void shouldComputeWeightedForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
-        NodeSimilarity nodeSimilarity = NodeSimilarity.create(
+        var parameters = NodeSimilarityParameters.create(
+            new JaccardSimilarityComputer(0.0),
+            1,
+            Integer.MAX_VALUE,
+            10,
+            0,
+            true,
+            true,
+            false,
+            null
+        );
+        var nodeSimilarity = new NodeSimilarity(
             graph,
-            streamConfigBuilder().relationshipWeightProperty("prop").concurrency(concurrency).build(),
+            parameters,
+            concurrency,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -313,9 +310,21 @@ final class NodeSimilarityTest {
     void shouldComputeForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
-        NodeSimilarity nodeSimilarity = NodeSimilarity.create(
+        var parameters = NodeSimilarityParameters.create(
+            new JaccardSimilarityComputer(0.0),
+            1,
+            Integer.MAX_VALUE,
+            10,
+            0,
+            true,
+            false,
+            false,
+            null
+        );
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            streamConfigBuilder().concurrency(concurrency).build(),
+            parameters,
+            concurrency,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -334,9 +343,22 @@ final class NodeSimilarityTest {
     void shouldComputeTopNForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
-        NodeSimilarity nodeSimilarity = NodeSimilarity.create(
+        var parameters = NodeSimilarityParameters.create(
+            new JaccardSimilarityComputer(0.0),
+            1,
+            Integer.MAX_VALUE,
+            10,
+            1,
+            true,
+            false,
+            false,
+            null
+        );
+
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            streamConfigBuilder().concurrency(concurrency).topN(1).build(),
+            parameters,
+            concurrency,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -355,9 +377,22 @@ final class NodeSimilarityTest {
     void shouldComputeNegativeTopNForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
-        NodeSimilarity nodeSimilarity = NodeSimilarity.create(
+        var parameters = NodeSimilarityParameters.create(
+            new JaccardSimilarityComputer(0.0),
+            1,
+            Integer.MAX_VALUE,
+            10,
+            -1,
+            false,
+            false,
+            false,
+            null
+        );
+
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            writeConfigBuilder().concurrency(concurrency).bottomN(1).build(),
+            parameters,
+            concurrency,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -379,9 +414,22 @@ final class NodeSimilarityTest {
     void shouldComputeTopKForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
-        NodeSimilarity nodeSimilarity = NodeSimilarity.create(
+        var parameters = NodeSimilarityParameters.create(
+            new JaccardSimilarityComputer(0.0),
+            1,
+            Integer.MAX_VALUE,
+            1,
+            0,
+            true,
+            false,
+            false,
+            null
+        );
+
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            streamConfigBuilder().topK(1).concurrency(concurrency).build(),
+            parameters,
+            concurrency,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -400,13 +448,22 @@ final class NodeSimilarityTest {
     void shouldComputeNegativeTopKForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
-        NodeSimilarity nodeSimilarity = NodeSimilarity.create(
+        var parameters = NodeSimilarityParameters.create(
+            new JaccardSimilarityComputer(0.0),
+            1,
+            Integer.MAX_VALUE,
+            -1,
+            0,
+            false,
+            false,
+            false,
+            null
+        );
+
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            writeConfigBuilder()
-                .concurrency(concurrency)
-                .topK(10)
-                .bottomK(1)
-                .build(),
+            parameters,
+            concurrency,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -434,9 +491,22 @@ final class NodeSimilarityTest {
     void shouldComputeWithSimilarityCutoffForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
-        NodeSimilarity nodeSimilarity = NodeSimilarity.create(
+        var parameters = NodeSimilarityParameters.create(
+            new JaccardSimilarityComputer(0.1),
+            1,
+            Integer.MAX_VALUE,
+            10,
+            0,
+            true,
+            false,
+            false,
+            null
+        );
+
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            streamConfigBuilder().concurrency(concurrency).similarityCutoff(0.1).build(),
+            parameters,
+            concurrency,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -458,9 +528,22 @@ final class NodeSimilarityTest {
     void shouldComputeWithDegreeCutoffForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
-        NodeSimilarity nodeSimilarity = NodeSimilarity.create(
+        var parameters = NodeSimilarityParameters.create(
+            new JaccardSimilarityComputer(0.0),
+            2,
+            Integer.MAX_VALUE,
+            10,
+            0,
+            true,
+            false,
+            false,
+            null
+        );
+
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            streamConfigBuilder().degreeCutoff(2).concurrency(concurrency).build(),
+            parameters,
+            concurrency,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -480,9 +563,22 @@ final class NodeSimilarityTest {
     @ParameterizedTest(name = "concurrency = {0}")
     @MethodSource("concurrencies")
     void shouldComputeForUndirectedGraphs(int concurrency) {
-        NodeSimilarity nodeSimilarity = NodeSimilarity.create(
+        var parameters = NodeSimilarityParameters.create(
+            new JaccardSimilarityComputer(0.0),
+            1,
+            Integer.MAX_VALUE,
+            10,
+            0,
+            true,
+            false,
+            false,
+            null
+        );
+
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             undirectedGraph,
-            streamConfigBuilder().concurrency(concurrency).build(),
+            parameters,
+            concurrency,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -493,18 +589,31 @@ final class NodeSimilarityTest {
 
     @Test
     void shouldComputeForUnionGraphs() {
-        NodeSimilarity nodeSimilarity = NodeSimilarity.create(
+        var parameters = NodeSimilarityParameters.create(
+            new JaccardSimilarityComputer(0.0),
+            1,
+            Integer.MAX_VALUE,
+            10,
+            0,
+            true,
+            false,
+            false,
+            null
+        );
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             naturalGraph,
-            streamConfigBuilder().concurrency(1).build(),
+            parameters,
+            1,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
         var result1 = nodeSimilarity.compute()
             .streamResult().collect(Collectors.toSet());
 
-        nodeSimilarity = NodeSimilarity.create(
+        nodeSimilarity = new NodeSimilarity(
             naturalUnionGraph,
-            streamConfigBuilder().concurrency(1).build(),
+            parameters,
+            1,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -519,9 +628,22 @@ final class NodeSimilarityTest {
     void shouldComputeSimilarityGraphInAllSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
-        NodeSimilarity nodeSimilarity = NodeSimilarity.create(
+        var parameters = NodeSimilarityParameters.create(
+            new JaccardSimilarityComputer(0.0),
+            1,
+            Integer.MAX_VALUE,
+            10,
+            0,
+            false,
+            false,
+            false,
+            null
+        );
+
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            writeConfigBuilder().concurrency(concurrency).build(),
+            parameters,
+            concurrency,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -566,13 +688,22 @@ final class NodeSimilarityTest {
     void shouldComputeToGraphWithUnusedNodesInInputGraph(Orientation orientation, int concurrency) {
         Graph graph = fromGdl(DB_CYPHER + ", (:Unused)".repeat(1024), orientation);
 
-        NodeSimilarity nodeSimilarity = NodeSimilarity.create(
+        var parameters = NodeSimilarityParameters.create(
+            new JaccardSimilarityComputer(0.0),
+            1,
+            Integer.MAX_VALUE,
+            100,
+            1,
+            false,
+            false,
+            false,
+            null
+        );
+
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            writeConfigBuilder()
-                .concurrency(concurrency)
-                .topK(100)
-                .topN(1)
-                .build(),
+            parameters,
+            concurrency,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -608,9 +739,22 @@ final class NodeSimilarityTest {
 
         Graph graph = fromGdl(gdl, orientation);
 
-        NodeSimilarity nodeSimilarity = NodeSimilarity.create(
+        var parameters = NodeSimilarityParameters.create(
+            new JaccardSimilarityComputer(0.0),
+            1,
+            Integer.MAX_VALUE,
+            10,
+            1,
+            true,
+            false,
+            false,
+            null
+        );
+
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            streamConfigBuilder().concurrency(concurrency).topN(1).build(),
+            parameters,
+            concurrency,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -636,9 +780,22 @@ final class NodeSimilarityTest {
 
         Graph graph = fromGdl(gdl, orientation);
 
-        NodeSimilarity nodeSimilarity = NodeSimilarity.create(
+        var parameters = NodeSimilarityParameters.create(
+            new JaccardSimilarityComputer(0.0),
+            1,
+            Integer.MAX_VALUE,
+            10,
+            0,
+            true,
+            false,
+            false,
+            null
+        );
+
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            streamConfigBuilder().concurrency(concurrency).build(),
+            parameters,
+            concurrency,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -653,21 +810,16 @@ final class NodeSimilarityTest {
     }
 
     @ParameterizedTest(name = "topK = {0}")
-    @ValueSource(ints = {TOP_K_DEFAULT, 100})
+    @ValueSource(ints = {10, 100})
     void shouldComputeMemrec(int topK) {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(1_000_000)
             .relCountUpperBound(5_000_000)
             .build();
 
-        NodeSimilarityWriteConfig config = NodeSimilarityWriteConfigImpl.builder()
-            .similarityCutoff(0.0)
-            .topK(topK)
-            .writeProperty("writeProperty")
-            .writeRelationshipType("writeRelationshipType")
-            .build();
-
-        MemoryTree actual = new NodeSimilarityFactory<>().memoryEstimation(config).estimate(dimensions, 1);
+        MemoryTree actual = new NodeSimilarityFactory<>()
+            .memoryEstimation(topK, 0, false, false, true)
+            .estimate(dimensions, 1);
 
         long nodeFilterRangeMin = 125_016L;
         long nodeFilterRangeMax = 125_016L;
@@ -689,7 +841,7 @@ final class NodeSimilarityTest {
 
         long topKMapRangeMin;
         long topKMapRangeMax;
-        if (topK == TOP_K_DEFAULT) {
+        if (topK == 10) {
             topKMapRangeMin = 248_000_016L;
             topKMapRangeMax = 248_000_016L;
         } else {
@@ -704,22 +856,16 @@ final class NodeSimilarityTest {
     }
 
     @ParameterizedTest(name = "topK = {0}")
-    @ValueSource(ints = {TOP_K_DEFAULT, 100})
+    @ValueSource(ints = {10, 100})
     void shouldComputeMemrecWithTop(int topK) {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(1_000_000)
             .relCountUpperBound(5_000_000)
             .build();
 
-        NodeSimilarityWriteConfig config = NodeSimilarityWriteConfigImpl.builder()
-            .similarityCutoff(0.0)
-            .topN(100)
-            .topK(topK)
-            .writeProperty("writeProperty")
-            .writeRelationshipType("writeRelationshipType")
-            .build();
-
-        MemoryTree actual = new NodeSimilarityFactory<>().memoryEstimation(config).estimate(dimensions, 1);
+        MemoryTree actual = new NodeSimilarityFactory<>()
+            .memoryEstimation(topK, 100, false, false, true)
+            .estimate(dimensions, 1);
 
         long nodeFilterRangeMin = 125_016L;
         long nodeFilterRangeMax = 125_016L;
@@ -746,7 +892,7 @@ final class NodeSimilarityTest {
 
         long topKMapRangeMin;
         long topKMapRangeMax;
-        if (topK == TOP_K_DEFAULT) {
+        if (topK == 10) {
             topKMapRangeMin = 248_000_016L;
             topKMapRangeMax = 248_000_016L;
         } else {
@@ -767,15 +913,9 @@ final class NodeSimilarityTest {
             .relCountUpperBound(20_000)
             .build();
 
-        NodeSimilarityWriteConfig config = NodeSimilarityWriteConfigImpl.builder()
-            .similarityCutoff(0.0)
-            .topK(Integer.MAX_VALUE)
-            .topN(Integer.MAX_VALUE)
-            .writeProperty("writeProperty")
-            .writeRelationshipType("writeRelationshipType")
-            .build();
-
-        MemoryTree actual = new NodeSimilarityFactory<>().memoryEstimation(config).estimate(dimensions, 1);
+        MemoryTree actual = new NodeSimilarityFactory<>()
+            .memoryEstimation(Integer.MAX_VALUE, Integer.MAX_VALUE, false, false, true)
+            .estimate(dimensions, 1);
 
         assertEquals(570592, actual.memoryUsage().min);
         assertEquals(732192, actual.memoryUsage().max);
@@ -786,16 +926,33 @@ final class NodeSimilarityTest {
     @MethodSource("topKAndConcurrencies")
     void shouldLogMessages(int topK, int concurrency) {
         var graph = naturalGraph;
-        var config = streamConfigBuilder().topN(100).topK(topK).concurrency(concurrency).build();
 
+        var factory = new NodeSimilarityFactory<>();
         var progressLog = Neo4jProxy.testLog();
-        var nodeSimilarity = new NodeSimilarityFactory<>().build(
-            graph,
-            config,
+        var progressTracker = new TestProgressTracker(
+            factory.progressTask(graph, false),
             progressLog,
+            concurrency,
             EmptyTaskRegistryFactory.INSTANCE
         );
-
+        var parameters = NodeSimilarityParameters.create(
+            new JaccardSimilarityComputer(1E-42),
+            1,
+            Integer.MAX_VALUE,
+            topK,
+            100,
+            true,
+            false,
+            false,
+            null
+        );
+        var nodeSimilarity = new NodeSimilarity(
+            graph,
+            parameters,
+            concurrency,
+            DefaultPool.INSTANCE,
+            progressTracker
+        );
         nodeSimilarity.compute();
 
         assertThat(progressLog.getMessages(INFO))
@@ -812,7 +969,9 @@ final class NodeSimilarityTest {
     @MethodSource("topKAndConcurrencies")
     void shouldNotLogMessagesWhenLoggingIsDisabled(int topK, int concurrency) {
         var graph = naturalGraph;
-        var config = streamConfigBuilder().topN(100).topK(topK).concurrency(concurrency).logProgress(false).build();
+        // TODO: wrong place to test org.neo4j.gds.AlgorithmFactory.createProgressTracker
+        var config = NodeSimilarityStreamConfigImpl.builder()
+            .similarityCutoff(0.0).topN(100).topK(topK).concurrency(concurrency).logProgress(false).build();
 
         var progressLog = Neo4jProxy.testLog();
         var nodeSimilarity = new NodeSimilarityFactory<>().build(
@@ -841,19 +1000,30 @@ final class NodeSimilarityTest {
     @ValueSource(ints = {1, 2})
     void shouldLogProgress(int concurrency) {
         var graph = naturalGraph;
-        var config = NodeSimilarityStreamConfigImpl.builder().degreeCutoff(1).concurrency(concurrency).build();
-        var progressTask = new NodeSimilarityFactory<>().progressTask(graph, config);
-        TestLog log = Neo4jProxy.testLog();
+        var progressTask = new NodeSimilarityFactory<>().progressTask(graph, false);
+        var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(
             progressTask,
             log,
             concurrency,
             EmptyTaskRegistryFactory.INSTANCE
         );
+        var parameters = NodeSimilarityParameters.create(
+            new JaccardSimilarityComputer(1E-42),
+            1,
+            Integer.MAX_VALUE,
+            10,
+            0,
+            true,
+            false,
+            false,
+            null
+        );
 
-        NodeSimilarity.create(
+        new NodeSimilarity(
             graph,
-            config,
+            parameters,
+            concurrency,
             DefaultPool.INSTANCE,
             progressTracker
         ).compute().streamResult().count();
@@ -877,12 +1047,19 @@ final class NodeSimilarityTest {
     @Test
     void shouldLogProgressForWccOptimization() {
         var graph = naturalGraph;
-        var config = NodeSimilarityStreamConfigImpl.builder()
-            .useComponents(true)
-            .concurrency(4)
-            .build();
-        var progressTask = new NodeSimilarityFactory<>().progressTask(graph, config);
-        TestLog log = Neo4jProxy.testLog();
+        var parameters = NodeSimilarityParameters.create(
+            new JaccardSimilarityComputer(1E-42),
+            1,
+            Integer.MAX_VALUE,
+            10,
+            0,
+            true,
+            false,
+            true,
+            null
+        );
+        var progressTask = new NodeSimilarityFactory<>().progressTask(graph, true);
+        var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(
             progressTask,
             log,
@@ -890,9 +1067,10 @@ final class NodeSimilarityTest {
             EmptyTaskRegistryFactory.INSTANCE
         );
 
-        NodeSimilarity.create(
+        new NodeSimilarity(
             graph,
-            config,
+            parameters,
+            4,
             DefaultPool.INSTANCE,
             progressTracker
         ).compute().streamResult().count();
@@ -931,9 +1109,21 @@ final class NodeSimilarityTest {
 
         Graph graph = fromGdl(gdl);
 
-        NodeSimilarity nodeSimilarity = NodeSimilarity.create(
+        var parameters1 = NodeSimilarityParameters.create(
+            new OverlapSimilarityComputer(0.0),
+            1,
+            Integer.MAX_VALUE,
+            10,
+            0,
+            true,
+            false,
+            false,
+            null
+        );
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
-            streamConfigBuilder().concurrency(1).similarityMetric(MetricSimilarityComputer.parse("ovErLaP")).build(),
+            parameters1,
+            1,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -946,13 +1136,21 @@ final class NodeSimilarityTest {
 
         assertThat(result).contains("0,1 0.500000");
 
-        nodeSimilarity = NodeSimilarity.create(
+        var parameters2 = NodeSimilarityParameters.create(
+            new OverlapSimilarityComputer(1E-42),
+            1,
+            Integer.MAX_VALUE,
+            10,
+            0,
+            true,
+            true,
+            false,
+            null
+        );
+        nodeSimilarity = new NodeSimilarity(
             graph,
-            streamConfigBuilder()
-                .relationshipWeightProperty("LIKES")
-                .concurrency(1)
-                .similarityMetric(MetricSimilarityComputer.parse("ovErLaP"))
-                .build(),
+            parameters2,
+            1,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -992,10 +1190,22 @@ final class NodeSimilarityTest {
     @ParameterizedTest
     @MethodSource("degreeCutoffInput")
     void shouldWorkForAllDegreeBoundsCombinations(int lowBound, int upperBound, String... expectedOutput) {
+        var parameters = NodeSimilarityParameters.create(
+            new JaccardSimilarityComputer(0.0),
+            lowBound,
+            upperBound,
+            10,
+            0,
+            true,
+            false,
+            false,
+            null
+        );
 
-        NodeSimilarity nodeSimilarity = NodeSimilarity.create(
+        NodeSimilarity nodeSimilarity = new NodeSimilarity(
             naturalGraph,
-            streamConfigBuilder().upperDegreeCutoff(upperBound).degreeCutoff(lowBound).build(),
+            parameters,
+            4,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -1007,11 +1217,5 @@ final class NodeSimilarityTest {
             .collect(Collectors.toSet());
 
         assertThat(result).containsExactlyInAnyOrder(expectedOutput);
-    }
-
-    @Test
-    void shouldThrowIfUpperIsSmaller() {
-        assertThatThrownBy(streamConfigBuilder().upperDegreeCutoff(3).degreeCutoff(4)::build)
-            .hasMessageContaining("upperDegreeCutoff cannot be smaller than degreeCutoff");
     }
 }
