@@ -73,10 +73,11 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceBuilder;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.configparser.ConfigurationParser;
@@ -341,11 +342,8 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
         );
 
         TestProcedureRunner.applyOnProcedure(db, LabelPropagationMutateProc.class, procedure -> {
-            procedure.facade = new GraphDataScience(
-                null,
-                null,
-                null,
-                new CommunityProcedureFacade(
+            procedure.facade = new GraphDataScienceBuilder(Log.noOpLog())
+                .with(new CommunityProcedureFacade(
                     new ConfigurationCreator(
                         ConfigurationParser.EMPTY,
                         null,
@@ -357,12 +355,9 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     null,
                     null,
                     null
-                ),
-                null,
-                null,
-                null,
-                DeprecatedProceduresMetricService.PASSTHROUGH
-            );
+                ))
+                .with(DeprecatedProceduresMetricService.PASSTHROUGH)
+                .build();
 
             ProcedureMethodHelper.mutateMethods(procedure)
                 .forEach(mutateMethod -> {
@@ -476,11 +471,8 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
         );
 
         TestProcedureRunner.applyOnProcedure(db, LabelPropagationMutateProc.class, procedure -> {
-            procedure.facade = new GraphDataScience(
-                null,
-                null,
-                null,
-                new CommunityProcedureFacade(
+            procedure.facade = new GraphDataScienceBuilder(Log.noOpLog())
+                .with(                new CommunityProcedureFacade(
                     new ConfigurationCreator(
                         ConfigurationParser.EMPTY,
                         null,
@@ -492,12 +484,9 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     null,
                     null,
                     null
-                ),
-                null,
-                null,
-                null,
-                DeprecatedProceduresMetricService.PASSTHROUGH
-            );
+                ))
+                .with(DeprecatedProceduresMetricService.PASSTHROUGH)
+                .build();
 
             ProcedureMethodHelper.mutateMethods(procedure)
                 .forEach(mutateMethod -> {
@@ -565,11 +554,8 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
         );
 
         TestProcedureRunner.applyOnProcedure(db, LabelPropagationMutateProc.class, (procedure) -> {
-            procedure.facade = new GraphDataScience(
-                null,
-                null,
-                null,
-                new CommunityProcedureFacade(
+            procedure.facade = new GraphDataScienceBuilder(Log.noOpLog())
+                .with(new CommunityProcedureFacade(
                     new ConfigurationCreator(
                         ConfigurationParser.EMPTY,
                         null,
@@ -581,12 +567,9 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     null,
                     null,
                     null
-                ),
-                null,
-                null,
-                null,
-                DeprecatedProceduresMetricService.PASSTHROUGH
-            );
+                ))
+                .with(DeprecatedProceduresMetricService.PASSTHROUGH)
+                .build();
 
             var methods = ProcedureMethodHelper.mutateMethods(procedure).collect(Collectors.toList());
 
@@ -660,11 +643,8 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
         );
 
         TestProcedureRunner.applyOnProcedure(db, LabelPropagationMutateProc.class, procedure -> {
-            procedure.facade = new GraphDataScience(
-                null,
-                null,
-                null,
-                new CommunityProcedureFacade(
+            procedure.facade = new GraphDataScienceBuilder(Log.noOpLog())
+                .with(new CommunityProcedureFacade(
                     new ConfigurationCreator(
                         ConfigurationParser.EMPTY,
                         null,
@@ -676,12 +656,9 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     null,
                     null,
                     null
-                ),
-                null,
-                null,
-                null,
-                DeprecatedProceduresMetricService.PASSTHROUGH
-            );
+                ))
+                .with(DeprecatedProceduresMetricService.PASSTHROUGH)
+                .build();
             ProcedureMethodHelper.mutateMethods(procedure)
                 .forEach(mutateMethod -> {
                     try {

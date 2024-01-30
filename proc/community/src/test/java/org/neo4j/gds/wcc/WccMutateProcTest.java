@@ -71,10 +71,11 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceBuilder;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.configparser.ConfigurationParser;
@@ -371,11 +372,8 @@ class WccMutateProcTest extends BaseProcTest {
         );
 
         applyOnProcedure(procedure -> {
-            procedure.facade = new GraphDataScience(
-                null,
-                null,
-                null,
-                new CommunityProcedureFacade(
+            procedure.facade = new GraphDataScienceBuilder(Log.noOpLog())
+                .with(new CommunityProcedureFacade(
                     new ConfigurationCreator(
                         ConfigurationParser.EMPTY,
                         null,
@@ -387,12 +385,9 @@ class WccMutateProcTest extends BaseProcTest {
                     null,
                     null,
                     null
-                ),
-                null,
-                null,
-                null,
-                DeprecatedProceduresMetricService.PASSTHROUGH
-            );
+                ))
+                .with(DeprecatedProceduresMetricService.PASSTHROUGH)
+                .build();
 
             ProcedureMethodHelper.mutateMethods(procedure)
                 .forEach(mutateMethod -> {
@@ -510,11 +505,8 @@ class WccMutateProcTest extends BaseProcTest {
                 new MutateNodePropertyService(logMock)
             );
 
-            procedure.facade = new GraphDataScience(
-                null,
-                null,
-                null,
-                new CommunityProcedureFacade(
+            procedure.facade = new GraphDataScienceBuilder(Log.noOpLog())
+                .with(new CommunityProcedureFacade(
                     new ConfigurationCreator(
                         ConfigurationParser.EMPTY,
                         null,
@@ -526,12 +518,9 @@ class WccMutateProcTest extends BaseProcTest {
                     null,
                     null,
                     null
-                ),
-                null,
-                null,
-                null,
-                DeprecatedProceduresMetricService.PASSTHROUGH
-            );
+                ))
+                .with(DeprecatedProceduresMetricService.PASSTHROUGH)
+                .build();
                 ProcedureMethodHelper.mutateMethods(procedure)
                     .forEach(mutateMethod -> {
                         Map<String, Object> config = Map.of("mutateProperty", MUTATE_PROPERTY);
@@ -596,11 +585,8 @@ class WccMutateProcTest extends BaseProcTest {
                 ),
                 new MutateNodePropertyService(null)
             );
-            proc.facade = new GraphDataScience(
-                null,
-                null,
-                null,
-                new CommunityProcedureFacade(
+            proc.facade = new GraphDataScienceBuilder(Log.noOpLog())
+                .with(new CommunityProcedureFacade(
                     new ConfigurationCreator(
                         ConfigurationParser.EMPTY,
                         null,
@@ -612,12 +598,9 @@ class WccMutateProcTest extends BaseProcTest {
                     null,
                     null,
                     null
-                ),
-                null,
-                null,
-                null,
-                DeprecatedProceduresMetricService.PASSTHROUGH
-            );
+                ))
+                .with(DeprecatedProceduresMetricService.PASSTHROUGH)
+                .build();
 
             var methods = ProcedureMethodHelper.mutateMethods(proc).collect(Collectors.toList());
 
@@ -692,11 +675,8 @@ class WccMutateProcTest extends BaseProcTest {
         applyOnProcedure(procedure ->
             ProcedureMethodHelper.mutateMethods(procedure)
                 .forEach(mutateMethod -> {
-                    procedure.facade = new GraphDataScience(
-                        null,
-                        null,
-                        null,
-                        new CommunityProcedureFacade(
+                    procedure.facade = new GraphDataScienceBuilder(Log.noOpLog())
+                        .with(new CommunityProcedureFacade(
                             new ConfigurationCreator(
                                 ConfigurationParser.EMPTY,
                                 null,
@@ -708,12 +688,9 @@ class WccMutateProcTest extends BaseProcTest {
                             null,
                             null,
                             null
-                        ),
-                        null,
-                        null,
-                        null,
-                        DeprecatedProceduresMetricService.PASSTHROUGH
-                    );
+                        ))
+                        .with(DeprecatedProceduresMetricService.PASSTHROUGH)
+                        .build();
                     Map<String, Object> config = new HashMap<>(additionalConfig);
                     config.put("mutateProperty", MUTATE_PROPERTY);
                     try {

@@ -52,11 +52,12 @@ import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.IdToVariable;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceBuilder;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.configparser.ConfigurationParser;
@@ -217,11 +218,8 @@ class K1ColoringStreamProcTest extends BaseProcTest {
                         EmptyUserLogRegistryFactory.INSTANCE
                     )
                 ));
-            proc.facade = new GraphDataScience(
-                null,
-                null,
-                null,
-                new CommunityProcedureFacade(
+            proc.facade = new GraphDataScienceBuilder(Log.noOpLog())
+                .with(new CommunityProcedureFacade(
                     new ConfigurationCreator(
                         ConfigurationParser.EMPTY,
                         mock(AlgorithmMetaDataSetter.class),
@@ -233,12 +231,9 @@ class K1ColoringStreamProcTest extends BaseProcTest {
                     null,
                     algorithmsStreamBusinessFacade,
                     null
-                ),
-                null,
-                null,
-                null,
-                DeprecatedProceduresMetricService.PASSTHROUGH
-            );
+                ))
+                .with(DeprecatedProceduresMetricService.PASSTHROUGH)
+                .build();
             var someJobId = new JobId();
             Map<String, Object> configMap = Map.of("jobId", someJobId);
             proc.stream(K1COLORING_GRAPH, configMap);

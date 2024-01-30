@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.kmeans;
 
+import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -31,6 +32,10 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
 import java.util.List;
 import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.DOUBLE;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
 class KmeansStreamProcTest extends BaseProcTest {
     @BeforeEach
@@ -48,7 +53,7 @@ class KmeansStreamProcTest extends BaseProcTest {
 
     @ParameterizedTest
     @ValueSource(strings = {"gds.kmeans","gds.beta.kmeans"})
-    void shouldWork(String procedureName) {
+    void shouldStream(String procedureName) {
         String nodeCreateQuery =
             "CREATE" +
             "  (a:Person {kmeans: [1.0, 1.0]} )" +
@@ -75,33 +80,47 @@ class KmeansStreamProcTest extends BaseProcTest {
             .addParameter("concurrency", 1)
             .addParameter("computeSilhouette", true)
             .yields("nodeId", "communityId", "distanceFromCentroid", "silhouette");
-        assertCypherResult(algoQuery, List.of(
-            Map.of(
-                "nodeId", 0L,
-                "communityId", 0L,
-                "distanceFromCentroid", 0.5,
-                "silhouette", 0.9929292857150108
-            ),
-            Map.of(
-                "nodeId", 1L,
-                "communityId", 1L,
-                "distanceFromCentroid", Math.sqrt(2),
-                "silhouette", 0.9799515133128792
-            ),
-            Map.of(
-                "nodeId", 2L,
-                "communityId", 0L,
-                "distanceFromCentroid", 0.5,
-                "silhouette", 0.9928938477702276
-            ),
-            Map.of(
-                "nodeId", 3L,
-                "communityId", 1L,
-                "distanceFromCentroid", Math.sqrt(2),
-                "silhouette", 0.9799505034216922
-            )
 
-        ));
+        var expectedStreamResult = Map.of(
+            0L, new KmeansTestStreamResult(0L, 0.5, 0.9929292857150108),
+            1L, new KmeansTestStreamResult(1L, Math.sqrt(2), 0.9799515133128792),
+            2L, new KmeansTestStreamResult(0L, 0.5, 0.9928938477702276),
+            3L, new KmeansTestStreamResult(1L, Math.sqrt(2), 0.9799505034216922)
+
+        );
+
+        var rowCount = runQueryWithRowConsumer(algoQuery, (resultRow) -> {
+
+            var nodeId = resultRow.getNumber("nodeId");
+            var expectedCommunity = expectedStreamResult.get(nodeId).communityId;
+            var expectedDistance = expectedStreamResult.get(nodeId).distanceFromCentroid;
+            var expectedsilhouette = expectedStreamResult.get(nodeId).silhouette;
+
+            assertThat(resultRow.getNumber("communityId")).asInstanceOf(LONG).isEqualTo(expectedCommunity);
+            assertThat(resultRow.getNumber("distanceFromCentroid")).asInstanceOf(DOUBLE).isCloseTo(
+                expectedDistance,
+                Offset.offset(1e-6)
+            );
+            assertThat(resultRow.getNumber("silhouette")).asInstanceOf(DOUBLE).isCloseTo(
+                expectedsilhouette,
+                Offset.offset(1e-6)
+            );
+
+        });
+        assertThat(rowCount).isEqualTo(4l);
+    }
+
+    class KmeansTestStreamResult {
+
+        public long communityId;
+        public double distanceFromCentroid;
+        public double silhouette;
+
+        public KmeansTestStreamResult(long communityId, double distanceFromCentroid, double silhouette) {
+            this.communityId = communityId;
+            this.distanceFromCentroid = distanceFromCentroid;
+            this.silhouette = silhouette;
+        }
     }
     
 }

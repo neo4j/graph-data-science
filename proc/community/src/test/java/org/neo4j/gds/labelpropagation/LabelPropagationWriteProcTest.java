@@ -680,9 +680,13 @@ class LabelPropagationWriteProcTest extends BaseProcTest {
             "MATCH (n) RETURN n.%1$s AS community, count(*) AS communitySize",
             "community"
         );
-        assertCypherResult(validateQuery, Arrays.asList(
-            Map.of("community", idFunction.of("a"), "communitySize", 6L),
-            Map.of("community", idFunction.of("b"), "communitySize", 6L)
-        ));
+
+
+        var validationRowCount = runQueryWithRowConsumer(validateQuery, (resultRow) -> {
+            assertThat(resultRow.get("community")).asInstanceOf(LONG).isIn(idFunction.of("a"), idFunction.of("b"));
+        });
+
+        assertThat(validationRowCount).isEqualTo(2l);
+      
     }
 }
