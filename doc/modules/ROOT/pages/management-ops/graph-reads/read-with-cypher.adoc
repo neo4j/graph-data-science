@@ -7,7 +7,7 @@
 --
 Running Cypher queries on an in-memory graph is deprecated and will be removed starting from version 2.7.
 Due to low adoption and high maintenance costs of this feature there is no replacement planned.
-If you want to run cypher queries on a graph the recommended way is to write back data to Neo4j and run Cypher queries on the database.
+If you want to run cypher queries on an in-memory graph the recommended way is to write back data to Neo4j and run Cypher queries on the database.
 --
 
 include::partial$/operations-reference/alpha-note.adoc[]
