@@ -79,17 +79,17 @@ class KCoreDecompositionWriteProcTest extends BaseProcTest {
 
 
         String query="CALL gds.kcore.write('graph', { writeProperty: 'coreValue'})";
-        var expectedResultMap = Map.of
-            (idFunction.of("z"), 0L,
-                idFunction.of("a"), 1L,
-                idFunction.of("b"), 1L,
-                idFunction.of("c"), 2L,
-                idFunction.of("d"), 2L,
-                idFunction.of("e"), 2L,
-                idFunction.of("f"), 2L,
-                idFunction.of("g"), 2L,
-                idFunction.of("h"), 2L
-            );
+        var expectedResultMap = Map.of(
+            idFunction.of("z"), 0L,
+            idFunction.of("a"), 1L,
+            idFunction.of("b"), 1L,
+            idFunction.of("c"), 2L,
+            idFunction.of("d"), 2L,
+            idFunction.of("e"), 2L,
+            idFunction.of("f"), 2L,
+            idFunction.of("g"), 2L,
+            idFunction.of("h"), 2L
+        );
         var rowCount = runQueryWithRowConsumer(query, row -> {
 
             assertThat(row.getNumber("preProcessingMillis"))
