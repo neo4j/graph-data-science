@@ -20,7 +20,6 @@
 package org.neo4j.gds.similarity.nodesim;
 
 import org.immutables.value.Value;
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
@@ -31,8 +30,6 @@ import org.neo4j.gds.config.RelationshipWeightConfig;
 
 import java.util.Collection;
 
-import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
-import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteCharacter;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
@@ -51,8 +48,6 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
     int BOTTOM_N_DEFAULT = TOP_N_DEFAULT;
 
     String COMPONENT_PROPERTY_KEY = "componentProperty";
-
-    String APPLY_WCC = "applyWcc";
 
     @Configuration.DoubleRange(min = 0, max = 1)
     default double similarityCutoff() {
@@ -99,12 +94,11 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
         return BOTTOM_N_DEFAULT;
     }
 
-    @Configuration.ConvertWith(method = "validatePropertyName")
-    @Configuration.Key(COMPONENT_PROPERTY_KEY)
-    default @Nullable String componentProperty() { return null; }
-
-    @Configuration.Key(APPLY_WCC)
-    default boolean applyWcc() {return false;}
+    @Configuration.ConvertWith(method = "org.neo4j.gds.similarity.nodesim.ComponentSpec#parse")
+    @Configuration.ToMapValue(          "org.neo4j.gds.similarity.nodesim.ComponentSpec#render")
+    default ComponentSpec useComponents() {
+        return ComponentSpec.NO;
+    }
 
     @Configuration.Ignore
     default int normalizedK() {
@@ -168,30 +162,26 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
         }
     }
 
-    static @Nullable String validatePropertyName(String input) {
-        return validateNoWhiteCharacter(emptyToNull(input), COMPONENT_PROPERTY_KEY);
-    }
-
     @Configuration.GraphStoreValidationCheck
     default void validateComponentProperty(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        String componentProperty = componentProperty();
-        if (componentProperty != null) {
-            ConfigNodesValidations.validateNodePropertyExists(graphStore, selectedLabels, "Component property", componentProperty);
+        var componentsUsage = useComponents();
+        if (componentsUsage.usePreComputedComponents()) {
+            ConfigNodesValidations.validateNodePropertyExists(graphStore, selectedLabels, "Component property", componentsUsage.componentProperty());
         }
     }
 
     @Configuration.Ignore
     default boolean actuallyRunWCC() {
-        return enableComponentsOptimization() && componentProperty() == null;
+        return useComponents().computeComponents();
     }
 
     @Configuration.Ignore
     default boolean enableComponentsOptimization() {
-        return applyWcc() || componentProperty() != null;
+        return useComponents().useComponents();
     }
 
 }
