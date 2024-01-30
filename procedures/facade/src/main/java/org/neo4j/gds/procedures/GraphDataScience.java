@@ -38,7 +38,10 @@ public class GraphDataScience {
     private final NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade;
     private final DeprecatedProceduresMetricService deprecatedProceduresMetricService;
 
-    public GraphDataScience(
+    /**
+     * Keeping this package private to encourage use of @{@link org.neo4j.gds.procedures.GraphDataScienceBuilder}
+     */
+    GraphDataScience(
         Log log,
         CatalogFacade catalogFacade,
         CentralityProcedureFacade centralityProcedureFacade,

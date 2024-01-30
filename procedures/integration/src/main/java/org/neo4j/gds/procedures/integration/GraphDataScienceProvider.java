@@ -23,6 +23,7 @@ import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceBuilder;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
@@ -61,15 +62,14 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         var similarityProcedureFacade = algorithmFacadeProvider.createSimilarityProcedureFacade();
         var nodeEmbeddingsProcedureFacade = algorithmFacadeProvider.createNodeEmbeddingsProcedureFacade();
 
-        return new GraphDataScience(
-            log,
-            catalogFacade,
-            centralityProcedureFacade,
-            communityProcedureFacade,
-            nodeEmbeddingsProcedureFacade,
-            similarityProcedureFacade,
-            pathFindingProcedureFacade,
-            deprecatedProceduresMetricService
-        );
+        return new GraphDataScienceBuilder(log)
+            .with(catalogFacade)
+            .with(centralityProcedureFacade)
+            .with(communityProcedureFacade)
+            .with(nodeEmbeddingsProcedureFacade)
+            .with(similarityProcedureFacade)
+            .with(pathFindingProcedureFacade)
+            .with(deprecatedProceduresMetricService)
+            .build();
     }
 }

@@ -50,10 +50,12 @@ import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceBuilder;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.configparser.ConfigurationParser;
@@ -204,10 +206,8 @@ class HarmonicCentralityWriteProcTest extends BaseProcTest {
             )
         );
 
-        return new GraphDataScience(
-            logMock,
-            null,
-            new CentralityProcedureFacade(
+        return new GraphDataScienceBuilder(Log.noOpLog())
+            .with(new CentralityProcedureFacade(
                 new ConfigurationCreator(ConfigurationParser.EMPTY, null, new User(getUsername(), false)),
                 ProcedureReturnColumns.EMPTY,
                 null,
@@ -215,12 +215,8 @@ class HarmonicCentralityWriteProcTest extends BaseProcTest {
                 null,
                 null,
                 writeBusinessFacade
-            ),
-            null,
-            null,
-            null,
-            null,
-            DeprecatedProceduresMetricService.PASSTHROUGH
-        );
+            ))
+            .with(DeprecatedProceduresMetricService.PASSTHROUGH)
+            .build();
     }
 }
