@@ -113,7 +113,7 @@ YIELD
 | Name                     | Type      | Description
 | running                  | Boolean   | True, if the Arrow Flight Server is currently running.
 | enabled                  | Boolean   | True, if the corresponding setting is enabled.
-| version                  | String    | The current version of the server (e.g. `v1`).
+| versions                 | List      | A list of supported command versions (e.g. `["v1", "v2"]`).
 | listenAddress            | String    | The address (host and port) the Arrow Flight Client should connect to.
 | batchSize                | Integer   | The batch size used for arrow property export.
 | abortionTimeout          | Duration  | The maximum time to wait for the next command before aborting the import process.
