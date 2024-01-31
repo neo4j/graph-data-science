@@ -29,16 +29,16 @@ public final class SettingProxyFactoryImpl implements SettingProxyFactory {
 
     @Override
     public boolean canLoad(Neo4jVersion version) {
-        return false;
+        return true;
     }
 
     @Override
     public SettingProxyApi load() {
-        throw new UnsupportedOperationException("5.x compatibility requires JDK17");
+        return new SettingProxyImpl();
     }
 
     @Override
     public String description() {
-        return "Neo4j Settings 5.x (placeholder)";
+        return "Neo4j Settings 5.x";
     }
 }

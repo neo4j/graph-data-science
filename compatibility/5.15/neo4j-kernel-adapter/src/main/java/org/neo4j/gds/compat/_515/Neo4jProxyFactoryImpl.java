@@ -29,16 +29,16 @@ public final class Neo4jProxyFactoryImpl implements Neo4jProxyFactory {
 
     @Override
     public boolean canLoad(Neo4jVersion version) {
-        return false;
+        return version == Neo4jVersion.V_5_15;
     }
 
     @Override
     public Neo4jProxyApi load() {
-        throw new UnsupportedOperationException("5.15 compatibility requires JDK17");
+        return new Neo4jProxyImpl();
     }
 
     @Override
     public String description() {
-        return "Neo4j 5.15 (placeholder)";
+        return "Neo4j 5.15";
     }
 }

@@ -29,12 +29,12 @@ public class StorageEngineProxyFactoryImpl implements StorageEngineProxyFactory 
 
     @Override
     public boolean canLoad(Neo4jVersion version) {
-        return false;
+        return version == Neo4jVersion.V_5_12;
     }
 
     @Override
     public StorageEngineProxyApi load() {
-        throw new UnsupportedOperationException("5.12 storage engine requires JDK17");
+        return new StorageEngineProxyImpl();
     }
 
     @Override
