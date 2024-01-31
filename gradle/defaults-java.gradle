@@ -1,26 +1,6 @@
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
-ext.vendor = { ->
-    // By specifying the vendor, we force us (and CI) to
-    // use that specific JDK version. If it is not locally
-    // available, Gradle will provision the toolchain, i.e.
-    // download it.
-    if (project.hasProperty("javaLanguageVendor")) {
-        return JvmVendorSpec.matching(project.property('javaLanguageVendor'))
-    } else {
-        return JvmVendorSpec.ADOPTIUM
-    }
-}
-
-ext.languageVersion = { ->
-    if (project.hasProperty("javaLanguageVersion")) {
-        return JavaLanguageVersion.of(project.property('javaLanguageVersion'))
-    } else {
-        return JavaLanguageVersion.of(17)
-    }
-}
-
 allprojects {
     plugins.withType(JavaLibraryPlugin).configureEach {
 
