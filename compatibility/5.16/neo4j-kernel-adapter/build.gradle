@@ -1,13 +1,8 @@
 apply plugin: 'java-library'
-apply plugin: 'me.champeau.mrjar'
 
 description = 'Neo4j Graph Data Science :: Neo4j Kernel Adapter 5.16'
 
 group = 'org.neo4j.gds'
-
-multiRelease {
-    targetVersions 17
-}
 
 dependencies {
     annotationProcessor project(':annotations')
