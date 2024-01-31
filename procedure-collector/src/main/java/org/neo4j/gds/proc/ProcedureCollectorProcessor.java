@@ -42,7 +42,7 @@ public final class ProcedureCollectorProcessor extends BasicAnnotationProcessor 
 
     @Override
     public SourceVersion getSupportedSourceVersion() {
-        return SourceVersion.RELEASE_11;
+        return SourceVersion.RELEASE_17;
     }
 
     private final List<TypeElement> validTypes = new ArrayList<>();
