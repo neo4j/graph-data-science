@@ -17,33 +17,24 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._5x;
+package org.neo4j.gds.compat;
 
-import org.neo4j.gds.compat.PropertyReference;
-import org.neo4j.storageengine.api.Reference;
+import org.neo4j.graphdb.Node;
+import org.neo4j.graphdb.RelationshipType;
 
-import java.util.Objects;
+public class VirtualRelationshipImpl extends VirtualRelationship {
 
-public final class ReferencePropertyReference implements PropertyReference {
-
-    private static final PropertyReference EMPTY = new ReferencePropertyReference(null);
-
-    public final Reference reference;
-
-    private ReferencePropertyReference(Reference reference) {
-        this.reference = reference;
-    }
-
-    public static PropertyReference of(Reference reference) {
-        return new ReferencePropertyReference(Objects.requireNonNull(reference));
-    }
-
-    public static PropertyReference empty() {
-        return EMPTY;
+    VirtualRelationshipImpl(
+        long id,
+        Node startNode,
+        Node endNode,
+        RelationshipType type
+    ) {
+        super(id, startNode, endNode, type);
     }
 
     @Override
-    public boolean isEmpty() {
-        return reference == null;
+    public String getElementId() {
+        return Long.toString(getId());
     }
 }

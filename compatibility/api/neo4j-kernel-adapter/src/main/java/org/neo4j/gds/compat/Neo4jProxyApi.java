@@ -19,190 +19,29 @@
  */
 package org.neo4j.gds.compat;
 
-import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.TestOnly;
 import org.neo4j.common.DependencyResolver;
-import org.neo4j.configuration.Config;
-import org.neo4j.configuration.connectors.ConnectorPortRegister;
-import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.Node;
-import org.neo4j.graphdb.Relationship;
-import org.neo4j.graphdb.RelationshipType;
-import org.neo4j.graphdb.config.Setting;
-import org.neo4j.internal.batchimport.AdditionalInitialIds;
-import org.neo4j.internal.batchimport.BatchImporter;
-import org.neo4j.internal.batchimport.BatchImporterFactory;
-import org.neo4j.internal.batchimport.Configuration;
-import org.neo4j.internal.batchimport.IndexConfig;
-import org.neo4j.internal.batchimport.input.Collector;
-import org.neo4j.internal.batchimport.input.IdType;
-import org.neo4j.internal.batchimport.input.Input;
-import org.neo4j.internal.batchimport.input.ReadableGroups;
-import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
-import org.neo4j.internal.helpers.HostnamePort;
-import org.neo4j.internal.id.IdGeneratorFactory;
-import org.neo4j.internal.kernel.api.NodeCursor;
-import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
-import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
-import org.neo4j.internal.kernel.api.RelationshipScanCursor;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
-import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
 import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
 import org.neo4j.internal.kernel.api.procs.QualifiedName;
-import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.internal.kernel.api.security.AccessMode;
-import org.neo4j.internal.kernel.api.security.AuthSubject;
-import org.neo4j.internal.kernel.api.security.SecurityContext;
-import org.neo4j.internal.schema.IndexCapability;
-import org.neo4j.io.fs.FileSystemAbstraction;
-import org.neo4j.io.layout.DatabaseLayout;
-import org.neo4j.io.layout.Neo4jLayout;
-import org.neo4j.io.pagecache.PageCache;
-import org.neo4j.io.pagecache.context.CursorContext;
+import org.neo4j.io.pagecache.context.CursorContextFactory;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.api.KernelTransactionHandle;
-import org.neo4j.kernel.api.procedure.CallableProcedure;
-import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
-import org.neo4j.kernel.impl.coreapi.InternalTransaction;
-import org.neo4j.kernel.impl.query.TransactionalContext;
-import org.neo4j.kernel.impl.query.TransactionalContextFactory;
-import org.neo4j.kernel.impl.store.RecordStore;
-import org.neo4j.kernel.impl.store.format.RecordFormats;
-import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
-import org.neo4j.logging.Log;
-import org.neo4j.logging.internal.LogService;
 import org.neo4j.procedure.Mode;
-import org.neo4j.scheduler.JobScheduler;
-import org.neo4j.ssl.config.SslPolicyLoader;
-import org.neo4j.values.storable.TextArray;
-import org.neo4j.values.virtual.MapValue;
-import org.neo4j.values.virtual.NodeValue;
 
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
 public interface Neo4jProxyApi {
 
-    GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms);
-
-    String validateExternalDatabaseName(String databaseName);
-
     AccessMode accessMode(CustomAccessMode customAccessMode);
 
-    String username(AuthSubject subject);
-
-    SecurityContext securityContext(
-        String username,
-        AuthSubject authSubject,
-        AccessMode mode,
-        String databaseName
-    );
-
-    long getHighId(RecordStore<? extends AbstractBaseRecord> recordStore);
-
-    List<StoreScan<NodeLabelIndexCursor>> entityCursorScan(
-        KernelTransaction transaction,
-        int[] labelIds,
-        int batchSize,
-        boolean allowPartitionedScan
-    );
-
-    List<StoreScan<NodeLabelIndexCursor>> partitionedCursorScan(
-        org.neo4j.kernel.api.KernelTransaction transaction,
-        int batchSize,
-        int... labelIds
-    );
-
-    PropertyCursor allocatePropertyCursor(KernelTransaction kernelTransaction);
-
-    PropertyReference propertyReference(NodeCursor nodeCursor);
-
-    PropertyReference propertyReference(RelationshipScanCursor relationshipScanCursor);
-
-    PropertyReference noPropertyReference();
-
-    void nodeProperties(
-        KernelTransaction kernelTransaction,
-        long nodeReference,
-        PropertyReference reference,
-        PropertyCursor cursor
-    );
-
-    void relationshipProperties(
-        KernelTransaction kernelTransaction,
-        long relationshipReference,
-        PropertyReference reference,
-        PropertyCursor cursor
-    );
-
-    NodeCursor allocateNodeCursor(KernelTransaction kernelTransaction);
-
-    RelationshipScanCursor allocateRelationshipScanCursor(KernelTransaction kernelTransaction);
-
-    NodeLabelIndexCursor allocateNodeLabelIndexCursor(KernelTransaction kernelTransaction);
-
-    boolean hasNodeLabelIndex(KernelTransaction kernelTransaction);
-
-    StoreScan<NodeLabelIndexCursor> nodeLabelIndexScan(
-        KernelTransaction transaction,
-        int labelId,
-        int batchSize,
-        boolean allowPartitionedScan
-    );
-
-    StoreScan<NodeCursor> nodesScan(KernelTransaction ktx, long nodeCount, int batchSize);
-
-    StoreScan<RelationshipScanCursor> relationshipsScan(KernelTransaction ktx, long relationshipCount, int batchSize);
-
     CompatExecutionContext executionContext(KernelTransaction ktx);
-
-    CompositeNodeCursor compositeNodeCursor(List<NodeLabelIndexCursor> cursors, int[] labelIds);
-
-    Configuration batchImporterConfig(
-        int batchSize,
-        int writeConcurrency,
-        Optional<Long> pageCacheMemory,
-        boolean highIO,
-        IndexConfig indexConfig
-    );
-
-    @TestOnly
-    int writeConcurrency(Configuration batchImportConfiguration);
-
-    BatchImporter instantiateBatchImporter(
-        BatchImporterFactory factory,
-        GdsDatabaseLayout directoryStructure,
-        FileSystemAbstraction fileSystem,
-        PageCacheTracer pageCacheTracer,
-        Configuration configuration,
-        LogService logService,
-        ExecutionMonitor executionMonitor,
-        AdditionalInitialIds additionalInitialIds,
-        Config dbConfig,
-        RecordFormats recordFormats,
-        JobScheduler jobScheduler,
-        Collector badCollector
-    );
-
-    Input batchInputFrom(CompatInput compatInput);
-
-    InputEntityIdVisitor.Long inputEntityLongIdVisitor(IdType idType, ReadableGroups groups);
-
-    InputEntityIdVisitor.String inputEntityStringIdVisitor(ReadableGroups groups);
-
-    Setting<String> additionalJvm();
-
-    Setting<?> pageCacheMemory();
-
-    Object pageCacheMemoryValue(String value);
 
     ProcedureSignature procedureSignature(
         QualifiedName name,
@@ -221,95 +60,13 @@ public interface Neo4jProxyApi {
         boolean threadSafe
     );
 
-    long getHighestPossibleNodeCount(Read read, @Nullable IdGeneratorFactory idGeneratorFactory);
-
-    long getHighestPossibleRelationshipCount(Read read, @Nullable IdGeneratorFactory idGeneratorFactory);
-
     long estimateNodeCount(Read read, int label);
+
     long estimateRelationshipCount(Read read, int sourceLabel, int targetLabel, int type);
 
-    String versionLongToString(long storeVersion);
-
-    TestLog testLog();
-
-    Log getUserLog(LogService logService, Class<?> loggingClass);
-
-    Log getInternalLog(LogService logService, Class<?> loggingClass);
-
-    NodeValue nodeValue(long id, TextArray labels, MapValue properties);
-
-    Relationship virtualRelationship(long id, Node startNode, Node endNode, RelationshipType type);
-
-    GdsDatabaseManagementServiceBuilder databaseManagementServiceBuilder(Path storeDir);
-
-    RecordFormats selectRecordFormatForStore(
-        DatabaseLayout databaseLayout,
-        FileSystemAbstraction fs,
-        PageCache pageCache,
-        LogService logService,
-        PageCacheTracer pageCacheTracer
-    );
-
-    boolean isNotNumericIndex(IndexCapability indexCapability);
-
-    void setAllowUpgrades(Config.Builder configBuilder, boolean value);
-
-    String defaultRecordFormatSetting();
-
-    void configureRecordFormat(Config.Builder configBuilder, String recordFormat);
-
-    GdsDatabaseLayout databaseLayout(Config config, String databaseName);
-
-    Neo4jLayout neo4jLayout(Config config);
+    CursorContextFactory cursorContextFactory(Optional<PageCacheTracer> pageCacheTracer);
 
     BoltTransactionRunner<?, ?> boltTransactionRunner();
-
-    HostnamePort getLocalBoltAddress(ConnectorPortRegister connectorPortRegister);
-
-    SslPolicyLoader createSllPolicyLoader(
-        FileSystemAbstraction fileSystem,
-        Config config,
-        LogService logService
-    );
-
-    RecordFormats recordFormatSelector(
-        String databaseName,
-        Config databaseConfig,
-        FileSystemAbstraction fs,
-        LogService logService,
-        GraphDatabaseService databaseService
-    );
-
-    ExecutionMonitor executionMonitor(CompatExecutionMonitor compatExecutionMonitor);
-
-    UserFunctionSignature userFunctionSignature(
-        QualifiedName name,
-        List<FieldSignature> inputSignature,
-        Neo4jTypes.AnyType type,
-        String description,
-        boolean internal,
-        boolean threadSafe,
-        Optional<String> deprecatedBy
-    );
-
-    @SuppressForbidden(reason = "This is the compat API")
-    CallableProcedure callableProcedure(CompatCallableProcedure procedure);
-
-    @SuppressForbidden(reason = "This is the compat API")
-    CallableUserAggregationFunction callableUserAggregationFunction(CompatUserAggregationFunction function);
-
-    long transactionId(KernelTransactionHandle kernelTransactionHandle);
-
-    long transactionId(KernelTransaction kernelTransaction);
-
-    void reserveNeo4jIds(IdGeneratorFactory generatorFactory, int size, CursorContext cursorContext);
-
-    TransactionalContext newQueryContext(
-        TransactionalContextFactory contextFactory,
-        InternalTransaction tx,
-        String queryText,
-        MapValue queryParameters
-    );
 
     boolean isCompositeDatabase(GraphDatabaseService databaseService);
 

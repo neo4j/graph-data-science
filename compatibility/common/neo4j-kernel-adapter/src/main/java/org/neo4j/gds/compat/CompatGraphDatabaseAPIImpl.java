@@ -17,11 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._5x;
+package org.neo4j.gds.compat;
 
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.dbms.systemgraph.TopologyGraphDbmsModel;
-import org.neo4j.gds.compat.GdsGraphDatabaseAPI;
 import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
 import org.neo4j.internal.kernel.api.security.LoginContext;
 import org.neo4j.kernel.api.KernelTransaction;

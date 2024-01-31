@@ -17,28 +17,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._5x;
+package org.neo4j.gds.compat;
 
-import org.neo4j.annotations.service.ServiceProvider;
-import org.neo4j.gds.compat.Neo4jVersion;
-import org.neo4j.gds.compat.SettingProxyApi;
-import org.neo4j.gds.compat.SettingProxyFactory;
+import org.neo4j.io.layout.DatabaseLayout;
 
-@ServiceProvider
-public final class SettingProxyFactoryImpl implements SettingProxyFactory {
+import java.nio.file.Path;
+
+public class GdsDatabaseLayoutImpl implements GdsDatabaseLayout {
+    private final DatabaseLayout databaseLayout;
+
+    public GdsDatabaseLayoutImpl(DatabaseLayout databaseLayout) {this.databaseLayout = databaseLayout;}
 
     @Override
-    public boolean canLoad(Neo4jVersion version) {
-        return true;
+    public Path databaseDirectory() {
+        return databaseLayout.databaseDirectory();
     }
 
     @Override
-    public SettingProxyApi load() {
-        return new SettingProxyImpl();
+    public Path getTransactionLogsDirectory() {
+        return databaseLayout.getTransactionLogsDirectory();
     }
 
     @Override
-    public String description() {
-        return "Neo4j Settings 5.x";
+    public Path metadataStore() {
+        return databaseLayout.metadataStore();
+    }
+
+    public DatabaseLayout databaseLayout() {
+        return databaseLayout;
     }
 }

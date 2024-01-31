@@ -21,10 +21,12 @@ package org.neo4j.gds.compat._512;
 
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.compat.BoltTransactionRunner;
+import org.neo4j.gds.compat.CompatAccessModeImpl;
 import org.neo4j.gds.compat.CompatExecutionContext;
+import org.neo4j.gds.compat.CustomAccessMode;
 import org.neo4j.gds.compat.GlobalProcedureRegistry;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
-import org.neo4j.gds.compat._5x.CommonNeo4jProxyImpl;
+import org.neo4j.gds.compat.Neo4jProxyApi;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.PartitionedScan;
@@ -44,8 +46,6 @@ import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.database.DatabaseReferenceImpl;
 import org.neo4j.kernel.database.DatabaseReferenceRepository;
-import org.neo4j.kernel.impl.store.RecordStore;
-import org.neo4j.kernel.impl.store.record.AbstractBaseRecord;
 import org.neo4j.procedure.Mode;
 
 import java.util.List;
@@ -53,11 +53,16 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public final class Neo4jProxyImpl extends CommonNeo4jProxyImpl {
+public final class Neo4jProxyImpl implements Neo4jProxyApi {
 
     @Override
-    public long getHighId(RecordStore<? extends AbstractBaseRecord> recordStore) {
-        return recordStore.getIdGenerator().getHighId();
+    public AccessMode accessMode(CustomAccessMode customAccessMode) {
+        return new CompatAccessModeImpl(customAccessMode);
+    }
+
+    @Override
+    public String metricsManagerClass() {
+        return "com.neo4j.metrics.global.MetricsManager";
     }
 
     @Override

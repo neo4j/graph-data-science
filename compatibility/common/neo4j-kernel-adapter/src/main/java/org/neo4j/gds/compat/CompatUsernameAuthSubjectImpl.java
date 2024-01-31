@@ -17,34 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._5x;
+package org.neo4j.gds.compat;
 
-import org.neo4j.gds.compat.GdsDatabaseLayout;
-import org.neo4j.io.layout.DatabaseLayout;
+import org.neo4j.internal.kernel.api.security.AuthSubject;
 
-import java.nio.file.Path;
+final class CompatUsernameAuthSubjectImpl extends CompatUsernameAuthSubject {
 
-public class GdsDatabaseLayoutImpl  implements GdsDatabaseLayout {
-    private final DatabaseLayout databaseLayout;
-
-    public GdsDatabaseLayoutImpl(DatabaseLayout databaseLayout) {this.databaseLayout = databaseLayout;}
-
-    @Override
-    public Path databaseDirectory() {
-        return databaseLayout.databaseDirectory();
+    CompatUsernameAuthSubjectImpl(String username, AuthSubject authSubject) {
+        super(username, authSubject);
     }
 
     @Override
-    public Path getTransactionLogsDirectory() {
-        return databaseLayout.getTransactionLogsDirectory();
-    }
-
-    @Override
-    public Path metadataStore() {
-        return databaseLayout.metadataStore();
-    }
-
-    public DatabaseLayout databaseLayout() {
-        return databaseLayout;
+    public String executingUser() {
+        return username;
     }
 }

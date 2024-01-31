@@ -17,5 +17,4 @@ dependencies {
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
 
     implementation project(':neo4j-kernel-adapter-api')
-    implementation project(':neo4j-kernel-adapter-5-common')
 }

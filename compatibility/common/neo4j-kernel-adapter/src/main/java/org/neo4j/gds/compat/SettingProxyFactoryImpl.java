@@ -17,16 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._5x;
+package org.neo4j.gds.compat;
 
-import org.neo4j.gds.compat.CompositeNodeCursor;
-import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
+import org.neo4j.annotations.service.ServiceProvider;
 
-import java.util.List;
+@ServiceProvider
+public final class SettingProxyFactoryImpl implements SettingProxyFactory {
 
-final class CompositeNodeCursorImpl extends CompositeNodeCursor {
+    @Override
+    public boolean canLoad(Neo4jVersion version) {
+        return true;
+    }
 
-    CompositeNodeCursorImpl(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
-        super(cursors, labelIds);
+    @Override
+    public SettingProxyApi load() {
+        return new SettingProxyImpl();
+    }
+
+    @Override
+    public String description() {
+        return "Neo4j Settings 5.x";
     }
 }

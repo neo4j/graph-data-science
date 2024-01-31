@@ -17,19 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._5x;
+package org.neo4j.gds.compat;
 
-import org.neo4j.gds.compat.CompatUsernameAuthSubject;
-import org.neo4j.internal.kernel.api.security.AuthSubject;
+import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 
-final class CompatUsernameAuthSubjectImpl extends CompatUsernameAuthSubject {
+import java.util.List;
 
-    CompatUsernameAuthSubjectImpl(String username, AuthSubject authSubject) {
-        super(username, authSubject);
-    }
+final class CompositeNodeCursorImpl extends CompositeNodeCursor {
 
-    @Override
-    public String executingUser() {
-        return username;
+    CompositeNodeCursorImpl(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
+        super(cursors, labelIds);
     }
 }

@@ -70,11 +70,11 @@ public final class Neo4jSettings {
         return GraphDatabaseSettings.neo4j_home;
     }
 
-    public static <T> Setting<T> pageCacheMemory() {
+    public static Setting<Long> pageCacheMemory() {
         return Neo4jProxy.pageCacheMemory();
     }
 
-    public static <T> T pageCacheMemoryValue(String value) {
+    public static Long pageCacheMemoryValue(String value) {
         return Neo4jProxy.pageCacheMemoryValue(value);
     }
 

@@ -19,11 +19,15 @@
  */
 package org.neo4j.gds.compat;
 
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.common.DependencyResolver;
+import org.neo4j.configuration.BootloaderSettings;
 import org.neo4j.configuration.Config;
+import org.neo4j.configuration.GraphDatabaseSettings;
+import org.neo4j.configuration.SettingValueParsers;
 import org.neo4j.configuration.connectors.ConnectorPortRegister;
+import org.neo4j.configuration.connectors.ConnectorType;
+import org.neo4j.configuration.helpers.DatabaseNameValidator;
 import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -36,18 +40,25 @@ import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
 import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.IndexConfig;
+import org.neo4j.internal.batchimport.InputIterable;
+import org.neo4j.internal.batchimport.Monitor;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.IdType;
 import org.neo4j.internal.batchimport.input.Input;
+import org.neo4j.internal.batchimport.input.InputEntityVisitor;
+import org.neo4j.internal.batchimport.input.PropertySizeCalculator;
 import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
+import org.neo4j.internal.batchimport.staging.StageExecution;
 import org.neo4j.internal.helpers.HostnamePort;
+import org.neo4j.internal.id.IdGenerator;
 import org.neo4j.internal.id.IdGeneratorFactory;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
+import org.neo4j.internal.kernel.api.connectioninfo.ClientConnectionInfo;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.procs.FieldSignature;
 import org.neo4j.internal.kernel.api.procs.Neo4jTypes;
@@ -57,12 +68,15 @@ import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
+import org.neo4j.internal.recordstorage.RecordIdType;
 import org.neo4j.internal.schema.IndexCapability;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.layout.Neo4jLayout;
+import org.neo4j.io.layout.recordstorage.RecordDatabaseLayout;
 import org.neo4j.io.pagecache.PageCache;
 import org.neo4j.io.pagecache.context.CursorContext;
+import org.neo4j.io.pagecache.context.CursorContextFactory;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.KernelTransactionHandle;
@@ -70,22 +84,41 @@ import org.neo4j.kernel.api.procedure.CallableProcedure;
 import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
+import org.neo4j.kernel.database.NormalizedDatabaseName;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
+import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
+import org.neo4j.kernel.impl.query.QueryExecutionConfiguration;
 import org.neo4j.kernel.impl.query.TransactionalContext;
 import org.neo4j.kernel.impl.query.TransactionalContextFactory;
+import org.neo4j.kernel.impl.store.format.RecordFormatSelector;
 import org.neo4j.kernel.impl.store.format.RecordFormats;
+import org.neo4j.kernel.impl.transaction.log.EmptyLogTailMetadata;
+import org.neo4j.kernel.impl.transaction.log.files.TransactionLogInitializer;
 import org.neo4j.logging.Log;
 import org.neo4j.logging.internal.LogService;
+import org.neo4j.memory.EmptyMemoryTracker;
 import org.neo4j.procedure.Mode;
 import org.neo4j.scheduler.JobScheduler;
 import org.neo4j.ssl.config.SslPolicyLoader;
+import org.neo4j.storageengine.api.PropertySelection;
+import org.neo4j.storageengine.api.StorageEngineFactory;
 import org.neo4j.values.storable.TextArray;
+import org.neo4j.values.storable.ValueCategory;
 import org.neo4j.values.virtual.MapValue;
 import org.neo4j.values.virtual.NodeValue;
+import org.neo4j.values.virtual.VirtualValues;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
+import static java.lang.String.format;
+import static org.neo4j.gds.compat.InternalReadOps.countByIdGenerator;
 
 public final class Neo4jProxy {
 
@@ -94,190 +127,24 @@ public final class Neo4jProxy {
         ProxyUtil.MayLogToStdout.YES
     );
 
-    public static GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms) {
-        return IMPL.newDb(dbms);
-    }
-
-    public static String validateExternalDatabaseName(String databaseName) {
-        return IMPL.validateExternalDatabaseName(databaseName);
-    }
-
     static AccessMode accessMode(CustomAccessMode customAccessMode) {
         return IMPL.accessMode(customAccessMode);
     }
 
-    public static String username(AuthSubject subject) {
-        return IMPL.username(subject);
+    static CursorContextFactory cursorContextFactory(Optional<PageCacheTracer> pageCacheTracer) {
+        return IMPL.cursorContextFactory(pageCacheTracer);
     }
 
-    // Maybe we should move this to a test-only proxy?
-    @TestOnly
-    public static SecurityContext securityContext(
-        String username,
-        AuthSubject authSubject,
-        AccessMode mode,
-        String databaseName
-    ) {
-        return IMPL.securityContext(username, authSubject, mode, databaseName);
+    public static long estimateNodeCount(Read read, int label) {
+        return IMPL.estimateNodeCount(read, label);
     }
 
-    public static List<StoreScan<NodeLabelIndexCursor>> entityCursorScan(
-        KernelTransaction transaction,
-        int[] labelIds,
-        int batchSize,
-        boolean allowPartitionedScan
-    ) {
-        return IMPL.entityCursorScan(transaction, labelIds, batchSize, allowPartitionedScan);
-    }
-
-    public static PropertyCursor allocatePropertyCursor(KernelTransaction kernelTransaction) {
-        return IMPL.allocatePropertyCursor(kernelTransaction);
-    }
-
-    public static PropertyReference propertyReference(NodeCursor nodeCursor) {
-        return IMPL.propertyReference(nodeCursor);
-    }
-
-    public static PropertyReference propertyReference(RelationshipScanCursor relationshipScanCursor) {
-        return IMPL.propertyReference(relationshipScanCursor);
-    }
-
-    public static PropertyReference noPropertyReference() {
-        return IMPL.noPropertyReference();
-    }
-
-    public static void nodeProperties(
-        KernelTransaction kernelTransaction,
-        long nodeReference,
-        PropertyReference reference,
-        PropertyCursor cursor
-    ) {
-        IMPL.nodeProperties(kernelTransaction, nodeReference, reference, cursor);
-    }
-
-    public static void relationshipProperties(
-        KernelTransaction kernelTransaction,
-        long relationshipReference,
-        PropertyReference reference,
-        PropertyCursor cursor
-    ) {
-        IMPL.relationshipProperties(kernelTransaction, relationshipReference, reference, cursor);
-    }
-
-    public static NodeCursor allocateNodeCursor(KernelTransaction kernelTransaction) {
-        return IMPL.allocateNodeCursor(kernelTransaction);
-    }
-
-    public static RelationshipScanCursor allocateRelationshipScanCursor(KernelTransaction kernelTransaction) {
-        return IMPL.allocateRelationshipScanCursor(kernelTransaction);
-    }
-
-    public static NodeLabelIndexCursor allocateNodeLabelIndexCursor(KernelTransaction kernelTransaction) {
-        return IMPL.allocateNodeLabelIndexCursor(kernelTransaction);
-    }
-
-    public static boolean hasNodeLabelIndex(KernelTransaction kernelTransaction) {
-        return IMPL.hasNodeLabelIndex(kernelTransaction);
-    }
-
-    public static StoreScan<NodeLabelIndexCursor> nodeLabelIndexScan(
-        KernelTransaction transaction,
-        int labelId,
-        int batchSize,
-        boolean allowPartitionedScan
-    ) {
-        return IMPL.nodeLabelIndexScan(transaction, labelId, batchSize, allowPartitionedScan);
-    }
-
-    public static StoreScan<NodeCursor> nodesScan(KernelTransaction ktx, long nodeCount, int batchSize) {
-        return IMPL.nodesScan(ktx, nodeCount, batchSize);
-    }
-
-    public static StoreScan<RelationshipScanCursor> relationshipsScan(
-        KernelTransaction ktx,
-        long relationshipCount,
-        int batchSize
-    ) {
-        return IMPL.relationshipsScan(ktx, relationshipCount, batchSize);
+    public static long estimateRelationshipCount(Read read, int sourceLabel, int targetLabel, int type) {
+        return IMPL.estimateRelationshipCount(read, sourceLabel, targetLabel, type);
     }
 
     public static CompatExecutionContext executionContext(KernelTransaction ktx) {
         return IMPL.executionContext(ktx);
-    }
-
-    public static CompositeNodeCursor compositeNodeCursor(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
-        return IMPL.compositeNodeCursor(cursors, labelIds);
-    }
-
-    public static Configuration batchImporterConfig(
-        int batchSize,
-        int writeConcurrency,
-        Optional<Long> pageCacheMemory,
-        boolean highIO,
-        IndexConfig indexConfig
-    ) {
-        return IMPL.batchImporterConfig(batchSize, writeConcurrency, pageCacheMemory, highIO, indexConfig);
-    }
-
-    @TestOnly
-    public static int writeConcurrency(Configuration batchImporterConfiguration) {
-        return IMPL.writeConcurrency(batchImporterConfiguration);
-    }
-
-    public static BatchImporter instantiateBatchImporter(
-        BatchImporterFactory factory,
-        GdsDatabaseLayout directoryStructure,
-        FileSystemAbstraction fileSystem,
-        PageCacheTracer pageCacheTracer,
-        Configuration configuration,
-        LogService logService,
-        ExecutionMonitor executionMonitor,
-        AdditionalInitialIds additionalInitialIds,
-        Config dbConfig,
-        RecordFormats recordFormats,
-        JobScheduler jobScheduler,
-        Collector badCollector
-    ) {
-        return IMPL.instantiateBatchImporter(
-            factory,
-            directoryStructure,
-            fileSystem,
-            pageCacheTracer,
-            configuration,
-            logService,
-            executionMonitor,
-            additionalInitialIds,
-            dbConfig,
-            recordFormats,
-            jobScheduler,
-            badCollector
-        );
-    }
-
-    public static InputEntityIdVisitor.Long inputEntityLongIdVisitor(IdType idType, ReadableGroups groups) {
-        return IMPL.inputEntityLongIdVisitor(idType, groups);
-    }
-
-    public static InputEntityIdVisitor.String inputEntityStringIdVisitor(ReadableGroups groups) {
-        return IMPL.inputEntityStringIdVisitor(groups);
-    }
-
-    public static Input batchInputFrom(CompatInput compatInput) {
-        return IMPL.batchInputFrom(compatInput);
-    }
-
-    public static Setting<String> additionalJvm() {
-        return IMPL.additionalJvm();
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> Setting<T> pageCacheMemory() {
-        return (Setting<T>) IMPL.pageCacheMemory();
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> T pageCacheMemoryValue(String value) {
-        return (T) IMPL.pageCacheMemoryValue(value);
     }
 
     public static ProcedureSignature procedureSignature(
@@ -314,162 +181,16 @@ public final class Neo4jProxy {
         );
     }
 
-    public static long getHighestPossibleNodeCount(Read read, @Nullable IdGeneratorFactory idGeneratorFactory) {
-        return IMPL.getHighestPossibleNodeCount(read, idGeneratorFactory);
-    }
-
-    public static long getHighestPossibleRelationshipCount(Read read, @Nullable IdGeneratorFactory idGeneratorFactory) {
-        return IMPL.getHighestPossibleRelationshipCount(read, idGeneratorFactory);
-    }
-
-    public static long estimateNodeCount(Read read, int label) {
-        return IMPL.estimateNodeCount(read, label);
-    }
-
-    public static long estimateRelationshipCount(Read read, int sourceLabel, int targetLabel, int type) {
-        return IMPL.estimateRelationshipCount(read, sourceLabel, targetLabel, type);
-    }
-
-    public static String versionLongToString(long storeVersion) {
-        return IMPL.versionLongToString(storeVersion);
-    }
-
-    public static TestLog testLog() {
-        return IMPL.testLog();
-    }
-
-    public static Log getUserLog(LogService logService, Class<?> loggingClass) {
-        return IMPL.getUserLog(logService, loggingClass);
-    }
-
-    public static Log getInternalLog(LogService logService, Class<?> loggingClass) {
-        return IMPL.getInternalLog(logService, loggingClass);
-    }
-
-    public static NodeValue nodeValue(long id, TextArray labels, MapValue properties) {
-        return IMPL.nodeValue(id, labels, properties);
-    }
-
-    public static Relationship virtualRelationship(long id, Node startNode, Node endNode, RelationshipType type) {
-        return IMPL.virtualRelationship(id, startNode, endNode, type);
-    }
-
-    public static GdsDatabaseManagementServiceBuilder databaseManagementServiceBuilder(Path storeDir) {
-        return IMPL.databaseManagementServiceBuilder(storeDir);
-    }
-
-    public static RecordFormats selectRecordFormatForStore(
-        DatabaseLayout databaseLayout,
-        FileSystemAbstraction fs,
-        PageCache pageCache,
-        LogService logService,
-        PageCacheTracer pageCacheTracer
-    ) {
-        return IMPL.selectRecordFormatForStore(databaseLayout, fs, pageCache, logService, pageCacheTracer);
-    }
-
-    public static boolean isNotNumericIndex(IndexCapability indexCapability) {
-        return IMPL.isNotNumericIndex(indexCapability);
-    }
-
-    public static void setAllowUpgrades(Config.Builder configBuilder, boolean value) {
-        IMPL.setAllowUpgrades(configBuilder, value);
-    }
-
-    public static String defaultRecordFormatSetting() {
-        return IMPL.defaultRecordFormatSetting();
-    }
-
-    public static void configureRecordFormat(Config.Builder configBuilder, String recordFormat) {
-        IMPL.configureRecordFormat(configBuilder, recordFormat);
-    }
-
-    public static GdsDatabaseLayout databaseLayout(Config config, String databaseName) {
-        return IMPL.databaseLayout(config, databaseName);
-    }
-
-    public static Neo4jLayout neo4jLayout(Config config) {
-        return IMPL.neo4jLayout(config);
-    }
-
     public static BoltTransactionRunner<?, ?> boltTransactionRunner() {
         return IMPL.boltTransactionRunner();
-    }
-
-    public static HostnamePort getLocalBoltAddress(ConnectorPortRegister connectorPortRegister) {
-        return IMPL.getLocalBoltAddress(connectorPortRegister);
-    }
-
-    public static SslPolicyLoader createSllPolicyLoader(
-        FileSystemAbstraction fileSystem,
-        Config config,
-        LogService logService
-    ) {
-        return IMPL.createSllPolicyLoader(fileSystem, config, logService);
-    }
-
-    public static RecordFormats recordFormatSelector(
-        String databaseName,
-        Config databaseConfig,
-        FileSystemAbstraction fs,
-        LogService logService,
-        GraphDatabaseService databaseService
-    ) {
-        return IMPL.recordFormatSelector(databaseName, databaseConfig, fs, logService, databaseService);
-    }
-
-    public static ExecutionMonitor executionMonitor(CompatExecutionMonitor compatExecutionMonitor) {
-        return IMPL.executionMonitor(compatExecutionMonitor);
-    }
-
-    public static UserFunctionSignature userFunctionSignature(
-        QualifiedName name,
-        List<FieldSignature> inputSignature,
-        Neo4jTypes.AnyType type,
-        String description,
-        boolean internal,
-        boolean threadSafe,
-        Optional<String> deprecatedBy
-    ) {
-        return IMPL.userFunctionSignature(name, inputSignature, type, description, internal, threadSafe, deprecatedBy);
-    }
-
-    @SuppressForbidden(reason = "This is the compat API")
-    public static CallableProcedure callableProcedure(CompatCallableProcedure procedure) {
-        return IMPL.callableProcedure(procedure);
-    }
-
-    @SuppressForbidden(reason = "This is the compat API")
-    public static CallableUserAggregationFunction callableUserAggregationFunction(CompatUserAggregationFunction function) {
-        return IMPL.callableUserAggregationFunction(function);
-    }
-
-    public static long transactionId(KernelTransactionHandle kernelTransactionHandle) {
-        return IMPL.transactionId(kernelTransactionHandle);
-    }
-
-    public static long transactionId(KernelTransaction kernelTransaction) {
-        return IMPL.transactionId(kernelTransaction);
-    }
-
-    public static void reserveNeo4jIds(IdGeneratorFactory generatorFactory, int size, CursorContext cursorContext) {
-        IMPL.reserveNeo4jIds(generatorFactory, size, cursorContext);
-    }
-    public static TransactionalContext newQueryContext(
-        TransactionalContextFactory contextFactory,
-        InternalTransaction tx,
-        String queryText,
-        MapValue queryParameters
-    ) {
-        return IMPL.newQueryContext(contextFactory, tx, queryText, queryParameters);
     }
 
     public static boolean isCompositeDatabase(GraphDatabaseService databaseService) {
         return IMPL.isCompositeDatabase(databaseService);
     }
 
-    public static <T> T lookupComponentProvider(Context ctx, Class<T> component, boolean safe) throws
-        ProcedureException {
+    public static <T> T lookupComponentProvider(Context ctx, Class<T> component, boolean safe)
+    throws ProcedureException {
         return IMPL.lookupComponentProvider(ctx, component, safe);
     }
 
@@ -485,11 +206,549 @@ public final class Neo4jProxy {
         return IMPL.neo4jArrowServerAddressHeader();
     }
 
-    private Neo4jProxy() {
-        throw new UnsupportedOperationException("No instances");
-    }
-
     public static String metricsManagerClass() {
         return IMPL.metricsManagerClass();
+    }
+
+
+    public static GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms) {
+        return new CompatGraphDatabaseAPIImpl(dbms);
+    }
+
+    public static String validateExternalDatabaseName(String databaseName) {
+        var normalizedName = new NormalizedDatabaseName(databaseName);
+        DatabaseNameValidator.validateExternalDatabaseName(normalizedName);
+        return normalizedName.name();
+    }
+
+    public static String username(AuthSubject subject) {
+        return subject.executingUser();
+    }
+
+    // Maybe we should move this to a test-only proxy?
+    @TestOnly
+    public static SecurityContext securityContext(
+        String username,
+        AuthSubject authSubject,
+        AccessMode mode,
+        String databaseName
+    ) {
+        return new SecurityContext(
+            new CompatUsernameAuthSubjectImpl(username, authSubject),
+            mode,
+            // GDS is always operating from an embedded context
+            ClientConnectionInfo.EMBEDDED_CONNECTION,
+            databaseName
+        );
+    }
+
+    public static PropertyCursor allocatePropertyCursor(KernelTransaction kernelTransaction) {
+        return kernelTransaction
+            .cursors()
+            .allocatePropertyCursor(kernelTransaction.cursorContext(), kernelTransaction.memoryTracker());
+    }
+
+    public static PropertyReference propertyReference(NodeCursor nodeCursor) {
+        return ReferencePropertyReference.of(nodeCursor.propertiesReference());
+    }
+
+    public static PropertyReference propertyReference(RelationshipScanCursor relationshipScanCursor) {
+        return ReferencePropertyReference.of(relationshipScanCursor.propertiesReference());
+    }
+
+    public static PropertyReference noPropertyReference() {
+        return ReferencePropertyReference.empty();
+    }
+
+    public static void nodeProperties(
+        KernelTransaction kernelTransaction,
+        long nodeReference,
+        PropertyReference reference,
+        PropertyCursor cursor
+    ) {
+        var neoReference = ((ReferencePropertyReference) reference).reference;
+        kernelTransaction
+            .dataRead()
+            .nodeProperties(nodeReference, neoReference, PropertySelection.ALL_PROPERTIES, cursor);
+    }
+
+    public static void relationshipProperties(
+        KernelTransaction kernelTransaction,
+        long relationshipReference,
+        PropertyReference reference,
+        PropertyCursor cursor
+    ) {
+        var neoReference = ((ReferencePropertyReference) reference).reference;
+        kernelTransaction
+            .dataRead()
+            .relationshipProperties(relationshipReference, neoReference, PropertySelection.ALL_PROPERTIES, cursor);
+    }
+
+    public static NodeCursor allocateNodeCursor(KernelTransaction kernelTransaction) {
+        return kernelTransaction.cursors().allocateNodeCursor(kernelTransaction.cursorContext());
+    }
+
+    public static RelationshipScanCursor allocateRelationshipScanCursor(KernelTransaction kernelTransaction) {
+        return kernelTransaction.cursors().allocateRelationshipScanCursor(kernelTransaction.cursorContext());
+    }
+
+    public static NodeLabelIndexCursor allocateNodeLabelIndexCursor(KernelTransaction kernelTransaction) {
+        return kernelTransaction.cursors().allocateNodeLabelIndexCursor(kernelTransaction.cursorContext());
+    }
+
+    public static boolean hasNodeLabelIndex(KernelTransaction kernelTransaction) {
+        return NodeLabelIndexLookupImpl.hasNodeLabelIndex(kernelTransaction);
+    }
+
+    public static StoreScan<NodeLabelIndexCursor> nodeLabelIndexScan(
+        KernelTransaction transaction,
+        int labelId,
+        int batchSize,
+        boolean allowPartitionedScan
+    ) {
+        return PartitionedStoreScan.createScans(transaction, batchSize, labelId).get(0);
+    }
+
+    public static StoreScan<NodeCursor> nodesScan(KernelTransaction ktx, long nodeCount, int batchSize) {
+        int numberOfPartitions = PartitionedStoreScan.getNumberOfPartitions(nodeCount, batchSize);
+        return new PartitionedStoreScan<>(ktx.dataRead().allNodesScan(numberOfPartitions, ktx.cursorContext()));
+    }
+
+    public static StoreScan<RelationshipScanCursor> relationshipsScan(
+        KernelTransaction ktx,
+        long relationshipCount,
+        int batchSize
+    ) {
+        int numberOfPartitions = PartitionedStoreScan.getNumberOfPartitions(relationshipCount, batchSize);
+        return new PartitionedStoreScan<>(ktx.dataRead().allRelationshipsScan(numberOfPartitions, ktx.cursorContext()));
+    }
+
+    public static CompositeNodeCursor compositeNodeCursor(List<NodeLabelIndexCursor> cursors, int[] labelIds) {
+        return new CompositeNodeCursorImpl(cursors, labelIds);
+    }
+
+    public static Configuration batchImporterConfig(
+        int batchSize,
+        int writeConcurrency,
+        Optional<Long> pageCacheMemory,
+        boolean highIO,
+        IndexConfig indexConfig
+    ) {
+        return new org.neo4j.internal.batchimport.Configuration() {
+
+            @Override
+            public int batchSize() {
+                return batchSize;
+            }
+
+            @Override
+            public int maxNumberOfWorkerThreads() {
+                return writeConcurrency;
+            }
+
+            @Override
+            public boolean highIO() {
+                return highIO;
+            }
+
+            @Override
+            public IndexConfig indexConfig() {
+                return indexConfig;
+            }
+        };
+    }
+
+    public static int writeConcurrency(Configuration batchImportConfiguration) {
+        return batchImportConfiguration.maxNumberOfWorkerThreads();
+    }
+
+    public static BatchImporter instantiateBatchImporter(
+        BatchImporterFactory factory,
+        GdsDatabaseLayout directoryStructure,
+        FileSystemAbstraction fileSystem,
+        PageCacheTracer pageCacheTracer,
+        Configuration configuration,
+        LogService logService,
+        ExecutionMonitor executionMonitor,
+        AdditionalInitialIds additionalInitialIds,
+        Config dbConfig,
+        RecordFormats recordFormats,
+        JobScheduler jobScheduler,
+        Collector badCollector
+    ) {
+        dbConfig.set(GraphDatabaseSettings.db_format, recordFormats.name());
+        var databaseLayout = ((GdsDatabaseLayoutImpl) directoryStructure).databaseLayout();
+        return factory.instantiate(
+            databaseLayout,
+            fileSystem,
+            pageCacheTracer,
+            configuration,
+            logService,
+            executionMonitor,
+            additionalInitialIds,
+            new EmptyLogTailMetadata(dbConfig),
+            dbConfig,
+            Monitor.NO_MONITOR,
+            jobScheduler,
+            badCollector,
+            TransactionLogInitializer.getLogFilesInitializer(),
+            new IndexImporterFactoryImpl(),
+            EmptyMemoryTracker.INSTANCE,
+            cursorContextFactory(Optional.empty())
+        );
+    }
+
+    public static Input batchInputFrom(CompatInput compatInput) {
+        return new InputFromCompatInput(compatInput);
+    }
+
+    public static InputEntityIdVisitor.Long inputEntityLongIdVisitor(IdType idType, ReadableGroups groups) {
+        switch (idType) {
+            case ACTUAL -> {
+                return new InputEntityIdVisitor.Long() {
+
+                    @Override
+                    public void visitNodeId(InputEntityVisitor visitor, long id) {
+                        visitor.id(id);
+                    }
+
+                    @Override
+                    public void visitSourceId(InputEntityVisitor visitor, long id) {
+                        visitor.startId(id);
+                    }
+
+                    @Override
+                    public void visitTargetId(InputEntityVisitor visitor, long id) {
+                        visitor.endId(id);
+                    }
+                };
+            }
+            case INTEGER -> {
+                var globalGroup = groups.get(null);
+
+                return new InputEntityIdVisitor.Long() {
+
+                    @Override
+                    public void visitNodeId(InputEntityVisitor visitor, long id) {
+                        visitor.id(id, globalGroup);
+                    }
+
+                    @Override
+                    public void visitSourceId(InputEntityVisitor visitor, long id) {
+                        visitor.startId(id, globalGroup);
+                    }
+
+                    @Override
+                    public void visitTargetId(InputEntityVisitor visitor, long id) {
+                        visitor.endId(id, globalGroup);
+                    }
+                };
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + idType);
+        }
+    }
+
+    public static InputEntityIdVisitor.String inputEntityStringIdVisitor(ReadableGroups groups) {
+        var globalGroup = groups.get(null);
+
+        return new InputEntityIdVisitor.String() {
+
+            @Override
+            public void visitNodeId(InputEntityVisitor visitor, String id) {
+                visitor.id(id, globalGroup);
+            }
+
+            @Override
+            public void visitSourceId(InputEntityVisitor visitor, String id) {
+                visitor.startId(id, globalGroup);
+            }
+
+            @Override
+            public void visitTargetId(InputEntityVisitor visitor, String id) {
+                visitor.endId(id, globalGroup);
+            }
+        };
+    }
+
+    public static Setting<String> additionalJvm() {
+        return BootloaderSettings.additional_jvm;
+    }
+
+    public static Setting<Long> pageCacheMemory() {
+        return GraphDatabaseSettings.pagecache_memory;
+    }
+
+    public static Long pageCacheMemoryValue(String value) {
+        return SettingValueParsers.BYTES.parse(value);
+    }
+
+    public static long getHighestPossibleNodeCount(
+        Read read, IdGeneratorFactory idGeneratorFactory
+    ) {
+        return countByIdGenerator(idGeneratorFactory, RecordIdType.NODE).orElseGet(read::nodesGetCount);
+    }
+
+    public static long getHighestPossibleRelationshipCount(
+        Read read, IdGeneratorFactory idGeneratorFactory
+    ) {
+        return countByIdGenerator(idGeneratorFactory, RecordIdType.RELATIONSHIP).orElseGet(read::relationshipsGetCount);
+    }
+
+    public static String versionLongToString(long storeVersion) {
+        // copied from org.neo4j.kernel.impl.store.LegacyMetadataHandler.versionLongToString which is private
+        if (storeVersion == -1) {
+            return "Unknown";
+        }
+        var bits = ByteBuffer.allocate(8).order(ByteOrder.LITTLE_ENDIAN).putLong(storeVersion).rewind();
+        int length = bits.get() & 0xFF;
+        if (length == 0 || length > 7) {
+            throw new IllegalArgumentException(format(
+                Locale.ENGLISH,
+                "The read version string length %d is not proper.",
+                length
+            ));
+        }
+        char[] result = new char[length];
+        for (int i = 0; i < length; i++) {
+            result[i] = (char) (bits.get() & 0xFF);
+        }
+        return new String(result);
+    }
+
+    private static final class InputFromCompatInput implements Input {
+        private final CompatInput delegate;
+
+        private InputFromCompatInput(CompatInput delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public InputIterable nodes(Collector badCollector) {
+            return delegate.nodes(badCollector);
+        }
+
+        @Override
+        public InputIterable relationships(Collector badCollector) {
+            return delegate.relationships(badCollector);
+        }
+
+        @Override
+        public IdType idType() {
+            return delegate.idType();
+        }
+
+        @Override
+        public ReadableGroups groups() {
+            return delegate.groups();
+        }
+
+        @Override
+        public Estimates calculateEstimates(PropertySizeCalculator propertySizeCalculator) throws IOException {
+            return delegate.calculateEstimates((values, kernelTransaction) -> propertySizeCalculator.calculateSize(
+                values,
+                kernelTransaction.cursorContext(),
+                kernelTransaction.memoryTracker()
+            ));
+        }
+    }
+
+    public static TestLog testLog() {
+        return new TestLogImpl();
+    }
+
+    @SuppressForbidden(reason = "This is the compat specific use")
+    public static Log getUserLog(LogService logService, Class<?> loggingClass) {
+        return logService.getUserLog(loggingClass);
+    }
+
+    @SuppressForbidden(reason = "This is the compat specific use")
+    public static Log getInternalLog(LogService logService, Class<?> loggingClass) {
+        return logService.getInternalLog(loggingClass);
+    }
+
+    public static NodeValue nodeValue(long id, TextArray labels, MapValue properties) {
+        return VirtualValues.nodeValue(id, String.valueOf(id), labels, properties);
+    }
+
+    public static Relationship virtualRelationship(long id, Node startNode, Node endNode, RelationshipType type) {
+        return new VirtualRelationshipImpl(id, startNode, endNode, type);
+    }
+
+    public static GdsDatabaseManagementServiceBuilder databaseManagementServiceBuilder(Path storeDir) {
+        return new GdsDatabaseManagementServiceBuilderImpl(storeDir);
+    }
+
+    @SuppressForbidden(reason = "This is the compat specific use")
+    public static RecordFormats selectRecordFormatForStore(
+        DatabaseLayout databaseLayout,
+        FileSystemAbstraction fs,
+        PageCache pageCache,
+        LogService logService,
+        PageCacheTracer pageCacheTracer
+    ) {
+        return RecordFormatSelector.selectForStore(
+            (RecordDatabaseLayout) databaseLayout,
+            fs,
+            pageCache,
+            logService.getInternalLogProvider(),
+            cursorContextFactory(Optional.ofNullable(pageCacheTracer))
+        );
+    }
+
+    public static boolean isNotNumericIndex(IndexCapability indexCapability) {
+        return !indexCapability.areValueCategoriesAccepted(ValueCategory.NUMBER);
+    }
+
+    public static void setAllowUpgrades(Config.Builder configBuilder, boolean value) {
+    }
+
+    public static String defaultRecordFormatSetting() {
+        return GraphDatabaseSettings.db_format.defaultValue();
+    }
+
+    public static void configureRecordFormat(Config.Builder configBuilder, String recordFormat) {
+        var databaseRecordFormat = recordFormat.toLowerCase(Locale.ENGLISH);
+        configBuilder.set(GraphDatabaseSettings.db_format, databaseRecordFormat);
+    }
+
+    public static GdsDatabaseLayout databaseLayout(Config config, String databaseName) {
+        var storageEngineFactory = StorageEngineFactory.selectStorageEngine(config);
+        var dbLayout = neo4jLayout(config).databaseLayout(databaseName);
+        var databaseLayout = storageEngineFactory.formatSpecificDatabaseLayout(dbLayout);
+        return new GdsDatabaseLayoutImpl(databaseLayout);
+    }
+
+    @SuppressForbidden(reason = "This is the compat specific use")
+    public static Neo4jLayout neo4jLayout(Config config) {
+        return Neo4jLayout.of(config);
+    }
+
+    public static HostnamePort getLocalBoltAddress(ConnectorPortRegister connectorPortRegister) {
+        return connectorPortRegister.getLocalAddress(ConnectorType.BOLT);
+    }
+
+    @SuppressForbidden(reason = "This is the compat specific use")
+    public static SslPolicyLoader createSllPolicyLoader(
+        FileSystemAbstraction fileSystem,
+        Config config,
+        LogService logService
+    ) {
+        return SslPolicyLoader.create(fileSystem, config, logService.getInternalLogProvider());
+    }
+
+    @SuppressForbidden(reason = "This is the compat specific use")
+    public static RecordFormats recordFormatSelector(
+        String databaseName,
+        Config databaseConfig,
+        FileSystemAbstraction fs,
+        LogService logService,
+        GraphDatabaseService databaseService
+    ) {
+        var neo4jLayout = Neo4jLayout.of(databaseConfig);
+        var recordDatabaseLayout = RecordDatabaseLayout.of(neo4jLayout, databaseName);
+        return RecordFormatSelector.selectForStoreOrConfigForNewDbs(
+            databaseConfig,
+            recordDatabaseLayout,
+            fs,
+            GraphDatabaseApiProxy.resolveDependency(databaseService, PageCache.class),
+            logService.getInternalLogProvider(),
+            GraphDatabaseApiProxy.resolveDependency(databaseService, CursorContextFactory.class)
+        );
+    }
+
+    public static ExecutionMonitor executionMonitor(CompatExecutionMonitor compatExecutionMonitor) {
+        return new ExecutionMonitor.Adapter(
+            compatExecutionMonitor.checkIntervalMillis(),
+            TimeUnit.MILLISECONDS
+        ) {
+
+            @Override
+            public void initialize(DependencyResolver dependencyResolver) {
+                compatExecutionMonitor.initialize(dependencyResolver);
+            }
+
+            @Override
+            public void start(StageExecution execution) {
+                compatExecutionMonitor.start(execution);
+            }
+
+            @Override
+            public void end(StageExecution execution, long totalTimeMillis) {
+                compatExecutionMonitor.end(execution, totalTimeMillis);
+            }
+
+            @Override
+            public void done(boolean successful, long totalTimeMillis, String additionalInformation) {
+                compatExecutionMonitor.done(successful, totalTimeMillis, additionalInformation);
+            }
+
+            @Override
+            public void check(StageExecution execution) {
+                compatExecutionMonitor.check(execution);
+            }
+        };
+    }
+
+    public static UserFunctionSignature userFunctionSignature(
+        QualifiedName name,
+        List<FieldSignature> inputSignature,
+        Neo4jTypes.AnyType type,
+        String description,
+        boolean internal,
+        boolean threadSafe,
+        Optional<String> deprecatedBy
+    ) {
+        String category = null;      // No predefined categpry (like temporal or math)
+        var caseInsensitive = false; // case sensitive name match
+        var isBuiltIn = false;       // is built in; never true for GDS
+
+        return new UserFunctionSignature(
+            name,
+            inputSignature,
+            type,
+            deprecatedBy.orElse(null),
+            description,
+            category,
+            caseInsensitive,
+            isBuiltIn,
+            internal,
+            threadSafe
+        );
+    }
+
+    @SuppressForbidden(reason = "This is the compat API")
+    public static CallableProcedure callableProcedure(CompatCallableProcedure procedure) {
+        return new CallableProcedureImpl(procedure);
+    }
+
+    @SuppressForbidden(reason = "This is the compat API")
+    public static CallableUserAggregationFunction callableUserAggregationFunction(CompatUserAggregationFunction function) {
+        return new CallableUserAggregationFunctionImpl(function);
+    }
+
+    public static long transactionId(KernelTransactionHandle kernelTransactionHandle) {
+        return kernelTransactionHandle.getTransactionSequenceNumber();
+    }
+
+    public static long transactionId(KernelTransaction kernelTransaction) {
+        return kernelTransaction.getTransactionSequenceNumber();
+    }
+
+    public static void reserveNeo4jIds(IdGeneratorFactory generatorFactory, int size, CursorContext cursorContext) {
+        IdGenerator idGenerator = generatorFactory.get(RecordIdType.NODE);
+
+        idGenerator.nextConsecutiveIdRange(size, false, cursorContext);
+    }
+
+    public static TransactionalContext newQueryContext(
+        TransactionalContextFactory contextFactory,
+        InternalTransaction tx,
+        String queryText,
+        MapValue queryParameters
+    ) {
+        return contextFactory.newContext(tx, queryText, queryParameters, QueryExecutionConfiguration.DEFAULT_CONFIG);
+    }
+    private Neo4jProxy() {
+        throw new UnsupportedOperationException("No instances");
     }
 }

@@ -17,13 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.compat._5x;
+package org.neo4j.gds.compat;
 
 import org.neo4j.common.EntityType;
 import org.neo4j.exceptions.KernelException;
-import org.neo4j.gds.compat.CompatExecutionContext;
-import org.neo4j.gds.compat.Neo4jProxyApi;
-import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
 import org.neo4j.internal.kernel.api.PartitionedScan;
@@ -50,7 +47,6 @@ public final class PartitionedStoreScan<C extends Cursor> implements StoreScan<C
     public static List<StoreScan<NodeLabelIndexCursor>> createScans(
         KernelTransaction transaction,
         int batchSize,
-        Neo4jProxyApi proxy,
         int... labelIds
     ) {
         var indexDescriptor = NodeLabelIndexLookupImpl.findUsableMatchingIndex(
@@ -68,11 +64,11 @@ public final class PartitionedStoreScan<C extends Cursor> implements StoreScan<C
         // and use that one as the driving partitioned index scan. The partitions
         // of all other partitioned index scans will be aligned to that one.
         int maxToken = labelIds[0];
-        long maxCount = proxy.estimateNodeCount(read, labelIds[0]);
+        long maxCount = Neo4jProxy.estimateNodeCount(read, labelIds[0]);
         int maxIndex = 0;
 
         for (int i = 1; i < labelIds.length; i++) {
-            long count = proxy.estimateNodeCount(read, labelIds[i]);
+            long count = Neo4jProxy.estimateNodeCount(read, labelIds[i]);
             if (count > maxCount) {
                 maxCount = count;
                 maxToken = labelIds[i];
@@ -84,7 +80,7 @@ public final class PartitionedStoreScan<C extends Cursor> implements StoreScan<C
         labelIds[maxIndex] = labelIds[0];
         labelIds[0] = maxToken;
 
-        int numberOfPartitions = PartitionedStoreScan.getNumberOfPartitions(maxCount, batchSize);
+        int numberOfPartitions = getNumberOfPartitions(maxCount, batchSize);
 
         try {
             var session = read.tokenReadSession(indexDescriptor);
