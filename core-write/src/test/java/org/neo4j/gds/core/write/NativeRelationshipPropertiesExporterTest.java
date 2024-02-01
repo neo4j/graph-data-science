@@ -20,7 +20,8 @@
 package org.neo4j.gds.core.write;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipProjection;
@@ -29,9 +30,8 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.values.storable.Values;
 
 import java.util.List;
@@ -62,8 +62,9 @@ class NativeRelationshipPropertiesExporterTest  extends BaseTest {
         runQuery(DB_CYPHER);
     }
 
-    @Test
-    void shouldWriteRelationshipsWithMultipleProperties() {
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 3, 4})
+    void shouldWriteRelationshipsWithMultipleProperties(int concurrency) {
         GraphStore graphStore = new StoreLoaderBuilder().databaseService(db)
             .putRelationshipProjectionsWithIdentifier(
                 "PAID",
@@ -78,19 +79,20 @@ class NativeRelationshipPropertiesExporterTest  extends BaseTest {
             TestSupport.fullAccessTransaction(db),
             graphStore,
             Values::doubleValue,
+            concurrency,
+            1,
             ProgressTracker.NULL_TRACKER,
-            ExecutorServiceUtil.DEFAULT_SINGLE_THREAD_POOL,
             TerminationFlag.RUNNING_TRUE
         );
 
         exporter.write("PAID", List.of("totalAmount", "numberOfPayments"));
 
         assertCypherResult(
-            "MATCH ()-[r:PAID]->() RETURN r.totalAmount AS totalAmount, r.numberOfPayments AS numberOfPayments",
+            "MATCH ()-[r:PAID]->() RETURN r.totalAmount AS totalAmount, r.numberOfPayments AS numberOfPayments order by totalAmount asc",
             List.of(
-                Map.of("totalAmount", 21d, "numberOfPayments", 6d),
                 Map.of("totalAmount", 7d, "numberOfPayments", 2d),
-                Map.of("totalAmount", 11d, "numberOfPayments", 2d)
+                Map.of("totalAmount", 11d, "numberOfPayments", 2d),
+                Map.of("totalAmount", 21d, "numberOfPayments", 6d)
             )
         );
     }

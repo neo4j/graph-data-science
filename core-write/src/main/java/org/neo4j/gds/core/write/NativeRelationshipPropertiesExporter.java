@@ -23,11 +23,12 @@ package org.neo4j.gds.core.write;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.concurrency.ParallelUtil;
-import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.gds.utils.StatementApi;
@@ -36,7 +37,7 @@ import org.neo4j.internal.kernel.api.exceptions.EntityNotFoundException;
 import org.neo4j.internal.kernel.api.exceptions.schema.ConstraintValidationException;
 
 import java.util.List;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 
@@ -47,7 +48,8 @@ public class NativeRelationshipPropertiesExporter extends StatementApi implement
     private final RelationshipPropertyTranslator propertyTranslator;
     private final ProgressTracker progressTracker;
 
-    private final ExecutorService executorService;
+    private final int concurrency;
+    private final long batchSize;
 
     private final TerminationFlag terminationFlag;
 
@@ -55,15 +57,17 @@ public class NativeRelationshipPropertiesExporter extends StatementApi implement
         TransactionContext tx,
         GraphStore graphStore,
         RelationshipPropertyTranslator propertyTranslator,
+        int concurrency,
+        long batchSize,
         ProgressTracker progressTracker,
-        ExecutorService executorService,
         TerminationFlag terminationFlag
     ) {
         super(tx);
         this.graphStore = graphStore;
         this.propertyTranslator = propertyTranslator;
+        this.concurrency = concurrency;
+        this.batchSize = batchSize;
         this.progressTracker = progressTracker;
-        this.executorService = executorService;
         this.terminationFlag = terminationFlag;
     }
 
@@ -87,19 +91,28 @@ public class NativeRelationshipPropertiesExporter extends StatementApi implement
         // is performed batch-wise, but single-threaded.
         var tasks = PartitionUtils.degreePartitionWithBatchSize(
             graph,
-            NativeNodePropertyExporter.MIN_BATCH_SIZE,
+            batchSize,
             partition -> createBatchRunnable(
                 relationshipToken,
                 propertyTokens,
                 partition,
-                relationshipIterator,
+                relationshipIterator.concurrentCopy(),
                 graph::toOriginalNodeId
             )
         );
 
         progressTracker.beginSubTask();
         try {
-            tasks.forEach(runnable -> ParallelUtil.run(runnable, executorService));
+            RunWithConcurrency
+                .builder()
+                .concurrency(concurrency)
+                .tasks(tasks)
+                .maxWaitRetries(Integer.MAX_VALUE)
+                .waitTime(10L, TimeUnit.MICROSECONDS)
+                .terminationFlag(terminationFlag)
+                .executor(DefaultPool.INSTANCE)
+                .mayInterruptIfRunning(false)
+                .run();
         } finally {
             progressTracker.endSubTask();
         }
