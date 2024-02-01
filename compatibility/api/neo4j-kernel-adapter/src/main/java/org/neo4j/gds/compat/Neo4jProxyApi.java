@@ -29,17 +29,24 @@ import java.util.Optional;
 
 public interface Neo4jProxyApi {
 
-    AccessMode accessMode(CustomAccessMode customAccessMode);
-
-    long estimateNodeCount(Read read, int label);
-
-    long estimateRelationshipCount(Read read, int sourceLabel, int targetLabel, int type);
-
+    @CompatSince(Neo4jVersion.V_5_12)
     CursorContextFactory cursorContextFactory(Optional<PageCacheTracer> pageCacheTracer);
 
+    @CompatSince(Neo4jVersion.V_5_12)
     DependencyResolver emptyDependencyResolver();
 
+    @CompatSince(Neo4jVersion.V_5_13)
+    AccessMode accessMode(CustomAccessMode customAccessMode);
+
+    @CompatSince(Neo4jVersion.V_5_14)
     String neo4jArrowServerAddressHeader();
 
+    @CompatSince(Neo4jVersion.V_5_15)
     String metricsManagerClass();
+
+    @CompatSince(value = Neo4jVersion.V_Dev, dev = "5.17")
+    long estimateNodeCount(Read read, int label);
+
+    @CompatSince(value = Neo4jVersion.V_Dev, dev = "5.17")
+    long estimateRelationshipCount(Read read, int sourceLabel, int targetLabel, int type);
 }
