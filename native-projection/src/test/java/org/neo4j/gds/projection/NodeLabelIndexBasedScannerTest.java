@@ -22,8 +22,7 @@ package org.neo4j.gds.projection;
 import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.LongScatterSet;
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
@@ -35,9 +34,8 @@ import static org.neo4j.gds.compat.GraphDatabaseApiProxy.runInFullAccessTransact
 
 class NodeLabelIndexBasedScannerTest extends BaseTest {
 
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void testMultipleNodeLabels(boolean allowPartitionedScan) {
+    @Test
+    void testMultipleNodeLabels() {
         var nodeCount = 150_000;
         var prefetchSize = StoreScanner.DEFAULT_PREFETCH_SIZE;
 
@@ -73,8 +71,7 @@ class NodeLabelIndexBasedScannerTest extends BaseTest {
             try (var scanner = new MultipleNodeLabelIndexBasedScanner(
                 labelIds,
                 prefetchSize,
-                txContext,
-                allowPartitionedScan
+                txContext
             );
                  var storeScanner = scanner.createCursor(ktx)) {
 
@@ -120,9 +117,8 @@ class NodeLabelIndexBasedScannerTest extends BaseTest {
         }
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void testBatchSizeAlignment(boolean allowPartitionedScan) {
+    @Test
+    void testBatchSizeAlignment() {
         var prefetchSize = StoreScanner.DEFAULT_PREFETCH_SIZE;
         // batchSize = prefetch size * PAGE_SIZE / NodeRecord size
         var expectedBatchSize = 54_656;
@@ -145,8 +141,7 @@ class NodeLabelIndexBasedScannerTest extends BaseTest {
                 var scanner = new NodeLabelIndexBasedScanner(
                     labelToken,
                     prefetchSize,
-                    txContext,
-                    allowPartitionedScan
+                    txContext
                 );
                 var storeScanner = scanner.createCursor(ktx)
             ) {

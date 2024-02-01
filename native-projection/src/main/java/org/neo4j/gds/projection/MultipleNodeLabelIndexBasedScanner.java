@@ -33,17 +33,14 @@ import java.util.stream.Collectors;
 final class MultipleNodeLabelIndexBasedScanner extends AbstractNodeCursorBasedScanner<CompositeNodeCursor> {
 
     private final int[] labelIds;
-    private final boolean allowPartitionedScan;
 
     MultipleNodeLabelIndexBasedScanner(
         int[] labelIds,
         int prefetchSize,
-        TransactionContext transaction,
-        boolean allowPartitionedScan
+        TransactionContext transaction
     ) {
         super(prefetchSize, transaction);
         this.labelIds = labelIds;
-        this.allowPartitionedScan = allowPartitionedScan;
     }
 
     @Override

@@ -28,17 +28,14 @@ import org.neo4j.kernel.api.KernelTransaction;
 final class NodeLabelIndexBasedScanner extends AbstractNodeCursorBasedScanner<NodeLabelIndexCursor> {
 
     private final int labelId;
-    private final boolean allowPartitionedScan;
 
     NodeLabelIndexBasedScanner(
         int labelId,
         int prefetchSize,
-        TransactionContext transaction,
-        boolean allowPartitionedScan
+        TransactionContext transaction
     ) {
         super(prefetchSize, transaction);
         this.labelId = labelId;
-        this.allowPartitionedScan = allowPartitionedScan;
     }
 
     @Override
@@ -51,8 +48,7 @@ final class NodeLabelIndexBasedScanner extends AbstractNodeCursorBasedScanner<No
         return Neo4jProxy.nodeLabelIndexScan(
             transaction,
             labelId,
-            batchSize(),
-            allowPartitionedScan
+            batchSize()
         );
     }
 

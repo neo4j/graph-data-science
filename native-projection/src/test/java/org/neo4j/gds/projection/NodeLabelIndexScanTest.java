@@ -21,7 +21,7 @@ package org.neo4j.gds.projection;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -60,13 +60,8 @@ class NodeLabelIndexScanTest extends BaseTest {
     }
 
     @ParameterizedTest
-    @CsvSource({
-        "A, false",
-        "A, true",
-        "B, false",
-        "B, true",
-    })
-    void nodeLabelIndexScanTest(String label, boolean usePartitionedScan) {
+    @ValueSource(strings = {"A", "B"})
+    void nodeLabelIndexScanTest(String label) {
         var tx = TestSupport.fullAccessTransaction(db);
 
         var expectedSet = label.equals("A")
@@ -78,8 +73,7 @@ class NodeLabelIndexScanTest extends BaseTest {
             var storeScan = Neo4jProxy.nodeLabelIndexScan(
                 ktx,
                 aToken,
-                RecordsBatchBuffer.DEFAULT_BUFFER_SIZE,
-                usePartitionedScan
+                RecordsBatchBuffer.DEFAULT_BUFFER_SIZE
             );
 
             try (
