@@ -381,7 +381,6 @@ public final class Neo4jProxy {
     public static Configuration batchImporterConfig(
         int batchSize,
         int writeConcurrency,
-        Optional<Long> pageCacheMemory,
         boolean highIO,
         IndexConfig indexConfig
     ) {

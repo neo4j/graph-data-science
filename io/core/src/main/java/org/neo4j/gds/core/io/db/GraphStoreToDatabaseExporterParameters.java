@@ -145,7 +145,6 @@ public final class GraphStoreToDatabaseExporterParameters {
         return Neo4jProxy.batchImporterConfig(
             batchSize,
             writeConcurrency,
-            pageCacheMemory,
             highIO,
             IndexConfig.DEFAULT.withLabelIndex().withRelationshipTypeIndex()
         );
