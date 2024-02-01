@@ -43,7 +43,6 @@ import static org.neo4j.gds.utils.GdsFeatureToggles.ENABLE_ARROW_DATABASE_IMPORT
 import static org.neo4j.gds.utils.GdsFeatureToggles.SKIP_ORPHANS;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_MIXED_ADJACENCY_LIST;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST;
-import static org.neo4j.gds.utils.GdsFeatureToggles.USE_PARTITIONED_SCAN;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_REORDERED_ADJACENCY_LIST;
 import static org.neo4j.gds.utils.GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST;
 
@@ -74,25 +73,6 @@ class FeatureToggleProcTest extends BaseProcTest {
     }
 
     @Test
-    void toggleUsePartitionedScan() {
-        var usePartitionedScan = USE_PARTITIONED_SCAN.isEnabled();
-        runQuery("CALL gds.features.usePartitionedScan($value)", Map.of("value", !usePartitionedScan));
-        assertEquals(!usePartitionedScan, USE_PARTITIONED_SCAN.isEnabled());
-        runQuery("CALL gds.features.usePartitionedScan($value)", Map.of("value", usePartitionedScan));
-        assertEquals(usePartitionedScan, USE_PARTITIONED_SCAN.isEnabled());
-    }
-
-    @Test
-    void resetUsePartitionedScan() {
-        USE_PARTITIONED_SCAN.reset();
-        assertCypherResult(
-            "CALL gds.features.usePartitionedScan.reset()",
-            List.of(Map.of("enabled", false))
-        );
-        assertFalse(USE_PARTITIONED_SCAN.isEnabled());
-    }
-
-    @Test
     void toggleUseUncompressedAdjacencyList() {
         var useUncompressedAdjacencyList = USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled();
         runQuery(
@@ -116,7 +96,7 @@ class FeatureToggleProcTest extends BaseProcTest {
         );
         assertFalse(USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled());
     }
-    
+
     @Test
     void toggleUsePackedAdjacencyList() {
         var usePackedAdjacencyList = USE_PACKED_ADJACENCY_LIST.isEnabled();

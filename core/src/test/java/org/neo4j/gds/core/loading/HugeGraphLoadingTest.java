@@ -40,7 +40,6 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
 
@@ -396,16 +395,14 @@ final class HugeGraphLoadingTest extends BaseTest {
             }
         });
 
-        GdsFeatureToggles.USE_PARTITIONED_SCAN.enableAndRun(() -> {
-            var graph = new StoreLoaderBuilder()
-                .databaseService(db)
-                .addNodeLabel(label.name())
-                .concurrency(concurrency)
-                .build()
-                .graph();
+        var graph = new StoreLoaderBuilder()
+            .databaseService(db)
+            .addNodeLabel(label.name())
+            .concurrency(concurrency)
+            .build()
+            .graph();
 
-            assertThat(graph.nodeCount()).isEqualTo(labelCount);
-        });
+        assertThat(graph.nodeCount()).isEqualTo(labelCount);
     }
 
     @ParameterizedTest
@@ -432,17 +429,15 @@ final class HugeGraphLoadingTest extends BaseTest {
             }
         });
 
-        GdsFeatureToggles.USE_PARTITIONED_SCAN.enableAndRun(() -> {
-            var graph = new StoreLoaderBuilder()
-                .databaseService(db)
-                .addNodeLabel(labelA.name())
-                .addNodeLabel(labelB.name())
-                .concurrency(concurrency)
-                .build()
-                .graph();
+        var graph = new StoreLoaderBuilder()
+            .databaseService(db)
+            .addNodeLabel(labelA.name())
+            .addNodeLabel(labelB.name())
+            .concurrency(concurrency)
+            .build()
+            .graph();
 
-            assertThat(graph.nodeCount()).isEqualTo(labelACount + labelBCount + labelABCount);
-        });
+        assertThat(graph.nodeCount()).isEqualTo(labelACount + labelBCount + labelABCount);
     }
 
     @Test
@@ -457,22 +452,20 @@ final class HugeGraphLoadingTest extends BaseTest {
             return null;
         });
 
-        GdsFeatureToggles.USE_PARTITIONED_SCAN.enableAndRun(() -> {
-            var graph = new StoreLoaderBuilder()
-                .databaseService(db)
-                .addNodeProjection(NodeProjection.builder().label("A").addProperty(PropertyMapping.of("prop1")).build())
-                .addNodeProjection(NodeProjection.builder().label("B").addProperty(PropertyMapping.of("prop2")).build())
-                .build()
-                .graph();
+        var graph = new StoreLoaderBuilder()
+            .databaseService(db)
+            .addNodeProjection(NodeProjection.builder().label("A").addProperty(PropertyMapping.of("prop1")).build())
+            .addNodeProjection(NodeProjection.builder().label("B").addProperty(PropertyMapping.of("prop2")).build())
+            .build()
+            .graph();
 
-            long idA = graph.toMappedNodeId(ids[0]);
-            long idB = graph.toMappedNodeId(ids[1]);
+        long idA = graph.toMappedNodeId(ids[0]);
+        long idB = graph.toMappedNodeId(ids[1]);
 
-            assertThat(graph.nodeCount(NodeLabel.of("A"))).isEqualTo(3);
-            assertThat(graph.nodeCount(NodeLabel.of("B"))).isEqualTo(1);
+        assertThat(graph.nodeCount(NodeLabel.of("A"))).isEqualTo(3);
+        assertThat(graph.nodeCount(NodeLabel.of("B"))).isEqualTo(1);
 
-            assertThat(graph.nodeProperties("prop1").longValue(idA)).isEqualTo(42);
-            assertThat(graph.nodeProperties("prop2").longValue(idB)).isEqualTo(1337);
-        });
+        assertThat(graph.nodeProperties("prop1").longValue(idA)).isEqualTo(42);
+        assertThat(graph.nodeProperties("prop2").longValue(idB)).isEqualTo(1337);
     }
 }

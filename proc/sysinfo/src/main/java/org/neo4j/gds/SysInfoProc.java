@@ -26,8 +26,8 @@ import org.neo4j.gds.compat.Neo4jProxyFactory;
 import org.neo4j.gds.compat.ProxyFactory;
 import org.neo4j.gds.compat.ProxyUtil;
 import org.neo4j.gds.compat.SettingProxyFactory;
-import org.neo4j.gds.settings.Neo4jSettings;
 import org.neo4j.gds.core.utils.mem.GcListenerExtension;
+import org.neo4j.gds.settings.Neo4jSettings;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.config.Configuration;
@@ -160,7 +160,6 @@ public class SysInfoProc {
     private static void features(Stream.Builder<DebugValue> builder) {
         builder
             .add(value("featureSkipOrphanNodes", GdsFeatureToggles.SKIP_ORPHANS.isEnabled()))
-            .add(value("featurePartitionedScan", GdsFeatureToggles.USE_PARTITIONED_SCAN.isEnabled()))
             .add(value("featureBitIdMap", GdsFeatureToggles.USE_BIT_ID_MAP.isEnabled()))
             .add(value(
                 "featureUncompressedAdjacencyList",

@@ -29,7 +29,6 @@ import java.util.concurrent.atomic.AtomicReference;
 public enum GdsFeatureToggles {
 
     SKIP_ORPHANS(false),
-    USE_PARTITIONED_SCAN(false),
     USE_BIT_ID_MAP(true),
     USE_UNCOMPRESSED_ADJACENCY_LIST(false),
     USE_PACKED_ADJACENCY_LIST(false),
