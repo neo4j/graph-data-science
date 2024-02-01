@@ -23,7 +23,7 @@ import org.jetbrains.annotations.TestOnly;
 import org.junit.jupiter.api.BeforeEach;
 import org.neo4j.exceptions.KernelException;
 import org.neo4j.gds.BaseTest;
-import org.neo4j.gds.compat.FilterAccessMode;
+import org.neo4j.gds.compat.CustomAccessMode;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.graphdb.Transaction;
@@ -49,7 +49,7 @@ public abstract class TransactionContextTest extends BaseTest {
             forbiddenToken = ktx.tokenWrite().labelGetOrCreateForName(label);
         }
         // forbid reading label token with this access mode
-        return new FilterAccessMode() {
+        return Neo4jProxy.accessMode(new CustomAccessMode() {
             @Override
             public boolean allowsTraverseAllLabels() {
                 return false;
@@ -64,11 +64,11 @@ public abstract class TransactionContextTest extends BaseTest {
             public boolean allowsTraverseNode(long... labels) {
                 return Arrays.stream(labels).noneMatch(l -> l == forbiddenToken);
             }
-        }.toNeoAccessMode();
+        });
     }
 
     protected AccessMode forbiddenNodes() {
-        return new FilterAccessMode() {
+        return Neo4jProxy.accessMode(new CustomAccessMode() {
                 @Override
                 public boolean allowsTraverseAllLabels() {
                     return false;
@@ -83,16 +83,16 @@ public abstract class TransactionContextTest extends BaseTest {
                 public boolean allowsTraverseNode(long... labels) {
                     return false;
                 }
-            }.toNeoAccessMode();
+        });
     }
 
     protected AccessMode forbiddenRelationships() {
-        return new FilterAccessMode() {
+        return Neo4jProxy.accessMode(new CustomAccessMode() {
             @Override
             public boolean allowsTraverseRelType(int relType) {
                 return false;
             }
-        }.toNeoAccessMode();
+        });
     }
 
     protected AccessMode forbiddenProperty(String property) throws KernelException {
@@ -102,12 +102,12 @@ public abstract class TransactionContextTest extends BaseTest {
             forbiddenToken = ktx.tokenWrite().propertyKeyGetOrCreateForName(property);
         }
 
-        return new FilterAccessMode() {
+        return Neo4jProxy.accessMode(new CustomAccessMode() {
             @Override
             public boolean allowsReadNodeProperty(int propertyKey) {
                 return propertyKey != forbiddenToken;
             }
-        }.toNeoAccessMode();
+        });
     }
 
     @TestOnly

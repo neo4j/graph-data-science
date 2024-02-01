@@ -151,8 +151,7 @@ public final class Neo4jProxy {
         return IMPL.metricsManagerClass();
     }
 
-    @TestOnly
-    static AccessMode accessMode(CustomAccessMode customAccessMode) {
+    public static AccessMode accessMode(CustomAccessMode customAccessMode) {
         return IMPL.accessMode(customAccessMode);
     }
 
