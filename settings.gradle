@@ -68,9 +68,6 @@ project(':legacy-cypher-projection').projectDir = file('legacy-cypher-projection
 include('cypher-core')
 project(':cypher-core').projectDir = file('cypher/cypher-core')
 
-include('cypher-test')
-project(':cypher-test').projectDir = file('cypher/cypher-test')
-
 include('doc')
 project(':doc').projectDir = file('doc')
 
