@@ -78,9 +78,9 @@ public class NodeEmbeddingsAlgorithmsMutateBusinessFacade {
             intermediateResult.algorithmResult,
             configuration,
             (result) -> NodePropertyValuesAdapter.adapt(result.embeddings()),
-            (result) -> new Long(intermediateResult.algorithmResult.graph().nodeCount()),
+            (result) -> intermediateResult.algorithmResult.graph().nodeCount(),
             intermediateResult.computeMilliseconds,
-            () -> new Long(0)
+            () -> 0L
         );
     }
 
@@ -97,9 +97,9 @@ public class NodeEmbeddingsAlgorithmsMutateBusinessFacade {
             intermediateResult.algorithmResult,
             configuration,
             (result) -> NodePropertyValuesAdapter.adapt(result.embeddings()),
-            (result) -> new Long(intermediateResult.algorithmResult.graph().nodeCount()),
+            (result) -> intermediateResult.algorithmResult.graph().nodeCount(),
             intermediateResult.computeMilliseconds,
-            () -> new Long(0)
+            () -> 0L
 
         );
     }
@@ -117,9 +117,9 @@ public class NodeEmbeddingsAlgorithmsMutateBusinessFacade {
             intermediateResult.algorithmResult,
             configuration,
             HashGNNResult::embeddings,
-            (result) -> new Long(intermediateResult.algorithmResult.graph().nodeCount()),
+            (result) -> intermediateResult.algorithmResult.graph().nodeCount(),
             intermediateResult.computeMilliseconds,
-            () -> new Long(0)
+            () -> 0l
 
         );
     }
