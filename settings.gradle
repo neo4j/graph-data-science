@@ -254,24 +254,6 @@ project(':opengds-procedure-facade').projectDir = file('procedures/facade')
 include('progress-tracking')
 project(':progress-tracking').projectDir = file('progress-tracking')
 
-include('storage-engine-adapter')
-project(':storage-engine-adapter').projectDir = file('compatibility/common/storage-engine-adapter')
-
-include('storage-engine-adapter-5.11')
-project(':storage-engine-adapter-5.11').projectDir = file('compatibility/5.11/storage-engine-adapter')
-
-include('storage-engine-adapter-5.12')
-project(':storage-engine-adapter-5.12').projectDir = file('compatibility/5.12/storage-engine-adapter')
-
-include('storage-engine-adapter-5.13')
-project(':storage-engine-adapter-5.13').projectDir = file('compatibility/5.13/storage-engine-adapter')
-
-include('storage-engine-adapter-5.14')
-project(':storage-engine-adapter-5.14').projectDir = file('compatibility/5.14/storage-engine-adapter')
-
-include('storage-engine-adapter-api')
-project(':storage-engine-adapter-api').projectDir = file('compatibility/api/storage-engine-adapter')
-
 include('string-formatting')
 project(':string-formatting').projectDir = file('string-formatting')
 
@@ -301,10 +283,6 @@ project(':defaults-and-limits-configuration').projectDir = file('defaults-and-li
 
 include('neo4j-kernel-adapter-5.15')
 project(':neo4j-kernel-adapter-5.15').projectDir = file('compatibility/5.15/neo4j-kernel-adapter')
-include('storage-engine-adapter-5.15')
-project(':storage-engine-adapter-5.15').projectDir = file('compatibility/5.15/storage-engine-adapter')
 
 include('neo4j-kernel-adapter-5.16')
 project(':neo4j-kernel-adapter-5.16').projectDir = file('compatibility/5.16/neo4j-kernel-adapter')
-include('storage-engine-adapter-5.16')
-project(':storage-engine-adapter-5.16').projectDir = file('compatibility/5.16/storage-engine-adapter')
