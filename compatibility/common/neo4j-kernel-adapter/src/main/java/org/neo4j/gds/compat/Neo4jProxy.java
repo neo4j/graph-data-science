@@ -131,20 +131,33 @@ public final class Neo4jProxy {
         ProxyUtil.MayLogToStdout.YES
     );
 
-    static AccessMode accessMode(CustomAccessMode customAccessMode) {
-        return IMPL.accessMode(customAccessMode);
-    }
-
-    static CursorContextFactory cursorContextFactory(Optional<PageCacheTracer> pageCacheTracer) {
-        return IMPL.cursorContextFactory(pageCacheTracer);
-    }
-
     public static long estimateNodeCount(Read read, int label) {
         return IMPL.estimateNodeCount(read, label);
     }
 
     public static long estimateRelationshipCount(Read read, int sourceLabel, int targetLabel, int type) {
         return IMPL.estimateRelationshipCount(read, sourceLabel, targetLabel, type);
+    }
+
+    public static DependencyResolver emptyDependencyResolver() {
+        return IMPL.emptyDependencyResolver();
+    }
+
+    public static String neo4jArrowServerAddressHeader() {
+        return IMPL.neo4jArrowServerAddressHeader();
+    }
+
+    public static String metricsManagerClass() {
+        return IMPL.metricsManagerClass();
+    }
+
+    @TestOnly
+    static AccessMode accessMode(CustomAccessMode customAccessMode) {
+        return IMPL.accessMode(customAccessMode);
+    }
+
+    private static CursorContextFactory cursorContextFactory(Optional<PageCacheTracer> pageCacheTracer) {
+        return IMPL.cursorContextFactory(pageCacheTracer);
     }
 
     public static CompatExecutionContext executionContext(KernelTransaction ktx) {
@@ -248,19 +261,6 @@ public final class Neo4jProxy {
             }
         };
     }
-
-    public static DependencyResolver emptyDependencyResolver() {
-        return IMPL.emptyDependencyResolver();
-    }
-
-    public static String neo4jArrowServerAddressHeader() {
-        return IMPL.neo4jArrowServerAddressHeader();
-    }
-
-    public static String metricsManagerClass() {
-        return IMPL.metricsManagerClass();
-    }
-
 
     public static GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms) {
         return new CompatGraphDatabaseAPIImpl(dbms);
