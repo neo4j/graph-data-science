@@ -211,8 +211,8 @@ public final class Neo4jProxy {
         );
     }
 
-    public static BoltTransactionRunner<?, ?> boltTransactionRunner() {
-        return IMPL.boltTransactionRunner();
+    public static BoltTransactionRunner boltTransactionRunner() {
+        return new BoltTransactionRunner();
     }
 
     public static boolean isCompositeDatabase(GraphDatabaseService databaseService) {

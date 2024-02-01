@@ -37,8 +37,6 @@ public interface Neo4jProxyApi {
 
     CursorContextFactory cursorContextFactory(Optional<PageCacheTracer> pageCacheTracer);
 
-    BoltTransactionRunner<?, ?> boltTransactionRunner();
-
     DependencyResolver emptyDependencyResolver();
 
     String neo4jArrowServerAddressHeader();

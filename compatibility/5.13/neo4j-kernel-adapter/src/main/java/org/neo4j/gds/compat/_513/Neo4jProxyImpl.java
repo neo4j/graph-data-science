@@ -20,7 +20,6 @@
 package org.neo4j.gds.compat._513;
 
 import org.neo4j.common.DependencyResolver;
-import org.neo4j.gds.compat.BoltTransactionRunner;
 import org.neo4j.gds.compat.CompatAccessModeImpl;
 import org.neo4j.gds.compat.CustomAccessMode;
 import org.neo4j.gds.compat.Neo4jProxyApi;
@@ -40,11 +39,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     @Override
     public String metricsManagerClass() {
         return "com.neo4j.metrics.global.MetricsManager";
-    }
-
-    @Override
-    public BoltTransactionRunner<?, ?> boltTransactionRunner() {
-        return new BoltTransactionRunnerImpl();
     }
 
     private static final DependencyResolver EMPTY_DEPENDENCY_RESOLVER = new DependencyResolver() {
