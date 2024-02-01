@@ -132,7 +132,6 @@ public final class GdsParallelBatchImporter {
             .set(Neo4jSettings.neo4jHome(), databaseConfig.get(Neo4jSettings.neo4jHome()))
             .set(GraphDatabaseSettings.data_directory, databaseConfig.get(GraphDatabaseSettings.data_directory));
 
-        Neo4jProxy.setAllowUpgrades(configBuilder, true);
         Neo4jProxy.configureRecordFormat(configBuilder, parameters.recordFormat());
 
         this.databaseConfig = configBuilder.build();

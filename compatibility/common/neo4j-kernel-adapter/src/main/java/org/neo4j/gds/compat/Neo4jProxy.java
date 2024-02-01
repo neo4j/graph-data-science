@@ -71,7 +71,6 @@ import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.AuthSubject;
 import org.neo4j.internal.kernel.api.security.SecurityContext;
 import org.neo4j.internal.recordstorage.RecordIdType;
-import org.neo4j.internal.schema.IndexCapability;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.layout.Neo4jLayout;
@@ -107,7 +106,6 @@ import org.neo4j.ssl.config.SslPolicyLoader;
 import org.neo4j.storageengine.api.PropertySelection;
 import org.neo4j.storageengine.api.StorageEngineFactory;
 import org.neo4j.values.storable.TextArray;
-import org.neo4j.values.storable.ValueCategory;
 import org.neo4j.values.virtual.MapValue;
 import org.neo4j.values.virtual.NodeValue;
 import org.neo4j.values.virtual.VirtualValues;
@@ -646,13 +644,6 @@ public final class Neo4jProxy {
             logService.getInternalLogProvider(),
             cursorContextFactory(Optional.ofNullable(pageCacheTracer))
         );
-    }
-
-    public static boolean isNotNumericIndex(IndexCapability indexCapability) {
-        return !indexCapability.areValueCategoriesAccepted(ValueCategory.NUMBER);
-    }
-
-    public static void setAllowUpgrades(Config.Builder configBuilder, boolean value) {
     }
 
     public static String defaultRecordFormatSetting() {
