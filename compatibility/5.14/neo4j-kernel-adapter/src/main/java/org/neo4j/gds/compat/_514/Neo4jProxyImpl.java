@@ -22,39 +22,18 @@ package org.neo4j.gds.compat._514;
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.compat.BoltTransactionRunner;
 import org.neo4j.gds.compat.CompatAccessModeImpl;
-import org.neo4j.gds.compat.CompatExecutionContext;
 import org.neo4j.gds.compat.CustomAccessMode;
-import org.neo4j.gds.compat.GlobalProcedureRegistry;
-import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxyApi;
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.internal.kernel.api.Cursor;
-import org.neo4j.internal.kernel.api.PartitionedScan;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.TokenSet;
-import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
-import org.neo4j.internal.kernel.api.procs.FieldSignature;
-import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
-import org.neo4j.internal.kernel.api.procs.QualifiedName;
-import org.neo4j.internal.kernel.api.procs.UserFunctionSignature;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.internal.kernel.api.security.ReadSecurityPropertyProvider;
-import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.io.pagecache.context.CursorContextFactory;
 import org.neo4j.io.pagecache.context.FixedVersionContextSupplier;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.api.procedure.Context;
-import org.neo4j.kernel.api.procedure.GlobalProcedures;
-import org.neo4j.kernel.database.DatabaseReferenceImpl;
-import org.neo4j.kernel.database.DatabaseReferenceRepository;
-import org.neo4j.procedure.Mode;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 public final class Neo4jProxyImpl implements Neo4jProxyApi {
 
@@ -64,72 +43,8 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    public <T> T lookupComponentProvider(Context ctx, Class<T> component, boolean safe) throws ProcedureException {
-        var globalProcedures = GraphDatabaseApiProxy.resolveDependency(
-            ctx.dependencyResolver(),
-            GlobalProcedures.class
-        );
-        return globalProcedures.getCurrentView().lookupComponentProvider(component, safe).apply(ctx);
-    }
-
-    @Override
     public BoltTransactionRunner<?, ?> boltTransactionRunner() {
         return new BoltTransactionRunnerImpl();
-    }
-
-    @Override
-    public ProcedureSignature procedureSignature(
-        QualifiedName name,
-        List<FieldSignature> inputSignature,
-        List<FieldSignature> outputSignature,
-        Mode mode,
-        boolean admin,
-        String deprecated,
-        String description,
-        String warning,
-        boolean eager,
-        boolean caseInsensitive,
-        boolean systemProcedure,
-        boolean internal,
-        boolean allowExpiredCredentials,
-        boolean threadSafe
-    ) {
-        return new ProcedureSignature(
-            name,
-            inputSignature,
-            outputSignature,
-            mode,
-            admin,
-            deprecated,
-            description,
-            warning,
-            eager,
-            caseInsensitive,
-            systemProcedure,
-            internal,
-            allowExpiredCredentials,
-            threadSafe
-        );
-    }
-
-    @Override
-    public GlobalProcedureRegistry globalProcedureRegistry(GlobalProcedures globalProcedures) {
-        return new GlobalProcedureRegistry() {
-            @Override
-            public Set<ProcedureSignature> getAllProcedures() {
-                return globalProcedures.getCurrentView().getAllProcedures();
-            }
-
-            @Override
-            public Stream<UserFunctionSignature> getAllNonAggregatingFunctions() {
-                return globalProcedures.getCurrentView().getAllNonAggregatingFunctions();
-            }
-
-            @Override
-            public Stream<UserFunctionSignature> getAllAggregatingFunctions() {
-                return globalProcedures.getCurrentView().getAllAggregatingFunctions();
-            }
-        };
     }
 
     private static final DependencyResolver EMPTY_DEPENDENCY_RESOLVER = new DependencyResolver() {
@@ -158,35 +73,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
-    public CompatExecutionContext executionContext(KernelTransaction ktx) {
-        var stmt = ktx.acquireStatement();
-        var ctx = ktx.createExecutionContext();
-        return new CompatExecutionContext() {
-            @Override
-            public CursorContext cursorContext() {
-                return ctx.cursorContext();
-            }
-
-            @Override
-            public AccessMode accessMode() {
-                return ctx.securityContext().mode();
-            }
-
-            @Override
-            public <C extends Cursor> boolean reservePartition(PartitionedScan<C> scan, C cursor) {
-                return scan.reservePartition(cursor, ctx);
-            }
-
-            @Override
-            public void close() {
-                ctx.complete();
-                ctx.close();
-                stmt.close();
-            }
-        };
-    }
-
-    @Override
     public AccessMode accessMode(CustomAccessMode customAccessMode) {
         return new CompatAccessModeImpl(customAccessMode) {
             @Override
@@ -204,15 +90,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     public String neo4jArrowServerAddressHeader() {
         // TODO: replace this with a dependency to neo4j once we moved the corresponding piece to a public module
         return "ArrowPluginAddress";
-    }
-
-    @Override
-    public boolean isCompositeDatabase(GraphDatabaseService databaseService) {
-        var databaseId = GraphDatabaseApiProxy.databaseId(databaseService);
-        var repo = GraphDatabaseApiProxy.resolveDependency(databaseService, DatabaseReferenceRepository.class);
-        return repo.getCompositeDatabaseReferences().stream()
-            .map(DatabaseReferenceImpl.Internal::databaseId)
-            .anyMatch(databaseId::equals);
     }
 
     @Override

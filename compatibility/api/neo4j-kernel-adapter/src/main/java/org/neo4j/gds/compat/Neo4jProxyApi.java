@@ -20,45 +20,16 @@
 package org.neo4j.gds.compat;
 
 import org.neo4j.common.DependencyResolver;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.Read;
-import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
-import org.neo4j.internal.kernel.api.procs.FieldSignature;
-import org.neo4j.internal.kernel.api.procs.ProcedureSignature;
-import org.neo4j.internal.kernel.api.procs.QualifiedName;
 import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.io.pagecache.context.CursorContextFactory;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
-import org.neo4j.kernel.api.KernelTransaction;
-import org.neo4j.kernel.api.procedure.Context;
-import org.neo4j.kernel.api.procedure.GlobalProcedures;
-import org.neo4j.procedure.Mode;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface Neo4jProxyApi {
 
     AccessMode accessMode(CustomAccessMode customAccessMode);
-
-    CompatExecutionContext executionContext(KernelTransaction ktx);
-
-    ProcedureSignature procedureSignature(
-        QualifiedName name,
-        List<FieldSignature> inputSignature,
-        List<FieldSignature> outputSignature,
-        Mode mode,
-        boolean admin,
-        String deprecated,
-        String description,
-        String warning,
-        boolean eager,
-        boolean caseInsensitive,
-        boolean systemProcedure,
-        boolean internal,
-        boolean allowExpiredCredentials,
-        boolean threadSafe
-    );
 
     long estimateNodeCount(Read read, int label);
 
@@ -67,12 +38,6 @@ public interface Neo4jProxyApi {
     CursorContextFactory cursorContextFactory(Optional<PageCacheTracer> pageCacheTracer);
 
     BoltTransactionRunner<?, ?> boltTransactionRunner();
-
-    boolean isCompositeDatabase(GraphDatabaseService databaseService);
-
-    <T> T lookupComponentProvider(Context ctx, Class<T> component, boolean safe) throws ProcedureException;
-
-    GlobalProcedureRegistry globalProcedureRegistry(GlobalProcedures globalProcedures);
 
     DependencyResolver emptyDependencyResolver();
 

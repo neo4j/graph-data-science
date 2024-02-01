@@ -53,8 +53,10 @@ import org.neo4j.internal.batchimport.staging.StageExecution;
 import org.neo4j.internal.helpers.HostnamePort;
 import org.neo4j.internal.id.IdGenerator;
 import org.neo4j.internal.id.IdGeneratorFactory;
+import org.neo4j.internal.kernel.api.Cursor;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.NodeLabelIndexCursor;
+import org.neo4j.internal.kernel.api.PartitionedScan;
 import org.neo4j.internal.kernel.api.PropertyCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.RelationshipScanCursor;
@@ -84,6 +86,8 @@ import org.neo4j.kernel.api.procedure.CallableProcedure;
 import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
 import org.neo4j.kernel.api.procedure.Context;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
+import org.neo4j.kernel.database.DatabaseReferenceImpl;
+import org.neo4j.kernel.database.DatabaseReferenceRepository;
 import org.neo4j.kernel.database.NormalizedDatabaseName;
 import org.neo4j.kernel.impl.coreapi.InternalTransaction;
 import org.neo4j.kernel.impl.index.schema.IndexImporterFactoryImpl;
@@ -115,7 +119,9 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static org.neo4j.gds.compat.InternalReadOps.countByIdGenerator;
@@ -144,7 +150,31 @@ public final class Neo4jProxy {
     }
 
     public static CompatExecutionContext executionContext(KernelTransaction ktx) {
-        return IMPL.executionContext(ktx);
+        var stmt = ktx.acquireStatement();
+        var ctx = ktx.createExecutionContext();
+        return new CompatExecutionContext() {
+            @Override
+            public CursorContext cursorContext() {
+                return ctx.cursorContext();
+            }
+
+            @Override
+            public AccessMode accessMode() {
+                return ctx.securityContext().mode();
+            }
+
+            @Override
+            public <C extends Cursor> boolean reservePartition(PartitionedScan<C> scan, C cursor) {
+                return scan.reservePartition(cursor, ctx);
+            }
+
+            @Override
+            public void close() {
+                ctx.complete();
+                ctx.close();
+                stmt.close();
+            }
+        };
     }
 
     public static ProcedureSignature procedureSignature(
@@ -163,7 +193,7 @@ public final class Neo4jProxy {
         boolean allowExpiredCredentials,
         boolean threadSafe
     ) {
-        return IMPL.procedureSignature(
+        return new ProcedureSignature(
             name,
             inputSignature,
             outputSignature,
@@ -186,16 +216,39 @@ public final class Neo4jProxy {
     }
 
     public static boolean isCompositeDatabase(GraphDatabaseService databaseService) {
-        return IMPL.isCompositeDatabase(databaseService);
+        var databaseId = GraphDatabaseApiProxy.databaseId(databaseService);
+        var repo = GraphDatabaseApiProxy.resolveDependency(databaseService, DatabaseReferenceRepository.class);
+        return repo.getCompositeDatabaseReferences().stream()
+            .map(DatabaseReferenceImpl.Internal::databaseId)
+            .anyMatch(databaseId::equals);
     }
 
     public static <T> T lookupComponentProvider(Context ctx, Class<T> component, boolean safe)
     throws ProcedureException {
-        return IMPL.lookupComponentProvider(ctx, component, safe);
+        var globalProcedures = GraphDatabaseApiProxy.resolveDependency(
+            ctx.dependencyResolver(),
+            GlobalProcedures.class
+        );
+        return globalProcedures.getCurrentView().lookupComponentProvider(component, safe).apply(ctx);
     }
 
     public static GlobalProcedureRegistry globalProcedureRegistry(GlobalProcedures globalProcedures) {
-        return IMPL.globalProcedureRegistry(globalProcedures);
+        return new GlobalProcedureRegistry() {
+            @Override
+            public Set<ProcedureSignature> getAllProcedures() {
+                return globalProcedures.getCurrentView().getAllProcedures();
+            }
+
+            @Override
+            public Stream<UserFunctionSignature> getAllNonAggregatingFunctions() {
+                return globalProcedures.getCurrentView().getAllNonAggregatingFunctions();
+            }
+
+            @Override
+            public Stream<UserFunctionSignature> getAllAggregatingFunctions() {
+                return globalProcedures.getCurrentView().getAllAggregatingFunctions();
+            }
+        };
     }
 
     public static DependencyResolver emptyDependencyResolver() {
