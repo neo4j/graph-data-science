@@ -35,9 +35,9 @@ You can also xref:management-ops/graph-drop.adoc[drop] a graph from the catalog 
 
 === Read
 
-The properties stored in the nodes and relationships of a graph can be retrieved using the `stream` methods on xref:management-ops/graph-reads/graph-stream-nodes.adoc[nodes] and xref:management-ops/graph-reads/graph-stream-relationships.adoc[relationships] respectively. In the Enterprise Edition, similar operations can be performed more efficiently using xref:management-ops/graph-export/graph-catalog-apache-arrow-ops.adoc[Apache Arrow].
+The properties stored in the nodes and relationships of a graph can be retrieved using the `stream` methods on xref:management-ops/graph-reads/graph-stream-nodes.adoc[nodes] and xref:management-ops/graph-reads/graph-stream-relationships.adoc[relationships] respectively.
+In the Enterprise Edition, similar operations can be performed more efficiently using xref:management-ops/graph-export/graph-catalog-apache-arrow-ops.adoc[Apache Arrow].
 
-For complex use cases where an expressive query language is needed, you can run xref:management-ops/create-cypher-db.adoc[Cypher queries] on a graph.
 
 === Update
 

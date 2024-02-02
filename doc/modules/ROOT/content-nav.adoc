@@ -43,10 +43,6 @@
 *** xref:management-ops/graph-update/to-undirected.adoc[]
 *** xref:management-ops/graph-update/collapse-path.adoc[]
 *** xref:management-ops/graph-update/dropping-parts.adoc[]
-// TODO: Uncomment and rename the _write-with-cypher.adoc page when
-// all bugs with writes have been fixed.
-// Also, add references to it in other pages accordingly.
-// *** xref:management-ops/graph-update/write-with-cypher.adoc[]
 ** Writing back to Neo4j
 *** xref:management-ops/graph-write-to-neo4j/write-back-to-nodes.adoc[]
 *** xref:management-ops/graph-write-to-neo4j/write-back-relationships.adoc[]
