@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.write;
 
-import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
 import org.neo4j.gds.transaction.TransactionContext;
 
 public class NativeRelationshipPropertiesExporterBuilder extends RelationshipPropertiesExporterBuilder {
@@ -36,8 +35,9 @@ public class NativeRelationshipPropertiesExporterBuilder extends RelationshipPro
             transactionContext,
             graphStore,
             propertyTranslator,
+            concurrency,
+            batchSize,
             progressTracker,
-            ExecutorServiceUtil.DEFAULT_SINGLE_THREAD_POOL,
             terminationFlag
         );
     }

@@ -40,6 +40,8 @@ public abstract class RelationshipPropertiesExporterBuilder {
     protected Stream<ExportedRelationship> relationships;
     protected LongUnaryOperator toOriginalId;
     protected long relationshipCount = -1L;
+    protected int concurrency = Runtime.getRuntime().availableProcessors();
+    protected long batchSize = NativeNodePropertyExporter.MIN_BATCH_SIZE;
     protected Optional<ArrowConnectionInfo> arrowConnectionInfo;
     protected Optional<String> remoteDatabaseName; // coupled with arrowConnectionInfo, but should not appear in external API
 
@@ -100,4 +102,13 @@ public abstract class RelationshipPropertiesExporterBuilder {
         return this;
     }
 
+    public RelationshipPropertiesExporterBuilder withConcurrency(int concurrency) {
+        this.concurrency = concurrency;
+        return this;
+    }
+
+    public RelationshipPropertiesExporterBuilder withBatchSize(long batchSize) {
+        this.batchSize = batchSize;
+        return this;
+    }
 }

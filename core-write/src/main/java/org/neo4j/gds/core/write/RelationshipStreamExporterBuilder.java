@@ -37,6 +37,7 @@ public abstract class RelationshipStreamExporterBuilder {
     protected TerminationFlag terminationFlag;
     protected ProgressTracker progressTracker = ProgressTracker.NULL_TRACKER;
     protected long relationshipCount = -1L;
+    protected int concurrency = Runtime.getRuntime().availableProcessors();
     protected Optional<ArrowConnectionInfo> arrowConnectionInfo;
     protected Optional<String> remoteDatabaseName; // coupled with arrowConnectionInfo, but should not appear in external API
 
@@ -85,6 +86,11 @@ public abstract class RelationshipStreamExporterBuilder {
     public RelationshipStreamExporterBuilder withArrowConnectionInfo(Optional<ArrowConnectionInfo> arrowConnectionInfo, Optional<String> remoteDatabaseName) {
         this.arrowConnectionInfo = arrowConnectionInfo;
         this.remoteDatabaseName = remoteDatabaseName;
+        return this;
+    }
+
+    public RelationshipStreamExporterBuilder withConcurrency(int concurrency) {
+        this.concurrency = concurrency;
         return this;
     }
 }

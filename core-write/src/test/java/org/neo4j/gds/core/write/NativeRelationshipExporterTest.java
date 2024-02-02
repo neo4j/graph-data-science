@@ -22,6 +22,8 @@ package org.neo4j.gds.core.write;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.PropertyMapping;
@@ -94,16 +96,17 @@ class NativeRelationshipExporterTest extends BaseTest {
         assertThatExceptionOfType(AuthorizationViolationException.class)
             .isThrownBy(() -> exporter.write("OUT_TYPE"));
     }
-
-    @Test
-    void exportRelationships() {
-        var exporter = setupExportTest(/* includeProperties */ true);
+    @ParameterizedTest
+    @ValueSource(ints = {1,2,4})
+    void exportRelationships(int concurrency) {
+        var exporter = setupExportTest(concurrency, /* includeProperties */ true);
         exporter.write("FOOBAR", "weight");
         validateWrittenGraph();
     }
 
-    @Test
-    void exportRelationshipsWithLongProperties() {
+    @ParameterizedTest
+    @ValueSource(ints = {1,2,4})
+    void exportRelationshipsWithLongProperties(int concurrency) {
         clearDb();
         runQuery(NODE_QUERY_PART + RELS_QUERY_PART);
 
@@ -122,6 +125,7 @@ class NativeRelationshipExporterTest extends BaseTest {
                 graphStore.getGraph(RelationshipType.of("NEW_REL"), Optional.of("newWeight")),
                 RUNNING_TRUE
             )
+            .withConcurrency(concurrency)
             .withRelationPropertyTranslator(relProperty -> Values.longValue((long) relProperty))
             .build()
             .write("NEW_REL", "newWeight");
@@ -232,6 +236,10 @@ class NativeRelationshipExporterTest extends BaseTest {
     }
 
     private RelationshipExporter setupExportTest(boolean includeProperties) {
+        return setupExportTest(1, includeProperties);
+    }
+
+    private RelationshipExporter setupExportTest(int concurrency, boolean includeProperties) {
         // create graph to export
         clearDb();
         runQuery(NODE_QUERY_PART + RELS_QUERY_PART);
@@ -251,6 +259,8 @@ class NativeRelationshipExporterTest extends BaseTest {
         // export into new database
         return NativeRelationshipExporter
             .builder(TestSupport.fullAccessTransaction(db), fromGraph, RUNNING_TRUE)
+            .withBatchSize(1)
+            .withConcurrency(concurrency)
             .build();
     }
 
