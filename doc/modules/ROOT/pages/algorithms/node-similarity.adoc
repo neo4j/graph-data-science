@@ -595,8 +595,8 @@ ORDER BY similarity DESC, Person1, Person2
 [opts="header"]
 |===
 | Person1 | Person2 | similarity
-| "Alice" | "Bob"  | 0.666666666666667
-| "Bob"  | "Alice" | 0.666666666666667
+| "Alice" | "Bob"  | 0.6666666667
+| "Bob"  | "Alice" | 0.6666666667
 | "Dave"   | "Alice" | 0.5
 |===
 --

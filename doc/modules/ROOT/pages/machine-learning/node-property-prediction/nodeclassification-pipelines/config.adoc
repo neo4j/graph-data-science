@@ -143,7 +143,7 @@ YIELD name, nodePropertySteps
 [opts="header",cols="1,9"]
 |===
 | name     | nodePropertySteps
-| "pipe"   | [{name=gds.scaleProperties.mutate, config={scaler=Mean, contextRelationshipTypes=[], contextNodeLabels=[], mutateProperty=scaledSizes, nodeProperties=sizePerStory}}]
+| "pipe"   | [{config={contextNodeLabels=[], contextRelationshipTypes=[], mutateProperty="scaledSizes", nodeProperties="sizePerStory", scaler="Mean"}, name="gds.scaleProperties.mutate"}]
 |===
 
 The `scaledSizes` property can be later used as a feature.
@@ -204,7 +204,7 @@ YIELD name, featureProperties
 [opts="header",cols="1,1"]
 |===
 | name     | featureProperties
-| "pipe"   | [scaledSizes, sizePerStory]
+| "pipe"   | ["scaledSizes", "sizePerStory"]
 |===
 
 Here we assume that the input graph contains a property `sizePerStory` and `scaledSizes` was created in a `nodePropertyStep`.
@@ -455,7 +455,9 @@ RETURN parameterSpace.RandomForest AS randomForestSpace, parameterSpace.Logistic
 [opts="header",cols="1, 1, 1"]
 |===
 | randomForestSpace | logisticRegressionSpace | MultilayerPerceptronSpace
-| [{maxDepth=2147483647, minLeafSize=1, criterion=GINI, minSplitSize=2, numberOfDecisionTrees=5, methodName=RandomForest, numberOfSamplesRatio=1.0}] | [{maxEpochs=100, minEpochs=1, classWeights=[], penalty=0.0, patience=1, methodName=LogisticRegression, focusWeight=0.0, batchSize=100, tolerance=0.001, learningRate=0.001}, {maxEpochs=500, minEpochs=1, classWeights=[], penalty={range=[1.0E-4, 100.0]}, patience=1, methodName=LogisticRegression, focusWeight=0.0, batchSize=100, tolerance=0.001, learningRate=0.001}] | [{maxEpochs=100, minEpochs=1, classWeights=[0.4, 0.3, 0.3], penalty=0.0, patience=1, methodName=MultilayerPerceptron, focusWeight=0.5, hiddenLayerSizes=[100], batchSize=100, tolerance=0.001, learningRate=0.001}]
+| [{criterion="GINI", maxDepth=2147483647, methodName="RandomForest", minLeafSize=1, minSplitSize=2, numberOfDecisionTrees=5, numberOfSamplesRatio=1.0}]
+| [{batchSize=100, classWeights=[], focusWeight=0.0, learningRate=0.001, maxEpochs=100, methodName="LogisticRegression", minEpochs=1, patience=1, penalty=0.0, tolerance=0.001}, {batchSize=100, classWeights=[], focusWeight=0.0, learningRate=0.001, maxEpochs=500, methodName="LogisticRegression", minEpochs=1, patience=1, penalty={range=[0.0001, 100.0]}, tolerance=0.001}]
+| [{batchSize=100, classWeights=[0.4, 0.3, 0.3], focusWeight=0.5, hiddenLayerSizes=[100], learningRate=0.001, maxEpochs=100, methodName="MultilayerPerceptron", minEpochs=1, patience=1, penalty=0.0, tolerance=0.001}]
 |===
 --
 

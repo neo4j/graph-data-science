@@ -118,9 +118,9 @@ ORDER BY score DESC
 [opts="header", cols="1,1"]
 |===
 | node | score
-| "Alice" | 1
-| "Bridget" | 1
-| "Charles" | 0
+| "Alice" | 1.0
+| "Bridget" | 1.0
+| "Charles" | 0.0
 |===
 --
 
@@ -141,6 +141,6 @@ RETURN [x in gds.util.asNodes(nodeIds)| x.name] AS nodes
 [opts="header"]
 |===
 | nodes
-| [Alice, Bridget]
+| ["Alice", "Bridget"]
 |===
 --

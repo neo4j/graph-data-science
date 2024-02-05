@@ -191,7 +191,7 @@ YIELD nodeProperties
 [opts="header"]
 |===
 | nodeProperties
-| [age, writtenScore]
+| ["age", "writtenScore"]
 |===
 --
 
@@ -261,8 +261,8 @@ ORDER BY name ASC
 [opts="header"]
 |===
 | name       | labels
-| "Adam"       | [Person, Reader]
-| "Florentin"  | [Person, Reader]
+| "Adam"       | ["Person", "Reader"]
+| "Florentin"  | ["Person", "Reader"]
 |===
 --
 

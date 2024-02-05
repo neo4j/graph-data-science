@@ -421,7 +421,7 @@ RETURN centralityDistribution.min AS minimumScore, centralityDistribution.mean A
 [opts="header"]
 |===
 | minimumScore | meanScore                  | nodePropertiesWritten
-| 0.0          | 2.714292253766741          | 7
+| 0.0          | 2.7142922538          | 7
 |===
 --
 

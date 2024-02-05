@@ -313,12 +313,12 @@ ORDER BY node
 [opts="header"]
 |===
 | node | parent | weight
-| "A"  | "A"    | 0
-| "B"  | "A"    | 1
-| "C"  | "B"    | 1
-| "D"  | "C"    | 4
-| "E"  | "C"    | 6
-| "F"  | "A"    | 10
+| "A"  | "A"    | 0.0
+| "B"  | "A"    | 1.0
+| "C"  | "B"    | 1.0
+| "D"  | "C"    | 4.0
+| "E"  | "C"    | 6.0
+| "F"  | "A"    | 10.0
 |===
 --
 
@@ -352,7 +352,7 @@ RETURN effectiveNodeCount, totalWeight
 [opts="header"]
 |===
 | effectiveNodeCount | totalWeight
-| 6                  | 22
+| 6                  | 22.0
 |===
 --
 
@@ -396,11 +396,11 @@ ORDER BY Source, Destination
 [opts="header",cols="1,1,1"]
 |===
 | Source | Destination | weight
-| "A"    | "B"         | 1
-| "A"    | "F"         | 10
-| "B"    | "C"         | 1
-| "C"    | "D"         | 4
-| "C"    | "E"         | 6
+| "A"    | "B"         | 1.0
+| "A"    | "F"         | 10.0
+| "B"    | "C"         | 1.0
+| "C"    | "D"         | 4.0
+| "C"    | "E"         | 6.0
 |===
 --
 
@@ -484,12 +484,12 @@ ORDER BY node
 [opts="header"]
 |===
 | node | parent | weight
-| "A"  | "A"    | 0
-| "B"  | "A"    | 1
-| "C"  | "B"    | 1
-| "D"  | "F"    | 3
-| "E"  | "C"    | 6
-| "F"  | "A"    | 10
+| "A"  | "A"    | 0.0
+| "B"  | "A"    | 1.0
+| "C"  | "B"    | 1.0
+| "D"  | "F"    | 3.0
+| "E"  | "C"    | 6.0
+| "F"  | "A"    | 10.0
 |===
 --
 
@@ -536,10 +536,10 @@ ORDER BY node
 [opts="header"]
 |===
 | node | parent | weight
-| "A"  | "A"    | 0
-| "D"  | "F"    | 3
-| "E"  | "A"    | 7
-| "F"  | "A"    | 10
+| "A"  | "A"    | 0.0
+| "D"  | "F"    | 3.0
+| "E"  | "A"    | 7.0
+| "F"  | "A"    | 10.0
 |===
 --
 

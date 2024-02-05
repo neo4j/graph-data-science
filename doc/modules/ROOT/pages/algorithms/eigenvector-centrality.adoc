@@ -578,14 +578,14 @@ ORDER BY score DESC, name ASC
 [opts="header",cols="1,1"]
 |===
 | name      | score
-| "Home"    | 1
+| "Home"    | 1.0
 | "About"   | 0.312876962110942
 | "Links"   | 0.312876962110942
 | "Product" | 0.312876962110942
-| "Site A"  | 0
-| "Site B"  | 0
-| "Site C"  | 0
-| "Site D"  | 0
+| "Site A"  | 0.0
+| "Site B"  | 0.0
+| "Site C"  | 0.0
+| "Site D"  | 0.0
 |===
 --
 

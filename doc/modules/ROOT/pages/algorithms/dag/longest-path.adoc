@@ -163,10 +163,10 @@ We use the utility function `asNode` to return the name of node instead of its I
 [opts="header"]
 |===
 | index | sourceNode | targetNode    | totalCost | nodeNames                    | costs           | path
-| 0     | "Timber"   | "Timber"      | 0.0       | [Timber]                     | [0.0]           | [Node[0]]
-| 1     | "Timber"   | "Lumber"      | 1.0       | [Timber, Lumber]             | [0.0, 1.0]      | [Node[0], Node[1]]
-| 2     | "Screws"   | "Table Maker" | 3.0       | [Screws, Table Maker]        | [0.0, 3.0]      | [Node[2], Node[3]]
-| 3     | "Screws"   | "Screws"      | 0.0       | [Screws]                     | [0.0]           | [Node[2]]
-| 4     | "Screws"   | "Table"       | 4.0       | [Screws, Table Maker, Table] | [0.0, 3.0, 4.0] | [Node[2], Node[3], Node[4]]
+| 0     | "Timber"   | "Timber"      | 0.0       | ["Timber"]                     | [0.0]           | [Node[0]]
+| 1     | "Timber"   | "Lumber"      | 1.0       | ["Timber", "Lumber"]             | [0.0, 1.0]      | [Node[0], Node[1]]
+| 2     | "Screws"   | "Table Maker" | 3.0       | ["Screws", "Table Maker"]        | [0.0, 3.0]      | [Node[2], Node[3]]
+| 3     | "Screws"   | "Screws"      | 0.0       | ["Screws"]                     | [0.0]           | [Node[2]]
+| 4     | "Screws"   | "Table"       | 4.0       | ["Screws", "Table Maker", "Table"] | [0.0, 3.0, 4.0] | [Node[2], Node[3], Node[4]]
 |===
 --

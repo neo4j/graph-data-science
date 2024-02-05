@@ -34,6 +34,7 @@ final class DocumentationTestToolsConstants {
     static {
         var decimalFormat = DecimalFormat.getInstance(Locale.ENGLISH);
         decimalFormat.setMaximumFractionDigits(10);
+        decimalFormat.setMinimumFractionDigits(1);
         decimalFormat.setGroupingUsed(false);
         FLOAT_FORMAT = decimalFormat;
     }

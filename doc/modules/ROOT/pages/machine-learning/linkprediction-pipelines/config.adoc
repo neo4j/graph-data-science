@@ -141,7 +141,7 @@ CALL gds.beta.pipeline.linkPrediction.addNodeProperty('pipe', 'fastRP', {
 [opts="header",cols="1,1,1,1,1,1"]
 |===
 | name     | nodePropertySteps | featureSteps | splitConfig | autoTuningConfig | parameterSpace
-| "pipe"   | [{name=gds.fastRP.mutate, config={randomSeed=42, contextRelationshipTypes=[], embeddingDimension=256, contextNodeLabels=[], mutateProperty=embedding}}]
+| "pipe"   | [{config={contextNodeLabels=[], contextRelationshipTypes=[], embeddingDimension=256, mutateProperty="embedding", randomSeed=42}, name="gds.fastRP.mutate"}]
 | []
 | {negativeSamplingRatio=1.0, testFraction=0.1, trainFraction=0.1, validationFolds=3}
 | {maxTrials={max-trials}}
@@ -241,7 +241,7 @@ CALL gds.beta.pipeline.linkPrediction.addFeature('pipe', 'hadamard', {
 [opts="header",cols="1"]
 |===
 | featureSteps
-| [{name=HADAMARD, config={nodeProperties=[embedding, age]}}]
+| [{config={nodeProperties=["embedding", "age"]}, name="HADAMARD"}]
 |===
 
 When executing the pipeline, the `nodeProperties` must be either present in the input graph, or created by a previous node property step.
@@ -571,7 +571,7 @@ RETURN parameterSpace.RandomForest AS randomForestSpace, parameterSpace.Logistic
 [opts="header",cols="1, 1, 1"]
 |===
 | randomForestSpace | logisticRegressionSpace | MultilayerPerceptronSpace
-| [{maxDepth=2147483647, minLeafSize=1, criterion=GINI, minSplitSize=2, numberOfDecisionTrees=10, methodName=RandomForest, numberOfSamplesRatio=1.0}] | [{maxEpochs=100, minEpochs=1, classWeights=[], penalty=0.0, patience=1, methodName=LogisticRegression, focusWeight=0.0, batchSize=100, tolerance=0.001, learningRate=0.001}, {maxEpochs=500, minEpochs=1, classWeights=[], penalty={range=[1.0E-4, 100.0]}, patience=1, methodName=LogisticRegression, focusWeight=0.0, batchSize=100, tolerance=0.001, learningRate=0.001}] | [{maxEpochs=100, minEpochs=1, classWeights=[0.55, 0.45], penalty=0.5, patience=2, methodName=MultilayerPerceptron, focusWeight={range=[0.0, 0.1]}, hiddenLayerSizes=[4, 2], batchSize=100, tolerance=0.001, learningRate=0.001}]
+| [{criterion="GINI", maxDepth=2147483647, methodName="RandomForest", minLeafSize=1, minSplitSize=2, numberOfDecisionTrees=10, numberOfSamplesRatio=1.0}] | [{batchSize=100, classWeights=[], focusWeight=0.0, learningRate=0.001, maxEpochs=100, methodName="LogisticRegression", minEpochs=1, patience=1, penalty=0.0, tolerance=0.001}, {batchSize=100, classWeights=[], focusWeight=0.0, learningRate=0.001, maxEpochs=500, methodName="LogisticRegression", minEpochs=1, patience=1, penalty={range=[0.0001, 100.0]}, tolerance=0.001}] | [{batchSize=100, classWeights=[0.55, 0.45], focusWeight={range=[0.0, 0.1]}, hiddenLayerSizes=[4, 2], learningRate=0.001, maxEpochs=100, methodName="MultilayerPerceptron", minEpochs=1, patience=2, penalty=0.5, tolerance=0.001}]
 |===
 --
 

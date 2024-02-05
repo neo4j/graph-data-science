@@ -273,10 +273,10 @@ RETURN
 [opts="header"]
 |===
 | name         | nodeProperty  | propertyValue | nodeLabels
-| "Florentin"  | "score"       | 2.0           | [Person]
-| "Adam"       | "score"       | 1.0           | [Person]
-| "Veselin"    | "score"       | 0.0           | [Person]
-| "The Hobbit" | "score"       | 0.0           | [Book]
+| "Florentin"  | "score"       | 2.0           | ["Person"]
+| "Adam"       | "score"       | 1.0           | ["Person"]
+| "Veselin"    | "score"       | 0.0           | ["Person"]
+| "The Hobbit" | "score"       | 0.0           | ["Book"]
 |===
 --
 

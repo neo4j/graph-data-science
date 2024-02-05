@@ -170,7 +170,7 @@ ORDER BY index
 [opts="header"]
 |===
 | index | sourceNodeName | targetNodeName | totalCost | nodeNames                                        | costs                | path
-| 0     | "Kings Cross"  | "Kentish Town" | 3.3       | [Kings Cross, Euston, Camden Town, Kentish Town] | [0.0, 0.7, 2.0, 3.3] | [Node[0], Node[1], Node[2], Node[4]]
+| 0     | "Kings Cross"  | "Kentish Town" | 3.3       | ["Kings Cross", "Euston", "Camden Town", "Kentish Town"] | [0.0, 0.7, 2.0, 3.3] | [Node[0], Node[1], Node[2], Node[4]]
 |===
 --
 

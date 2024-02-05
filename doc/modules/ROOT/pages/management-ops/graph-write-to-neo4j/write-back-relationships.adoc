@@ -332,7 +332,7 @@ YIELD
 [opts="header"]
 |===
 | graphName          | relationshipType | relationshipProperties              | relationshipsWritten | propertiesWritten
-| "aggregatedGraph"  | "PAID"           | [totalAmount, numberOfPayments]     | 3                    | 6
+| "aggregatedGraph"  | "PAID"           | ["totalAmount", "numberOfPayments"]     | 3                    | 6
 |===
 --
 

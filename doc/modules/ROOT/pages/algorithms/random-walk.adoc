@@ -179,14 +179,14 @@ RETURN nodeIds, [node IN nodes(path) | node.name ] AS pages
 [opts="header"]
 |===
 | nodeIds   | pages
-|[0, 5, 0] | [Home, Site B, Home]
-|[1, 0, 4] | [About, Home, Site A]
-|[2, 0, 3] | [Product, Home, Links]
-|[3, 7, 3] | [Links, Site D, Links]
-|[4, 3, 0] | [Site A, Links, Home]
-|[5, 0, 2] | [Site B, Home, Product]
-|[6, 0, 4] | [Site C, Home, Site A]
-|[7, 0, 2] | [Site D, Home, Product]
+|[0, 5, 0] | ["Home", "Site B", "Home"]
+|[1, 0, 4] | ["About", "Home", "Site A"]
+|[2, 0, 3] | ["Product", "Home", "Links"]
+|[3, 7, 3] | ["Links", "Site D", "Links"]
+|[4, 3, 0] | ["Site A", "Links", "Home"]
+|[5, 0, 2] | ["Site B", "Home", "Product"]
+|[6, 0, 4] | ["Site C", "Home", "Site A"]
+|[7, 0, 2] | ["Site D", "Home", "Product"]
 |===
 --
 
@@ -219,8 +219,8 @@ RETURN nodeIds, [node IN nodes(path) | node.name ] AS pages
 [opts="header"]
 |===
 | nodeIds   | pages
-|[0, 5, 0] | [Home, Site B, Home]
-|[1, 0, 4] | [About, Home, Site A]
+|[0, 5, 0] | ["Home", "Site B", "Home"]
+|[1, 0, 4] | ["About", "Home", "Site A"]
 |===
 --
 

@@ -20,7 +20,6 @@
 package org.neo4j.gds.doc;
 
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Disabled;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.functions.AsNodeFunc;
@@ -38,7 +37,6 @@ import org.neo4j.gds.scaling.ScalePropertiesMutateProc;
 
 import java.util.List;
 
-@Disabled
 class NodeClassificationPipelineDocTest extends MultiFileDocTestBase {
 
     @AfterAll
