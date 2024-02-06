@@ -151,10 +151,6 @@ public final class Neo4jProxy {
         return IMPL.metricsManagerClass();
     }
 
-    public static AccessMode accessMode(CustomAccessMode customAccessMode) {
-        return IMPL.accessMode(customAccessMode);
-    }
-
     private static CursorContextFactory cursorContextFactory(Optional<PageCacheTracer> pageCacheTracer) {
         return IMPL.cursorContextFactory(pageCacheTracer);
     }

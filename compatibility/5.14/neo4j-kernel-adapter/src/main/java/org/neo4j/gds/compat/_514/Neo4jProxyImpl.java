@@ -20,19 +20,13 @@
 package org.neo4j.gds.compat._514;
 
 import org.neo4j.common.DependencyResolver;
-import org.neo4j.gds.compat.CompatAccessModeImpl;
-import org.neo4j.gds.compat.CustomAccessMode;
 import org.neo4j.gds.compat.Neo4jProxyApi;
 import org.neo4j.internal.kernel.api.Read;
-import org.neo4j.internal.kernel.api.TokenSet;
-import org.neo4j.internal.kernel.api.security.AccessMode;
-import org.neo4j.internal.kernel.api.security.ReadSecurityPropertyProvider;
 import org.neo4j.io.pagecache.context.CursorContextFactory;
 import org.neo4j.io.pagecache.context.FixedVersionContextSupplier;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
 public final class Neo4jProxyImpl implements Neo4jProxyApi {
 
@@ -64,20 +58,6 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
             cacheTracer,
             FixedVersionContextSupplier.EMPTY_CONTEXT_SUPPLIER
         )).orElse(CursorContextFactory.NULL_CONTEXT_FACTORY);
-    }
-
-    @Override
-    public AccessMode accessMode(CustomAccessMode customAccessMode) {
-        return new CompatAccessModeImpl(customAccessMode) {
-            @Override
-            public boolean allowsReadNodeProperty(
-                Supplier<TokenSet> labels,
-                int propertyKey,
-                ReadSecurityPropertyProvider propertyProvider
-            ) {
-                return custom.allowsReadNodeProperty(propertyKey);
-            }
-        };
     }
 
     @Override

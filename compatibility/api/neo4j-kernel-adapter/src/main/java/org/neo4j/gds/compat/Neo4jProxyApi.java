@@ -21,7 +21,6 @@ package org.neo4j.gds.compat;
 
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.internal.kernel.api.Read;
-import org.neo4j.internal.kernel.api.security.AccessMode;
 import org.neo4j.io.pagecache.context.CursorContextFactory;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 
@@ -34,9 +33,6 @@ public interface Neo4jProxyApi {
 
     @CompatSince(Neo4jVersion.V_5_12)
     DependencyResolver emptyDependencyResolver();
-
-    @CompatSince(Neo4jVersion.V_5_13)
-    AccessMode accessMode(CustomAccessMode customAccessMode);
 
     @CompatSince(Neo4jVersion.V_5_14)
     String neo4jArrowServerAddressHeader();
