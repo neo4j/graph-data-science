@@ -135,9 +135,6 @@ public final class GraphDatabaseApiProxy {
         return cast(db).databaseId();
     }
 
-    @TestOnly
-    // DatabaseLayout switched from a class to an interface from 5.0 to 5.1
-    // It should not be used in code paths run in production. Tests are ok
     public static DatabaseLayout databaseLayout(GraphDatabaseService db) {
         return cast(db).databaseLayout();
     }

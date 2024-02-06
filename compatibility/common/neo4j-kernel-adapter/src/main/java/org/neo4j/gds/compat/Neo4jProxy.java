@@ -28,7 +28,6 @@ import org.neo4j.configuration.SettingValueParsers;
 import org.neo4j.configuration.connectors.ConnectorPortRegister;
 import org.neo4j.configuration.connectors.ConnectorType;
 import org.neo4j.configuration.helpers.DatabaseNameValidator;
-import org.neo4j.dbms.api.DatabaseManagementService;
 import org.neo4j.gds.annotation.SuppressForbidden;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Node;
@@ -255,10 +254,6 @@ public final class Neo4jProxy {
                 return globalProcedures.getCurrentView().getAllAggregatingFunctions();
             }
         };
-    }
-
-    public static GdsGraphDatabaseAPI newDb(DatabaseManagementService dbms) {
-        return new CompatGraphDatabaseAPIImpl(dbms);
     }
 
     public static String validateExternalDatabaseName(String databaseName) {
