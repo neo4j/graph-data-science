@@ -20,9 +20,8 @@
 package org.neo4j.gds.projection;
 
 import org.neo4j.gds.compat.PropertyReference;
-import org.neo4j.kernel.impl.store.record.RelationshipRecord;
 
-public interface RelationshipReference extends RecordReference<RelationshipRecord> {
+public interface RelationshipReference extends RecordReference {
 
     long relationshipId();
 

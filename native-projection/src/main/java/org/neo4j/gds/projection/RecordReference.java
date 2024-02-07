@@ -19,5 +19,5 @@
  */
 package org.neo4j.gds.projection;
 
-public interface RecordReference<Record> {
+public interface RecordReference {
 }

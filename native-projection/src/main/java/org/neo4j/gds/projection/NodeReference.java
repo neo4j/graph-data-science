@@ -21,9 +21,8 @@ package org.neo4j.gds.projection;
 
 import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.core.loading.NodeLabelTokenSet;
-import org.neo4j.kernel.impl.store.record.NodeRecord;
 
-public interface NodeReference extends RecordReference<NodeRecord> {
+public interface NodeReference extends RecordReference {
 
     long nodeId();
 

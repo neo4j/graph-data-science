@@ -38,11 +38,3 @@ dependencies {
     testCompileOnly group: 'org.jetbrains', name: 'annotations', version: ver.'jetbrains-annotations'
 
 }
-
-afterEvaluate {
-    if (ver.'neo4j'.startsWith('5.')) {
-        dependencies {
-            implementation group: 'org.neo4j', name: 'neo4j-record-storage-engine', version: ver.'neo4j'
-        }
-    }
-}

@@ -34,11 +34,3 @@ dependencies {
     testImplementation project(':test-graph-loaders')
     testImplementation project(':test-utils')
 }
-
-afterEvaluate {
-    if (ver.'neo4j'.startsWith('5.')) {
-        dependencies {
-            testImplementation group: 'org.neo4j', name: 'neo4j-record-storage-engine', version: ver.'neo4j'
-        }
-    }
-}
