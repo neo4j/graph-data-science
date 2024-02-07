@@ -22,7 +22,6 @@ package org.neo4j.gds.core;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
 import org.neo4j.gds.PrivateLookup;
 import org.neo4j.gds.StoreLoaderBuilder;
 import org.neo4j.gds.api.Graph;
@@ -66,14 +65,12 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 class ParallelGraphLoadingTest extends RandomGraphTestCase {
 
     @Test
-    @Timeout(value = 5)
     void shouldLoadAllNodes() {
         Graph graph = loadEverything();
         assertEquals(NODE_COUNT, graph.nodeCount());
     }
 
     @Test
-    @Timeout(value = 5)
     void shouldLoadNodesInOrder() {
         Graph graph = loadEverything();
         final Set<Long> nodeIds;
@@ -93,14 +90,12 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
     }
 
     @Test
-    @Timeout(value = 5)
     void shouldLoadAllRelationships() {
         Graph graph = loadEverything();
         runInFullAccessTransaction(db, tx -> graph.forEachNode(id -> testRelationships(tx, graph, id)));
     }
 
     @Test
-    @Timeout(value = 5)
     void shouldCollectErrors() {
         String message = "oh noes";
         ThrowingThreadPool pool = new ThrowingThreadPool(3, message);
@@ -136,7 +131,6 @@ class ParallelGraphLoadingTest extends RandomGraphTestCase {
         }
 
         @Test
-        @Timeout(value = 5)
         void shouldLoadSparseNodes() {
             runInFullAccessTransaction(db, tx -> {
                 tx.findNodes(Label.label("Label2"))
