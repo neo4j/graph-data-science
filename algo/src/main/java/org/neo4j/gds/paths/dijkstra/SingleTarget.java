@@ -22,11 +22,11 @@ package org.neo4j.gds.paths.dijkstra;
 import static org.neo4j.gds.paths.dijkstra.TraversalState.CONTINUE;
 import static org.neo4j.gds.paths.dijkstra.TraversalState.EMIT_AND_STOP;
 
-class SingleTarget implements Targets{
+public class SingleTarget implements Targets {
 
     private final long targetNode;
 
-     SingleTarget(long targetNode) {
+    public SingleTarget(long targetNode) {
          this.targetNode = targetNode;
      }
 

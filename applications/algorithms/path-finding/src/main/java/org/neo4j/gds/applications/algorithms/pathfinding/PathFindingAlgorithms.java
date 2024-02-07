@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
-import org.neo4j.gds.paths.SourceTargetShortestPathBaseConfig;
+import org.neo4j.gds.paths.SourceTargetsShortestPathBaseConfig;
 import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
@@ -92,7 +92,7 @@ public class PathFindingAlgorithms {
      */
     PathFindingResult singlePairShortestPathDijkstra(
         Graph graph,
-        SourceTargetShortestPathBaseConfig configuration
+        SourceTargetsShortestPathBaseConfig configuration
     ) {
         var progressTracker = createProgressTracker(
             configuration,

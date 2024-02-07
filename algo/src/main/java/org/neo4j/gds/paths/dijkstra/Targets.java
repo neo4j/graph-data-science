@@ -21,7 +21,7 @@ package org.neo4j.gds.paths.dijkstra;
 
 import java.util.List;
 
-interface Targets {
+public interface Targets {
 
     TraversalState apply(long nodeId);
 

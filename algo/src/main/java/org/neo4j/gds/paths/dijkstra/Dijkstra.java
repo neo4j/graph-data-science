@@ -31,11 +31,12 @@ import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
 import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.PathResult;
-import org.neo4j.gds.paths.SourceTargetShortestPathBaseConfig;
+import org.neo4j.gds.paths.SourceTargetsShortestPathBaseConfig;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.function.LongToDoubleFunction;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.paths.dijkstra.TraversalState.CONTINUE;
@@ -47,7 +48,7 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
 
     private final Graph graph;
     // Takes a visited node as input and decides if a path should be emitted.
-    private final TraversalPredicate traversalPredicate;
+    private final Targets targets;
     // Holds the current state of the traversal.
     private TraversalState traversalState;
 
@@ -75,7 +76,7 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
     @Deprecated
     public static Dijkstra sourceTarget(
         Graph graph,
-        SourceTargetShortestPathBaseConfig config,
+        SourceTargetsShortestPathBaseConfig config,
         boolean trackRelationships,
         Optional<HeuristicFunction> heuristicFunction,
         ProgressTracker progressTracker
@@ -95,19 +96,18 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
      */
     public static Dijkstra sourceTarget(
         Graph graph,
-        SourceTargetShortestPathBaseConfig configuration,
+        SourceTargetsShortestPathBaseConfig configuration,
         boolean trackRelationships,
         Optional<HeuristicFunction> heuristicFunction,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
         long sourceNode = graph.toMappedNodeId(configuration.sourceNode());
-        long targetNode = graph.toMappedNodeId(configuration.targetNode());
-
+        var targets = configuration.targetsList().stream().map(graph::toMappedNodeId).collect(Collectors.toList());
         return new Dijkstra(
             graph,
             sourceNode,
-            node -> node == targetNode ? EMIT_AND_STOP : CONTINUE,
+            Targets.of(targets),
             trackRelationships,
             heuristicFunction,
             progressTracker,
@@ -149,7 +149,7 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
     ) {
         return new Dijkstra(graph,
             graph.toMappedNodeId(config.sourceNode()),
-            node -> EMIT_AND_CONTINUE,
+            new AllTargets(),
             trackRelationships,
             heuristicFunction,
             progressTracker,
@@ -160,7 +160,7 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
     public Dijkstra(
         Graph graph,
         long sourceNode,
-        TraversalPredicate traversalPredicate,
+        Targets targets,
         boolean trackRelationships,
         Optional<HeuristicFunction> heuristicFunction,
         ProgressTracker progressTracker,
@@ -168,7 +168,7 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
         super(progressTracker);
         this.graph = graph;
         this.sourceNode = sourceNode;
-        this.traversalPredicate = traversalPredicate;
+        this.targets = targets;
         this.traversalState = CONTINUE;
         this.trackRelationships = trackRelationships;
         this.queue = heuristicFunction
@@ -218,13 +218,13 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
             .sourceNode(sourceNode);
 
         var paths = Stream
-            .generate(() -> next(traversalPredicate, pathResultBuilder))
+            .generate(() -> next(targets, pathResultBuilder))
             .takeWhile(pathResult -> pathResult != PathResult.EMPTY);
 
         return new PathFindingResult(paths, progressTracker::endSubTask);
     }
 
-    private PathResult next(TraversalPredicate traversalPredicate, ImmutablePathResult.Builder pathResultBuilder) {
+    private PathResult next(Targets targets, ImmutablePathResult.Builder pathResultBuilder) {
         var relationshipId = new MutableInt();
 
         while (!queue.isEmpty() && terminationFlag.running() && traversalState != EMIT_AND_STOP) {
@@ -249,7 +249,7 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
             );
 
             // Using the current node, decide if we need to emit a path and continue the traversal.
-            traversalState = traversalPredicate.apply(node);
+            traversalState = targets.apply(node);
 
             if (traversalState == EMIT_AND_CONTINUE || traversalState == EMIT_AND_STOP) {
                 return pathResult(node, pathResultBuilder);
@@ -325,10 +325,6 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
             .build();
     }
 
-    @FunctionalInterface
-    public interface TraversalPredicate {
-        TraversalState apply(long nodeId);
-    }
 
     @FunctionalInterface
     public interface RelationshipFilter {

@@ -21,13 +21,15 @@ package org.neo4j.gds.paths.dijkstra.config;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.paths.SourceTargetShortestPathBaseConfig;
+import org.neo4j.gds.paths.SourceTargetsShortestPathBaseConfig;
 
 @Configuration
-public interface ShortestPathDijkstraStreamConfig extends SourceTargetShortestPathBaseConfig {
+public interface ShortestPathDijkstraStreamConfig extends SourceTargetsShortestPathBaseConfig {
 
     static ShortestPathDijkstraStreamConfig of(CypherMapWrapper userInput) {
         return new ShortestPathDijkstraStreamConfigImpl(userInput);
 
     }
+
+    
 }

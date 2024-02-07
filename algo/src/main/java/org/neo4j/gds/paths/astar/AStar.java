@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.paths.dijkstra.SingleTarget;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
@@ -79,12 +80,22 @@ public final class AStar extends Algorithm<PathFindingResult> {
 
         var latitudeProperties = graph.nodeProperties(latitudeProperty);
         var longitudeProperties = graph.nodeProperties(longitudeProperty);
+
+        var sourceNode = graph.toMappedNodeId(config.sourceNode());
         var targetNode = graph.toMappedNodeId(config.targetNode());
 
         var heuristic = new HaversineHeuristic(latitudeProperties, longitudeProperties, targetNode);
 
         // Init dijkstra algorithm for computing shortest paths
-        var dijkstra = Dijkstra.sourceTarget(graph, config, false, Optional.of(heuristic), progressTracker, terminationFlag);
+        var dijkstra = new Dijkstra(
+            graph,
+            sourceNode,
+            new SingleTarget(targetNode),
+            false,
+            Optional.of(heuristic),
+            progressTracker,
+            terminationFlag
+        );
         return new AStar(dijkstra, terminationFlag);
     }
 

@@ -28,7 +28,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
 import org.neo4j.gds.paths.ShortestPathBaseConfig;
-import org.neo4j.gds.paths.SourceTargetShortestPathBaseConfig;
+import org.neo4j.gds.paths.SourceTargetsShortestPathBaseConfig;
 
 import java.util.Optional;
 
@@ -55,7 +55,7 @@ public abstract class DijkstraFactory<CONFIG extends ShortestPathBaseConfig> ext
         return Tasks.leaf(taskName, graph.relationshipCount());
     }
 
-    public static class SourceTargetDijkstraFactory<T extends SourceTargetShortestPathBaseConfig> extends
+    public static class SourceTargetDijkstraFactory<T extends SourceTargetsShortestPathBaseConfig> extends
         DijkstraFactory<T> {
         @Override
         public Dijkstra build(

@@ -22,7 +22,7 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
-import org.neo4j.gds.paths.SourceTargetShortestPathBaseConfig;
+import org.neo4j.gds.paths.SourceTargetsShortestPathBaseConfig;
 import org.neo4j.gds.paths.astar.AStarMemoryEstimateDefinition;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateDefinition;
@@ -49,7 +49,7 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
     }
 
     public MemoryEstimateResult singlePairShortestPathDijkstraEstimate(
-        SourceTargetShortestPathBaseConfig configuration,
+        SourceTargetsShortestPathBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
         return runEstimation(new DijkstraMemoryEstimateDefinition(), configuration, graphNameOrConfiguration);
