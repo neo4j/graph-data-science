@@ -38,9 +38,9 @@ import java.util.Optional;
 import java.util.function.LongToDoubleFunction;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.paths.dijkstra.Dijkstra.TraversalState.CONTINUE;
-import static org.neo4j.gds.paths.dijkstra.Dijkstra.TraversalState.EMIT_AND_CONTINUE;
-import static org.neo4j.gds.paths.dijkstra.Dijkstra.TraversalState.EMIT_AND_STOP;
+import static org.neo4j.gds.paths.dijkstra.TraversalState.CONTINUE;
+import static org.neo4j.gds.paths.dijkstra.TraversalState.EMIT_AND_CONTINUE;
+import static org.neo4j.gds.paths.dijkstra.TraversalState.EMIT_AND_STOP;
 
 public final class Dijkstra extends Algorithm<PathFindingResult> {
     private static final long NO_RELATIONSHIP = -1;
@@ -323,12 +323,6 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
             .relationshipIds(trackRelationships ? relationshipIds.toArray() : EMPTY_ARRAY)
             .costs(costs.toArray())
             .build();
-    }
-
-    enum TraversalState {
-        EMIT_AND_STOP,
-        EMIT_AND_CONTINUE,
-        CONTINUE,
     }
 
     @FunctionalInterface
