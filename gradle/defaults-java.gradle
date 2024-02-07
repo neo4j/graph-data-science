@@ -66,6 +66,8 @@ allprojects {
                 includeEngines 'jqwik'
             }
 
+            systemProperty("junit.jupiter.execution.timeout.default", "20m")
+
             reports.junitXml.required = !project.hasProperty('disableTestXMLReports')
 
             // enable verbose test logging

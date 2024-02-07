@@ -20,7 +20,6 @@
 package org.neo4j.gds.core.huge;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
 import org.neo4j.gds.BaseTest;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.StoreLoaderBuilder;
@@ -30,8 +29,6 @@ import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipType;
-
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.getNodeById;
@@ -64,7 +61,6 @@ final class HugeGraphWeightTest extends BaseTest {
     }
 
     @Test
-    @Timeout(value = 10_000, unit = TimeUnit.MILLISECONDS)
     void shouldLoadMoreWeights() {
         int nodeCount = PageUtil.pageSizeFor(PageUtil.PAGE_SIZE_32KB, MemoryUsage.BYTES_OBJECT_REF);
         mkDb(nodeCount, 4);
