@@ -183,7 +183,7 @@ RETURN gds.graph.project('personsCypher', n, m,
     relationshipType: type(r)
   }
 )"
-| {graphProperties={}, nodes={Person={}}, relationships={KNOWS={properties={}, direction=DIRECTED}}}
+| {graphProperties={}, nodes={Person={}}, relationships={KNOWS={direction="DIRECTED", properties={}}}}
 |===
 --
 
@@ -202,8 +202,8 @@ RETURN graphName, schemaWithOrientation, configuration.nodeProjection AS nodePro
 |===
 | graphName | schemaWithOrientation | nodeProjection
 | "personsNative"
-| {graphProperties={}, nodes={Person={}}, relationships={KNOWS={properties={}, direction=DIRECTED}}}
-| {Person={label=Person, properties={}}}
+| {graphProperties={}, nodes={Person={}}, relationships={KNOWS={direction="DIRECTED", properties={}}}}
+| {Person={label="Person", properties={}}}
 |===
 --
 
@@ -228,6 +228,6 @@ YIELD graphName, degreeDistribution;
 |===
 | graphName       | degreeDistribution
 | "personsNative"
-| {max=2, mean=0.6666666666666666, min=0, p50=0, p75=2, p90=2, p95=2, p99=2, p999=2}
+| {max=2, mean=0.6666666667, min=0, p50=0, p75=2, p90=2, p95=2, p99=2, p999=2}
 |===
 --

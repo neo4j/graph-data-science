@@ -57,7 +57,7 @@ YIELD modelName, modelType, modelInfo, loaded, stored, published
 [opts="header",cols="1m,1m,1m,1m,1m,1m"]
 |===
 | modelName   | modelType            | modelInfo                       | loaded | stored | published
-| "my-model1" | "example-model-type" | {exampleModelInfo=exampleValue} | true   | false  | false
+| "my-model1" | "example-model-type" | {exampleModelInfo="exampleValue"} | true   | false  | false
 | "my-model2" | "example-model-type" | {number=42}                     | true   | false  | false
 |===
 --
@@ -83,6 +83,6 @@ YIELD modelName, modelType, modelInfo, loaded, stored, published
 [opts="header",cols="1m,1m,1m,1m,1m,1m"]
 |===
 | modelName   | modelType            | modelInfo                       | loaded | stored | published
-| "my-model1" | "example-model-type" | {exampleModelInfo=exampleValue} | true   | false  | false
+| "my-model1" | "example-model-type" | {exampleModelInfo="exampleValue"} | true   | false  | false
 |===
 --

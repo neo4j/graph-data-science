@@ -192,12 +192,12 @@ ORDER BY index
 [opts="header",cols="2,3,3,1,2,2,2,3"]
 |===
 | index | sourceNode | targetNode | totalCost | nodeNames       | costs                   | route                                         | isNegativeCycle
-| 0     | "A"        | "A"        | 0.0       | [A]             | [0]                     | [Node[0]]                                     | false
-| 1     | "A"        | "B"        | 50.0      | [A, B]          | [0, 50]                 | [Node[0], Node[1]]                            | false
-| 2     | "A"        | "C"        | -50.0     | [A, C]          | [0, -50]                | [Node[0], Node[2]]                            | false
-| 3     | "A"        | "D"        | -10.0     | [A, C, D]       | [0, -50, -10]           | [Node[0], Node[2], Node[3]]                   | false
-| 4     | "A"        | "E"        | 20.0      | [A, C, D, E]    | [0, -50, -10, 20]       | [Node[0], Node[2], Node[3], Node[4]]          | false
-| 5     | "A"        | "F"        | 60.0      | [A, C, D, E, F] | [0, -50, -10.0, 20, 60] | [Node[0], Node[2], Node[3], Node[4], Node[5]] | false
+| 0     | "A"        | "A"        | 0.0       | ["A"]             | [0.0]                     | [Node[0]]                                     | false
+| 1     | "A"        | "B"        | 50.0      | ["A", "B"]          | [0.0, 50.0]                 | [Node[0], Node[1]]                            | false
+| 2     | "A"        | "C"        | -50.0     | ["A", "C"]          | [0.0, -50.0]                | [Node[0], Node[2]]                            | false
+| 3     | "A"        | "D"        | -10.0     | ["A", "C", "D"]       | [0.0, -50.0, -10.0]           | [Node[0], Node[2], Node[3]]                   | false
+| 4     | "A"        | "E"        | 20.0      | ["A", "C", "D", "E"]    | [0.0, -50.0, -10.0, 20.0]       | [Node[0], Node[2], Node[3], Node[4]]          | false
+| 5     | "A"        | "F"        | 60.0      | ["A", "C", "D", "E", "F"] | [0.0, -50.0, -10.0, 20.0, 60.0] | [Node[0], Node[2], Node[3], Node[4], Node[5]] | false
 |===
 --
 
@@ -235,7 +235,7 @@ ORDER BY index
 [opts="header",cols="2,3,3,1,2,2,2,3"]
 |===
 | index | sourceNode | targetNode | totalCost | nodeNames       | costs              | route                                | isNegativeCycle
-| 0     | "G"        | "G"        | -10       | [G, H, I, G]    | [0, 40, -20, -10]  | [Node[6], Node[7], Node[8], Node[6]] | true
+| 0     | "G"        | "G"        | -10.0       | ["G", "H", "I", "G"]    | [0.0, 40.0, -20.0, -10.0]  | [Node[6], Node[7], Node[8], Node[6]] | true
 
 |===
 --

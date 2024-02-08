@@ -300,11 +300,11 @@ ORDER BY node
 [opts="header"]
 |===
 | node  |parent | weight
-| "A"  | "B" | 1
-| "B"  | "D" | 4
-| "C"  | "A" | 2
-| "D"  | "D" | 0
-| "E"  | "C" | 5
+| "A"  | "B" | 1.0
+| "B"  | "D" | 4.0
+| "C"  | "A" | 2.0
+| "D"  | "D" | 0.0
+| "E"  | "C" | 5.0
 
 |===
 --
@@ -332,7 +332,7 @@ RETURN effectiveNodeCount, totalWeight
 [opts="header"]
 |===
 | effectiveNodeCount | totalWeight
-| 5  | 12
+| 5  | 12.0
 |===
 --
 
@@ -375,10 +375,10 @@ RETURN startNode(rel).id AS Source, endNode(rel).id AS Destination, rel.writeCos
 [opts="header",cols="1,1,1"]
 |===
 | Source | Destination | Cost
-| "D"      | "B"           | 4
-| "B"      | "A"           | 1
-| "A"      | "C"           | 2
-| "C"      | "E"           | 5
+| "D"      | "B"           | 4.0
+| "B"      | "A"           | 1.0
+| "A"      | "C"           | 2.0
+| "C"      | "E"           | 5.0
 |===
 --
 
@@ -447,7 +447,7 @@ RETURN totalWeight
 [opts="header"]
 |===
 | totalWeight
-| 17
+| 17.0
 |===
 --
 

@@ -59,7 +59,7 @@ YIELD modelName, modelType, modelInfo, loaded, stored, published
 [opts="header",cols="1m,1m,1m,1m,1m,1m"]
 |===
 | modelName   | modelType            | modelInfo                       | loaded | stored | published
-| "my-model1" | "example-model-type" | {exampleModelInfo=exampleValue} | true   | false  | false
+| "my-model1" | "example-model-type" | {exampleModelInfo="exampleValue"} | true   | false  | false
 |===
 --
 

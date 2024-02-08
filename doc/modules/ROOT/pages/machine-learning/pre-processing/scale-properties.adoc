@@ -480,7 +480,7 @@ CALL gds.scaleProperties.write('myGraph', {
 [opts="header"]
 |===
 | nodePropertiesWritten | scalerStatistics
-| 8                     | {avgReview={avg=[4.49875], std=[6.675837845356941]}, buildYear={avg=[1991.875], std=[18.917171432325713]}}
+| 8                     | {avgReview={avg=[4.49875], std=[6.6758378454]}, buildYear={avg=[1991.875], std=[18.9171714323]}}
 |===
 --
 

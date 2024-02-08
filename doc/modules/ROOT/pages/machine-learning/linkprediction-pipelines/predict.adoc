@@ -261,7 +261,7 @@ Because we are using the `UNDIRECTED` orientation, we will write twice as many r
 [opts="header"]
 |===
 | relationshipsWritten | samplingStats
-| 10                    | {linksConsidered=16, strategy=exhaustive}
+| 10                    | {linksConsidered=16, strategy="exhaustive"}
 |===
 --
 
@@ -307,7 +307,7 @@ Because we are using the `UNDIRECTED` orientation, we will write twice as many r
 [opts="header",cols="3,7"]
 |===
 | relationshipsWritten | samplingStats
-| 16                   | {didConverge=true, linksConsidered=43, ranIterations=2, strategy=approximate}
+| 16                   | {didConverge=true, linksConsidered=43, ranIterations=2, strategy="approximate"}
 |===
 --
 
@@ -347,11 +347,11 @@ As the default samplingRate is `1`, we use the xref:machine-learning/linkpredict
 [opts="header"]
 |===
 | person1   | person2   | probability
-| "Alice"    | "Chris" | 0.761499973561355
-| "Chris"    | "Mark" | 0.698029761673014
-| "Alice"    | "Mark" | 0.592463039575708
-| "Alice"    | "Karin" | 0.573335167938716
-| "Alice"    | "Greg" | 0.563686221461585
+| "Alice"    | "Chris" | 0.7614999736
+| "Chris"    | "Mark" | 0.6980297617
+| "Alice"    | "Mark" | 0.5924630396
+| "Alice"    | "Karin" | 0.5733351679
+| "Alice"    | "Greg" | 0.5636862215
 |===
 
 We can see that our model predicts the same top 5 links as it did with the unfiltered model `lp-pipeline-model`.

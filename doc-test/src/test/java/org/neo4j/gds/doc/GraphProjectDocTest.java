@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.doc;
 
-import org.junit.jupiter.api.Disabled;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
 import org.neo4j.gds.functions.AsNodeFunc;
@@ -27,7 +26,6 @@ import org.neo4j.gds.functions.NodePropertyFunc;
 
 import java.util.List;
 
-@Disabled
 class GraphProjectDocTest extends SingleFileDocTestBase {
     @Override
     protected List<Class<?>> functions() {

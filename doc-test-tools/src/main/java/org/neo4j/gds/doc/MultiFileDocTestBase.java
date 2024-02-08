@@ -259,7 +259,11 @@ public abstract class MultiFileDocTestBase {
                         if (string.startsWith("[")) {
                             return formatListOfNumbers(string);
                         }
-                        return DocumentationTestToolsConstants.FLOAT_FORMAT.format(Double.parseDouble(string));
+                        if (string.contains(".")) {
+                            return DocumentationTestToolsConstants.FLOAT_FORMAT.format(Double.parseDouble(string));
+                        } else {
+                            return string;
+                        }
                     } catch (NumberFormatException e) {
                         return string;
                     }
@@ -277,7 +281,11 @@ public abstract class MultiFileDocTestBase {
         var separator = "";
         for (var part : parts) {
             builder.append(separator);
-            builder.append(DocumentationTestToolsConstants.FLOAT_FORMAT.format(Double.parseDouble(part)));
+            String formattedPart = part.contains(".")
+                ? DocumentationTestToolsConstants.FLOAT_FORMAT.format(Double.parseDouble(part))
+                : part;
+
+            builder.append(formattedPart);
             separator = commaSeparator;
         }
         builder.append("]");
@@ -290,29 +298,19 @@ public abstract class MultiFileDocTestBase {
             return "null";
         } else if (value instanceof String) {
             return "\"" + value + "\"";
-        } else if (value instanceof Double) {
+        } else if (value instanceof Double || value instanceof Float ) {
             return DocumentationTestToolsConstants.FLOAT_FORMAT.format(value);
         } else if (value instanceof List<?>) {
-            return ((List<?>) value).stream().map(v -> {
-                if (v instanceof Number) {
-                    return DocumentationTestToolsConstants.FLOAT_FORMAT.format(v);
-                }
-                return v;
-            }).collect(Collectors.toList()).toString();
+            return ((List<?>) value).stream()
+                .map(v -> valueToString(v))
+                .collect(Collectors.toList()).toString();
         } else if (value instanceof Map<?, ?>) {
-            var map = ((Map<?, ?>) value);
-            var mappedMap = map.entrySet()
+            var mappedMap = ((Map<?, ?>) value).entrySet()
                 .stream()
                 .collect(
                     Collectors.toMap(
                         entry -> entry.getKey().toString(),
-                        entry -> {
-                            var innerValue = entry.getValue();
-                            if (innerValue instanceof Map<?, ?>) {
-                                return new TreeMap<>((Map<?, ?>) innerValue);
-                            }
-                            return innerValue;
-                        }
+                        entry -> valueToString(entry.getValue())
                     )
                 );
             return new TreeMap<>(mappedMap).toString();

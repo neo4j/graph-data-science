@@ -384,13 +384,13 @@ ORDER BY spread DESC, name ASC
 | "Alice"     | 1.6
 | "Ceri"      | 1.08
 | "Michael"   | 1.08
-| "Amir"      | 0
-| "Ethan"     | 0
-| "Jack"      | 0
-| "Jimmy"     | 0
-| "Lara"      | 0
-| "Mohammed"  | 0
-| "Willie"    | 0
+| "Amir"      | 0.0
+| "Ethan"     | 0.0
+| "Jack"      | 0.0
+| "Jimmy"     | 0.0
+| "Lara"      | 0.0
+| "Mohammed"  | 0.0
+| "Willie"    | 0.0
 |===
 
 --
@@ -440,13 +440,13 @@ ORDER BY spread DESC, name ASC
 | "Alice"     | 1.6
 | "Ceri"      | 1.08
 | "Michael"   | 1.08
-| "Amir"      | 0
-| "Ethan"     | 0
-| "Jack"      | 0
-| "Jimmy"     | 0
-| "Lara"      | 0
-| "Mohammed"  | 0
-| "Willie"    | 0
+| "Amir"      | 0.0
+| "Ethan"     | 0.0
+| "Jack"      | 0.0
+| "Jimmy"     | 0.0
+| "Lara"      | 0.0
+| "Mohammed"  | 0.0
+| "Willie"    | 0.0
 |===
 
 --
