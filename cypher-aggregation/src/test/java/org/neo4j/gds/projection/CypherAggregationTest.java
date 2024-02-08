@@ -113,7 +113,7 @@ class CypherAggregationTest extends BaseProcTest {
             .contains(function.signature());
 
         if (!alreadyExists) {
-            GraphDatabaseApiProxy.register(globalProcedures, Neo4jProxy.callableUserAggregationFunction(function));
+            GraphDatabaseApiProxy.register(db, Neo4jProxy.callableUserAggregationFunction(function));
         }
     }
 

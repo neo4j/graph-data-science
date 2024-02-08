@@ -29,9 +29,11 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.security.LoginContext;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.api.KernelTransaction;
+import org.neo4j.kernel.api.exceptions.Status;
 import org.neo4j.kernel.api.procedure.CallableProcedure;
 import org.neo4j.kernel.api.procedure.CallableUserAggregationFunction;
 import org.neo4j.kernel.api.procedure.CallableUserFunction;
@@ -78,14 +80,22 @@ public final class GraphDatabaseApiProxy {
     throws KernelException {
         GlobalProcedures procedures = resolveDependency(db, GlobalProcedures.class);
         for (Class<?> clazz : procedureClasses) {
-            procedures.registerProcedure(clazz);
+            try {
+                procedures.registerProcedure(clazz);
+            } catch (ProcedureException e) {
+                rethrowUnlessDuplicateRegistration(e);
+            }
         }
     }
 
     public static void registerFunctions(GraphDatabaseService db, Class<?>... functionClasses) throws KernelException {
         GlobalProcedures procedures = resolveDependency(db, GlobalProcedures.class);
         for (Class<?> clazz : functionClasses) {
-            procedures.registerFunction(clazz);
+            try {
+                procedures.registerFunction(clazz);
+            } catch (ProcedureException e) {
+                rethrowUnlessDuplicateRegistration(e);
+            }
         }
     }
 
@@ -93,7 +103,11 @@ public final class GraphDatabaseApiProxy {
     throws KernelException {
         GlobalProcedures procedures = resolveDependency(db, GlobalProcedures.class);
         for (Class<?> clazz : functionClasses) {
-            procedures.registerAggregationFunction(clazz);
+            try {
+                procedures.registerAggregationFunction(clazz);
+            } catch (ProcedureException e) {
+                rethrowUnlessDuplicateRegistration(e);
+            }
         }
     }
 
@@ -101,24 +115,30 @@ public final class GraphDatabaseApiProxy {
     public static void register(GraphDatabaseService db, CallableUserAggregationFunction function)
     throws KernelException {
         var procedures = resolveDependency(db, GlobalProcedures.class);
-        procedures.register(function);
-    }
-
-    @SuppressForbidden(reason = "We're not implementing CallableUserAggregationFunction, just passing it on")
-    public static void register(GlobalProcedures procedures, CallableUserAggregationFunction function)
-    throws KernelException {
-        procedures.register(function);
+        try {
+            procedures.register(function);
+        } catch (ProcedureException e) {
+            rethrowUnlessDuplicateRegistration(e);
+        }
     }
 
     public static void register(GlobalProcedures procedures, CallableUserFunction function)
     throws KernelException {
-        procedures.register(function);
+        try {
+            procedures.register(function);
+        } catch (ProcedureException e) {
+            rethrowUnlessDuplicateRegistration(e);
+        }
     }
 
     @SuppressForbidden(reason = "We're not implementing CallableProcedure, just passing it on")
     public static void register(GlobalProcedures procedures, CallableProcedure procedure)
     throws KernelException {
-        procedures.register(procedure);
+        try {
+            procedures.register(procedure);
+        } catch (ProcedureException e) {
+            rethrowUnlessDuplicateRegistration(e);
+        }
     }
 
     public static NamedDatabaseId databaseId(GraphDatabaseService db) {
@@ -242,5 +262,12 @@ public final class GraphDatabaseApiProxy {
                  NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static void rethrowUnlessDuplicateRegistration(ProcedureException e) throws KernelException {
+        if (e.status() == Status.Procedure.ProcedureRegistrationFailed && e.getMessage().contains("already in use")) {
+            return;
+        }
+        throw e;
     }
 }
