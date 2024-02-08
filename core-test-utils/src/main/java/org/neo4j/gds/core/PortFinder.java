@@ -42,6 +42,7 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicIntegerArray;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -142,12 +143,28 @@ public class PortFinder implements ParameterResolver, TestInstancePostProcessor 
     }
 
     private static boolean portAvailable(int port) {
+        if (SelectedPorts.INSTANCE.isOccupied(port)) {
+            return false;
+        }
         try (ServerSocket serverSocket = new ServerSocket()) {
             serverSocket.setReuseAddress(false);
             serverSocket.bind(new InetSocketAddress(InetAddress.getLoopbackAddress(), port), 1);
-            return true;
+            return SelectedPorts.INSTANCE.select(port);
         } catch (Exception ex) {
             return false;
+        }
+    }
+
+    private enum SelectedPorts {
+        INSTANCE;
+        final AtomicIntegerArray ports = new AtomicIntegerArray(65536);
+
+        boolean isOccupied(int port) {
+            return this.ports.get(port) != 0;
+        }
+
+        boolean select(int port) {
+            return this.ports.compareAndSet(port, 0, 1);
         }
     }
 }
