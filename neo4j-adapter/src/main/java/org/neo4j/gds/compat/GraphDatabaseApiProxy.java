@@ -29,7 +29,6 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.NotFoundException;
 import org.neo4j.graphdb.Result;
 import org.neo4j.graphdb.Transaction;
-import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.internal.kernel.api.security.LoginContext;
 import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -45,7 +44,6 @@ import org.neo4j.kernel.internal.GraphDatabaseAPI;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -76,19 +74,11 @@ public final class GraphDatabaseApiProxy {
         return cast(db).getDependencyResolver();
     }
 
-    public static void registerProcedures(GraphDatabaseService db, Class<?>... procedureClasses) throws
-        KernelException {
-        registerProcedures(db, false, procedureClasses);
-    }
-
-    public static void registerProcedures(
-        GraphDatabaseService db,
-        boolean overrideCurrentImplementation,
-        Class<?>... procedureClasses
-    ) throws KernelException {
+    public static void registerProcedures(GraphDatabaseService db, Class<?>... procedureClasses)
+    throws KernelException {
         GlobalProcedures procedures = resolveDependency(db, GlobalProcedures.class);
         for (Class<?> clazz : procedureClasses) {
-            registerProcedures(procedures, clazz, overrideCurrentImplementation);
+            procedures.registerProcedure(clazz);
         }
     }
 
@@ -99,8 +89,8 @@ public final class GraphDatabaseApiProxy {
         }
     }
 
-    public static void registerAggregationFunctions(GraphDatabaseService db, Class<?>... functionClasses) throws
-        KernelException {
+    public static void registerAggregationFunctions(GraphDatabaseService db, Class<?>... functionClasses)
+    throws KernelException {
         GlobalProcedures procedures = resolveDependency(db, GlobalProcedures.class);
         for (Class<?> clazz : functionClasses) {
             procedures.registerAggregationFunction(clazz);
@@ -108,27 +98,27 @@ public final class GraphDatabaseApiProxy {
     }
 
     @SuppressForbidden(reason = "We're not implementing CallableUserAggregationFunction, just passing it on")
-    public static void register(GraphDatabaseService db, CallableUserAggregationFunction function) throws
-        KernelException {
-        GlobalProcedures procedures = resolveDependency(db, GlobalProcedures.class);
-        register(procedures, function);
+    public static void register(GraphDatabaseService db, CallableUserAggregationFunction function)
+    throws KernelException {
+        var procedures = resolveDependency(db, GlobalProcedures.class);
+        procedures.register(function);
     }
 
     @SuppressForbidden(reason = "We're not implementing CallableUserAggregationFunction, just passing it on")
-    public static void register(GlobalProcedures procedures, CallableUserAggregationFunction function) throws
-        KernelException {
-        register(procedures, CallableUserAggregationFunction.class, function);
+    public static void register(GlobalProcedures procedures, CallableUserAggregationFunction function)
+    throws KernelException {
+        procedures.register(function);
     }
 
-    public static void register(GlobalProcedures procedures, CallableUserFunction function) throws
-        KernelException {
-        register(procedures, CallableUserFunction.class, function);
+    public static void register(GlobalProcedures procedures, CallableUserFunction function)
+    throws KernelException {
+        procedures.register(function);
     }
 
     @SuppressForbidden(reason = "We're not implementing CallableProcedure, just passing it on")
-    public static void register(GlobalProcedures procedures, CallableProcedure procedure) throws
-        KernelException {
-        register(procedures, CallableProcedure.class, procedure);
+    public static void register(GlobalProcedures procedures, CallableProcedure procedure)
+    throws KernelException {
+        procedures.register(procedure);
     }
 
     public static NamedDatabaseId databaseId(GraphDatabaseService db) {
@@ -240,38 +230,6 @@ public final class GraphDatabaseApiProxy {
         throw new UnsupportedOperationException("No instances");
     }
 
-    private static void registerProcedures(
-        GlobalProcedures globalProcedures,
-        Class<?> procedureClass,
-        boolean overrideCurrentImplementation
-    ) {
-        var globalProceduresClass = globalProcedures.getClass();
-
-        var legacySignatureMethod = getMethod(globalProceduresClass, "registerProcedure", Class.class, boolean.class);
-        var newSignatureMethod = getMethod(globalProceduresClass, "registerProcedure", Class.class);
-        if (legacySignatureMethod.isPresent()) {
-            invokeMethod(globalProcedures, legacySignatureMethod.get(), procedureClass, overrideCurrentImplementation);
-        } else if (newSignatureMethod.isPresent()){
-            invokeMethod(globalProcedures, newSignatureMethod.get(), procedureClass);
-        } else {
-            throw new RuntimeException("Could not find registerProcedure method");
-        }
-    }
-
-    private static void register(GlobalProcedures globalProcedures, Class<?> clazz, Object obj) {
-        var globalProceduresClass = globalProcedures.getClass();
-
-        var legacySignatureMethod = getMethod(globalProceduresClass, "register", clazz, boolean.class);
-        var newSignatureMethod = getMethod(globalProceduresClass, "register", clazz);
-        if (legacySignatureMethod.isPresent()) {
-            invokeMethod(globalProcedures, legacySignatureMethod.get(), obj, true);
-        } else if (newSignatureMethod.isPresent()){
-            invokeMethod(globalProcedures, newSignatureMethod.get(), obj);
-        } else {
-            throw new RuntimeException("Could not find registerProcedure method");
-        }
-    }
-
     public static int arrowListenPort(GraphDatabaseService db) {
         try {
             // resolve listenPort through ArrowServer, as internal.arrow.status only returns the configured port
@@ -282,26 +240,6 @@ public final class GraphDatabaseApiProxy {
             return (int) listenPortMethod.invoke(arrowServer);
         } catch (ClassNotFoundException | IllegalAccessException | InvocationTargetException |
                  NoSuchMethodException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static Optional<Method> getMethod(Class<?> clazz, String name, Class<?>... parameterTypes) {
-        try {
-            return Optional.of(clazz.getMethod(name, parameterTypes));
-        } catch (NoSuchMethodException e) {
-            return Optional.empty();
-        }
-    }
-
-    private static void invokeMethod(Object obj, Method method, Object... arguments) {
-        try {
-            method.invoke(obj, arguments);
-        } catch (InvocationTargetException e) {
-            if (e.getTargetException().getClass() != ProcedureException.class) {
-                throw new RuntimeException(e.getTargetException());
-            }
-        } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }
