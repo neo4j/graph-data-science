@@ -109,8 +109,7 @@ class CypherAggregationTest extends BaseProcTest {
         var globalProcedures = GraphDatabaseApiProxy.resolveDependency(db, GlobalProcedures.class);
         var alreadyExists = Neo4jProxy.globalProcedureRegistry(globalProcedures)
             .getAllAggregatingFunctions()
-            .collect(Collectors.toSet())
-            .contains(function.signature());
+            .anyMatch(e -> e.equals(function.signature()));
 
         if (!alreadyExists) {
             GraphDatabaseApiProxy.register(db, Neo4jProxy.callableUserAggregationFunction(function));
