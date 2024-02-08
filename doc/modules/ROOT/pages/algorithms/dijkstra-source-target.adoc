@@ -4,7 +4,7 @@
 :entity: source-target-pair
 :result: shortest path
 :algorithm: Dijkstra
-:source-target: true
+:source-targets: true
 :procedure-name: pass:q[gds.shortestPath.dijkstra]
 :sequential: true
 
@@ -34,6 +34,9 @@ Altering the concurrency configuration has no effect.
 
 include::partial$/algorithms/shortest-path/path-syntax.adoc[]
 
+[[algorithms-dijkstra-source-target-considerations]]
+== Considerations
+The procedure requires exactly one of the `targetNodes` and `targetNode` configuration parameters to be provided as input. In particular, the `targetNode` parameter is considered as deprecated in favor of `targetNodes`, and only kept for backward compatability.
 
 [[algorithms-dijkstra-source-target-examples]]
 == Examples
@@ -99,7 +102,7 @@ include::partial$/algorithms/shared/examples-estimate-intro.adoc[]
 MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
 CALL gds.shortestPath.dijkstra.write.estimate('myGraph', {
     sourceNode: source,
-    targetNode: target,
+    targetNodes: target,
     relationshipWeightProperty: 'cost',
     writeRelationshipType: 'PATH'
 })
@@ -130,7 +133,7 @@ include::partial$/algorithms/shared/examples-stream-intro.adoc[]
 MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
 CALL gds.shortestPath.dijkstra.stream('myGraph', {
     sourceNode: source,
-    targetNode: target,
+    targetNodes: target,
     relationshipWeightProperty: 'cost'
 })
 YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, path
@@ -172,7 +175,7 @@ include::partial$/algorithms/shortest-path/path-examples-mutate-intro.adoc[]
 MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
 CALL gds.shortestPath.dijkstra.mutate('myGraph', {
     sourceNode: source,
-    targetNode: target,
+    targetNodes: target,
     relationshipWeightProperty: 'cost',
     mutateRelationshipType: 'PATH'
 })
@@ -210,7 +213,7 @@ include::partial$/algorithms/shortest-path/path-examples-write-intro.adoc[]
 MATCH (source:Location {name: 'A'}), (target:Location {name: 'F'})
 CALL gds.shortestPath.dijkstra.write('myGraph', {
     sourceNode: source,
-    targetNode: target,
+    targetNodes: target,
     relationshipWeightProperty: 'cost',
     writeRelationshipType: 'PATH',
     writeNodeIds: true,
@@ -235,3 +238,41 @@ The relationship stores three properties describing the path: `totalCost`, `node
 ====
 The relationship written is always directed, even if the input graph is undirected.
 ====
+[[algorithms-dijkstra-source-target-many-nodes]]
+=== Specifying multiple targets
+
+It is possible to  calculate the shortest path between a source node and multiple target nodes. This can be achieved by providing `targetNodes` with a list of nodes or node ids as shown in the example below.
+
+[role=query-example]
+--
+.The following will run the algorithm in `stream` mode:
+[source, cypher, role=noplay]
+----
+MATCH (source:Location {name: 'A'}), (targetD:Location {name: 'D'}),  (targetF:Location {name: 'F'})
+CALL gds.shortestPath.dijkstra.stream('myGraph', {
+    sourceNode: source,
+    targetNodes: [targetD,targetF],
+    relationshipWeightProperty: 'cost'
+})
+YIELD index, sourceNode, targetNode, totalCost, nodeIds, costs, path
+RETURN
+    index,
+    gds.util.asNode(sourceNode).name AS sourceNodeName,
+    gds.util.asNode(targetNode).name AS targetNodeName,
+    totalCost,
+    [nodeId IN nodeIds | gds.util.asNode(nodeId).name] AS nodeNames,
+    costs,
+    nodes(path) as path
+ORDER BY index
+----
+
+.Results
+[opts="header"]
+|===
+| index | sourceNodeName | targetNodeName | totalCost | nodeNames       | costs | path
+| 0     | "A"            | "D"            | 90.0      | [A, B, D]       | [0.0, 50.0, 90.0]                 | [Node[0], Node[1], Node[3]]
+| 1     | "A"            | "F"            | 160.0     | [A, B, D, E, F] | [0.0, 50.0, 90.0, 120.0, 160.0]   | [Node[0], Node[1], Node[3], Node[4], Node[5]]
+|===
+--
+
+Note that this is not possible with the  `targetNode` configuration parameter.
