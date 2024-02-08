@@ -44,8 +44,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.neo4j.gds.paths.PathTestUtil.expected;
@@ -319,6 +321,24 @@ final class DijkstraTest {
         }
 
         @Test
+        void sourceTargets() {
+
+            var n6 = graph.toMappedNodeId("n6");
+            var n7 = graph.toMappedNodeId("n7");
+
+            var config = defaultSourceTargetConfigBuilder()
+                .sourceNode(graph.toOriginalNodeId("n1"))
+                .targetNodes(List.of(graph.toOriginalNodeId(n7), graph.toOriginalNodeId(n6)))
+                .build();
+
+            var path = Dijkstra
+                .sourceTarget(graph, config, false, Optional.empty(), ProgressTracker.NULL_TRACKER)
+                .compute().pathSet().stream().map(v -> v.targetNode()).collect(Collectors.toList());
+
+            assertThat(path).containsExactlyInAnyOrder(n6, n7);
+        }
+
+        @Test
         void singleSource() {
             IdFunction mappedId = graph::toMappedNodeId;
 
@@ -395,4 +415,6 @@ final class DijkstraTest {
             assertEquals(expected, path);
         }
     }
+
+
 }
