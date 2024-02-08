@@ -31,6 +31,17 @@ public final class Extractors {
 
     private Extractors() {}
 
+    public static ThrowingExtractor<String, String, RuntimeException> removingServerAddress() {
+        return Extractors::removingServerAddress;
+    }
+
+    private static String removingServerAddress(String message) {
+        if (message.contains("localhost:")) {
+            return removingServerAddress(message.replaceFirst("localhost:\\d+", "<address>"));
+        }
+        return message;
+    }
+
     public static ThrowingExtractor<String, String, RuntimeException> removingThreadId() {
         return Extractors::removeThreadId;
     }
