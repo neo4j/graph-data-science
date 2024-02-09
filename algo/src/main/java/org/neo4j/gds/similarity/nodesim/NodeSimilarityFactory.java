@@ -154,7 +154,7 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
-        return progressTask(graph, config.actuallyRunWCC());
+        return progressTask(graph, config.useComponents().computeComponents());
     }
 
     public Task progressTask(Graph graph, boolean runWCC) {

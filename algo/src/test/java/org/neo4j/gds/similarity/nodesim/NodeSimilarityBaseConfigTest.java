@@ -26,30 +26,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class NodeSimilarityBaseConfigTest {
 
     @Test
-    void shouldNotRequestAnythingIfNotEnabled(){
-        var config = NodeSimilarityStreamConfigImpl.builder().build();
-
-        assertThat(config.actuallyRunWCC()).isFalse();
-        assertThat(config.enableComponentsOptimization()).isFalse();
-    }
-
-    @Test
-    void shouldRequestWccIfEnabled(){
-        var config = NodeSimilarityStreamConfigImpl.builder().useComponents(true).build();
-
-        assertThat(config.actuallyRunWCC()).isTrue();
-        assertThat(config.enableComponentsOptimization()).isTrue();
-    }
-
-    @Test
-    void shouldNotRequestWccIfPropertyGiven(){
-        var config = NodeSimilarityStreamConfigImpl.builder().useComponents("foo").build();
-
-        assertThat(config.actuallyRunWCC()).isFalse();
-        assertThat(config.enableComponentsOptimization()).isTrue();
-    }
-
-    @Test
     void shouldGenerateParamsCorrectly() {
 
         var config = NodeSimilarityStreamConfigImpl.builder().useComponents("foo").build();

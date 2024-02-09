@@ -171,7 +171,7 @@ public class FilteredNodeSimilarityFactory<CONFIG extends FilteredNodeSimilarity
     public Task progressTask(Graph graph, CONFIG config) {
         return Tasks.task(
             taskName(),
-            progressTask(graph, config.actuallyRunWCC()),
+            progressTask(graph, config.useComponents().computeComponents()),
             Tasks.leaf("compare node pairs")
         );
     }

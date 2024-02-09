@@ -141,15 +141,6 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
         }
     }
 
-    @Configuration.Ignore
-    default boolean actuallyRunWCC() {
-        return useComponents().computeComponents();
-    }
-
-    @Configuration.Ignore
-    default boolean enableComponentsOptimization() {
-        return useComponents().useComponents();
-    }
 
     @Configuration.Ignore
     default NodeSimilarityParameters toParameters() {
