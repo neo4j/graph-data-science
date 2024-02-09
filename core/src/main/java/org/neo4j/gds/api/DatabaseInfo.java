@@ -31,6 +31,10 @@ public interface DatabaseInfo {
         return ImmutableDatabaseInfo.of(databaseId, databaseLocation, Optional.empty());
     }
 
+    static DatabaseInfo of(DatabaseId databaseId, DatabaseLocation databaseLocation, DatabaseId remoteDatabaseId) {
+        return ImmutableDatabaseInfo.of(databaseId, databaseLocation, remoteDatabaseId);
+    }
+
     DatabaseId databaseId();
 
     DatabaseLocation databaseLocation();
