@@ -911,17 +911,23 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         var graphStore = graphStoreWithConfig.graphStore();
         var graphProjectConfig = graphStoreWithConfig.config();
 
-        return graphSamplingApplication.sample(
-            user,
-            taskRegistryFactory,
-            userLogRegistryFactory,
-            graphStore,
-            graphProjectConfig,
-            originGraphName,
-            graphName,
-            configuration,
-            samplerType
-        );
+        var samplingMetric = projectionMetricsService.createRandomWakSampling(samplerType.name());
+        try (samplingMetric) {
+            return graphSamplingApplication.sample(
+                user,
+                taskRegistryFactory,
+                userLogRegistryFactory,
+                graphStore,
+                graphProjectConfig,
+                originGraphName,
+                graphName,
+                configuration,
+                samplerType
+            );
+        } catch (Exception e) {
+            samplingMetric.failed();
+            throw e;
+        }
 
     }
 
