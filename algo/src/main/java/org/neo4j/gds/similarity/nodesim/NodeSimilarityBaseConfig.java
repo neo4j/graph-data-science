@@ -174,7 +174,7 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
             normalizedN,
             computeToStream(),
             hasRelationshipWeightProperty(),
-            componentUsage.computeComponents(),
+            componentUsage.useComponents(),
             componentUsage.componentProperty()
         );
     };
