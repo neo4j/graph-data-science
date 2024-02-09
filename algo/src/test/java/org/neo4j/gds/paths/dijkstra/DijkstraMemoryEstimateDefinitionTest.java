@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.paths.dijkstra;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -45,11 +46,16 @@ class DijkstraMemoryEstimateDefinitionTest {
     @MethodSource("expectedMemoryEstimation")
     void shouldComputeMemoryEstimation(int nodeCount, boolean trackRelationships, long expectedBytes) {
 
-
-
         MemoryEstimationAssert.assertThat(DijkstraMemoryEstimateDefinition.memoryEstimation(trackRelationships))
             .memoryRange(nodeCount,1)
             .hasSameMinAndMaxEqualTo(expectedBytes);
+    }
+
+    @Test
+    void shouldWorkWithBitset() {
+        MemoryEstimationAssert.assertThat(DijkstraMemoryEstimateDefinition.memoryEstimation(false, true))
+            .memoryRange(1_000, 1)
+            .hasSameMinAndMaxEqualTo(40_616 + 168);
     }
 
 

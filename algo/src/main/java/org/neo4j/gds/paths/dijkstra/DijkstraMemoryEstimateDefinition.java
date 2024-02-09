@@ -26,22 +26,35 @@ import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.paths.ShortestPathBaseConfig;
+import org.neo4j.gds.paths.SourceTargetsShortestPathBaseConfig;
 
 public class DijkstraMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<ShortestPathBaseConfig> {
 
     @Override
     public MemoryEstimation memoryEstimation(ShortestPathBaseConfig configuration) {
 
-        return memoryEstimation(false); //could be configration.track potentially
+        boolean manyTargets = false;
+        if (configuration instanceof SourceTargetsShortestPathBaseConfig) { //horrible but will  have to do for now
+            manyTargets = ((SourceTargetsShortestPathBaseConfig) configuration).targetsList().size() > 1;
+        }
+        return memoryEstimation(false, manyTargets); //could be configration.track potentially
     }
 
    public static  MemoryEstimation memoryEstimation(boolean trackRelationships){
+
+       return memoryEstimation(trackRelationships, false);
+    }
+
+    public static MemoryEstimation memoryEstimation(boolean trackRelationships, boolean manyTargets) {
 
         var builder = MemoryEstimations.builder(Dijkstra.class)
             .add("priority queue", HugeLongPriorityQueue.memoryEstimation())
             .add("reverse path", HugeLongLongMap.memoryEstimation());
         if (trackRelationships) {
             builder.add("relationship ids", HugeLongLongMap.memoryEstimation());
+        }
+        if (manyTargets) {
+            builder.perNode("targets bitset", MemoryUsage::sizeOfBitset);
         }
         return builder
             .perNode("visited set", MemoryUsage::sizeOfBitset)
