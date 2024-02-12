@@ -40,7 +40,7 @@ class ShortestPathConfigTest {
         var config = new ShortestPathDijkstraStreamConfigImpl(cypherMapWrapper);
 
         assertThat(config.sourceNode()).isEqualTo(42L);
-        assertThat(config.targetNode()).isEqualTo(1337L);
+        assertThat(config.targetNode().get()).isEqualTo(1337L);
     }
 
     @Test
@@ -53,7 +53,7 @@ class ShortestPathConfigTest {
         var config = new ShortestPathDijkstraStreamConfigImpl(cypherMapWrapper);
 
         assertThat(config.sourceNode()).isEqualTo(42L);
-        assertThat(config.targetNode()).isEqualTo(1337L);
+        assertThat(config.targetNode().get()).isEqualTo(1337L);
     }
 
     @Test

@@ -17,25 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.dijkstra.config;
+package org.neo4j.gds.paths.dijkstra;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.WriteRelationshipConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.paths.SourceTargetsShortestPathBaseConfig;
-import org.neo4j.gds.paths.WritePathOptionsConfig;
+import static org.neo4j.gds.paths.dijkstra.TraversalState.CONTINUE;
+import static org.neo4j.gds.paths.dijkstra.TraversalState.EMIT_AND_STOP;
 
-@Configuration
-public interface ShortestPathDijkstraWriteConfig extends SourceTargetsShortestPathBaseConfig,
-    WriteRelationshipConfig,
-    WritePathOptionsConfig {
+public class SingleTarget implements Targets {
 
-    String TOTAL_COST_KEY = "totalCost";
-    String NODE_IDS_KEY = "nodeIds";
-    String COSTS_KEY = "costs";
+    private final long targetNode;
 
-    static ShortestPathDijkstraWriteConfig of(CypherMapWrapper userInput) {
-        return new ShortestPathDijkstraWriteConfigImpl(userInput);
+    public SingleTarget(long targetNode) {
+         this.targetNode = targetNode;
+     }
 
+     @Override
+    public TraversalState apply(long nodeId) {
+        return  (nodeId == targetNode) ? EMIT_AND_STOP : CONTINUE;
     }
 }

@@ -17,25 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.dijkstra.config;
+package org.neo4j.gds.paths.dijkstra;
 
-import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.WriteRelationshipConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.paths.SourceTargetsShortestPathBaseConfig;
-import org.neo4j.gds.paths.WritePathOptionsConfig;
-
-@Configuration
-public interface ShortestPathDijkstraWriteConfig extends SourceTargetsShortestPathBaseConfig,
-    WriteRelationshipConfig,
-    WritePathOptionsConfig {
-
-    String TOTAL_COST_KEY = "totalCost";
-    String NODE_IDS_KEY = "nodeIds";
-    String COSTS_KEY = "costs";
-
-    static ShortestPathDijkstraWriteConfig of(CypherMapWrapper userInput) {
-        return new ShortestPathDijkstraWriteConfigImpl(userInput);
-
-    }
+enum TraversalState {
+    EMIT_AND_STOP,
+    EMIT_AND_CONTINUE,
+    CONTINUE,
 }

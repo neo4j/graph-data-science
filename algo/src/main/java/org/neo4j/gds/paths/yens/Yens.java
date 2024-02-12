@@ -25,9 +25,10 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.PathResult;
-import org.neo4j.gds.paths.SourceTargetShortestPathBaseConfig;
+import org.neo4j.gds.paths.SourceTargetsShortestPathBaseConfig;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.paths.dijkstra.SingleTarget;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfigImpl;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -166,9 +167,10 @@ public final class Yens extends Algorithm<PathFindingResult> {
     }
 
     private Optional<PathResult> findFirstPath() {
-        var dijkstra = Dijkstra.sourceTarget(
+        var dijkstra = new Dijkstra(
             graph,
-            config,
+            graph.toMappedNodeId(config.sourceNode()),
+            new SingleTarget(graph.toMappedNodeId(config.targetNode())),
             trackRelationships,
             Optional.empty(),
             progressTracker,
@@ -178,7 +180,7 @@ public final class Yens extends Algorithm<PathFindingResult> {
         return dijkstra.compute().findFirst();
     }
 
-    static SourceTargetShortestPathBaseConfig dijkstraConfig(long targetNode) {
+    static SourceTargetsShortestPathBaseConfig dijkstraConfig(long targetNode) {
 
         return ShortestPathDijkstraStreamConfigImpl
             .builder()
