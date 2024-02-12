@@ -20,7 +20,7 @@ include::partial$/algorithms/shared/algorithm-traits.adoc[]
 
 The Dijkstra Shortest Path algorithm computes the shortest path between nodes.
 The algorithm supports weighted graphs with positive relationship weights.
-The Dijkstra Source-Target algorithm computes the shortest path between a source and a target node.
+The Dijkstra Source-Target algorithm computes the shortest path between a source and a list of target nodes.
 To compute all paths from a source node to all reachable nodes, xref:algorithms/dijkstra-single-source.adoc[Dijkstra Single-Source] can be used.
 
 The GDS implementation is based on the https://citeseerx.ist.psu.edu/doc_view/pid/6855bd86e3d6d4278fac61a4924417fd3e0f9643[original description] and uses a binary heap as priority queue.
@@ -33,10 +33,6 @@ Altering the concurrency configuration has no effect.
 == Syntax
 
 include::partial$/algorithms/shortest-path/path-syntax.adoc[]
-
-[[algorithms-dijkstra-source-target-considerations]]
-== Considerations
-The procedure requires exactly one of the `targetNodes` and `targetNode` configuration parameters to be provided as input. In particular, the `targetNode` parameter is considered as deprecated in favor of `targetNodes`, and only kept for backward compatability.
 
 [[algorithms-dijkstra-source-target-examples]]
 == Examples
