@@ -14,8 +14,9 @@ dependencies {
 
     implementation project(':annotations')
     implementation project(':executor')
-    implementation group: 'org.immutables',  name: 'value-annotations',  version: ver.'immutables'
-    implementation group: 'com.google.auto', name: 'auto-common',        version: ver.'auto-common'
-    implementation group: 'com.squareup',    name: 'javapoet',           version: ver.'javapoet'
-    implementation group: 'org.jetbrains',   name: 'annotations',        version: ver.'jetbrains-annotations'
+    implementation group: 'org.neo4j',       name: 'neo4j-procedure-api', version: ver.neo4j
+    implementation group: 'org.immutables',  name: 'value-annotations',   version: ver.'immutables'
+    implementation group: 'com.google.auto', name: 'auto-common',         version: ver.'auto-common'
+    implementation group: 'com.squareup',    name: 'javapoet',            version: ver.'javapoet'
+    implementation group: 'org.jetbrains',   name: 'annotations',         version: ver.'jetbrains-annotations'
 }
