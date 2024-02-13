@@ -30,7 +30,6 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class SessionProcedureCollectorStep implements BasicAnnotationProcessor.Step {
@@ -38,21 +37,18 @@ public class SessionProcedureCollectorStep implements BasicAnnotationProcessor.S
     static final String USER_FUNCTION = UserFunction.class.getCanonicalName();
     static final String USER_AGGREGATION = UserAggregationFunction.class.getCanonicalName();
 
-    private final List<TypeElement> procedures;
-    private final List<TypeElement> functions;
-    private final List<TypeElement> aggregations;
-    private final Set allowedProcedures;
+    private final Set<TypeElement> procedures;
+    private final Set<TypeElement> functions;
+    private final Set<TypeElement> aggregations;
 
     SessionProcedureCollectorStep(
-        List<TypeElement> outProcedures,
-        List<TypeElement> outFunctions,
-        List<TypeElement> outAggregations,
-        Set allowedProcedures
+        Set<TypeElement> outProcedures,
+        Set<TypeElement> outFunctions,
+        Set<TypeElement> outAggregations
     ) {
         this.procedures = outProcedures;
         this.functions = outFunctions;
         this.aggregations = outAggregations;
-        this.allowedProcedures = allowedProcedures;
     }
 
     @Override
@@ -66,7 +62,8 @@ public class SessionProcedureCollectorStep implements BasicAnnotationProcessor.S
         for (var procedure : allProcedures) {
             if(isInPackage(procedure)) {
                 var annotation = Arrays.stream(procedure.getAnnotationsByType(Procedure.class)).toList().get(0);
-                if (isAllowed(annotation.value().isEmpty() ? annotation.name() : annotation.value())) {
+                var elementName = annotation.value().isEmpty() ? annotation.name() : annotation.value();
+                if (isAllowed(elementName)) {
                     procedures.add(MoreElements.asType(procedure.getEnclosingElement()));
                 }
             }
@@ -98,11 +95,12 @@ public class SessionProcedureCollectorStep implements BasicAnnotationProcessor.S
     private boolean isInPackage(Element element) {
         var thePackage = MoreElements.getPackage(element);
         var packageName = thePackage.getQualifiedName().toString();
-        return packageName.startsWith("org.neo4j.gds.");
+        return packageName.startsWith("org.neo4j.gds.") || packageName.equals("org.neo4j.gds");
     }
 
     private boolean isAllowed(String elementName) {
-        return allowedProcedures.contains(elementName);
+        // TODO: Let's do allow list validation in integration test for sessions, not while processing annotations
+        return true;
     }
 
 }

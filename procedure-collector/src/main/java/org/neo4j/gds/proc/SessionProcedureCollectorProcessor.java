@@ -28,17 +28,13 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static javax.tools.StandardLocation.CLASS_OUTPUT;
 
@@ -50,29 +46,13 @@ import static javax.tools.StandardLocation.CLASS_OUTPUT;
 @AutoService(Processor.class)
 public class SessionProcedureCollectorProcessor extends BasicAnnotationProcessor {
 
-    private final List<TypeElement> proceduresWithAnnotations = new ArrayList<>();
-    private final List<TypeElement> functionsWithAnnotations = new ArrayList<>();
-    private final List<TypeElement> aggregationsWithAnnotations = new ArrayList<>();
-    private final Set allowedProcedures = new HashSet();
+    private final Set<TypeElement> proceduresWithAnnotations = new HashSet<>();
+    private final Set<TypeElement> functionsWithAnnotations = new HashSet<>();
+    private final Set<TypeElement> aggregationsWithAnnotations = new HashSet<>();
 
-    public SessionProcedureCollectorProcessor() {
-        loadAllowedProcedures();
-    }
-
-    private void loadAllowedProcedures() {
-        try (
-            var inputStream = SessionProcedureCollectorProcessor.class.getResourceAsStream("/sessionAllowList");
-            var reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-            allowedProcedures.addAll(reader.lines().collect(Collectors.toList()));
-        } catch (IOException e) {
-            logError(e, "Failed to load GSD session allow list");
-        }
-    }
-
-    // todo: do I really need it?
     @Override
     public SourceVersion getSupportedSourceVersion() {
-        return SourceVersion.RELEASE_11;
+        return SourceVersion.RELEASE_17;
     }
 
     @Override
@@ -80,8 +60,7 @@ public class SessionProcedureCollectorProcessor extends BasicAnnotationProcessor
         return List.of(new SessionProcedureCollectorStep(
             proceduresWithAnnotations,
             functionsWithAnnotations,
-            aggregationsWithAnnotations,
-            allowedProcedures
+            aggregationsWithAnnotations
         ));
     }
 
@@ -93,10 +72,6 @@ public class SessionProcedureCollectorProcessor extends BasicAnnotationProcessor
     }
 
     private void tryWriteElements() {
-        if (proceduresWithAnnotations.isEmpty()) {
-            return;
-        }
-
         try {
             writeElements();
             proceduresWithAnnotations.clear();
@@ -112,13 +87,13 @@ public class SessionProcedureCollectorProcessor extends BasicAnnotationProcessor
     }
 
     private void writeElements() throws IOException {
-        if (! proceduresWithAnnotations.isEmpty()) {
+        if (!proceduresWithAnnotations.isEmpty()) {
             writeElementsOfType(SessionProcedureCollectorStep.PROCEDURE, proceduresWithAnnotations);
         }
-        if (! functionsWithAnnotations.isEmpty()) {
+        if (!functionsWithAnnotations.isEmpty()) {
             writeElementsOfType(SessionProcedureCollectorStep.USER_FUNCTION, functionsWithAnnotations);
         }
-        if (! aggregationsWithAnnotations.isEmpty()) {
+        if (!aggregationsWithAnnotations.isEmpty()) {
             writeElementsOfType(SessionProcedureCollectorStep.USER_AGGREGATION, aggregationsWithAnnotations);
         }
     }
