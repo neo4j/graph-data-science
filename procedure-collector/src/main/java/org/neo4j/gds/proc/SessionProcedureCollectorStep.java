@@ -95,7 +95,8 @@ public class SessionProcedureCollectorStep implements BasicAnnotationProcessor.S
     private boolean isInPackage(Element element) {
         var thePackage = MoreElements.getPackage(element);
         var packageName = thePackage.getQualifiedName().toString();
-        return packageName.startsWith("org.neo4j.gds.") || packageName.equals("org.neo4j.gds");
+        return packageName.startsWith("org.neo4j.gds.") || packageName.equals("org.neo4j.gds")
+            || packageName.startsWith("com.neo4j.gds.") || packageName.equals("com.neo4j.gds");
     }
 
     private boolean isAllowed(String elementName) {

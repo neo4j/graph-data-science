@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.doc;
 
-import org.neo4j.gds.similarity.SimilaritiesFunc;
+import org.neo4j.gds.functions.SimilaritiesFunc;
 
 import java.util.List;
 
