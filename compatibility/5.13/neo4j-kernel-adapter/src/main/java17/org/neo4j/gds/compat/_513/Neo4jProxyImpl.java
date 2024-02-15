@@ -29,6 +29,7 @@ import org.neo4j.gds.compat._5x.CommonNeo4jProxyImpl;
 import org.neo4j.gds.compat._5x.CompatAccessModeImpl;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.Cursor;
+import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.PartitionedScan;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.internal.kernel.api.TokenSet;
@@ -55,6 +56,7 @@ import org.neo4j.procedure.Mode;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -224,5 +226,14 @@ public final class Neo4jProxyImpl extends CommonNeo4jProxyImpl {
     @Override
     public long estimateRelationshipCount(Read read, int sourceLabel, int targetLabel, int type) {
         return read.countsForRelationshipWithoutTxState(sourceLabel, type, targetLabel);
+    }
+
+    @Override
+    public <T> T nodeLabelTokenSet(
+        NodeCursor nodeCursor,
+        Function<int[], T> intsConstructor,
+        Function<long[], T> longsConstructor
+    ) {
+        return longsConstructor.apply(nodeCursor.labels().all());
     }
 }

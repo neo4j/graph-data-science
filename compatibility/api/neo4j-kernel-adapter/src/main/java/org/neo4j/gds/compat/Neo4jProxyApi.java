@@ -88,6 +88,7 @@ import org.neo4j.values.virtual.NodeValue;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 public interface Neo4jProxyApi {
 
@@ -322,4 +323,11 @@ public interface Neo4jProxyApi {
     String neo4jArrowServerAddressHeader();
 
     String metricsManagerClass();
+
+    <T> T nodeLabelTokenSet(
+        NodeCursor nodeCursor,
+        Function<int[], T> intsConstructor,
+        Function<long[], T> longsConstructor
+    );
+
 }

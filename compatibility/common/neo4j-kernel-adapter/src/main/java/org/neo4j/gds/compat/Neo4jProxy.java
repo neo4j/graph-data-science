@@ -86,6 +86,7 @@ import org.neo4j.values.virtual.NodeValue;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 public final class Neo4jProxy {
 
@@ -491,5 +492,13 @@ public final class Neo4jProxy {
 
     public static String metricsManagerClass() {
         return IMPL.metricsManagerClass();
+    }
+
+    public static <T> T nodeLabelTokenSet(
+        NodeCursor nodeCursor,
+        Function<int[], T> intsConstructor,
+        Function<long[], T> longsConstructor
+    ) {
+        return IMPL.nodeLabelTokenSet(nodeCursor, intsConstructor, longsConstructor);
     }
 }
