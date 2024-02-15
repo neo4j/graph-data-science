@@ -24,8 +24,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.graph.GraphProperty;
-import org.neo4j.gds.compat.CompatInput;
-import org.neo4j.gds.compat.CompatPropertySizeCalculator;
 import org.neo4j.gds.compat.InputEntityIdVisitor;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.io.GraphStoreExporter.IdMapFunction;
@@ -39,6 +37,7 @@ import org.neo4j.internal.batchimport.input.IdType;
 import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.input.InputChunk;
 import org.neo4j.internal.batchimport.input.InputEntityVisitor;
+import org.neo4j.internal.batchimport.input.PropertySizeCalculator;
 import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.id.IdValidator;
 
@@ -57,7 +56,7 @@ import java.util.function.LongFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public final class GraphStoreInput implements CompatInput {
+public final class GraphStoreInput implements Input {
 
     private final MetaDataStore metaDataStore;
     private final NodeStore nodeStore;
@@ -193,7 +192,7 @@ public final class GraphStoreInput implements CompatInput {
     }
 
     @Override
-    public Input.Estimates calculateEstimates(CompatPropertySizeCalculator propertySizeCalculator) {
+    public Input.Estimates calculateEstimates(PropertySizeCalculator propertySizeCalculator) {
         long numberOfNodeProperties = nodeStore.propertyCount();
         long numberOfRelationshipProperties = relationshipStore.propertyCount();
 

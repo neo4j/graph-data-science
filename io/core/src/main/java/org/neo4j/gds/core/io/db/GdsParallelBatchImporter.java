@@ -22,7 +22,6 @@ package org.neo4j.gds.core.io.db;
 import org.neo4j.configuration.Config;
 import org.neo4j.configuration.GraphDatabaseSettings;
 import org.neo4j.dbms.api.DatabaseManagementService;
-import org.neo4j.gds.compat.CompatInput;
 import org.neo4j.gds.compat.GdsDatabaseLayout;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -34,6 +33,7 @@ import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.Collectors;
+import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
 import org.neo4j.io.fs.FileSystemAbstraction;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
@@ -137,7 +137,7 @@ public final class GdsParallelBatchImporter {
         this.databaseConfig = configBuilder.build();
     }
 
-    public void writeDatabase(CompatInput compatInput, boolean startDatabase) {
+    public void writeDatabase(Input input, boolean startDatabase) {
         log.info("Database import started");
 
         var importTimer = ProgressTimer.start();
@@ -161,7 +161,6 @@ public final class GdsParallelBatchImporter {
 
             lifeSupport.start();
 
-            var input = Neo4jProxy.batchInputFrom(compatInput);
             var batchImporter = instantiateBatchImporter(
                 databaseLayout,
                 logService,

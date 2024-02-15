@@ -30,7 +30,6 @@ import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
-import org.neo4j.gds.compat.CompatPropertySizeCalculator;
 import org.neo4j.gds.core.io.GraphStoreInput;
 import org.neo4j.gds.core.io.file.FileHeader;
 import org.neo4j.gds.core.io.file.FileInput;
@@ -49,6 +48,7 @@ import org.neo4j.internal.batchimport.input.IdType;
 import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.input.InputChunk;
 import org.neo4j.internal.batchimport.input.InputEntityVisitor;
+import org.neo4j.internal.batchimport.input.PropertySizeCalculator;
 import org.neo4j.internal.batchimport.input.ReadableGroups;
 
 import java.io.IOException;
@@ -148,7 +148,7 @@ final class CsvFileInput implements FileInput {
     }
 
     @Override
-    public Input.Estimates calculateEstimates(CompatPropertySizeCalculator propertySizeCalculator) {
+    public Input.Estimates calculateEstimates(PropertySizeCalculator propertySizeCalculator) {
         return null;
     }
 

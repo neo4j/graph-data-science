@@ -22,15 +22,15 @@ package org.neo4j.gds.core.io.file;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
-import org.neo4j.gds.compat.CompatInput;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.internal.batchimport.InputIterable;
+import org.neo4j.internal.batchimport.input.Input;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public interface FileInput extends CompatInput {
+public interface FileInput extends Input {
     InputIterable graphProperties();
     String userName();
     GraphInfo graphInfo();

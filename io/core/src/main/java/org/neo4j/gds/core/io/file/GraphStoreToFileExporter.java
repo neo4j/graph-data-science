@@ -21,7 +21,6 @@ package org.neo4j.gds.core.io.file;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.compat.CompatInput;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.io.GraphStoreExporter;
@@ -39,6 +38,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.internal.batchimport.input.Collector;
+import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.logging.Log;
 
 import java.io.IOException;
@@ -159,7 +159,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
     }
 
     private void exportNodes(
-        CompatInput graphStoreInput,
+        Input graphStoreInput,
         ProgressTracker progressTracker
     ) {
         progressTracker.beginSubTask();
@@ -180,7 +180,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
     }
 
     private void exportRelationships(
-        CompatInput graphStoreInput,
+        Input graphStoreInput,
         ProgressTracker progressTracker
     ) {
         progressTracker.beginSubTask();

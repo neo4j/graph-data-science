@@ -39,13 +39,10 @@ import org.neo4j.internal.batchimport.BatchImporter;
 import org.neo4j.internal.batchimport.BatchImporterFactory;
 import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.IndexConfig;
-import org.neo4j.internal.batchimport.InputIterable;
 import org.neo4j.internal.batchimport.Monitor;
 import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.IdType;
-import org.neo4j.internal.batchimport.input.Input;
 import org.neo4j.internal.batchimport.input.InputEntityVisitor;
-import org.neo4j.internal.batchimport.input.PropertySizeCalculator;
 import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
 import org.neo4j.internal.batchimport.staging.StageExecution;
@@ -109,7 +106,6 @@ import org.neo4j.values.virtual.MapValue;
 import org.neo4j.values.virtual.NodeValue;
 import org.neo4j.values.virtual.VirtualValues;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.file.Path;
@@ -446,10 +442,6 @@ public final class Neo4jProxy {
         );
     }
 
-    public static Input batchInputFrom(CompatInput compatInput) {
-        return new InputFromCompatInput(compatInput);
-    }
-
     public static InputEntityIdVisitor.Long inputEntityLongIdVisitor(IdType idType, ReadableGroups groups) {
         switch (idType) {
             case ACTUAL -> {
@@ -561,43 +553,6 @@ public final class Neo4jProxy {
             result[i] = (char) (bits.get() & 0xFF);
         }
         return new String(result);
-    }
-
-    private static final class InputFromCompatInput implements Input {
-        private final CompatInput delegate;
-
-        private InputFromCompatInput(CompatInput delegate) {
-            this.delegate = delegate;
-        }
-
-        @Override
-        public InputIterable nodes(Collector badCollector) {
-            return delegate.nodes(badCollector);
-        }
-
-        @Override
-        public InputIterable relationships(Collector badCollector) {
-            return delegate.relationships(badCollector);
-        }
-
-        @Override
-        public IdType idType() {
-            return delegate.idType();
-        }
-
-        @Override
-        public ReadableGroups groups() {
-            return delegate.groups();
-        }
-
-        @Override
-        public Estimates calculateEstimates(PropertySizeCalculator propertySizeCalculator) throws IOException {
-            return delegate.calculateEstimates((values, kernelTransaction) -> propertySizeCalculator.calculateSize(
-                values,
-                kernelTransaction.cursorContext(),
-                kernelTransaction.memoryTracker()
-            ));
-        }
     }
 
     public static TestLog testLog() {
