@@ -45,7 +45,6 @@ import org.neo4j.internal.batchimport.input.IdType;
 import org.neo4j.internal.batchimport.input.InputEntityVisitor;
 import org.neo4j.internal.batchimport.input.ReadableGroups;
 import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
-import org.neo4j.internal.batchimport.staging.StageExecution;
 import org.neo4j.internal.helpers.HostnamePort;
 import org.neo4j.internal.id.IdGenerator;
 import org.neo4j.internal.id.IdGeneratorFactory;
@@ -113,7 +112,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -650,39 +648,6 @@ public final class Neo4jProxy {
             logService.getInternalLogProvider(),
             GraphDatabaseApiProxy.resolveDependency(databaseService, CursorContextFactory.class)
         );
-    }
-
-    public static ExecutionMonitor executionMonitor(CompatExecutionMonitor compatExecutionMonitor) {
-        return new ExecutionMonitor.Adapter(
-            compatExecutionMonitor.checkIntervalMillis(),
-            TimeUnit.MILLISECONDS
-        ) {
-
-            @Override
-            public void initialize(DependencyResolver dependencyResolver) {
-                compatExecutionMonitor.initialize(dependencyResolver);
-            }
-
-            @Override
-            public void start(StageExecution execution) {
-                compatExecutionMonitor.start(execution);
-            }
-
-            @Override
-            public void end(StageExecution execution, long totalTimeMillis) {
-                compatExecutionMonitor.end(execution, totalTimeMillis);
-            }
-
-            @Override
-            public void done(boolean successful, long totalTimeMillis, String additionalInformation) {
-                compatExecutionMonitor.done(successful, totalTimeMillis, additionalInformation);
-            }
-
-            @Override
-            public void check(StageExecution execution) {
-                compatExecutionMonitor.check(execution);
-            }
-        };
     }
 
     public static UserFunctionSignature userFunctionSignature(
