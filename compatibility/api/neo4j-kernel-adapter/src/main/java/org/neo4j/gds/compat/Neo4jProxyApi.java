@@ -20,11 +20,13 @@
 package org.neo4j.gds.compat;
 
 import org.neo4j.common.DependencyResolver;
+import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.io.pagecache.context.CursorContextFactory;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 public interface Neo4jProxyApi {
 
@@ -36,6 +38,13 @@ public interface Neo4jProxyApi {
 
     @CompatSince(Neo4jVersion.V_5_14)
     String neo4jArrowServerAddressHeader();
+
+    @CompatSince(Neo4jVersion.V_5_14)
+    <T> T nodeLabelTokenSet(
+        NodeCursor nodeCursor,
+        Function<int[], T> intsConstructor,
+        Function<long[], T> longsConstructor
+    );
 
     @CompatSince(Neo4jVersion.V_5_15)
     String metricsManagerClass();

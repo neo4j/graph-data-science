@@ -21,12 +21,14 @@ package org.neo4j.gds.compat._514;
 
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.compat.Neo4jProxyApi;
+import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.io.pagecache.context.CursorContextFactory;
 import org.neo4j.io.pagecache.context.FixedVersionContextSupplier;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 public final class Neo4jProxyImpl implements Neo4jProxyApi {
 
@@ -64,6 +66,15 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     public String neo4jArrowServerAddressHeader() {
         // TODO: replace this with a dependency to neo4j once we moved the corresponding piece to a public module
         return "ArrowPluginAddress";
+    }
+
+    @Override
+    public <T> T nodeLabelTokenSet(
+        NodeCursor nodeCursor,
+        Function<int[], T> intsConstructor,
+        Function<long[], T> longsConstructor
+    ) {
+        return intsConstructor.apply(nodeCursor.labels().all());
     }
 
     @Override
