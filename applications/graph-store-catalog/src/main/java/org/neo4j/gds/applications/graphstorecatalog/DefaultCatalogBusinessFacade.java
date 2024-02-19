@@ -23,40 +23,36 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.beta.filter.GraphFilterResult;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
-import org.neo4j.gds.beta.filter.GraphFilterResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.write.NodeLabelExporterBuilder;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipPropertiesExporterBuilder;
+import org.neo4j.gds.graphsampling.RandomWalkSamplerType;
 import org.neo4j.gds.legacycypherprojection.GraphProjectCypherResult;
-import org.neo4j.gds.graphsampling.RandomWalkBasedNodesSampler;
-import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.projection.GraphProjectNativeResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.applications.graphstorecatalog.SamplerCompanion.CNARW_CONFIG_PROVIDER;
-import static org.neo4j.gds.applications.graphstorecatalog.SamplerCompanion.CNARW_PROVIDER;
-import static org.neo4j.gds.applications.graphstorecatalog.SamplerCompanion.RWR_CONFIG_PROVIDER;
-import static org.neo4j.gds.applications.graphstorecatalog.SamplerCompanion.RWR_PROVIDER;
+import static org.neo4j.gds.graphsampling.RandomWalkSamplerType.CNARW;
+import static org.neo4j.gds.graphsampling.RandomWalkSamplerType.RWR;
+
 
 /**
  * This layer is shared between Neo4j and other integrations. It is entry-point agnostic.
@@ -838,8 +834,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
             graphName,
             originGraphName,
             configuration,
-            RWR_CONFIG_PROVIDER,
-            RWR_PROVIDER
+            RWR
         );
     }
 
@@ -861,8 +856,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
             graphNameAsString,
             originGraphName,
             configuration,
-            CNARW_CONFIG_PROVIDER,
-            CNARW_PROVIDER
+            CNARW
         );
     }
 
@@ -908,8 +902,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         String graphNameAsString,
         String originGraphNameAsString,
         Map<String, Object> configuration,
-        Function<CypherMapWrapper, RandomWalkWithRestartsConfig> samplerConfigProvider,
-        Function<RandomWalkWithRestartsConfig, RandomWalkBasedNodesSampler> samplerAlgorithmProvider
+        RandomWalkSamplerType samplerType
     ) {
         var graphName = ensureGraphNameValidAndUnknown(user, databaseId, graphNameAsString);
         var originGraphName = GraphName.parse(originGraphNameAsString);
@@ -918,18 +911,24 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         var graphStore = graphStoreWithConfig.graphStore();
         var graphProjectConfig = graphStoreWithConfig.config();
 
-        return graphSamplingApplication.sample(
-            user,
-            taskRegistryFactory,
-            userLogRegistryFactory,
-            graphStore,
-            graphProjectConfig,
-            originGraphName,
-            graphName,
-            configuration,
-            samplerConfigProvider,
-            samplerAlgorithmProvider
-        );
+        var samplingMetric = projectionMetricsService.createRandomWakSampling(samplerType.name());
+        try (samplingMetric) {
+            return graphSamplingApplication.sample(
+                user,
+                taskRegistryFactory,
+                userLogRegistryFactory,
+                graphStore,
+                graphProjectConfig,
+                originGraphName,
+                graphName,
+                configuration,
+                samplerType
+            );
+        } catch (Exception e) {
+            samplingMetric.failed();
+            throw e;
+        }
+
     }
 
     private GraphName ensureGraphNameValidAndUnknown(User user, DatabaseId databaseId, String graphNameAsString) {

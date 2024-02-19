@@ -47,6 +47,8 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.neo4j.gds.graphsampling.RandomWalkSamplerType.CNARW;
+import static org.neo4j.gds.graphsampling.RandomWalkSamplerType.RWR;
 
 @GdlExtension
 class GraphSamplingApplicationTest {
@@ -121,8 +123,8 @@ class GraphSamplingApplicationTest {
             GraphName.parse("graph"),
             GraphName.parse("sample"),
             mapConfiguration,
-            SamplerCompanion.RWR_CONFIG_PROVIDER,
-            SamplerCompanion.RWR_PROVIDER
+            RWR
+
         );
 
         assertThat(result.nodeCount).isEqualTo(expectedNodeCount);
@@ -161,8 +163,7 @@ class GraphSamplingApplicationTest {
             GraphName.parse("graph"),
             GraphName.parse("sample"),
             mapConfiguration,
-            SamplerCompanion.CNARW_CONFIG_PROVIDER,
-            SamplerCompanion.CNARW_PROVIDER
+            CNARW
         );
 
         assertThat(result.nodeCount).isEqualTo(expectedNodeCount);
@@ -210,8 +211,7 @@ class GraphSamplingApplicationTest {
                 "randomSeed",
                 42L
             ),
-            SamplerCompanion.RWR_CONFIG_PROVIDER,
-            SamplerCompanion.RWR_PROVIDER
+            RWR
         );
 
         assertThat(result.startNodeCount).isEqualTo(expectedStartNodeCount);
@@ -254,8 +254,7 @@ class GraphSamplingApplicationTest {
                 "randomSeed",
                 42L
             ),
-            SamplerCompanion.CNARW_CONFIG_PROVIDER,
-            SamplerCompanion.CNARW_PROVIDER
+            CNARW
         );
 
         assertThat(result.startNodeCount).isEqualTo(expectedStartNodeCount);

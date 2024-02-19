@@ -85,4 +85,27 @@ class ProjectionMetricsServiceTest {
         verifyNoMoreInteractions(registrarMock);
     }
 
+    @Test
+    void shouldCreateSamplingProjectionMetric() {
+        // given
+        var registrarMock = Mockito.mock(ExecutionMetricRegistrar.class);
+        var metricsService = new ProjectionMetricsService(registrarMock);
+
+        // when
+        metricsService.createRandomWakSampling(SamplerType.CNARW.name());
+        metricsService.createRandomWakSampling(SamplerType.RWR.name());
+
+
+        // then
+        verify(registrarMock, times(1)).create("CNARW");
+        verify(registrarMock, times(1)).create("RWR");
+
+        verifyNoMoreInteractions(registrarMock);
+    }
+
+    enum SamplerType {
+
+        CNARW, RWR
+    }
+
 }

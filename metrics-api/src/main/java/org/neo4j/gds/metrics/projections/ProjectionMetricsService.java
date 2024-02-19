@@ -46,4 +46,8 @@ public class ProjectionMetricsService {
         return metricRegistrar.create("subGraph");
     }
 
+    public ExecutionMetric createRandomWakSampling(String type) {
+        return metricRegistrar.create(type);
+    }
+
 }

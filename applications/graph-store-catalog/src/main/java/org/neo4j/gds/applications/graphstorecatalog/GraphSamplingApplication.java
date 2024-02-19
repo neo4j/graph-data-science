@@ -30,12 +30,10 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.graphsampling.GraphSampleConstructor;
-import org.neo4j.gds.graphsampling.RandomWalkBasedNodesSampler;
-import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
+import org.neo4j.gds.graphsampling.RandomWalkSamplerType;
 import org.neo4j.gds.logging.Log;
 
 import java.util.Map;
-import java.util.function.Function;
 
 public final class GraphSamplingApplication {
     private final Log log;
@@ -55,14 +53,14 @@ public final class GraphSamplingApplication {
         GraphName originGraphName,
         GraphName graphName,
         Map<String, Object> configuration,
-        Function<CypherMapWrapper, RandomWalkWithRestartsConfig> samplerConfigProvider,
-        Function<RandomWalkWithRestartsConfig, RandomWalkBasedNodesSampler> samplerAlgorithmProvider
+        RandomWalkSamplerType samplerType
     ) {
         try (var progressTimer = ProgressTimer.start()) {
             var cypherMap = CypherMapWrapper.create(configuration);
-            var samplerConfig = samplerConfigProvider.apply(cypherMap);
+            var samplerProvider = SamplerProvider.of(samplerType, cypherMap);
+            var samplerConfig = samplerProvider.config();
 
-            var samplerAlgorithm = samplerAlgorithmProvider.apply(samplerConfig);
+            var samplerAlgorithm = samplerProvider.algorithm();
             var progressTracker = new TaskProgressTracker(
                 GraphSampleConstructor.progressTask(graphStore, samplerAlgorithm),
                 (org.neo4j.logging.Log) log.getNeo4jLog(),
