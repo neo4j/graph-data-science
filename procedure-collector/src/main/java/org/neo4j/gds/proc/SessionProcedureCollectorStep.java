@@ -28,8 +28,6 @@ import org.neo4j.procedure.UserFunction;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 public class SessionProcedureCollectorStep implements BasicAnnotationProcessor.Step {
@@ -58,38 +56,25 @@ public class SessionProcedureCollectorStep implements BasicAnnotationProcessor.S
 
     @Override
     public Set<? extends Element> process(ImmutableSetMultimap<String, Element> elementsByAnnotation) {
-        var allProcedures = elementsByAnnotation.get(PROCEDURE);
-        for (var procedure : allProcedures) {
+        for (var procedure : elementsByAnnotation.get(PROCEDURE)) {
             if(isInPackage(procedure)) {
-                var annotation = Arrays.stream(procedure.getAnnotationsByType(Procedure.class)).toList().get(0);
-                var elementName = annotation.value().isEmpty() ? annotation.name() : annotation.value();
-                if (isAllowed(elementName)) {
-                    procedures.add(MoreElements.asType(procedure.getEnclosingElement()));
-                }
+                procedures.add(MoreElements.asType(procedure.getEnclosingElement()));
             }
         }
 
-        var allFunctions = elementsByAnnotation.get(USER_FUNCTION);
-        for (var function : allFunctions) {
+        for (var function : elementsByAnnotation.get(USER_FUNCTION)) {
             if(isInPackage(function)) {
-                var annotation = Arrays.stream(function.getAnnotationsByType(UserFunction.class)).toList().get(0);
-                if (isAllowed(annotation.value().isEmpty() ? annotation.name() : annotation.value())) {
-                    functions.add(MoreElements.asType(function.getEnclosingElement()));
-                }
+                functions.add(MoreElements.asType(function.getEnclosingElement()));
             }
         }
 
-        var allAggregations = elementsByAnnotation.get(USER_AGGREGATION);
-        for (var aggregation : allAggregations) {
+        for (var aggregation : elementsByAnnotation.get(USER_AGGREGATION)) {
             if(isInPackage(aggregation)) {
-                var annotation = Arrays.stream(aggregation.getAnnotationsByType(UserAggregationFunction.class)).toList().get(0);
-                if (isAllowed(annotation.value().isEmpty() ? annotation.name() : annotation.value())) {
-                    aggregations.add(MoreElements.asType(aggregation.getEnclosingElement()));
-                }
+                aggregations.add(MoreElements.asType(aggregation.getEnclosingElement()));
             }
         }
 
-        return new HashSet<>();
+        return Set.of();
     }
 
     private boolean isInPackage(Element element) {
@@ -98,10 +83,4 @@ public class SessionProcedureCollectorStep implements BasicAnnotationProcessor.S
         return packageName.startsWith("org.neo4j.gds.") || packageName.equals("org.neo4j.gds")
             || packageName.startsWith("com.neo4j.gds.") || packageName.equals("com.neo4j.gds");
     }
-
-    private boolean isAllowed(String elementName) {
-        // TODO: Let's do allow list validation in integration test for sessions, not while processing annotations
-        return true;
-    }
-
 }

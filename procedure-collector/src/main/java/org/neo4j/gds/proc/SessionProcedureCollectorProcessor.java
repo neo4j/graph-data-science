@@ -40,7 +40,7 @@ import static javax.tools.StandardLocation.CLASS_OUTPUT;
 
 /**
  * An annotation processor that creates files to enable service loading for procedures, user functions and aggregations.
- *
+ * <p>
  * Only things listed in the session allow list will be written (and thus loaded).
  */
 @AutoService(Processor.class)
