@@ -12,8 +12,6 @@ This example shows how to create a simple product recommendation engine based on
 * Find similar customers and recommend products using Cypher queries.
 
 
-:sectnums!:
-
 == Create the graph
 
 The following Cypher query creates an example graph of products and customers in the Neo4j database.

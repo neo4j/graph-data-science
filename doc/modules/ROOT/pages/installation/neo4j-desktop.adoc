@@ -7,7 +7,6 @@ image::neo4j-desktop-gds.png[width=500]
 
 The installer downloads the GDS library and installs it in the `plugins` directory of the database.
 
-:sectnums!:
 
 == Configuration
 

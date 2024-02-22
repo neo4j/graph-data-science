@@ -7,8 +7,6 @@ One of the most common problems on graphs is finding the shortest path between n
 This example shows how to create a GDS graph from Neo4j data, run a path finding algorithm, and write the results back to Neo4j.
 
 
-:sectnums!:
-
 == Create the graph
 
 The following Cypher query creates the graph of a small train network in the Neo4j database.

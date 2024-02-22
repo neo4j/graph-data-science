@@ -16,7 +16,6 @@ link:https://neo4j.com/data-science-sandbox/[Neo4j Data Science Sandbox] is a fr
 link:https://neo4j.com/cloud/platform/aura-graph-data-science/[Neo4j AuraDS] is the fully managed version of Neo4j GDS Enterprise Edition which does not require any installation.
 ====
 
-:sectnums!:
 
 == Installation methods
 

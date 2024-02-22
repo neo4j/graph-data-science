@@ -2,12 +2,9 @@
 = Machine learning pipeline
 :description: This chapter shows a complete example using machine learning pipelines from the Neo4j Graph Data Science library.
 :keywords: GDS, getting started, machine learning, pipeline
-:sectnums!:
 
 This example is a simplified version of the Link Prediction pipeline described in the xref:machine-learning/linkprediction-pipelines/config.adoc[Machine learning] section.
 
-
-:sectnums!:
 
 == Create the graph
 

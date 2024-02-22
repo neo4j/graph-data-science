@@ -17,7 +17,6 @@ When Neo4j is restarted, graphs stored in the catalog are lost.
 See xref:management-ops/backup-restore.adoc[] to learn how to persist your graph projections.
 ====
 
-:sectnums!:
 
 == Catalog operations
 
