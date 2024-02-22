@@ -53,8 +53,6 @@ asciidoc:
     page-mixpanel: 4bfb2414ab973c741b6f067bf06d5575
     # page-cdn: /static/assets
     includePDF: false
-    sectnums: true
-    sectnumlevel: 3
     doctype: book
     nonhtmloutput: ""
     # sectnums: true, removed so they are off by default
