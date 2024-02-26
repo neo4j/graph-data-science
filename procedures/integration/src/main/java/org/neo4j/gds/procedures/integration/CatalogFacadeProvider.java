@@ -45,6 +45,7 @@ import org.neo4j.gds.applications.graphstorecatalog.WriteNodeLabelApplication;
 import org.neo4j.gds.applications.graphstorecatalog.WriteNodePropertiesApplication;
 import org.neo4j.gds.applications.graphstorecatalog.WriteRelationshipPropertiesApplication;
 import org.neo4j.gds.applications.graphstorecatalog.WriteRelationshipsApplication;
+import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.logging.Log;
@@ -218,9 +219,7 @@ public class CatalogFacadeProvider {
         var streamCloser = new Consumer<AutoCloseable>() {
             @Override
             public void accept(AutoCloseable autoCloseable) {
-                try (var statement = kernelTransaction.acquireStatement()) {
-                    statement.registerCloseableResource(autoCloseable);
-                }
+                Neo4jProxy.registerCloseableResource(kernelTransaction, autoCloseable);
             }
         };
         var terminationFlag = terminationFlagService.createTerminationFlag(kernelTransaction);

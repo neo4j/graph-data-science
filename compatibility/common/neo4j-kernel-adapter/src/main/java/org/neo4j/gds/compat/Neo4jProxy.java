@@ -709,6 +709,15 @@ public final class Neo4jProxy {
     ) {
         return contextFactory.newContext(tx, queryText, queryParameters, QueryExecutionConfiguration.DEFAULT_CONFIG);
     }
+
+
+    public static void registerCloseableResource(
+        org.neo4j.kernel.api.KernelTransaction transaction,
+        AutoCloseable autoCloseable
+    ) {
+        IMPL.registerCloseableResource(transaction, autoCloseable);
+    }
+
     private Neo4jProxy() {
         throw new UnsupportedOperationException("No instances");
     }

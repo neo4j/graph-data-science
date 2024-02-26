@@ -54,4 +54,10 @@ public interface Neo4jProxyApi {
 
     @CompatSince(value = Neo4jVersion.V_Dev, dev = "5.17")
     long estimateRelationshipCount(Read read, int sourceLabel, int targetLabel, int type);
+
+    @CompatSince(Neo4jVersion.V_5_11)
+    void registerCloseableResource(
+        org.neo4j.kernel.api.KernelTransaction transaction,
+        AutoCloseable autoCloseable
+    );
 }

@@ -26,6 +26,7 @@ import org.neo4j.internal.kernel.api.Read;
 import org.neo4j.io.pagecache.context.CursorContextFactory;
 import org.neo4j.io.pagecache.context.FixedVersionContextSupplier;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
+import org.neo4j.kernel.api.KernelTransaction;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -84,5 +85,10 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     @Override
     public long estimateRelationshipCount(Read read, int sourceLabel, int targetLabel, int type) {
         return read.countsForRelationshipWithoutTxState(sourceLabel, type, targetLabel);
+    }
+
+    @Override
+    public void registerCloseableResource(KernelTransaction transaction, AutoCloseable autoCloseable) {
+        transaction.resourceMonitor().registerCloseableResource(autoCloseable);
     }
 }
