@@ -486,6 +486,13 @@ public final class Neo4jProxy {
         return IMPL.neo4jArrowServerAddressHeader();
     }
 
+    public static void registerCloseableResource(
+        org.neo4j.kernel.api.KernelTransaction transaction,
+        AutoCloseable autoCloseable
+    ) {
+        IMPL.registerCloseableResource(transaction, autoCloseable);
+    }
+
     private Neo4jProxy() {
         throw new UnsupportedOperationException("No instances");
     }

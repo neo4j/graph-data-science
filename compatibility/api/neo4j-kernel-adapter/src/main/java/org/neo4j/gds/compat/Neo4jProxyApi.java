@@ -324,6 +324,11 @@ public interface Neo4jProxyApi {
 
     String metricsManagerClass();
 
+    void registerCloseableResource(
+        org.neo4j.kernel.api.KernelTransaction transaction,
+        AutoCloseable autoCloseable
+    );
+
     <T> T nodeLabelTokenSet(
         NodeCursor nodeCursor,
         Function<int[], T> intsConstructor,

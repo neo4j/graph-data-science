@@ -874,6 +874,13 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     }
 
     @Override
+    public void registerCloseableResource(KernelTransaction transaction, AutoCloseable autoCloseable) {
+        try (var statement = transaction.acquireStatement()) {
+            statement.registerCloseableResource(autoCloseable);
+        }
+    }
+
+    @Override
     public <T> T nodeLabelTokenSet(
         NodeCursor nodeCursor,
         Function<int[], T> intsConstructor,

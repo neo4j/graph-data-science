@@ -36,6 +36,7 @@ import org.neo4j.gds.compat.Neo4jProxyApi;
 import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.compat.StoreScan;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.kernel.api.KernelTransaction;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -513,5 +514,10 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
     @Override
     public String metricsManagerClass() {
         return "com.neo4j.metrics.global.MetricsManager";
+    }
+
+    @Override
+    public void registerCloseableResource(KernelTransaction transaction, AutoCloseable autoCloseable) {
+        throw new IllegalStateException("Compat layer for 5.x must be run on Java 17");
     }
 }

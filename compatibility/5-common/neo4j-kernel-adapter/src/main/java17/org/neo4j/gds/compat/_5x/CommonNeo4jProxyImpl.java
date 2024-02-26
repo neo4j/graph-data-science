@@ -749,4 +749,9 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
     public String metricsManagerClass() {
         return "com.neo4j.metrics.global.MetricsManager";
     }
+
+    @Override
+    public void registerCloseableResource(KernelTransaction transaction, AutoCloseable autoCloseable) {
+        transaction.resourceMonitor().registerCloseableResource(autoCloseable);
+    }
 }
