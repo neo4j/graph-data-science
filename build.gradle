@@ -28,6 +28,7 @@ ext {
                     project(':neo4j-kernel-adapter-5.14'),
                     project(':neo4j-kernel-adapter-5.15'),
                     project(':neo4j-kernel-adapter-5.16'),
+                    project(':neo4j-kernel-adapter-5.17'),
             ]
     ]
 }
