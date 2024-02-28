@@ -53,7 +53,7 @@ import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.procedures.KernelTransactionAccessor;
 import org.neo4j.gds.procedures.ProcedureTransactionAccessor;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
-import org.neo4j.gds.procedures.TerminationFlagService;
+import org.neo4j.gds.procedures.TerminationFlagAccessor;
 import org.neo4j.gds.procedures.TransactionContextAccessor;
 import org.neo4j.gds.procedures.catalog.CatalogFacade;
 import org.neo4j.gds.services.DatabaseIdAccessor;
@@ -74,6 +74,12 @@ import java.util.function.Function;
  * We call it a provider because it is used as a sub-provider to the {@link org.neo4j.gds.procedures.GraphDataScience} provider.
  */
 public class CatalogFacadeProvider {
+    // dull bits
+    private final DatabaseIdAccessor databaseIdAccessor = new DatabaseIdAccessor();
+    private final KernelTransactionAccessor kernelTransactionAccessor = new KernelTransactionAccessor();
+    private final TerminationFlagAccessor terminationFlagAccessor = new TerminationFlagAccessor();
+    private final UserAccessor userAccessor = new UserAccessor();
+
     // Global scoped/ global state/ stateless things
     private final CatalogConfigurationService catalogConfigurationService;
     private final Log log;
@@ -83,14 +89,10 @@ public class CatalogFacadeProvider {
     private final ProcedureTransactionAccessor procedureTransactionAccessor;
 
     // Request scoped things
-    private final DatabaseIdAccessor databaseIdAccessor;
     private final ExporterBuildersProviderService exporterBuildersProviderService;
-    private final KernelTransactionAccessor kernelTransactionAccessor;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
-    private final TerminationFlagService terminationFlagService;
     private final TransactionContextAccessor transactionContextAccessor;
     private final UserLogServices userLogServices;
-    private final UserAccessor userAccessor;
 
     // applications
     private final CypherProjectApplication cypherProjectApplication;
@@ -131,14 +133,10 @@ public class CatalogFacadeProvider {
         GraphStoreCatalogService graphStoreCatalogService,
         GraphStoreValidationService graphStoreValidationService,
         ProcedureTransactionAccessor procedureTransactionAccessor,
-        DatabaseIdAccessor databaseIdAccessor,
         ExporterBuildersProviderService exporterBuildersProviderService,
-        KernelTransactionAccessor kernelTransactionAccessor,
         TaskRegistryFactoryService taskRegistryFactoryService,
-        TerminationFlagService terminationFlagService,
         TransactionContextAccessor transactionContextAccessor,
         UserLogServices userLogServices,
-        UserAccessor userAccessor,
         CypherProjectApplication cypherProjectApplication,
         DropGraphApplication dropGraphApplication,
         DropNodePropertiesApplication dropNodePropertiesApplication,
@@ -168,14 +166,10 @@ public class CatalogFacadeProvider {
         this.log = log;
         this.procedureTransactionAccessor = procedureTransactionAccessor;
 
-        this.databaseIdAccessor = databaseIdAccessor;
         this.exporterBuildersProviderService = exporterBuildersProviderService;
-        this.kernelTransactionAccessor = kernelTransactionAccessor;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
-        this.terminationFlagService = terminationFlagService;
         this.transactionContextAccessor = transactionContextAccessor;
         this.userLogServices = userLogServices;
-        this.userAccessor = userAccessor;
 
         this.cypherProjectApplication = cypherProjectApplication;
         this.dropGraphApplication = dropGraphApplication;
@@ -222,7 +216,7 @@ public class CatalogFacadeProvider {
                 Neo4jProxy.registerCloseableResource(kernelTransaction, autoCloseable);
             }
         };
-        var terminationFlag = terminationFlagService.createTerminationFlag(kernelTransaction);
+        var terminationFlag = terminationFlagAccessor.createTerminationFlag(kernelTransaction);
         var transactionContext = transactionContextAccessor.transactionContext(
             graphDatabaseService,
             procedureTransaction

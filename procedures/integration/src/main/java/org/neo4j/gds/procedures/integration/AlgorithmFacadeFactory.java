@@ -73,7 +73,7 @@ import org.neo4j.gds.procedures.pathfinding.PathFindingProcedureFacade;
 import org.neo4j.gds.procedures.similarity.SimilarityProcedureFacade;
 import org.neo4j.gds.termination.TerminationFlag;
 
-class AlgorithmProcedureFacadeProvider {
+class AlgorithmFacadeFactory {
     // Global scoped dependencies
     private final Log log;
 
@@ -96,7 +96,7 @@ class AlgorithmProcedureFacadeProvider {
     private final UserLogRegistryFactory userLogRegistryFactory;
     private final ModelCatalogService modelCatalogService;
 
-    AlgorithmProcedureFacadeProvider(
+    AlgorithmFacadeFactory(
         Log log,
         CloseableResourceRegistry closeableResourceRegistry,
         ConfigurationCreator configurationCreator,

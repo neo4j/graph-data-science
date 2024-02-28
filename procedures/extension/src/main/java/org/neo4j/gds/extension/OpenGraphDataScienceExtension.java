@@ -21,18 +21,11 @@ package org.neo4j.gds.extension;
 
 import org.neo4j.annotations.service.ServiceProvider;
 import org.neo4j.configuration.Config;
-import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTemplate;
-import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.core.model.OpenModelCatalogProvider;
 import org.neo4j.gds.core.write.NativeExportBuildersProvider;
 import org.neo4j.gds.metrics.MetricsFacade;
-import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
-import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
-import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
-import org.neo4j.gds.modelcatalogservices.ModelCatalogServiceProvider;
-import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.integration.ExporterBuildersProviderService;
-import org.neo4j.gds.procedures.integration.ExtensionBuilder;
+import org.neo4j.gds.procedures.integration.GraphDataScienceExtensionBuilder;
 import org.neo4j.gds.procedures.integration.LogAccessor;
 import org.neo4j.kernel.api.procedure.GlobalProcedures;
 import org.neo4j.kernel.extension.ExtensionFactory;
@@ -41,7 +34,6 @@ import org.neo4j.kernel.lifecycle.Lifecycle;
 import org.neo4j.logging.internal.LogService;
 
 import java.util.Optional;
-import java.util.function.Function;
 
 /**
  * The OpenGDS extension for Neo4j.
@@ -59,44 +51,21 @@ public class OpenGraphDataScienceExtension extends ExtensionFactory<OpenGraphDat
     public Lifecycle newInstance(ExtensionContext extensionContext, Dependencies dependencies) {
         var log = new LogAccessor().getLog(dependencies.logService(), getClass());
 
-        var extensionBuilder = ExtensionBuilder.create(
+        // OpenGDS edition customisations go here
+        ExporterBuildersProviderService exporterBuildersProviderService = __ -> new NativeExportBuildersProvider(); // we always just offer native writes in OpenGDS
+        var metricsFacade = MetricsFacade.PASSTHROUGH_METRICS_FACADE; // no metrics in OpenGDS
+        var modelCatalog = new OpenModelCatalogProvider().get(null);
+
+        return GraphDataScienceExtensionBuilder.create(
             log,
             dependencies.config(),
-            dependencies.globalProcedures()
-        );
-
-        // we always just offer native writes in OpenGDS
-        ExporterBuildersProviderService exporterBuildersProviderService = __ -> new NativeExportBuildersProvider();
-
-        // we have no extra checks to do in OpenGDS
-        Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator = Optional.empty();
-        Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator = Optional.empty();
-
-        // metrics are a no-op in OpenGDS
-        var algorithmMetricsService = new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar());
-        var projectionMetricsService = new ProjectionMetricsService(new PassthroughExecutionMetricRegistrar());
-        var modelCatalogServiceProvider = new ModelCatalogServiceProvider(new OpenModelCatalogProvider().get(
-            null));
-
-        var metricsFacade = MetricsFacade.PASSTHROUGH_METRICS_FACADE;
-
-        // build the extension and return any lifecycles we need managed
-        return extensionBuilder
-            .withComponent(
-                GraphDataScience.class,
-                () -> extensionBuilder.gdsProvider(
-                    exporterBuildersProviderService,
-                    businessFacadeDecorator,
-                    metricsFacade,
-                    algorithmProcessingTemplateDecorator,
-                    modelCatalogServiceProvider
-                )
-            )
-            .withComponent(
-                MetricsFacade.class,
-                () -> ctx -> metricsFacade
-            )
-            .registerExtension();
+            dependencies.globalProcedures(),
+            Optional.empty(), // no extra checks in OpenGDS
+            Optional.empty(), // no extra checks in OpenGDS
+            exporterBuildersProviderService,
+            metricsFacade,
+            modelCatalog
+        ).build();
     }
 
     public interface Dependencies {

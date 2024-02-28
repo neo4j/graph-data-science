@@ -24,7 +24,6 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.GraphDataScienceBuilder;
-import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
@@ -34,33 +33,31 @@ import org.neo4j.kernel.api.procedure.Context;
 public class GraphDataScienceProvider implements ThrowingFunction<Context, GraphDataScience, ProcedureException> {
     private final Log log;
     private final CatalogFacadeProvider catalogFacadeProvider;
-    private final AlgorithmFacadeProviderFactory algorithmFacadeService;
+    private final AlgorithmFacadeFactoryProvider algorithmFacadeFactoryProvider;
     private final DeprecatedProceduresMetricService deprecatedProceduresMetricService;
 
     GraphDataScienceProvider(
         Log log,
         CatalogFacadeProvider catalogFacadeProvider,
-        AlgorithmFacadeProviderFactory algorithmFacadeService,
+        AlgorithmFacadeFactoryProvider algorithmFacadeFactoryProvider,
         DeprecatedProceduresMetricService deprecatedProceduresMetricService
     ) {
         this.log = log;
         this.catalogFacadeProvider = catalogFacadeProvider;
-        this.algorithmFacadeService = algorithmFacadeService;
+        this.algorithmFacadeFactoryProvider = algorithmFacadeFactoryProvider;
         this.deprecatedProceduresMetricService = deprecatedProceduresMetricService;
     }
 
     @Override
     public GraphDataScience apply(Context context) throws ProcedureException {
-
         var catalogFacade = catalogFacadeProvider.createCatalogFacade(context);
-        context.dependencyResolver().resolveDependency(GraphDatabaseService.class);
-        var algorithmFacadeProvider = algorithmFacadeService.createAlgorithmFacadeProvider(context);
 
-        var centralityProcedureFacade = algorithmFacadeProvider.createCentralityProcedureFacade();
-        var communityProcedureFacade = algorithmFacadeProvider.createCommunityProcedureFacade();
-        var pathFindingProcedureFacade = algorithmFacadeProvider.createPathFindingProcedureFacade();
-        var similarityProcedureFacade = algorithmFacadeProvider.createSimilarityProcedureFacade();
-        var nodeEmbeddingsProcedureFacade = algorithmFacadeProvider.createNodeEmbeddingsProcedureFacade();
+        var algorithmFacadeFactory = algorithmFacadeFactoryProvider.createAlgorithmFacadeFactory(context);
+        var centralityProcedureFacade = algorithmFacadeFactory.createCentralityProcedureFacade();
+        var communityProcedureFacade = algorithmFacadeFactory.createCommunityProcedureFacade();
+        var pathFindingProcedureFacade = algorithmFacadeFactory.createPathFindingProcedureFacade();
+        var similarityProcedureFacade = algorithmFacadeFactory.createSimilarityProcedureFacade();
+        var nodeEmbeddingsProcedureFacade = algorithmFacadeFactory.createNodeEmbeddingsProcedureFacade();
 
         return new GraphDataScienceBuilder(log)
             .with(catalogFacade)

@@ -23,7 +23,7 @@ import org.neo4j.gds.TransactionTerminationMonitor;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.kernel.api.KernelTransaction;
 
-public class TerminationFlagService {
+public class TerminationFlagAccessor {
     public TerminationFlag createTerminationFlag(KernelTransaction kernelTransaction) {
         var terminationMonitor = new TransactionTerminationMonitor(kernelTransaction);
         return TerminationFlag.wrap(terminationMonitor);

@@ -32,17 +32,12 @@ import org.neo4j.kernel.api.procedure.Context;
  */
 @Deprecated
 public class TaskRegistryFactoryProvider implements ThrowingFunction<Context, TaskRegistryFactory, ProcedureException> {
-    private final DatabaseIdAccessor databaseIdAccessor;
-    private final UserAccessor userAccessor;
+    private final DatabaseIdAccessor databaseIdAccessor = new DatabaseIdAccessor();
+    private final UserAccessor userAccessor = new UserAccessor();
+
     private final TaskRegistryFactoryService taskRegistryFactoryService;
 
-    public TaskRegistryFactoryProvider(
-        DatabaseIdAccessor databaseIdAccessor,
-        UserAccessor userAccessor,
-        TaskRegistryFactoryService taskRegistryFactoryService
-    ) {
-        this.databaseIdAccessor = databaseIdAccessor;
-        this.userAccessor = userAccessor;
+    TaskRegistryFactoryProvider(TaskRegistryFactoryService taskRegistryFactoryService) {
         this.taskRegistryFactoryService = taskRegistryFactoryService;
     }
 

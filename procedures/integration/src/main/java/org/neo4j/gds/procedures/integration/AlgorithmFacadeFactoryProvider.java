@@ -44,7 +44,7 @@ import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.modelcatalogservices.ModelCatalogServiceProvider;
 import org.neo4j.gds.procedures.KernelTransactionAccessor;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
-import org.neo4j.gds.procedures.TerminationFlagService;
+import org.neo4j.gds.procedures.TerminationFlagAccessor;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.configparser.ConfigurationParser;
 import org.neo4j.gds.services.DatabaseIdAccessor;
@@ -56,9 +56,14 @@ import org.neo4j.kernel.api.procedure.Context;
 import java.util.Optional;
 import java.util.function.Function;
 
-class AlgorithmFacadeProviderFactory {
+class AlgorithmFacadeFactoryProvider {
     // dull utilities
+    private final AlgorithmMetaDataSetterService algorithmMetaDataSetterService = new AlgorithmMetaDataSetterService();
+    private final DatabaseIdAccessor databaseIdAccessor = new DatabaseIdAccessor();
     private final FictitiousGraphStoreEstimationService fictitiousGraphStoreEstimationService = new FictitiousGraphStoreEstimationService();
+    private final KernelTransactionAccessor kernelTransactionAccessor = new KernelTransactionAccessor();
+    private final TerminationFlagAccessor terminationFlagAccessor = new TerminationFlagAccessor();
+    private final UserAccessor userAccessor = new UserAccessor();
 
     // Global state and services
     private final Log log;
@@ -68,34 +73,24 @@ class AlgorithmFacadeProviderFactory {
     private final boolean useMaxMemoryEstimation;
 
     // Request scoped state and services
-    private final AlgorithmMetaDataSetterService algorithmMetaDataSetterService;
     private final AlgorithmMetricsService algorithmMetricsService;
-    private final DatabaseIdAccessor databaseIdAccessor;
     private final ExporterBuildersProviderService exporterBuildersProviderService;
-    private final KernelTransactionAccessor kernelTransactionAccessor;
     private final TaskRegistryFactoryService taskRegistryFactoryService;
-    private final TerminationFlagService terminationFlagService;
-    private final UserAccessor userAccessor;
     private final UserLogServices userLogServices;
     private final ModelCatalogServiceProvider modelCatalogServiceProvider;
     private final Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator;
     //algorithm facade parameters
 
-    AlgorithmFacadeProviderFactory(
+    AlgorithmFacadeFactoryProvider(
         Log log,
         ConfigurationParser configurationParser,
         GraphStoreCatalogService graphStoreCatalogService,
         MemoryGauge memoryGauge,
         boolean useMaxMemoryEstimation,
-        AlgorithmMetaDataSetterService algorithmMetaDataSetterService,
         AlgorithmMetricsService algorithmMetricsService,
-        DatabaseIdAccessor databaseIdAccessor,
         ExporterBuildersProviderService exporterBuildersProviderService,
-        KernelTransactionAccessor kernelTransactionAccessor,
         ModelCatalogServiceProvider modelCatalogServiceProvider,
         TaskRegistryFactoryService taskRegistryFactoryService,
-        TerminationFlagService terminationFlagService,
-        UserAccessor userAccessor,
         UserLogServices userLogServices,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator
     ) {
@@ -105,21 +100,16 @@ class AlgorithmFacadeProviderFactory {
         this.memoryGauge = memoryGauge;
         this.useMaxMemoryEstimation = useMaxMemoryEstimation;
 
-        this.algorithmMetaDataSetterService = algorithmMetaDataSetterService;
-        this.databaseIdAccessor = databaseIdAccessor;
-        this.kernelTransactionAccessor = kernelTransactionAccessor;
         this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.algorithmMetricsService = algorithmMetricsService;
-        this.terminationFlagService = terminationFlagService;
         this.userLogServices = userLogServices;
-        this.userAccessor = userAccessor;
         this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
         this.modelCatalogServiceProvider = modelCatalogServiceProvider;
     }
 
 
-    AlgorithmProcedureFacadeProvider createAlgorithmFacadeProvider(Context context) throws ProcedureException {
+    AlgorithmFacadeFactory createAlgorithmFacadeFactory(Context context) throws ProcedureException {
         // Neo4j's services
         var graphDatabaseService = context.graphDatabaseAPI();
         var kernelTransaction = kernelTransactionAccessor.getKernelTransaction(context);
@@ -141,7 +131,7 @@ class AlgorithmFacadeProviderFactory {
         var mutateRelationshipService = new MutateRelationshipService(log);
         var nodeLookup = new TransactionNodeLookup(kernelTransaction);
         var returnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
-        var terminationFlag = terminationFlagService.createTerminationFlag(kernelTransaction);
+        var terminationFlag = terminationFlagAccessor.createTerminationFlag(kernelTransaction);
         var user = userAccessor.getUser(context.securityContext());
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
@@ -209,17 +199,19 @@ class AlgorithmFacadeProviderFactory {
         );
 
         if (this.algorithmProcessingTemplateDecorator.isPresent())
-            algorithmProcessingTemplate = this.algorithmProcessingTemplateDecorator.get().apply(algorithmProcessingTemplate);
+            algorithmProcessingTemplate = this.algorithmProcessingTemplateDecorator.get().apply(
+                algorithmProcessingTemplate);
 
         var algorithmEstimationTemplate = new AlgorithmEstimationTemplate(
             graphStoreCatalogService,
             databaseId,
             databaseGraphStoreEstimationService,
             fictitiousGraphStoreEstimationService,
-            user);
+            user
+        );
 
         // procedure facade
-        return new AlgorithmProcedureFacadeProvider(
+        return new AlgorithmFacadeFactory(
             log,
             closeableResourceRegistry,
             configurationCreator,

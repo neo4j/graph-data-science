@@ -35,11 +35,11 @@ import org.neo4j.kernel.api.procedure.Context;
  */
 @Deprecated
 public class TaskStoreProvider implements ThrowingFunction<Context, TaskStore, ProcedureException> {
-    private final DatabaseIdAccessor databaseIdAccessor;
+    private final DatabaseIdAccessor databaseIdAccessor = new DatabaseIdAccessor();
+
     private final TaskStoreService taskStoreService;
 
-    public TaskStoreProvider(DatabaseIdAccessor databaseIdAccessor, TaskStoreService taskStoreService) {
-        this.databaseIdAccessor = databaseIdAccessor;
+    TaskStoreProvider(TaskStoreService taskStoreService) {
         this.taskStoreService = taskStoreService;
     }
 

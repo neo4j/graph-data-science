@@ -22,8 +22,8 @@ package org.neo4j.gds.procedures.integration;
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.services.DatabaseIdAccessor;
-import org.neo4j.gds.services.UserLogServices;
 import org.neo4j.gds.services.UserAccessor;
+import org.neo4j.gds.services.UserLogServices;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
@@ -32,17 +32,12 @@ import org.neo4j.kernel.api.procedure.Context;
  */
 @Deprecated
 public class UserLogRegistryFactoryProvider implements ThrowingFunction<Context, UserLogRegistryFactory, ProcedureException> {
-    private final DatabaseIdAccessor databaseIdAccessor;
-    private final UserAccessor userAccessor;
+    private final DatabaseIdAccessor databaseIdAccessor = new DatabaseIdAccessor();
+    private final UserAccessor userAccessor = new UserAccessor();
+
     private final UserLogServices userLogServices;
 
-    public UserLogRegistryFactoryProvider(
-        DatabaseIdAccessor databaseIdAccessor,
-        UserAccessor userAccessor,
-        UserLogServices userLogServices
-    ) {
-        this.databaseIdAccessor = databaseIdAccessor;
-        this.userAccessor = userAccessor;
+    UserLogRegistryFactoryProvider(UserLogServices userLogServices) {
         this.userLogServices = userLogServices;
     }
 

@@ -48,14 +48,10 @@ import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.legacycypherprojection.GraphProjectCypherResult;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
-import org.neo4j.gds.procedures.KernelTransactionAccessor;
 import org.neo4j.gds.procedures.ProcedureTransactionAccessor;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
-import org.neo4j.gds.procedures.TerminationFlagService;
 import org.neo4j.gds.procedures.TransactionContextAccessor;
 import org.neo4j.gds.projection.GraphProjectNativeResult;
-import org.neo4j.gds.services.DatabaseIdAccessor;
-import org.neo4j.gds.services.UserAccessor;
 import org.neo4j.gds.services.UserLogServices;
 
 import java.util.Optional;
@@ -67,28 +63,26 @@ import java.util.function.Function;
  */
 class CatalogFacadeProviderFactory {
     private final Log log;
-    private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator;
+    private final ExporterBuildersProviderService exporterBuildersProviderService;
+    private final ProjectionMetricsService projectionMetricsService;
 
     CatalogFacadeProviderFactory(
         Log log,
+        Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator,
         ExporterBuildersProviderService exporterBuildersProviderService,
-        Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> businessFacadeDecorator
+        ProjectionMetricsService projectionMetricsService
     ) {
         this.log = log;
         this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.businessFacadeDecorator = businessFacadeDecorator;
+        this.projectionMetricsService = projectionMetricsService;
     }
 
     CatalogFacadeProvider createCatalogFacadeProvider(
         GraphStoreCatalogService graphStoreCatalogService,
-        DatabaseIdAccessor databaseIdAccessor,
-        KernelTransactionAccessor kernelTransactionAccessor,
         TaskRegistryFactoryService taskRegistryFactoryService,
-        ProjectionMetricsService projectionMetricsService,
-        TerminationFlagService terminationFlagService,
-        UserLogServices userLogServices,
-        UserAccessor userServices
+        UserLogServices userLogServices
     ) {
         // there are some services that are currently only used for graph catalog, they can live here
         var catalogConfigurationService = new CatalogConfigurationService();
@@ -145,14 +139,10 @@ class CatalogFacadeProviderFactory {
             graphStoreCatalogService,
             graphStoreValidationService,
             procedureTransactionAccessor,
-            databaseIdAccessor,
             exporterBuildersProviderService,
-            kernelTransactionAccessor,
             taskRegistryFactoryService,
-            terminationFlagService,
             transactionContextAccessor,
             userLogServices,
-            userServices,
             cypherProjectApplication,
             dropGraphApplication,
             dropNodePropertiesApplication,
