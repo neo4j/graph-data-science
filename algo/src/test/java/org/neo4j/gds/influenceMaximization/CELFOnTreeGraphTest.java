@@ -31,7 +31,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 
-import static org.neo4j.gds.influenceMaximization.CELFAlgorithmFactory.DEFAULT_BATCH_SIZE;
+import java.util.Optional;
 
 
 @GdlExtension
@@ -131,17 +131,24 @@ class CELFOnTreeGraphTest {
         //finally a5 has a gain of 0
         IdFunction mappedId = variable -> graph.toMappedNodeId(idFunction.of(variable));
 
-        CELF celf = new CELF(
-            graph,
+
+        var parameters = CELFParameters.create(
             5,
             0.51,
             3,
-            DefaultPool.INSTANCE,
             1,
-            10,
-            DEFAULT_BATCH_SIZE,
-            ProgressTracker.EmptyProgressTracker.NULL_TRACKER
+            Optional.of(10l),
+            10
         );
+
+        var celf = new CELF(
+            graph,
+            parameters,
+            DefaultPool.INSTANCE,
+            ProgressTracker.NULL_TRACKER
+        );
+
+
         var celfResult = celf.compute().seedSetNodes();
         var softAssertions = new SoftAssertions();
 

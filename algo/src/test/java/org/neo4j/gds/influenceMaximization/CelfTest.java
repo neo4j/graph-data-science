@@ -27,6 +27,8 @@ import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
  class CelfTest {
@@ -44,15 +46,19 @@ import static org.assertj.core.api.Assertions.assertThat;
              .build()
              .generate();
 
-         var celf = new CELF(
-             graph,
+         var parameters = CELFParameters.create(
              seedSize,
              0.1,
              3,
-             DefaultPool.INSTANCE,
              1,
-             10,
-             5,
+             Optional.of(10l),
+             5
+         );
+
+         var celf = new CELF(
+             graph,
+             parameters,
+             DefaultPool.INSTANCE,
              ProgressTracker.NULL_TRACKER
          ).compute().seedSetNodes();
          

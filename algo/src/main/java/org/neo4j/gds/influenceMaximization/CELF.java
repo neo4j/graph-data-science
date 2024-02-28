@@ -34,16 +34,10 @@ import java.util.concurrent.ExecutorService;
 
 public class CELF extends Algorithm<CELFResult> {
 
-    private final long seedSetCount;
-    private final double propagationProbability;
-    private final int monteCarloSimulations;
-    private final int concurrency;
-
+    private final int seedSetCount;
     private final Graph graph;
-    private final long initialRandomSeed;
-    private final int batchSize;
+    private final CELFParameters parameters;
     private final LongDoubleScatterMap seedSetNodes;
-
     private final HugeLongPriorityQueue spreads;
     private final ExecutorService executorService;
 
@@ -54,32 +48,23 @@ public class CELF extends Algorithm<CELFResult> {
      * monteCarloSimulations:   Number of Monte-Carlo simulations
      * propagationProbability:  Propagation Probability
      */
+
     public CELF(
         Graph graph,
-        int seedSetCount,
-        double propagationProbability,
-        int monteCarloSimulations,
+        CELFParameters parameters,
         ExecutorService executorService,
-        int concurrency,
-        long initialRandomSeed,
-        int batchSize,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
+
         this.graph = graph;
-        this.initialRandomSeed = initialRandomSeed;
-        this.batchSize = batchSize;
-        long nodeCount = graph.nodeCount();
-
-        this.seedSetCount = (seedSetCount <= nodeCount) ? seedSetCount : nodeCount; // k <= nodeCount
-        this.propagationProbability = propagationProbability;
-        this.monteCarloSimulations = monteCarloSimulations;
-
+        this.parameters = parameters;
+        this.seedSetCount = (parameters.seedSetSize() <= graph.nodeCount())
+            ? parameters.seedSetSize()
+            : (int) graph.nodeCount(); // k <= nodeCount
         this.executorService = executorService;
-        this.concurrency = concurrency;
-
         this.seedSetNodes = new LongDoubleScatterMap(seedSetCount);
-        this.spreads = new HugeLongPriorityQueue(nodeCount) {
+        this.spreads = new HugeLongPriorityQueue(graph.nodeCount()) {
             @Override
             protected boolean lessThan(long a, long b) {
                 return (Double.compare(costValues.get(a), costValues.get(b)) == 0) // when equal costs
@@ -87,7 +72,9 @@ public class CELF extends Algorithm<CELFResult> {
                     : costValues.get(a) > costValues.get(b);                       // otherwise compare the costs
             }
         };
+
     }
+
 
     @Override
     public CELFResult compute() {
@@ -105,22 +92,22 @@ public class CELF extends Algorithm<CELFResult> {
         HugeDoubleArray singleSpreadArray = HugeDoubleArray.newArray(graph.nodeCount());
         progressTracker.beginSubTask(graph.nodeCount());
         var tasks = PartitionUtils.rangePartition(
-            concurrency,
+            parameters.concurrency(),
             graph.nodeCount(),
             partition -> new ICInitTask(
                 partition,
                 graph,
-                propagationProbability,
-                monteCarloSimulations,
+                parameters.propagationProbability(),
+                parameters.monteCarloSimulations(),
                 singleSpreadArray,
-                initialRandomSeed,
+                parameters.randomSeed(),
                 progressTracker
             ),
-            Optional.of(Math.toIntExact(graph.nodeCount()) / concurrency)
+            Optional.of(Math.toIntExact(graph.nodeCount()) / parameters.concurrency())
         );
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency)
+            .concurrency(parameters.concurrency())
             .tasks(tasks)
             .executor(executorService)
             .run();
@@ -141,21 +128,21 @@ public class CELF extends Algorithm<CELFResult> {
 
         var independentCascade = ICLazyForwardMC.create(
             graph,
-            propagationProbability,
-            monteCarloSimulations,
+            parameters.propagationProbability(),
+            parameters.monteCarloSimulations(),
             firstSeedNode,
-            (int) seedSetCount,
-            concurrency,
+            seedSetCount,
+            parameters.concurrency(),
             executorService,
-            initialRandomSeed,
-            batchSize
+            parameters.randomSeed(),
+            parameters.batchSize()
         );
         progressTracker.beginSubTask(seedSetCount - 1);
         var lastUpdate = HugeIntArray.newArray(graph.nodeCount());
-        long[] firstK = new long[batchSize];
+        long[] firstK = new long[parameters.batchSize()];
         for (int i = 1; i < seedSetCount; i++) {
             while (lastUpdate.get(spreads.top()) != i) {
-                long batchUpperBound = Math.min(batchSize, spreads.size());
+                long batchUpperBound = Math.min(parameters.batchSize(), spreads.size());
                 int actualBatchSize = 0;
                 for (int j = 0; j < batchUpperBound; ++j) {
                     var nextNodeId = spreads.getIth(j);
@@ -166,7 +153,7 @@ public class CELF extends Algorithm<CELFResult> {
                 independentCascade.runForCandidate(firstK, actualBatchSize);
                 for (int j = 0; j < actualBatchSize; ++j) {
                     long nodeId = firstK[j];
-                    double value = independentCascade.getSpread(j) / monteCarloSimulations;
+                    double value = independentCascade.getSpread(j) / parameters.monteCarloSimulations();
                     spreads.set(nodeId, value - gain);
                     lastUpdate.set(nodeId, i);
                 }

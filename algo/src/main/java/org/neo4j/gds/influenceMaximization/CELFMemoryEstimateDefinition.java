@@ -28,18 +28,18 @@ import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 import org.neo4j.gds.mem.MemoryUsage;
 
-public final class CELFMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<InfluenceMaximizationBaseConfig> {
+public final class CELFMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<CELFParameters> {
 
     public static final int DEFAULT_BATCH_SIZE = 10;
 
     @Override
-    public MemoryEstimation memoryEstimation(InfluenceMaximizationBaseConfig configuration) {
+    public MemoryEstimation memoryEstimation(CELFParameters celfParameters) {
         MemoryEstimations.Builder builder = MemoryEstimations.builder(CELF.class);
 
         //CELF class
         builder.fixed(
                 "seedSet",
-                MemoryUsage.sizeOfLongDoubleScatterMap(configuration.seedSetSize())
+                MemoryUsage.sizeOfLongDoubleScatterMap(celfParameters.seedSetSize())
             )
             .fixed("firstK", MemoryUsage.sizeOfLongArray(DEFAULT_BATCH_SIZE))
             .add("LazyForwarding: spread priority queue", HugeLongPriorityQueue.memoryEstimation())
@@ -54,7 +54,9 @@ public final class CELFMemoryEstimateDefinition implements AlgorithmMemoryEstima
         //ICLazyMC
         builder.fixed("spread", MemoryUsage.sizeOfDoubleArray(DEFAULT_BATCH_SIZE));
         //ICLazyMCTask class
-        builder.add("newActive", ICLazyMemoryEstimationBuilder(configuration.seedSetSize()).build());
+        builder.add("newActive", ICLazyMemoryEstimationBuilder(celfParameters.seedSetSize()).build());
+        builder.add(MemoryEstimations.builder(CELFParameters.class).build());
+        
         return builder.build();
     }
 

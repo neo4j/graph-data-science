@@ -36,23 +36,22 @@ public class CELFAlgorithmFactory<CONFIG extends InfluenceMaximizationBaseConfig
         return "CELF";
     }
 
+    public CELF build(
+        Graph graph,
+        CELFParameters celfParameters,
+        ProgressTracker progressTracker
+    ) {
+        return new CELF(graph, celfParameters, DefaultPool.INSTANCE, progressTracker);
+    }
+
     @Override
     public CELF build(
         Graph graph,
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-        return new CELF(
-            graph,
-            configuration.seedSetSize(),
-            configuration.propagationProbability(),
-            configuration.monteCarloSimulations(),
-            DefaultPool.INSTANCE,
-            configuration.concurrency(),
-            configuration.randomSeed().orElse(0L),
-            DEFAULT_BATCH_SIZE,
-            progressTracker
-        );
+        var parameters = configuration.toParameters();
+        return build(graph, parameters, progressTracker);
     }
 
     @Override
@@ -66,7 +65,7 @@ public class CELFAlgorithmFactory<CONFIG extends InfluenceMaximizationBaseConfig
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return new CELFMemoryEstimateDefinition().memoryEstimation(configuration);
+        return new CELFMemoryEstimateDefinition().memoryEstimation(configuration.toParameters());
     }
 
 }

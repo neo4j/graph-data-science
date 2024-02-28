@@ -31,20 +31,20 @@ class CELFMemoryEstimateDefinitionTest {
     @ParameterizedTest
     @CsvSource(
         {
-            "1, 1, 3_256",
-            "1, 4, 4_840",
-            "1, 64, 36_520",
-            "10, 1, 3_504",
-            "10, 4, 5_088",
-            "10, 64, 36_768",
+            "1, 1, 3_280",
+            "1, 4, 4_864",
+            "1, 64, 36_544",
+            "10, 1, 3_528",
+            "10, 4, 5_112",
+            "10, 64, 36_792",
         }
     )
     void memoryEstimation(int seedSetSize, int concurrency, long expectedMemory) {
-        var configMock = mock(InfluenceMaximizationBaseConfig.class);
-        when(configMock.seedSetSize()).thenReturn(seedSetSize);
-        when(configMock.concurrency()).thenReturn(concurrency);
+        var parameters = mock(CELFParameters.class);
+        when(parameters.seedSetSize()).thenReturn(seedSetSize);
+        when(parameters.concurrency()).thenReturn(concurrency);
 
-        var memoryEstimation = new CELFMemoryEstimateDefinition().memoryEstimation(configMock);
+        var memoryEstimation = new CELFMemoryEstimateDefinition().memoryEstimation(parameters);
 
         assertThat(memoryEstimation)
             .memoryRange(42, 1337, concurrency)

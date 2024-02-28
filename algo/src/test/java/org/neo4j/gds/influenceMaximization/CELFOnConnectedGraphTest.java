@@ -35,10 +35,11 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
-import static org.neo4j.gds.influenceMaximization.CELFAlgorithmFactory.DEFAULT_BATCH_SIZE;
 
 
 @GdlExtension
@@ -99,9 +100,23 @@ class CELFOnConnectedGraphTest {
         // gain[d|a,b,d,e] :        0 {a already activates d}      1(d)                1(d)    =  2/3 =0.667
         IdFunction idFunction = variable -> graph.toMappedNodeId(variable);
 
-        CELF celf = new CELF(graph, 5, 0.2, 3, DefaultPool.INSTANCE, 2, 0, DEFAULT_BATCH_SIZE,
-            ProgressTracker.EmptyProgressTracker.NULL_TRACKER
+
+        var parameters = CELFParameters.create(
+            5,
+            0.2,
+            3,
+            2,
+            Optional.of(0l),
+            10
         );
+
+        var celf = new CELF(
+            graph,
+            parameters,
+            DefaultPool.INSTANCE,
+            ProgressTracker.NULL_TRACKER
+        );
+
         var celfResult = celf.compute().seedSetNodes();
         var softAssertions = new SoftAssertions();
 
