@@ -24,9 +24,10 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 
-public final class DegreeCentralityAlgorithmEstimateDefinition implements AlgorithmMemoryEstimateDefinition<DegreeCentralityConfig> {
+public final class DegreeCentralityAlgorithmEstimateDefinition implements AlgorithmMemoryEstimateDefinition<Boolean> {
+    @Override
 
-    public MemoryEstimation memoryEstimation(boolean hasRelationshipWeightProperty) {
+    public MemoryEstimation memoryEstimation(Boolean hasRelationshipWeightProperty) {
         var builder = MemoryEstimations.builder(DegreeCentrality.class);
         if (hasRelationshipWeightProperty) {
             builder.perNode("degree cache", HugeDoubleArray::memoryEstimation);
@@ -34,8 +35,4 @@ public final class DegreeCentralityAlgorithmEstimateDefinition implements Algori
         return builder.build();
     }
 
-    @Override
-    public MemoryEstimation memoryEstimation(DegreeCentralityConfig configuration) {
-        return memoryEstimation(configuration.hasRelationshipWeightProperty());
-    }
 }
