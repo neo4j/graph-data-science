@@ -19,10 +19,9 @@
  */
 package org.neo4j.gds;
 
-import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 
-public interface AlgorithmMemoryEstimateDefinition<CONFIG extends AlgoBaseConfig> {
+public interface AlgorithmMemoryEstimateDefinition<PARAMETERS> {
 
-    MemoryEstimation memoryEstimation(CONFIG configuration);
+    MemoryEstimation memoryEstimation(PARAMETERS parameters);
 }
