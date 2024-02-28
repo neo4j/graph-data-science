@@ -25,8 +25,15 @@ import org.neo4j.kernel.impl.transaction.log.LogPosition;
 import org.neo4j.storageengine.api.ClosedTransactionMetadata;
 import org.neo4j.storageengine.api.TransactionId;
 import org.neo4j.storageengine.api.TransactionIdStore;
+import org.neo4j.util.concurrent.ArrayQueueOutOfOrderSequence;
+import org.neo4j.util.concurrent.OutOfOrderSequence;
 
 public class InMemoryTransactionIdStoreImpl extends AbstractTransactionIdStore {
+
+    @Override
+    protected OutOfOrderSequence createClosedTransactionId() {
+        return new ArrayQueueOutOfOrderSequence(-1L, 100, new long[5]);
+    }
 
     @Override
     protected void initLastCommittedAndClosedTransactionId(

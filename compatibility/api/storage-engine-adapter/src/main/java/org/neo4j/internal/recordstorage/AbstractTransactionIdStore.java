@@ -21,7 +21,6 @@ package org.neo4j.internal.recordstorage;
 
 import org.neo4j.storageengine.api.TransactionId;
 import org.neo4j.storageengine.api.TransactionIdStore;
-import org.neo4j.util.concurrent.ArrayQueueOutOfOrderSequence;
 import org.neo4j.util.concurrent.OutOfOrderSequence;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -47,7 +46,7 @@ public abstract class AbstractTransactionIdStore implements TransactionIdStore {
         long previouslyCommittedTxLogByteOffset
     ) {
         this.committingTransactionId = new AtomicLong();
-        this.closedTransactionId = new ArrayQueueOutOfOrderSequence(-1L, 100, new long[5]);
+        this.closedTransactionId =  createClosedTransactionId();
         this.committedTransactionId = new AtomicReference<>(transactionId(1L, -559063315, 0L));
 
         assert previouslyCommittedTxId >= 1L : "cannot start from a tx id less than BASE_TX_ID";
@@ -63,6 +62,8 @@ public abstract class AbstractTransactionIdStore implements TransactionIdStore {
         this.initialTransactionChecksum = checksum;
         this.previouslyCommittedTxCommitTimestamp = previouslyCommittedTxCommitTimestamp;
     }
+
+    protected abstract OutOfOrderSequence createClosedTransactionId();
 
     protected abstract void initLastCommittedAndClosedTransactionId(
         long previouslyCommittedTxId,

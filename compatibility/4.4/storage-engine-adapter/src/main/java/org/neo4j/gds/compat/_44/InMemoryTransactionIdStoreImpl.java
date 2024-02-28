@@ -24,12 +24,19 @@ import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.kernel.impl.transaction.log.LogPosition;
 import org.neo4j.storageengine.api.ClosedTransactionMetadata;
 import org.neo4j.storageengine.api.TransactionId;
+import org.neo4j.util.concurrent.ArrayQueueOutOfOrderSequence;
+import org.neo4j.util.concurrent.OutOfOrderSequence;
 
 public class InMemoryTransactionIdStoreImpl extends AbstractTransactionIdStore {
 
     public ClosedTransactionMetadata getLastClosedTransaction() {
         long[] metaData = this.closedTransactionId.get();
         return new ClosedTransactionMetadata(metaData[0], new LogPosition(metaData[1], metaData[2]));
+    }
+
+    @Override
+    protected OutOfOrderSequence createClosedTransactionId() {
+        return new ArrayQueueOutOfOrderSequence(-1L, 100, new long[5]);
     }
 
     @Override
