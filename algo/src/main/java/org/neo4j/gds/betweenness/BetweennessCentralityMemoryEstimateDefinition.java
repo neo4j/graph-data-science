@@ -33,9 +33,9 @@ import org.neo4j.gds.mem.MemoryUsage;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
-public class BetweennessCentralityMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<BetweennessCentralityBaseConfig> {
-
-    public MemoryEstimation memoryEstimation(boolean hasRelationshipWeightProperty) {
+public class BetweennessCentralityMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<Boolean> {
+    @Override
+    public MemoryEstimation memoryEstimation(Boolean hasRelationshipWeightProperty) {
         return MemoryEstimations.builder(BetweennessCentrality.class)
             .perNode("centrality scores", HugeAtomicDoubleArray::memoryEstimation)
             .perThread(
@@ -44,10 +44,6 @@ public class BetweennessCentralityMemoryEstimateDefinition implements AlgorithmM
             ).build();
     }
 
-    @Override
-    public MemoryEstimation memoryEstimation(BetweennessCentralityBaseConfig configuration) {
-        return memoryEstimation(configuration.hasRelationshipWeightProperty());
-    }
 
     @NotNull
     private static MemoryEstimations.Builder bcTaskMemoryEstimationBuilder(boolean weighted) {
