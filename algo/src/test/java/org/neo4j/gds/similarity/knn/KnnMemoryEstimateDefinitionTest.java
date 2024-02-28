@@ -27,7 +27,6 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.mem.MemoryUsage;
@@ -39,7 +38,7 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfIntArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfOpenHashContainer;
 
-class KnnFactoryTest {
+class KnnMemoryEstimateDefinitionTest {
 
     static Stream<Arguments> smallParameters() {
         return TestSupport.crossArguments(
@@ -54,18 +53,18 @@ class KnnFactoryTest {
     @ParameterizedTest
     @MethodSource("smallParameters")
     void memoryEstimationWithNodeProperty(long nodeCount, KnnSampler.SamplerType initialSampler) {
-        var config = knnConfig(initialSampler);
-        var k = config.k(nodeCount);
 
-        MemoryEstimation estimation = new KnnFactory<>().memoryEstimation(config);
+
+        var parameters = new KnnMemoryEstimationParametersBuilder(0.5, 10, initialSampler);
+
+        var estimation = new KnnMemoryEstimateDefinition().memoryEstimation(parameters);
         GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
         MemoryTree estimate = estimation.estimate(dimensions, 1);
         MemoryRange actual = estimate.memoryUsage();
 
         assertEstimation(
             nodeCount,
-            k.value,
-            k.sampledValue,
+            parameters.build(nodeCount).k(),
             initialSampler,
             actual
         );
@@ -84,37 +83,35 @@ class KnnFactoryTest {
     @ParameterizedTest
     @MethodSource("largeParameters")
     void memoryEstimationLargePagesWithProperty(long nodeCount, KnnSampler.SamplerType initialSampler) {
-        var config = knnConfig(initialSampler);
-        var k = config.k(nodeCount);
+        var parameters = new KnnMemoryEstimationParametersBuilder(0.5, 10, initialSampler);
 
-        MemoryEstimation estimation = new KnnFactory<>().memoryEstimation(config);
+        var estimation = new KnnMemoryEstimateDefinition().memoryEstimation(parameters);
         GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
         MemoryTree estimate = estimation.estimate(dimensions, 1);
         MemoryRange actual = estimate.memoryUsage();
 
-        assertEstimation(nodeCount, k.value, k.sampledValue, initialSampler, actual);
+        assertEstimation(nodeCount, parameters.build(nodeCount).k(), initialSampler, actual);
     }
 
     private void assertEstimation(
         long nodeCount,
-        int boundedK,
-        int sampledK,
+        K k,
         KnnSampler.SamplerType initialSampler,
         MemoryRange actual
     ) {
         long knnAlgo = MemoryUsage.sizeOfInstance(Knn.class);
 
-        long topKNeighborList = MemoryUsage.sizeOfInstance(NeighborList.class) + sizeOfLongArray(boundedK * 2L);
+        long topKNeighborList = MemoryUsage.sizeOfInstance(NeighborList.class) + sizeOfLongArray(k.value * 2L);
         long topKNeighborsList = HugeObjectArray.memoryEstimation(nodeCount, topKNeighborList);
 
         long tempNeighborsListMin = HugeObjectArray.memoryEstimation(nodeCount, 0);
         long tempNeighborsListMax = HugeObjectArray.memoryEstimation(
             nodeCount,
-            MemoryUsage.sizeOfInstance(LongArrayList.class) + sizeOfLongArray(sampledK)
+            MemoryUsage.sizeOfInstance(LongArrayList.class) + sizeOfLongArray(k.sampledValue)
         );
 
-        var randomList = KnnFactory.initialSamplerMemoryEstimation(initialSampler, boundedK);
-        long sampledList = sizeOfIntArray(sizeOfOpenHashContainer(sampledK));
+        var randomList = KnnFactory.initialSamplerMemoryEstimation(initialSampler, k.value);
+        long sampledList = sizeOfIntArray(sizeOfOpenHashContainer(k.sampledValue));
 
         long expectedMin = knnAlgo + topKNeighborsList + 4 * tempNeighborsListMin + randomList.min + sampledList;
         long expectedMax = knnAlgo + topKNeighborsList + 4 * tempNeighborsListMax + randomList.max + sampledList;
@@ -123,12 +120,5 @@ class KnnFactoryTest {
         assertEquals(expectedMax, actual.max);
     }
 
-    private KnnBaseConfig knnConfig(KnnSampler.SamplerType initialSampler) {
-        return KnnBaseConfigImpl.builder()
-            .nodeProperties(KnnNodePropertySpecParser.parse("knn"))
-            .initialSampler(initialSampler)
-            .similarityCutoff(0.8)
-            .build();
-    }
 
 }

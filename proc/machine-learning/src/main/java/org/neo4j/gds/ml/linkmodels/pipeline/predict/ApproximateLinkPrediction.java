@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.ml.linkmodels.PredictedLink;
@@ -30,10 +29,8 @@ import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.similarity.knn.ImmutableKnnContext;
 import org.neo4j.gds.similarity.knn.Knn;
-import org.neo4j.gds.similarity.knn.KnnFactory;
 import org.neo4j.gds.similarity.knn.KnnParameters;
 import org.neo4j.gds.similarity.knn.KnnResult;
-import org.neo4j.gds.similarity.knn.KnnSampler;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Map;
@@ -67,18 +64,7 @@ public class ApproximateLinkPrediction extends LinkPrediction {
     }
 
     public static MemoryEstimation estimate(LinkPredictionPredictPipelineBaseConfig config) {
-        var knnEstimation = KnnFactory.memoryEstimation(
-            new KnnFactory<>().taskName(),
-            Knn.class,
-            config.topK().orElse(10),
-            config.sampleRate(),
-            config.thresholdOrDefault(),
-            config.derivedInitialSampler().orElse(KnnSampler.SamplerType.UNIFORM)
-        );
-
-        return MemoryEstimations.builder(ApproximateLinkPrediction.class.getSimpleName())
-            .add(knnEstimation)
-            .build();
+        return new ApproximateLinkPredictionEstimateDefinition().memoryEstimation(config);
     }
 
     @Override

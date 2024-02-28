@@ -19,13 +19,10 @@
  */
 package org.neo4j.gds.similarity.knn;
 
-import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -33,12 +30,6 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
 
 import java.util.List;
-import java.util.function.LongFunction;
-
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfIntArray;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfOpenHashContainer;
 
 public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFactory<Knn, CONFIG> {
 
@@ -79,7 +70,7 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return KnnFactory.memoryEstimation(taskName(), Knn.class, configuration.topK(), configuration.sampleRate(), configuration.deltaThreshold(), configuration.initialSampler());
+        return new KnnMemoryEstimateDefinition().memoryEstimation(configuration.tomMemoryEstimationParameters());
     }
 
     public static MemoryRange initialSamplerMemoryEstimation(KnnSampler.SamplerType samplerType, long boundedK) {
@@ -116,57 +107,5 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
         );
     }
 
-    public static MemoryEstimation memoryEstimation(
-        String taskName,
-        Class<?> clazz,
-        int topK,
-        double sampleRate,
-        double deltaThreshold,
-        KnnSampler.SamplerType initialSampler
-    ) {
-        return MemoryEstimations.setup(
-            taskName,
-            (dim, concurrency) -> {
-                var k = K.create(topK, dim.nodeCount(), sampleRate, deltaThreshold);
 
-                LongFunction<MemoryRange> tempListEstimation = nodeCount -> MemoryRange.of(
-                    HugeObjectArray.memoryEstimation(nodeCount, 0),
-                    HugeObjectArray.memoryEstimation(
-                        nodeCount,
-                        sizeOfInstance(LongArrayList.class) + sizeOfLongArray(k.sampledValue)
-                    )
-                );
-
-                var neighborListEstimate = NeighborList.memoryEstimation(k.value)
-                    .estimate(dim, concurrency)
-                    .memoryUsage();
-
-                LongFunction<MemoryRange> perNodeNeighborListEstimate = nodeCount -> MemoryRange.of(
-                    HugeObjectArray.memoryEstimation(nodeCount, neighborListEstimate.min),
-                    HugeObjectArray.memoryEstimation(nodeCount, neighborListEstimate.max)
-                );
-
-                return MemoryEstimations
-                    .builder(clazz)
-                    .rangePerNode("top-k-neighbors-list", perNodeNeighborListEstimate)
-                    .rangePerNode("old-neighbors", tempListEstimation)
-                    .rangePerNode("new-neighbors", tempListEstimation)
-                    .rangePerNode("old-reverse-neighbors", tempListEstimation)
-                    .rangePerNode("new-reverse-neighbors", tempListEstimation)
-                    .fixed(
-                        "initial-random-neighbors (per thread)",
-                        KnnFactory
-                            .initialSamplerMemoryEstimation(initialSampler, k.value)
-                            .times(concurrency)
-                    )
-                    .fixed(
-                        "sampled-random-neighbors (per thread)",
-                        MemoryRange.of(
-                            sizeOfIntArray(sizeOfOpenHashContainer(k.sampledValue)) * concurrency
-                        )
-                    )
-                    .build();
-            }
-        );
-    }
 }

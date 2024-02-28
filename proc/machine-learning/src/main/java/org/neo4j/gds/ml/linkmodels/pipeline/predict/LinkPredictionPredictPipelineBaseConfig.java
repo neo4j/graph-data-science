@@ -212,6 +212,7 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
     default double thresholdOrDefault() {
         return threshold().orElse(DEFAULT_THRESHOLD);
     }
+    
 
     @Configuration.Ignore
     default boolean isApproximateStrategy() {
