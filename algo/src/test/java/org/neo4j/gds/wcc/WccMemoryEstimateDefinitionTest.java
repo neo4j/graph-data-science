@@ -23,9 +23,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 class WccMemoryEstimateDefinitionTest {
 
     @ParameterizedTest(name = "Node count: {0}")
@@ -35,10 +32,8 @@ class WccMemoryEstimateDefinitionTest {
         "100_000_000_000, 800_122_070_392"
     })
     void wccMemoryEstimation(long nodeCount, long expectedMemoryUsage) {
-        var configMock = mock(WccBaseConfig.class);
-        when(configMock.isIncremental()).thenReturn(false);
 
-        var memoryEstimation = new WccMemoryEstimateDefinition().memoryEstimation(configMock);
+        var memoryEstimation = new WccMemoryEstimateDefinition().memoryEstimation(false);
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(nodeCount, 4)
@@ -52,10 +47,8 @@ class WccMemoryEstimateDefinitionTest {
         "100_000_000_000, 1_600_244_140_760"
     })
     void incrementalWccMemoryEstimation(long nodeCount, long expectedMemoryUsage) {
-        var configMock = mock(WccBaseConfig.class);
-        when(configMock.isIncremental()).thenReturn(true);
 
-        var memoryEstimation = new WccMemoryEstimateDefinition().memoryEstimation(configMock);
+        var memoryEstimation = new WccMemoryEstimateDefinition().memoryEstimation(true);
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(nodeCount, 4)
@@ -69,9 +62,8 @@ class WccMemoryEstimateDefinitionTest {
         "128, 864"
     })
     void shouldGiveTheSameEstimationRegardlessOfTheConcurrency(int concurrency, long expectedMemory) {
-        var configMock = mock(WccBaseConfig.class);
 
-        var memoryEstimation = new WccMemoryEstimateDefinition().memoryEstimation(configMock);
+        var memoryEstimation = new WccMemoryEstimateDefinition().memoryEstimation(false);
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(100, concurrency)
@@ -85,10 +77,8 @@ class WccMemoryEstimateDefinitionTest {
         "128, 1_704"
     })
     void shouldGiveTheSameEstimationRegardlessOfTheConcurrencyIncrementalConfiguration(int concurrency, long expectedMemory) {
-        var configMock = mock(WccBaseConfig.class);
-        when(configMock.isIncremental()).thenReturn(true);
 
-        var memoryEstimation = new WccMemoryEstimateDefinition().memoryEstimation(configMock);
+        var memoryEstimation = new WccMemoryEstimateDefinition().memoryEstimation(true);
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(100, concurrency)

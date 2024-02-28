@@ -24,14 +24,10 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
 
-public class WccMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<WccBaseConfig> {
+public final class WccMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<Boolean> {
 
     @Override
-    public MemoryEstimation memoryEstimation(WccBaseConfig configuration) {
-        return memoryEstimation(configuration.isIncremental());
-    }
-
-    public MemoryEstimation memoryEstimation(boolean isIncremental) {
+    public MemoryEstimation memoryEstimation(Boolean isIncremental) {
         return MemoryEstimations
             .builder(Wcc.class.getSimpleName())
             .add("dss", HugeAtomicDisjointSetStruct.memoryEstimation(isIncremental))

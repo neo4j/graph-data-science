@@ -24,6 +24,8 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -75,11 +77,15 @@ public final class WccAlgorithmFactory<CONFIG extends WccBaseConfig> extends Gra
     }
 
     public MemoryEstimation memoryEstimation(boolean isIncremental) {
-        return new WccMemoryEstimateDefinition().memoryEstimation(isIncremental);
+        return MemoryEstimations
+            .builder(Wcc.class.getSimpleName())
+            .add("dss", HugeAtomicDisjointSetStruct.memoryEstimation(isIncremental))
+            .build();
     }
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
-        return memoryEstimation(config.isIncremental());
+        return new WccMemoryEstimateDefinition()
+            .memoryEstimation(config.isIncremental());
     }
 }

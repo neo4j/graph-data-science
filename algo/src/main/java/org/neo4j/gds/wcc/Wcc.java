@@ -21,7 +21,6 @@ package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
@@ -53,7 +52,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class Wcc extends Algorithm<DisjointSetStruct> {
 
     private final WccParameters parameters;
-    private final NodePropertyValues initialComponents;
     private final ExecutorService executorService;
     private final long batchSize;
 
@@ -69,9 +67,7 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
         super(progressTracker);
         this.graph = graph;
         this.parameters = parameters;
-        this.initialComponents = parameters.isIncremental()
-            ? graph.nodeProperties(parameters.seedProperty())
-            : null;
+
         this.executorService = executor;
 
         this.batchSize = ParallelUtil.adjustedBatchSize(
@@ -96,10 +92,12 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
         progressTracker.beginSubTask();
 
         long nodeCount = graph.nodeCount();
-
-        var disjointSetStruct = parameters.isIncremental()
-            ? new HugeAtomicDisjointSetStruct(nodeCount, initialComponents, parameters.concurrency())
-            : new HugeAtomicDisjointSetStruct(nodeCount, parameters.concurrency());
+        var disjointSetStruct = parameters.seedProperty()
+            .map(seedProperty -> {
+                var initialComponents = graph.nodeProperties(seedProperty);
+                return new HugeAtomicDisjointSetStruct(nodeCount, initialComponents, parameters.concurrency());
+            })
+            .orElseGet(() -> new HugeAtomicDisjointSetStruct(nodeCount, parameters.concurrency()));
 
         if (graph.characteristics().isUndirected() || graph.characteristics().isInverseIndexed()) {
             new SampledStrategyBuilder()

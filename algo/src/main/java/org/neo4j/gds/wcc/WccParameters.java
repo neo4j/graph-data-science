@@ -19,14 +19,19 @@
  */
 package org.neo4j.gds.wcc;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Parameters;
+
+import java.util.Optional;
 
 @Parameters
 public final class WccParameters {
 
+    public static final WccParameters DEFAULTS = new WccParameters(0D, null, 4);
+
     public static WccParameters create(
         double threshold,
-        String seedProperty,
+        @Nullable String seedProperty,
         int concurrency
     ) {
         return new WccParameters(threshold, seedProperty, concurrency);
@@ -36,7 +41,7 @@ public final class WccParameters {
     private final String seedProperty;
     private final int concurrency;
 
-    private WccParameters(double threshold, String seedProperty, int concurrency) {
+    private WccParameters(double threshold, @Nullable String seedProperty, int concurrency) {
         this.threshold = threshold;
         this.seedProperty = seedProperty;
         this.concurrency = concurrency;
@@ -50,12 +55,8 @@ public final class WccParameters {
         return !Double.isNaN(threshold()) && threshold() > 0;
     }
 
-    String seedProperty() {
-        return seedProperty;
-    }
-
-    public boolean isIncremental() {
-        return seedProperty != null;
+    Optional<String> seedProperty() {
+        return Optional.ofNullable(seedProperty);
     }
 
     int concurrency() {
