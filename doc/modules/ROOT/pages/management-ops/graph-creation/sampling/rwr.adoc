@@ -36,7 +36,7 @@ If at some point it's very unlikely to visit new nodes by random walking from th
 
 It was shown by Leskovec et al. in the paper _"Sampling from Large Graphs"_ that RWR is a very good sampling algorithm for preserving structural features of the original graph that was sampled from. Additionally, RWR has been successfully used throughout the literature to sample batches for graph neural network (GNN) training.
 
-[Note]
+[NOTE]
 ====
 Random walk with restarts is sometimes also referred to as _rooted_ or _personalized_ random walk.
 ====
@@ -57,7 +57,7 @@ The stratified sampling is performed by only adding a node to the sampled graph 
 By default, the algorithm treats all nodes in the same way no matter how they are labeled and makes no special effort to preserve the node label distribution of the original graph.
 Please note that the stratified sampling might be a bit slower since it has restrictions on the types of nodes it can add to the sampled graph when crawling it.
 
-[Note]
+[NOTE]
 ====
 At this time there is no support for relationship type stratification.
 ====

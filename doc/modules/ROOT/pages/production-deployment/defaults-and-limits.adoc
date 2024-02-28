@@ -43,7 +43,7 @@ CALL gds.config.defaults.set('sudo', true, 'Alicia')
 
 These configuration values are now applied each time Alicia runs an algorithm that uses the `concurrency`, `maxIterations` or `sudo` configuration parameters. See for example xref:algorithms/knn.adoc[K-Nearest Neighbors].
 
-[Note]
+[NOTE]
 ====
 If you leave out the username parameter, the default is set globally, for all users.
 ====
@@ -92,7 +92,7 @@ CALL gds.config.defaults.list({ username: 'Alicia' })
 |===
 --
 
-[Note]
+[NOTE]
 ====
 Again, if you leave out the username parameter, we list defaults globally, for all users.
 ====
@@ -127,7 +127,7 @@ CALL gds.config.limits.set('sudo', false, 'Kristian')
 
 These limits are now checked each time Kristian runs an algorithm that uses the `concurrency` or `sudo` configuration parameters. See for example xref:algorithms/page-rank.adoc[Page Rank]. He will be able to use a `concurrency` setting of 6 or lower only, and he can never run in `sudo` mode.
 
-[Note]
+[NOTE]
 ====
 If you leave out the username parameter, the default is set globally, for all users.
 ====
