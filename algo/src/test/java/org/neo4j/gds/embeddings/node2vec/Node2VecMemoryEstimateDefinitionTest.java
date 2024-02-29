@@ -34,7 +34,11 @@ class Node2VecMemoryEstimateDefinitionTest {
         when(configMock.walkLength()).thenReturn(80);
         when(configMock.embeddingDimension()).thenReturn(128);
 
-        var memoryEstimation = new Node2VecMemoryEstimateDefinition().memoryEstimation(configMock);
+        when(configMock.node2VecParameters()).thenCallRealMethod();
+        when(configMock.walkParameters()).thenCallRealMethod();
+        when(configMock.trainParameters()).thenCallRealMethod();
+
+        var memoryEstimation = new Node2VecMemoryEstimateDefinition().memoryEstimation(configMock.node2VecParameters());
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(1000, 1)

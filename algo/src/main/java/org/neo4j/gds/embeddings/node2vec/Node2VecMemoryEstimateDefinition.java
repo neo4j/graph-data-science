@@ -27,12 +27,12 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryUsage;
 
-public final class Node2VecMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<Node2VecBaseConfig> {
+public final class Node2VecMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<Node2VecParameters> {
     @Override
-    public MemoryEstimation memoryEstimation(Node2VecBaseConfig configuration) {
-        int walksPerNode = configuration.walksPerNode();
-        int walkLength = configuration.walkLength();
-        int embeddingDimension = configuration.embeddingDimension();
+    public MemoryEstimation memoryEstimation(Node2VecParameters parameters) {
+        int walksPerNode = parameters.walkParameters().walksPerNode;
+        int walkLength = parameters.walkParameters().walkLength;
+        int embeddingDimension = parameters.trainParameters().embeddingDimension;
         return MemoryEstimations.builder(Node2Vec.class)
             .perNode("random walks", (nodeCount) -> {
                 var numberOfRandomWalks = nodeCount * walksPerNode;
