@@ -54,7 +54,7 @@ public final class KmeansAlgorithmFactory<CONFIG extends KmeansBaseConfig> exten
         if (seedCentroids.size() > 0 && seedCentroids.size() != configuration.k()) {
             throw new IllegalArgumentException("Incorrect number of seeded centroids given for running K-Means");
         }
-        return Kmeans.createKmeans(graph, configuration, ImmutableKmeansContext
+        return Kmeans.createKmeans(graph, configuration.toParameters(), ImmutableKmeansContext
             .builder()
             .progressTracker(progressTracker)
             .executor(DefaultPool.INSTANCE)
@@ -95,6 +95,6 @@ public final class KmeansAlgorithmFactory<CONFIG extends KmeansBaseConfig> exten
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return new KmeansMemoryEstimateDefinition().memoryEstimation(configuration);
+        return new KmeansMemoryEstimateDefinition().memoryEstimation(configuration.toParameters());
     }
 }

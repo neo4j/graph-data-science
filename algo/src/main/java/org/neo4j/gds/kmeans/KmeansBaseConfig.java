@@ -96,4 +96,20 @@ public interface KmeansBaseConfig extends AlgoBaseConfig, IterationsConfig, Rand
     default boolean isSeeded() {
         return !seedCentroids().isEmpty();
     }
+
+    @Configuration.Ignore
+    default KmeansParameters toParameters() {
+        return new KmeansParameters(
+            k(),
+            maxIterations(),
+            deltaThreshold(),
+            numberOfRestarts(),
+            computeSilhouette(),
+            concurrency(),
+            nodeProperty(),
+            initialSampler(),
+            seedCentroids(),
+            randomSeed()
+        );
+    }
 }

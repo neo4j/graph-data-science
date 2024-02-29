@@ -58,7 +58,7 @@ class KmeansRestartsTest {
             .build();
         var kmeansContext = ImmutableKmeansContext.builder().build();
 
-        var kmeans = Kmeans.createKmeans(graph, kmeansConfig, kmeansContext);
+        var kmeans = Kmeans.createKmeans(graph, kmeansConfig.toParameters(), kmeansContext);
         var result = kmeans.compute();
         var communities = result.communities();
         var distances = result.distanceFromCenter();
@@ -92,7 +92,7 @@ class KmeansRestartsTest {
 
         var kmeansContext = ImmutableKmeansContext.builder().build();
 
-        var kmeans = Kmeans.createKmeans(graph, kmeansConfig, kmeansContext);
+        var kmeans = Kmeans.createKmeans(graph, kmeansConfig.toParameters(), kmeansContext);
         var result = kmeans.compute();
         var communities = result.communities();
         var distances = result.distanceFromCenter();
@@ -128,7 +128,7 @@ class KmeansRestartsTest {
             .k(2)
             .build();
         var kmeansContext = ImmutableKmeansContext.builder().build();
-        var kmeans = Kmeans.createKmeans(graph, kmeansConfig, kmeansContext);
+        var kmeans = Kmeans.createKmeans(graph, kmeansConfig.toParameters(), kmeansContext);
         var centers = kmeans.compute().centers();
         assertThat(centers[1]).isEqualTo(new double[]{100.0});
         assertThat(centers[0][0]).isCloseTo(1.05, Offset.offset(1e-4));

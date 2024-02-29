@@ -34,17 +34,17 @@ class KmeansMemoryEstimateDefinitionTest {
     @Test
     void memoryEstimation() {
 
-        var config = mock(KmeansBaseConfig.class);
-        when(config.k()).thenReturn(10);
+        var params = mock(KmeansParameters.class);
+        when(params.k()).thenReturn(10);
 
         var graphDimensions = GraphDimensions.of(42, 1337);
 
-        var memoryEstimation = new KmeansMemoryEstimateDefinition().memoryEstimation(config);
+        var memoryEstimation = new KmeansMemoryEstimateDefinition().memoryEstimation(params);
 
         MemoryEstimationAssert.assertThat(memoryEstimation).
             memoryRange(graphDimensions, 4)
-            .hasMin(33952L)
-            .hasMax(54944L);
+            .hasMin(33928)
+            .hasMax(54920);
 
     }
 
@@ -54,32 +54,32 @@ class KmeansMemoryEstimateDefinitionTest {
         var centroidsSeeds = List.of(List.of(40.712776, -74.005974), List.of(52.370216, 4.895168), List.of(41.902782, 12.496365));
         var graphDimensions = GraphDimensions.of(42, 1337);
 
-        var config = mock(KmeansBaseConfig.class);
-        when(config.k()).thenReturn(10);
-        when(config.seedCentroids()).thenReturn(centroidsSeeds);
-        when(config.isSeeded()).thenReturn(true);
-        var memoryEstimation = new KmeansMemoryEstimateDefinition().memoryEstimation(config);
+        var params = mock(KmeansParameters.class);
+        when(params.k()).thenReturn(10);
+        when(params.seedCentroids()).thenReturn(centroidsSeeds);
+        when(params.isSeeded()).thenReturn(true);
+        var memoryEstimation = new KmeansMemoryEstimateDefinition().memoryEstimation(params);
 
         MemoryEstimationAssert.assertThat(memoryEstimation).
             memoryRange(graphDimensions, 4)
-            .hasMin(33952L + MemoryUsage.sizeOf(centroidsSeeds))
-            .hasMax(54944L + MemoryUsage.sizeOf(centroidsSeeds));
+            .hasMin(33928L + MemoryUsage.sizeOf(centroidsSeeds))
+            .hasMax(54920L + MemoryUsage.sizeOf(centroidsSeeds));
     }
 
     @Test
     void memoryEstimationWithSilhouette() {
         var graphDimensions = GraphDimensions.of(42, 1337);
 
-        var config = mock(KmeansBaseConfig.class);
-        when(config.k()).thenReturn(10);
-        when(config.computeSilhouette()).thenReturn(true);
+        var parameters = mock(KmeansParameters.class);
+        when(parameters.k()).thenReturn(10);
+        when(parameters.computeSilhouette()).thenReturn(true);
 
-        var memoryEstimation = new KmeansMemoryEstimateDefinition().memoryEstimation(config);
+        var memoryEstimation = new KmeansMemoryEstimateDefinition().memoryEstimation(parameters);
 
         MemoryEstimationAssert.assertThat(memoryEstimation).
             memoryRange(graphDimensions, 4)
-            .hasMin(34328L)
-            .hasMax(55320L);
+            .hasMin(34304)
+            .hasMax(55296);
 
     }
 
