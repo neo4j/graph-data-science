@@ -94,6 +94,6 @@ public class ApproxMaxKCutAlgorithmFactory<CONFIG extends ApproxMaxKCutBaseConfi
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return new ApproxMaxKCutMemoryEstimateDefinition().memoryEstimation(configuration);
+        return new ApproxMaxKCutMemoryEstimateDefinition().memoryEstimation(configuration.toMemoryEstimationParameters());
     }
 }

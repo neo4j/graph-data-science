@@ -61,6 +61,10 @@ public final class MemoryEstimationAssert extends AbstractAssert<MemoryEstimatio
         return memoryRange(nodeCount, 0, concurrency);
     }
 
+    public MemoryRangeAssert memoryRange(long nodeCount) {
+        return memoryRange(nodeCount, 0, 1);
+    }
+
 
     public MemoryTreeAssert memoryTree(GraphDimensions graphDimensions, int concurrency) {
         isNotNull();

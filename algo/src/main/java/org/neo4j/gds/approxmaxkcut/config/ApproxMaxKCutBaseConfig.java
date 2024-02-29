@@ -24,6 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutMemoryEstimationParameters;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutParameters;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
@@ -125,6 +126,13 @@ public interface ApproxMaxKCutBaseConfig extends AlgoBaseConfig,
             minCommunitySizes(),
             hasRelationshipWeightProperty(),
             minimize()
+        );
+    }
+    @Configuration.Ignore
+    default ApproxMaxKCutMemoryEstimationParameters toMemoryEstimationParameters() {
+        return new ApproxMaxKCutMemoryEstimationParameters(
+            k(),
+            vnsMaxNeighborhoodOrder()
         );
     }
 }

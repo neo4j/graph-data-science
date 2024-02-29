@@ -21,69 +21,44 @@ package org.neo4j.gds.approxmaxkcut;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class ApproxMaxKCutMemoryEstimateDefinitionTest {
 
     @ParameterizedTest(name = "nodeCount: {0}, k: {1}")
-    @CsvSource({
-        "10_000, 2, 200_272",
-        "10_000, 5, 440_272",
-        "40_000, 2, 800_272",
-        "40_000, 5, 1_760_272"
-    })
+    @CsvSource(
+        {
+            "10_000, 2, 200_272",
+            "10_000, 5, 440_272",
+            "40_000, 2, 800_272",
+            "40_000, 5, 1_760_272"
+        }
+    )
     void memoryEstimationWithVNS(long nodeCount, byte k, long expectedMemory) {
-        var configMock = mock(ApproxMaxKCutBaseConfig.class);
+        var estimationParameters = new ApproxMaxKCutMemoryEstimationParameters(k, 4);
 
-        when(configMock.k()).thenReturn(k);
-        when(configMock.vnsMaxNeighborhoodOrder()).thenReturn(4);
-        when(configMock.concurrency()).thenReturn(4);
-
-        var memoryEstimate = new ApproxMaxKCutMemoryEstimateDefinition().memoryEstimation(configMock);
+        var memoryEstimate = new ApproxMaxKCutMemoryEstimateDefinition().memoryEstimation(estimationParameters);
 
         MemoryEstimationAssert.assertThat(memoryEstimate)
-            .memoryRange(nodeCount, 4)
+            .memoryRange(nodeCount)
             .hasSameMinAndMaxEqualTo(expectedMemory);
     }
 
     @ParameterizedTest(name = "nodeCount: {0}, k: {1}")
-    @CsvSource({
-        "10_000, 2, 190_232",
-        "40_000, 5, 1_720_232"
-    })
+    @CsvSource(
+        {
+            "10_000, 2, 190_232",
+            "40_000, 5, 1_720_232"
+        }
+    )
     void memoryEstimationWithoutVNS(long nodeCount, byte k, long expectedMemory) {
-        var configMock = mock(ApproxMaxKCutBaseConfig.class);
+        var estimationParameters = new ApproxMaxKCutMemoryEstimationParameters(k, 0);
 
-        when(configMock.k()).thenReturn(k);
-        when(configMock.vnsMaxNeighborhoodOrder()).thenReturn(0);
-        when(configMock.concurrency()).thenReturn(4);
-
-        var memoryEstimate = new ApproxMaxKCutMemoryEstimateDefinition().memoryEstimation(configMock);
+        var memoryEstimate = new ApproxMaxKCutMemoryEstimateDefinition().memoryEstimation(estimationParameters);
 
         MemoryEstimationAssert.assertThat(memoryEstimate)
-            .memoryRange(nodeCount, 4)
+            .memoryRange(nodeCount)
             .hasSameMinAndMaxEqualTo(expectedMemory);
-    }
-
-    @ParameterizedTest(name = "Concurrency: {0}")
-    @ValueSource(ints = {1, 8, 64})
-    void shouldReturnTheSameEstimationRegardlessConcurrency(int concurrency) {
-        var configMock = mock(ApproxMaxKCutBaseConfig.class);
-
-        when(configMock.k()).thenReturn((byte) 5);
-        when(configMock.vnsMaxNeighborhoodOrder()).thenReturn(0);
-        when(configMock.concurrency()).thenReturn(concurrency);
-
-        var memoryEstimate = new ApproxMaxKCutMemoryEstimateDefinition().memoryEstimation(configMock);
-
-        MemoryEstimationAssert.assertThat(memoryEstimate)
-            .memoryRange(10_000, 4)
-            .hasSameMinAndMaxEqualTo(430_232L);
     }
 
 }

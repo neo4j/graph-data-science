@@ -20,18 +20,17 @@
 package org.neo4j.gds.approxmaxkcut;
 
 import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
-import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
 import org.neo4j.gds.collections.ha.HugeByteArray;
 import org.neo4j.gds.collections.haa.HugeAtomicByteArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 
-public class ApproxMaxKCutMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<ApproxMaxKCutBaseConfig> {
+public class ApproxMaxKCutMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<ApproxMaxKCutMemoryEstimationParameters> {
 
     @Override
-    public MemoryEstimation memoryEstimation(ApproxMaxKCutBaseConfig configuration) {
-        MemoryEstimations.Builder builder = MemoryEstimations.builder(ApproxMaxKCut.class);
+    public MemoryEstimation memoryEstimation(ApproxMaxKCutMemoryEstimationParameters configuration) {
+        var builder = MemoryEstimations.builder(ApproxMaxKCut.class);
 
         builder.perNode("best solution candidate", HugeByteArray::memoryEstimation);
         builder.perNode("solution workspace", HugeByteArray::memoryEstimation);
