@@ -76,7 +76,7 @@ class ConnectedComponentsPregelAlgoTest {
     void wcc() {
         int maxIterations = 10;
 
-        var config = ImmutableConnectedComponentsConfig.builder()
+        var config = ConnectedComponentsConfigImpl.builder()
             .concurrency(2)
             .maxIterations(maxIterations)
             .build();

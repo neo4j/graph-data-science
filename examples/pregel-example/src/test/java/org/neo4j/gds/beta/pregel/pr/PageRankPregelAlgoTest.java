@@ -78,7 +78,7 @@ class PageRankPregelAlgoTest {
         int maxIterations = 10;
         float dampingFactor = 0.85f;
 
-        var config = ImmutablePageRankPregelConfig.builder()
+        var config = PageRankPregelConfigImpl.builder()
             .maxIterations(maxIterations)
             .dampingFactor(dampingFactor)
             .isAsynchronous(false)

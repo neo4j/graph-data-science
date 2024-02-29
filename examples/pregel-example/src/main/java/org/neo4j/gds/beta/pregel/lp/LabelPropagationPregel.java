@@ -20,7 +20,6 @@
 package org.neo4j.gds.beta.pregel.lp;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.Messages;
 import org.neo4j.gds.beta.pregel.PregelComputation;
@@ -104,9 +103,7 @@ public class LabelPropagationPregel implements PregelComputation<LabelPropagatio
         context.voteToHalt();
     }
 
-    @ValueClass
     @Configuration("LabelPropagationPregelConfigImpl")
-    @SuppressWarnings("immutables:subtype")
     public interface LabelPropagationPregelConfig extends PregelProcedureConfig, SeedConfig {
 
         static LabelPropagationPregelConfig of(CypherMapWrapper userInput) {

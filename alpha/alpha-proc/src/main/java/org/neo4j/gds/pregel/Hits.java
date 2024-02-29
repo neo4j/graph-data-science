@@ -19,10 +19,8 @@
  */
 package org.neo4j.gds.pregel;
 
-import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.BidirectionalPregelComputation;
 import org.neo4j.gds.beta.pregel.Messages;
@@ -138,18 +136,14 @@ public class Hits implements BidirectionalPregelComputation<Hits.HitsConfig> {
         return normalizedValue;
     }
 
-    @ValueClass
     @Configuration
-    @SuppressWarnings("immutables:subtype")
     public interface HitsConfig extends PregelProcedureConfig {
 
-        @Value.Default
         default int hitsIterations() {
             return 20;
         }
 
         @Override
-        @Value.Derived
         @Configuration.Ignore
         default int maxIterations() {
             return hitsIterations() * 4;
@@ -157,18 +151,15 @@ public class Hits implements BidirectionalPregelComputation<Hits.HitsConfig> {
 
         @Override
         @Configuration.Ignore
-        @Value.Derived
         default boolean isAsynchronous() {
             return false;
         }
 
-        @Value.Default
         @Configuration.ConvertWith(method = "validateHubProperty")
         default String hubProperty() {
             return "hub";
         }
 
-        @Value.Default
         @Configuration.ConvertWith(method = "validateAuthProperty")
         default String authProperty() {
             return "auth";

@@ -120,7 +120,7 @@ class WeightedPageRankPregelAlgoTest {
     }
 
     static void assertResult(TestGraph graph, Map<String, Double> expected) {
-        var config = ImmutablePageRankPregelConfig.builder()
+        var config = PageRankPregelConfigImpl.builder()
             .relationshipWeightProperty("weight")
             .maxIterations(20)
             .isAsynchronous(false)

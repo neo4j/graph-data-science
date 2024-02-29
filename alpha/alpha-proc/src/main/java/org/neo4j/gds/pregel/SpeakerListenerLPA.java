@@ -22,9 +22,7 @@ package org.neo4j.gds.pregel;
 import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.LongIntScatterMap;
 import com.carrotsearch.hppc.cursors.LongIntCursor;
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.Messages;
 import org.neo4j.gds.beta.pregel.PregelComputation;
@@ -151,12 +149,9 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
     }
 
 
-    @ValueClass
     @Configuration
-    @SuppressWarnings("immutables:subtype")
     public interface SpeakerListenerLPAConfig extends PregelProcedureConfig {
 
-        @Value.Default
         default double minAssociationStrength() {
             return 0.2;
         }
@@ -165,15 +160,13 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
             return new SpeakerListenerLPAConfigImpl(userConfig);
         }
 
-        @Value.Derived
-        @Configuration.Ignore
         @Override
+        @Configuration.Ignore
         default boolean isAsynchronous() {
             return true;
         }
 
 
-        @Value.Derived
         @Configuration.Ignore
         default int propagationSteps() {
             return maxIterations() - 1;

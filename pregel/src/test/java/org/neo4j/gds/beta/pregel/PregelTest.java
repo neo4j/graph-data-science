@@ -98,7 +98,7 @@ class PregelTest {
     @MethodSource("partitioningConfigAndResult")
     void sendsMessages(
         Partitioning partitioning,
-        ImmutablePregelConfig.Builder configBuilder,
+        PregelConfigImpl.Builder configBuilder,
         PregelComputation<PregelConfig> computation,
         double[] expected
     ) {
@@ -145,7 +145,7 @@ class PregelTest {
             .build()
             .generate();
 
-        var config = ImmutablePregelConfig.builder()
+        var config = PregelConfigImpl.builder()
             .maxIterations(2)
             .partitioning(partitioning)
             .concurrency(4)
@@ -204,7 +204,7 @@ class PregelTest {
             .build()
             .generate();
 
-        var config = ImmutablePregelConfig.builder()
+        var config = PregelConfigImpl.builder()
             .maxIterations(2)
             .isAsynchronous(false)
             .build();
@@ -247,7 +247,7 @@ class PregelTest {
             .build()
             .generate();
 
-        var configBuilder = ImmutablePregelConfig.builder()
+        var configBuilder = PregelConfigImpl.builder()
             .maxIterations(10)
             .partitioning(partitioning)
             .isAsynchronous(false);
@@ -289,7 +289,7 @@ class PregelTest {
     @ParameterizedTest
     @EnumSource(Partitioning.class)
     void sendMessageToSpecificTarget(Partitioning partitioning) {
-        var config = ImmutablePregelConfig.builder()
+        var config = PregelConfigImpl.builder()
             .maxIterations(2)
             .concurrency(1)
             .partitioning(partitioning)
@@ -360,7 +360,7 @@ class PregelTest {
     void testMasterComputeStep(Partitioning partitioning) {
         var pregelJob = Pregel.create(
             graph,
-            ImmutablePregelConfig.builder().maxIterations(4).partitioning(partitioning).build(),
+            PregelConfigImpl.builder().maxIterations(4).partitioning(partitioning).build(),
             new TestMasterCompute(),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
@@ -375,7 +375,7 @@ class PregelTest {
     void testMasterComputeStepWithConvergence(Partitioning partitioning) {
         var pregelJob = Pregel.create(
             graph,
-            ImmutablePregelConfig.builder().maxIterations(4).partitioning(partitioning).build(),
+            PregelConfigImpl.builder().maxIterations(4).partitioning(partitioning).build(),
             new TestMasterCompute(2),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
@@ -482,7 +482,7 @@ class PregelTest {
 
         Pregel.create(
             graph,
-            ImmutablePregelConfig.builder().maxIterations(1).build(),
+            PregelConfigImpl.builder().maxIterations(1).build(),
             new PregelComputation<>() {
 
                 @Override
@@ -553,22 +553,22 @@ class PregelTest {
     static Stream<Arguments> configAndResult() {
         return Stream.of(
             Arguments.of(
-                ImmutablePregelConfig.builder().maxIterations(2),
+                PregelConfigImpl.builder().maxIterations(2),
                 new TestPregelComputation(),
                 new double[]{0.0, 1.0, 1.0}
             ),
             Arguments.of(
-                ImmutablePregelConfig.builder().maxIterations(2).relationshipWeightProperty("prop"),
+                PregelConfigImpl.builder().maxIterations(2).relationshipWeightProperty("prop"),
                 new TestPregelComputation(),
                 new double[]{0.0, 1.0, 1.0}
             ),
             Arguments.of(
-                ImmutablePregelConfig.builder().maxIterations(2).relationshipWeightProperty("prop"),
+                PregelConfigImpl.builder().maxIterations(2).relationshipWeightProperty("prop"),
                 new TestWeightComputation(),
                 new double[]{0.0, 2.0, 1.0}
             ),
             Arguments.of(
-                ImmutablePregelConfig.builder().maxIterations(2),
+                PregelConfigImpl.builder().maxIterations(2),
                 new TestReduciblePregelComputation(),
                 new double[]{0.0, 1.0, 1.0}
             )
@@ -615,7 +615,7 @@ class PregelTest {
     @ParameterizedTest
     @MethodSource("partitioningAndAsynchronous")
     void messagesInInitialSuperStepShouldBeEmpty(Partitioning partitioning, boolean isAsynchronous) {
-        var config = ImmutablePregelConfig
+        var config = PregelConfigImpl
             .builder()
             .maxIterations(2)
             .partitioning(partitioning)
@@ -821,7 +821,7 @@ class PregelTest {
     void throwIfBidirectionalWithoutInverseIndex() {
         ThrowableAssert.ThrowingCallable pregelCreate = () -> Pregel.create(
             graph,
-            ImmutablePregelConfig.builder().maxIterations(4).build(),
+            PregelConfigImpl.builder().maxIterations(4).build(),
             new Bidirectional(),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER

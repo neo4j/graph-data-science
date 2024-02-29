@@ -20,12 +20,9 @@
 package org.neo4j.gds.pagerank;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.CypherMapWrapper;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface PageRankStreamConfig extends PageRankConfig {
 
     static PageRankStreamConfig of(CypherMapWrapper userInput) {

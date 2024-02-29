@@ -94,7 +94,7 @@ class BFSPregelAlgoTest {
 
     @Inject
     private TestGraph graph;
-    
+
     @Inject
     private TestGraph parentGraph;
 
@@ -102,7 +102,7 @@ class BFSPregelAlgoTest {
     void levelBfs() {
         int maxIterations = 10;
 
-        var config = ImmutableBFSPregelConfig.builder()
+        var config = BFSPregelConfigImpl.builder()
             .maxIterations(maxIterations)
             .startNode(graph.toMappedNodeId("a"))
             .build();
@@ -138,7 +138,7 @@ class BFSPregelAlgoTest {
     void parentBfs() {
         int maxIterations = 10;
 
-        var config = ImmutableBFSPregelConfig.builder()
+        var config = BFSPregelConfigImpl.builder()
             .maxIterations(maxIterations)
             .startNode(graph.toMappedNodeId("a"))
             .build();
@@ -174,7 +174,7 @@ class BFSPregelAlgoTest {
     void parentBugTest() {
         int maxIterations = 10;
 
-        var config = ImmutableBFSPregelConfig.builder()
+        var config = BFSPregelConfigImpl.builder()
             .maxIterations(maxIterations)
             .startNode(parentGraph.toMappedNodeId("a"))
             .build();

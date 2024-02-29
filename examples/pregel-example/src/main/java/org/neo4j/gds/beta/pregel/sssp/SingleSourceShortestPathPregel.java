@@ -20,7 +20,6 @@
 package org.neo4j.gds.beta.pregel.sssp;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.Messages;
 import org.neo4j.gds.beta.pregel.PregelComputation;
@@ -83,9 +82,7 @@ public class SingleSourceShortestPathPregel implements PregelComputation<SingleS
 
     }
 
-    @ValueClass
     @Configuration("SingleSourceShortestPathPregelConfigImpl")
-    @SuppressWarnings("immutables:subtype")
     interface SingleSourceShortestPathPregelConfig extends PregelProcedureConfig {
         long startNode();
 

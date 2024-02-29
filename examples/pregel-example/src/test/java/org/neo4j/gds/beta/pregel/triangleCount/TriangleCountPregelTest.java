@@ -326,7 +326,7 @@ class TriangleCountPregelTest {
     }
 
     HugeLongArray nodeWiseTriangles(Graph graph) {
-        var config = ImmutableTriangleCountPregelConfig.builder().maxIterations(4).build();
+        var config = TriangleCountPregelConfigImpl.builder().maxIterations(4).build();
 
         var pregelJob = Pregel.create(
             graph,
@@ -338,7 +338,7 @@ class TriangleCountPregelTest {
 
         return pregelJob.run().nodeValues().longProperties(TriangleCountPregel.TRIANGLE_COUNT);
     }
-    
+
     long globalCount(HugeLongArray nodeWiseCounts) {
         return Arrays.stream(nodeWiseCounts.toArray()).sum() / 3;
     }

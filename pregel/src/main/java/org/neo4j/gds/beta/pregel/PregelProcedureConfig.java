@@ -19,11 +19,9 @@
  */
 package org.neo4j.gds.beta.pregel;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
@@ -31,27 +29,22 @@ import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Collection;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface PregelProcedureConfig extends
     PregelConfig,
     WritePropertyConfig,
     MutateNodePropertyConfig {
 
-    @Value.Default
     default String writeProperty() {
         return "";
     }
 
-    @Value.Default
     default String mutateProperty() {
         return "";
     }
 
     @Override
     @Configuration.GraphStoreValidationCheck
-    @Value.Default
     default void validateGraphIsSuitableForWrite(
         GraphStore graphStore,
         @SuppressWarnings("unused") Collection<NodeLabel> selectedLabels,

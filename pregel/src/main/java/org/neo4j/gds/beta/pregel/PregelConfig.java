@@ -19,37 +19,30 @@
  */
 package org.neo4j.gds.beta.pregel;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.IterationsConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 
-@ValueClass
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface PregelConfig extends
     AlgoBaseConfig,
     RelationshipWeightConfig,
     IterationsConfig,
     ConcurrencyConfig {
 
-    @Value.Default
     @Configuration.Key("isAsynchronous")
     default boolean isAsynchronous() {
         return false;
     }
 
-    @Value.Default
     @Configuration.ConvertWith(method = "org.neo4j.gds.beta.pregel.Partitioning#parse")
     @Configuration.ToMapValue("org.neo4j.gds.beta.pregel.Partitioning#toString")
     default Partitioning partitioning() {
         return Partitioning.RANGE;
     }
 
-    @Value.Derived
     @Configuration.Ignore
     default boolean useForkJoin() {
         return partitioning() == Partitioning.AUTO;

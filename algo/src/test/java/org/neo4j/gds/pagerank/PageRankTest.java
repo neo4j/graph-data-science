@@ -108,7 +108,7 @@ class PageRankTest {
 
         @Test
         void withoutTolerance() {
-            var config = ImmutablePageRankStreamConfig.builder()
+            var config = PageRankStreamConfigImpl.builder()
                 .maxIterations(41)
                 .concurrency(1)
                 .tolerance(0)
@@ -129,7 +129,7 @@ class PageRankTest {
         @ParameterizedTest
         @CsvSource(value = {"0.5, 2", "0.1, 13"})
         void withTolerance(double tolerance, int expectedIterations) {
-            var config = ImmutablePageRankStreamConfig.builder()
+            var config = PageRankStreamConfigImpl.builder()
                 .maxIterations(40)
                 .concurrency(1)
                 .tolerance(tolerance)
@@ -152,7 +152,7 @@ class PageRankTest {
                 .map(graph::toOriginalNodeId)
                 .collect(Collectors.toList());
 
-            var config = ImmutablePageRankConfig.builder()
+            var config = PageRankConfigImpl.builder()
                 .maxIterations(41)
                 .tolerance(0)
                 .concurrency(1)
@@ -175,7 +175,7 @@ class PageRankTest {
         @EnumSource(Mode.class)
         void shouldLogProgress(Mode mode) {
             var maxIterations = 10;
-            var config = ImmutablePageRankConfig.builder()
+            var config = PageRankConfigImpl.builder()
                 .maxIterations(maxIterations)
                 .build();
 
@@ -253,7 +253,7 @@ class PageRankTest {
 
         @Test
         void checkTerminationFlag() {
-            var config = ImmutablePageRankStreamConfig.builder()
+            var config = PageRankStreamConfigImpl.builder()
                 .maxIterations(40)
                 .concurrency(1)
                 .build();
@@ -339,7 +339,7 @@ class PageRankTest {
         @ParameterizedTest
         @ValueSource(strings = {"weight", "unnormalizedWeight"})
         void withWeights(String relationshipWeight) {
-            var config = ImmutablePageRankStreamConfig.builder()
+            var config = PageRankStreamConfigImpl.builder()
                 .maxIterations(41)
                 .tolerance(0)
                 .relationshipWeightProperty(relationshipWeight)
@@ -360,7 +360,7 @@ class PageRankTest {
 
         @Test
         void withZeroWeights() {
-            var config = ImmutablePageRankStreamConfig.builder()
+            var config = PageRankStreamConfigImpl.builder()
                 .maxIterations(40)
                 .tolerance(0)
                 .relationshipWeightProperty("weight")
@@ -440,7 +440,7 @@ class PageRankTest {
 
         @Test
         void articleRank(SoftAssertions softly) {
-            var config = ImmutablePageRankStreamConfig
+            var config = PageRankStreamConfigImpl
                 .builder()
                 .maxIterations(40)
                 .tolerance(0)
@@ -459,7 +459,7 @@ class PageRankTest {
 
         @Test
         void articleRankOnPaperGraphTest(SoftAssertions softly) {
-            var config = ImmutablePageRankStreamConfig
+            var config = PageRankStreamConfigImpl
                 .builder()
                 .maxIterations(20)
                 .tolerance(0)
@@ -513,7 +513,7 @@ class PageRankTest {
 
         @Test
         void eigenvector() {
-            var config = ImmutablePageRankStreamConfig
+            var config = PageRankStreamConfigImpl
                 .builder()
                 .maxIterations(40)
                 .tolerance(0)
@@ -534,7 +534,7 @@ class PageRankTest {
 
         @Test
         void weighted() {
-            var config = ImmutablePageRankStreamConfig
+            var config = PageRankStreamConfigImpl
                 .builder()
                 .relationshipWeightProperty("weight")
                 .maxIterations(10)
@@ -556,12 +556,12 @@ class PageRankTest {
 
         @Test
         void withSourceNodes() {
-            var config = ImmutablePageRankStreamConfig
+            var config = PageRankStreamConfigImpl
                 .builder()
                 .maxIterations(10)
                 .tolerance(0.1)
                 .concurrency(1)
-                .addSourceNode(idFunction.of("d"))
+                .sourceNodes(List.of(idFunction.of("d")))
                 .build();
 
             var rankProvider = runOnPregel(graph, config, Mode.EIGENVECTOR).centralityScoreProvider();
@@ -609,7 +609,7 @@ class PageRankTest {
         @ParameterizedTest
         @CsvSource({"MINMAX, expectedMinMax", "STDSCORE, expectedStdScore", "MEAN, expectedMean"})
         void test(String scalerName, String expectedPropertyKey) {
-            var config = ImmutablePageRankConfig
+            var config = PageRankConfigImpl
                 .builder()
                 .maxIterations(40)
                 .tolerance(0)
@@ -642,7 +642,7 @@ class PageRankTest {
     @ParameterizedTest
     @MethodSource("expectedMemoryEstimation")
     void shouldComputeMemoryEstimation(int concurrency, long expectedMinBytes, long expectedMaxBytes) {
-        var config = ImmutablePageRankConfig
+        var config = PageRankConfigImpl
             .builder()
             .build();
 
@@ -668,7 +668,7 @@ class PageRankTest {
             .build()
             .generate();
 
-        var configBuilder = ImmutablePageRankConfig.builder();
+        var configBuilder = PageRankConfigImpl.builder();
 
         var singleThreaded = runOnPregel(graph, configBuilder.concurrency(1).build(), mode).centralityScoreProvider();
         var multiThreaded = runOnPregel(graph, configBuilder.concurrency(4).build(), mode).centralityScoreProvider();
@@ -680,7 +680,7 @@ class PageRankTest {
 
     @Test
     void shouldComputeMemoryEstimationFor10BElements() {
-        var config = ImmutablePageRankConfig
+        var config = PageRankConfigImpl
             .builder()
             .build();
 
@@ -708,5 +708,5 @@ class PageRankTest {
             )
             .compute();
     }
-    
+
 }

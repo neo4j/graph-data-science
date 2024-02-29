@@ -19,9 +19,7 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.beta.pregel.Partitioning;
 import org.neo4j.gds.beta.pregel.PregelConfig;
 import org.neo4j.gds.config.SourceNodesConfig;
@@ -30,50 +28,42 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.scaling.NoneScaler;
 import org.neo4j.gds.scaling.ScalerFactory;
 
-@ValueClass
 @Configuration("PageRankConfigImpl")
-@SuppressWarnings("immutables:subtype")
 public interface PageRankConfig extends
     PregelConfig,
     ToleranceConfig,
     SourceNodesConfig
 {
-    @Value.Default
     @Override
     @Configuration.DoubleRange(min = 0D)
     default double tolerance() {
         return 1E-7;
     }
 
-    @Configuration.IntegerRange(min = 1)
-    @Value.Default
     @Override
+    @Configuration.IntegerRange(min = 1)
     default int maxIterations() {
         return 20;
     }
 
-    @Value.Default
     @Configuration.DoubleRange(min = 0, max = 1, maxInclusive = false)
     default double dampingFactor() {
         return 0.85;
     }
 
-    @Value.Default
     @Configuration.ConvertWith(method = "org.neo4j.gds.scaling.ScalerFactory#parse")
     @Configuration.ToMapValue("org.neo4j.gds.scaling.ScalerFactory#toString")
     default ScalerFactory scaler() {
         return NoneScaler.buildFrom(CypherMapWrapper.empty());
     }
-    
+
     @Override
-    @Value.Default
     @Configuration.Ignore
     default boolean isAsynchronous() {
         return false;
     }
 
     @Override
-    @Value.Default
     @Configuration.Ignore
     default Partitioning partitioning() {
         return Partitioning.AUTO;

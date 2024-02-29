@@ -59,7 +59,7 @@ class HitsTest {
 
     @Test
     void testHits() {
-        var config = ImmutableHitsConfig.builder().concurrency(1).hitsIterations(30).build();
+        var config = HitsConfigImpl.builder().concurrency(1).hitsIterations(30).build();
 
         var pregelJob = Pregel.create(
             graph,
