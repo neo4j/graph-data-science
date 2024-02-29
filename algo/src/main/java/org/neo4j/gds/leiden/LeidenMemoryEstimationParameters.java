@@ -19,23 +19,33 @@
  */
 package org.neo4j.gds.leiden;
 
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.neo4j.gds.assertions.MemoryEstimationAssert;
+import org.jetbrains.annotations.Nullable;
 
-class LeidenMemoryEstimateDefinitionTest {
+public final class LeidenMemoryEstimationParameters {
 
-    @ParameterizedTest(name = "Concurrency: {0}")
-    @CsvSource({
-        "1, 18361384,25830376",
-        "4, 20789008,34314976"
-    })
-    void shouldEstimateMemory(int concurrency,long expectedMin, long expectedMax) {
-        var estimate = new LeidenMemoryEstimateDefinition().memoryEstimation(new LeidenMemoryEstimationParameters(null, false, 3));
-        
-        MemoryEstimationAssert.assertThat(estimate)
-            .memoryRange(10_1000,100_000,concurrency)
-            .hasMin(expectedMin)
-            .hasMax(expectedMax);
+    private final String seedProperty;
+    private final boolean includeIntermediateCommunities;
+    private final int maxLevels;
+
+    public LeidenMemoryEstimationParameters(
+        @Nullable String seedProperty,
+        boolean includeIntermediateCommunities,
+        int maxLevels
+    ) {
+        this.seedProperty = seedProperty;
+        this.maxLevels = maxLevels;
+        this.includeIntermediateCommunities = includeIntermediateCommunities;
+    }
+
+    @Nullable String seedProperty() {
+        return seedProperty;
+    }
+
+    boolean includeIntermediateCommunities() {
+        return includeIntermediateCommunities;
+    }
+
+    int maxLevels() {
+        return maxLevels;
     }
 }

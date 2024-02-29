@@ -19,29 +19,29 @@
  */
 package org.neo4j.gds.leiden;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 
-public class LeidenMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<LeidenBaseConfig> {
+public class LeidenMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<LeidenMemoryEstimationParameters> {
 
-    public MemoryEstimation memoryEstimation(@Nullable String seedProperty, boolean includeIntermediateCommunities, int maxLevels) {
+    @Override
+    public MemoryEstimation memoryEstimation(LeidenMemoryEstimationParameters configuration) {
         var builder = MemoryEstimations.builder(Leiden.class)
             .perNode("local move communities", HugeLongArray::memoryEstimation)
             .perNode("local move node volumes", HugeDoubleArray::memoryEstimation)
             .perNode("local move community volumes", HugeDoubleArray::memoryEstimation)
             .perNode("current communities", HugeLongArray::memoryEstimation);
-        if (seedProperty != null) {
+        if (configuration.seedProperty() != null) {
             builder.add("seeded communities", SeedCommunityManager.memoryEstimation());
         }
         builder
             .add("local move phase", LocalMovePhase.estimation())
             .add("modularity computation", ModularityComputer.estimation())
             .add("dendogram manager", LeidenDendrogramManager.memoryEstimation(
-                includeIntermediateCommunities ? maxLevels : 1
+                configuration.includeIntermediateCommunities() ? configuration.maxLevels() : 1
             ))
             .add("refinement phase", RefinementPhase.memoryEstimation())
             .add("aggregation phase", GraphAggregationPhase.memoryEstimation())
@@ -53,14 +53,6 @@ public class LeidenMemoryEstimateDefinition implements AlgorithmMemoryEstimateDe
                 .build()
             );
         return builder.build();
-    }
-    @Override
-    public MemoryEstimation memoryEstimation(LeidenBaseConfig configuration) {
-        return memoryEstimation(
-            configuration.seedProperty(),
-            configuration.includeIntermediateCommunities(),
-            configuration.maxLevels()
-        );
     }
 
 }
