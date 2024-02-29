@@ -60,7 +60,7 @@ public class LabelPropagationFactory<CONFIG extends LabelPropagationBaseConfig> 
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
-        return new LabelPropagationMemoryEstimateDefinition().memoryEstimation(config);
+        return new LabelPropagationMemoryEstimateDefinition().memoryEstimation(null);
     }
 
     public Task progressTask(long relationshipCount, int maxIterations) {
