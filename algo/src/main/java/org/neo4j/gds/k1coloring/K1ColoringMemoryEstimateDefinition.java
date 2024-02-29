@@ -19,16 +19,17 @@
  */
 package org.neo4j.gds.k1coloring;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryUsage;
 
-public final class K1ColoringMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<K1ColoringBaseConfig> {
+public final class K1ColoringMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<Void> {
 
     @Override
-    public MemoryEstimation memoryEstimation(K1ColoringBaseConfig configuration) {
+    public MemoryEstimation memoryEstimation(@Nullable Void unusedEvilParameter) {
         return MemoryEstimations.builder(K1Coloring.class)
             .perNode("colors", HugeLongArray::memoryEstimation)
             .perNode("nodesToColor", MemoryUsage::sizeOfBitset)
