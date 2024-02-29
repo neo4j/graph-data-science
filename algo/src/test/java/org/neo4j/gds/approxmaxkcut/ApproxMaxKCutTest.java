@@ -154,18 +154,20 @@ final class ApproxMaxKCutTest {
         var minCommunitySizes = minimize ? Collections.nCopies(k, 1L) : Collections.nCopies(k, 0L);
         var graph = minimize ? minGraph : maxGraph;
 
-        var approxMaxKCut = new ApproxMaxKCut(
+        var approxMaxKCut = ApproxMaxKCut.create(
             graph,
+            new ApproxMaxKCutParameters(
+                k,
+                iterations,
+                vnsMaxNeighborhoodOrder,
+                concurrency,
+                minBatchSize,
+                randomSeed,
+                minCommunitySizes,
+                weighted,
+                minimize
+            ),
             DefaultPool.INSTANCE,
-            k,
-            iterations,
-            vnsMaxNeighborhoodOrder,
-            concurrency,
-            minBatchSize,
-            randomSeed,
-            minCommunitySizes,
-            weighted,
-            minimize,
             ProgressTracker.NULL_TRACKER
         );
 
@@ -200,18 +202,20 @@ final class ApproxMaxKCutTest {
         var minBatchSize = concurrency > 1 ? 1 : ParallelUtil.DEFAULT_BATCH_SIZE;
         var k = (byte) 2;
 
-        var approxMaxKCut = new ApproxMaxKCut(
+        var approxMaxKCut = ApproxMaxKCut.create(
             maxGraph,
+            new ApproxMaxKCutParameters(
+                k,
+                8,
+                0,
+                concurrency,
+                minBatchSize,
+                Optional.empty(),
+                minCommunitySizes,
+                false,
+                false
+            ),
             DefaultPool.INSTANCE,
-            k,
-            8,
-            0,
-            concurrency,
-            minBatchSize,
-            Optional.empty(),
-            minCommunitySizes,
-            false,
-            false,
             ProgressTracker.NULL_TRACKER
         );
 

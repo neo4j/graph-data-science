@@ -24,6 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutParameters;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.config.SingleThreadedRandomSeedConfig;
@@ -58,6 +59,12 @@ public interface ApproxMaxKCutBaseConfig extends AlgoBaseConfig,
     @Configuration.Ignore
     default boolean minimize() {
         return false;
+    }
+
+    // Min k-cut capabilities not exposed in API yet.
+    @Configuration.Ignore
+    default int batchSize() {
+        return 10_000;
     }
 
     // Min k-cut capabilities not exposed in API yet.
@@ -104,5 +111,20 @@ public interface ApproxMaxKCutBaseConfig extends AlgoBaseConfig,
                 halfNodeCount
             ));
         }
+    }
+
+    @Configuration.Ignore
+    default ApproxMaxKCutParameters toParameters() {
+        return new ApproxMaxKCutParameters(
+            k(),
+            iterations(),
+            vnsMaxNeighborhoodOrder(),
+            concurrency(),
+            batchSize(),
+            randomSeed(),
+            minCommunitySizes(),
+            hasRelationshipWeightProperty(),
+            minimize()
+        );
     }
 }

@@ -27,7 +27,6 @@ import org.neo4j.gds.core.concurrency.AtomicDouble;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.SplittableRandom;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLongArray;
@@ -44,7 +43,7 @@ import java.util.concurrent.atomic.AtomicLongArray;
  * [1]: Festa et al. Randomized Heuristics for the Max-Cut Problem, 2002.
  * [2]: Dunning et al. What Works Best When? A Systematic Evaluation of Heuristics for Max-Cut and QUBO, 2018.
  */
-public class ApproxMaxKCut extends Algorithm<ApproxMaxKCutResult> {
+public final class ApproxMaxKCut extends Algorithm<ApproxMaxKCutResult> {
     public static final String APPROX_MAX_K_CUT_DESCRIPTION = "Approximate Maximum k-cut maps each node into one of k disjoint communities trying to maximize the sum of weights of relationships between these communities.";
 
     private static final Comparator MINIMIZING = (lhs, rhs) -> lhs < rhs;
@@ -64,65 +63,97 @@ public class ApproxMaxKCut extends Algorithm<ApproxMaxKCutResult> {
     private VariableNeighborhoodSearch variableNeighborhoodSearch;
     private AtomicLongArray currentCardinalities;
 
-    public ApproxMaxKCut(
+    public static ApproxMaxKCut create(
         Graph graph,
+        ApproxMaxKCutParameters parameters,
         ExecutorService executor,
-        byte k,
-        int iterations,
-        int vnsMaxNeighborhoodOrder,
-        int concurrency,
-        int minBatchSize,
-        Optional<Long> randomSeed,
-        List<Long> minCommunitySizes,
-        boolean hasRelationshipWeightProperty,
-        boolean minimize,
         ProgressTracker progressTracker
     ) {
-        super(progressTracker);
-        this.random = new SplittableRandom(randomSeed.orElseGet(() -> new SplittableRandom().nextLong()));
-        this.graph = graph;
-        this.comparator = minimize ? MINIMIZING : MAXIMIZING;
+        var random = new SplittableRandom(parameters.randomSeed().orElseGet(() -> new SplittableRandom().nextLong()));
+        var comparator = parameters.minimize() ? MINIMIZING : MAXIMIZING;
 
-        this.k = k;
-        this.iterations = iterations;
-        this.minCommunitySizes = minCommunitySizes;
-        this.vnsMaxNeighborhoodOrder = vnsMaxNeighborhoodOrder;
         // We allocate two arrays in order to be able to compare results between iterations "GRASP style".
-        this.candidateSolutions = new HugeByteArray[]{
+        var candidateSolutions = new HugeByteArray[]{
             HugeByteArray.newArray(graph.nodeCount()),
             HugeByteArray.newArray(graph.nodeCount())
         };
 
-        this.costs = new AtomicDouble[]{
+        var costs = new AtomicDouble[]{
             new AtomicDouble(),
             new AtomicDouble(),
         };
-        costs[0].set(minimize ? Double.MAX_VALUE : Double.MIN_VALUE);
-        costs[1].set(minimize ? Double.MAX_VALUE : Double.MIN_VALUE);
+        costs[0].set(parameters.minimize() ? Double.MAX_VALUE : Double.MIN_VALUE);
+        costs[1].set(parameters.minimize() ? Double.MAX_VALUE : Double.MIN_VALUE);
 
-        this.currentCardinalities = new AtomicLongArray(k);
+        var currentCardinalities = new AtomicLongArray(parameters.k());
 
-        this.placeNodesRandomly = new PlaceNodesRandomly(
-            concurrency,
-            k,
-            minCommunitySizes,
-            minBatchSize,
+        var placeNodesRandomly = new PlaceNodesRandomly(
+            parameters.concurrency(),
+            parameters.k(),
+            parameters.minCommunitySizes(),
+            parameters.minBatchSize(),
             random,
             graph,
             executor,
             progressTracker
         );
-        this.localSearch = new LocalSearch(
+        var localSearch = new LocalSearch(
             graph,
             comparator,
-            concurrency,
-            k,
-            minCommunitySizes,
-            minBatchSize,
-            hasRelationshipWeightProperty,
+            parameters.concurrency(),
+            parameters.k(),
+            parameters.minCommunitySizes(),
+            parameters.minBatchSize(),
+            parameters.hasRelationshipWeightProperty(),
             executor,
             progressTracker
         );
+
+        return new ApproxMaxKCut(
+            progressTracker,
+            graph,
+            random,
+            comparator,
+            placeNodesRandomly,
+            localSearch,
+            currentCardinalities,
+            candidateSolutions,
+            costs,
+            parameters.vnsMaxNeighborhoodOrder(),
+            parameters.minCommunitySizes(),
+            parameters.k(),
+            parameters.iterations()
+        );
+    }
+
+    private ApproxMaxKCut(
+        ProgressTracker progressTracker,
+        Graph graph,
+        SplittableRandom random,
+        Comparator comparator,
+        PlaceNodesRandomly placeNodesRandomly,
+        LocalSearch localSearch,
+        AtomicLongArray currentCardinalities,
+        HugeByteArray[] candidateSolutions,
+        AtomicDouble[] costs,
+        int vnsMaxNeighborhoodOrder,
+        List<Long> minCommunitySizes,
+        byte k,
+        int iterations
+    ) {
+        super(progressTracker);
+        this.graph = graph;
+        this.random = random;
+        this.comparator = comparator;
+        this.placeNodesRandomly = placeNodesRandomly;
+        this.localSearch = localSearch;
+        this.currentCardinalities = currentCardinalities;
+        this.candidateSolutions = candidateSolutions;
+        this.costs = costs;
+        this.vnsMaxNeighborhoodOrder = vnsMaxNeighborhoodOrder;
+        this.minCommunitySizes = minCommunitySizes;
+        this.k = k;
+        this.iterations = iterations;
     }
 
     @FunctionalInterface

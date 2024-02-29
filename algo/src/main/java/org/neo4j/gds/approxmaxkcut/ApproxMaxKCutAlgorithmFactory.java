@@ -47,18 +47,10 @@ public class ApproxMaxKCutAlgorithmFactory<CONFIG extends ApproxMaxKCutBaseConfi
         CONFIG config,
         ProgressTracker progressTracker
     ) {
-        return new ApproxMaxKCut(
+        return ApproxMaxKCut.create(
             graph,
+            config.toParameters(),
             DefaultPool.INSTANCE,
-            config.k(),
-            config.iterations(),
-            config.vnsMaxNeighborhoodOrder(),
-            config.concurrency(),
-            10_000,
-            config.randomSeed(),
-            config.minCommunitySizes(),
-            config.hasRelationshipWeightProperty(),
-            config.minimize(),
             progressTracker
         );
     }
