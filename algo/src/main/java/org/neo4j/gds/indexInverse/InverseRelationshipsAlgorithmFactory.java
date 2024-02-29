@@ -66,6 +66,6 @@ public class InverseRelationshipsAlgorithmFactory extends GraphStoreAlgorithmFac
 
     @Override
     public MemoryEstimation memoryEstimation(InverseRelationshipsConfig configuration) {
-        return new InverseRelationshipsMemoryEstimateDefinition().memoryEstimation(configuration);
+        return new InverseRelationshipsMemoryEstimateDefinition().memoryEstimation(configuration.relationshipTypes());
     }
 }

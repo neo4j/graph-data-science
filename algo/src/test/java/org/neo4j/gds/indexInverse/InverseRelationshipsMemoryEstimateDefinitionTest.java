@@ -31,12 +31,9 @@ import org.neo4j.gds.core.TestMethodRunner;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 class InverseRelationshipsMemoryEstimateDefinitionTest {
 
-    public static Stream<Arguments> compressions() {
+    private static Stream<Arguments> compressions() {
         var compressedRunner = TestMethodRunner.runCompressedOrdered();
         var uncompressedRunner = TestMethodRunner.runUncompressedOrdered();
 
@@ -49,14 +46,11 @@ class InverseRelationshipsMemoryEstimateDefinitionTest {
     @ParameterizedTest
     @MethodSource("compressions")
     void memoryEstimationWithUncompressedFeatureToggle(TestMethodRunner runner, long expectedSize) {
-        var config = mock(InverseRelationshipsConfig.class);
 
-        when(config.relationshipTypes()).thenReturn(List.of("T1"));
-
-        GraphDimensions graphDimensions = GraphDimensions.of(100_000, 100_000);
+        var graphDimensions = GraphDimensions.of(100_000, 100_000);
 
         runner.run(() -> {
-            var memoryEstimation = new InverseRelationshipsMemoryEstimateDefinition().memoryEstimation(config);
+            var memoryEstimation = new InverseRelationshipsMemoryEstimateDefinition().memoryEstimation(List.of("T1"));
             MemoryEstimationAssert.assertThat(memoryEstimation)
                 .memoryTree(graphDimensions, 4)
                 .memoryRange()
@@ -66,11 +60,7 @@ class InverseRelationshipsMemoryEstimateDefinitionTest {
 
     @Test
     void memoryEstimationWithMultipleTypes() {
-        var config = mock(InverseRelationshipsConfig.class);
-
-        when(config.relationshipTypes()).thenReturn(List.of("T1", "T2"));
-
-        GraphDimensions graphDimensions = GraphDimensions
+        var graphDimensions = GraphDimensions
             .builder()
             .nodeCount(100_000)
             .putRelationshipCount(RelationshipType.of("T1"), 10_000)
@@ -78,7 +68,7 @@ class InverseRelationshipsMemoryEstimateDefinitionTest {
             .relCountUpperBound(100_000)
             .build();
 
-        var memoryEstimation = new InverseRelationshipsMemoryEstimateDefinition().memoryEstimation(config);
+        var memoryEstimation = new InverseRelationshipsMemoryEstimateDefinition().memoryEstimation(List.of("T1", "T2"));
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryTree(graphDimensions, 4)
@@ -93,18 +83,14 @@ class InverseRelationshipsMemoryEstimateDefinitionTest {
 
     @Test
     void memoryEstimationWithTypeFilter() {
-        var config = mock(InverseRelationshipsConfig.class);
-
-        when(config.relationshipTypes()).thenReturn(List.of("T2"));
-
-        GraphDimensions graphDimensions = GraphDimensions
+        var graphDimensions = GraphDimensions
             .builder()
             .nodeCount(100_000)
             .putRelationshipCount(RelationshipType.of("T1"), 10_000)
             .putRelationshipCount(RelationshipType.of("T2"), 90_000)
             .build();
 
-        var memoryEstimation = new InverseRelationshipsMemoryEstimateDefinition().memoryEstimation(config);
+        var memoryEstimation = new InverseRelationshipsMemoryEstimateDefinition().memoryEstimation(List.of("T2"));
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryTree(graphDimensions, 4)
@@ -119,12 +105,7 @@ class InverseRelationshipsMemoryEstimateDefinitionTest {
 
     @Test
     void memoryEstimationWithFilterStar() {
-
-        var config = mock(InverseRelationshipsConfig.class);
-
-        when(config.relationshipTypes()).thenReturn(List.of("*"));
-
-        GraphDimensions graphDimensions = GraphDimensions
+        var graphDimensions = GraphDimensions
             .builder()
             .nodeCount(100_000)
             .putRelationshipCount(RelationshipType.of("T1"), 10_000)
@@ -132,7 +113,7 @@ class InverseRelationshipsMemoryEstimateDefinitionTest {
             .relCountUpperBound(100_000)
             .build();
 
-        var memoryEstimation = new InverseRelationshipsMemoryEstimateDefinition().memoryEstimation(config);
+        var memoryEstimation = new InverseRelationshipsMemoryEstimateDefinition().memoryEstimation(List.of("*"));
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryTree(graphDimensions, 4)
