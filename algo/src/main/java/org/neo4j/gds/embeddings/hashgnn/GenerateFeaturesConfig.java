@@ -50,7 +50,7 @@ public interface GenerateFeaturesConfig {
         return List.of();
     }
 
-    @Value.Check
+    @Configuration.Check
     default void validate() {
         if (densityLevel() > dimension()) {
             throw new IllegalArgumentException(formatWithLocale("Generate features requires `densityLevel` to be at most `dimension` but was %d > %d.", densityLevel(), dimension()));

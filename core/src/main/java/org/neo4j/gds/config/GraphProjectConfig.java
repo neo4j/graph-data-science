@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.config;
 
-import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStoreFactory;
@@ -107,7 +106,7 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
         };
     }
 
-    @Value.Check
+    @Configuration.Check
     default void validateReadConcurrency() {
         ConcurrencyValidatorService
             .validator()

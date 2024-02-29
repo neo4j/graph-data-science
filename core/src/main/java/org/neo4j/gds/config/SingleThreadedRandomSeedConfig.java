@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.config;
 
-import org.immutables.value.Value;
+import org.neo4j.gds.annotation.Configuration;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface SingleThreadedRandomSeedConfig extends ConcurrencyConfig, RandomSeedConfig {
-    @Value.Check
+    @Configuration.Check
     default void validate() {
         randomSeed().ifPresent(unused -> {
             if (concurrency() > 1) {

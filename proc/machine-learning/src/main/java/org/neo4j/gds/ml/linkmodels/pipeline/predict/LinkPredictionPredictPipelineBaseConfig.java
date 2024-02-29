@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
@@ -132,7 +131,7 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
         return initialSampler().map(KnnSampler.SamplerType::parse);
     }
 
-    @Value.Check
+    @Configuration.Check
     default void validateParameterCombinations() {
         if (isApproximateStrategy()) {
             Map<String, Boolean> exhaustiveStrategyParameters = Map.of(

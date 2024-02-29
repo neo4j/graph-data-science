@@ -154,6 +154,27 @@ public @interface Configuration {
     }
 
     /**
+     * The annotated method will be invoked internally to validate invariants after instance has been created,
+     * but before returned to a client. The method must
+     * <ul>
+     * <li>be parameter-less</li>
+     * <li>be non-private</li>
+     * <li>have a {@code void} return type</li>
+     * <li>not throw a checked exception</li>
+     * </ul>
+     * <p>
+     * Can also be used to compute a normalized variant by specifying a non-void return type.
+     * This is probably not what you want.
+     * <p>
+     * See {@code org.immutables.value.Value.Check}.
+     */
+    @Documented
+    @Target(ElementType.METHOD)
+    @Retention(RetentionPolicy.CLASS)
+    @interface Check {
+    }
+
+    /**
      * Input for the annotated configuration field storing an Integer, will be validated if it is in the given range.
      */
     @Documented

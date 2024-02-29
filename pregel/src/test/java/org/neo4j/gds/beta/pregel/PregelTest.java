@@ -32,7 +32,6 @@ import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.TestTaskStore;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
@@ -41,13 +40,12 @@ import org.neo4j.gds.beta.pregel.context.ComputeContext;
 import org.neo4j.gds.beta.pregel.context.ComputeContext.BidirectionalComputeContext;
 import org.neo4j.gds.beta.pregel.context.InitContext;
 import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.TaskRegistry;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -56,6 +54,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -313,7 +312,7 @@ class PregelTest {
     @ParameterizedTest
     @EnumSource(Partitioning.class)
     void compositeNodeValueTest(Partitioning partitioning) {
-        var config = ImmutableCompositeTestComputationConfig.builder()
+        var config = CompositeTestComputationConfigImpl.builder()
             .maxIterations(2)
             .concurrency(1)
             .partitioning(partitioning)
@@ -576,15 +575,16 @@ class PregelTest {
         );
     }
 
-    @ValueClass
-    @SuppressWarnings("immutables:subtype")
+    @Configuration
     interface HackerManConfig extends PregelProcedureConfig {
         @Override
+        @Configuration.Check
         default void validateConcurrency() {
             // haha, h4ck3rm4n, so smart, much wow
         }
 
         @Override
+        @Configuration.Check
         default void validateWriteConcurrency() {
             // and he strikes again, HAHA
         }
@@ -593,7 +593,7 @@ class PregelTest {
     @ParameterizedTest
     @EnumSource(Partitioning.class)
     void preventIllegalConcurrencyConfiguration(Partitioning partitioning) {
-        var config = ImmutableHackerManConfig.builder()
+        var config = HackerManConfigImpl.builder()
             .maxIterations(1337)
             .partitioning(partitioning)
             .concurrency(42)
@@ -701,9 +701,7 @@ class PregelTest {
         }
     }
 
-    @ValueClass
     @Configuration
-    @SuppressWarnings("immutables:subtype")
     public interface CompositeTestComputationConfig extends PregelConfig {
         String doubleProperty();
 

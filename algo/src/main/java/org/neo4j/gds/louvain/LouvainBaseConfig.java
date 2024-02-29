@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.louvain;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConsecutiveIdsConfig;
@@ -56,7 +55,7 @@ public interface LouvainBaseConfig extends
         return false;
     }
 
-    @Value.Check
+    @Configuration.Check
     default void validate() {
         if (includeIntermediateCommunities() && consecutiveIds()) {
             throw new IllegalArgumentException("`includeIntermediateResults` and the `consecutiveIds` option cannot be used at the same time.");

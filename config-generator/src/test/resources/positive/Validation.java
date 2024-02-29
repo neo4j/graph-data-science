@@ -19,7 +19,6 @@
  */
 package positive;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 
 @Configuration("ValidationConfig")
@@ -27,10 +26,10 @@ public interface Validation {
 
     int foo();
 
-    @Value.Check
+    @Configuration.Check
     default void validate() {}
 
-    @Value.Check
+    @Configuration.Check
     default Validation normalize() {
         return this;
     }

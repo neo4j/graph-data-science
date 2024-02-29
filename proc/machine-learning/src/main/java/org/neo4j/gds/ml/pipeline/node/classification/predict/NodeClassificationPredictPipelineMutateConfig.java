@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
@@ -39,7 +38,7 @@ public interface NodeClassificationPredictPipelineMutateConfig extends
         return new NodeClassificationPredictPipelineMutateConfigImpl(username, config);
     }
 
-    @Value.Check
+    @Configuration.Check
     default void validateMutatePropertiesDiffer() {
         predictedProbabilityProperty().ifPresent(predictedProbabilityProperty -> {
             if (mutateProperty().equals(predictedProbabilityProperty)) {

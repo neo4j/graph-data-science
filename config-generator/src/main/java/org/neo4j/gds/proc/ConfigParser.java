@@ -325,7 +325,7 @@ final class ConfigParser {
     }
 
     private static void validateValueCheck(ExecutableElement method, ImmutableMember.Builder memberBuilder) {
-        if (isAnnotationPresent(method, Value.Check.class)) {
+        if (isAnnotationPresent(method, Configuration.Check.class)) {
             if (method.getReturnType().getKind() == TypeKind.VOID) {
                 memberBuilder.validates(true);
             } else {
@@ -441,7 +441,7 @@ final class ConfigParser {
                     Locale.ENGLISH,
                     "Cannot combine @%s with @%s",
                     CollectKeys.class.getSimpleName(),
-                    Value.Check.class.getSimpleName()
+                    Configuration.Check.class.getSimpleName()
                 ));
             }
             if (toMap() && (validates() || normalizes())) {
@@ -449,7 +449,7 @@ final class ConfigParser {
                     Locale.ENGLISH,
                     "Cannot combine @%s with @%s",
                     ToMap.class.getSimpleName(),
-                    Value.Check.class.getSimpleName()
+                    Configuration.Check.class.getSimpleName()
                 ));
             }
             if (trimmedKey.equals(lookupKey())) {

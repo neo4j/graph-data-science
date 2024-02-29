@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.projection;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
@@ -102,7 +101,7 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
         };
     }
 
-    @Value.Check
+    @Configuration.Check
     default void validateProjectionsAreNotEmpty() {
         if (nodeProjections().isEmpty()) {
             throw new IllegalArgumentException(
@@ -117,7 +116,7 @@ public interface GraphProjectFromStoreConfig extends GraphProjectConfig {
         }
     }
 
-    @Value.Check
+    @Configuration.Check
     default GraphProjectFromStoreConfig withNormalizedPropertyMappings() {
         PropertyMappings nodeProperties = nodeProperties();
         PropertyMappings relationshipProperties = relationshipProperties();

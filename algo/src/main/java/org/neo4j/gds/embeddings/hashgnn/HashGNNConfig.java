@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.FeaturePropertiesConfig;
@@ -57,7 +56,7 @@ public interface HashGNNConfig extends AlgoBaseConfig, FeaturePropertiesConfig, 
     @Configuration.ConvertWith(method = "parseBinarizationConfig", inverse = Configuration.ConvertWith.INVERSE_IS_TO_MAP)
     Optional<BinarizeFeaturesConfig> binarizeFeatures();
 
-    @Value.Check
+    @Configuration.Check
     default void validate() {
         if (!featureProperties().isEmpty() && generateFeatures().isPresent()) {
             throw new IllegalArgumentException("It is not allowed to use `generateFeatures` and have non-empty `featureProperties`.");

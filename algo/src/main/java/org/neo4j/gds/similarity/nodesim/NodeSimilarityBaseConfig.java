@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
@@ -106,7 +105,7 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
         return false;
     }
 
-    @Value.Check
+    @Configuration.Check
     default void validate() {
         if (topK() != TOP_K_DEFAULT && bottomK() != BOTTOM_K_DEFAULT) {
             throw new IllegalArgumentException(formatWithLocale(

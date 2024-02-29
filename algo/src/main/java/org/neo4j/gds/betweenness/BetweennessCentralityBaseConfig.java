@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.betweenness;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
@@ -42,7 +41,7 @@ public interface BetweennessCentralityBaseConfig extends AlgoBaseConfig, Relatio
 
     Optional<Long> samplingSeed();
 
-    @Value.Check
+    @Configuration.Check
     default void validate() {
         samplingSize().ifPresent(samplingSize -> {
             if (samplingSize < 0) {
@@ -69,7 +68,7 @@ public interface BetweennessCentralityBaseConfig extends AlgoBaseConfig, Relatio
             .map(Direction::toOrientation)
             .distinct()
             .count();
-            
+
         if (selectedDirectionsCount > 1) {
             throw new IllegalArgumentException(StringFormatting.formatWithLocale(
                 "Combining UNDIRECTED orientation with NATURAL or REVERSE is not supported. Found projections: %s.",

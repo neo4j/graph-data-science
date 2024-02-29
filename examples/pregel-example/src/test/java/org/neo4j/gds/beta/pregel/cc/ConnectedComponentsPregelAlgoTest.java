@@ -114,7 +114,7 @@ class ConnectedComponentsPregelAlgoTest {
         int maxIterations = 10;
 
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> {
-            ImmutableConnectedComponentsConfig.builder()
+            ConnectedComponentsConfigImpl.builder()
                 .concurrency(10)
                 .maxIterations(maxIterations)
                 .build();

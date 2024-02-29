@@ -35,7 +35,7 @@ public interface ConcurrencyConfig {
         return DEFAULT_CONCURRENCY;
     }
 
-    @Value.Check
+    @Configuration.Check
     default void validateConcurrency() {
         ConcurrencyValidatorService.validator().validate(concurrency(), CONCURRENCY_KEY, CONCURRENCY_LIMITATION);
     }

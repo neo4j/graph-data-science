@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.decisiontree;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -42,7 +41,7 @@ public interface DecisionTreeTrainerConfig {
         return 1;
     }
 
-    @Value.Check
+    @Configuration.Check
     default void validateMinSizes() {
         if (minLeafSize() >= minSplitSize()) {
             throw new IllegalArgumentException(formatWithLocale(

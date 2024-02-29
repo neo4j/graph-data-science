@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.leiden;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConsecutiveIdsConfig;
@@ -58,7 +57,7 @@ public interface LeidenBaseConfig extends
         return 0.0001;
     }
 
-    @Value.Check
+    @Configuration.Check
     default void validate() {
         if (includeIntermediateCommunities() && consecutiveIds()) {
             throw new IllegalArgumentException(

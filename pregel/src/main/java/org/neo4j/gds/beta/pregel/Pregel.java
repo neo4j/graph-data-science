@@ -67,7 +67,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
         // validation in custom PregelConfig implementations.
         // Creating a copy of the user config triggers the
         // concurrency validations.
-        ImmutablePregelConfig.copyOf(config);
+        PregelConfigImpl.Builder.from(config).build();
 
         if (computation instanceof BidirectionalPregelComputation && !graph.characteristics().isInverseIndexed()) {
             throw new UnsupportedOperationException(String.format(
