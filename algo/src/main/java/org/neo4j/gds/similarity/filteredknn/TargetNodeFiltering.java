@@ -20,14 +20,16 @@
 package org.neo4j.gds.similarity.filteredknn;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.knn.NeighbourConsumers;
 import org.neo4j.gds.similarity.knn.SimilarityFunction;
+import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -49,16 +51,30 @@ public final class TargetNodeFiltering implements NeighbourConsumers {
         LongPredicate targetNodePredicate,
         Graph graph,
         Optional<SimilarityFunction> optionalSimilarityFunction,
-        double similarityCutoff
+        double similarityCutoff,
+        int concurrency
     ) {
         var neighbourConsumers = HugeObjectArray.newArray(TargetNodeFilter.class, nodeCount);
+        var startingSeeds = findSeeds(
+            nodeCount,
+            targetNodePredicate,
+            k + 1,
+            optionalSimilarityFunction.isEmpty()
+        );
 
-        for (int i = 0; i < nodeCount; i++) {
-            var optionalSeeds = prepareSeeds(graph, targetNodePredicate, k, i, optionalSimilarityFunction);
-            TargetNodeFilter targetNodeFilter = TargetNodeFilter.create(targetNodePredicate, k, optionalSeeds, similarityCutoff);
+        ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, (nodeId) -> {
 
-            neighbourConsumers.set(i, targetNodeFilter);
-        }
+            var optionalPersonalizedSeeds = prepareNode(nodeId, startingSeeds, optionalSimilarityFunction);
+            TargetNodeFilter targetNodeFilter = TargetNodeFilter.create(
+                targetNodePredicate,
+                k,
+                optionalPersonalizedSeeds,
+                similarityCutoff
+            );
+            neighbourConsumers.set(nodeId, targetNodeFilter);
+        });
+
+
 
         return new TargetNodeFiltering(neighbourConsumers);
     }
@@ -72,43 +88,58 @@ public final class TargetNodeFiltering implements NeighbourConsumers {
      *
      * Cons include bias for start of node array, yada yada. Extremely naive solution at this point.
      *
-     * @param similarityFunction An actual similarity function if you want seeds, empty otherwise.
      */
-    private static Optional<Set<Pair<Double, Long>>> prepareSeeds(
-        Graph graph,
+    private static long[] findSeeds(
+        long nodeCount,
         LongPredicate targetNodePredicate,
         int k,
-        int n,
-        Optional<SimilarityFunction> similarityFunction
+        boolean isEmpty
     ) {
-        if (similarityFunction.isEmpty()) { return Optional.empty(); }
+        if (isEmpty) {
+            return null;
+        }
+        long[] seeds = new long[k + 1];
+        Arrays.fill(seeds, -1L);
 
-        Set<Pair<Double, Long>> seeds = prepareSeedSet(k);
+        int index = 0;
+        for (var nodeId = 0; (index < k && nodeId < nodeCount); ++nodeId) {
+            if (targetNodePredicate.test(nodeId)) {
+                seeds[index++] = nodeId;
+            }
 
-        graph.forEachNode(m -> {
-            if (n == m) return true;
+        }
 
-            if (!targetNodePredicate.test(m)) return true;
-
-            double similarityScore = similarityFunction.get().computeSimilarity(n, m);
-
-            seeds.add(Pair.of(similarityScore, m));
-
-            return seeds.size() < k;
-        });
-
-        return Optional.of(seeds);
+        return seeds;
     }
 
-    /**
-     * Ensuring the {@link java.util.HashSet} never needs to resize
-     */
-    @NotNull
+    //TODO: Replace the Pair<Double,Long>  stuff but not here not now
     private static Set<Pair<Double, Long>> prepareSeedSet(int k) {
         float defaultLoadFactor = 0.75f; // java.util.HashMap.DEFAULT_LOAD_FACTOR
         int initialCapacity = (int) (k / defaultLoadFactor); // see treatise in @HashMap JavaDoc
         return new HashSet<>(initialCapacity, defaultLoadFactor);
     }
+
+    private static Optional<Set<Pair<Double, Long>>> prepareNode(
+        long nodeId,
+        long[] seeds,
+        Optional<SimilarityFunction> optionalSimilarityFunction
+    ) {
+
+        return optionalSimilarityFunction.map(similarityFunction -> {
+            var discoveredSeed = prepareSeedSet(seeds.length);
+            for (int i = 0; i < seeds.length; ++i) {
+                if (seeds[i] == -1) {
+                    break;
+                }
+                if (seeds[i] == nodeId) {
+                    continue;
+                }
+                discoveredSeed.add(Pair.of(similarityFunction.computeSimilarity(nodeId, seeds[i]), seeds[i]));
+            }
+            return Optional.of(discoveredSeed);
+        }).orElse(Optional.empty());
+    }
+
 
     private TargetNodeFiltering(HugeObjectArray<TargetNodeFilter> targetNodeFilters) {
         this.targetNodeFilters = targetNodeFilters;

@@ -34,17 +34,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 class TargetNodeFilteringTest {
     @Test
     void shouldFilterTargetNodes() {
-        int thereIsOneNodeInThisFilter = 1;
+        int thereIsSixNodeInThisFilter = 6;
         int kIsTwo = 2;
         LongPredicate evenNodesAreTargetNodes = l -> l % 2 == 0;
         double noSimilarityCutoff = Double.MIN_VALUE;
         TargetNodeFiltering targetNodeFiltering = TargetNodeFiltering.create(
-            thereIsOneNodeInThisFilter,
+            thereIsSixNodeInThisFilter,
             kIsTwo,
             evenNodesAreTargetNodes,
             null /* not needed when not seeding */,
             Optional.empty(),  /* not needed when not seeding */
-            noSimilarityCutoff
+            noSimilarityCutoff,
+            1
         );
 
         TargetNodeFilter targetNodeFilter = targetNodeFiltering.get(0);
@@ -63,7 +64,7 @@ class TargetNodeFilteringTest {
 
     @Test
     void shouldSeed() {
-        int thereIsOneNodeInThisFilter = 1;
+        int thereIsSixNodeInThisFilter = 6;
         int kIsFive = 5;
         LongPredicate allNodesAreTargetNodes = l -> true;
         Graph graphWithAtLeastKNodes = new GraphAdapter(null) {
@@ -88,12 +89,13 @@ class TargetNodeFilteringTest {
         });
         double noSimilarityCutoff = Double.MIN_VALUE;
         TargetNodeFiltering targetNodeFiltering = TargetNodeFiltering.create(
-            thereIsOneNodeInThisFilter,
+            thereIsSixNodeInThisFilter,
             kIsFive,
             allNodesAreTargetNodes,
             graphWithAtLeastKNodes,
             weSeedWithLowScores,
-            noSimilarityCutoff
+            noSimilarityCutoff,
+            1
         );
 
         // we only offer three high quality nodes
@@ -114,7 +116,7 @@ class TargetNodeFilteringTest {
 
     @Test
     void shouldNotSeedWithSelf() {
-        int thereIsOneNodeInThisFilter = 1;
+        int thereIsSixNodeInThisFilter = 6;
         int kIsFive = 5;
         LongPredicate allNodesAreTargetNodes = l -> true;
         Graph graphWithAtLeastKNodes = new GraphAdapter(null) {
@@ -139,12 +141,13 @@ class TargetNodeFilteringTest {
         });
         double noSimilarityCutoff = Double.MIN_VALUE;
         TargetNodeFiltering targetNodeFiltering = TargetNodeFiltering.create(
-            thereIsOneNodeInThisFilter,
+            thereIsSixNodeInThisFilter,
             kIsFive,
             allNodesAreTargetNodes,
             graphWithAtLeastKNodes,
             weSeedWithLowScores,
-            noSimilarityCutoff
+            noSimilarityCutoff,
+            1
         );
 
         // this is only the seeds
