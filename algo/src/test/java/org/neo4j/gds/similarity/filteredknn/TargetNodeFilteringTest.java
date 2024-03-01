@@ -20,9 +20,8 @@
 package org.neo4j.gds.similarity.filteredknn;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphAdapter;
 import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.similarity.knn.SimilarityFunction;
 
 import java.util.Optional;
@@ -39,16 +38,16 @@ class TargetNodeFilteringTest {
         LongPredicate evenNodesAreTargetNodes = l -> l % 2 == 0;
         double noSimilarityCutoff = Double.MIN_VALUE;
         TargetNodeFiltering targetNodeFiltering = TargetNodeFiltering.create(
+            NodeFilter.ALLOW_EVERYTHING,
             thereIsSixNodeInThisFilter,
             kIsTwo,
             evenNodesAreTargetNodes,
-            null /* not needed when not seeding */,
             Optional.empty(),  /* not needed when not seeding */
             noSimilarityCutoff,
             1
         );
 
-        TargetNodeFilter targetNodeFilter = targetNodeFiltering.get(0);
+        var targetNodeFilter = targetNodeFiltering.get(0);
         targetNodeFilter.offer(40, 3.14);
         targetNodeFilter.offer(41, 3.15);
         targetNodeFilter.offer(42, 3.16);
@@ -67,20 +66,7 @@ class TargetNodeFilteringTest {
         int thereIsSixNodeInThisFilter = 6;
         int kIsFive = 5;
         LongPredicate allNodesAreTargetNodes = l -> true;
-        Graph graphWithAtLeastKNodes = new GraphAdapter(null) {
-            @Override
-            public Graph concurrentCopy() {
-                throw new UnsupportedOperationException("TODO");
-            }
 
-            @Override
-            public void forEachNode(LongPredicate consumer) {
-                int i = 0;
-                while (true) {
-                    if (!consumer.test(i++)) break;
-                }
-            }
-        };
         Optional<SimilarityFunction> weSeedWithLowScores = Optional.of(new SimilarityFunction(null) {
             @Override
             public double computeSimilarity(long n, long m) {
@@ -89,17 +75,17 @@ class TargetNodeFilteringTest {
         });
         double noSimilarityCutoff = Double.MIN_VALUE;
         TargetNodeFiltering targetNodeFiltering = TargetNodeFiltering.create(
+            NodeFilter.ALLOW_EVERYTHING,
             thereIsSixNodeInThisFilter,
             kIsFive,
             allNodesAreTargetNodes,
-            graphWithAtLeastKNodes,
             weSeedWithLowScores,
             noSimilarityCutoff,
             1
         );
 
         // we only offer three high quality nodes
-        TargetNodeFilter targetNodeFilter = targetNodeFiltering.get(0);
+        var targetNodeFilter = targetNodeFiltering.get(0);
         targetNodeFilter.offer(40, 3.14);
         targetNodeFilter.offer(41, 3.15);
         targetNodeFilter.offer(42, 3.16);
@@ -119,20 +105,7 @@ class TargetNodeFilteringTest {
         int thereIsSixNodeInThisFilter = 6;
         int kIsFive = 5;
         LongPredicate allNodesAreTargetNodes = l -> true;
-        Graph graphWithAtLeastKNodes = new GraphAdapter(null) {
-            @Override
-            public Graph concurrentCopy() {
-                throw new UnsupportedOperationException("TODO");
-            }
 
-            @Override
-            public void forEachNode(LongPredicate consumer) {
-                int i = 0;
-                while (true) {
-                    if (!consumer.test(i++)) break;
-                }
-            }
-        };
         Optional<SimilarityFunction> weSeedWithLowScores = Optional.of(new SimilarityFunction(null) {
             @Override
             public double computeSimilarity(long n, long m) {
@@ -141,10 +114,10 @@ class TargetNodeFilteringTest {
         });
         double noSimilarityCutoff = Double.MIN_VALUE;
         TargetNodeFiltering targetNodeFiltering = TargetNodeFiltering.create(
+            NodeFilter.ALLOW_EVERYTHING,
             thereIsSixNodeInThisFilter,
             kIsFive,
             allNodesAreTargetNodes,
-            graphWithAtLeastKNodes,
             weSeedWithLowScores,
             noSimilarityCutoff,
             1
@@ -154,5 +127,28 @@ class TargetNodeFilteringTest {
         Stream<SimilarityResult> similarityResultStream = targetNodeFiltering.get(0).asSimilarityStream(0);
 
         assertThat(similarityResultStream.mapToLong(SimilarityResult::targetNodeId)).doesNotContain(0L);
+    }
+
+    @Test
+    void shouldRestrictToSourceFilteredNodes() {
+        int thereIsSixNodeInThisFilter = 6;
+        int kIsTwo = 2;
+        LongPredicate evenNodesAreTargetNodes = l -> l % 2 == 0;
+        double noSimilarityCutoff = Double.MIN_VALUE;
+        TargetNodeFiltering targetNodeFiltering = TargetNodeFiltering.create(
+            l -> l > 0,
+            thereIsSixNodeInThisFilter,
+            kIsTwo,
+            evenNodesAreTargetNodes,
+            Optional.empty(),  /* not needed when not seeding */
+            noSimilarityCutoff,
+            1
+        );
+
+        var targetNodeFilterZero = targetNodeFiltering.get(0);
+        var targetNodeFilterOne = targetNodeFiltering.get(1);
+        assertThat(targetNodeFilterZero).isInstanceOf(EmptyTargetNodeFilter.class);
+        assertThat(targetNodeFilterOne).isInstanceOf(ProvidedTargetNodeFilter.class);
+
     }
 }

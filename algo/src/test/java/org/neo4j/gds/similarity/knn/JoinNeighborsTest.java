@@ -48,7 +48,7 @@ class JoinNeighborsTest {
 
     @Test
     void joinNeighbors() {
-        NeighbourConsumer neighbourConsumer = NeighbourConsumer.devNull;
+        NeighbourConsumer neighbourConsumer = NeighbourConsumer.EMPTY_CONSUMER;
         SplittableRandom random = new SplittableRandom(42);
         double perturbationRate = 0.0;
         var allNeighbors = HugeObjectArray.of(

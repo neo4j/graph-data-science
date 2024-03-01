@@ -50,7 +50,7 @@ class SplitOldAndNewNeighborsTest extends RandomNodeCountAndKValues {
 
         SplittableRandom rng = new SplittableRandom();
         allNeighbors.setAll(nodeId -> {
-            var neighbors = new NeighborList(k, NeighbourConsumer.devNull);
+            var neighbors = new NeighborList(k, NeighbourConsumer.EMPTY_CONSUMER);
             LongStream.concat(
                 LongStream.range(nodeId + 1, nodeCount),
                 LongStream.range(0, nodeId)

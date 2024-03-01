@@ -73,10 +73,13 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
      */
     static FilteredKnn create(Graph graph, FilteredKnnBaseConfig config, KnnContext context, Optional<SimilarityFunction> optionalSimilarityFunction) {
         var targetNodeFilter = config.targetNodeFilter().toNodeFilter(graph);
-        var targetNodeFiltering = TargetNodeFiltering.create(graph.nodeCount(),
+        var sourceNodeFilter = config.sourceNodeFilter().toNodeFilter(graph);
+
+        var targetNodeFiltering = TargetNodeFiltering.create(
+            sourceNodeFilter,
+            graph.nodeCount(),
             config.k(graph.nodeCount()).value,
             targetNodeFilter,
-            graph,
             optionalSimilarityFunction,
             config.similarityCutoff(),
             config.concurrency()
@@ -102,7 +105,6 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
             new KnnNeighborFilterFactory(graph.nodeCount()),
             targetNodeFiltering
         );
-        var sourceNodeFilter = config.sourceNodeFilter().toNodeFilter(graph);
 
         return new FilteredKnn(context.progressTracker(), knn, targetNodeFiltering, sourceNodeFilter);
     }

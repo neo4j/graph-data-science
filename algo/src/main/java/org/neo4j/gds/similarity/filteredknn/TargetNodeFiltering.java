@@ -20,11 +20,11 @@
 package org.neo4j.gds.similarity.filteredknn;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.similarity.knn.NeighbourConsumers;
 import org.neo4j.gds.similarity.knn.SimilarityFunction;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -39,6 +39,8 @@ import java.util.function.UnaryOperator;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.similarity.filteredknn.EmptyTargetNodeFilter.EMPTY_CONSUMER;
+
 public final class TargetNodeFiltering implements NeighbourConsumers {
     private final HugeObjectArray<TargetNodeFilter> targetNodeFilters;
 
@@ -46,10 +48,10 @@ public final class TargetNodeFiltering implements NeighbourConsumers {
      * @param optionalSimilarityFunction An actual similarity function if you want seeding, empty otherwise
      */
     static TargetNodeFiltering create(
+        NodeFilter sourceNodeFilter,
         long nodeCount,
         int k,
         LongPredicate targetNodePredicate,
-        Graph graph,
         Optional<SimilarityFunction> optionalSimilarityFunction,
         double similarityCutoff,
         int concurrency
@@ -63,15 +65,18 @@ public final class TargetNodeFiltering implements NeighbourConsumers {
         );
 
         ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, (nodeId) -> {
-
-            var optionalPersonalizedSeeds = prepareNode(nodeId, startingSeeds, optionalSimilarityFunction);
-            TargetNodeFilter targetNodeFilter = TargetNodeFilter.create(
-                targetNodePredicate,
-                k,
-                optionalPersonalizedSeeds,
-                similarityCutoff
-            );
-            neighbourConsumers.set(nodeId, targetNodeFilter);
+            if (sourceNodeFilter.test(nodeId)) {
+                var optionalPersonalizedSeeds = prepareNode(nodeId, startingSeeds, optionalSimilarityFunction);
+                TargetNodeFilter targetNodeFilter = ProvidedTargetNodeFilter.create(
+                    targetNodePredicate,
+                    k,
+                    optionalPersonalizedSeeds,
+                    similarityCutoff
+                );
+                neighbourConsumers.set(nodeId, targetNodeFilter);
+            } else {
+                neighbourConsumers.set(nodeId, EMPTY_CONSUMER);
+            }
         });
 
 

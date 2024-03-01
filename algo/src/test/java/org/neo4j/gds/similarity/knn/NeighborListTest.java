@@ -36,7 +36,7 @@ class NeighborListTest {
     void shouldKeepMaxValuesOrderedByPriority() {
         long[] expected = {6L, 5L, 2L};
 
-        NeighborList queue = new NeighborList(3, NeighbourConsumer.devNull);
+        NeighborList queue = new NeighborList(3, NeighbourConsumer.EMPTY_CONSUMER);
         SplittableRandom splittableRandom = new SplittableRandom();
 
         assertEquals(1, queue.add(0, Double.MIN_VALUE, splittableRandom, 0.0));
@@ -55,7 +55,7 @@ class NeighborListTest {
     void shouldLimitReturnWhenNotFull() {
         long[] expected = {6L, 5L, 4L};
 
-        NeighborList queue = new NeighborList(10, NeighbourConsumer.devNull);
+        NeighborList queue = new NeighborList(10, NeighbourConsumer.EMPTY_CONSUMER);
         SplittableRandom splittableRandom = new SplittableRandom();
 
         assertEquals(1, queue.add(6, 6.0, splittableRandom, 0.0));
@@ -72,7 +72,7 @@ class NeighborListTest {
         var elements = LongStream.range(0, nodeCount).boxed().collect(Collectors.toList());
         var rng = new SplittableRandom(1337L);
 
-        var queue = new NeighborList(nodeCount, NeighbourConsumer.devNull);
+        var queue = new NeighborList(nodeCount, NeighbourConsumer.EMPTY_CONSUMER);
 
         elements.forEach(candidate -> queue.add(candidate, 1.0 / (1.0 + Math.abs(candidate - 2)), rng, 0.0));
 
@@ -82,7 +82,7 @@ class NeighborListTest {
     @Test
     void insertEveryThingTake2() {
         List<Long> elements = List.of(0L, 2L);
-        var queue = new NeighborList(2, NeighbourConsumer.devNull);
+        var queue = new NeighborList(2, NeighbourConsumer.EMPTY_CONSUMER);
         var rng = new SplittableRandom(1337L);
 
         elements.forEach(candidate -> queue.add(candidate, 1.0 / (1.0 + Math.abs(candidate - 1)), rng, 0.0));

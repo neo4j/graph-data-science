@@ -85,7 +85,7 @@ class NodeFilterTest {
 
     @Test
     void noOpFilterShouldReturnTrue() {
-        var nodeFilter = NodeFilter.noOp;
+        var nodeFilter = NodeFilter.ALLOW_EVERYTHING;
         assertThat(nodeFilter.test(10)).isTrue();
         assertThat(nodeFilter.test(1)).isTrue();
     }
