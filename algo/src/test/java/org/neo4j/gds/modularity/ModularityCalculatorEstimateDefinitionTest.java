@@ -26,16 +26,12 @@ import org.neo4j.gds.assertions.MemoryEstimationAssert;
 
 import java.util.stream.Stream;
 
-import static org.mockito.Mockito.mock;
-
 class ModularityCalculatorEstimateDefinitionTest {
 
-    @ParameterizedTest(name = "{0}")
+    @ParameterizedTest(name = "Concurrency: {0}")
     @MethodSource("memoryEstimationSetup")
     void memoryEstimation(int concurrency,long expected) {
-        var config = mock(ModularityBaseConfig.class);
-
-        var memoryEstimation = new ModularityCalculatorMemoryEstimateDefinition().memoryEstimation(config);
+        var memoryEstimation = new ModularityCalculatorMemoryEstimateDefinition().memoryEstimation(null);
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(10, 23, concurrency)
