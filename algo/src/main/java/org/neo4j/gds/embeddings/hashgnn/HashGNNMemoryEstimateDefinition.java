@@ -27,18 +27,17 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.mem.MemoryUsage;
 
-import java.util.Optional;
 import java.util.function.LongUnaryOperator;
 
-public class HashGNNMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<HashGNNConfig> {
-
-    public MemoryEstimation memoryEstimation(
-        int embeddingDensity,
-        boolean heterogeneous,
-        Optional<Integer> outputDimension,
-        Optional<GenerateFeaturesConfig> generateFeatures,
-        Optional<BinarizeFeaturesConfig> binarizeFeatures
-    ) {
+public class HashGNNMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<HashGNNParameters> {
+    
+    @Override
+    public MemoryEstimation memoryEstimation(HashGNNParameters parameters) {
+        var embeddingDensity = parameters.embeddingDensity();
+        var heterogeneous = parameters.heterogeneous();
+        var outputDimension = parameters.outputDimension();
+        var generateFeatures = parameters.generateFeatures();
+        var binarizeFeatures = parameters.binarizeFeatures();
         int FUDGED_BINARY_DIMENSION = 1024;
         int binaryDimension = generateFeatures.map(GenerateFeaturesConfig::dimension)
             .orElse(binarizeFeatures.map(BinarizeFeaturesConfig::dimension).orElse(FUDGED_BINARY_DIMENSION));
@@ -77,17 +76,4 @@ public class HashGNNMemoryEstimateDefinition implements AlgorithmMemoryEstimateD
         return builder.build();
     }
 
-    public MemoryEstimation memoryEstimation(HashGNNParameters parameters) {
-        var embeddingDensity = parameters.embeddingDensity();
-        var heterogeneous = parameters.heterogeneous();
-        var outputDimension = parameters.outputDimension();
-        var generateFeatures = parameters.generateFeatures();
-        var binarizeFeatures = parameters.binarizeFeatures();
-        return memoryEstimation(embeddingDensity, heterogeneous, outputDimension, generateFeatures, binarizeFeatures);
-    }
-
-    @Override
-    public MemoryEstimation memoryEstimation(HashGNNConfig configuration) {
-        return memoryEstimation(configuration.toParameters());
-    }
 }

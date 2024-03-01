@@ -41,7 +41,7 @@ class LabelPropagationMemoryEstimateDefinitionTest {
     @ParameterizedTest
     @MethodSource("expectedMemoryEstimation")
     void shouldComputeMemoryEstimation(int concurrency, long expectedMinBytes, long expectedMaxBytes) {
-        var memoryEstimation = new LabelPropagationMemoryEstimateDefinition().memoryEstimation();
+        var memoryEstimation = new LabelPropagationMemoryEstimateDefinition().memoryEstimation(null);
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(100_000L, concurrency)
             .hasMin(expectedMinBytes)
@@ -51,7 +51,7 @@ class LabelPropagationMemoryEstimateDefinitionTest {
     @Test
     void shouldBoundMemEstimationToMaxSupportedDegree() {
         var largeNodeCount = ((long) Integer.MAX_VALUE + (long) Integer.MAX_VALUE);
-        var memoryEstimation = new LabelPropagationMemoryEstimateDefinition().memoryEstimation();
+        var memoryEstimation = new LabelPropagationMemoryEstimateDefinition().memoryEstimation(null);
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(largeNodeCount, 1)

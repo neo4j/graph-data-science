@@ -77,7 +77,7 @@ public class FastRPFactory<CONFIG extends FastRPBaseConfig> extends GraphAlgorit
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return new FastRPMemoryEstimateDefinition().memoryEstimation(configuration);
+        return new FastRPMemoryEstimateDefinition().memoryEstimation(configuration.toParameters());
     }
 
     @Override

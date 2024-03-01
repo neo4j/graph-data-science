@@ -26,10 +26,10 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 
-public class KCoreDecompositionMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<KCoreDecompositionBaseConfig> {
+public class KCoreDecompositionMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<Void> {
 
     @Override
-    public MemoryEstimation memoryEstimation(KCoreDecompositionBaseConfig configuration) {
+    public MemoryEstimation memoryEstimation(Void unused) {
         var builder = MemoryEstimations.builder(KCoreDecomposition.class);
         builder
             .perNode("currentDegrees", HugeAtomicIntArray::memoryEstimation)

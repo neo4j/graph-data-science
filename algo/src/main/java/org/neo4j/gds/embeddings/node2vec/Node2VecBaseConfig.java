@@ -82,6 +82,10 @@ public interface Node2VecBaseConfig extends AlgoBaseConfig, EmbeddingDimensionCo
     }
 
     @Configuration.Ignore
+    default Node2VecParameters node2VecParameters() {
+        return new Node2VecParameters(walkParameters(), trainParameters());
+    }
+    @Configuration.Ignore
     default WalkParameters walkParameters() {
         return new WalkParameters(
             walksPerNode(),

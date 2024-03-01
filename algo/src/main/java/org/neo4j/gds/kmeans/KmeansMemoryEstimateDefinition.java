@@ -26,31 +26,31 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryUsage;
 
-public class KmeansMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<KmeansBaseConfig> {
+public class KmeansMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<KmeansParameters> {
 
     @Override
-    public MemoryEstimation memoryEstimation(KmeansBaseConfig configuration) {
+    public MemoryEstimation memoryEstimation(KmeansParameters parameters) {
         var fakeLength = 128;
         var builder = MemoryEstimations.builder(Kmeans.class)
             .perNode("bestCommunities", HugeIntArray::memoryEstimation)
             .fixed(
                 "bestCentroids",
-                MemoryUsage.sizeOfArray(configuration.k(), MemoryUsage.sizeOfDoubleArray(fakeLength))
+                MemoryUsage.sizeOfArray(parameters.k(), MemoryUsage.sizeOfDoubleArray(fakeLength))
             )
             .perNode("nodesInCluster", MemoryUsage::sizeOfLongArray)
             .perNode("distanceFromCentroid", HugeDoubleArray::memoryEstimation)
             .add(ClusterManager.memoryEstimation(
-                configuration.k(),
+                parameters.k(),
                 fakeLength
             ))
-            .perThread("KMeansTask", KmeansTask.memoryEstimation(configuration.k(), fakeLength));
+            .perThread("KMeansTask", KmeansTask.memoryEstimation(parameters.k(), fakeLength));
 
-        if(configuration.computeSilhouette()) {
+        if (parameters.computeSilhouette()) {
             builder.perNode("silhouette", HugeDoubleArray::memoryEstimation);
         }
 
-        if(configuration.isSeeded()) {
-            var centroids = configuration.seedCentroids();
+        if (parameters.isSeeded()) {
+            var centroids = parameters.seedCentroids();
             builder.fixed("seededCentroids", MemoryUsage.sizeOf(centroids));
         }
 

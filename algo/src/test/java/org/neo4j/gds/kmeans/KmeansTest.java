@@ -109,7 +109,7 @@ class KmeansTest {
             .k(2)
             .build();
         var kmeansContext = ImmutableKmeansContext.builder().build();
-        var kmeans = Kmeans.createKmeans(nanGraph, kmeansConfig, kmeansContext);
+        var kmeans = Kmeans.createKmeans(nanGraph, kmeansConfig.toParameters(), kmeansContext);
         assertThatThrownBy(kmeans::compute).hasMessageContaining(
             "Input for K-Means should not contain any NaN values");
 
@@ -124,7 +124,7 @@ class KmeansTest {
             .k(2)
             .build();
         var kmeansContext = ImmutableKmeansContext.builder().build();
-        var kmeans = Kmeans.createKmeans(missGraph, kmeansConfig, kmeansContext);
+        var kmeans = Kmeans.createKmeans(missGraph, kmeansConfig.toParameters(), kmeansContext);
         assertThatThrownBy(kmeans::compute).hasMessageContaining(
             "All property arrays for K-Means should have the same number of dimensions");
 
@@ -140,7 +140,7 @@ class KmeansTest {
             .build();
         var kmeansContext = ImmutableKmeansContext.builder().build();
 
-        var kmeans = Kmeans.createKmeans(graph, kmeansConfig, kmeansContext);
+        var kmeans = Kmeans.createKmeans(graph, kmeansConfig.toParameters(), kmeansContext);
         var result = kmeans.compute();
         var communities = result.communities();
         var distances = result.distanceFromCenter();
@@ -176,7 +176,7 @@ class KmeansTest {
             .build();
         var kmeansContext = ImmutableKmeansContext.builder().build();
 
-        var kmeans = Kmeans.createKmeans(floatGraph, kmeansConfig, kmeansContext);
+        var kmeans = Kmeans.createKmeans(floatGraph, kmeansConfig.toParameters(), kmeansContext);
         var result = kmeans.compute();
         var communities = result.communities();
         var centers = result.centers();
@@ -200,7 +200,7 @@ class KmeansTest {
             .build();
         var kmeansContext = ImmutableKmeansContext.builder().build();
 
-        var kmeans = Kmeans.createKmeans(lineGraph, kmeansConfig, kmeansContext);
+        var kmeans = Kmeans.createKmeans(lineGraph, kmeansConfig.toParameters(), kmeansContext);
         var result = kmeans.compute();
         var communities = result.communities();
         assertThat(communities.get(0)).isEqualTo(communities.get(1));
@@ -219,7 +219,7 @@ class KmeansTest {
             .build();
         var kmeansContext = ImmutableKmeansContext.builder().build();
 
-        var kmeans = Kmeans.createKmeans(lineGraph, kmeansConfig, kmeansContext);
+        var kmeans = Kmeans.createKmeans(lineGraph, kmeansConfig.toParameters(), kmeansContext);
         var result = kmeans.compute();
         var communities = result.communities();
 
@@ -241,7 +241,7 @@ class KmeansTest {
             .build();
         var kmeansContext = ImmutableKmeansContext.builder().build();
 
-        var kmeans = Kmeans.createKmeans(graph, kmeansConfig, kmeansContext);
+        var kmeans = Kmeans.createKmeans(graph, kmeansConfig.toParameters(), kmeansContext);
         var result = kmeans.compute();
 
         var silhouette = result.silhouette();
@@ -316,7 +316,7 @@ class KmeansTest {
             .build();
 
         var kmeansContext = ImmutableKmeansContext.builder().build();
-        var kmeans = Kmeans.createKmeans(missGraph, kmeansConfig, kmeansContext);
+        var kmeans = Kmeans.createKmeans(missGraph, kmeansConfig.toParameters(), kmeansContext);
         assertThatThrownBy(kmeans::compute).hasMessageContaining("same");
     }
 
@@ -331,7 +331,7 @@ class KmeansTest {
             .build();
 
         var kmeansContext = ImmutableKmeansContext.builder().build();
-        var kmeans = Kmeans.createKmeans(missGraph, kmeansConfig, kmeansContext);
+        var kmeans = Kmeans.createKmeans(missGraph, kmeansConfig.toParameters(), kmeansContext);
         assertThatThrownBy(kmeans::compute).hasMessageContaining("NaN");
     }
 
@@ -346,7 +346,7 @@ class KmeansTest {
             .build();
 
         var kmeansContext = ImmutableKmeansContext.builder().build();
-        var kmeans = Kmeans.createKmeans(lineGraph, kmeansConfig, kmeansContext);
+        var kmeans = Kmeans.createKmeans(lineGraph, kmeansConfig.toParameters(), kmeansContext);
         var result = kmeans.compute();
         assertThat(result.communities().toArray()).isEqualTo(new int[]{0, 0, 0, 0, 0});
         var secondCentroid = result.centers()[1];
@@ -520,7 +520,7 @@ class KmeansTest {
         assertThatThrownBy(
                 () -> Kmeans.createKmeans(
                     graph,
-                    kmeansConfig,
+                    kmeansConfig.toParameters(),
                     kmeansContext
                 ).compute()
             ).hasMessageContaining(property);

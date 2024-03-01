@@ -23,6 +23,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.util.List;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.neo4j.gds.assertions.MemoryEstimationAssert.assertThat;
 
 class FastRPMemoryEstimateDefinitionTest {
@@ -39,7 +43,12 @@ class FastRPMemoryEstimateDefinitionTest {
     )
     void shouldComputeMemoryEstimation(long nodeCount, int concurrency, long expectedMemory) {
         var fastRPMemoryEstimation = new FastRPMemoryEstimateDefinition();
-        assertThat(fastRPMemoryEstimation.memoryEstimation(128, 0, 0))
+        var params = mock(FastRPParameters.class);
+        when(params.embeddingDimension()).thenReturn(128);
+        when(params.featureProperties()).thenReturn(List.of());
+        when(params.propertyDimension()).thenReturn(0);
+
+        assertThat(fastRPMemoryEstimation.memoryEstimation(params))
             .memoryRange(nodeCount, concurrency)
             .hasSameMinAndMaxEqualTo(expectedMemory);
     }
@@ -47,7 +56,7 @@ class FastRPMemoryEstimateDefinitionTest {
     @Test
     void shouldHaveCorrectDescription() {
         var fastRPMemoryEstimation = new FastRPMemoryEstimateDefinition();
-        assertThat(fastRPMemoryEstimation.memoryEstimation(1, 2, 3))
+        assertThat(fastRPMemoryEstimation.memoryEstimation(mock(FastRPParameters.class)))
             .hasDescription("FastRP");
     }
 }

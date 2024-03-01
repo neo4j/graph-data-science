@@ -30,6 +30,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class HashGNNMemoryEstimateDefinitionTest {
 
@@ -57,7 +59,15 @@ class HashGNNMemoryEstimateDefinitionTest {
         long expectedMinMemory,
         long expectedMaxMemory
     ) {
-        var memoryEstimation = new HashGNNMemoryEstimateDefinition().memoryEstimation(embeddingDensity, false, Optional.empty(), Optional.empty(), Optional.empty());
+
+        var params = mock(HashGNNParameters.class);
+        when(params.embeddingDensity()).thenReturn(embeddingDensity);
+        when(params.heterogeneous()).thenReturn(false);
+        when(params.outputDimension()).thenReturn(Optional.empty());
+        when(params.generateFeatures()).thenReturn(Optional.empty());
+        when(params.binarizeFeatures()).thenReturn(Optional.empty());
+
+        var memoryEstimation = new HashGNNMemoryEstimateDefinition().memoryEstimation(params);
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(nodeCount,relationshipCount,concurrency)
@@ -68,13 +78,15 @@ class HashGNNMemoryEstimateDefinitionTest {
 
     @Test
     void shouldEstimateMemoryWithOutputDimension(){
-        var memoryEstimation = new HashGNNMemoryEstimateDefinition().memoryEstimation(
-            10,
-            false,
-            Optional.of(100),
-            Optional.empty(),
-            Optional.empty()
-        );
+      
+        var params = mock(HashGNNParameters.class);
+        when(params.embeddingDensity()).thenReturn(10);
+        when(params.heterogeneous()).thenReturn(false);
+        when(params.outputDimension()).thenReturn(Optional.of(100));
+        when(params.generateFeatures()).thenReturn(Optional.empty());
+        when(params.binarizeFeatures()).thenReturn(Optional.empty());
+
+        var memoryEstimation = new HashGNNMemoryEstimateDefinition().memoryEstimation(params);
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(10_000,20_000,8)

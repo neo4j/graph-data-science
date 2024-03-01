@@ -139,7 +139,7 @@ class KmeansGridTest {
             .build();
         var kmeansContext = ImmutableKmeansContext.builder().build();
 
-        var kmeans = Kmeans.createKmeans(graph, kmeansConfig, kmeansContext);
+        var kmeans = Kmeans.createKmeans(graph, kmeansConfig.toParameters(), kmeansContext);
         var result = kmeans.compute();
 
         var centroids = result.centers();
