@@ -3,8 +3,7 @@
 [CAUTION]
 ====
 This version of Graph Data Science is EOL.
-
-The most recent version can be found link:/current[here].
+You can find the most recent version link:{gds-docs-base-uri}/current[here].
 ====
 
 # end::eol[]
