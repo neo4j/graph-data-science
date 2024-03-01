@@ -65,7 +65,7 @@ class LabelPropagationPregelAlgoTest {
     void runLP() {
         int maxIterations = 10;
 
-        var config = ImmutableLabelPropagationPregelConfig.builder()
+        var config = LabelPropagationPregelConfigImpl.builder()
             .maxIterations(maxIterations)
             .build();
 
@@ -95,7 +95,7 @@ class LabelPropagationPregelAlgoTest {
     void runWeightedLP() {
         int maxIterations = 10;
 
-        var config = ImmutableLabelPropagationPregelConfig.builder()
+        var config = LabelPropagationPregelConfigImpl.builder()
             .maxIterations(maxIterations)
             .relationshipWeightProperty("weight")
             .build();

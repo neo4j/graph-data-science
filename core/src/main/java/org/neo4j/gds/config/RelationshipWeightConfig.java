@@ -45,7 +45,7 @@ public interface RelationshipWeightConfig {
         return relationshipWeightProperty().isPresent();
     }
 
-    @Value.Check
+    @Configuration.Check
     default void validateRelationshipWeightProperty() {
         relationshipWeightProperty().ifPresent(input -> validateNoWhiteCharacter(
             emptyToNull(input),

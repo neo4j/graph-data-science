@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
@@ -183,7 +182,7 @@ public interface GraphSageTrainConfig extends
         return projectedFeatureDimension().orElse(featureProperties().size());
     }
 
-    @Value.Check
+    @Configuration.Check
     default void validate() {
         if (featureProperties().isEmpty()) {
             throw new IllegalArgumentException(

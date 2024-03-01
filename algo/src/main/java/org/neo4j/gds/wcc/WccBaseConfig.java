@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.wcc;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ConsecutiveIdsConfig;
@@ -37,7 +36,7 @@ public interface WccBaseConfig extends AlgoBaseConfig, SeedConfig, ConsecutiveId
         return !Double.isNaN(threshold()) && threshold() > 0;
     }
 
-    @Value.Check
+    @Configuration.Check
     default void validate() {
         if (threshold() > 0 && relationshipWeightProperty().isEmpty()) {
             throw new IllegalArgumentException("Specifying a threshold requires `relationshipWeightProperty` to be set.");

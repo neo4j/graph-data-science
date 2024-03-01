@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.approxmaxkcut.config;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
@@ -77,7 +76,7 @@ public interface ApproxMaxKCutBaseConfig extends AlgoBaseConfig,
         return Collections.nCopies(k(), 0L);
     }
 
-    @Value.Check
+    @Configuration.Check
     default void validateMinCommunitySizes() {
         if (minCommunitySizes().size() != k()) {
             throw new IllegalArgumentException(formatWithLocale(

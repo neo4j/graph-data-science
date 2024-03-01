@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.config;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
@@ -64,7 +63,7 @@ public interface GraphProjectFromGraphConfig extends GraphProjectConfig {
         return Collections.emptyMap();
     }
 
-    @Value.Check
+    @Configuration.Check
     default void validateReadConcurrency() {
         ConcurrencyValidatorService.validator().validate(concurrency(), "concurrency", ConcurrencyConfig.CONCURRENCY_LIMITATION);
     }

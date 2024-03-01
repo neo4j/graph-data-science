@@ -19,9 +19,7 @@
  */
 package org.neo4j.gds.beta.pregel.pr;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.Messages;
 import org.neo4j.gds.beta.pregel.PregelComputation;
@@ -98,11 +96,8 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
         return nodeValue * relationshipWeight;
     }
 
-    @ValueClass
     @Configuration("PageRankPregelConfigImpl")
-    @SuppressWarnings("immutables:subtype")
     public interface PageRankPregelConfig extends PregelProcedureConfig, SeedConfig {
-        @Value.Default
         default double dampingFactor() {
             return 0.85;
         }

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.paths;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.OptionalTargetNodeConfig;
 import org.neo4j.gds.config.TargetNodesConfig;
@@ -42,7 +41,7 @@ public interface SourceTargetsShortestPathBaseConfig extends
         return targetNodes;
     }
 
-    @Value.Check
+    @Configuration.Check
     default void validate() {
         if (!targetNodes().isEmpty() && targetNode().isPresent()) {
             throw new IllegalArgumentException(

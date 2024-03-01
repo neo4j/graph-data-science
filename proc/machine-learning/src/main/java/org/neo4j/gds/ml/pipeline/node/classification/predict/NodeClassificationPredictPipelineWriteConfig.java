@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.pipeline.node.classification.predict;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -28,7 +27,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 @Configuration
 public interface NodeClassificationPredictPipelineWriteConfig extends NodeClassificationPredictPipelineMutateOrWriteConfig, WritePropertyConfig {
-    @Value.Check
+    @Configuration.Check
     default void validateWritePropertiesDiffer() {
         predictedProbabilityProperty()
             .ifPresent(predictedProbabilityProperty -> {

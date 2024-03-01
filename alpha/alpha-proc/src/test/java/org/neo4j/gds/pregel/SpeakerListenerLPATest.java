@@ -69,7 +69,7 @@ class SpeakerListenerLPATest {
 
     @Test
     void testWithoutPruning() {
-        var config = ImmutableSpeakerListenerLPAConfig.builder().concurrency(1).minAssociationStrength(0.00).maxIterations(10).build();
+        var config = SpeakerListenerLPAConfigImpl.builder().concurrency(1).minAssociationStrength(0.00).maxIterations(10).build();
 
         var pregelJob = Pregel.create(
             graph,
@@ -116,7 +116,7 @@ class SpeakerListenerLPATest {
 
     @Test
     void prunesAwayAfterManyIterations() {
-        var config = ImmutableSpeakerListenerLPAConfig.builder().concurrency(1).maxIterations(30).build();
+        var config = SpeakerListenerLPAConfigImpl.builder().concurrency(1).maxIterations(30).build();
 
         var pregelJob = Pregel.create(
             graph,

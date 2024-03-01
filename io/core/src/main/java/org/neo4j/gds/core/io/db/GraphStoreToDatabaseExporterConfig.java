@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.io.db;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.JobIdConfig;
@@ -39,7 +38,7 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
         return false;
     }
 
-    @Value.Check
+    @Configuration.Check
     default void validate() {
         Neo4jProxy.validateExternalDatabaseName(dbName());
     }

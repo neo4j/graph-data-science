@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
@@ -40,7 +39,7 @@ public interface TriangleCountBaseConfig extends AlgoBaseConfig {
         return Long.MAX_VALUE;
     }
 
-    @Value.Check
+    @Configuration.Check
     default void validateMaxDegree() {
         if (maxDegree() < 2) {
             throw new IllegalArgumentException("The 'maxDegree' parameter must be set to a value greater than 1.");

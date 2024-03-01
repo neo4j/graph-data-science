@@ -69,7 +69,7 @@ public interface LinkPredictionTrainConfig extends TrainBaseConfig, GraphNameCon
         return List.of(targetRelationshipType());
     }
 
-    @Value.Check
+    @Configuration.Check
     default void validate() {
         if (targetRelationshipType().equals(ElementProjection.PROJECT_ALL)) {
             throw new IllegalArgumentException("'*' is not allowed as targetRelationshipType.");

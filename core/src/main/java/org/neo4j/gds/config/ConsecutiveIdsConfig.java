@@ -20,6 +20,7 @@
 package org.neo4j.gds.config;
 
 import org.immutables.value.Value;
+import org.neo4j.gds.annotation.Configuration;
 
 public interface ConsecutiveIdsConfig {
     @Value.Default
@@ -27,7 +28,7 @@ public interface ConsecutiveIdsConfig {
         return false;
     }
 
-    @Value.Check
+    @Configuration.Check
     default void forbidSeedingAndConsecutiveIds() {
         if (this instanceof SeedConfig) {
             var thisAsASeedConfig = (SeedConfig) this;

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.pregel.proc;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -27,7 +26,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 @Configuration
 public interface TestPregelConfig extends PregelProcedureConfig {
 
-    @Value.Default
     default boolean throwInCompute() {
         return false;
     }

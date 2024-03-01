@@ -39,7 +39,7 @@ public interface WriteConfig extends ConcurrencyConfig {
         return concurrency();
     }
 
-    @Value.Check
+    @Configuration.Check
     default void validateWriteConcurrency() {
         ConcurrencyValidatorService
             .validator()

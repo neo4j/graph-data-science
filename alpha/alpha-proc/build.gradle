@@ -10,8 +10,6 @@ dependencies {
     annotationProcessor project(':pregel-proc-generator')
     annotationProcessor project(':procedure-collector')
 
-    annotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
-
     compileOnly project(':proc-common')
 
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
@@ -44,9 +42,7 @@ dependencies {
     implementation group: 'org.reflections',  name: 'reflections',  version: ver.doc.'reflections'
     implementation group: 'org.hdrhistogram', name: 'HdrHistogram', version: ver.'HdrHistogram'
 
-    testCompileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     testCompileOnly group: 'org.immutables', name: 'builder',           version: ver.'immutables'
-    testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
 
     testImplementation project(':test-utils')
     testImplementation project(':proc-test')

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.EmbeddingDimensionConfig;
@@ -56,7 +55,7 @@ public interface FastRPBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConf
         return 0.0f;
     }
 
-    @Value.Check
+    @Configuration.Check
     default void validate() {
         if (nodeSelfInfluence().floatValue() < 0) {
             throw new IllegalArgumentException("The value of `nodeSelfInfluence` may not be negative.");

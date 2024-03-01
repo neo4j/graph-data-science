@@ -73,7 +73,7 @@ class SingleSourceShortestPathPregelAlgoTest {
     void runSSSP() {
         int maxIterations = 10;
 
-        var config = ImmutableSingleSourceShortestPathPregelConfig.builder()
+        var config = SingleSourceShortestPathPregelConfigImpl.builder()
             .maxIterations(maxIterations)
             .isAsynchronous(true)
             .startNode(idFunction.of("a"))

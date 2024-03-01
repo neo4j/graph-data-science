@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.pipeline.nodePipeline.regression;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.ml.metrics.regression.RegressionMetrics;
@@ -39,7 +38,7 @@ public interface NodeRegressionPipelineTrainConfig extends NodePropertyPipelineB
         return new NodeRegressionPipelineTrainConfigImpl(username, config);
     }
 
-    @Value.Check
+    @Configuration.Check
     default void validateMetrics() {
         if (metrics().isEmpty()) {
             throw new IllegalArgumentException("Must specify at least one evaluation metric via the `metrics` parameter.");
