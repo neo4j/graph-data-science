@@ -20,24 +20,32 @@
 package org.neo4j.gds.similarity.filteredknn;
 
 import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.similarity.knn.NeighbourConsumer;
 
+import java.util.function.LongPredicate;
 import java.util.stream.Stream;
 
-public class EmptyTargetNodeFilter implements TargetNodeFilter {
+public final class EmptyTargetNodeFiltering implements TargetNodeFiltering {
 
-    static EmptyTargetNodeFilter EMPTY_CONSUMER = new EmptyTargetNodeFilter();
+    static EmptyTargetNodeFiltering EMPTY_TARGET_FILTERING = new EmptyTargetNodeFiltering();
+
     @Override
-    public Stream<SimilarityResult> asSimilarityStream(long nodeId) {
+    public boolean isTargetNodeFiltered() {
+        return false;
+    }
+
+    @Override
+    public Stream<SimilarityResult> asSimilarityResultStream(LongPredicate sourceNodePredicate) {
         return Stream.empty();
     }
 
     @Override
-    public long size() {
+    public long numberOfSimilarityPairs(LongPredicate sourceNodePredicate) {
         return 0;
     }
 
     @Override
-    public void offer(long element, double priority) {
-
+    public NeighbourConsumer get(long nodeId) {
+        return NeighbourConsumer.EMPTY_CONSUMER;
     }
 }

@@ -38,7 +38,7 @@ public class FilteredKnnResult {
         KnnResult knnResult,
         NodeFilter sourceNodeFilter
     ) {
-        this.isTargetFiltered = targetNodeFiltering.isFiltered();
+        this.isTargetFiltered = targetNodeFiltering.isTargetNodeFiltered();
         this.targetNodeFiltering = targetNodeFiltering;
         this.knnResult = knnResult;
         this.sourceNodeFilter = sourceNodeFilter;

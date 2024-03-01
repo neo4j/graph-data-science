@@ -37,7 +37,7 @@ class TargetNodeFilteringTest {
         int kIsTwo = 2;
         LongPredicate evenNodesAreTargetNodes = l -> l % 2 == 0;
         double noSimilarityCutoff = Double.MIN_VALUE;
-        TargetNodeFiltering targetNodeFiltering = TargetNodeFiltering.create(
+        ProvidedTargetNodeFiltering targetNodeFiltering = ProvidedTargetNodeFiltering.create(
             NodeFilter.ALLOW_EVERYTHING,
             thereIsSixNodeInThisFilter,
             kIsTwo,
@@ -74,7 +74,7 @@ class TargetNodeFilteringTest {
             }
         });
         double noSimilarityCutoff = Double.MIN_VALUE;
-        TargetNodeFiltering targetNodeFiltering = TargetNodeFiltering.create(
+        ProvidedTargetNodeFiltering targetNodeFiltering = ProvidedTargetNodeFiltering.create(
             NodeFilter.ALLOW_EVERYTHING,
             thereIsSixNodeInThisFilter,
             kIsFive,
@@ -113,7 +113,7 @@ class TargetNodeFilteringTest {
             }
         });
         double noSimilarityCutoff = Double.MIN_VALUE;
-        TargetNodeFiltering targetNodeFiltering = TargetNodeFiltering.create(
+        ProvidedTargetNodeFiltering targetNodeFiltering = ProvidedTargetNodeFiltering.create(
             NodeFilter.ALLOW_EVERYTHING,
             thereIsSixNodeInThisFilter,
             kIsFive,
@@ -135,7 +135,7 @@ class TargetNodeFilteringTest {
         int kIsTwo = 2;
         LongPredicate evenNodesAreTargetNodes = l -> l % 2 == 0;
         double noSimilarityCutoff = Double.MIN_VALUE;
-        TargetNodeFiltering targetNodeFiltering = TargetNodeFiltering.create(
+        ProvidedTargetNodeFiltering targetNodeFiltering = ProvidedTargetNodeFiltering.create(
             l -> l > 0,
             thereIsSixNodeInThisFilter,
             kIsTwo,
