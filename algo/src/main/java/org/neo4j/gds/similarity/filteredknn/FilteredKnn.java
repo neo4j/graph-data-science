@@ -125,12 +125,9 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
     public FilteredKnnResult compute() {
         KnnResult result = delegate.compute();
 
-        return ImmutableFilteredKnnResult.of(
-            result.ranIterations(),
-            result.didConverge(),
-            result.nodePairsConsidered(),
-            result.nodesCompared(),
+        return new FilteredKnnResult(
             targetNodeFiltering,
+            result,
             sourceNodeFilter
         );
     }

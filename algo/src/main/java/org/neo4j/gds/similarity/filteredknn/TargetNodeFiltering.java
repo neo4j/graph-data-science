@@ -47,6 +47,8 @@ public final class TargetNodeFiltering implements NeighbourConsumers {
     /**
      * @param optionalSimilarityFunction An actual similarity function if you want seeding, empty otherwise
      */
+
+    private final boolean isFiltered;
     static TargetNodeFiltering create(
         NodeFilter sourceNodeFilter,
         long nodeCount,
@@ -57,15 +59,21 @@ public final class TargetNodeFiltering implements NeighbourConsumers {
         int concurrency
     ) {
         var neighbourConsumers = HugeObjectArray.newArray(TargetNodeFilter.class, nodeCount);
-        var startingSeeds = findSeeds(
-            nodeCount,
-            targetNodePredicate,
-            k + 1,
-            optionalSimilarityFunction.isEmpty()
-        );
-
+        boolean isFiltered = targetNodePredicate != NodeFilter.ALLOW_EVERYTHING;
+        long[] startingSeeds = new long[k + 1];
+        if (isFiltered) {
+            findSeeds(
+                startingSeeds,
+                nodeCount,
+                targetNodePredicate,
+                k + 1,
+                optionalSimilarityFunction.isEmpty()
+            );
+        }
         ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, (nodeId) -> {
-            if (sourceNodeFilter.test(nodeId)) {
+            if (!sourceNodeFilter.test(nodeId) || !isFiltered) {
+                neighbourConsumers.set(nodeId, EMPTY_CONSUMER);
+            } else {
                 var optionalPersonalizedSeeds = prepareNode(nodeId, startingSeeds, optionalSimilarityFunction);
                 TargetNodeFilter targetNodeFilter = ProvidedTargetNodeFilter.create(
                     targetNodePredicate,
@@ -74,14 +82,12 @@ public final class TargetNodeFiltering implements NeighbourConsumers {
                     similarityCutoff
                 );
                 neighbourConsumers.set(nodeId, targetNodeFilter);
-            } else {
-                neighbourConsumers.set(nodeId, EMPTY_CONSUMER);
             }
         });
 
 
+        return new TargetNodeFiltering(neighbourConsumers, isFiltered);
 
-        return new TargetNodeFiltering(neighbourConsumers);
     }
 
     /**
@@ -94,16 +100,16 @@ public final class TargetNodeFiltering implements NeighbourConsumers {
      * Cons include bias for start of node array, yada yada. Extremely naive solution at this point.
      *
      */
-    private static long[] findSeeds(
+    private static void findSeeds(
+        long[] seeds,
         long nodeCount,
         LongPredicate targetNodePredicate,
         int k,
         boolean isEmpty
     ) {
         if (isEmpty) {
-            return null;
+            return;
         }
-        long[] seeds = new long[k + 1];
         Arrays.fill(seeds, -1L);
 
         int index = 0;
@@ -114,7 +120,6 @@ public final class TargetNodeFiltering implements NeighbourConsumers {
 
         }
 
-        return seeds;
     }
 
     //TODO: Replace the Pair<Double,Long>  stuff but not here not now
@@ -146,10 +151,14 @@ public final class TargetNodeFiltering implements NeighbourConsumers {
     }
 
 
-    private TargetNodeFiltering(HugeObjectArray<TargetNodeFilter> targetNodeFilters) {
+    private TargetNodeFiltering(HugeObjectArray<TargetNodeFilter> targetNodeFilters, boolean isFiltered) {
         this.targetNodeFilters = targetNodeFilters;
+        this.isFiltered = isFiltered;
     }
 
+    public boolean isFiltered() {
+        return isFiltered;
+    }
     @Override
     public TargetNodeFilter get(long nodeId) {
         return targetNodeFilters.get(nodeId);
