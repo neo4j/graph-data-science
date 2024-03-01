@@ -37,14 +37,11 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationMemoryEstimateDefinition;
 
-public class LouvainMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<LouvainBaseConfig> {
+public class LouvainMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<LouvainMemoryEstimationParameters> {
 
     @Override
-    public MemoryEstimation memoryEstimation(LouvainBaseConfig configuration) {
-        return memoryEstimation(configuration.includeIntermediateCommunities(), configuration.maxLevels());
-    }
-
-    public MemoryEstimation memoryEstimation(boolean includeIntermediateCommunities, int maxLevels) {
+    public MemoryEstimation memoryEstimation(LouvainMemoryEstimationParameters parameters) {
+        int maxLevels = parameters.maxLevels();
         return MemoryEstimations.builder(Louvain.class)
             .add(
                 "modularityOptimization()",
@@ -80,7 +77,8 @@ public class LouvainMemoryEstimateDefinition implements AlgorithmMemoryEstimateD
             })
             .rangePerNode("dendrograms", (nodeCount) -> MemoryRange.of(
                 HugeLongArray.memoryEstimation(nodeCount),
-                HugeLongArray.memoryEstimation(nodeCount) * (includeIntermediateCommunities ? maxLevels : Math.min(2, maxLevels))
+                HugeLongArray.memoryEstimation(nodeCount) * (parameters.includeIntermediateCommunities()
+                    ? maxLevels : Math.min(2, maxLevels))
             ))
             .build();
     }

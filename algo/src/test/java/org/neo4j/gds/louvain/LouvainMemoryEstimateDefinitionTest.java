@@ -32,8 +32,6 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class LouvainMemoryEstimateDefinitionTest {
 
@@ -71,11 +69,12 @@ class LouvainMemoryEstimateDefinitionTest {
         var nodeCount = 100_000L;
         var relCount = 500_000L;
 
-        var config = mock(LouvainBaseConfig.class);
-        when(config.includeIntermediateCommunities()).thenReturn(includeIntermediateCommunities);
-        when(config.maxLevels()).thenReturn(levels);
+        var estimationParameters = new LouvainMemoryEstimationParameters(
+            levels,
+            includeIntermediateCommunities
+        );
 
-        var memoryEstimation = new LouvainMemoryEstimateDefinition().memoryEstimation(config);
+        var memoryEstimation = new LouvainMemoryEstimateDefinition().memoryEstimation(estimationParameters);
 
         MemoryEstimationAssert.assertThat(memoryEstimation).
             memoryRange(nodeCount,relCount, concurrency)
@@ -99,11 +98,12 @@ class LouvainMemoryEstimateDefinitionTest {
             .build();
 
 
-        var config = mock(LouvainBaseConfig.class);
-        when(config.includeIntermediateCommunities()).thenReturn(false);
-        when(config.maxLevels()).thenReturn(1);
+        var estimationParameters = new LouvainMemoryEstimationParameters(
+            1,
+            false
+        );
 
-        var memoryEstimation = new LouvainMemoryEstimateDefinition().memoryEstimation(config);
+        var memoryEstimation = new LouvainMemoryEstimateDefinition().memoryEstimation(estimationParameters);
 
         MemoryTree memoryTree = memoryEstimation
             .estimate(dimensionsWithoutProperties, 1);

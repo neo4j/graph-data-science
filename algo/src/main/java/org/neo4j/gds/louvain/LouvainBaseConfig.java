@@ -74,4 +74,9 @@ public interface LouvainBaseConfig extends
             seedProperty()
         );
     }
+
+    @Configuration.Ignore
+    default LouvainMemoryEstimationParameters toMemoryEstimationParameters() {
+        return new LouvainMemoryEstimationParameters(maxLevels(), includeIntermediateCommunities());
+    }
 }
