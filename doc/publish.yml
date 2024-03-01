@@ -6,7 +6,10 @@ site:
 content:
   sources:
   - url: https://github.com/neo-technology/graph-analytics
-    branches: ['2.6', 'master']
+    # Includes previous version, current, and preview (master).
+    # When updating this, update the version in the
+    # `page-add-notes-versions` below too.
+    branches: ['2.5', '2.6', 'master']
     start_path: public/doc
     include: public/doc/
     exclude:
@@ -38,6 +41,7 @@ asciidoc:
   extensions:
   - "@neo4j-documentation/remote-include"
   - "@neo4j-documentation/macros"
+  - "@neo4j-antora/antora-add-notes"
   - "@neo4j-antora/antora-page-roles"
   - "@neo4j-antora/antora-table-footnotes"
   attributes:
@@ -61,3 +65,7 @@ asciidoc:
     copyright: 2024
     common-license-page-uri: https://neo4j.com/docs/license/
     operations-manual-base-uri: https://neo4j.com/docs/operations-manual/
+    gds-docs-base-uri: https://neo4j.com/docs/graph-data-science
+    page-add-notes-tags: eol
+    # Version(s) to add the EOL banner to
+    page-add-notes-versions: ['2.5']

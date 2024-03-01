@@ -1,0 +1,9 @@
+# tag::eol[]
+
+[CAUTION]
+====
+This version of Graph Data Science is EOL.
+You can find the most recent version link:{gds-docs-base-uri}/current[here].
+====
+
+# end::eol[]
