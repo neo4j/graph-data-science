@@ -151,4 +151,60 @@ class TargetNodeFilteringTest {
         assertThat(targetNodeFilterOne).isInstanceOf(ProvidedTargetNodeFilter.class);
 
     }
+
+    @Test()
+    void shouldRealizeThereAreNotEnoughTargetNodes() {
+        int gazillionNodes = 100;
+        int gazillionK = 10;
+        LongPredicate targetNodes = l -> (l >= 2 && l <= 5);
+        double noSimilarityCutoff = Double.MIN_VALUE;
+
+        Optional<SimilarityFunction> weSeed = Optional.of(new SimilarityFunction(null) {
+            @Override
+            public double computeSimilarity(long n, long m) {
+                return 1.337 + 0.42;
+            }
+        });
+
+        ProvidedTargetNodeFiltering targetNodeFiltering = ProvidedTargetNodeFiltering.create(
+            NodeFilter.ALLOW_EVERYTHING,
+            gazillionNodes,
+            gazillionK,
+            targetNodes,
+            weSeed,
+            noSimilarityCutoff,
+            1
+        );
+
+        assertThat(targetNodeFiltering.seedingSummary().seededOptimally()).isTrue();
+
+    }
+
+    @Test()
+    void shouldClaimNotSeedOptimallyOtherwise() {
+        int gazillionNodes = 100;
+        int gazillionK = 3;
+        LongPredicate targetNodes = l -> (l >= 2 && l <= 5);
+        double noSimilarityCutoff = Double.MIN_VALUE;
+
+        Optional<SimilarityFunction> weSeed = Optional.of(new SimilarityFunction(null) {
+            @Override
+            public double computeSimilarity(long n, long m) {
+                return 1.337 + 0.42;
+            }
+        });
+
+        ProvidedTargetNodeFiltering targetNodeFiltering = ProvidedTargetNodeFiltering.create(
+            NodeFilter.ALLOW_EVERYTHING,
+            gazillionNodes,
+            gazillionK,
+            targetNodes,
+            weSeed,
+            noSimilarityCutoff,
+            1
+        );
+
+        assertThat(targetNodeFiltering.seedingSummary().seededOptimally()).isFalse();
+
+    }
 }

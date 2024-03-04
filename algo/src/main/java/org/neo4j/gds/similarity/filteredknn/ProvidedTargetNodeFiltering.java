@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Function;
 import java.util.function.LongPredicate;
 import java.util.function.UnaryOperator;
@@ -41,7 +42,9 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.similarity.filteredknn.EmptyTargetNodeFilter.EMPTY_CONSUMER;
 
 public final class ProvidedTargetNodeFiltering implements TargetNodeFiltering {
+
     private final HugeObjectArray<TargetNodeFilter> targetNodeFilters;
+    private final SeedingSummary seedingSummary;
 
     /**
      * @param optionalSimilarityFunction An actual similarity function if you want seeding, empty otherwise
@@ -63,12 +66,20 @@ public final class ProvidedTargetNodeFiltering implements TargetNodeFiltering {
                 k + 1,
                 optionalSimilarityFunction.isEmpty()
             );
+        LongAdder nodeCountAdder = new LongAdder();
+        LongAdder nodepairAdder = new LongAdder();
 
         ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, (nodeId) -> {
             if (!sourceNodeFilter.test(nodeId)) {
                 neighbourConsumers.set(nodeId, EMPTY_CONSUMER);
             } else {
                 var optionalPersonalizedSeeds = prepareNode(nodeId, startingSeeds, optionalSimilarityFunction);
+                nodeCountAdder.increment();
+
+                if (optionalPersonalizedSeeds.isPresent()) {
+                    nodepairAdder.add(optionalPersonalizedSeeds.get().size());
+                }
+
                 TargetNodeFilter targetNodeFilter = ProvidedTargetNodeFilter.create(
                     targetNodePredicate,
                     k,
@@ -79,8 +90,11 @@ public final class ProvidedTargetNodeFiltering implements TargetNodeFiltering {
             }
         });
 
-
-        return new ProvidedTargetNodeFiltering(neighbourConsumers);
+        var seededOptimally = (startingSeeds[k] == -1) && (optionalSimilarityFunction.isPresent()); //if there less than `k+1` targets, we optimally find solution just by seeding.
+        return new ProvidedTargetNodeFiltering(
+            neighbourConsumers,
+            new SeedingSummary(nodepairAdder.longValue(), nodepairAdder.longValue(), seededOptimally)
+        );
 
     }
 
@@ -148,14 +162,24 @@ public final class ProvidedTargetNodeFiltering implements TargetNodeFiltering {
     }
 
 
-    private ProvidedTargetNodeFiltering(HugeObjectArray<TargetNodeFilter> targetNodeFilters) {
+    private ProvidedTargetNodeFiltering(
+        HugeObjectArray<TargetNodeFilter> targetNodeFilters,
+        SeedingSummary seedingSummary
+    ) {
         this.targetNodeFilters = targetNodeFilters;
+        this.seedingSummary = seedingSummary;
     }
 
     @Override
     public boolean isTargetNodeFiltered() {
         return true;
     }
+
+    @Override
+    public SeedingSummary seedingSummary() {
+        return seedingSummary;
+    }
+
     @Override
     public TargetNodeFilter get(long nodeId) {
         return targetNodeFilters.get(nodeId);

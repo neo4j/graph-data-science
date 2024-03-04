@@ -32,6 +32,11 @@ public interface TargetNodeFiltering extends NeighbourConsumers {
 
     boolean isTargetNodeFiltered();
 
+
+    default SeedingSummary seedingSummary() {
+        return SeedingSummary.EMPTY_SEEDING_SUMMARY;
+    }
+
     Stream<SimilarityResult> asSimilarityResultStream(LongPredicate sourceNodePredicate);
 
     long numberOfSimilarityPairs(LongPredicate sourceNodePredicate);

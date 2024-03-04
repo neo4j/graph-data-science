@@ -19,33 +19,28 @@
  */
 package org.neo4j.gds.similarity.filteredknn;
 
-import org.neo4j.gds.similarity.SimilarityResult;
-import org.neo4j.gds.similarity.knn.NeighbourConsumer;
+public class SeedingSummary {
 
-import java.util.function.LongPredicate;
-import java.util.stream.Stream;
+    private final long nodesCompared;
+    private final long nodePairsCompared;
+    private final boolean seededOptimally;
 
-public final class EmptyTargetNodeFiltering implements TargetNodeFiltering {
+    static SeedingSummary EMPTY_SEEDING_SUMMARY = new SeedingSummary(0,0,false);
 
-    static EmptyTargetNodeFiltering EMPTY_TARGET_FILTERING = new EmptyTargetNodeFiltering();
-
-    @Override
-    public boolean isTargetNodeFiltered() {
-        return false;
-    }
-    
-    @Override
-    public Stream<SimilarityResult> asSimilarityResultStream(LongPredicate sourceNodePredicate) {
-        return Stream.empty();
+    SeedingSummary(long nodesCompared, long nodePairsCompared,boolean seededOptimally) {
+        this.nodesCompared = nodesCompared;
+        this.nodePairsCompared = nodePairsCompared;
+        this.seededOptimally = seededOptimally;
     }
 
-    @Override
-    public long numberOfSimilarityPairs(LongPredicate sourceNodePredicate) {
-        return 0;
+    public long nodesCompared(){
+        return nodesCompared;
+    }
+    public long nodePairsCompared(){
+        return nodePairsCompared;
     }
 
-    @Override
-    public NeighbourConsumer get(long nodeId) {
-        return NeighbourConsumer.EMPTY_CONSUMER;
+    public boolean seededOptimally(){
+        return seededOptimally;
     }
 }

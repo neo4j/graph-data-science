@@ -21,12 +21,15 @@ package org.neo4j.gds.similarity.filteredknn;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
+import org.neo4j.gds.similarity.knn.ImmutableKnnResult;
 import org.neo4j.gds.similarity.knn.Knn;
 import org.neo4j.gds.similarity.knn.KnnContext;
 import org.neo4j.gds.similarity.knn.KnnNeighborFilterFactory;
 import org.neo4j.gds.similarity.knn.KnnResult;
+import org.neo4j.gds.similarity.knn.NeighborList;
 import org.neo4j.gds.similarity.knn.SimilarityFunction;
 import org.neo4j.gds.similarity.knn.metrics.SimilarityComputer;
 
@@ -88,6 +91,7 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
             graph,
             config.nodeProperties()
         )));
+
         var knn = new Knn(
             graph,
             context.progressTracker(),
@@ -123,8 +127,16 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
 
     @Override
     public FilteredKnnResult compute() {
-        KnnResult result = delegate.compute();
-
+        var seedingSummary = targetNodeFiltering.seedingSummary();
+        KnnResult result = (seedingSummary.seededOptimally()) ?
+            ImmutableKnnResult.of(
+                HugeObjectArray.newArray(NeighborList.class, 0),
+                0,
+                true,
+                seedingSummary.nodePairsCompared(),
+                seedingSummary.nodesCompared()
+            ) : delegate.compute();
+        
         return new FilteredKnnResult(
             targetNodeFiltering,
             result,
