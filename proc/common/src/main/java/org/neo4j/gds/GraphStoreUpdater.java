@@ -87,7 +87,8 @@ public final class GraphStoreUpdater {
         maybeTranslatedProperties.forEach(nodeProperty -> graphStore.addNodeProperty(
             new HashSet<>(labelsToUpdate),
             nodeProperty.propertyKey(),
-            nodeProperty.properties()
+            nodeProperty.properties(),
+            mutatePropertyConfig.propertyState()
         ));
 
         resultBuilder.withNodePropertiesWritten(maybeTranslatedProperties.size() * graph.nodeCount());

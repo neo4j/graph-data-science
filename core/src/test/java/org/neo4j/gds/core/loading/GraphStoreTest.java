@@ -37,6 +37,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ImmutableTopology;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.Aggregation;
@@ -166,7 +167,7 @@ class GraphStoreTest extends BaseTest {
         // add node properties
         ZonedDateTime initialTime = graphStore.modificationTime();
         Thread.sleep(42);
-        graphStore.addNodeProperty(Set.of(ALL_NODES), "foo", new DoubleNullPropertyMap(42.0));
+        graphStore.addNodeProperty(Set.of(ALL_NODES), "foo", new DoubleNullPropertyMap(42.0), PropertyState.TRANSIENT);
         ZonedDateTime nodePropertyTime = graphStore.modificationTime();
 
         // add relationships

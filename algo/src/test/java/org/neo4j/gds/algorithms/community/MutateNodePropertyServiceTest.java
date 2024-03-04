@@ -24,6 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.extension.GdlExtension;
@@ -67,6 +68,7 @@ class MutateNodePropertyServiceTest {
         var result = nodePropertyService.mutate(
             "bugger-off",
             nodePropertyValuesToMutate,
+            PropertyState.TRANSIENT,
             List.of(NodeLabel.of("Node")),
             graph,
             graphStore

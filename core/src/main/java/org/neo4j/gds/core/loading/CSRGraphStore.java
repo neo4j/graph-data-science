@@ -284,7 +284,8 @@ public final class CSRGraphStore implements GraphStore {
     public void addNodeProperty(
         Set<NodeLabel> labels,
         String propertyKey,
-        NodePropertyValues propertyValues
+        NodePropertyValues propertyValues,
+        PropertyState propertyState
     ) {
         updateGraphStore((graphStore) -> {
             if (graphStore.hasNodeProperty(propertyKey)) {
@@ -299,7 +300,7 @@ public final class CSRGraphStore implements GraphStore {
             graphStore.nodeProperties = NodePropertyStore
                 .builder()
                 .from(graphStore.nodeProperties)
-                .putIfAbsent(propertyKey, NodeProperty.of(propertyKey, PropertyState.TRANSIENT, propertyValues))
+                .putIfAbsent(propertyKey, NodeProperty.of(propertyKey, propertyState, propertyValues))
                 .build();
 
 
@@ -312,7 +313,7 @@ public final class CSRGraphStore implements GraphStore {
                             propertyKey,
                             propertyValues.valueType(),
                             propertyValues.valueType().fallbackValue(),
-                            PropertyState.TRANSIENT
+                            propertyState
                         )
                     )
             );
