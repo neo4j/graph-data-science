@@ -96,6 +96,7 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
     }
 
     private MemoryEstimation withNodeCount(GraphSageTrainConfig config, long nodeCount, boolean mutate) {
+        var estimationParameters = config.toMemoryEstimateParameters();
         var gsBuilder = MemoryEstimations.builder("GraphSage");
 
         if (mutate) {
@@ -103,7 +104,7 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
                 .startField(RESIDENT_MEMORY)
                 .perNode(
                     "resultFeatures",
-                    nc -> HugeObjectArray.memoryEstimation(nc, sizeOfDoubleArray(config.embeddingDimension()))
+                    nc -> HugeObjectArray.memoryEstimation(nc, sizeOfDoubleArray(estimationParameters.embeddingDimension()))
                 )
                 .endField();
         }
@@ -113,18 +114,18 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
             .field("this.instance", GraphSage.class)
             .perNode(
                 "initialFeatures",
-                nc -> HugeObjectArray.memoryEstimation(nc, sizeOfDoubleArray(config.estimationFeatureDimension()))
+                nc -> HugeObjectArray.memoryEstimation(nc, sizeOfDoubleArray(estimationParameters.estimationFeatureDimension()))
             )
             .perThread(
                 "concurrentBatches",
                 MemoryEstimations.builder().add(
-                    GraphSageHelper.embeddingsEstimation(config, config.batchSize(), nodeCount, 0, false)
+                    GraphSageHelper.embeddingsEstimation(estimationParameters, estimationParameters.batchSize(), nodeCount, 0, false)
                 ).build()
             );
         if (!mutate) {
             builder = builder.perNode(
                 "resultFeatures",
-                nc -> HugeObjectArray.memoryEstimation(nc, sizeOfDoubleArray(config.embeddingDimension()))
+                nc -> HugeObjectArray.memoryEstimation(nc, sizeOfDoubleArray(estimationParameters.embeddingDimension()))
             );
         }
         return builder.endField().build();

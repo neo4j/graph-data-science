@@ -21,22 +21,14 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.compat.GdsVersionInfoProvider;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.embeddings.graphsage.Aggregator;
-import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 
-import static org.neo4j.gds.core.utils.mem.MemoryEstimations.RESIDENT_MEMORY;
-import static org.neo4j.gds.core.utils.mem.MemoryEstimations.TEMPORARY_MEMORY;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.ml.core.EmbeddingUtils.validateRelationshipWeightPropertyValue;
 
 public final class GraphSageTrainAlgorithmFactory extends GraphAlgorithmFactory<GraphSageTrain, GraphSageTrainConfig> {
@@ -71,14 +63,7 @@ public final class GraphSageTrainAlgorithmFactory extends GraphAlgorithmFactory<
 
     @Override
     public MemoryEstimation memoryEstimation(GraphSageTrainConfig configuration) {
-        return MemoryEstimations.setup(
-            "",
-            graphDimensions -> estimate(
-                configuration,
-                graphDimensions.nodeCount(),
-                graphDimensions.estimationNodeLabelCount()
-            )
-        );
+        return new GraphSageTrainEstimateDefinition().memoryEstimation(configuration.toMemoryEstimateParameters());
     }
 
     @Override
@@ -86,69 +71,4 @@ public final class GraphSageTrainAlgorithmFactory extends GraphAlgorithmFactory<
         return Tasks.task(taskName(), GraphSageModelTrainer.progressTasks(config, graph.nodeCount()));
     }
 
-    private MemoryEstimation estimate(GraphSageTrainConfig config, long nodeCount, int labelCount) {
-        var layerConfigs = config.layerConfigs(config.estimationFeatureDimension());
-        var numberOfLayers = layerConfigs.size();
-
-        var layerBuilder = MemoryEstimations.builder("GraphSageTrain")
-            .startField(RESIDENT_MEMORY)
-            .startField("weights");
-
-        long initialAdamOptimizer = 0L;
-        long updateAdamOptimizer = 0L;
-        for (int i = 0; i < numberOfLayers; i++) {
-            var layerConfig = layerConfigs.get(i);
-            var weightDimensions = layerConfig.rows() * layerConfig.cols();
-            var weightsMemory = sizeOfDoubleArray(weightDimensions);
-            if (layerConfig.aggregatorType() == Aggregator.AggregatorType.POOL) {
-                // selfWeights
-                weightsMemory += sizeOfDoubleArray((long) layerConfig.rows() * layerConfig.rows());
-                // neighborsWeights
-                weightsMemory += sizeOfDoubleArray((long) layerConfig.rows() * layerConfig.rows());
-                // bias
-                weightsMemory += sizeOfDoubleArray(layerConfig.rows());
-            }
-            layerBuilder.fixed("layer " + (i + 1), weightsMemory);
-
-            initialAdamOptimizer += 2 * sizeOfDoubleArray(weightDimensions);
-            updateAdamOptimizer += 5L * weightDimensions;
-        }
-
-        var isMultiLabel = config.isMultiLabel();
-
-        var estimationsBuilder = layerBuilder
-            .endField()
-            .endField()
-            .startField(TEMPORARY_MEMORY)
-            .field("this.instance", GraphSage.class);
-
-        if (isMultiLabel) {
-            var minNumProperties = 1;
-            var maxNumProperties = config.featureProperties().size();
-            maxNumProperties++; // Add one for the label
-            var minWeightsMemory = sizeOfDoubleArray(config.estimationFeatureDimension() * minNumProperties);
-            var maxWeightsMemory = sizeOfDoubleArray((long) config.estimationFeatureDimension() * maxNumProperties);
-            var weightByLabelMemory = MemoryRange.of(minWeightsMemory, maxWeightsMemory).times(labelCount);
-
-            estimationsBuilder.fixed("weightsByLabel", weightByLabelMemory);
-        }
-
-        return estimationsBuilder
-            .rangePerNode("initialFeatures", nc -> MemoryRange.of(
-                HugeObjectArray.memoryEstimation(nc, sizeOfDoubleArray(isMultiLabel ? 1 : config.estimationFeatureDimension())),
-                HugeObjectArray.memoryEstimation(nc, sizeOfDoubleArray(config.estimationFeatureDimension()))
-            ))
-            .startField("trainOnEpoch")
-            .fixed("initialAdamOptimizer", initialAdamOptimizer)
-            .perThread("concurrentBatches", MemoryEstimations
-                .builder()
-                .startField("trainOnBatch")
-                .add(GraphSageHelper.embeddingsEstimation(config, 3L * config.batchSize(), nodeCount, labelCount, true))
-                .fixed("updateAdamOptimizer", updateAdamOptimizer)
-                .endField()
-                .build())
-            .endField()
-            .endField()
-            .build();
-    }
 }

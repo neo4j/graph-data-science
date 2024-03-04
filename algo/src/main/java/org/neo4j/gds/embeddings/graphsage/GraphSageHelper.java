@@ -25,11 +25,12 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.api.schema.NodeSchemaEntry;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainMemoryEstimateParameters;
 import org.neo4j.gds.embeddings.graphsage.algo.MultiLabelFeatureExtractors;
 import org.neo4j.gds.ml.core.NeighborhoodFunction;
 import org.neo4j.gds.ml.core.Variable;
@@ -101,7 +102,7 @@ public final class GraphSageHelper {
     }
 
     public static MemoryEstimation embeddingsEstimation(
-        GraphSageTrainConfig config,
+        GraphSageTrainMemoryEstimateParameters config,
         long batchSize,
         long nodeCount,
         int labelCount,
@@ -109,7 +110,7 @@ public final class GraphSageHelper {
     ) {
         var isMultiLabel = config.isMultiLabel();
 
-        var layerConfigs = config.layerConfigs(config.estimationFeatureDimension());
+        var layerConfigs = config.layerConfigs();
         var numberOfLayers = layerConfigs.size();
 
         var computationGraphBuilder = MemoryEstimations.builder("computationGraph").startField("subgraphs");
