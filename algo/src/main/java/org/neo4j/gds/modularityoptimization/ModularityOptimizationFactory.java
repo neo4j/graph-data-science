@@ -43,7 +43,7 @@ public class ModularityOptimizationFactory<CONFIG extends ModularityOptimization
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return new ModularityOptimizationMemoryEstimateDefinition().memoryEstimation();
+        return new ModularityOptimizationMemoryEstimateDefinition().memoryEstimation(null);
     }
 
     @Override

@@ -27,15 +27,13 @@ import org.neo4j.gds.assertions.MemoryEstimationAssert;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static org.mockito.Mockito.mock;
 
 class ModularityOptimizationMemoryEstimateDefinitionTest {
 
     @ParameterizedTest
     @MethodSource("memoryEstimationTuples")
     void testMemoryEstimation(int concurrency, long min, long max) {
-        var config = mock(ModularityOptimizationBaseConfig.class);
-        var memoryEstimation = new ModularityOptimizationMemoryEstimateDefinition().memoryEstimation(config);
+        var memoryEstimation = new ModularityOptimizationMemoryEstimateDefinition().memoryEstimation(null);
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(100_000L,  concurrency)
             .hasMax(max)

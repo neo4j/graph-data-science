@@ -32,10 +32,15 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.assertj.Extractors;
+import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.DefaultPool;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
@@ -43,6 +48,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.logging.Log;
 
 import java.util.Optional;
@@ -207,7 +213,30 @@ class ModularityOptimizationWithoutOrientationTest {
     @MethodSource("memoryEstimationTuples")
     void testMemoryEstimation(int concurrency, long min, long max) {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(100_000L).build();
-        MemoryTree memoryTree = new ModularityOptimizationMemoryEstimateDefinition().memoryEstimation()
+        MemoryTree memoryTree = MemoryEstimations.builder(ModularityOptimization.class)
+            .perNode("currentCommunities", HugeLongArray::memoryEstimation)
+            .perNode("nextCommunities", HugeLongArray::memoryEstimation)
+            .perNode("cumulativeNodeWeights", HugeDoubleArray::memoryEstimation)
+            .perNode("nodeCommunityInfluences", HugeDoubleArray::memoryEstimation)
+            .perNode("communityWeights", HugeAtomicDoubleArray::memoryEstimation)
+            .perNode("colorsUsed", MemoryUsage::sizeOfBitset)
+            .perNode("colors", HugeLongArray::memoryEstimation)
+            .rangePerNode(
+                "reversedSeedCommunityMapping", (nodeCount) ->
+                    MemoryRange.of(0, HugeLongArray.memoryEstimation(nodeCount))
+            )
+            .perNode("communityWeightUpdates", HugeAtomicDoubleArray::memoryEstimation)
+            .perThread("ModularityOptimizationTask", MemoryEstimations.builder()
+                .rangePerNode(
+                    "communityInfluences",
+                    (nodeCount) -> MemoryRange.of(
+                        MemoryUsage.sizeOfLongDoubleHashMap(50),
+                        MemoryUsage.sizeOfLongDoubleHashMap(Math.max(50, nodeCount))
+                    )
+                )
+                .build()
+            )
+            .build()
             .estimate(dimensions, concurrency);
         assertEquals(min, memoryTree.memoryUsage().min);
         assertEquals(max, memoryTree.memoryUsage().max);
