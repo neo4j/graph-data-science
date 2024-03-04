@@ -42,7 +42,7 @@ public interface NodeFilterSpec {
     NodeFilterSpec noOp = new NodeFilterSpec() {
         @Override
         public NodeFilter toNodeFilter(IdMap idMap) {
-            return NodeFilter.noOp;
+            return NodeFilter.ALLOW_EVERYTHING;
         }
 
         @Override

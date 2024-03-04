@@ -17,13 +17,27 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.knn;
+package org.neo4j.gds.similarity.filteredknn;
 
-/**
- * During KNN execution, this listener is offered every neighbour we encounter.
- */
-public interface NeighbourConsumer {
-    NeighbourConsumer EMPTY_CONSUMER = (element, priority) -> { /* do nothing */ };
+import org.neo4j.gds.similarity.SimilarityResult;
 
-    void offer(long element, double priority);
+import java.util.stream.Stream;
+
+public class EmptyTargetNodeFilter implements TargetNodeFilter {
+
+    static EmptyTargetNodeFilter EMPTY_CONSUMER = new EmptyTargetNodeFilter();
+    @Override
+    public Stream<SimilarityResult> asSimilarityStream(long nodeId) {
+        return Stream.empty();
+    }
+
+    @Override
+    public long size() {
+        return 0;
+    }
+
+    @Override
+    public void offer(long element, double priority) {
+
+    }
 }

@@ -22,5 +22,7 @@ package org.neo4j.gds.similarity.filtering;
 import java.util.function.LongPredicate;
 
 public interface NodeFilter extends LongPredicate {
-    NodeFilter noOp = (nodeId) -> true;
+    NodeFilter ALLOW_EVERYTHING = (nodeId) -> true;
+    NodeFilter BLOCK_EVERYTHING = (nodeId) -> false;
+
 }

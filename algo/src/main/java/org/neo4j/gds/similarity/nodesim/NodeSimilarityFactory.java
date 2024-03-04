@@ -59,8 +59,8 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
             concurrency,
             DefaultPool.INSTANCE,
             progressTracker,
-            NodeFilter.noOp,
-            NodeFilter.noOp
+            NodeFilter.ALLOW_EVERYTHING,
+            NodeFilter.ALLOW_EVERYTHING
         );
     }
 

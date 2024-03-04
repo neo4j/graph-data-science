@@ -22,18 +22,30 @@ package org.neo4j.gds.similarity.filteredknn;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.knn.NeighbourConsumer;
 
+import java.util.function.LongPredicate;
 import java.util.stream.Stream;
 
+public final class EmptyTargetNodeFiltering implements TargetNodeFiltering {
 
-public interface TargetNodeFilter extends NeighbourConsumer {
+    static EmptyTargetNodeFiltering EMPTY_TARGET_FILTERING = new EmptyTargetNodeFiltering();
 
+    @Override
+    public boolean isTargetNodeFiltered() {
+        return false;
+    }
     
-    /**
-     * As part of an instrumentation of KNN this is a handy utility.
-     */
-    Stream<SimilarityResult> asSimilarityStream(long nodeId);
-    /**
-     * As part of an instrumentation of KNN this is a handy utility.
-     */
-    long size();
+    @Override
+    public Stream<SimilarityResult> asSimilarityResultStream(LongPredicate sourceNodePredicate) {
+        return Stream.empty();
+    }
+
+    @Override
+    public long numberOfSimilarityPairs(LongPredicate sourceNodePredicate) {
+        return 0;
+    }
+
+    @Override
+    public NeighbourConsumer get(long nodeId) {
+        return NeighbourConsumer.EMPTY_CONSUMER;
+    }
 }

@@ -17,13 +17,30 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.knn;
+package org.neo4j.gds.similarity.filteredknn;
 
-/**
- * During KNN execution, this listener is offered every neighbour we encounter.
- */
-public interface NeighbourConsumer {
-    NeighbourConsumer EMPTY_CONSUMER = (element, priority) -> { /* do nothing */ };
+public class SeedingSummary {
 
-    void offer(long element, double priority);
+    private final long nodesCompared;
+    private final long nodePairsCompared;
+    private final boolean seededOptimally;
+
+    static SeedingSummary EMPTY_SEEDING_SUMMARY = new SeedingSummary(0,0,false);
+
+    SeedingSummary(long nodesCompared, long nodePairsCompared,boolean seededOptimally) {
+        this.nodesCompared = nodesCompared;
+        this.nodePairsCompared = nodePairsCompared;
+        this.seededOptimally = seededOptimally;
+    }
+
+    public long nodesCompared(){
+        return nodesCompared;
+    }
+    public long nodePairsCompared(){
+        return nodePairsCompared;
+    }
+
+    public boolean seededOptimally(){
+        return seededOptimally;
+    }
 }

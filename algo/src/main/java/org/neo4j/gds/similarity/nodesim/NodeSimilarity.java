@@ -86,8 +86,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             concurrency,
             executorService,
             progressTracker,
-            NodeFilter.noOp,
-            NodeFilter.noOp
+            NodeFilter.ALLOW_EVERYTHING,
+            NodeFilter.ALLOW_EVERYTHING
         );
     }
 
@@ -305,7 +305,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
         loggableAndTerminableSourceNodeStream()
             .forEach(sourceNodeId -> {
-                if (sourceNodeFilter.equals(NodeFilter.noOp)) {
+                if (sourceNodeFilter.equals(NodeFilter.ALLOW_EVERYTHING)) {
                     targetNodesStream.apply(components.applyAsLong(sourceNodeId), sourceNodeId + 1)
                         .forEach(targetNodeId -> computeSimilarityFor(sourceNodeId, targetNodeId,
                             (source, target, similarity) -> {
@@ -359,7 +359,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         var topNList = new TopNList(parameters.normalizedN());
         loggableAndTerminableSourceNodeStream()
             .forEach(sourceNodeId -> {
-                if (sourceNodeFilter.equals(NodeFilter.noOp)) {
+                if (sourceNodeFilter.equals(NodeFilter.ALLOW_EVERYTHING)) {
                     targetNodesStream.apply(components.applyAsLong(sourceNodeId), sourceNodeId + 1)
                         .forEach(targetNodeId -> computeSimilarityFor(sourceNodeId, targetNodeId, topNList::add));
                 } else {
@@ -487,7 +487,8 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
         //when on concurrency of 1 on not-filtered similarity,  we only compare nodeId with greater indexed nodes
         // so work is halved. This does not hold for filtered similarity, since the targetNodes might be lesser indexed.
-        boolean isNotFiltered = sourceNodeFilter.equals(NodeFilter.noOp) && targetNodeFilter.equals(NodeFilter.noOp);
+        boolean isNotFiltered = sourceNodeFilter.equals(NodeFilter.ALLOW_EVERYTHING) && targetNodeFilter.equals(
+            NodeFilter.ALLOW_EVERYTHING);
         if (concurrency == 1 && isNotFiltered) {
             workload = workload / 2;
         }

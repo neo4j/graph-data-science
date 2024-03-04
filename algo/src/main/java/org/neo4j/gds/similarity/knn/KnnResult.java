@@ -23,6 +23,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.similarity.filtering.NodeFilter;
 
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
@@ -56,6 +57,33 @@ public abstract class KnnResult {
                 UnaryOperator.identity()
             )
             .flatMap(cursor -> IntStream.range(cursor.offset, cursor.limit)
+                .mapToObj(index -> cursor.array[index].similarityStream(index + cursor.base))
+                .flatMap(Function.identity())
+            );
+    }
+
+    public long totalSimilarityPairs(NodeFilter resultFilter) {
+        var neighborList = neighborList();
+        return Stream.iterate(
+                neighborList.initCursor(neighborList.newCursor()),
+                HugeCursor::next,
+                UnaryOperator.identity()
+            )
+            .flatMapToLong(cursor -> IntStream.range(cursor.offset, cursor.limit)
+                .filter(index -> resultFilter.test(index + cursor.base))
+                .mapToLong(index -> cursor.array[index].size()))
+            .sum();
+    }
+
+    public Stream<SimilarityResult> streamSimilarityResult(NodeFilter resultFilter) {
+        var neighborList = neighborList();
+        return Stream.iterate(
+                neighborList.initCursor(neighborList.newCursor()),
+                HugeCursor::next,
+                UnaryOperator.identity()
+            )
+            .flatMap(cursor -> IntStream.range(cursor.offset, cursor.limit)
+                .filter(index -> resultFilter.test(index + cursor.base))
                 .mapToObj(index -> cursor.array[index].similarityStream(index + cursor.base))
                 .flatMap(Function.identity())
             );

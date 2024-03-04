@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.procedures.similarity;
 
-import org.neo4j.gds.algorithms.similarity.specificfields.KnnSpecificFields;
 import org.neo4j.gds.algorithms.RelationshipMutateResult;
 import org.neo4j.gds.algorithms.RelationshipWriteResult;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
+import org.neo4j.gds.algorithms.similarity.specificfields.KnnSpecificFields;
 import org.neo4j.gds.procedures.similarity.knn.KnnMutateResult;
 import org.neo4j.gds.procedures.similarity.knn.KnnStatsResult;
 import org.neo4j.gds.procedures.similarity.knn.KnnWriteResult;

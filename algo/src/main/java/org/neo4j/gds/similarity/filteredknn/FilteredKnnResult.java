@@ -19,40 +19,67 @@
  */
 package org.neo4j.gds.similarity.filteredknn;
 
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
+import org.neo4j.gds.similarity.knn.KnnResult;
 
 import java.util.stream.Stream;
 
-@ValueClass
-public abstract class FilteredKnnResult {
-    public abstract int ranIterations();
+public class FilteredKnnResult {
 
-    public abstract boolean didConverge();
+    private final boolean isTargetFiltered;
+    private final TargetNodeFiltering targetNodeFiltering;
+    private final NodeFilter sourceNodeFilter;
+    private final KnnResult knnResult;
 
-    public abstract long nodePairsConsidered();
 
-    public abstract long nodesCompared();
-
+    public FilteredKnnResult(
+        TargetNodeFiltering targetNodeFiltering,
+        KnnResult knnResult,
+        NodeFilter sourceNodeFilter
+    ) {
+        this.isTargetFiltered = targetNodeFiltering.isTargetNodeFiltered();
+        this.targetNodeFiltering = targetNodeFiltering;
+        this.knnResult = knnResult;
+        this.sourceNodeFilter = sourceNodeFilter;
+    }
 
     public Stream<SimilarityResult> similarityResultStream() {
-        TargetNodeFiltering neighbourConsumers = neighbourConsumers();
-        NodeFilter sourceNodeFilter = sourceNodeFilter();
 
-        return neighbourConsumers.asSimilarityResultStream(sourceNodeFilter);
+
+        if (isTargetFiltered) {
+            return targetNodeFiltering.asSimilarityResultStream(sourceNodeFilter);
+        }
+
+        return knnResult.streamSimilarityResult(sourceNodeFilter);
     }
 
     public long numberOfSimilarityPairs() {
-        TargetNodeFiltering neighbourConsumers = neighbourConsumers();
-        NodeFilter sourceNodeFilter = sourceNodeFilter();
 
-        return neighbourConsumers.numberOfSimilarityPairs(sourceNodeFilter);
+        if (isTargetFiltered) {
+            return targetNodeFiltering.numberOfSimilarityPairs(sourceNodeFilter);
+        }
+
+        return knnResult.totalSimilarityPairs(sourceNodeFilter);
+
     }
 
-    // ***
-    // Below is for internal use only
-    // ***
-    abstract TargetNodeFiltering neighbourConsumers();
-    abstract NodeFilter sourceNodeFilter();
+    public int ranIterations() {
+        return knnResult.ranIterations();
+
+    }
+
+    public boolean didConverge() {
+        return knnResult.didConverge();
+
+    }
+
+    public long nodePairsConsidered() {
+        return knnResult.nodePairsConsidered();
+    }
+
+    public long nodesCompared() {
+        return knnResult.nodesCompared();
+    }
+
 }
