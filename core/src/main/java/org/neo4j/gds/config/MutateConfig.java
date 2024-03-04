@@ -19,4 +19,12 @@
  */
 package org.neo4j.gds.config;
 
-public interface MutateConfig extends AlgoBaseConfig { }
+
+import org.immutables.value.Value;
+
+public interface MutateConfig extends AlgoBaseConfig {
+    @Value.Default
+    default boolean isAuxiliary() {
+        return false;
+    }
+}
