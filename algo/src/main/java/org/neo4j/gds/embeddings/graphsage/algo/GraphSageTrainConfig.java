@@ -206,4 +206,17 @@ public interface GraphSageTrainConfig extends
         return new GraphSageTrainConfigImpl(username, userInput);
     }
 
+
+    @Configuration.Ignore
+    default GraphSageTrainMemoryEstimateParameters toMemoryEstimateParameters() {
+        return new GraphSageTrainMemoryEstimateParameters(
+            layerConfigs(estimationFeatureDimension()),
+            isMultiLabel(),
+            featureProperties().size(),
+            estimationFeatureDimension(),
+            batchSize(),
+            embeddingDimension()
+        );
+    }
+
 }
