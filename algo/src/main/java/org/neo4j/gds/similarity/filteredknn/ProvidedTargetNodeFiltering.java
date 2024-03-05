@@ -93,7 +93,7 @@ public final class ProvidedTargetNodeFiltering implements TargetNodeFiltering {
         var seededOptimally = (startingSeeds[k] == -1) && (optionalSimilarityFunction.isPresent()); //if there less than `k+1` targets, we optimally find solution just by seeding.
         return new ProvidedTargetNodeFiltering(
             neighbourConsumers,
-            new SeedingSummary(nodepairAdder.longValue(), nodepairAdder.longValue(), seededOptimally)
+            new SeedingSummary(nodeCountAdder.longValue(), nodepairAdder.longValue(), seededOptimally)
         );
 
     }
