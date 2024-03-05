@@ -119,6 +119,7 @@ public class MutableRelationshipSchema implements RelationshipSchema {
     public void set(MutableRelationshipSchemaEntry entry) {
         entries.put(entry.identifier(), entry);
     }
+
     public void remove(RelationshipType identifier) {
         entries.remove(identifier);
     }

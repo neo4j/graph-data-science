@@ -75,6 +75,7 @@ public final class GraphStoreUpdater {
         GraphStore graphStore,
         String mutateRelationshipType,
         String mutateProperty,
+        PropertyState propertyState,
         SingleTypeRelationshipsProducer singleTypeRelationshipsProducer,
         Log log
     ) {
@@ -83,7 +84,8 @@ public final class GraphStoreUpdater {
 
             var resultRelationships = singleTypeRelationshipsProducer.getRelationships(
                 mutateRelationshipType,
-                mutateProperty
+                mutateProperty,
+                propertyState
             );
 
             log.info("Updating in-memory graph store");

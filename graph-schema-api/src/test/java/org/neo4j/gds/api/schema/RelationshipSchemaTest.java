@@ -275,7 +275,11 @@ class RelationshipSchemaTest {
     @Test
     void testBuildProperties() {
         MutableRelationshipSchema relationshipSchema = MutableRelationshipSchema.empty()
-            .addProperty(RelationshipType.of("X"), Direction.UNDIRECTED, "x", ValueType.DOUBLE,
+            .addProperty(
+                RelationshipType.of("X"),
+                Direction.UNDIRECTED,
+                "x",
+                ValueType.DOUBLE,
                 PropertyState.PERSISTENT
             );
         relationshipSchema
@@ -295,15 +299,24 @@ class RelationshipSchemaTest {
                 RelationshipType.of("Z"),
                 Direction.UNDIRECTED,
                 "z",
-                RelationshipPropertySchema.of("z", ValueType.DOUBLE)
+                RelationshipPropertySchema.of("z", ValueType.DOUBLE, PropertyState.TRANSIENT)
             );
 
         assertThat(schema.isUndirected()).isFalse();
         assertThat(schema.availableTypes()).contains(RelationshipType.of("X"), RelationshipType.of("Y"));
 
-        assertThat(schema.get(RelationshipType.of("X")).properties()).containsExactlyInAnyOrderEntriesOf(Map.of("x", RelationshipPropertySchema.of("x", ValueType.DOUBLE)));
-        assertThat(schema.get(RelationshipType.of("Y")).properties()).containsExactlyInAnyOrderEntriesOf(Map.of("y", RelationshipPropertySchema.of("y", ValueType.DOUBLE, Aggregation.MIN)));
-        assertThat(schema.get(RelationshipType.of("Z")).properties()).containsExactlyInAnyOrderEntriesOf(Map.of("z", RelationshipPropertySchema.of("z", ValueType.DOUBLE)));
+        assertThat(schema.get(RelationshipType.of("X")).properties()).containsExactlyInAnyOrderEntriesOf(Map.of(
+            "x",
+            RelationshipPropertySchema.of("x", ValueType.DOUBLE, PropertyState.TRANSIENT)
+        ));
+        assertThat(schema.get(RelationshipType.of("Y")).properties()).containsExactlyInAnyOrderEntriesOf(Map.of(
+            "y",
+            RelationshipPropertySchema.of("y", ValueType.DOUBLE, Aggregation.MIN, PropertyState.TRANSIENT)
+        ));
+        assertThat(schema.get(RelationshipType.of("Z")).properties()).containsExactlyInAnyOrderEntriesOf(Map.of(
+            "z",
+            RelationshipPropertySchema.of("z", ValueType.DOUBLE, PropertyState.TRANSIENT)
+        ));
 
 
         assertThat(schema.get(RelationshipType.of("X")).direction()).isEqualTo(Direction.UNDIRECTED);

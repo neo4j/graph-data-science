@@ -318,7 +318,8 @@ public class CentralityAlgorithmsMutateBusinessFacade {
                 nodePropertyValues,
                 configuration.propertyState(),
                 configuration.nodeLabelIdentifiers(algorithmResult.graphStore()),
-                algorithmResult.graph(), algorithmResult.graphStore()
+                algorithmResult.graph(),
+                algorithmResult.graphStore()
             );
 
             var specificFields = specificFieldsSupplier.specificFields(result, centralitySummary);

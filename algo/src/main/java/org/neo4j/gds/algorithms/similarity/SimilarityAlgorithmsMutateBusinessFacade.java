@@ -20,17 +20,19 @@
 package org.neo4j.gds.algorithms.similarity;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
-import org.neo4j.gds.algorithms.similarity.specificfields.KnnSpecificFields;
 import org.neo4j.gds.algorithms.RelationshipMutateResult;
+import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
+import org.neo4j.gds.algorithms.similarity.specificfields.KnnSpecificFields;
 import org.neo4j.gds.algorithms.similarity.specificfields.SimilaritySpecificFields;
 import org.neo4j.gds.algorithms.similarity.specificfields.SimilaritySpecificFieldsWithDistribution;
-import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
-import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.MutateRelationshipConfig;
+import org.neo4j.gds.config.MutateRelationshipPropertyConfig;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnMutateConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityMutateConfig;
 import org.neo4j.gds.similarity.knn.KnnMutateConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -66,13 +68,11 @@ public class SimilarityAlgorithmsMutateBusinessFacade {
         return mutate(
             algorithmResult,
             configuration,
-            result -> result.graphResult(),
+            NodeSimilarityResult::graphResult,
             NODE_SIMILARITY_SPECIFIC_FIELDS_SUPPLIER,
             intermediateResult.computeMilliseconds,
             () -> SimilaritySpecificFieldsWithDistribution.EMPTY,
-            computeSimilarityDistribution,
-            configuration.mutateRelationshipType(),
-            configuration.mutateProperty()
+            computeSimilarityDistribution
         );
 
     }
@@ -91,13 +91,11 @@ public class SimilarityAlgorithmsMutateBusinessFacade {
         return mutate(
             algorithmResult,
             configuration,
-            result -> result.graphResult(),
+            NodeSimilarityResult::graphResult,
             NODE_SIMILARITY_SPECIFIC_FIELDS_SUPPLIER,
             intermediateResult.computeMilliseconds,
             () -> SimilaritySpecificFieldsWithDistribution.EMPTY,
-            computeSimilarityDistribution,
-            configuration.mutateRelationshipType(),
-            configuration.mutateProperty()
+            computeSimilarityDistribution
         );
     }
 
@@ -124,9 +122,7 @@ public class SimilarityAlgorithmsMutateBusinessFacade {
             KNN_SPECIFIC_FIELDS_SUPPLIER,
             intermediateResult.computeMilliseconds,
             () -> KnnSpecificFields.EMPTY,
-            computeSimilarityDistribution,
-            configuration.mutateRelationshipType(),
-            configuration.mutateProperty()
+            computeSimilarityDistribution
         );
 
     }
@@ -154,23 +150,19 @@ public class SimilarityAlgorithmsMutateBusinessFacade {
             FILTERED_KNN_SPECIFIC_FIELDS_SUPPLIER,
             intermediateResult.computeMilliseconds,
             () -> KnnSpecificFields.EMPTY,
-            computeSimilarityDistribution,
-            configuration.mutateRelationshipType(),
-            configuration.mutateProperty()
+            computeSimilarityDistribution
         );
 
     }
 
-    <RESULT, ASF extends SimilaritySpecificFields, CONFIG extends AlgoBaseConfig> RelationshipMutateResult<ASF> mutate(
+    <RESULT, ASF extends SimilaritySpecificFields, CONFIG extends MutateRelationshipConfig & MutateRelationshipPropertyConfig> RelationshipMutateResult<ASF> mutate(
         AlgorithmComputationResult<RESULT> algorithmResult,
         CONFIG configuration,
         Function<RESULT, SimilarityGraphResult> similarityGraphResultSupplier,
         SpecificFieldsWithSimilarityStatisticsSupplier<RESULT, ASF> specificFieldsSupplier,
         long computeMilliseconds,
         Supplier<ASF> emptyASFSupplier,
-        boolean shouldComputeSimilarityDistribution,
-        String mutateRelationshipType,
-        String mutateProperty
+        boolean shouldComputeSimilarityDistribution
     ) {
 
         return algorithmResult.result().map(result -> {
@@ -183,8 +175,9 @@ public class SimilarityAlgorithmsMutateBusinessFacade {
 
             var mutateResult = mutateRelationshipService.mutate(
                 algorithmResult.graphStore(),
-                mutateRelationshipType,
-                mutateProperty,
+                configuration.mutateRelationshipType(),
+                configuration.mutateProperty(),
+                configuration.propertyState(),
                 similaritySingleTypeRelationshipsHandler
             );
 

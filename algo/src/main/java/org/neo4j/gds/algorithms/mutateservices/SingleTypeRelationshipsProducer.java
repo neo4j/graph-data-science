@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.algorithms.mutateservices;
 
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 
 /**
@@ -26,7 +27,7 @@ import org.neo4j.gds.core.loading.SingleTypeRelationships;
  */
 public interface SingleTypeRelationshipsProducer {
 
-    SingleTypeRelationships getRelationships(String mutateRelationshipType, String mutateProperty);
+    SingleTypeRelationships getRelationships(String mutateRelationshipType, String mutateProperty, PropertyState propertyState);
 
     long relationshipsCount();
 }
