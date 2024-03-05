@@ -20,9 +20,11 @@
 package org.neo4j.gds.paths.delta.config;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.RelationshipWeightConfig;
+import org.neo4j.gds.config.SourceNodeConfig;
 
-public interface AllShortestPathsDeltaBaseConfig extends AllShortestPathsBaseConfig {
+public interface AllShortestPathsDeltaBaseConfig extends AlgoBaseConfig, SourceNodeConfig, RelationshipWeightConfig {
 
     @Configuration.DoubleRange(min = 0, minInclusive = false)
     default double delta() {
