@@ -91,14 +91,18 @@ public class GraphDataScienceBuilder {
     }
 
     public GraphDataScience build() {
+        var algorithmsAndCatalogFacade = new AlgorithmsAndCatalogFacade(pathFindingProcedureFacade);
+
         return new GraphDataScience(
             log,
+            algorithmsAndCatalogFacade,
             catalogFacade,
             centralityProcedureFacade,
             communityProcedureFacade,
             miscAlgorithmsProcedureFacade,
             nodeEmbeddingsProcedureFacade,
-            pathFindingProcedureFacade,
+            null,
+            null,
             similarityProcedureFacade,
             deprecatedProceduresMetricService
         );

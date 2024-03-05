@@ -24,20 +24,25 @@ import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.catalog.CatalogFacade;
 import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
-import org.neo4j.gds.procedures.embeddings.NodeEmbeddingsProcedureFacade;
 import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.pathfinding.PathFindingProcedureFacade;
+import org.neo4j.gds.procedures.embeddings.NodeEmbeddingsProcedureFacade;
+import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
 import org.neo4j.gds.procedures.similarity.SimilarityProcedureFacade;
 
 public class GraphDataScience {
     private final Log log;
+
+    private final AlgorithmsAndCatalogFacade algorithmsAndCatalogFacade;
     private final CatalogFacade catalogFacade;
-    private final CommunityProcedureFacade communityProcedureFacade;
     private final CentralityProcedureFacade centralityProcedureFacade;
+    private final CommunityProcedureFacade communityProcedureFacade;
     private final MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade;
     private final NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade;
     private final PathFindingProcedureFacade pathFindingProcedureFacade;
+    private final PipelinesProcedureFacade pipelinesProcedureFacade;
     private final SimilarityProcedureFacade similarityProcedureFacade;
+
     private final DeprecatedProceduresMetricService deprecatedProceduresMetricService;
 
     /**
@@ -45,23 +50,27 @@ public class GraphDataScience {
      */
     GraphDataScience(
         Log log,
+        AlgorithmsAndCatalogFacade algorithmsAndCatalogFacade,
         CatalogFacade catalogFacade,
         CentralityProcedureFacade centralityProcedureFacade,
         CommunityProcedureFacade communityProcedureFacade,
         MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade,
         NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade,
         PathFindingProcedureFacade pathFindingProcedureFacade,
+        PipelinesProcedureFacade pipelinesProcedureFacade,
         SimilarityProcedureFacade similarityProcedureFacade,
         DeprecatedProceduresMetricService deprecatedProceduresMetricService
     ) {
         this.log = log;
+        this.algorithmsAndCatalogFacade = algorithmsAndCatalogFacade;
         this.catalogFacade = catalogFacade;
         this.centralityProcedureFacade = centralityProcedureFacade;
         this.communityProcedureFacade = communityProcedureFacade;
         this.miscAlgorithmsProcedureFacade = miscAlgorithmsProcedureFacade;
-        this.nodeEmbeddingsProcedureFacade = nodeEmbeddingsProcedureFacade;
         this.pathFindingProcedureFacade = pathFindingProcedureFacade;
+        this.pipelinesProcedureFacade = pipelinesProcedureFacade;
         this.similarityProcedureFacade = similarityProcedureFacade;
+        this.nodeEmbeddingsProcedureFacade = nodeEmbeddingsProcedureFacade;
         this.deprecatedProceduresMetricService = deprecatedProceduresMetricService;
     }
 
