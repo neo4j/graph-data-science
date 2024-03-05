@@ -207,4 +207,25 @@ class NodeSchemaTest {
             PropertySchema.of("bar", ValueType.LONG_ARRAY)
         );
     }
+
+    @Test
+    void shouldFilterPropertySchemas() {
+        var nodeSchema = MutableNodeSchema.empty();
+
+        nodeSchema.addProperty(
+            NodeLabel.of("A"),
+            "foo",
+            PropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.PERSISTENT)
+        );
+
+        nodeSchema.addProperty(
+            NodeLabel.of("A"),
+            "bar",
+            PropertySchema.of("bar", ValueType.LONG, DefaultValue.forLong(), PropertyState.AUXILIARY)
+        );
+
+        var filteredNodeSchema = nodeSchema.filterProperties(schema -> schema.state() != PropertyState.AUXILIARY);
+
+        assertThat(filteredNodeSchema.allProperties()).containsExactly("foo");
+    }
 }

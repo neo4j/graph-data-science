@@ -341,4 +341,27 @@ class RelationshipSchemaTest {
             .doesNotContainKey("shouldNotExistInOriginalSchema")
             .containsOnlyKeys("prop");
     }
+
+    @Test
+    void shouldFilterPropertySchemas() {
+        var relSchema = MutableRelationshipSchema.empty();
+
+        relSchema.addProperty(
+            RelationshipType.of("A"),
+            Direction.DIRECTED,
+            "foo",
+            RelationshipPropertySchema.of("foo", ValueType.LONG, PropertyState.PERSISTENT)
+        );
+
+        relSchema.addProperty(
+            RelationshipType.of("A"),
+            Direction.DIRECTED,
+            "bar",
+            RelationshipPropertySchema.of("bar", ValueType.LONG, PropertyState.AUXILIARY)
+        );
+
+        var filteredRelSchema = relSchema.filterProperties(schema -> schema.state() != PropertyState.AUXILIARY);
+
+        assertThat(filteredRelSchema.allProperties()).containsExactly("foo");
+    }
 }
