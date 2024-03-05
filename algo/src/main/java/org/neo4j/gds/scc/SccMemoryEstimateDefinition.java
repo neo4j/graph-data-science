@@ -28,10 +28,10 @@ import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.paged.PagedLongStack;
 import org.neo4j.gds.mem.MemoryUsage;
 
-public class SccMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<SccCommonBaseConfig> {
+public class SccMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<Void> {
 
     @Override
-    public MemoryEstimation memoryEstimation(SccCommonBaseConfig configuration) {
+    public MemoryEstimation memoryEstimation(Void unused) {
         var builder = MemoryEstimations.builder(Scc.class);
         builder
             .perNode("index", HugeLongArray::memoryEstimation)

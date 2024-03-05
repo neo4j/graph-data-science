@@ -22,14 +22,11 @@ package org.neo4j.gds.scc;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
 
-import static org.mockito.Mockito.mock;
-
 class SccMemoryEstimateDefinitionTest {
 
     @Test
     void shouldEstimateMemoryAccurately() {
-        var config = mock(SccCommonBaseConfig.class);
-        var memoryEstimation = new SccMemoryEstimateDefinition().memoryEstimation(config);
+        var memoryEstimation = new SccMemoryEstimateDefinition().memoryEstimation(null);
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(100, 6000, 1)
