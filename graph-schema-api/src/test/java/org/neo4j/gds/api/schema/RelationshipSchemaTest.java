@@ -364,4 +364,32 @@ class RelationshipSchemaTest {
 
         assertThat(filteredRelSchema.allProperties()).containsExactly("foo");
     }
+
+    @Test
+    void shouldNotShowHiddenPropertiesInToMap() {
+        var relSchema = MutableRelationshipSchema.empty();
+
+        relSchema.addProperty(
+            RelationshipType.of("A"),
+            Direction.DIRECTED,
+            "foo",
+            RelationshipPropertySchema.of("foo", ValueType.LONG, PropertyState.PERSISTENT)
+        );
+
+        relSchema.addProperty(
+            RelationshipType.of("A"),
+            Direction.DIRECTED,
+            "bar",
+            RelationshipPropertySchema.of("bar", ValueType.LONG, PropertyState.HIDDEN)
+        );
+
+        assertThat(relSchema.toMap()).containsAllEntriesOf(Map.of(
+            "A", Map.of(
+                "direction", "DIRECTED",
+                "properties", Map.of(
+                    "foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT, Aggregation.NONE)"
+                )
+            )
+        ));
+    }
 }

@@ -228,4 +228,27 @@ class NodeSchemaTest {
 
         assertThat(filteredNodeSchema.allProperties()).containsExactly("foo");
     }
+
+    @Test
+    void shouldNotShowHiddenPropertiesInToMap() {
+        var nodeSchema = MutableNodeSchema.empty();
+
+        nodeSchema.addProperty(
+            NodeLabel.of("A"),
+            "foo",
+            PropertySchema.of("foo", ValueType.LONG, DefaultValue.forLong(), PropertyState.PERSISTENT)
+        );
+
+        nodeSchema.addProperty(
+            NodeLabel.of("A"),
+            "bar",
+            PropertySchema.of("bar", ValueType.LONG, DefaultValue.forLong(), PropertyState.HIDDEN)
+        );
+
+        assertThat(nodeSchema.toMap()).containsAllEntriesOf(Map.of(
+            "A", Map.of(
+                "foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT)"
+            )
+        ));
+    }
 }
