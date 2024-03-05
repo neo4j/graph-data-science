@@ -36,6 +36,7 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.paths.ImmutablePathResult;
+import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfigImpl;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfigImpl;
 
@@ -103,7 +104,14 @@ final class DijkstraTest {
                 .build();
 
             var paths = Dijkstra
-                .sourceTarget(graph, config, false, Optional.empty(), ProgressTracker.NULL_TRACKER)
+                .sourceTarget(
+                    graph,
+                    config.sourceNode(),
+                    config.targetsList(),
+                    false,
+                    Optional.empty(),
+                    ProgressTracker.NULL_TRACKER
+                )
                 .compute()
                 .pathSet();
 
@@ -120,7 +128,14 @@ final class DijkstraTest {
                 .build();
 
             var path = Dijkstra
-                .sourceTarget(graph, config, false, Optional.empty(), ProgressTracker.NULL_TRACKER)
+                .sourceTarget(
+                    graph,
+                    config.sourceNode(),
+                    config.targetsList(),
+                    false,
+                    Optional.empty(),
+                    ProgressTracker.NULL_TRACKER
+                )
                 .compute()
                 .findFirst()
                 .get();
@@ -142,7 +157,14 @@ final class DijkstraTest {
                 .build();
 
             var dijkstra = Dijkstra
-                .sourceTarget(graph, config, false, Optional.empty(), ProgressTracker.NULL_TRACKER)
+                .sourceTarget(
+                    graph,
+                    config.sourceNode(),
+                    config.targetsList(),
+                    false,
+                    Optional.empty(),
+                    ProgressTracker.NULL_TRACKER
+                )
                 .withRelationshipFilter(relationshipFilter);
             var paths = dijkstra
                 .compute()
@@ -166,7 +188,14 @@ final class DijkstraTest {
                 .build();
 
             var path = Dijkstra
-                .sourceTarget(graph, config, true, Optional.empty(), ProgressTracker.NULL_TRACKER)
+                .sourceTarget(
+                    graph,
+                    config.sourceNode(),
+                    config.targetsList(),
+                    true,
+                    Optional.empty(),
+                    ProgressTracker.NULL_TRACKER
+                )
                 .compute()
                 .findFirst()
                 .get();
@@ -206,8 +235,13 @@ final class DijkstraTest {
                 .sourceNode(sourceNode)
                 .build();
 
-            var paths = Dijkstra.singleSource(graph, config, false, Optional.empty(), ProgressTracker.NULL_TRACKER)
-                .compute()
+            var paths = Dijkstra.singleSource(
+                    graph,
+                    config.sourceNode(),
+                    false,
+                    Optional.empty(),
+                    ProgressTracker.NULL_TRACKER
+                ).compute()
                 .pathSet();
 
             assertEquals(expected, paths);
@@ -230,7 +264,13 @@ final class DijkstraTest {
                 .sourceNode(sourceNode)
                 .build();
 
-            var paths = Dijkstra.singleSource(graph, config, false, Optional.empty(), ProgressTracker.NULL_TRACKER)
+            var paths = Dijkstra.singleSource(
+                    graph,
+                    config.sourceNode(),
+                    false,
+                    Optional.empty(),
+                    ProgressTracker.NULL_TRACKER
+                )
                 .compute()
                 .pathSet();
 
@@ -249,7 +289,14 @@ final class DijkstraTest {
             var testLog = Neo4jProxy.testLog();
             var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
 
-            Dijkstra.sourceTarget(graph, config, false, Optional.empty(), progressTracker)
+            Dijkstra.sourceTarget(
+                    graph,
+                    config.sourceNode(),
+                    config.targetsList(),
+                    false,
+                    Optional.empty(),
+                    progressTracker
+                )
                 .compute()
                 .pathSet();
 
@@ -312,7 +359,14 @@ final class DijkstraTest {
                 .build();
 
             var path = Dijkstra
-                .sourceTarget(graph, config, false, Optional.empty(), ProgressTracker.NULL_TRACKER)
+                .sourceTarget(
+                    graph,
+                    config.sourceNode(),
+                    config.targetsList(),
+                    false,
+                    Optional.empty(),
+                    ProgressTracker.NULL_TRACKER
+                )
                 .compute()
                 .findFirst()
                 .get();
@@ -332,8 +386,15 @@ final class DijkstraTest {
                 .build();
 
             var path = Dijkstra
-                .sourceTarget(graph, config, false, Optional.empty(), ProgressTracker.NULL_TRACKER)
-                .compute().pathSet().stream().map(v -> v.targetNode()).collect(Collectors.toList());
+                .sourceTarget(
+                    graph,
+                    config.sourceNode(),
+                    config.targetsList(),
+                    false,
+                    Optional.empty(),
+                    ProgressTracker.NULL_TRACKER
+                )
+                .compute().pathSet().stream().map(PathResult::targetNode).collect(Collectors.toList());
 
             assertThat(path).containsExactlyInAnyOrder(n6, n7);
         }
@@ -358,7 +419,13 @@ final class DijkstraTest {
                 .sourceNode(sourceNode)
                 .build();
 
-            var paths = Dijkstra.singleSource(graph, config, false, Optional.empty(), ProgressTracker.NULL_TRACKER)
+            var paths = Dijkstra.singleSource(
+                    graph,
+                    config.sourceNode(),
+                    false,
+                    Optional.empty(),
+                    ProgressTracker.NULL_TRACKER
+                )
                 .compute()
                 .pathSet();
 
@@ -406,10 +473,17 @@ final class DijkstraTest {
             };
 
             var path = Dijkstra
-                .sourceTarget(graph, config, false, Optional.of(heuristicFunction), ProgressTracker.NULL_TRACKER)
+                .sourceTarget(
+                    graph,
+                    config.sourceNode(),
+                    config.targetsList(),
+                    false,
+                    Optional.of(heuristicFunction),
+                    ProgressTracker.NULL_TRACKER
+                )
                 .compute()
                 .findFirst()
-                .get();
+                .orElseThrow();
 
             assertEquals(List.of(2L, 1L, 4L, 1L, 3L, 1L, 5L, 1L), heapComparisons);
             assertEquals(expected, path);

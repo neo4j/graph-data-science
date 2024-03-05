@@ -258,7 +258,7 @@ class BellmanFordTest {
             .shortestPaths();
 
         var dijkstraAlgo = Dijkstra
-            .singleSource(newGraph, config, true, Optional.empty(), ProgressTracker.NULL_TRACKER)
+            .singleSource(newGraph, config.sourceNode(), true, Optional.empty(), ProgressTracker.NULL_TRACKER)
             .compute();
 
         double[] bellman = new double[nodeCount];

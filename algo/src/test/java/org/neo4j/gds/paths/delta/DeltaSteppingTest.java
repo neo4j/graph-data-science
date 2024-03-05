@@ -377,7 +377,7 @@ final class DeltaSteppingTest {
         ).compute();
 
         var dijkstraAlgo = Dijkstra
-            .singleSource(newGraph, config, true, Optional.empty(), ProgressTracker.NULL_TRACKER)
+            .singleSource(newGraph, config.sourceNode(), true, Optional.empty(), ProgressTracker.NULL_TRACKER)
             .compute();
 
         double[] delta = new double[nodeCount];

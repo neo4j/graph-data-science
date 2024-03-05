@@ -28,12 +28,11 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
-import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
 import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.PathResult;
-import org.neo4j.gds.paths.SourceTargetsShortestPathBaseConfig;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.function.LongToDoubleFunction;
 import java.util.stream.Collectors;
@@ -76,14 +75,16 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
     @Deprecated
     public static Dijkstra sourceTarget(
         Graph graph,
-        SourceTargetsShortestPathBaseConfig config,
+        long originalNodeId,
+        Collection<Long> targetsList,
         boolean trackRelationships,
         Optional<HeuristicFunction> heuristicFunction,
         ProgressTracker progressTracker
     ) {
         return sourceTarget(
             graph,
-            config,
+            originalNodeId,
+            targetsList,
             trackRelationships,
             heuristicFunction,
             progressTracker,
@@ -96,14 +97,15 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
      */
     public static Dijkstra sourceTarget(
         Graph graph,
-        SourceTargetsShortestPathBaseConfig configuration,
+        long originalNodeId,
+        Collection<Long> targetsList,
         boolean trackRelationships,
         Optional<HeuristicFunction> heuristicFunction,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
-        long sourceNode = graph.toMappedNodeId(configuration.sourceNode());
-        var targets = configuration.targetsList().stream().map(graph::toMappedNodeId).collect(Collectors.toList());
+        long sourceNode = graph.toMappedNodeId(originalNodeId);
+        var targets = targetsList.stream().map(graph::toMappedNodeId).collect(Collectors.toList());
         return new Dijkstra(
             graph,
             sourceNode,
@@ -121,14 +123,14 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
     @Deprecated
     public static Dijkstra singleSource(
         Graph graph,
-        AllShortestPathsBaseConfig config,
+        long originalNodeId,
         boolean trackRelationships,
         Optional<HeuristicFunction> heuristicFunction,
         ProgressTracker progressTracker
     ) {
         return singleSource(
             graph,
-            config,
+            originalNodeId,
             trackRelationships,
             heuristicFunction,
             progressTracker,
@@ -141,14 +143,14 @@ public final class Dijkstra extends Algorithm<PathFindingResult> {
      */
     public static Dijkstra singleSource(
         Graph graph,
-        AllShortestPathsBaseConfig config,
+        long originalNodeId,
         boolean trackRelationships,
         Optional<HeuristicFunction> heuristicFunction,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
         return new Dijkstra(graph,
-            graph.toMappedNodeId(config.sourceNode()),
+            graph.toMappedNodeId(originalNodeId),
             new AllTargets(),
             trackRelationships,
             heuristicFunction,
