@@ -19,9 +19,15 @@
  */
 package org.neo4j.gds.paths.astar.config;
 
-import org.neo4j.gds.paths.SourceTargetShortestPathBaseConfig;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.RelationshipWeightConfig;
+import org.neo4j.gds.config.SourceNodeConfig;
+import org.neo4j.gds.config.TargetNodeConfig;
 
-public interface ShortestPathAStarBaseConfig extends SourceTargetShortestPathBaseConfig {
+public interface ShortestPathAStarBaseConfig extends TargetNodeConfig,
+    AlgoBaseConfig,
+    SourceNodeConfig,
+    RelationshipWeightConfig {
 
     String LONGITUDE_PROPERTY_KEY = "longitudeProperty";
     String LATITUDE_PROPERTY_KEY = "latitudeProperty";
