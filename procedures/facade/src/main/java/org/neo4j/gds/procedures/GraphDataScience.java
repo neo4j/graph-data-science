@@ -102,6 +102,10 @@ public class GraphDataScience {
         return pathFindingProcedureFacade;
     }
 
+    public PipelinesProcedureFacade pipelines() {
+        return pipelinesProcedureFacade;
+    }
+
     public SimilarityProcedureFacade similarity() {
         return similarityProcedureFacade;
     }

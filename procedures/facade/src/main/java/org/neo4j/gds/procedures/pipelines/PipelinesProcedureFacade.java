@@ -19,5 +19,35 @@
  */
 package org.neo4j.gds.procedures.pipelines;
 
+import org.neo4j.gds.api.User;
+import org.neo4j.gds.ml.pipeline.PipelineCatalog;
+import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
+
+import java.util.Map;
+import java.util.stream.Stream;
+
+import static org.neo4j.gds.ml.pipeline.NodePropertyStepFactory.createNodePropertyStep;
+
 public class PipelinesProcedureFacade {
+    private final User user;
+
+    public PipelinesProcedureFacade(User user) {
+        this.user = user;
+    }
+
+    public Stream<NodePipelineInfoResult> addNodeProperty(
+        String pipelineName,
+        String taskName,
+        Map<String, Object> procedureConfig
+    ) {
+        var pipeline = PipelineCatalog.getTyped(
+            user.getUsername(),
+            pipelineName,
+            NodeClassificationTrainingPipeline.class
+        );
+
+        pipeline.addNodePropertyStep(createNodePropertyStep(taskName, procedureConfig));
+
+        return Stream.of(new NodePipelineInfoResult(pipelineName, pipeline));
+    }
 }

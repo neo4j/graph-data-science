@@ -21,9 +21,11 @@ package org.neo4j.gds.ml.pipeline.node.classification;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
-import org.neo4j.gds.ml.pipeline.node.NodePipelineInfoResult;
+import org.neo4j.gds.procedures.pipelines.NodePipelineInfoResult;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -32,24 +34,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.ml.pipeline.NodePropertyStepFactory.createNodePropertyStep;
 import static org.neo4j.procedure.Mode.READ;
 
 public class NodeClassificationPipelineAddStepProcs extends BaseProc {
-
-
-    public static NodePipelineInfoResult addNodeProperty(
-        String username,
-        String pipelineName,
-        String taskName,
-        Map<String, Object> procedureConfig
-    ) {
-        var pipeline = PipelineCatalog.getTyped(username, pipelineName, NodeClassificationTrainingPipeline.class);
-
-        pipeline.addNodePropertyStep(createNodePropertyStep(taskName, procedureConfig));
-
-        return new NodePipelineInfoResult(pipelineName, pipeline);
-    }
+    @Context
+    public GraphDataScience facade;
 
     public static NodePipelineInfoResult selectFeatures(
         String username,
@@ -83,12 +72,7 @@ public class NodeClassificationPipelineAddStepProcs extends BaseProc {
         @Name("procedureName") String taskName,
         @Name("procedureConfiguration") Map<String, Object> procedureConfig
     ) {
-        return Stream.of(addNodeProperty(
-            username(),
-            pipelineName,
-            taskName,
-            procedureConfig
-        ));
+        return facade.pipelines().addNodeProperty(pipelineName, taskName, procedureConfig);
     }
 
     @Procedure(name = "gds.beta.pipeline.nodeClassification.selectFeatures", mode = READ)
