@@ -270,7 +270,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
         var labelMapping = graphStoreInput.labelMapping();
         if (labelMapping.isPresent()) {
             try (var labelMappingVisitor = labelMappingVisitorSupplier.get()) {
-                labelMapping.get().entrySet().forEach(entry -> labelMappingVisitor.export(entry));
+                labelMapping.get().entrySet().forEach(labelMappingVisitor::export);
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }

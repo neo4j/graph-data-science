@@ -24,11 +24,13 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.PropertyState;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static java.util.function.Predicate.not;
 
 public final class RelationshipStore {
 
@@ -78,23 +80,27 @@ public final class RelationshipStore {
         Map<RelationshipType, CompositeRelationshipIterator> relationshipIterators = new HashMap<>();
         var propertyCount = new MutableLong(0);
 
-        graphStore.relationshipTypes().forEach(relationshipType -> {
-            var outputProperties = new ArrayList<>(graphStore.relationshipPropertyKeys(relationshipType));
+        graphStore.schema()
+            .relationshipSchema()
+            .filterProperties(not(property -> property.state() == PropertyState.AUXILIARY))
+            .entries()
+            .forEach(entry -> {
+                var relationshipType = entry.identifier();
+                var properties = entry.properties().keySet();
+                propertyCount.add(properties.size() * graphStore.relationshipCount(relationshipType));
 
-            propertyCount.add(outputProperties.size() * graphStore.relationshipCount(relationshipType));
+                relationshipType = relationshipType.equals(RelationshipType.ALL_RELATIONSHIPS)
+                    ? RelationshipType.of(defaultRelationshipType)
+                    : relationshipType;
 
-            var outputRelationshipType = relationshipType.equals(RelationshipType.ALL_RELATIONSHIPS)
-                ? RelationshipType.of(defaultRelationshipType)
-                : relationshipType;
-
-            relationshipIterators.put(
-                outputRelationshipType,
-                graphStore.getCompositeRelationshipIterator(
+                relationshipIterators.put(
                     relationshipType,
-                    outputProperties
-                )
-            );
-        });
+                    graphStore.getCompositeRelationshipIterator(
+                        relationshipType,
+                        properties
+                    )
+                );
+            });
 
         return new RelationshipStore(
             graphStore.nodes(),
