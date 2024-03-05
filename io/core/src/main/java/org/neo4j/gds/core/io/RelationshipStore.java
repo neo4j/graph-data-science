@@ -89,12 +89,12 @@ public final class RelationshipStore {
                 var properties = entry.properties().keySet();
                 propertyCount.add(properties.size() * graphStore.relationshipCount(relationshipType));
 
-                relationshipType = relationshipType.equals(RelationshipType.ALL_RELATIONSHIPS)
+                var outputRelationshipType = relationshipType.equals(RelationshipType.ALL_RELATIONSHIPS)
                     ? RelationshipType.of(defaultRelationshipType)
                     : relationshipType;
 
                 relationshipIterators.put(
-                    relationshipType,
+                    outputRelationshipType,
                     graphStore.getCompositeRelationshipIterator(
                         relationshipType,
                         properties
