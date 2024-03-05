@@ -49,6 +49,6 @@ public class SccAlgorithmFactory<CONFIG extends SccCommonBaseConfig> extends Gra
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
 
-        return new SccMemoryEstimateDefinition().memoryEstimation(configuration);
+        return new SccMemoryEstimateDefinition().memoryEstimation(null);
     }
 }
