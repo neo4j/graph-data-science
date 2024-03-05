@@ -357,10 +357,10 @@ class RelationshipSchemaTest {
             RelationshipType.of("A"),
             Direction.DIRECTED,
             "bar",
-            RelationshipPropertySchema.of("bar", ValueType.LONG, PropertyState.AUXILIARY)
+            RelationshipPropertySchema.of("bar", ValueType.LONG, PropertyState.HIDDEN)
         );
 
-        var filteredRelSchema = relSchema.filterProperties(schema -> schema.state() != PropertyState.AUXILIARY);
+        var filteredRelSchema = relSchema.filterProperties(schema -> schema.state() != PropertyState.HIDDEN);
 
         assertThat(filteredRelSchema.allProperties()).containsExactly("foo");
     }

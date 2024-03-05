@@ -113,7 +113,7 @@ public final class NodeStore {
         graphStore.nodeLabels().forEach(label -> {
             var properties = nodeProperties.computeIfAbsent(label.name, k -> new HashMap<>());
             graphStore.schema().nodeSchema().propertySchemasFor(label).forEach(propertySchema -> {
-                if (propertySchema.state() != PropertyState.AUXILIARY) {
+                if (propertySchema.state() != PropertyState.HIDDEN) {
                     properties.put(propertySchema.key(), graphStore.nodeProperty(propertySchema.key()).values());
                 }
             });

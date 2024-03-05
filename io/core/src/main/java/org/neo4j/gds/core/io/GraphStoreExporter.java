@@ -120,7 +120,7 @@ public abstract class GraphStoreExporter {
             .graphPropertyKeys()
             .stream()
             .map(graphStore::graphProperty)
-            .filter(not(graphProperty -> graphProperty.propertyState() == PropertyState.AUXILIARY))
+            .filter(not(graphProperty -> graphProperty.propertyState() == PropertyState.HIDDEN))
             .collect(Collectors.toSet());
 
         var graphStoreInput = GraphStoreInput.of(

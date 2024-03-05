@@ -107,7 +107,7 @@ public class MutableRelationshipSchemaEntry implements RelationshipSchemaEntry {
             "properties", properties
                 .entrySet()
                 .stream()
-                .filter(not(entry -> entry.getValue().state() == PropertyState.AUXILIARY))
+                .filter(not(entry -> entry.getValue().state() == PropertyState.HIDDEN))
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         innerEntry -> GraphSchema.forPropertySchema(innerEntry.getValue())

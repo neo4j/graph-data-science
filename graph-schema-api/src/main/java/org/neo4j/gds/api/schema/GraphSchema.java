@@ -72,7 +72,7 @@ public interface GraphSchema {
         return graphProperties()
             .entrySet()
             .stream()
-            .filter(not(e -> e.getValue().state() == PropertyState.AUXILIARY))
+            .filter(not(e -> e.getValue().state() == PropertyState.HIDDEN))
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 schema -> GraphSchema.forPropertySchema(schema.getValue())

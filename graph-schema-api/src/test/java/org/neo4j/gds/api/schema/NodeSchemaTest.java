@@ -221,10 +221,10 @@ class NodeSchemaTest {
         nodeSchema.addProperty(
             NodeLabel.of("A"),
             "bar",
-            PropertySchema.of("bar", ValueType.LONG, DefaultValue.forLong(), PropertyState.AUXILIARY)
+            PropertySchema.of("bar", ValueType.LONG, DefaultValue.forLong(), PropertyState.HIDDEN)
         );
 
-        var filteredNodeSchema = nodeSchema.filterProperties(schema -> schema.state() != PropertyState.AUXILIARY);
+        var filteredNodeSchema = nodeSchema.filterProperties(schema -> schema.state() != PropertyState.HIDDEN);
 
         assertThat(filteredNodeSchema.allProperties()).containsExactly("foo");
     }

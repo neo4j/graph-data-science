@@ -40,5 +40,5 @@ public enum PropertyState {
      * The property is auxiliary and should not be visible to the user
      * or serialized as part of a backup.
      */
-    AUXILIARY
+    HIDDEN
 }

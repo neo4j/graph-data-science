@@ -82,7 +82,7 @@ public final class RelationshipStore {
 
         graphStore.schema()
             .relationshipSchema()
-            .filterProperties(not(property -> property.state() == PropertyState.AUXILIARY))
+            .filterProperties(not(property -> property.state() == PropertyState.HIDDEN))
             .entries()
             .forEach(entry -> {
                 var relationshipType = entry.identifier();

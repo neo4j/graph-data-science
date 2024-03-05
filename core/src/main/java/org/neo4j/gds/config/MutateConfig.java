@@ -26,12 +26,12 @@ import org.neo4j.gds.api.PropertyState;
 
 public interface MutateConfig extends AlgoBaseConfig {
     @Value.Default
-    default boolean isAuxiliary() {
+    default boolean isHidden() {
         return false;
     }
 
     @Configuration.Ignore
     default PropertyState propertyState() {
-        return isAuxiliary() ? PropertyState.AUXILIARY : PropertyState.PERSISTENT;
+        return isHidden() ? PropertyState.HIDDEN : PropertyState.TRANSIENT;
     }
 }

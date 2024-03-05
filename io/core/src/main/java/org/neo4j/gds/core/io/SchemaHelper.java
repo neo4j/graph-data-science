@@ -45,12 +45,12 @@ final class SchemaHelper {
     }
 
     private static <S extends ElementSchema<S, ?, ?, ?>> S filterInvisibleProperties(S schema) {
-        return schema.filterProperties(not(propertySchema -> propertySchema.state() == PropertyState.AUXILIARY));
+        return schema.filterProperties(not(propertySchema -> propertySchema.state() == PropertyState.HIDDEN));
     }
 
     private static Map<String, PropertySchema> filterInvisibleProperties(Map<String, PropertySchema> propertySchemas) {
         return propertySchemas.entrySet().stream()
-            .filter(not(entry -> entry.getValue().state() == PropertyState.AUXILIARY))
+            .filter(not(entry -> entry.getValue().state() == PropertyState.HIDDEN))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }
