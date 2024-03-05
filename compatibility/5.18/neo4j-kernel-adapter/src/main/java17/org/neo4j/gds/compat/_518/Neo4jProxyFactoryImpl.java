@@ -29,7 +29,7 @@ public final class Neo4jProxyFactoryImpl implements Neo4jProxyFactory {
 
     @Override
     public boolean canLoad(Neo4jVersion version) {
-        return version == Neo4jVersion.V_RC;
+        return version == Neo4jVersion.V_5_18;
     }
 
     @Override
@@ -39,6 +39,6 @@ public final class Neo4jProxyFactoryImpl implements Neo4jProxyFactory {
 
     @Override
     public String description() {
-        return "Neo4j RC";
+        return "Neo4j 5.18";
     }
 }
