@@ -20,9 +20,15 @@
 package org.neo4j.gds.paths.yens.config;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.paths.SourceTargetShortestPathBaseConfig;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.RelationshipWeightConfig;
+import org.neo4j.gds.config.SourceNodeConfig;
+import org.neo4j.gds.config.TargetNodeConfig;
 
-public interface ShortestPathYensBaseConfig extends SourceTargetShortestPathBaseConfig {
+public interface ShortestPathYensBaseConfig extends TargetNodeConfig,
+    AlgoBaseConfig,
+    SourceNodeConfig,
+    RelationshipWeightConfig {
 
     // Number of shortest paths to compute
     @Configuration.IntegerRange(min = 1)
