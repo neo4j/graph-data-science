@@ -79,7 +79,7 @@ ext {
         'qala-datagen'         : '2.5.1',
         'sb-contrib'           : '7.6.3',
         'scala'                : scalas[neo4j_minor],
-        'protobuf'             : '3.25.1',
+        'protobuf'             : '3.25.3',
     ]
     dep = [
         junit5bom:          "org.junit:junit-bom:${ver.junit5bom}",
