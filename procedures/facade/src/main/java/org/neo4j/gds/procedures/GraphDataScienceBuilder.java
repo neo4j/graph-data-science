@@ -40,11 +40,10 @@ public class GraphDataScienceBuilder {
     private CatalogFacade catalogFacade;
     private CentralityProcedureFacade centralityProcedureFacade;
     private CommunityProcedureFacade communityProcedureFacade;
-    private NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade;
-    private SimilarityProcedureFacade similarityProcedureFacade;
     private MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade;
-
+    private NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade;
     private PathFindingProcedureFacade pathFindingProcedureFacade;
+    private SimilarityProcedureFacade similarityProcedureFacade;
     private DeprecatedProceduresMetricService deprecatedProceduresMetricService;
 
     public GraphDataScienceBuilder(Log log) {
@@ -66,23 +65,23 @@ public class GraphDataScienceBuilder {
         return this;
     }
 
-    public GraphDataScienceBuilder with(NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade) {
-        this.nodeEmbeddingsProcedureFacade = nodeEmbeddingsProcedureFacade;
-        return this;
-    }
-
-    public GraphDataScienceBuilder with(SimilarityProcedureFacade similarityProcedureFacade) {
-        this.similarityProcedureFacade = similarityProcedureFacade;
-        return this;
-    }
-
     public GraphDataScienceBuilder with(MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade) {
         this.miscAlgorithmsProcedureFacade = miscAlgorithmsProcedureFacade;
         return this;
     }
 
+    public GraphDataScienceBuilder with(NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade) {
+        this.nodeEmbeddingsProcedureFacade = nodeEmbeddingsProcedureFacade;
+        return this;
+    }
+
     public GraphDataScienceBuilder with(PathFindingProcedureFacade pathFindingProcedureFacade) {
         this.pathFindingProcedureFacade = pathFindingProcedureFacade;
+        return this;
+    }
+
+    public GraphDataScienceBuilder with(SimilarityProcedureFacade similarityProcedureFacade) {
+        this.similarityProcedureFacade = similarityProcedureFacade;
         return this;
     }
 
@@ -97,10 +96,10 @@ public class GraphDataScienceBuilder {
             catalogFacade,
             centralityProcedureFacade,
             communityProcedureFacade,
-            nodeEmbeddingsProcedureFacade,
-            similarityProcedureFacade,
             miscAlgorithmsProcedureFacade,
+            nodeEmbeddingsProcedureFacade,
             pathFindingProcedureFacade,
+            similarityProcedureFacade,
             deprecatedProceduresMetricService
         );
     }

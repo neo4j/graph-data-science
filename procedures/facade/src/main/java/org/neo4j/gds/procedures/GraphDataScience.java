@@ -34,10 +34,10 @@ public class GraphDataScience {
     private final CatalogFacade catalogFacade;
     private final CommunityProcedureFacade communityProcedureFacade;
     private final CentralityProcedureFacade centralityProcedureFacade;
-    private final SimilarityProcedureFacade similarityProcedureFacade;
     private final MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade;
-    private final PathFindingProcedureFacade pathFindingProcedureFacade;
     private final NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade;
+    private final PathFindingProcedureFacade pathFindingProcedureFacade;
+    private final SimilarityProcedureFacade similarityProcedureFacade;
     private final DeprecatedProceduresMetricService deprecatedProceduresMetricService;
 
     /**
@@ -48,20 +48,20 @@ public class GraphDataScience {
         CatalogFacade catalogFacade,
         CentralityProcedureFacade centralityProcedureFacade,
         CommunityProcedureFacade communityProcedureFacade,
-        NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade,
-        SimilarityProcedureFacade similarityProcedureFacade,
         MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade,
+        NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade,
         PathFindingProcedureFacade pathFindingProcedureFacade,
+        SimilarityProcedureFacade similarityProcedureFacade,
         DeprecatedProceduresMetricService deprecatedProceduresMetricService
     ) {
         this.log = log;
         this.catalogFacade = catalogFacade;
         this.centralityProcedureFacade = centralityProcedureFacade;
         this.communityProcedureFacade = communityProcedureFacade;
-        this.similarityProcedureFacade = similarityProcedureFacade;
         this.miscAlgorithmsProcedureFacade = miscAlgorithmsProcedureFacade;
-        this.pathFindingProcedureFacade = pathFindingProcedureFacade;
         this.nodeEmbeddingsProcedureFacade = nodeEmbeddingsProcedureFacade;
+        this.pathFindingProcedureFacade = pathFindingProcedureFacade;
+        this.similarityProcedureFacade = similarityProcedureFacade;
         this.deprecatedProceduresMetricService = deprecatedProceduresMetricService;
     }
 
@@ -81,20 +81,20 @@ public class GraphDataScience {
         return communityProcedureFacade;
     }
 
-    public SimilarityProcedureFacade similarity() {
-        return similarityProcedureFacade;
-    }
-
     public MiscAlgorithmsProcedureFacade miscellaneousAlgorithms() {
         return miscAlgorithmsProcedureFacade;
+    }
+
+    public NodeEmbeddingsProcedureFacade nodeEmbeddings() {
+        return nodeEmbeddingsProcedureFacade;
     }
 
     public PathFindingProcedureFacade pathFinding() {
         return pathFindingProcedureFacade;
     }
 
-    public NodeEmbeddingsProcedureFacade nodeEmbeddings() {
-        return nodeEmbeddingsProcedureFacade;
+    public SimilarityProcedureFacade similarity() {
+        return similarityProcedureFacade;
     }
 
     public DeprecatedProceduresMetricService deprecatedProcedures() {
