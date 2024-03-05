@@ -22,6 +22,7 @@ package org.neo4j.gds.undirected;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.TestMethodRunner;
@@ -49,9 +50,8 @@ class ToUndirectedMemoryEstimateDefinitionTest {
     @MethodSource("compressions")
     void memoryEstimationWithUncompressedFeatureToggle(TestMethodRunner runner, MemoryRange expected) {
 
-        var config = mock(ToUndirectedConfig.class);
-        when(config.relationshipType()).thenReturn("T1");
-        doCallRealMethod().when(config).internalRelationshipType();
+        var config = mock(ToUndirectedMemoryEstimateParameters.class);
+        when(config.internalRelationshipType()).thenReturn(RelationshipType .of("T1"));
 
         GraphDimensions graphDimensions = GraphDimensions.of(100_000, 100_000);
 

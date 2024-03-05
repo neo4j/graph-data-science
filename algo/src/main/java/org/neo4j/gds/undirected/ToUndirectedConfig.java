@@ -177,4 +177,9 @@ public interface ToUndirectedConfig extends AlgoBaseConfig, MutateRelationshipCo
     static @Nullable String validateRelationshipTypeIdentifier(String input) {
         return validateNoWhiteCharacter(emptyToNull(input), "relationshipType");
     }
+
+    @Configuration.Ignore
+    default ToUndirectedMemoryEstimateParameters toMemoryEstimateParameters() {
+        return new ToUndirectedMemoryEstimateParameters(internalRelationshipType());
+    }
 }
