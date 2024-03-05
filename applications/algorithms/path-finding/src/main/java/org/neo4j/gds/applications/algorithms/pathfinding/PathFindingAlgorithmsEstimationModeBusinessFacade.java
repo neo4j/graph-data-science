@@ -21,11 +21,11 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
-import org.neo4j.gds.paths.SourceTargetsShortestPathBaseConfig;
 import org.neo4j.gds.paths.astar.AStarMemoryEstimateDefinition;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateDefinition;
+import org.neo4j.gds.paths.dijkstra.config.DijkstraBaseConfig;
+import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
 import org.neo4j.gds.paths.yens.YensMemoryEstimateDefinition;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -45,14 +45,14 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         ShortestPathAStarBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        return runEstimation(new AStarMemoryEstimateDefinition(), configuration, graphNameOrConfiguration);
+        return runEstimation(new AStarMemoryEstimateDefinition(), configuration,  graphNameOrConfiguration);
     }
 
     public MemoryEstimateResult singlePairShortestPathDijkstraEstimate(
-        SourceTargetsShortestPathBaseConfig configuration,
+        DijkstraSourceTargetsBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        return runEstimation(new DijkstraMemoryEstimateDefinition(), configuration, graphNameOrConfiguration);
+        return runEstimation(new DijkstraMemoryEstimateDefinition(), configuration.toMemoryEstimateParameters(), configuration, graphNameOrConfiguration);
     }
 
     public MemoryEstimateResult singlePairShortestPathYensEstimate(
@@ -63,18 +63,34 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
     }
 
     public MemoryEstimateResult singleSourceShortestPathDijkstraEstimate(
-        AllShortestPathsBaseConfig configuration,
+        DijkstraBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        return runEstimation(new DijkstraMemoryEstimateDefinition(), configuration, graphNameOrConfiguration);
+        return runEstimation(new DijkstraMemoryEstimateDefinition(), configuration.toMemoryEstimateParameters(), configuration, graphNameOrConfiguration);
     }
 
+    // TODO: remove this fella once finished with the estimate definitions
     private <CONFIGURATION extends AlgoBaseConfig> MemoryEstimateResult runEstimation(
         AlgorithmMemoryEstimateDefinition<CONFIGURATION> memoryEstimateDefinition,
         CONFIGURATION configuration,
         Object graphNameOrConfiguration
     ) {
         var memoryEstimation = memoryEstimateDefinition.memoryEstimation(configuration);
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
+    }
+
+    private <CONFIGURATION extends AlgoBaseConfig, MEP> MemoryEstimateResult runEstimation(
+        AlgorithmMemoryEstimateDefinition<MEP> memoryEstimateDefinition,
+        MEP memoryEstimateParameters,
+        CONFIGURATION configuration,
+        Object graphNameOrConfiguration
+    ) {
+        var memoryEstimation = memoryEstimateDefinition.memoryEstimation(memoryEstimateParameters);
 
         return algorithmEstimationTemplate.estimate(
             configuration,

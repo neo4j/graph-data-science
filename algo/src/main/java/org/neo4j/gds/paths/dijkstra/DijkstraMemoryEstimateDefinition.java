@@ -25,19 +25,12 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 import org.neo4j.gds.mem.MemoryUsage;
-import org.neo4j.gds.paths.ShortestPathBaseConfig;
-import org.neo4j.gds.paths.SourceTargetsShortestPathBaseConfig;
 
-public class DijkstraMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<ShortestPathBaseConfig> {
+public class DijkstraMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<DijkstraMemoryEstimateParameters> {
 
     @Override
-    public MemoryEstimation memoryEstimation(ShortestPathBaseConfig configuration) {
-
-        boolean manyTargets = false;
-        if (configuration instanceof SourceTargetsShortestPathBaseConfig) { //horrible but will  have to do for now
-            manyTargets = ((SourceTargetsShortestPathBaseConfig) configuration).targetsList().size() > 1;
-        }
-        return memoryEstimation(false, manyTargets); //could be configration.track potentially
+    public MemoryEstimation memoryEstimation(DijkstraMemoryEstimateParameters parameters) {
+        return memoryEstimation(parameters.trackRelationships(), parameters.manyTargets()); //could be configration.track potentially
     }
 
    public static  MemoryEstimation memoryEstimation(boolean trackRelationships){

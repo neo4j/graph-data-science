@@ -99,7 +99,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             graphName,
             configuration,
             DIJKSTRA,
-            () -> new DijkstraMemoryEstimateDefinition().memoryEstimation(configuration),
+            () -> new DijkstraMemoryEstimateDefinition().memoryEstimation(configuration.toMemoryEstimateParameters()),
             graph -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
             resultBuilder
         );
@@ -129,7 +129,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             graphName,
             configuration,
             DIJKSTRA,
-            () -> new DijkstraMemoryEstimateDefinition().memoryEstimation(configuration),
+            () -> new DijkstraMemoryEstimateDefinition().memoryEstimation(configuration.toMemoryEstimateParameters()),
             graph -> pathFindingAlgorithms.singleSourceShortestPathDijkstra(graph, configuration),
             resultBuilder
         );

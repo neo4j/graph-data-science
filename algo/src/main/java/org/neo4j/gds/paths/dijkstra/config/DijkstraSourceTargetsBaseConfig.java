@@ -17,18 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths;
+package org.neo4j.gds.paths.dijkstra.config;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.OptionalTargetNodeConfig;
 import org.neo4j.gds.config.TargetNodesConfig;
+import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateParameters;
 
 import java.util.List;
 
-public interface SourceTargetsShortestPathBaseConfig extends
-    OptionalTargetNodeConfig,
-    TargetNodesConfig,
-    ShortestPathBaseConfig {
+public interface DijkstraSourceTargetsBaseConfig extends OptionalTargetNodeConfig, TargetNodesConfig, DijkstraBaseConfig {
 
     @Configuration.Ignore
     default List<Long> targetsList() {
@@ -54,5 +52,9 @@ public interface SourceTargetsShortestPathBaseConfig extends
 
     }
 
-
+    @Override
+    @Configuration.Ignore
+    default DijkstraMemoryEstimateParameters toMemoryEstimateParameters() {
+        return new DijkstraMemoryEstimateParameters(false, targetsList().size() > 1);
+    }
 }

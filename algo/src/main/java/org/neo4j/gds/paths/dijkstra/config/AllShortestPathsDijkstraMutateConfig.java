@@ -22,10 +22,9 @@ package org.neo4j.gds.paths.dijkstra.config;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
 
 @Configuration
-public interface AllShortestPathsDijkstraMutateConfig extends AllShortestPathsBaseConfig, MutateRelationshipConfig {
+public interface AllShortestPathsDijkstraMutateConfig extends DijkstraBaseConfig, MutateRelationshipConfig {
 
     static AllShortestPathsDijkstraMutateConfig of(CypherMapWrapper userInput) {
         return new AllShortestPathsDijkstraMutateConfigImpl(userInput);

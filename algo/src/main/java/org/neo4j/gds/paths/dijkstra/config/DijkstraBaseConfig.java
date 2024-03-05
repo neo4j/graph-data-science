@@ -20,21 +20,15 @@
 package org.neo4j.gds.paths.dijkstra.config;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.config.WriteRelationshipConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.paths.WritePathOptionsConfig;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.RelationshipWeightConfig;
+import org.neo4j.gds.config.SourceNodeConfig;
+import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateParameters;
 
-@Configuration
-public interface ShortestPathDijkstraWriteConfig extends DijkstraSourceTargetsBaseConfig,
-    WriteRelationshipConfig,
-    WritePathOptionsConfig {
+public interface DijkstraBaseConfig extends AlgoBaseConfig, SourceNodeConfig, RelationshipWeightConfig {
 
-    String TOTAL_COST_KEY = "totalCost";
-    String NODE_IDS_KEY = "nodeIds";
-    String COSTS_KEY = "costs";
-
-    static ShortestPathDijkstraWriteConfig of(CypherMapWrapper userInput) {
-        return new ShortestPathDijkstraWriteConfigImpl(userInput);
-
+    @Configuration.Ignore
+    default DijkstraMemoryEstimateParameters toMemoryEstimateParameters() {
+        return new DijkstraMemoryEstimateParameters(false, false);
     }
 }

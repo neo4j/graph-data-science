@@ -29,12 +29,12 @@ import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
-import org.neo4j.gds.paths.SourceTargetsShortestPathBaseConfig;
 import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.paths.dijkstra.config.DijkstraBaseConfig;
+import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
 import org.neo4j.gds.paths.yens.Yens;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -92,7 +92,7 @@ public class PathFindingAlgorithms {
      */
     PathFindingResult singlePairShortestPathDijkstra(
         Graph graph,
-        SourceTargetsShortestPathBaseConfig configuration
+        DijkstraSourceTargetsBaseConfig configuration
     ) {
         var progressTracker = createProgressTracker(
             configuration,
@@ -132,7 +132,7 @@ public class PathFindingAlgorithms {
 
     PathFindingResult singleSourceShortestPathDijkstra(
         Graph graph,
-        AllShortestPathsBaseConfig configuration
+        DijkstraBaseConfig configuration
     ) {
         var progressTracker = createProgressTracker(
             configuration,

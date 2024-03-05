@@ -21,10 +21,9 @@ package org.neo4j.gds.paths.dijkstra.config;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
 
 @Configuration
-public interface AllShortestPathsDijkstraStreamConfig extends AllShortestPathsBaseConfig {
+public interface AllShortestPathsDijkstraStreamConfig extends DijkstraBaseConfig {
 
     static AllShortestPathsDijkstraStreamConfig of(CypherMapWrapper userInput) {
         return new AllShortestPathsDijkstraStreamConfigImpl(userInput);

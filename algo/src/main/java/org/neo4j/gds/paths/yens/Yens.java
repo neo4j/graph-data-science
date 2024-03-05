@@ -25,7 +25,7 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.PathResult;
-import org.neo4j.gds.paths.SourceTargetsShortestPathBaseConfig;
+import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.SingleTarget;
@@ -180,7 +180,7 @@ public final class Yens extends Algorithm<PathFindingResult> {
         return dijkstra.compute().findFirst();
     }
 
-    static SourceTargetsShortestPathBaseConfig dijkstraConfig(long targetNode) {
+    static DijkstraSourceTargetsBaseConfig dijkstraConfig(long targetNode) {
 
         return ShortestPathDijkstraStreamConfigImpl
             .builder()

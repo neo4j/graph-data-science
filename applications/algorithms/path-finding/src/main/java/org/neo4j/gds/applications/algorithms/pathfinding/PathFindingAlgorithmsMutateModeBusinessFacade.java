@@ -81,7 +81,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             DIJKSTRA,
-            () -> new DijkstraMemoryEstimateDefinition().memoryEstimation(configuration),
+            () -> new DijkstraMemoryEstimateDefinition().memoryEstimation(configuration.toMemoryEstimateParameters()),
             graph -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
@@ -115,7 +115,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             DIJKSTRA,
-            () -> new DijkstraMemoryEstimateDefinition().memoryEstimation(configuration),
+            () -> new DijkstraMemoryEstimateDefinition().memoryEstimation(configuration.toMemoryEstimateParameters()),
             graph -> pathFindingAlgorithms.singleSourceShortestPathDijkstra(graph, configuration),
             Optional.of(new ShortestPathMutateStep(configuration)),
             resultBuilder

@@ -26,17 +26,16 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
-import org.neo4j.gds.paths.ShortestPathBaseConfig;
-import org.neo4j.gds.paths.SourceTargetsShortestPathBaseConfig;
+import org.neo4j.gds.paths.dijkstra.config.DijkstraBaseConfig;
+import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
 
 import java.util.Optional;
 
-public abstract class DijkstraFactory<CONFIG extends ShortestPathBaseConfig> extends GraphAlgorithmFactory<Dijkstra, CONFIG> {
+public abstract class DijkstraFactory<CONFIG extends DijkstraBaseConfig> extends GraphAlgorithmFactory<Dijkstra, CONFIG> {
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return new DijkstraMemoryEstimateDefinition().memoryEstimation(configuration);
+        return new DijkstraMemoryEstimateDefinition().memoryEstimation(configuration.toMemoryEstimateParameters());
     }
 
     @Override
@@ -55,7 +54,7 @@ public abstract class DijkstraFactory<CONFIG extends ShortestPathBaseConfig> ext
         return Tasks.leaf(taskName, graph.relationshipCount());
     }
 
-    public static class SourceTargetDijkstraFactory<T extends SourceTargetsShortestPathBaseConfig> extends
+    public static class SourceTargetDijkstraFactory<T extends DijkstraSourceTargetsBaseConfig> extends
         DijkstraFactory<T> {
         @Override
         public Dijkstra build(
@@ -74,7 +73,7 @@ public abstract class DijkstraFactory<CONFIG extends ShortestPathBaseConfig> ext
         }
     }
 
-    public static class AllShortestPathsDijkstraFactory<T extends AllShortestPathsBaseConfig> extends DijkstraFactory<T> {
+    public static class AllShortestPathsDijkstraFactory<T extends DijkstraBaseConfig> extends DijkstraFactory<T> {
         @Override
         public Dijkstra build(
             Graph graph,

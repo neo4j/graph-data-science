@@ -22,11 +22,10 @@ package org.neo4j.gds.paths.dijkstra.config;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
 import org.neo4j.gds.paths.WritePathOptionsConfig;
 
 @Configuration
-public interface AllShortestPathsDijkstraWriteConfig extends AllShortestPathsBaseConfig, WriteRelationshipConfig, WritePathOptionsConfig {
+public interface AllShortestPathsDijkstraWriteConfig extends DijkstraBaseConfig, WriteRelationshipConfig, WritePathOptionsConfig {
 
     static AllShortestPathsDijkstraWriteConfig of(CypherMapWrapper userInput) {
         return new AllShortestPathsDijkstraWriteConfigImpl(userInput);
