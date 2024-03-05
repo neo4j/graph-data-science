@@ -29,6 +29,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.util.function.Predicate.not;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class MutableRelationshipSchemaEntry implements RelationshipSchemaEntry {
@@ -106,6 +107,7 @@ public class MutableRelationshipSchemaEntry implements RelationshipSchemaEntry {
             "properties", properties
                 .entrySet()
                 .stream()
+                .filter(not(entry -> entry.getValue().state() == PropertyState.AUXILIARY))
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
                         innerEntry -> GraphSchema.forPropertySchema(innerEntry.getValue())

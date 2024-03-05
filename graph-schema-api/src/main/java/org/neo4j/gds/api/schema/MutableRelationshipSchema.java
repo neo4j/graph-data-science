@@ -29,6 +29,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.function.Predicate.not;
+
 public class MutableRelationshipSchema implements RelationshipSchema {
 
     private final Map<RelationshipType, MutableRelationshipSchemaEntry> entries;
@@ -110,6 +112,7 @@ public class MutableRelationshipSchema implements RelationshipSchema {
                     .properties()
                     .entrySet()
                     .stream()
+                    .filter(not(entry -> entry.getValue().state() == PropertyState.AUXILIARY))
                     .collect(Collectors.toMap(Map.Entry::getKey,
                         innerEntry -> GraphSchema.forPropertySchema(innerEntry.getValue())
                     ))

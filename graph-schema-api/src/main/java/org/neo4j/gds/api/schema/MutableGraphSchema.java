@@ -39,7 +39,6 @@ public interface MutableGraphSchema extends GraphSchema {
     @Override
     MutableRelationshipSchema relationshipSchema();
 
-
     @Override
     default MutableGraphSchema filterNodeLabels(Set<NodeLabel> labelsToKeep) {
         return of(nodeSchema().filter(labelsToKeep), relationshipSchema(), graphProperties());
