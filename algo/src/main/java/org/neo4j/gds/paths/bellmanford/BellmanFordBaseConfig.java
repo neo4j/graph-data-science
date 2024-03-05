@@ -20,9 +20,11 @@
 package org.neo4j.gds.paths.bellmanford;
 
 import org.neo4j.gds.annotation.Configuration;
-import org.neo4j.gds.paths.AllShortestPathsBaseConfig;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.config.RelationshipWeightConfig;
+import org.neo4j.gds.config.SourceNodeConfig;
 
-public interface BellmanFordBaseConfig extends AllShortestPathsBaseConfig {
+public interface BellmanFordBaseConfig extends AlgoBaseConfig, SourceNodeConfig, RelationshipWeightConfig {
 
     @Configuration.Ignore
     default boolean trackNegativeCycles() {
