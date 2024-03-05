@@ -25,6 +25,8 @@ import org.neo4j.gds.similarity.knn.KnnResult;
 
 import java.util.stream.Stream;
 
+//TODO: Maybe Split to DelagateKnnResult and FilteredTargetResult to store one of  `targetNodeFiltering` and `KnnResult` and release the other.
+
 public class FilteredKnnResult {
 
     private final boolean isTargetFiltered;
