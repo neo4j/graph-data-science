@@ -65,7 +65,7 @@ public class CsvRelationshipSchemaVisitor extends RelationshipSchemaVisitor {
             row.add(aggregation().name());
             row.add(state().name());
         }
-        csvWriter.writeRow(row);
+        csvWriter.writeRecord(row);
     }
 
     @Override
@@ -78,7 +78,7 @@ public class CsvRelationshipSchemaVisitor extends RelationshipSchemaVisitor {
     }
 
     private void writeHeader() {
-        csvWriter.writeRow(
+        csvWriter.writeRecord(
             RELATIONSHIP_TYPE_COLUMN_NAME,
             DIRECTION_COLUMN_NAME,
             PROPERTY_KEY_COLUMN_NAME,

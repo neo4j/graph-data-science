@@ -54,7 +54,7 @@ ext {
         'cypher-dsl'           : '2021.2.0',
         'eclipse-collections'  : '11.1.0',
         'ejml'                 : '0.43.1',
-        'fastcsv'              : '2.2.2',
+        'fastcsv'              : '3.0.0',
         'gdl'                  : '0.3.8',
         'hamcrest'             : '2.2',
         'HdrHistogram'         : '2.1.12',
