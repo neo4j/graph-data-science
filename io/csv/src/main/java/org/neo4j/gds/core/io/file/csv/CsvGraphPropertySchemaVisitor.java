@@ -50,7 +50,7 @@ public class CsvGraphPropertySchemaVisitor extends ElementSchemaVisitor  {
     @Override
     protected void export() {
         if (key() != null) {
-            csvWriter.writeRow(key(), valueType().csvName(), defaultValue().toString(), state().name());
+            csvWriter.writeRecord(key(), valueType().csvName(), defaultValue().toString(), state().name());
         }
     }
 
@@ -64,7 +64,7 @@ public class CsvGraphPropertySchemaVisitor extends ElementSchemaVisitor  {
     }
 
     private void writeHeader() {
-        csvWriter.writeRow(
+        csvWriter.writeRecord(
             PROPERTY_KEY_COLUMN_NAME,
             VALUE_TYPE_COLUMN_NAME,
             DEFAULT_VALUE_COLUMN_NAME,

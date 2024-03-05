@@ -50,11 +50,11 @@ public class CsvNodeLabelMappingVisitor implements SimpleVisitor<Map.Entry<NodeL
         var row = new ArrayList<String>();
         row.add(nodeLabelMapping.getValue());
         row.add(nodeLabelMapping.getKey().name());
-        csvWriter.writeRow(row);
+        csvWriter.writeRecord(row);
     }
 
     private void writeHeader() {
-        csvWriter.writeRow(
+        csvWriter.writeRecord(
             LABEL_MAPPING,
             LABEL_COLUMN_NAME
         );

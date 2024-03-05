@@ -58,7 +58,7 @@ public class CsvNodeSchemaVisitor extends NodeSchemaVisitor {
             row.add(DefaultValueIOHelper.serialize(defaultValue()));
             row.add(state().name());
         }
-        csvWriter.writeRow(row);
+        csvWriter.writeRecord(row);
     }
 
     @Override
@@ -71,7 +71,7 @@ public class CsvNodeSchemaVisitor extends NodeSchemaVisitor {
     }
 
     private void writeHeader() {
-        csvWriter.writeRow(
+        csvWriter.writeRecord(
             LABEL_COLUMN_NAME,
             PROPERTY_KEY_COLUMN_NAME,
             VALUE_TYPE_COLUMN_NAME,

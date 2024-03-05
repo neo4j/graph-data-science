@@ -63,7 +63,7 @@ public class CsvGraphInfoVisitor implements SingleRowVisitor<GraphInfo> {
             .map(RelationshipType::name)
             .collect(Collectors.joining(";"));
 
-        this.csvWriter.writeRow(
+        this.csvWriter.writeRecord(
             graphInfo.databaseInfo().databaseId().databaseName(),
             graphInfo.databaseInfo().databaseLocation().name(),
             graphInfo.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName).orElse(""),
@@ -85,7 +85,7 @@ public class CsvGraphInfoVisitor implements SingleRowVisitor<GraphInfo> {
     }
 
     private void writeHeader() {
-        this.csvWriter.writeRow(
+        this.csvWriter.writeRecord(
             DATABASE_NAME_COLUMN_NAME,
             DATABASE_LOCATION_COLUMN_NAME,
             REMOTE_DATABASE_ID_COLUMN_NAME,
