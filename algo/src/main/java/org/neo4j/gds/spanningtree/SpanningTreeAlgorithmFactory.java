@@ -53,7 +53,7 @@ public class SpanningTreeAlgorithmFactory<CONFIG extends SpanningTreeBaseConfig>
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
-        return new SpanningTreeMemoryEstimateDefinition().memoryEstimation(config);
+        return new SpanningTreeMemoryEstimateDefinition().memoryEstimation(null);
     }
 
     public Task progressTask(Graph graph) {
