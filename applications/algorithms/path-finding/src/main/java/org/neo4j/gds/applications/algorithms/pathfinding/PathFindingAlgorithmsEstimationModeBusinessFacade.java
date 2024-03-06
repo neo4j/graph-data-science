@@ -59,7 +59,7 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         ShortestPathYensBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        return runEstimation(new YensMemoryEstimateDefinition(), configuration, graphNameOrConfiguration);
+        return runEstimation(new YensMemoryEstimateDefinition(), configuration.k(), configuration, graphNameOrConfiguration);
     }
 
     public MemoryEstimateResult singleSourceShortestPathDijkstraEstimate(

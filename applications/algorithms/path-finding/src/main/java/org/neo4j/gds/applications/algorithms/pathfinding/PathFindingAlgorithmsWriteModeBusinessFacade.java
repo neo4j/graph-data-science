@@ -114,7 +114,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             graphName,
             configuration,
             YENS,
-            () -> new YensMemoryEstimateDefinition().memoryEstimation(configuration),
+            () -> new YensMemoryEstimateDefinition().memoryEstimation(configuration.k()),
             graph -> pathFindingAlgorithms.singlePairShortestPathYens(graph, configuration),
             resultBuilder
         );

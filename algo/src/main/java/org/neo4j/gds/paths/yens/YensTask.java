@@ -21,14 +21,9 @@ package org.neo4j.gds.paths.yens;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
-import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateDefinition;
-import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateParameters;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -51,16 +46,6 @@ public class YensTask implements Runnable {
     private final ArrayList<MutablePathResult> kShortestPaths;
     private final CandidatePathsPriorityQueue candidatePathsQueue;
     private final BiConsumer<MutablePathResult, PathResult> pathAppender;
-
-    public static MemoryEstimation memoryEstimation(int k, boolean trackRelationships) {
-        return MemoryEstimations.builder(YensTask.class)
-            .fixed("neighbors", MemoryUsage.sizeOfLongArray(k))
-            .add(
-                "Dijkstra",
-                new DijkstraMemoryEstimateDefinition()
-                    .memoryEstimation(new DijkstraMemoryEstimateParameters(trackRelationships, false))
-            ).build();
-    }
 
     YensTask(
         Graph graph,
