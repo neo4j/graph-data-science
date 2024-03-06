@@ -30,15 +30,8 @@ public class DijkstraMemoryEstimateDefinition implements AlgorithmMemoryEstimate
 
     @Override
     public MemoryEstimation memoryEstimation(DijkstraMemoryEstimateParameters parameters) {
-        return memoryEstimation(parameters.trackRelationships(), parameters.manyTargets()); //could be configration.track potentially
-    }
-
-   public static  MemoryEstimation memoryEstimation(boolean trackRelationships){
-
-       return memoryEstimation(trackRelationships, false);
-    }
-
-    public static MemoryEstimation memoryEstimation(boolean trackRelationships, boolean manyTargets) {
+        boolean trackRelationships = parameters.trackRelationships();
+        boolean manyTargets = parameters.manyTargets();
 
         var builder = MemoryEstimations.builder(Dijkstra.class)
             .add("priority queue", HugeLongPriorityQueue.memoryEstimation())

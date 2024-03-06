@@ -23,12 +23,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
-import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 
 import java.util.stream.Stream;
-
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class YensMemoryEstimateDefinitionTest {
 
@@ -50,17 +46,14 @@ class YensMemoryEstimateDefinitionTest {
     @MethodSource("expectedMemoryEstimation")
     void shouldComputeMemoryEstimation(
         int nodeCount,
-        int k,
+        int numberOfShortestPathsToFind,
         int concurrency,
         long expectedBytes
     ) {
+        var memoryEstimation= new YensMemoryEstimateDefinition()
+            .memoryEstimation(numberOfShortestPathsToFind);
 
-        var config= mock(ShortestPathYensBaseConfig.class);
-        when(config.k()).thenReturn(k);
-
-        var memoryEstimation= new YensMemoryEstimateDefinition();
-
-        MemoryEstimationAssert.assertThat(memoryEstimation.memoryEstimation(config))
+        MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(nodeCount,concurrency)
             .hasSameMinAndMaxEqualTo(expectedBytes);
     }
