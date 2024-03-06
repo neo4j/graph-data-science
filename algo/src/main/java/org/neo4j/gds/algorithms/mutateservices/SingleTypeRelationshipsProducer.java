@@ -27,7 +27,7 @@ import org.neo4j.gds.core.loading.SingleTypeRelationships;
  */
 public interface SingleTypeRelationshipsProducer {
 
-    SingleTypeRelationships getRelationships(String mutateRelationshipType, String mutateProperty, PropertyState propertyState);
+    SingleTypeRelationships createRelationships(String mutateRelationshipType, String mutateProperty, PropertyState propertyState);
 
     long relationshipsCount();
 }

@@ -81,7 +81,7 @@ public class SteinerTreeMutateSpec implements AlgorithmSpec<ShortestPathsSteiner
                 .initRelationshipsBuilder()
                 .nodes(computationResult.graph())
                 .relationshipType(mutateRelationshipType)
-                .addPropertyConfig(GraphFactory.PropertyConfig.of(config.mutateProperty()))
+                .addPropertyConfig(GraphFactory.PropertyConfig.of(config.mutateProperty(), config.propertyState()))
                 .orientation(Orientation.NATURAL)
                 .build();
 

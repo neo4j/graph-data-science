@@ -66,7 +66,7 @@ public class SimilaritySingleTypeRelationshipsHandler implements SingleTypeRelat
     }
 
     @Override
-    public SingleTypeRelationships getRelationships(String mutateRelationshipType, String mutateProperty, PropertyState propertyState) {
+    public SingleTypeRelationships createRelationships(String mutateRelationshipType, String mutateProperty, PropertyState propertyState) {
 
         RelationshipType relationshipType = RelationshipType.of(mutateRelationshipType);
         var similarityGraphResult = similarityGraphResultSupplier.get();
@@ -79,7 +79,7 @@ public class SimilaritySingleTypeRelationshipsHandler implements SingleTypeRelat
                 .nodes(topKGraph)
                 .relationshipType(relationshipType)
                 .orientation(Orientation.NATURAL)
-                .addPropertyConfig(GraphFactory.PropertyConfig.of(mutateProperty))
+                .addPropertyConfig(GraphFactory.PropertyConfig.of(mutateProperty, PropertyState.TRANSIENT))
                 .concurrency(1)
                 .executorService(DefaultPool.INSTANCE)
                 .build();
@@ -100,7 +100,7 @@ public class SimilaritySingleTypeRelationshipsHandler implements SingleTypeRelat
                         return true;
                     });
             relationships = relationshipsBuilder.build();
-            similaritySummary =similarityDistributionBuilder.similaritySummary();
+            similaritySummary = similarityDistributionBuilder.similaritySummary();
         } else {
             HugeGraph similarityGraph = (HugeGraph) similarityGraphResult.similarityGraph();
 

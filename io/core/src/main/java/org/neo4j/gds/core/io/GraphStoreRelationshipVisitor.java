@@ -65,7 +65,7 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
                 (relationshipTypeString) -> {
                     var propertyConfigs = getPropertySchema()
                         .stream()
-                        .map(schema -> GraphFactory.PropertyConfig.of(schema.key(), schema.aggregation(), schema.defaultValue()))
+                        .map(schema -> GraphFactory.PropertyConfig.of(schema.key(), schema.aggregation(), schema.defaultValue(), schema.state()))
                         .collect(Collectors.toList());
                     RelationshipType relationshipType = RelationshipType.of(relationshipTypeString);
 

@@ -82,7 +82,7 @@ public final class GraphStoreUpdater {
         var mutateMilliseconds = new AtomicLong();
         try (ProgressTimer ignored = ProgressTimer.start(mutateMilliseconds::set)) {
 
-            var resultRelationships = singleTypeRelationshipsProducer.getRelationships(
+            var resultRelationships = singleTypeRelationshipsProducer.createRelationships(
                 mutateRelationshipType,
                 mutateProperty,
                 propertyState

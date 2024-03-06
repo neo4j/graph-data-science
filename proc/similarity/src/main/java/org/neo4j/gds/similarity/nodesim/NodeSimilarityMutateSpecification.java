@@ -139,7 +139,7 @@ public class NodeSimilarityMutateSpecification implements AlgorithmSpec<NodeSimi
                 .nodes(topKGraph)
                 .relationshipType(relationshipType)
                 .orientation(Orientation.NATURAL)
-                .addPropertyConfig(GraphFactory.PropertyConfig.of(relationshipPropertyKey))
+                .addPropertyConfig(GraphFactory.PropertyConfig.of(relationshipPropertyKey, propertyState))
                 .concurrency(1)
                 .executorService(DefaultPool.INSTANCE)
                 .build();
