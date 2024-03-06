@@ -92,11 +92,11 @@ public final class NodePropertyStepFactory {
     ) {
         validateReservedConfigKeys(procConfigMap);
 
-        var thingie = NodePropertyStepFactoryUsingStubs.GetOrCreate(NodePropertyStepFactory.class.getSimpleName());
+        var nodePropertyStepFactoryUsingStubs = NodePropertyStepFactoryUsingStubs.GetOrCreate(NodePropertyStepFactory.class.getSimpleName());
 
         // this is the last possible moment to decide to use the new approach
-        if (thingie.handles(taskName)) {
-            return thingie.createNodePropertyStep(
+        if (nodePropertyStepFactoryUsingStubs.handles(taskName)) {
+            return nodePropertyStepFactoryUsingStubs.createNodePropertyStep(
                 taskName,
                 procConfigMap,
                 contextNodeLabels,

@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.pipelines;
 
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
 
@@ -49,7 +50,9 @@ public class PipelinesProcedureFacade {
             NodeClassificationTrainingPipeline.class
         );
 
-        pipeline.addNodePropertyStep(createNodePropertyStep(taskName, procedureConfig));
+        ExecutableNodePropertyStep nodePropertyStep = createNodePropertyStep(taskName, procedureConfig);
+
+        pipeline.addNodePropertyStep(nodePropertyStep);
 
         return Stream.of(new NodePipelineInfoResult(pipelineName, pipeline));
     }

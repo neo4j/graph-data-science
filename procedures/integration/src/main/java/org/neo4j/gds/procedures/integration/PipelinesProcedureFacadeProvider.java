@@ -27,11 +27,7 @@ import org.neo4j.kernel.api.procedure.Context;
  * Lifecycle: global
  */
 class PipelinesProcedureFacadeProvider {
-    private final UserAccessor userAccessor;
-
-    PipelinesProcedureFacadeProvider() {
-        userAccessor = new UserAccessor();
-    }
+    private final UserAccessor userAccessor = new UserAccessor();
 
     PipelinesProcedureFacade createPipelinesProcedureFacade(Context context) {
         var user = userAccessor.getUser(context.securityContext());

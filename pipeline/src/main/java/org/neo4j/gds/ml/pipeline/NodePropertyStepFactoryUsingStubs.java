@@ -22,8 +22,14 @@ package org.neo4j.gds.ml.pipeline;
 import java.util.List;
 import java.util.Map;
 
-class NodePropertyStepFactoryUsingStubs {
+final class NodePropertyStepFactoryUsingStubs {
     private static volatile NodePropertyStepFactoryUsingStubs INSTANCE = null;
+
+    private final Map<CanonicalProcedureName, Object> supportedProcedures;
+
+    private NodePropertyStepFactoryUsingStubs(Map<CanonicalProcedureName, Object> supportedProcedures) {
+        this.supportedProcedures = supportedProcedures;
+    }
 
     /**
      * This is terrible, but necessary.
@@ -44,12 +50,16 @@ class NodePropertyStepFactoryUsingStubs {
         if (INSTANCE == null) {
             synchronized (NodePropertyStepFactoryUsingStubs.class) {
                 if (INSTANCE == null) {
-                    INSTANCE = new NodePropertyStepFactoryUsingStubs();
+                    INSTANCE = NodePropertyStepFactoryUsingStubs.create();
                 }
             }
         }
 
         return INSTANCE;
+    }
+
+    private static NodePropertyStepFactoryUsingStubs create() {
+        return new NodePropertyStepFactoryUsingStubs(Map.of());
     }
 
     /**
@@ -58,7 +68,9 @@ class NodePropertyStepFactoryUsingStubs {
      * indeed the only thing.
      */
     boolean handles(String procedureName) {
-        return false;
+        var canonicalProcedureName = CanonicalProcedureName.parse(procedureName);
+
+        return supportedProcedures.containsKey(canonicalProcedureName);
     }
 
     ExecutableNodePropertyStep createNodePropertyStep(
