@@ -58,4 +58,9 @@ public interface RandomWalkBaseConfig extends AlgoBaseConfig, RelationshipWeight
             walksPerNode(), walkLength(), returnFactor(), inOutFactor()
         );
     }
+
+    @Configuration.Ignore
+    default WalkEstimateParameters toMemoryEstimateParameters() {
+        return new WalkEstimateParameters(walkLength(), walkBufferSize());
+    }
 }

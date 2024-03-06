@@ -19,22 +19,20 @@
  */
 package org.neo4j.gds.traversal;
 
-import org.junit.jupiter.api.Test;
-import org.neo4j.gds.assertions.MemoryEstimationAssert;
+public class WalkEstimateParameters {
+    public final int walkLength;
+    public final int walkBufferSize;
 
-class RandomWalkMemoryEstimateDefinitionTest {
-
-    @Test
-    void shouldComputeMemoryCorrectly(){
-
-        var memoryEstimation =
-            new RandomWalkMemoryEstimateDefinition(new WalkEstimateParameters(80, 1000))
-                .memoryEstimation();
-
-        MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryRange(100, 6000, 1)
-            .hasMin(4016)
-            .hasMax(660032);
+    public WalkEstimateParameters(int walkLength, int walkBufferSize) {
+        this.walkLength = walkLength;
+        this.walkBufferSize = walkBufferSize;
     }
 
+    int walkLength() {
+        return this.walkLength;
+    }
+
+    int walkBufferSize() {
+        return this.walkBufferSize;
+    }
 }
