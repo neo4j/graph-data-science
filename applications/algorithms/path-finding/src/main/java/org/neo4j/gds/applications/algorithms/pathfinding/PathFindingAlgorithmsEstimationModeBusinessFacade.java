@@ -45,7 +45,7 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         ShortestPathAStarBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        return runEstimation(new AStarMemoryEstimateDefinition(), configuration,  graphNameOrConfiguration);
+        return runEstimation(new AStarMemoryEstimateDefinition(), null, configuration,  graphNameOrConfiguration);
     }
 
     public MemoryEstimateResult singlePairShortestPathDijkstraEstimate(

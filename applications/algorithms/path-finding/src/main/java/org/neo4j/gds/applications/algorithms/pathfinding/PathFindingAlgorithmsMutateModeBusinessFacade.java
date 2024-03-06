@@ -63,7 +63,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             A_STAR,
-            () -> new AStarMemoryEstimateDefinition().memoryEstimation(configuration),
+            () -> new AStarMemoryEstimateDefinition().memoryEstimation(null),
             graph -> pathFindingAlgorithms.singlePairShortestPathAStar(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
