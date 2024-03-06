@@ -24,9 +24,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.ElementTypeValidator;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.negativeSampling.NegativeSampler;
 import org.neo4j.gds.ml.negativeSampling.RandomNegativeSampler;
@@ -72,29 +69,6 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
         IdMap targetNodes = graphStore.getGraph(targetLabels);
 
         return new SplitRelationships(graph, masterGraph, graphStore.nodes(), sourceNodes, targetNodes, config);
-    }
-
-    public static MemoryEstimation estimate(SplitRelationshipsEstimateParameters estimateParameters) {
-        // we cannot assume any compression of the relationships
-        var pessimisticSizePerRel = estimateParameters.hasRelationshipWeightProperty
-            ? Double.BYTES + 2 * Long.BYTES
-            : 2 * Long.BYTES;
-
-        return MemoryEstimations.builder("Relationship splitter")
-            .perGraphDimension("Selected relationships", (graphDimensions, threads) -> {
-                var positiveRelCount = graphDimensions.estimatedRelCount(estimateParameters.relationshipTypes) * estimateParameters.holdoutFraction;
-                var negativeRelCount = positiveRelCount * estimateParameters.negativeSamplingRatio;
-                long selectedRelCount = (long) (positiveRelCount + negativeRelCount);
-
-                // Whether the graph is undirected or directed
-                return MemoryRange.of(selectedRelCount / 2, selectedRelCount).times(pessimisticSizePerRel);
-            })
-            .perGraphDimension("Remaining relationships", (graphDimensions, threads) -> {
-                long remainingRelCount = (long) (graphDimensions.estimatedRelCount(estimateParameters.relationshipTypes) * (1 - estimateParameters.holdoutFraction));
-                // remaining relationships are always undirected
-                return MemoryRange.of(remainingRelCount * pessimisticSizePerRel);
-            })
-            .build();
     }
 
     @Override
