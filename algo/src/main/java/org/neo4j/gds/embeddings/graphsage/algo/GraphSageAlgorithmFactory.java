@@ -21,21 +21,15 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.config.MutateConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
 
-import static org.neo4j.gds.core.utils.mem.MemoryEstimations.RESIDENT_MEMORY;
-import static org.neo4j.gds.core.utils.mem.MemoryEstimations.TEMPORARY_MEMORY;
 import static org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver.resolveModel;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.ml.core.EmbeddingUtils.validateRelationshipWeightPropertyValue;
 
 public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> extends GraphAlgorithmFactory<GraphSage, CONFIG> {
@@ -56,7 +50,6 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
             configuration.modelUser(),
             configuration.modelName()
         );
-
 
         if (graph.hasRelationshipProperty()) {
             validateRelationshipWeightPropertyValue(graph, configuration.concurrency(), executorService);
@@ -80,55 +73,15 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
     public MemoryEstimation memoryEstimation(CONFIG config) {
         var model = resolveModel(modelCatalog, config.username(), config.modelName());
 
-        return MemoryEstimations.setup(
-            "",
-            graphDimensions -> withNodeCount(
-                model.trainConfig(),
-                graphDimensions.nodeCount(),
-                config instanceof MutateConfig
-            )
-        );
+        return new GraphSageMemoryEstimateDefinition(
+            model.trainConfig().toMemoryEstimateParameters(),
+            config instanceof MutateConfig
+        ).memoryEstimation();
     }
 
     @Override
     public Task progressTask(Graph graph, CONFIG config) {
         return Tasks.leaf(taskName(), graph.nodeCount());
-    }
-
-    private MemoryEstimation withNodeCount(GraphSageTrainConfig config, long nodeCount, boolean mutate) {
-        var estimationParameters = config.toMemoryEstimateParameters();
-        var gsBuilder = MemoryEstimations.builder("GraphSage");
-
-        if (mutate) {
-            gsBuilder = gsBuilder
-                .startField(RESIDENT_MEMORY)
-                .perNode(
-                    "resultFeatures",
-                    nc -> HugeObjectArray.memoryEstimation(nc, sizeOfDoubleArray(estimationParameters.embeddingDimension()))
-                )
-                .endField();
-        }
-
-        var builder = gsBuilder
-            .startField(TEMPORARY_MEMORY)
-            .field("this.instance", GraphSage.class)
-            .perNode(
-                "initialFeatures",
-                nc -> HugeObjectArray.memoryEstimation(nc, sizeOfDoubleArray(estimationParameters.estimationFeatureDimension()))
-            )
-            .perThread(
-                "concurrentBatches",
-                MemoryEstimations.builder().add(
-                    GraphSageHelper.embeddingsEstimation(estimationParameters, estimationParameters.batchSize(), nodeCount, 0, false)
-                ).build()
-            );
-        if (!mutate) {
-            builder = builder.perNode(
-                "resultFeatures",
-                nc -> HugeObjectArray.memoryEstimation(nc, sizeOfDoubleArray(estimationParameters.embeddingDimension()))
-            );
-        }
-        return builder.endField().build();
     }
 
 
