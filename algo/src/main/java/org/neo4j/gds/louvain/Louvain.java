@@ -23,6 +23,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.Aggregation;
@@ -235,6 +236,7 @@ public final class Louvain extends Algorithm<LouvainResult> {
             .addPropertyConfig(GraphFactory.PropertyConfig.builder()
                 .propertyKey("property")
                 .aggregation(Aggregation.SUM)
+                .propertyState(PropertyState.TRANSIENT)
                 .build())
             .executorService(executorService)
             .build();
