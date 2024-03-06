@@ -74,23 +74,23 @@ public final class SplitRelationships extends Algorithm<EdgeSplitter.SplitResult
         return new SplitRelationships(graph, masterGraph, graphStore.nodes(), sourceNodes, targetNodes, config);
     }
 
-    public static MemoryEstimation estimate(SplitRelationshipsBaseConfig configuration) {
+    public static MemoryEstimation estimate(SplitRelationshipsEstimateParameters estimateParameters) {
         // we cannot assume any compression of the relationships
-        var pessimisticSizePerRel = configuration.hasRelationshipWeightProperty()
+        var pessimisticSizePerRel = estimateParameters.hasRelationshipWeightProperty
             ? Double.BYTES + 2 * Long.BYTES
             : 2 * Long.BYTES;
 
         return MemoryEstimations.builder("Relationship splitter")
             .perGraphDimension("Selected relationships", (graphDimensions, threads) -> {
-                var positiveRelCount = graphDimensions.estimatedRelCount(configuration.relationshipTypes()) * configuration.holdoutFraction();
-                var negativeRelCount = positiveRelCount * configuration.negativeSamplingRatio();
+                var positiveRelCount = graphDimensions.estimatedRelCount(estimateParameters.relationshipTypes) * estimateParameters.holdoutFraction;
+                var negativeRelCount = positiveRelCount * estimateParameters.negativeSamplingRatio;
                 long selectedRelCount = (long) (positiveRelCount + negativeRelCount);
 
                 // Whether the graph is undirected or directed
                 return MemoryRange.of(selectedRelCount / 2, selectedRelCount).times(pessimisticSizePerRel);
             })
             .perGraphDimension("Remaining relationships", (graphDimensions, threads) -> {
-                long remainingRelCount = (long) (graphDimensions.estimatedRelCount(configuration.relationshipTypes()) * (1 - configuration.holdoutFraction()));
+                long remainingRelCount = (long) (graphDimensions.estimatedRelCount(estimateParameters.relationshipTypes) * (1 - estimateParameters.holdoutFraction));
                 // remaining relationships are always undirected
                 return MemoryRange.of(remainingRelCount * pessimisticSizePerRel);
             })
