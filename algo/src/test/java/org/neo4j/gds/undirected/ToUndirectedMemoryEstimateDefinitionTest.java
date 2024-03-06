@@ -30,7 +30,6 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 
 import java.util.stream.Stream;
 
-import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
