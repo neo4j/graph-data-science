@@ -26,22 +26,15 @@ import org.neo4j.gds.assertions.MemoryEstimationAssert;
 
 import java.util.stream.Stream;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 class BellmanFordMemoryEstimateDefinitionTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("memoryEstimationSetup")
     void memoryEstimation(String description, boolean trackNegativeCycles, long expectedBytes) {
 
+        var memoryEstimation = new BellmanFordMemoryEstimateDefinition().memoryEstimation(trackNegativeCycles);
 
-        var config = mock(BellmanFordBaseConfig.class);
-        when(config.trackNegativeCycles()).thenReturn(trackNegativeCycles);
-
-        var memoryEstimation = new BellmanFordMemoryEstimateDefinition();
-
-        MemoryEstimationAssert.assertThat(memoryEstimation.memoryEstimation(config))
+        MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(10, 23, 4)
             .hasSameMinAndMaxEqualTo(expectedBytes);
     }
