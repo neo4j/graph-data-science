@@ -32,6 +32,7 @@ dependencies {
     implementation project(':logging')
     implementation project(':memory-usage')
     implementation project(':ml-algo')
+    implementation project(':ml-api')
     implementation project(':ml-core')
     implementation project(':native-projection')
     implementation project(':neo4j-api')

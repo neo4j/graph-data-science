@@ -39,7 +39,6 @@ public class GraphDataScience {
     private final CommunityProcedureFacade communityProcedureFacade;
     private final MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade;
     private final NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade;
-    private final PathFindingProcedureFacade pathFindingProcedureFacade;
     private final PipelinesProcedureFacade pipelinesProcedureFacade;
     private final SimilarityProcedureFacade similarityProcedureFacade;
 
@@ -56,7 +55,6 @@ public class GraphDataScience {
         CommunityProcedureFacade communityProcedureFacade,
         MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade,
         NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade,
-        PathFindingProcedureFacade pathFindingProcedureFacade,
         PipelinesProcedureFacade pipelinesProcedureFacade,
         SimilarityProcedureFacade similarityProcedureFacade,
         DeprecatedProceduresMetricService deprecatedProceduresMetricService
@@ -67,10 +65,9 @@ public class GraphDataScience {
         this.centralityProcedureFacade = centralityProcedureFacade;
         this.communityProcedureFacade = communityProcedureFacade;
         this.miscAlgorithmsProcedureFacade = miscAlgorithmsProcedureFacade;
-        this.pathFindingProcedureFacade = pathFindingProcedureFacade;
+        this.nodeEmbeddingsProcedureFacade = nodeEmbeddingsProcedureFacade;
         this.pipelinesProcedureFacade = pipelinesProcedureFacade;
         this.similarityProcedureFacade = similarityProcedureFacade;
-        this.nodeEmbeddingsProcedureFacade = nodeEmbeddingsProcedureFacade;
         this.deprecatedProceduresMetricService = deprecatedProceduresMetricService;
     }
 
@@ -99,7 +96,7 @@ public class GraphDataScience {
     }
 
     public PathFindingProcedureFacade pathFinding() {
-        return pathFindingProcedureFacade;
+        return algorithmsAndCatalogFacade.pathFinding();
     }
 
     public PipelinesProcedureFacade pipelines() {

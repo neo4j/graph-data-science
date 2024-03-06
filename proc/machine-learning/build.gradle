@@ -53,6 +53,7 @@ dependencies {
     testCompileOnly group: 'org.immutables', name: 'builder',           version: ver.'immutables'
     testCompileOnly group: 'org.jetbrains',  name: 'annotations',       version: ver.'jetbrains-annotations'
 
+    testImplementation project(':logging')
     testImplementation project(':open-model-catalog')
     testImplementation project(':proc-test')
     testImplementation project(':proc-common')

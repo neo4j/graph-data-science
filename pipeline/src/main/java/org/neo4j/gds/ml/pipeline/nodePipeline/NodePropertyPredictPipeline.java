@@ -22,7 +22,6 @@ package org.neo4j.gds.ml.pipeline.nodePipeline;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
-import org.neo4j.gds.ml.pipeline.NodePropertyStep;
 import org.neo4j.gds.ml.pipeline.Pipeline;
 
 import java.util.List;
@@ -53,7 +52,7 @@ public final class NodePropertyPredictPipeline implements Pipeline<NodeFeatureSt
     }
 
     public static NodePropertyPredictPipeline from(
-        Stream<NodePropertyStep> nodePropertySteps,
+        Stream<ExecutableNodePropertyStep> nodePropertySteps,
         Stream<NodeFeatureStep> featureSteps
     ) {
         return new NodePropertyPredictPipeline(

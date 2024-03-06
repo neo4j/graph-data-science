@@ -27,6 +27,7 @@ import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.embeddings.NodeEmbeddingsProcedureFacade;
 import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.pathfinding.PathFindingProcedureFacade;
+import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
 import org.neo4j.gds.procedures.similarity.SimilarityProcedureFacade;
 
 /**
@@ -43,6 +44,7 @@ public class GraphDataScienceBuilder {
     private MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade;
     private NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade;
     private PathFindingProcedureFacade pathFindingProcedureFacade;
+    private PipelinesProcedureFacade pipelinesProcedureFacade;
     private SimilarityProcedureFacade similarityProcedureFacade;
     private DeprecatedProceduresMetricService deprecatedProceduresMetricService;
 
@@ -85,6 +87,15 @@ public class GraphDataScienceBuilder {
         return this;
     }
 
+    /**
+     * @deprecated this stops working the moment I need pipelines to use algorithms. At that point: opinionated builder
+     */
+    @Deprecated
+    public GraphDataScienceBuilder with(PipelinesProcedureFacade pipelinesProcedureFacade) {
+        this.pipelinesProcedureFacade = pipelinesProcedureFacade;
+        return this;
+    }
+
     public GraphDataScienceBuilder with(DeprecatedProceduresMetricService deprecatedProceduresMetricService) {
         this.deprecatedProceduresMetricService = deprecatedProceduresMetricService;
         return this;
@@ -101,8 +112,7 @@ public class GraphDataScienceBuilder {
             communityProcedureFacade,
             miscAlgorithmsProcedureFacade,
             nodeEmbeddingsProcedureFacade,
-            null,
-            null,
+            pipelinesProcedureFacade,
             similarityProcedureFacade,
             deprecatedProceduresMetricService
         );

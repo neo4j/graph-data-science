@@ -40,6 +40,13 @@ public class NodeClassificationPipelineAddStepProcs extends BaseProc {
     @Context
     public GraphDataScience facade;
 
+    public NodeClassificationPipelineAddStepProcs() {
+    }
+
+    NodeClassificationPipelineAddStepProcs(GraphDataScience facade) {
+        this.facade = facade;
+    }
+
     public static NodePipelineInfoResult selectFeatures(
         String username,
         String pipelineName,

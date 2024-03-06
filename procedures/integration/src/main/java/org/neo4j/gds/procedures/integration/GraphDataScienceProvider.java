@@ -35,6 +35,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
     private final CatalogFacadeProvider catalogFacadeProvider;
     private final AlgorithmFacadeFactoryProvider algorithmFacadeFactoryProvider;
     private final DeprecatedProceduresMetricService deprecatedProceduresMetricService;
+    private final PipelinesProcedureFacadeProvider pipelinesProcedureFacadeProvider = new PipelinesProcedureFacadeProvider();
 
     GraphDataScienceProvider(
         Log log,
@@ -55,18 +56,22 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         var algorithmFacadeFactory = algorithmFacadeFactoryProvider.createAlgorithmFacadeFactory(context);
         var centralityProcedureFacade = algorithmFacadeFactory.createCentralityProcedureFacade();
         var communityProcedureFacade = algorithmFacadeFactory.createCommunityProcedureFacade();
+        var miscAlgorithmsProcedureFacade = algorithmFacadeFactory.createMiscellaneousProcedureFacade();
+        var nodeEmbeddingsProcedureFacade = algorithmFacadeFactory.createNodeEmbeddingsProcedureFacade();
         var pathFindingProcedureFacade = algorithmFacadeFactory.createPathFindingProcedureFacade();
         var similarityProcedureFacade = algorithmFacadeFactory.createSimilarityProcedureFacade();
-        var nodeEmbeddingsProcedureFacade = algorithmFacadeFactory.createNodeEmbeddingsProcedureFacade();
-        var miscAlgorithmsProcedureFacade = algorithmFacadeFactory.createMiscellaneousProcedureFacade();
+
+        var pipelinesProcedureFacade = pipelinesProcedureFacadeProvider.createPipelinesProcedureFacade(context);
+
         return new GraphDataScienceBuilder(log)
             .with(catalogFacade)
             .with(centralityProcedureFacade)
             .with(communityProcedureFacade)
-            .with(nodeEmbeddingsProcedureFacade)
-            .with(similarityProcedureFacade)
-            .with(pathFindingProcedureFacade)
             .with(miscAlgorithmsProcedureFacade)
+            .with(nodeEmbeddingsProcedureFacade)
+            .with(pathFindingProcedureFacade)
+            .with(pipelinesProcedureFacade)
+            .with(similarityProcedureFacade)
             .with(deprecatedProceduresMetricService)
             .build();
     }

@@ -28,6 +28,9 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.ml.pipeline.NodePropertyStepFactory.createNodePropertyStep;
 
+/**
+ * Lifecycle: request - newed up on each request
+ */
 public class PipelinesProcedureFacade {
     private final User user;
 

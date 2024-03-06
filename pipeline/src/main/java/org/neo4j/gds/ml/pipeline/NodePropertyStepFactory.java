@@ -47,12 +47,10 @@ public final class NodePropertyStepFactory {
 
     private NodePropertyStepFactory() {}
 
-    public static NodePropertyStep createNodePropertyStep(
+    public static ExecutableNodePropertyStep createNodePropertyStep(
         String taskName,
         Map<String, Object> configMap
     ) {
-        var gdsCallableDefinition = getGdsCallableDefinition(taskName);
-
         var procConfigMap = new HashMap<>(configMap);
         var contextNodeLabels = procConfigMap.remove(CONTEXT_NODE_LABELS);
         var contextRelationshipTypes = procConfigMap.remove(CONTEXT_RELATIONSHIP_TYPES);
@@ -64,25 +62,49 @@ public final class NodePropertyStepFactory {
 
         var contextConfig = NodePropertyStepContextConfig.of(contextConfigMap);
 
-        return createNodePropertyStepFromCallableDefinition(procConfigMap, gdsCallableDefinition, contextConfig.contextNodeLabels(), contextConfig.contextRelationshipTypes());
+        return createNodePropertyStep(
+            procConfigMap,
+            taskName,
+            contextConfig.contextNodeLabels(),
+            contextConfig.contextRelationshipTypes()
+        );
     }
 
-    public static NodePropertyStep createNodePropertyStep(
+    public static ExecutableNodePropertyStep createNodePropertyStep(
         String taskName,
         Map<String, Object> procConfigMap,
         List<String> contextNodeLabels,
         List<String> contextRelationshipTypes
     ) {
-        return createNodePropertyStepFromCallableDefinition(procConfigMap, getGdsCallableDefinition(taskName), contextNodeLabels, contextRelationshipTypes);
+        return createNodePropertyStep(
+            procConfigMap,
+            taskName,
+            contextNodeLabels,
+            contextRelationshipTypes
+        );
     }
 
-    private static NodePropertyStep createNodePropertyStepFromCallableDefinition(
+    private static ExecutableNodePropertyStep createNodePropertyStep(
         Map<String, Object> procConfigMap,
-        GdsCallableFinder.GdsCallableDefinition gdsCallableDefinition,
+        String taskName,
         List<String> contextNodeLabels,
         List<String> contextRelationshipTypes
     ) {
         validateReservedConfigKeys(procConfigMap);
+
+        var thingie = NodePropertyStepFactoryUsingStubs.GetOrCreate(NodePropertyStepFactory.class.getSimpleName());
+
+        // this is the last possible moment to decide to use the new approach
+        if (thingie.handles(taskName)) {
+            return thingie.createNodePropertyStep(
+                taskName,
+                procConfigMap,
+                contextNodeLabels,
+                contextRelationshipTypes
+            );
+        }
+
+        var gdsCallableDefinition = getGdsCallableDefinition(taskName);
 
         // validate user-input is valid
         tryParsingConfig(gdsCallableDefinition, procConfigMap);
