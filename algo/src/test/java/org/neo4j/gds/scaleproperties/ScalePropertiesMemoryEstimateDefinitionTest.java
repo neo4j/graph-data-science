@@ -44,7 +44,7 @@ class ScalePropertiesMemoryEstimateDefinitionTest {
         var config= mock(ScalePropertiesBaseConfig.class);
         when(config.nodeProperties()).thenReturn(List.of("bAndC", "longArrayB"));
 
-        var memoryEstimation = new ScalePropertiesMemoryEstimateDefinition(config)
+        var memoryEstimation = new ScalePropertiesMemoryEstimateDefinition(config.nodeProperties())
             .memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
@@ -68,7 +68,7 @@ class ScalePropertiesMemoryEstimateDefinitionTest {
         var config= mock(ScalePropertiesBaseConfig.class);
         when(config.nodeProperties()).thenReturn(List.of("DUMMY"));
 
-        var memoryEstimation = new ScalePropertiesMemoryEstimateDefinition(config)
+        var memoryEstimation = new ScalePropertiesMemoryEstimateDefinition(config.nodeProperties())
             .memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
