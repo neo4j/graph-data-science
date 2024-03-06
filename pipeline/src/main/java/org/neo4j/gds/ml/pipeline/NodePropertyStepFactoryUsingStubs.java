@@ -19,15 +19,17 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
+import org.neo4j.gds.procedures.AlgorithmsAndCatalogFacade;
+
 import java.util.List;
 import java.util.Map;
 
 final class NodePropertyStepFactoryUsingStubs {
     private static volatile NodePropertyStepFactoryUsingStubs INSTANCE = null;
 
-    private final Map<CanonicalProcedureName, Object> supportedProcedures;
+    private final Map<CanonicalProcedureName, Stub> supportedProcedures;
 
-    private NodePropertyStepFactoryUsingStubs(Map<CanonicalProcedureName, Object> supportedProcedures) {
+    private NodePropertyStepFactoryUsingStubs(Map<CanonicalProcedureName, Stub> supportedProcedures) {
         this.supportedProcedures = supportedProcedures;
     }
 
@@ -74,32 +76,25 @@ final class NodePropertyStepFactoryUsingStubs {
     }
 
     ExecutableNodePropertyStep createNodePropertyStep(
-        String procedureName,
+        AlgorithmsAndCatalogFacade facade, String procedureName,
         Map<String, Object> configuration,
         List<String> contextNodeLabels,
         List<String> contextRelationshipTypes
     ) {
+        var canonicalProcedureName = CanonicalProcedureName.parse(procedureName);
+
         // identify stub
+        var stub = supportedProcedures.get(canonicalProcedureName);
 
         // parse/ validate
+        stub.validateBeforeCreatingNodePropertyStep(facade, configuration);
 
         // create step
-
-        throw new UnsupportedOperationException("TODO: not populated yet");
+        return new StubPoweredNodePropertyStep(
+            canonicalProcedureName,
+            configuration,
+            contextNodeLabels,
+            contextRelationshipTypes
+        );
     }
-
-//    private static AlgoBaseConfig tryParsingConfig(
-//        GdsCallableFinder.GdsCallableDefinition callableDefinition,
-//        Map<String, Object> configuration
-//    ) {
-//        NewConfigFunction<AlgoBaseConfig> newConfigFunction = callableDefinition
-//            .algorithmSpec()
-//            .newConfigFunction();
-//
-//        var defaults = DefaultsConfiguration.Instance;
-//        var limits = LimitsConfiguration.Instance;
-//
-//        // passing the EMPTY_USERNAME as we only try to check if the given configuration itself is valid
-//        return new AlgoConfigParser<>(Username.EMPTY_USERNAME.username(), newConfigFunction, defaults, limits).processInput(configuration);
-//    }
 }

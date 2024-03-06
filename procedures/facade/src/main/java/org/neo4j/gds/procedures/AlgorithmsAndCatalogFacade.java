@@ -25,7 +25,7 @@ import org.neo4j.gds.procedures.pathfinding.PathFindingProcedureFacade;
  * This is the facade that faces pipelines, so everything you can pipeline I guess.
  * I assume you can't pipeline a pipeline...
  */
-class AlgorithmsAndCatalogFacade {
+public class AlgorithmsAndCatalogFacade {
     private final PathFindingProcedureFacade pathFindingProcedureFacade;
 
     AlgorithmsAndCatalogFacade(PathFindingProcedureFacade pathFindingProcedureFacade) {

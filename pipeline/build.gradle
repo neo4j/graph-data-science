@@ -51,6 +51,7 @@ dependencies {
     implementation project(':model-catalog-api')
     implementation project(':neo4j-api')
     implementation project(':neo4j-settings')
+    implementation project(':opengds-procedure-facade')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':termination')
