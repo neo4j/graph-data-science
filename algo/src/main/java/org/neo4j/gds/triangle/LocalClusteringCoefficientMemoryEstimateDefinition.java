@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.triangle;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -26,10 +27,10 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 
 public class LocalClusteringCoefficientMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
 
-    private final LocalClusteringCoefficientBaseConfig configuration;
+    private final String seedProperty;
 
-    public LocalClusteringCoefficientMemoryEstimateDefinition(LocalClusteringCoefficientBaseConfig configuration) {
-        this.configuration = configuration;
+    public LocalClusteringCoefficientMemoryEstimateDefinition(@Nullable String seedProperty) {
+        this.seedProperty = seedProperty;
     }
 
     @Override
@@ -38,7 +39,6 @@ public class LocalClusteringCoefficientMemoryEstimateDefinition implements Algor
             .builder(LocalClusteringCoefficient.class)
             .perNode("local-clustering-coefficient", HugeDoubleArray::memoryEstimation);
 
-        var seedProperty = configuration.seedProperty();
         if (seedProperty == null) {
             builder.add(
                 "computed-triangle-counts",
