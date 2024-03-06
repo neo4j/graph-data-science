@@ -79,6 +79,6 @@ public class SteinerTreeAlgorithmFactory<CONFIG extends SteinerTreeBaseConfig> e
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
-        return new SteinerTreeMemoryEstimateDefinition(config).memoryEstimation();
+        return new SteinerTreeMemoryEstimateDefinition(config.applyRerouting()).memoryEstimation();
     }
 }
