@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.paths.delta;
 
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
@@ -26,46 +27,40 @@ import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
 
-public class DeltaSteppingMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<AllShortestPathsDeltaBaseConfig> {
+public class DeltaSteppingMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<Void> {
 
     @Override
-    public MemoryEstimation memoryEstimation(AllShortestPathsDeltaBaseConfig configuration) {
-        var storePredecessors= true;
+    public MemoryEstimation memoryEstimation(@Nullable Void unusedEvilParameter) {
+        return MemoryEstimations.builder(DeltaStepping.class)
+            .perNode("distance array", HugeAtomicDoubleArray::memoryEstimation)
+            .rangePerGraphDimension("shared bin", (dimensions, concurrency) -> {
+                // This is the average case since it is likely that we visit most nodes
+                // in one of the iterations due to power-law distributions.
+                var lowerBound = HugeLongArray.memoryEstimation(dimensions.nodeCount());
+                // This is the worst-case, which we will most likely never hit since the
+                // graph needs to be complete to reach all nodes from all threads.
+                var upperBound = HugeLongArray.memoryEstimation(dimensions.relCountUpperBound());
 
-            var builder = MemoryEstimations.builder(DeltaStepping.class)
-                .perNode("distance array", HugeAtomicDoubleArray::memoryEstimation)
-                .rangePerGraphDimension("shared bin", (dimensions, concurrency) -> {
-                    // This is the average case since it is likely that we visit most nodes
-                    // in one of the iterations due to power-law distributions.
-                    var lowerBound = HugeLongArray.memoryEstimation(dimensions.nodeCount());
-                    // This is the worst-case, which we will most likely never hit since the
-                    // graph needs to be complete to reach all nodes from all threads.
-                    var upperBound = HugeLongArray.memoryEstimation(dimensions.relCountUpperBound());
+                return MemoryRange.of(lowerBound, Math.max(lowerBound, upperBound));
+            })
+            .rangePerGraphDimension("local bins", (dimensions, concurrency) -> {
+                // We don't know how many buckets we have per thread since it depends on the delta
+                // and the average path length within the graph. We try some bounds instead ...
 
-                    return MemoryRange.of(lowerBound, Math.max(lowerBound, upperBound));
-                })
-                .rangePerGraphDimension("local bins", (dimensions, concurrency) -> {
-                    // We don't know how many buckets we have per thread since it depends on the delta
-                    // and the average path length within the graph. We try some bounds instead ...
+                // Assuming that each node is visited by at most one thread, it is stored in at most
+                // one thread-local bucket, hence the best case is dividing all the nodes across
+                // thread-local buckets.
+                var lowerBound = HugeLongArray.memoryEstimation(dimensions.nodeCount() / concurrency);
 
-                    // Assuming that each node is visited by at most one thread, it is stored in at most
-                    // one thread-local bucket, hence the best case is dividing all the nodes across
-                    // thread-local buckets.
-                    var lowerBound = HugeLongArray.memoryEstimation(dimensions.nodeCount() / concurrency);
+                // The worst case is again the fully-connected graph where we would replicate all nodes in
+                // thread-local buckets in a single iteration.
+                var upperBound = HugeLongArray.memoryEstimation(concurrency * dimensions.nodeCount());
 
-                    // The worst case is again the fully-connected graph where we would replicate all nodes in
-                    // thread-local buckets in a single iteration.
-                    var upperBound = HugeLongArray.memoryEstimation(concurrency * dimensions.nodeCount());
-
-                    return MemoryRange.of(lowerBound, Math.max(lowerBound, upperBound));
-                });
-
-            if (storePredecessors) {
-                builder.perNode("predecessor array", HugeAtomicLongArray::memoryEstimation);
-            }
-            return builder.build();
-        }
+                return MemoryRange.of(lowerBound, Math.max(lowerBound, upperBound));
+            })
+            .perNode("predecessor array", HugeAtomicLongArray::memoryEstimation)
+            .build();
+    }
 
 }
