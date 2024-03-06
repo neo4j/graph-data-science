@@ -37,6 +37,8 @@ public abstract class PropertyValues {
 
     public abstract Iterable<String> propertyKeys();
 
+    public abstract Value get(String key);
+
     public static PropertyValues of(MapValue mapValue) {
         return new CypherPropertyValues(mapValue);
     }
@@ -71,6 +73,11 @@ public abstract class PropertyValues {
         public Set<String> propertyKeys() {
             return this.properties.keySet();
         }
+
+        @Override
+        public Value get(String key) {
+            return properties.get(key);
+        }
     }
 
     private static final class CypherPropertyValues extends PropertyValues {
@@ -100,6 +107,11 @@ public abstract class PropertyValues {
         @Override
         public Iterable<String> propertyKeys() {
             return this.properties.keySet();
+        }
+
+        @Override
+        public Value get(String key) {
+            return ValueConverter.toValue(properties.get(key));
         }
     }
 }
