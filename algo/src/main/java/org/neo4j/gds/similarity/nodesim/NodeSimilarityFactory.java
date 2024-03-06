@@ -19,26 +19,15 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
-import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
-import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.wcc.WccAlgorithmFactory;
-import org.neo4j.gds.wcc.WccMemoryEstimateDefinition;
-
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
 public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> extends GraphAlgorithmFactory<NodeSimilarity, CONFIG> {
 
