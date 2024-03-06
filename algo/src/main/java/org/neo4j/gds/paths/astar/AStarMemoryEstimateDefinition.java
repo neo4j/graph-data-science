@@ -33,7 +33,11 @@ public class AStarMemoryEstimateDefinition implements AlgorithmMemoryEstimateDef
     public MemoryEstimation memoryEstimation(@Nullable Void unusedEvilParameter) {
 
         return MemoryEstimations.builder(AStar.class)
-            .add("Dijkstra", DijkstraMemoryEstimateDefinition.memoryEstimation(false))
+            .add(
+                "Dijkstra",
+                new DijkstraMemoryEstimateDefinition()
+                    .memoryEstimation(new DijkstraMemoryEstimateParameters(false, false))
+            )
             .add("distanceCache", HugeLongDoubleMap.memoryEstimation())
             .build();
 

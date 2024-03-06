@@ -28,6 +28,7 @@ import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateDefinition;
+import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateParameters;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -54,7 +55,11 @@ public class YensTask implements Runnable {
     public static MemoryEstimation memoryEstimation(int k, boolean trackRelationships) {
         return MemoryEstimations.builder(YensTask.class)
             .fixed("neighbors", MemoryUsage.sizeOfLongArray(k))
-            .add("Dijkstra", DijkstraMemoryEstimateDefinition.memoryEstimation(trackRelationships)).build();
+            .add(
+                "Dijkstra",
+                new DijkstraMemoryEstimateDefinition()
+                    .memoryEstimation(new DijkstraMemoryEstimateParameters(trackRelationships, false))
+            ).build();
     }
 
     YensTask(
