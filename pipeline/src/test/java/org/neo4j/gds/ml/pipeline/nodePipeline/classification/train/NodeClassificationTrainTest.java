@@ -32,8 +32,6 @@ import org.neo4j.gds.ResourceUtil;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.model.OpenModelCatalog;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -51,7 +49,6 @@ import org.neo4j.gds.ml.models.mlp.MLPClassifierTrainConfigImpl;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfig;
 import org.neo4j.gds.ml.pipeline.AutoTuningConfigImpl;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStepTestUtil;
-import org.neo4j.gds.ml.pipeline.NodePropertyStepFactory;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureProducer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
@@ -67,7 +64,6 @@ import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 import static org.neo4j.gds.assertj.Extractors.keepingFixedNumberOfDecimals;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.compat.TestLog.DEBUG;
@@ -650,50 +646,6 @@ class NodeClassificationTrainTest {
                 1e-10
             ));
     }
-
-    @ParameterizedTest
-    @MethodSource("trainerMethodConfigs")
-    void shouldEstimateMemory(List<TunableTrainerConfig> tunableConfigs, MemoryRange memoryRange) {
-        var pipeline = new NodeClassificationTrainingPipeline();
-        pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(
-            "testProc",
-            Map.of("mutateProperty", "pr")
-        ));
-        pipeline.nodePropertySteps().add(NodePropertyStepFactory.createNodePropertyStep(
-            "testProc", Map.of("mutateProperty", "myNewProp"))
-        );
-        pipeline.featureProperties().addAll(List.of("array", "scalar", "pr"));
-
-        for (TunableTrainerConfig tunableConfig : tunableConfigs) {
-            pipeline.addTrainerConfig(tunableConfig);
-        }
-
-        // Limit maxTrials to make comparison with concrete-only parameter spaces easier.
-        pipeline.setAutoTuningConfig(AutoTuningConfigImpl.builder().maxTrials(2).build());
-
-        var config = NodeClassificationPipelineTrainConfigImpl.builder()
-            .pipeline("")
-            .modelUser("myUser")
-            .graphName(GRAPH_NAME_WITH_RELATIONSHIPS)
-            .modelName("myModel")
-            .concurrency(1)
-            .randomSeed(42L)
-            .targetProperty("t")
-            .relationshipTypes(List.of("SOME_REL"))
-            .targetNodeLabels(List.of("SOME_LABEL"))
-            .metrics(List.of(ClassificationMetricSpecification.Parser.parse("F1_WEIGHTED")))
-            .build();
-
-        var memoryEstimation = NodeClassificationTrain.estimate(pipeline, config, new OpenModelCatalog());
-        assertMemoryEstimation(
-            () -> memoryEstimation,
-            relGraphStore.nodeCount(),
-            relGraphStore.relationshipCount(),
-            config.concurrency(),
-            memoryRange
-        );
-    }
-
     @Test
     void failGivenTooSmallTestSet() {
         var pipeline = new NodeClassificationTrainingPipeline();
@@ -714,46 +666,6 @@ class NodeClassificationTrainTest {
         // we are mostly interested in the fact that the validation method is called
         assertThatThrownBy(() -> NodeClassificationTrain.create(nodeGraphStore, pipeline, config, nodeFeatureProducer, ProgressTracker.NULL_TRACKER))
             .hasMessage("The specified `testFraction` is too low for the current graph. The test set would have 0 node(s) but it must have at least 1.");
-    }
-
-    public static Stream<Arguments> trainerMethodConfigs() {
-        return Stream.of(
-            Arguments.of(
-                List.of(LogisticRegressionTrainConfig.DEFAULT.toTunableConfig()),
-                MemoryRange.of(778_968, 810_928)
-            ),
-            Arguments.of(
-                List.of(RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()),
-                MemoryRange.of(90_906, 207_678)
-            ),
-            Arguments.of(
-                List.of(
-                    LogisticRegressionTrainConfig.DEFAULT.toTunableConfig(),
-                    RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()
-                ),
-                MemoryRange.of(859_936, 927_176)
-            ),
-            Arguments.of(
-                List.of(
-                    TunableTrainerConfig.of(
-                        Map.of("penalty", Map.of("range", List.of(1e-4, 1e4))),
-                        TrainingMethod.LogisticRegression
-                    ),
-                    RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()
-                ),
-                MemoryRange.of(939_936, 1_007_176)
-            ),
-            Arguments.of(
-                List.of(
-                    TunableTrainerConfig.of(
-                        Map.of("batchSize", Map.of("range", List.of(1, 100_000))),
-                        TrainingMethod.LogisticRegression
-                    ),
-                    RandomForestClassifierTrainerConfig.DEFAULT.toTunableConfig()
-                ),
-                MemoryRange.of(430_110_336, 430_177_576)
-            )
-        );
     }
 
 

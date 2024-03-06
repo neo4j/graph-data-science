@@ -19,62 +19,46 @@
  */
 package org.neo4j.gds.ml.pipeline.nodePipeline.classification.train;
 
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.collections.LongMultiSet;
-import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
-import org.neo4j.gds.core.model.ModelCatalog;
-import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.collections.ha.HugeIntArray;
+import org.neo4j.gds.core.model.ModelCatalog;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.ml.api.TrainingMethod;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.Metric;
 import org.neo4j.gds.ml.metrics.MetricConsumer;
 import org.neo4j.gds.ml.metrics.ModelCandidateStats;
 import org.neo4j.gds.ml.metrics.ModelSpecificMetricsHandler;
 import org.neo4j.gds.ml.metrics.classification.ClassificationMetric;
-import org.neo4j.gds.ml.metrics.classification.ClassificationMetricSpecification;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.ClassifierTrainer;
 import org.neo4j.gds.ml.models.ClassifierTrainerFactory;
 import org.neo4j.gds.ml.models.Features;
 import org.neo4j.gds.ml.models.TrainerConfig;
 import org.neo4j.gds.ml.models.automl.RandomSearch;
-import org.neo4j.gds.ml.models.automl.TunableTrainerConfig;
-import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.nodeClassification.ClassificationMetricComputer;
 import org.neo4j.gds.ml.nodePropertyPrediction.NodeSplitter;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepExecutor;
 import org.neo4j.gds.ml.pipeline.PipelineTrainer;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureProducer;
-import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
-import org.neo4j.gds.ml.splitting.FractionSplitter;
-import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 import org.neo4j.gds.ml.training.CrossValidation;
 import org.neo4j.gds.ml.training.TrainingStatistics;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
-import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
-import static org.neo4j.gds.core.utils.mem.MemoryEstimations.delegateEstimation;
-import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.LabelsAndClassCountsExtractor.extractLabelsAndClassCounts;
 import static org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig.classificationMetrics;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
@@ -98,87 +82,11 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         NodeClassificationPipelineTrainConfig configuration,
         ModelCatalog modelCatalog
     ) {
-        pipeline.validateTrainingParameterSpace();
-
-        MemoryEstimation nodePropertyStepsEstimation = NodePropertyStepExecutor.estimateNodePropertySteps(
-            modelCatalog,
-            configuration.username(),
-            pipeline.nodePropertySteps(),
-            configuration.nodeLabels(),
-            configuration.relationshipTypes()
-        );
-
-        var trainingEstimation = MemoryEstimations
-            .builder()
-            .add("Training", estimateExcludingNodePropertySteps(pipeline, configuration))
-            .build();
-
-        return maxEstimation(
-            "Node Classification Train Pipeline",
-            List.of(nodePropertyStepsEstimation, trainingEstimation)
-        );
-    }
-
-    private static MemoryEstimation estimateExcludingNodePropertySteps(
-        NodeClassificationTrainingPipeline pipeline,
-        NodeClassificationPipelineTrainConfig config
-    ) {
-        var fudgedClassCount = 1000;
-        var fudgedFeatureCount = 500;
-        NodePropertyPredictionSplitConfig splitConfig = pipeline.splitConfig();
-        var testFraction = splitConfig.testFraction();
-
-        var modelSelection = modelTrainAndEvaluateMemoryUsage(
+        return new NodeClassificationTrainMemoryEstimateDefinition(
             pipeline,
-            fudgedClassCount,
-            fudgedFeatureCount,
-            splitConfig::foldTrainSetSize,
-            splitConfig::foldTestSetSize
-        );
-        var bestModelEvaluation = delegateEstimation(
-            modelTrainAndEvaluateMemoryUsage(
-                pipeline,
-                fudgedClassCount,
-                fudgedFeatureCount,
-                splitConfig::trainSetSize,
-                splitConfig::testSetSize
-            ),
-            "best model evaluation"
-        );
-
-        var modelTrainingEstimation = maxEstimation(List.of(modelSelection, bestModelEvaluation));
-
-        // Final step is to retrain the best model with the entire node set.
-        // Training memory is independent of node set size so we can skip that last estimation.
-        var builder = MemoryEstimations.builder()
-            .perNode("global targets", HugeIntArray::memoryEstimation)
-            .rangePerNode("global class counts", __ -> MemoryRange.of(2L * Long.BYTES, (long) fudgedClassCount * Long.BYTES))
-            .add("metrics", ClassificationMetricSpecification.memoryEstimation(fudgedClassCount))
-            .perNode("node IDs", HugeLongArray::memoryEstimation)
-            .add("outer split", FractionSplitter.estimate(1 - testFraction))
-            .add(
-                "inner split",
-                StratifiedKFoldSplitter.memoryEstimationForNodeSet(splitConfig.validationFolds(), 1 - testFraction)
-            )
-            .add(
-                "stats map train",
-                TrainingStatistics.memoryEstimationStatsMap(config.metrics().size(), pipeline.numberOfModelSelectionTrials())
-            )
-            .add(
-                "stats map validation",
-                TrainingStatistics.memoryEstimationStatsMap(config.metrics().size(), pipeline.numberOfModelSelectionTrials())
-            )
-            .add("max of model selection and best model evaluation", modelTrainingEstimation);
-
-        if (!pipeline.trainingParameterSpace().get(TrainingMethod.RandomForestClassification).isEmpty()) {
-            // Having a random forest model candidate forces using eager feature extraction.
-            builder.perGraphDimension("cached feature vectors", (dim, threads) -> MemoryRange.of(
-                HugeObjectArray.memoryEstimation(dim.nodeCount(), sizeOfDoubleArray(10)),
-                HugeObjectArray.memoryEstimation(dim.nodeCount(), sizeOfDoubleArray(fudgedFeatureCount))
-            ));
-        }
-
-        return builder.build();
+            configuration,
+            modelCatalog
+        ).memoryEstimation();
     }
 
     public static Task progressTask(NodeClassificationTrainingPipeline pipeline, long nodeCount) {
@@ -200,55 +108,6 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         tasks.add(ClassifierTrainer.progressTask("Retrain best model", 5 * nodeCount));
 
         return Tasks.task("Node Classification Train Pipeline", tasks);
-    }
-
-    @NotNull
-    private static MemoryEstimation modelTrainAndEvaluateMemoryUsage(
-        NodeClassificationTrainingPipeline pipeline,
-        int fudgedClassCount,
-        int fudgedFeatureCount,
-        LongUnaryOperator trainSetSize,
-        LongUnaryOperator testSetSize
-    ) {
-        var foldEstimations = pipeline
-            .trainingParameterSpace()
-            .values()
-            .stream()
-            .flatMap(List::stream)
-            .flatMap(TunableTrainerConfig::streamCornerCaseConfigs)
-            .map(
-                config ->
-                    MemoryEstimations.setup("max of training and evaluation", dim ->
-                        {
-                            var training = ClassifierTrainerFactory.memoryEstimation(
-                                config,
-                                trainSetSize,
-                                (int) Math.min(fudgedClassCount, dim.nodeCount()),
-                                MemoryRange.of(fudgedFeatureCount),
-                                false
-                            );
-
-                            int batchSize = config instanceof LogisticRegressionTrainConfig
-                                ? ((LogisticRegressionTrainConfig) config).batchSize()
-                                : 0; // Not used
-                            var evaluation = ClassificationMetricComputer.estimateEvaluation(
-                                config,
-                                (int) Math.min(batchSize, dim.nodeCount()),
-                                trainSetSize,
-                                testSetSize,
-                                (int) Math.min(fudgedClassCount, dim.nodeCount()),
-                                fudgedFeatureCount,
-                                false
-                            );
-
-                            return MemoryEstimations.maxEstimation(List.of(training, evaluation));
-                        }
-                    ))
-            .collect(Collectors.toList());
-
-        return MemoryEstimations.builder("model selection")
-            .max(foldEstimations)
-            .build();
     }
 
     public static NodeClassificationTrain create(
