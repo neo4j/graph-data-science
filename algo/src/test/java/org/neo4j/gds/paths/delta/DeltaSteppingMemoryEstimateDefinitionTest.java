@@ -33,7 +33,7 @@ class DeltaSteppingMemoryEstimateDefinitionTest {
 
         var memoryEstimation = new DeltaSteppingMemoryEstimateDefinition();
 
-        MemoryEstimationAssert.assertThat(memoryEstimation.memoryEstimation(null))
+        MemoryEstimationAssert.assertThat(memoryEstimation.memoryEstimation())
             .memoryRange(dimensions,4)
             .hasMin(expectedMin)
             .hasMax(expectedMax);

@@ -33,7 +33,7 @@ class RandomWalkMemoryEstimateDefinitionTest {
         when(config.walkLength()).thenReturn(80);
         when(config.walkBufferSize()).thenReturn(1000);
 
-        var memoryEstimation = new RandomWalkMemoryEstimateDefinition().memoryEstimation(config);
+        var memoryEstimation = new RandomWalkMemoryEstimateDefinition(config).memoryEstimation();
 
 
         MemoryEstimationAssert.assertThat(memoryEstimation)

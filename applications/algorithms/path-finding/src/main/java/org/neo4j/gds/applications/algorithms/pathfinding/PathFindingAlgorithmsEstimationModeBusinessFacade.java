@@ -45,37 +45,37 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         ShortestPathAStarBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        return runEstimation(new AStarMemoryEstimateDefinition(), null, configuration,  graphNameOrConfiguration);
+        return runEstimation(new AStarMemoryEstimateDefinition(), configuration,  graphNameOrConfiguration);
     }
 
     public MemoryEstimateResult singlePairShortestPathDijkstraEstimate(
         DijkstraSourceTargetsBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        return runEstimation(new DijkstraMemoryEstimateDefinition(), configuration.toMemoryEstimateParameters(), configuration, graphNameOrConfiguration);
+        return runEstimation(new DijkstraMemoryEstimateDefinition(configuration.toMemoryEstimateParameters()), configuration, graphNameOrConfiguration);
     }
 
     public MemoryEstimateResult singlePairShortestPathYensEstimate(
         ShortestPathYensBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        return runEstimation(new YensMemoryEstimateDefinition(), configuration.k(), configuration, graphNameOrConfiguration);
+        return runEstimation(new YensMemoryEstimateDefinition(configuration.k()), configuration, graphNameOrConfiguration);
     }
 
     public MemoryEstimateResult singleSourceShortestPathDijkstraEstimate(
         DijkstraBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        return runEstimation(new DijkstraMemoryEstimateDefinition(), configuration.toMemoryEstimateParameters(), configuration, graphNameOrConfiguration);
+        return runEstimation(new DijkstraMemoryEstimateDefinition(configuration.toMemoryEstimateParameters()), configuration, graphNameOrConfiguration);
     }
 
     // TODO: remove this fella once finished with the estimate definitions
     private <CONFIGURATION extends AlgoBaseConfig> MemoryEstimateResult runEstimation(
-        AlgorithmMemoryEstimateDefinition<CONFIGURATION> memoryEstimateDefinition,
+        AlgorithmMemoryEstimateDefinition memoryEstimateDefinition,
         CONFIGURATION configuration,
         Object graphNameOrConfiguration
     ) {
-        var memoryEstimation = memoryEstimateDefinition.memoryEstimation(configuration);
+        var memoryEstimation = memoryEstimateDefinition.memoryEstimation();
 
         return algorithmEstimationTemplate.estimate(
             configuration,
@@ -84,18 +84,4 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         );
     }
 
-    private <CONFIGURATION extends AlgoBaseConfig, MEP> MemoryEstimateResult runEstimation(
-        AlgorithmMemoryEstimateDefinition<MEP> memoryEstimateDefinition,
-        MEP memoryEstimateParameters,
-        CONFIGURATION configuration,
-        Object graphNameOrConfiguration
-    ) {
-        var memoryEstimation = memoryEstimateDefinition.memoryEstimation(memoryEstimateParameters);
-
-        return algorithmEstimationTemplate.estimate(
-            configuration,
-            graphNameOrConfiguration,
-            memoryEstimation
-        );
-    }
 }

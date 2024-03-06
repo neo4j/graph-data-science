@@ -35,7 +35,7 @@ public abstract class DijkstraFactory<CONFIG extends DijkstraBaseConfig> extends
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return new DijkstraMemoryEstimateDefinition().memoryEstimation(configuration.toMemoryEstimateParameters());
+        return new DijkstraMemoryEstimateDefinition(configuration.toMemoryEstimateParameters()).memoryEstimation();
     }
 
     @Override

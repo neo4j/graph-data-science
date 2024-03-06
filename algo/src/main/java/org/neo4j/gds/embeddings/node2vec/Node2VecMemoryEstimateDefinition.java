@@ -27,9 +27,17 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryUsage;
 
-public final class Node2VecMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<Node2VecParameters> {
+public final class Node2VecMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+
+    private final Node2VecParameters parameters;
+
+    public Node2VecMemoryEstimateDefinition(Node2VecParameters parameters) {
+        this.parameters = parameters;
+    }
+
+
     @Override
-    public MemoryEstimation memoryEstimation(Node2VecParameters parameters) {
+    public MemoryEstimation memoryEstimation() {
         int walksPerNode = parameters.walkParameters().walksPerNode;
         int walkLength = parameters.walkParameters().walkLength;
         int embeddingDimension = parameters.trainParameters().embeddingDimension;

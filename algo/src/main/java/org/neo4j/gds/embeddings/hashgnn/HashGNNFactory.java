@@ -97,7 +97,7 @@ public class HashGNNFactory<CONFIG extends HashGNNConfig> extends GraphAlgorithm
     }
 
     public MemoryEstimation memoryEstimation(HashGNNParameters parameters) {
-        return new HashGNNMemoryEstimateDefinition().memoryEstimation(parameters);
+        return new HashGNNMemoryEstimateDefinition(parameters).memoryEstimation();
     }
 
     @Override

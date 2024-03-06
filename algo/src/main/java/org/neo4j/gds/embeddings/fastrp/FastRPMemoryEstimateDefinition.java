@@ -25,10 +25,16 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryUsage;
 
-public final class FastRPMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<FastRPParameters> {
-    
+public final class FastRPMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+
+    private final FastRPParameters parameters;
+
+    public FastRPMemoryEstimateDefinition(FastRPParameters parameters) {
+        this.parameters = parameters;
+    }
+
     @Override
-    public MemoryEstimation memoryEstimation(FastRPParameters parameters) {
+    public MemoryEstimation memoryEstimation() {
         var sizeOfEmbeddingArray = MemoryUsage.sizeOfFloatArray(parameters.embeddingDimension());
         var featurePropertySize = parameters.featureProperties().size();
         return MemoryEstimations

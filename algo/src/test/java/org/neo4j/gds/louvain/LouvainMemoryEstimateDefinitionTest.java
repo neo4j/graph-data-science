@@ -74,7 +74,7 @@ class LouvainMemoryEstimateDefinitionTest {
             includeIntermediateCommunities
         );
 
-        var memoryEstimation = new LouvainMemoryEstimateDefinition().memoryEstimation(estimationParameters);
+        var memoryEstimation = new LouvainMemoryEstimateDefinition(estimationParameters).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation).
             memoryRange(nodeCount,relCount, concurrency)
@@ -103,7 +103,7 @@ class LouvainMemoryEstimateDefinitionTest {
             false
         );
 
-        var memoryEstimation = new LouvainMemoryEstimateDefinition().memoryEstimation(estimationParameters);
+        var memoryEstimation = new LouvainMemoryEstimateDefinition(estimationParameters).memoryEstimation();
 
         MemoryTree memoryTree = memoryEstimation
             .estimate(dimensionsWithoutProperties, 1);

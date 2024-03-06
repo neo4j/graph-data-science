@@ -88,6 +88,6 @@ public class LeidenAlgorithmFactory<CONFIG extends LeidenBaseConfig> extends Gra
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
-        return new LeidenMemoryEstimateDefinition().memoryEstimation(config.toMemoryEstimationParameters());
+        return new LeidenMemoryEstimateDefinition(config.toMemoryEstimationParameters()).memoryEstimation();
     }
 }

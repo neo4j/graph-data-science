@@ -70,6 +70,6 @@ public class BfsAlgorithmFactory<CONFIG extends BfsBaseConfig> extends GraphAlgo
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return new BfsMemoryEstimateDefinition().memoryEstimation(configuration);
+        return new BfsMemoryEstimateDefinition().memoryEstimation();
     }
 }

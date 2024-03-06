@@ -26,23 +26,27 @@ import org.neo4j.gds.similarity.knn.KnnMemoryEstimateDefinition;
 import org.neo4j.gds.similarity.knn.KnnMemoryEstimationParametersBuilder;
 import org.neo4j.gds.similarity.knn.KnnSampler;
 
-public class ApproximateLinkPredictionEstimateDefinition implements AlgorithmMemoryEstimateDefinition<LinkPredictionPredictPipelineBaseConfig> {
+public class ApproximateLinkPredictionEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+
+    private final LinkPredictionPredictPipelineBaseConfig config;
+
+    public ApproximateLinkPredictionEstimateDefinition(LinkPredictionPredictPipelineBaseConfig config) {
+        this.config = config;
+    }
 
     @Override
-    public MemoryEstimation memoryEstimation(LinkPredictionPredictPipelineBaseConfig config) {
+    public MemoryEstimation memoryEstimation() {
 
         var knnMemoryHolder = new KnnMemoryEstimationParametersBuilder(
             config.sampleRate(),
             config.topK().orElse(10),
-            config.derivedInitialSampler().orElse(KnnSampler.SamplerType.UNIFORM));
+            config.derivedInitialSampler().orElse(KnnSampler.SamplerType.UNIFORM)
+        );
 
-        var knnEstimation = new KnnMemoryEstimateDefinition().memoryEstimation(knnMemoryHolder);
+        var knnEstimation = new KnnMemoryEstimateDefinition(knnMemoryHolder).memoryEstimation();
 
         return MemoryEstimations.builder(ApproximateLinkPrediction.class.getSimpleName())
             .add(knnEstimation)
             .build();
     }
 }
-
-
-

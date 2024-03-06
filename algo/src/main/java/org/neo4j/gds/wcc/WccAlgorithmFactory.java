@@ -85,7 +85,7 @@ public final class WccAlgorithmFactory<CONFIG extends WccBaseConfig> extends Gra
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
-        return new WccMemoryEstimateDefinition()
-            .memoryEstimation(config.isIncremental());
+        return new WccMemoryEstimateDefinition(config.isIncremental())
+            .memoryEstimation();
     }
 }

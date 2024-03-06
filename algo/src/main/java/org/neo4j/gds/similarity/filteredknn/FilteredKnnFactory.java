@@ -70,7 +70,7 @@ public class FilteredKnnFactory<CONFIG extends FilteredKnnBaseConfig> extends Gr
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return new FilteredKnnMemoryEstimateDefinition().memoryEstimation(configuration.tomMemoryEstimationParameters());
+        return new FilteredKnnMemoryEstimateDefinition(configuration.tomMemoryEstimationParameters()).memoryEstimation();
     }
 
     @Override

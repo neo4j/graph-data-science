@@ -59,6 +59,6 @@ public class DeltaSteppingFactory<T extends AllShortestPathsDeltaBaseConfig> ext
 
     @Override
     public MemoryEstimation memoryEstimation(T configuration) {
-        return new DeltaSteppingMemoryEstimateDefinition().memoryEstimation(null);
+        return new DeltaSteppingMemoryEstimateDefinition().memoryEstimation();
     }
 }

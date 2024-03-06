@@ -46,8 +46,11 @@ class DijkstraMemoryEstimateDefinitionTest {
     @MethodSource("expectedMemoryEstimation")
     void shouldComputeMemoryEstimation(int nodeCount, boolean trackRelationships, long expectedBytes) {
 
-        var actualMemoryEstimation = new DijkstraMemoryEstimateDefinition()
-            .memoryEstimation(new DijkstraMemoryEstimateParameters(trackRelationships, false));
+        var actualMemoryEstimation = new DijkstraMemoryEstimateDefinition(new DijkstraMemoryEstimateParameters(
+            trackRelationships,
+            false
+        ))
+            .memoryEstimation();
 
         MemoryEstimationAssert.assertThat(actualMemoryEstimation)
             .memoryRange(nodeCount, 1)
@@ -56,8 +59,11 @@ class DijkstraMemoryEstimateDefinitionTest {
 
     @Test
     void shouldWorkWithBitset() {
-        var actualMemoryEstimation = new DijkstraMemoryEstimateDefinition()
-            .memoryEstimation(new DijkstraMemoryEstimateParameters(false, true));
+        var actualMemoryEstimation = new DijkstraMemoryEstimateDefinition(new DijkstraMemoryEstimateParameters(
+            false,
+            true
+        ))
+            .memoryEstimation();
 
         MemoryEstimationAssert.assertThat(actualMemoryEstimation)
             .memoryRange(1_000, 1)

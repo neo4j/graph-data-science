@@ -25,10 +25,16 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.mem.MemoryUsage;
 
-public class RandomWalkMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<RandomWalkBaseConfig> {
+public class RandomWalkMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+
+    private final RandomWalkBaseConfig configuration;
+
+    public RandomWalkMemoryEstimateDefinition(RandomWalkBaseConfig configuration) {
+        this.configuration = configuration;
+    }
 
     @Override
-    public MemoryEstimation memoryEstimation(RandomWalkBaseConfig configuration) {
+    public MemoryEstimation memoryEstimation() {
         var memoryUsagePerWalk = MemoryUsage.sizeOfLongArray(configuration.walkLength());
         var sizeOfBuffer = MemoryUsage.sizeOfObjectArray(configuration.walkBufferSize());
 
@@ -38,5 +44,5 @@ public class RandomWalkMemoryEstimateDefinition implements AlgorithmMemoryEstima
             .fixed("random walk buffer", MemoryRange.of(sizeOfBuffer, maxMemoryUsage))
             .build();
     }
-    
+
 }

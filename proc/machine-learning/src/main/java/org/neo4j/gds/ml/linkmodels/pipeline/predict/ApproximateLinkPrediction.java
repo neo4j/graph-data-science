@@ -64,7 +64,7 @@ public class ApproximateLinkPrediction extends LinkPrediction {
     }
 
     public static MemoryEstimation estimate(LinkPredictionPredictPipelineBaseConfig config) {
-        return new ApproximateLinkPredictionEstimateDefinition().memoryEstimation(config);
+        return new ApproximateLinkPredictionEstimateDefinition(config).memoryEstimation();
     }
 
     @Override

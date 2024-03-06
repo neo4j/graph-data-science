@@ -39,7 +39,7 @@ class KmeansMemoryEstimateDefinitionTest {
 
         var graphDimensions = GraphDimensions.of(42, 1337);
 
-        var memoryEstimation = new KmeansMemoryEstimateDefinition().memoryEstimation(params);
+        var memoryEstimation = new KmeansMemoryEstimateDefinition(params).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation).
             memoryRange(graphDimensions, 4)
@@ -58,7 +58,7 @@ class KmeansMemoryEstimateDefinitionTest {
         when(params.k()).thenReturn(10);
         when(params.seedCentroids()).thenReturn(centroidsSeeds);
         when(params.isSeeded()).thenReturn(true);
-        var memoryEstimation = new KmeansMemoryEstimateDefinition().memoryEstimation(params);
+        var memoryEstimation = new KmeansMemoryEstimateDefinition(params).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation).
             memoryRange(graphDimensions, 4)
@@ -74,7 +74,7 @@ class KmeansMemoryEstimateDefinitionTest {
         when(parameters.k()).thenReturn(10);
         when(parameters.computeSilhouette()).thenReturn(true);
 
-        var memoryEstimation = new KmeansMemoryEstimateDefinition().memoryEstimation(parameters);
+        var memoryEstimation = new KmeansMemoryEstimateDefinition(parameters).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation).
             memoryRange(graphDimensions, 4)

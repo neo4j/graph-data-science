@@ -33,9 +33,16 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfIntArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfOpenHashContainer;
 
-public class KnnMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<KnnMemoryEstimationParametersBuilder> {
+public class KnnMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+
+    private final KnnMemoryEstimationParametersBuilder parametersSansNodeCount;
+
+    public KnnMemoryEstimateDefinition(KnnMemoryEstimationParametersBuilder parametersSansNodeCount) {
+        this.parametersSansNodeCount = parametersSansNodeCount;
+    }
+
     @Override
-    public MemoryEstimation memoryEstimation(KnnMemoryEstimationParametersBuilder parametersSansNodeCount) {
+    public MemoryEstimation memoryEstimation() {
         return MemoryEstimations.setup(
             "Knn",
             (dim, concurrency) -> {

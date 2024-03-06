@@ -33,7 +33,7 @@ class BetweennessCentralityMemoryEstimateDefinitionTest {
         "42, 219_211_528"
     })
     void testMemoryEstimation(int concurrency, long expectedBytes) {
-        var memoryEstimation = new BetweennessCentralityMemoryEstimateDefinition().memoryEstimation(false);
+        var memoryEstimation = new BetweennessCentralityMemoryEstimateDefinition(false).memoryEstimation();
         assertThat(memoryEstimation)
             .memoryRange(100_000L, concurrency)
             .hasSameMinAndMaxEqualTo(expectedBytes);
@@ -46,7 +46,7 @@ class BetweennessCentralityMemoryEstimateDefinitionTest {
         "42, 270_141_736"
     })
     void testMemoryEstimationWithRelationshipWeight(int concurrency, long expectedBytes) {
-        var memoryEstimation = new BetweennessCentralityMemoryEstimateDefinition().memoryEstimation(true);
+        var memoryEstimation = new BetweennessCentralityMemoryEstimateDefinition(true).memoryEstimation();
         assertThat(memoryEstimation)
             .memoryRange(100_000L, concurrency)
             .hasSameMinAndMaxEqualTo(expectedBytes);

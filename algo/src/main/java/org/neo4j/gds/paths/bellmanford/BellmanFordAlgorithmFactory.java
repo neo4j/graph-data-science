@@ -60,6 +60,6 @@ public class BellmanFordAlgorithmFactory<CONFIG extends BellmanFordBaseConfig> e
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return new BellmanFordMemoryEstimateDefinition().memoryEstimation(configuration.trackNegativeCycles());
+        return new BellmanFordMemoryEstimateDefinition(configuration.trackNegativeCycles()).memoryEstimation();
     }
 }

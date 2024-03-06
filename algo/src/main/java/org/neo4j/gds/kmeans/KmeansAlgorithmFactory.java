@@ -95,6 +95,6 @@ public final class KmeansAlgorithmFactory<CONFIG extends KmeansBaseConfig> exten
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return new KmeansMemoryEstimateDefinition().memoryEstimation(configuration.toParameters());
+        return new KmeansMemoryEstimateDefinition(configuration.toParameters()).memoryEstimation();
     }
 }

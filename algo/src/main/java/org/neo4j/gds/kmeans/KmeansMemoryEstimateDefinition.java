@@ -26,10 +26,16 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryUsage;
 
-public class KmeansMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<KmeansParameters> {
+public class KmeansMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+
+    private final KmeansParameters parameters;
+
+    public KmeansMemoryEstimateDefinition(KmeansParameters parameters) {
+        this.parameters = parameters;
+    }
 
     @Override
-    public MemoryEstimation memoryEstimation(KmeansParameters parameters) {
+    public MemoryEstimation memoryEstimation() {
         var fakeLength = 128;
         var builder = MemoryEstimations.builder(Kmeans.class)
             .perNode("bestCommunities", HugeIntArray::memoryEstimation)

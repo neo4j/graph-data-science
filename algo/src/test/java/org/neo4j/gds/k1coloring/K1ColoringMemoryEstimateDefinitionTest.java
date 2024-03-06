@@ -34,7 +34,7 @@ class K1ColoringMemoryEstimateDefinitionTest {
     })
     void shouldComputeMemoryEstimation(int concurrency, long expectedMemory) {
 
-        var memoryEstimation = new K1ColoringMemoryEstimateDefinition().memoryEstimation(null);
+        var memoryEstimation = new K1ColoringMemoryEstimateDefinition().memoryEstimation();
 
         assertThat(memoryEstimation)
             .memoryRange(100_000L, concurrency)

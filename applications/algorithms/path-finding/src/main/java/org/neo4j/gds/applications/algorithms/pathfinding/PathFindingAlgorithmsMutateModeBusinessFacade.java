@@ -63,7 +63,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             A_STAR,
-            () -> new AStarMemoryEstimateDefinition().memoryEstimation(null),
+            () -> new AStarMemoryEstimateDefinition().memoryEstimation(),
             graph -> pathFindingAlgorithms.singlePairShortestPathAStar(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
@@ -81,7 +81,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             DIJKSTRA,
-            () -> new DijkstraMemoryEstimateDefinition().memoryEstimation(configuration.toMemoryEstimateParameters()),
+            () -> new DijkstraMemoryEstimateDefinition(configuration.toMemoryEstimateParameters()).memoryEstimation(),
             graph -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
@@ -99,7 +99,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             YENS,
-            () -> new YensMemoryEstimateDefinition().memoryEstimation(configuration.k()),
+            () -> new YensMemoryEstimateDefinition(configuration.k()).memoryEstimation(),
             graph -> pathFindingAlgorithms.singlePairShortestPathYens(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
@@ -115,7 +115,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             DIJKSTRA,
-            () -> new DijkstraMemoryEstimateDefinition().memoryEstimation(configuration.toMemoryEstimateParameters()),
+            () -> new DijkstraMemoryEstimateDefinition(configuration.toMemoryEstimateParameters()).memoryEstimation(),
             graph -> pathFindingAlgorithms.singleSourceShortestPathDijkstra(graph, configuration),
             Optional.of(new ShortestPathMutateStep(configuration)),
             resultBuilder

@@ -70,6 +70,6 @@ public final class ScalePropertiesFactory<CONFIG extends ScalePropertiesBaseConf
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return new ScalePropertiesMemoryEstimateDefinition().memoryEstimation(configuration);
+        return new ScalePropertiesMemoryEstimateDefinition(configuration).memoryEstimation();
     }
 }

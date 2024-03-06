@@ -24,10 +24,10 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryUsage;
 
-public class DfsMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<DfsBaseConfig> {
+public class DfsMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
 
     @Override
-    public MemoryEstimation memoryEstimation(DfsBaseConfig configuration) {
+    public MemoryEstimation memoryEstimation() {
 
         MemoryEstimations.Builder builder = MemoryEstimations.builder(DFS.class);
         builder.perNode("visited ", MemoryUsage::sizeOfBitset);

@@ -37,7 +37,7 @@ class ApproxMaxKCutMemoryEstimateDefinitionTest {
     void memoryEstimationWithVNS(long nodeCount, byte k, long expectedMemory) {
         var estimationParameters = new ApproxMaxKCutMemoryEstimationParameters(k, 4);
 
-        var memoryEstimate = new ApproxMaxKCutMemoryEstimateDefinition().memoryEstimation(estimationParameters);
+        var memoryEstimate = new ApproxMaxKCutMemoryEstimateDefinition(estimationParameters).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimate)
             .memoryRange(nodeCount)
@@ -54,7 +54,7 @@ class ApproxMaxKCutMemoryEstimateDefinitionTest {
     void memoryEstimationWithoutVNS(long nodeCount, byte k, long expectedMemory) {
         var estimationParameters = new ApproxMaxKCutMemoryEstimationParameters(k, 0);
 
-        var memoryEstimate = new ApproxMaxKCutMemoryEstimateDefinition().memoryEstimation(estimationParameters);
+        var memoryEstimate = new ApproxMaxKCutMemoryEstimateDefinition(estimationParameters).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimate)
             .memoryRange(nodeCount)

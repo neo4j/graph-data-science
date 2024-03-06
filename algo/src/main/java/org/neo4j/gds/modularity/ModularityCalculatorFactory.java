@@ -40,7 +40,7 @@ public class ModularityCalculatorFactory<CONFIG extends ModularityBaseConfig> ex
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
-        return new ModularityCalculatorMemoryEstimateDefinition().memoryEstimation(null);
+        return new ModularityCalculatorMemoryEstimateDefinition().memoryEstimation();
     }
 
     @Override

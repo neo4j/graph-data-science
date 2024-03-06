@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.modularity;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
@@ -28,10 +27,10 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
 import org.neo4j.gds.mem.MemoryUsage;
 
-public class ModularityCalculatorMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<Void> {
+public class ModularityCalculatorMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
 
     @Override
-    public MemoryEstimation memoryEstimation(@Nullable Void unusedEvilParameter) {
+    public MemoryEstimation memoryEstimation() {
 
         //only methods inside, but want the class overhead
         var perTask = MemoryEstimations.builder(RelationshipCountCollector.class).build();

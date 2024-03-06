@@ -61,7 +61,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             graphName,
             configuration,
             A_STAR,
-            () -> new AStarMemoryEstimateDefinition().memoryEstimation(null),
+            () -> new AStarMemoryEstimateDefinition().memoryEstimation(),
             graph -> pathFindingAlgorithms.singlePairShortestPathAStar(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -77,7 +77,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             graphName,
             configuration,
             DIJKSTRA,
-            () -> new DijkstraMemoryEstimateDefinition().memoryEstimation(configuration.toMemoryEstimateParameters()),
+            () -> new DijkstraMemoryEstimateDefinition(configuration.toMemoryEstimateParameters()).memoryEstimation(),
             graph -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -93,7 +93,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             graphName,
             configuration,
             YENS,
-            () -> new YensMemoryEstimateDefinition().memoryEstimation(configuration.k()),
+            () -> new YensMemoryEstimateDefinition(configuration.k()).memoryEstimation(),
             graph -> pathFindingAlgorithms.singlePairShortestPathYens(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -109,7 +109,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             graphName,
             configuration,
             DIJKSTRA,
-            () -> new DijkstraMemoryEstimateDefinition().memoryEstimation(configuration.toMemoryEstimateParameters()),
+            () -> new DijkstraMemoryEstimateDefinition(configuration.toMemoryEstimateParameters()).memoryEstimation(),
             graph -> pathFindingAlgorithms.singleSourceShortestPathDijkstra(graph, configuration),
             Optional.empty(),
             resultBuilder

@@ -25,13 +25,20 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.similarity.knn.KnnMemoryEstimateDefinition;
 import org.neo4j.gds.similarity.knn.KnnMemoryEstimationParametersBuilder;
 
-public class FilteredKnnMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<KnnMemoryEstimationParametersBuilder> {
+public class FilteredKnnMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+
+    private final KnnMemoryEstimationParametersBuilder parametersSansNodeCount;
+
+    public FilteredKnnMemoryEstimateDefinition(KnnMemoryEstimationParametersBuilder parametersSansNodeCount) {
+        this.parametersSansNodeCount = parametersSansNodeCount;
+    }
+
     @Override
-    public MemoryEstimation memoryEstimation(KnnMemoryEstimationParametersBuilder parametersSansNodeCount) {
+    public MemoryEstimation memoryEstimation() {
 
         return MemoryEstimations
             .builder(FilteredKnn.class)
-            .add(new KnnMemoryEstimateDefinition().memoryEstimation(parametersSansNodeCount)).build();
+            .add(new KnnMemoryEstimateDefinition(parametersSansNodeCount).memoryEstimation()).build();
 
     }
 }

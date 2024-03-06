@@ -41,7 +41,7 @@ class AStarMemoryEstimateDefinitionTest {
     void shouldComputeMemoryEstimation(int nodeCount, long expectedBytes) {
 
         var memoryEstimation=new AStarMemoryEstimateDefinition();
-        MemoryEstimationAssert.assertThat(memoryEstimation.memoryEstimation(null))
+        MemoryEstimationAssert.assertThat(memoryEstimation.memoryEstimation())
             .memoryRange(nodeCount,1)
             .hasSameMinAndMaxEqualTo(expectedBytes);
     }

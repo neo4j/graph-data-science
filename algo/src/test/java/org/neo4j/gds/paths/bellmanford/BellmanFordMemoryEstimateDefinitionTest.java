@@ -32,7 +32,7 @@ class BellmanFordMemoryEstimateDefinitionTest {
     @MethodSource("memoryEstimationSetup")
     void memoryEstimation(String description, boolean trackNegativeCycles, long expectedBytes) {
 
-        var memoryEstimation = new BellmanFordMemoryEstimateDefinition().memoryEstimation(trackNegativeCycles);
+        var memoryEstimation = new BellmanFordMemoryEstimateDefinition(trackNegativeCycles).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(10, 23, 4)

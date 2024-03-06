@@ -53,7 +53,7 @@ class BFSMemoryEstimateDefinitionTest {
 
         var memoryEstimation = new BfsMemoryEstimateDefinition();
 
-        MemoryEstimationAssert.assertThat(memoryEstimation.memoryEstimation(config))
+        MemoryEstimationAssert.assertThat(memoryEstimation.memoryEstimation())
             .memoryRange(dimensions, concurrency)
             .hasMin(expectedMin)
             .hasMax(expectedMax);

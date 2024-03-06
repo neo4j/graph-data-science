@@ -44,7 +44,7 @@ class CELFMemoryEstimateDefinitionTest {
         when(parameters.seedSetSize()).thenReturn(seedSetSize);
         when(parameters.concurrency()).thenReturn(concurrency);
 
-        var memoryEstimation = new CELFMemoryEstimateDefinition().memoryEstimation(parameters);
+        var memoryEstimation = new CELFMemoryEstimateDefinition(parameters).memoryEstimation();
 
         assertThat(memoryEstimation)
             .memoryRange(42, 1337, concurrency)

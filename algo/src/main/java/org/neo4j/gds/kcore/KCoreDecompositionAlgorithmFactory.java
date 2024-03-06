@@ -41,7 +41,7 @@ public class KCoreDecompositionAlgorithmFactory<CONFIG extends KCoreDecompositio
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
 
-        return new KCoreDecompositionMemoryEstimateDefinition().memoryEstimation(null);
+        return new KCoreDecompositionMemoryEstimateDefinition().memoryEstimation();
     }
 
     @Override

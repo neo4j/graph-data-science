@@ -29,10 +29,10 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.mem.MemoryUsage;
 
-public class BfsMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<BfsBaseConfig> {
+public class BfsMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
 
     @Override
-    public MemoryEstimation memoryEstimation(BfsBaseConfig configuration) {
+    public MemoryEstimation memoryEstimation() {
         MemoryEstimations.Builder builder = MemoryEstimations.builder(BFS.class);
 
         builder.perNode("visited ", HugeAtomicBitSet::memoryEstimation) //global variables

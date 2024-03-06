@@ -69,6 +69,6 @@ public class RandomWalkAlgorithmFactory<CONFIG extends RandomWalkBaseConfig> ext
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
-        return new RandomWalkMemoryEstimateDefinition().memoryEstimation(config);
+        return new RandomWalkMemoryEstimateDefinition(config).memoryEstimation();
     }
 }

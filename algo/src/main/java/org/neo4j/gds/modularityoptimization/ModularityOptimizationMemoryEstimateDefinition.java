@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.modularityoptimization;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -29,10 +28,10 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.mem.MemoryUsage;
 
-public class ModularityOptimizationMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<Void> {
+public class ModularityOptimizationMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
 
     @Override
-    public MemoryEstimation memoryEstimation(@Nullable Void unusedEvilParameter) {
+    public MemoryEstimation memoryEstimation() {
         return MemoryEstimations.builder(ModularityOptimization.class)
             .perNode("currentCommunities", HugeLongArray::memoryEstimation)
             .perNode("nextCommunities", HugeLongArray::memoryEstimation)

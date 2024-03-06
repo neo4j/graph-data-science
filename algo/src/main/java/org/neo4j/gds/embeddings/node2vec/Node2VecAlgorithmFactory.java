@@ -61,7 +61,7 @@ public class Node2VecAlgorithmFactory<CONFIG extends Node2VecBaseConfig> extends
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return new Node2VecMemoryEstimateDefinition().memoryEstimation(configuration.node2VecParameters());
+        return new Node2VecMemoryEstimateDefinition(configuration.node2VecParameters()).memoryEstimation();
     }
 
     @Override

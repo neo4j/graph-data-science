@@ -31,7 +31,11 @@ class LeidenMemoryEstimateDefinitionTest {
         "4, 20789008,34314976"
     })
     void shouldEstimateMemory(int concurrency,long expectedMin, long expectedMax) {
-        var estimate = new LeidenMemoryEstimateDefinition().memoryEstimation(new LeidenMemoryEstimationParameters(null, false, 3));
+        var estimate = new LeidenMemoryEstimateDefinition(new LeidenMemoryEstimationParameters(
+            null,
+            false,
+            3
+        )).memoryEstimation();
         
         MemoryEstimationAssert.assertThat(estimate)
             .memoryRange(10_1000,100_000,concurrency)

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.paths.delta;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
@@ -28,10 +27,10 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 
-public class DeltaSteppingMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<Void> {
+public class DeltaSteppingMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
 
     @Override
-    public MemoryEstimation memoryEstimation(@Nullable Void unusedEvilParameter) {
+    public MemoryEstimation memoryEstimation() {
         return MemoryEstimations.builder(DeltaStepping.class)
             .perNode("distance array", HugeAtomicDoubleArray::memoryEstimation)
             .rangePerGraphDimension("shared bin", (dimensions, concurrency) -> {

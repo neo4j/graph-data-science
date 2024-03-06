@@ -26,7 +26,7 @@ class SccMemoryEstimateDefinitionTest {
 
     @Test
     void shouldEstimateMemoryAccurately() {
-        var memoryEstimation = new SccMemoryEstimateDefinition().memoryEstimation(null);
+        var memoryEstimation = new SccMemoryEstimateDefinition().memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(100, 6000, 1)

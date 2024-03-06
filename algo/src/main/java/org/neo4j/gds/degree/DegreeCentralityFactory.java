@@ -56,7 +56,7 @@ public class DegreeCentralityFactory<CONFIG extends DegreeCentralityConfig> exte
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return new DegreeCentralityAlgorithmEstimateDefinition().memoryEstimation(configuration.hasRelationshipWeightProperty());
+        return new DegreeCentralityAlgorithmEstimateDefinition(configuration.hasRelationshipWeightProperty()).memoryEstimation();
     }
 
     @Override

@@ -31,14 +31,20 @@ import static org.neo4j.gds.core.utils.mem.MemoryEstimations.RESIDENT_MEMORY;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.TEMPORARY_MEMORY;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 
-public class GraphSageTrainEstimateDefinition implements AlgorithmMemoryEstimateDefinition<GraphSageTrainMemoryEstimateParameters> {
+public class GraphSageTrainEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+
+    private final GraphSageTrainMemoryEstimateParameters parameters;
+
+    GraphSageTrainEstimateDefinition(GraphSageTrainMemoryEstimateParameters parameters) {
+        this.parameters = parameters;
+    }
 
     @Override
-    public MemoryEstimation memoryEstimation(GraphSageTrainMemoryEstimateParameters configuration) {
+    public MemoryEstimation memoryEstimation() {
         return MemoryEstimations.setup(
             "",
             graphDimensions -> estimate(
-                configuration,
+                parameters,
                 graphDimensions.nodeCount(),
                 graphDimensions.estimationNodeLabelCount()
             )
@@ -94,7 +100,10 @@ public class GraphSageTrainEstimateDefinition implements AlgorithmMemoryEstimate
 
         return estimationsBuilder
             .rangePerNode("initialFeatures", nc -> MemoryRange.of(
-                HugeObjectArray.memoryEstimation(nc, sizeOfDoubleArray(isMultiLabel ? 1 : config.estimationFeatureDimension())),
+                HugeObjectArray.memoryEstimation(
+                    nc,
+                    sizeOfDoubleArray(isMultiLabel ? 1 : config.estimationFeatureDimension())
+                ),
                 HugeObjectArray.memoryEstimation(nc, sizeOfDoubleArray(config.estimationFeatureDimension()))
             ))
             .startField("trainOnEpoch")

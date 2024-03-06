@@ -28,12 +28,18 @@ import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 import org.neo4j.gds.mem.MemoryUsage;
 
-public final class CELFMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<CELFParameters> {
+public final class CELFMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
 
     public static final int DEFAULT_BATCH_SIZE = 10;
 
+    private final CELFParameters celfParameters;
+
+    public CELFMemoryEstimateDefinition(CELFParameters celfParameters) {
+        this.celfParameters = celfParameters;
+    }
+
     @Override
-    public MemoryEstimation memoryEstimation(CELFParameters celfParameters) {
+    public MemoryEstimation memoryEstimation() {
         MemoryEstimations.Builder builder = MemoryEstimations.builder(CELF.class);
 
         //CELF class

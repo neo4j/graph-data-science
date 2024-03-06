@@ -73,6 +73,6 @@ public class DfsAlgorithmFactory<CONFIG extends DfsBaseConfig> extends GraphAlgo
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return new DfsMemoryEstimateDefinition().memoryEstimation(configuration);
+        return new DfsMemoryEstimateDefinition().memoryEstimation();
     }
 }

@@ -25,21 +25,27 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 
-public class BellmanFordMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<Boolean> {
+public class BellmanFordMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+
+    private final boolean trackNegativeCycles;
+
+    public BellmanFordMemoryEstimateDefinition(boolean trackNegativeCycles) {
+        this.trackNegativeCycles = trackNegativeCycles;
+    }
 
     @Override
-    public MemoryEstimation memoryEstimation(Boolean trackNegativeCycles) {
+    public MemoryEstimation memoryEstimation() {
         var builder = MemoryEstimations.builder(BellmanFord.class)
             .perNode("frontier", HugeLongArray::memoryEstimation)
             .perNode("validBitset", HugeAtomicBitSet::memoryEstimation)
             .add(DistanceTracker.memoryEstimation())
             .perThread("BellmanFordTask", BellmanFordTask.memoryEstimation());
 
-        if(trackNegativeCycles) {
+        if (trackNegativeCycles) {
             builder.perNode("negativeCyclesVertices", HugeLongArray::memoryEstimation);
         }
 
         return builder.build();
-        }
+    }
 
 }

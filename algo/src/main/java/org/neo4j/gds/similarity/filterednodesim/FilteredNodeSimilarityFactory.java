@@ -124,7 +124,7 @@ public class FilteredNodeSimilarityFactory<CONFIG extends FilteredNodeSimilarity
             builder.perNode("upper bound per component", HugeAtomicLongArray::memoryEstimation);
 
             if (actuallyRunWCC) {
-                builder.add("wcc", new WccMemoryEstimateDefinition().memoryEstimation(false));
+                builder.add("wcc", new WccMemoryEstimateDefinition(false).memoryEstimation());
             } else {
                 builder.perNode("component mapping", HugeLongArray::memoryEstimation);
             }

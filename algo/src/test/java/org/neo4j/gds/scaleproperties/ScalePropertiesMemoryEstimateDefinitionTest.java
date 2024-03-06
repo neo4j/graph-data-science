@@ -44,9 +44,10 @@ class ScalePropertiesMemoryEstimateDefinitionTest {
         var config= mock(ScalePropertiesBaseConfig.class);
         when(config.nodeProperties()).thenReturn(List.of("bAndC", "longArrayB"));
 
-        var memoryEstimation = new ScalePropertiesMemoryEstimateDefinition();
+        var memoryEstimation = new ScalePropertiesMemoryEstimateDefinition(config)
+            .memoryEstimation();
 
-        MemoryEstimationAssert.assertThat(memoryEstimation.memoryEstimation(config))
+        MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(gdlGraph.dimensions(),1)
             .hasSameMinAndMaxEqualTo(288);
     }
@@ -67,9 +68,10 @@ class ScalePropertiesMemoryEstimateDefinitionTest {
         var config= mock(ScalePropertiesBaseConfig.class);
         when(config.nodeProperties()).thenReturn(List.of("DUMMY"));
 
-        var memoryEstimation = new ScalePropertiesMemoryEstimateDefinition();
+        var memoryEstimation = new ScalePropertiesMemoryEstimateDefinition(config)
+            .memoryEstimation();
 
-        MemoryEstimationAssert.assertThat(memoryEstimation.memoryEstimation(config))
+        MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(nodeCount,1)
             .hasSameMinAndMaxEqualTo(expectedMemory);
     }

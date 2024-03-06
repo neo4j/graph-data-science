@@ -50,7 +50,7 @@ class InverseRelationshipsMemoryEstimateDefinitionTest {
         var graphDimensions = GraphDimensions.of(100_000, 100_000);
 
         runner.run(() -> {
-            var memoryEstimation = new InverseRelationshipsMemoryEstimateDefinition().memoryEstimation(List.of("T1"));
+            var memoryEstimation = new InverseRelationshipsMemoryEstimateDefinition(List.of("T1")).memoryEstimation();
             MemoryEstimationAssert.assertThat(memoryEstimation)
                 .memoryTree(graphDimensions, 4)
                 .memoryRange()
@@ -68,7 +68,7 @@ class InverseRelationshipsMemoryEstimateDefinitionTest {
             .relCountUpperBound(100_000)
             .build();
 
-        var memoryEstimation = new InverseRelationshipsMemoryEstimateDefinition().memoryEstimation(List.of("T1", "T2"));
+        var memoryEstimation = new InverseRelationshipsMemoryEstimateDefinition(List.of("T1", "T2")).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryTree(graphDimensions, 4)
@@ -90,7 +90,7 @@ class InverseRelationshipsMemoryEstimateDefinitionTest {
             .putRelationshipCount(RelationshipType.of("T2"), 90_000)
             .build();
 
-        var memoryEstimation = new InverseRelationshipsMemoryEstimateDefinition().memoryEstimation(List.of("T2"));
+        var memoryEstimation = new InverseRelationshipsMemoryEstimateDefinition(List.of("T2")).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryTree(graphDimensions, 4)
@@ -113,7 +113,7 @@ class InverseRelationshipsMemoryEstimateDefinitionTest {
             .relCountUpperBound(100_000)
             .build();
 
-        var memoryEstimation = new InverseRelationshipsMemoryEstimateDefinition().memoryEstimation(List.of("*"));
+        var memoryEstimation = new InverseRelationshipsMemoryEstimateDefinition(List.of("*")).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryTree(graphDimensions, 4)

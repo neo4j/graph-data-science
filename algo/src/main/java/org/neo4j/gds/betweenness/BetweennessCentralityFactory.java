@@ -69,7 +69,7 @@ public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBa
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return new BetweennessCentralityMemoryEstimateDefinition().memoryEstimation(configuration.hasRelationshipWeightProperty());
+        return new BetweennessCentralityMemoryEstimateDefinition(configuration.hasRelationshipWeightProperty()).memoryEstimation();
     }
 
     public Task progressTask(Graph graph, Optional<Long> samplingSize) {

@@ -31,7 +31,7 @@ class ModularityCalculatorEstimateDefinitionTest {
     @ParameterizedTest(name = "Concurrency: {0}")
     @MethodSource("memoryEstimationSetup")
     void memoryEstimation(int concurrency,long expected) {
-        var memoryEstimation = new ModularityCalculatorMemoryEstimateDefinition().memoryEstimation(null);
+        var memoryEstimation = new ModularityCalculatorMemoryEstimateDefinition().memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(10, 23, concurrency)

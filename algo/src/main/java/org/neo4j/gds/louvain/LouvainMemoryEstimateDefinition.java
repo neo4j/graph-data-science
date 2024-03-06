@@ -37,15 +37,21 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationMemoryEstimateDefinition;
 
-public class LouvainMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<LouvainMemoryEstimationParameters> {
+public class LouvainMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+
+    private final LouvainMemoryEstimationParameters parameters;
+
+    public LouvainMemoryEstimateDefinition(LouvainMemoryEstimationParameters parameters) {
+        this.parameters = parameters;
+    }
 
     @Override
-    public MemoryEstimation memoryEstimation(LouvainMemoryEstimationParameters parameters) {
+    public MemoryEstimation memoryEstimation() {
         int maxLevels = parameters.maxLevels();
         return MemoryEstimations.builder(Louvain.class)
             .add(
                 "modularityOptimization()",
-                new ModularityOptimizationMemoryEstimateDefinition().memoryEstimation(null)
+                new ModularityOptimizationMemoryEstimateDefinition().memoryEstimation()
             )
             .rangePerGraphDimension("subGraph", (graphDimensions, concurrency) -> {
                 ImmutableGraphDimensions.Builder dimensionsBuilder = ImmutableGraphDimensions

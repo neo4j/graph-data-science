@@ -29,10 +29,16 @@ import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.function.LongUnaryOperator;
 
-public class HashGNNMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<HashGNNParameters> {
-    
+public class HashGNNMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+
+    private final HashGNNParameters parameters;
+
+    public HashGNNMemoryEstimateDefinition(HashGNNParameters parameters) {
+        this.parameters = parameters;
+    }
+
     @Override
-    public MemoryEstimation memoryEstimation(HashGNNParameters parameters) {
+    public MemoryEstimation memoryEstimation() {
         var embeddingDensity = parameters.embeddingDensity();
         var heterogeneous = parameters.heterogeneous();
         var outputDimension = parameters.outputDimension();

@@ -63,7 +63,7 @@ public final class GraphSageTrainAlgorithmFactory extends GraphAlgorithmFactory<
 
     @Override
     public MemoryEstimation memoryEstimation(GraphSageTrainConfig configuration) {
-        return new GraphSageTrainEstimateDefinition().memoryEstimation(configuration.toMemoryEstimateParameters());
+        return new GraphSageTrainEstimateDefinition(configuration.toMemoryEstimateParameters()).memoryEstimation();
     }
 
     @Override

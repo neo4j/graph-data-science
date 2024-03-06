@@ -55,7 +55,7 @@ class ToUndirectedMemoryEstimateDefinitionTest {
         GraphDimensions graphDimensions = GraphDimensions.of(100_000, 100_000);
 
         runner.run(() -> {
-            var memoryEstimation = new ToUndirectedMemoryEstimateDefinition().memoryEstimation(config);
+            var memoryEstimation = new ToUndirectedMemoryEstimateDefinition(config).memoryEstimation();
             MemoryEstimationAssert.assertThat(memoryEstimation)
                 .memoryRange(graphDimensions, 4)
                 .hasMin(expected.min)

@@ -61,7 +61,7 @@ public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoe
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return new LocalClusteringCoefficientMemoryEstimateDefinition().memoryEstimation(configuration);
+        return new LocalClusteringCoefficientMemoryEstimateDefinition(configuration).memoryEstimation();
     }
 
 

@@ -28,10 +28,17 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 
 import java.util.Locale;
 
-public class InverseRelationshipsMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<Iterable<String>> {
+public class InverseRelationshipsMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+
+    private final Iterable<String> relationshipTypes;
+
+    public InverseRelationshipsMemoryEstimateDefinition(Iterable<String> relationshipTypes) {
+        this.relationshipTypes = relationshipTypes;
+    }
+
 
     @Override
-    public MemoryEstimation memoryEstimation(Iterable<String> relationshipTypes) {
+    public MemoryEstimation memoryEstimation() {
 
         var builder = MemoryEstimations.builder(InverseRelationships.class);
 

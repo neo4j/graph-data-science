@@ -57,7 +57,7 @@ class KnnMemoryEstimateDefinitionTest {
 
         var parameters = new KnnMemoryEstimationParametersBuilder(0.5, 10, initialSampler);
 
-        var estimation = new KnnMemoryEstimateDefinition().memoryEstimation(parameters);
+        var estimation = new KnnMemoryEstimateDefinition(parameters).memoryEstimation();
         GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
         MemoryTree estimate = estimation.estimate(dimensions, 1);
         MemoryRange actual = estimate.memoryUsage();
@@ -85,7 +85,7 @@ class KnnMemoryEstimateDefinitionTest {
     void memoryEstimationLargePagesWithProperty(long nodeCount, KnnSampler.SamplerType initialSampler) {
         var parameters = new KnnMemoryEstimationParametersBuilder(0.5, 10, initialSampler);
 
-        var estimation = new KnnMemoryEstimateDefinition().memoryEstimation(parameters);
+        var estimation = new KnnMemoryEstimateDefinition(parameters).memoryEstimation();
         GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
         MemoryTree estimate = estimation.estimate(dimensions, 1);
         MemoryRange actual = estimate.memoryUsage();

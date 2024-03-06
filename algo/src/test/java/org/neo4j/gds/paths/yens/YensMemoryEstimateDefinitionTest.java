@@ -50,8 +50,8 @@ class YensMemoryEstimateDefinitionTest {
         int concurrency,
         long expectedBytes
     ) {
-        var memoryEstimation= new YensMemoryEstimateDefinition()
-            .memoryEstimation(numberOfShortestPathsToFind);
+        var memoryEstimation= new YensMemoryEstimateDefinition(numberOfShortestPathsToFind)
+            .memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(nodeCount,concurrency)

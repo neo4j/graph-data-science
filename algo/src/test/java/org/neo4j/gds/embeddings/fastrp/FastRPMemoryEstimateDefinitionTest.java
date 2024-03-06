@@ -42,21 +42,22 @@ class FastRPMemoryEstimateDefinitionTest {
         }
     )
     void shouldComputeMemoryEstimation(long nodeCount, int concurrency, long expectedMemory) {
-        var fastRPMemoryEstimation = new FastRPMemoryEstimateDefinition();
         var params = mock(FastRPParameters.class);
         when(params.embeddingDimension()).thenReturn(128);
         when(params.featureProperties()).thenReturn(List.of());
         when(params.propertyDimension()).thenReturn(0);
+        var fastRPMemoryEstimation = new FastRPMemoryEstimateDefinition(params).memoryEstimation();
 
-        assertThat(fastRPMemoryEstimation.memoryEstimation(params))
+        assertThat(fastRPMemoryEstimation)
             .memoryRange(nodeCount, concurrency)
             .hasSameMinAndMaxEqualTo(expectedMemory);
     }
 
     @Test
     void shouldHaveCorrectDescription() {
-        var fastRPMemoryEstimation = new FastRPMemoryEstimateDefinition();
-        assertThat(fastRPMemoryEstimation.memoryEstimation(mock(FastRPParameters.class)))
+        var fastRPMemoryEstimation = new FastRPMemoryEstimateDefinition(mock(FastRPParameters.class))
+            .memoryEstimation();
+        assertThat(fastRPMemoryEstimation)
             .hasDescription("FastRP");
     }
 }

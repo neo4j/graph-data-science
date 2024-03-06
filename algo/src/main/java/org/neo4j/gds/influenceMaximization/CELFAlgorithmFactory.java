@@ -65,7 +65,7 @@ public class CELFAlgorithmFactory<CONFIG extends InfluenceMaximizationBaseConfig
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return new CELFMemoryEstimateDefinition().memoryEstimation(configuration.toParameters());
+        return new CELFMemoryEstimateDefinition(configuration.toParameters()).memoryEstimation();
     }
 
 }

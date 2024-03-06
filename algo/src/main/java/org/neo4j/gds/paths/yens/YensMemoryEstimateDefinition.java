@@ -26,17 +26,23 @@ import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateDefinition;
 import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateParameters;
 
-public class YensMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<Integer> {
+public class YensMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+
+    private final int numberOfShortestPathsToFind;
+
+    public YensMemoryEstimateDefinition(int numberOfShortestPathsToFind) {
+        this.numberOfShortestPathsToFind = numberOfShortestPathsToFind;
+    }
 
     @Override
-    public MemoryEstimation memoryEstimation(Integer numberOfShortestPathsToFind) {
+    public MemoryEstimation memoryEstimation() {
         return MemoryEstimations.builder(Yens.class)
             .perThread("Yens Task", MemoryEstimations.builder(YensTask.class)
                 .fixed("neighbors", MemoryUsage.sizeOfLongArray(numberOfShortestPathsToFind))
                 .add(
                     "Dijkstra",
-                    new DijkstraMemoryEstimateDefinition()
-                        .memoryEstimation(new DijkstraMemoryEstimateParameters(true, false))
+                    new DijkstraMemoryEstimateDefinition(new DijkstraMemoryEstimateParameters(true, false))
+                        .memoryEstimation()
                 ).build())
             .build();
     }

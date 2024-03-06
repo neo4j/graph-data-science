@@ -67,7 +67,7 @@ class HashGNNMemoryEstimateDefinitionTest {
         when(params.generateFeatures()).thenReturn(Optional.empty());
         when(params.binarizeFeatures()).thenReturn(Optional.empty());
 
-        var memoryEstimation = new HashGNNMemoryEstimateDefinition().memoryEstimation(params);
+        var memoryEstimation = new HashGNNMemoryEstimateDefinition(params).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(nodeCount,relationshipCount,concurrency)
@@ -86,7 +86,7 @@ class HashGNNMemoryEstimateDefinitionTest {
         when(params.generateFeatures()).thenReturn(Optional.empty());
         when(params.binarizeFeatures()).thenReturn(Optional.empty());
 
-        var memoryEstimation = new HashGNNMemoryEstimateDefinition().memoryEstimation(params);
+        var memoryEstimation = new HashGNNMemoryEstimateDefinition(params).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(10_000,20_000,8)

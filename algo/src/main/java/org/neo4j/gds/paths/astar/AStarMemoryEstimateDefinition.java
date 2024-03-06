@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.paths.astar;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -27,16 +26,17 @@ import org.neo4j.gds.core.utils.paged.HugeLongDoubleMap;
 import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateDefinition;
 import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateParameters;
 
-public class AStarMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<Void> {
+public class AStarMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
 
     @Override
-    public MemoryEstimation memoryEstimation(@Nullable Void unusedEvilParameter) {
+    public MemoryEstimation memoryEstimation() {
 
         return MemoryEstimations.builder(AStar.class)
-            .add(
-                "Dijkstra",
-                new DijkstraMemoryEstimateDefinition()
-                    .memoryEstimation(new DijkstraMemoryEstimateParameters(false, false))
+            .add("Dijkstra",
+                new DijkstraMemoryEstimateDefinition(new DijkstraMemoryEstimateParameters(
+                    false,
+                    false
+                )).memoryEstimation()
             )
             .add("distanceCache", HugeLongDoubleMap.memoryEstimation())
             .build();

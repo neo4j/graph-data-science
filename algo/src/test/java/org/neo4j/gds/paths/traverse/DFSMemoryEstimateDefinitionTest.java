@@ -33,7 +33,7 @@ class DFSMemoryEstimateDefinitionTest {
 
         var memoryEstimation = new DfsMemoryEstimateDefinition();
 
-        MemoryEstimationAssert.assertThat(memoryEstimation.memoryEstimation(config))
+        MemoryEstimationAssert.assertThat(memoryEstimation.memoryEstimation())
             .memoryRange(10_000, 1)
             .hasSameMinAndMaxEqualTo(321440);
     }

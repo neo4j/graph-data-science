@@ -26,10 +26,16 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 
-public class ToUndirectedMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<ToUndirectedMemoryEstimateParameters> {
+public class ToUndirectedMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+
+    private final ToUndirectedMemoryEstimateParameters estimateParameters;
+
+    public ToUndirectedMemoryEstimateDefinition(ToUndirectedMemoryEstimateParameters estimateParameters) {
+        this.estimateParameters = estimateParameters;
+    }
 
     @Override
-    public MemoryEstimation memoryEstimation(ToUndirectedMemoryEstimateParameters estimateParameters) {
+    public MemoryEstimation memoryEstimation() {
         RelationshipType relationshipType = estimateParameters.internalRelationshipType();
 
         var builder = MemoryEstimations.builder(ToUndirected.class)
@@ -47,5 +53,5 @@ public class ToUndirectedMemoryEstimateDefinition implements AlgorithmMemoryEsti
 
         return builder.build();
     }
-    
+
 }

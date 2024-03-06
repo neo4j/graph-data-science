@@ -26,10 +26,16 @@ import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 import org.neo4j.gds.mem.MemoryUsage;
 
-public class DijkstraMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<DijkstraMemoryEstimateParameters> {
+public class DijkstraMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+
+    private final DijkstraMemoryEstimateParameters parameters;
+
+    public DijkstraMemoryEstimateDefinition(DijkstraMemoryEstimateParameters parameters) {
+        this.parameters = parameters;
+    }
 
     @Override
-    public MemoryEstimation memoryEstimation(DijkstraMemoryEstimateParameters parameters) {
+    public MemoryEstimation memoryEstimation() {
         boolean trackRelationships = parameters.trackRelationships();
         boolean manyTargets = parameters.manyTargets();
 

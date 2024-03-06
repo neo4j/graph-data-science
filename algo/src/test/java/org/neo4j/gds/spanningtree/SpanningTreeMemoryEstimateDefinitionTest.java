@@ -27,7 +27,7 @@ class SpanningTreeMemoryEstimateDefinitionTest {
 
     @Test
     void shouldEstimateMemory() {
-        var memoryEstimation = new SpanningTreeMemoryEstimateDefinition().memoryEstimation(null);
+        var memoryEstimation = new SpanningTreeMemoryEstimateDefinition().memoryEstimation();
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange( GraphDimensions.of(10_000, 100_000), 1)
             .hasSameMinAndMaxEqualTo(321544);

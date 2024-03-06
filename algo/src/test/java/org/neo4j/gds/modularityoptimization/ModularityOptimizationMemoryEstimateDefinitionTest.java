@@ -33,7 +33,7 @@ class ModularityOptimizationMemoryEstimateDefinitionTest {
     @ParameterizedTest
     @MethodSource("memoryEstimationTuples")
     void testMemoryEstimation(int concurrency, long min, long max) {
-        var memoryEstimation = new ModularityOptimizationMemoryEstimateDefinition().memoryEstimation(null);
+        var memoryEstimation = new ModularityOptimizationMemoryEstimateDefinition().memoryEstimation();
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(100_000L,  concurrency)
             .hasMax(max)

@@ -38,7 +38,7 @@ class Node2VecMemoryEstimateDefinitionTest {
         when(configMock.walkParameters()).thenCallRealMethod();
         when(configMock.trainParameters()).thenCallRealMethod();
 
-        var memoryEstimation = new Node2VecMemoryEstimateDefinition().memoryEstimation(configMock.node2VecParameters());
+        var memoryEstimation = new Node2VecMemoryEstimateDefinition(configMock.node2VecParameters()).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(1000, 1)

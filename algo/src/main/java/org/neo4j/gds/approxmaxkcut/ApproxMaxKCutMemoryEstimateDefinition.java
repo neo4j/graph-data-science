@@ -26,22 +26,28 @@ import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 
-public class ApproxMaxKCutMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<ApproxMaxKCutMemoryEstimationParameters> {
+public class ApproxMaxKCutMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+
+    private final ApproxMaxKCutMemoryEstimationParameters parameters;
+
+    public ApproxMaxKCutMemoryEstimateDefinition(ApproxMaxKCutMemoryEstimationParameters parameters) {
+        this.parameters = parameters;
+    }
 
     @Override
-    public MemoryEstimation memoryEstimation(ApproxMaxKCutMemoryEstimationParameters configuration) {
+    public MemoryEstimation memoryEstimation() {
         var builder = MemoryEstimations.builder(ApproxMaxKCut.class);
 
         builder.perNode("best solution candidate", HugeByteArray::memoryEstimation);
         builder.perNode("solution workspace", HugeByteArray::memoryEstimation);
         builder.perNodeVector(
             "local search improvement costs cache",
-            configuration.k(),
+            parameters.k(),
             HugeAtomicDoubleArray::memoryEstimation
         );
         builder.perNode("local search set swap status cache", HugeAtomicByteArray::memoryEstimation);
 
-        if (configuration.vnsMaxNeighborhoodOrder() > 0) {
+        if (parameters.vnsMaxNeighborhoodOrder() > 0) {
             builder.perNode("vns neighbor solution candidate", HugeByteArray::memoryEstimation);
         }
 

@@ -27,7 +27,13 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.mem.MemoryUsage;
 
-public class SteinerTreeMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<SteinerTreeBaseConfig> {
+public class SteinerTreeMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+
+    private final SteinerTreeBaseConfig configuration;
+
+    public SteinerTreeMemoryEstimateDefinition(SteinerTreeBaseConfig configuration) {
+        this.configuration = configuration;
+    }
 
     public MemoryEstimation memoryEstimation(boolean applyRerouting) {
         var memoryEstimationBuilder = MemoryEstimations.builder()
@@ -46,7 +52,7 @@ public class SteinerTreeMemoryEstimateDefinition implements AlgorithmMemoryEstim
     }
 
     @Override
-    public MemoryEstimation memoryEstimation(SteinerTreeBaseConfig configuration) {
+    public MemoryEstimation memoryEstimation() {
         return memoryEstimation(configuration.applyRerouting());
     }
 }

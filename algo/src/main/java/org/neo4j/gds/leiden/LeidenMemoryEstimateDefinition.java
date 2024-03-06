@@ -25,23 +25,29 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 
-public class LeidenMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<LeidenMemoryEstimationParameters> {
+public class LeidenMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+
+    private final LeidenMemoryEstimationParameters parameters;
+
+    public LeidenMemoryEstimateDefinition(LeidenMemoryEstimationParameters parameters) {
+        this.parameters = parameters;
+    }
 
     @Override
-    public MemoryEstimation memoryEstimation(LeidenMemoryEstimationParameters configuration) {
+    public MemoryEstimation memoryEstimation() {
         var builder = MemoryEstimations.builder(Leiden.class)
             .perNode("local move communities", HugeLongArray::memoryEstimation)
             .perNode("local move node volumes", HugeDoubleArray::memoryEstimation)
             .perNode("local move community volumes", HugeDoubleArray::memoryEstimation)
             .perNode("current communities", HugeLongArray::memoryEstimation);
-        if (configuration.seedProperty() != null) {
+        if (parameters.seedProperty() != null) {
             builder.add("seeded communities", SeedCommunityManager.memoryEstimation());
         }
         builder
             .add("local move phase", LocalMovePhase.estimation())
             .add("modularity computation", ModularityComputer.estimation())
             .add("dendogram manager", LeidenDendrogramManager.memoryEstimation(
-                configuration.includeIntermediateCommunities() ? configuration.maxLevels() : 1
+                parameters.includeIntermediateCommunities() ? parameters.maxLevels() : 1
             ))
             .add("refinement phase", RefinementPhase.memoryEstimation())
             .add("aggregation phase", GraphAggregationPhase.memoryEstimation())

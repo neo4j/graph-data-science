@@ -24,10 +24,16 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
 
-public final class WccMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<Boolean> {
+public final class WccMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+
+    private final boolean isIncremental;
+
+    public WccMemoryEstimateDefinition(boolean isIncremental) {
+        this.isIncremental = isIncremental;
+    }
 
     @Override
-    public MemoryEstimation memoryEstimation(Boolean isIncremental) {
+    public MemoryEstimation memoryEstimation() {
         return MemoryEstimations
             .builder(Wcc.class.getSimpleName())
             .add("dss", HugeAtomicDisjointSetStruct.memoryEstimation(isIncremental))

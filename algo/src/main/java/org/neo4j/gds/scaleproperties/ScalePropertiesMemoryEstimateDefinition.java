@@ -26,13 +26,18 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.mem.MemoryUsage;
 
-public class ScalePropertiesMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<ScalePropertiesBaseConfig> {
+public class ScalePropertiesMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
 
     private static final int ESTIMATED_DIMENSION_PER_PROPERTY = 128;
 
-    
+    private final ScalePropertiesBaseConfig configuration;
+
+    public ScalePropertiesMemoryEstimateDefinition(ScalePropertiesBaseConfig configuration) {
+        this.configuration = configuration;
+    }
+
     @Override
-    public MemoryEstimation memoryEstimation(ScalePropertiesBaseConfig configuration) {
+    public MemoryEstimation memoryEstimation() {
         MemoryEstimations.Builder builder = MemoryEstimations.builder("Scale properties");
 
         builder.perGraphDimension("Scaled properties", (graphDimensions, concurrency) -> {

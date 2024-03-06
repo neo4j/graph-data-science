@@ -62,7 +62,7 @@ public class K1ColoringAlgorithmFactory<T extends K1ColoringBaseConfig> extends 
 
     @Override
     public MemoryEstimation memoryEstimation(T config) {
-        return new K1ColoringMemoryEstimateDefinition().memoryEstimation(null);
+        return new K1ColoringMemoryEstimateDefinition().memoryEstimation();
     }
 
     @Override

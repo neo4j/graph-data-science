@@ -33,7 +33,7 @@ class DegreeCentralityAlgorithmEstimateDefinitionTest {
         "10_000_000, 48"
     })
     void testMemoryEstimation(long nodeCount, long expectedMemory) {
-        var memoryEstimation = new DegreeCentralityAlgorithmEstimateDefinition().memoryEstimation(false);
+        var memoryEstimation = new DegreeCentralityAlgorithmEstimateDefinition(false).memoryEstimation();
         assertThat(memoryEstimation)
             .memoryRange(nodeCount, 4)
             .hasSameMinAndMaxEqualTo(expectedMemory);
@@ -46,7 +46,7 @@ class DegreeCentralityAlgorithmEstimateDefinitionTest {
         "10_000, 128, 48"
     })
     void shouldGiveTheSameEstimationRegardlessOfTheConcurrency(long nodeCount, int concurrency, long expectedMemory) {
-        var memoryEstimation = new DegreeCentralityAlgorithmEstimateDefinition().memoryEstimation(false);
+        var memoryEstimation = new DegreeCentralityAlgorithmEstimateDefinition(false).memoryEstimation();
         assertThat(memoryEstimation)
             .memoryRange(nodeCount, concurrency)
             .hasSameMinAndMaxEqualTo(expectedMemory);
@@ -59,7 +59,7 @@ class DegreeCentralityAlgorithmEstimateDefinitionTest {
         "10_000_000, 80_000_088"
     })
     void testMemoryEstimationWithRelationshipWeight(long nodeCount, long expectedMemory) {
-        var memoryEstimation = new DegreeCentralityAlgorithmEstimateDefinition().memoryEstimation(true);
+        var memoryEstimation = new DegreeCentralityAlgorithmEstimateDefinition(true).memoryEstimation();
         assertThat(memoryEstimation)
             .memoryRange(nodeCount, 4)
             .hasSameMinAndMaxEqualTo(expectedMemory);
@@ -72,7 +72,7 @@ class DegreeCentralityAlgorithmEstimateDefinitionTest {
         "10_000, 128, 80_088"
     })
     void shouldGiveTheSameEstimationRegardlessOfTheConcurrencyWeighted(long nodeCount, int concurrency, long expectedMemory) {
-        var memoryEstimation = new DegreeCentralityAlgorithmEstimateDefinition().memoryEstimation(true);
+        var memoryEstimation = new DegreeCentralityAlgorithmEstimateDefinition(true).memoryEstimation();
         assertThat(memoryEstimation)
             .memoryRange(nodeCount, concurrency)
             .hasSameMinAndMaxEqualTo(expectedMemory);

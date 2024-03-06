@@ -33,7 +33,7 @@ class IntersectingTriangleCountMemoryEstimateDefinitionTest {
     @ParameterizedTest
     void memoryEstimation(long nodeCount) {
         MemoryEstimation memoryEstimation =
-            new IntersectingTriangleCountMemoryEstimateDefinition().memoryEstimation(null);
+            new IntersectingTriangleCountMemoryEstimateDefinition().memoryEstimation();
 
         GraphDimensions graphDimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
 
@@ -49,7 +49,7 @@ class IntersectingTriangleCountMemoryEstimateDefinitionTest {
     @ParameterizedTest
     void memoryEstimationLargePages(long nodeCount, long sizeOfHugeArray) {
         MemoryEstimation memoryEstimation =
-            new IntersectingTriangleCountMemoryEstimateDefinition().memoryEstimation(null);
+            new IntersectingTriangleCountMemoryEstimateDefinition().memoryEstimation();
 
         GraphDimensions graphDimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
         

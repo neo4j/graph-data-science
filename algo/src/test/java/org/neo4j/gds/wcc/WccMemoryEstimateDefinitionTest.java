@@ -33,7 +33,7 @@ class WccMemoryEstimateDefinitionTest {
     })
     void wccMemoryEstimation(long nodeCount, long expectedMemoryUsage) {
 
-        var memoryEstimation = new WccMemoryEstimateDefinition().memoryEstimation(false);
+        var memoryEstimation = new WccMemoryEstimateDefinition(false).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(nodeCount, 4)
@@ -48,7 +48,7 @@ class WccMemoryEstimateDefinitionTest {
     })
     void incrementalWccMemoryEstimation(long nodeCount, long expectedMemoryUsage) {
 
-        var memoryEstimation = new WccMemoryEstimateDefinition().memoryEstimation(true);
+        var memoryEstimation = new WccMemoryEstimateDefinition(true).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(nodeCount, 4)
@@ -63,7 +63,7 @@ class WccMemoryEstimateDefinitionTest {
     })
     void shouldGiveTheSameEstimationRegardlessOfTheConcurrency(int concurrency, long expectedMemory) {
 
-        var memoryEstimation = new WccMemoryEstimateDefinition().memoryEstimation(false);
+        var memoryEstimation = new WccMemoryEstimateDefinition(false).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(100, concurrency)
@@ -78,7 +78,7 @@ class WccMemoryEstimateDefinitionTest {
     })
     void shouldGiveTheSameEstimationRegardlessOfTheConcurrencyIncrementalConfiguration(int concurrency, long expectedMemory) {
 
-        var memoryEstimation = new WccMemoryEstimateDefinition().memoryEstimation(true);
+        var memoryEstimation = new WccMemoryEstimateDefinition(true).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
             .memoryRange(100, concurrency)

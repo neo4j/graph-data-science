@@ -30,10 +30,10 @@ import org.neo4j.gds.mem.MemoryUsage;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
-public class LabelPropagationMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition<Void> {
+public class LabelPropagationMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
 
     @Override
-    public MemoryEstimation memoryEstimation(Void unused) {
+    public MemoryEstimation memoryEstimation() {
         return MemoryEstimations.builder(LabelPropagation.class)
             .perNode("labels", HugeLongArray::memoryEstimation)
             .perThread("votes", MemoryEstimations.builder()

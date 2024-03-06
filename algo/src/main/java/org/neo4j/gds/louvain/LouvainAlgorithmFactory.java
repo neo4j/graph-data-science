@@ -74,6 +74,6 @@ public class LouvainAlgorithmFactory<CONFIG extends LouvainBaseConfig> extends G
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
-        return new LouvainMemoryEstimateDefinition().memoryEstimation(config.toMemoryEstimationParameters());
+        return new LouvainMemoryEstimateDefinition(config.toMemoryEstimationParameters()).memoryEstimation();
     }
 }
