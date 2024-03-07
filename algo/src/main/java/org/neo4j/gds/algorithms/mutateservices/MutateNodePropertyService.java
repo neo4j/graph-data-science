@@ -22,6 +22,7 @@ package org.neo4j.gds.algorithms.mutateservices;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.logging.Log;
 
@@ -38,6 +39,7 @@ public class MutateNodePropertyService {
     public AddNodePropertyResult mutate(
         String nodePropertyToMutate,
         NodePropertyValues nodePropertyValues,
+        PropertyState propertyState,
         Collection<NodeLabel> nodeLabelsToUpdate,
         Graph graph,
         GraphStore graphStore
@@ -48,6 +50,7 @@ public class MutateNodePropertyService {
             nodeLabelsToUpdate,
             nodePropertyToMutate,
             nodePropertyValues,
+            propertyState,
             this.log
         );
     }

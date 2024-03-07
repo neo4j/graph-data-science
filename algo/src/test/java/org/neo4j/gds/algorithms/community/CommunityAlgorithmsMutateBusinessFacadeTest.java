@@ -96,6 +96,8 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
 
         var configMock = mock(MutateNodePropertyConfig.class);
         when(configMock.mutateProperty()).thenReturn("bugger-off");
+        when(configMock.propertyState()).thenCallRealMethod();
+
         var result = HugeLongArray.newArray(graph.nodeCount());
         result.setAll(graph::toOriginalNodeId);
         var algorithmResultMock = AlgorithmComputationResult.of(
@@ -152,6 +154,8 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
 
         var configMock = mock(MutateNodePropertyConfig.class);
         when(configMock.mutateProperty()).thenReturn("bugger-off");
+        when(configMock.propertyState()).thenCallRealMethod();
+
         var result = HugeLongArray.newArray(graph.nodeCount());
         result.setAll(graph::toOriginalNodeId);
         var algorithmResultMock = AlgorithmComputationResult.of(

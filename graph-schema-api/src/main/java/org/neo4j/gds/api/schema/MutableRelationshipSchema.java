@@ -27,7 +27,10 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import static java.util.function.Predicate.not;
 
 public class MutableRelationshipSchema implements RelationshipSchema {
 
@@ -55,6 +58,26 @@ public class MutableRelationshipSchema implements RelationshipSchema {
             .stream()
             .filter(e -> relationshipTypesToKeep.contains(e.getKey()))
             .collect(Collectors.toMap(Map.Entry::getKey, entry -> MutableRelationshipSchemaEntry.from(entry.getValue()))));
+    }
+
+    @Override
+    public RelationshipSchema filterProperties(Predicate<RelationshipPropertySchema> predicate) {
+        return new MutableRelationshipSchema(entries
+            .entrySet()
+            .stream()
+            .map(entry -> new MutableRelationshipSchemaEntry(entry.getKey(), entry.getValue().direction(), entry
+                .getValue()
+                .properties()
+                .entrySet()
+                .stream()
+                .filter(property -> predicate.test(property.getValue()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
+            ))
+            .collect(Collectors.toMap(
+                MutableRelationshipSchemaEntry::identifier,
+                entry -> entry
+            ))
+        );
     }
 
     @Override
@@ -110,6 +133,7 @@ public class MutableRelationshipSchema implements RelationshipSchema {
                     .properties()
                     .entrySet()
                     .stream()
+                    .filter(not(entry -> entry.getValue().state() == PropertyState.HIDDEN))
                     .collect(Collectors.toMap(Map.Entry::getKey,
                         innerEntry -> GraphSchema.forPropertySchema(innerEntry.getValue())
                     ))
@@ -119,6 +143,7 @@ public class MutableRelationshipSchema implements RelationshipSchema {
     public void set(MutableRelationshipSchemaEntry entry) {
         entries.put(entry.identifier(), entry);
     }
+
     public void remove(RelationshipType identifier) {
         entries.remove(identifier);
     }

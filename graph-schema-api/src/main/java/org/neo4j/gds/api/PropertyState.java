@@ -20,5 +20,25 @@
 package org.neo4j.gds.api;
 
 public enum PropertyState {
-    PERSISTENT, TRANSIENT, REMOTE
+    /**
+     * The property is projected from a source graph.
+     */
+    PERSISTENT,
+
+    /**
+     * The property is only present in the in-memory graph,
+     * e.g. as a result of a mutate operation.
+     */
+    TRANSIENT,
+
+    /**
+     * The property is projected from a remote source graph.
+     */
+    REMOTE,
+
+    /**
+     * The property is auxiliary and should not be visible to the user
+     * or serialized as part of a backup.
+     */
+    HIDDEN
 }

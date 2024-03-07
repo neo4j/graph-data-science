@@ -119,7 +119,8 @@ public interface GraphStore {
     void addNodeProperty(
         Set<NodeLabel> nodeLabels,
         String propertyKey,
-        NodePropertyValues propertyValues
+        NodePropertyValues propertyValues,
+        PropertyState propertyState
     );
 
     void removeNodeProperty(String propertyKey);

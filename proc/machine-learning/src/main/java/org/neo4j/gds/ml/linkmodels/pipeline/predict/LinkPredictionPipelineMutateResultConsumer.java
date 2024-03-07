@@ -28,11 +28,11 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Collection;
 import java.util.stream.Stream;
@@ -63,7 +63,7 @@ class LinkPredictionPipelineMutateResultConsumer extends MutateComputationResult
             .nodes(graph)
             .relationshipType(mutateRelationshipType)
             .orientation(Orientation.UNDIRECTED)
-            .addPropertyConfig(GraphFactory.PropertyConfig.of(computationResult.config().mutateProperty()))
+            .addPropertyConfig(GraphFactory.PropertyConfig.of(config.mutateProperty(), config.propertyState()))
             .concurrency(concurrency)
             .executorService(DefaultPool.INSTANCE)
             .build();

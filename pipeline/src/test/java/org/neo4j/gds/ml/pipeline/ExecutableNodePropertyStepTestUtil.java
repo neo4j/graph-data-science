@@ -24,6 +24,7 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
@@ -102,7 +103,8 @@ public class ExecutableNodePropertyStepTestUtil {
                         return true;
                     });
                     return sum.getValue();
-                })
+                }),
+                PropertyState.TRANSIENT
             );
         }
 
@@ -176,7 +178,8 @@ public class ExecutableNodePropertyStepTestUtil {
             graphStore.addNodeProperty(
                 graphStore.nodeLabels(),
                 propertyName,
-                new LongTestPropertyValues(nodeId -> nodeId)
+                new LongTestPropertyValues(nodeId -> nodeId),
+                PropertyState.TRANSIENT
             );
         }
 

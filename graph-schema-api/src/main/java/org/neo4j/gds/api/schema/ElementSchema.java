@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -39,6 +40,8 @@ public interface ElementSchema<
 
 
     SELF filter(Set<ELEMENT_IDENTIFIER> elementIdentifiersToKeep);
+
+    SELF filterProperties(Predicate<PROPERTY_SCHEMA> predicate);
 
     SELF union(SELF other);
 

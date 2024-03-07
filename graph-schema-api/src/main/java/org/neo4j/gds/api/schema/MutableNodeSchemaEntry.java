@@ -28,6 +28,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.util.function.Predicate.not;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class MutableNodeSchemaEntry implements NodeSchemaEntry {
@@ -78,6 +79,7 @@ public class MutableNodeSchemaEntry implements NodeSchemaEntry {
         return properties
             .entrySet()
             .stream()
+            .filter(not(entry -> entry.getValue().state() == PropertyState.HIDDEN))
             .collect(Collectors.toMap(
                     Map.Entry::getKey,
                     innerEntry -> GraphSchema.forPropertySchema(innerEntry.getValue())

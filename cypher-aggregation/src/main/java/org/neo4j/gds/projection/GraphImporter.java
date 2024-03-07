@@ -67,6 +67,7 @@ public final class GraphImporter {
 
     private final WriteMode writeMode;
     private final String query;
+    private final PropertyState propertyState;
 
     private final Map<RelationshipType, RelationshipsBuilder> relImporters;
     private final ImmutableMutableGraphSchema.Builder graphSchemaBuilder;
@@ -77,7 +78,8 @@ public final class GraphImporter {
         List<String> inverseIndexedRelationshipTypes,
         LazyIdMapBuilder idMapBuilder,
         WriteMode writeMode,
-        String query
+        String query,
+        PropertyState propertyState
     ) {
         this.config = config;
         this.undirectedRelationshipTypes = undirectedRelationshipTypes;
@@ -85,6 +87,7 @@ public final class GraphImporter {
         this.idMapBuilder = idMapBuilder;
         this.writeMode = writeMode;
         this.query = query;
+        this.propertyState = propertyState;
         this.relImporters = new ConcurrentHashMap<>();
         this.graphSchemaBuilder = MutableGraphSchema.builder();
     }
@@ -116,7 +119,8 @@ public final class GraphImporter {
             config.inverseIndexedRelationshipTypes(),
             idMapBuilder,
             writeMode,
-            query
+            query,
+            propertyState
         );
     }
 
@@ -243,7 +247,7 @@ public final class GraphImporter {
         if (properties != null) {
             for (String propertyKey : properties.propertyKeys()) {
                 relationshipsBuilderBuilder.addPropertyConfig(
-                    ImmutablePropertyConfig.builder().propertyKey(propertyKey).build()
+                    ImmutablePropertyConfig.builder().propertyKey(propertyKey).propertyState(propertyState).build()
                 );
             }
         }

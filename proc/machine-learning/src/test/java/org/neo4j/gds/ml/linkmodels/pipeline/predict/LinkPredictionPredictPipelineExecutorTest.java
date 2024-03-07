@@ -26,6 +26,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
@@ -622,7 +623,8 @@ class LinkPredictionPredictPipelineExecutorTest {
             graphStore.addNodeProperty(
                 graphStore.nodeLabels(),
                 propertyName,
-                new LongTestPropertyValues(nodeId -> nodeId)
+                new LongTestPropertyValues(nodeId -> nodeId),
+                PropertyState.TRANSIENT
             );
         }
 

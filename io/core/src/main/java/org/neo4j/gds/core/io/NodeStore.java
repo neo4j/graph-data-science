@@ -19,9 +19,11 @@
  */
 package org.neo4j.gds.core.io;
 
+import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 
@@ -73,7 +75,7 @@ public final class NodeStore {
         this.nodeLabelMapping = nodeLabelMapping;
         this.labelNameFunction = nodeLabelMapping.isPresent()
             ? nodeLabelMapping.get()::get
-            : (NodeLabel nodeLabel) -> nodeLabel.name();
+            : ElementIdentifier::name;
     }
 
     boolean hasLabels() {
@@ -84,15 +86,48 @@ public final class NodeStore {
         return nodeProperties != null;
     }
 
-    Map<String, Map<String, NodePropertyValues>> labelToNodeProperties() {
-        return nodeLabelMapping.isPresent()
-            ? nodeProperties.entrySet()
-            .stream()
-            .collect(Collectors.toMap(
-                entry -> nodeLabelMapping.get().get(NodeLabel.of(entry.getKey())),
-                entry -> entry.getValue()
-            ))
-            : nodeProperties;
+    static NodeStore of(
+        GraphStore graphStore,
+        Map<String, LongFunction<Object>> additionalProperties,
+        Optional<NodeLabelMapping> nodeLabelMapping
+    ) {
+        HugeIntArray labelCounts = HugeIntArray.of();
+
+        var nodeLabels = graphStore.nodes();
+        var nodeProperties = new HashMap<String, Map<String, NodePropertyValues>>();
+
+        boolean hasNodeLabels = !graphStore.schema().nodeSchema().containsOnlyAllNodesLabel();
+        if (hasNodeLabels) {
+            labelCounts = HugeIntArray.newArray(graphStore.nodeCount());
+            labelCounts.setAll(i -> {
+                int labelCount = 0;
+                for (var nodeLabel : nodeLabels.availableNodeLabels()) {
+                    if (nodeLabels.hasLabel(i, nodeLabel)) {
+                        labelCount++;
+                    }
+                }
+                return labelCount;
+            });
+        }
+
+        graphStore.nodeLabels().forEach(label -> {
+            var properties = nodeProperties.computeIfAbsent(label.name, k -> new HashMap<>());
+            graphStore.schema().nodeSchema().propertySchemasFor(label).forEach(propertySchema -> {
+                if (propertySchema.state() != PropertyState.HIDDEN) {
+                    properties.put(propertySchema.key(), graphStore.nodeProperty(propertySchema.key()).values());
+                }
+            });
+        });
+
+        return new NodeStore(
+            graphStore.nodeCount(),
+            labelCounts,
+            nodeLabels,
+            hasNodeLabels,
+            nodeProperties.isEmpty() ? null : nodeProperties,
+            additionalProperties,
+            nodeLabelMapping
+        );
     }
 
     int labelCount() {
@@ -128,45 +163,14 @@ public final class NodeStore {
         return labels;
     }
 
-    static NodeStore of(
-        GraphStore graphStore,
-        Map<String, LongFunction<Object>> additionalProperties,
-        Optional<NodeLabelMapping> nodeLabelMapping
-    ) {
-        HugeIntArray labelCounts = null;
-
-        var nodeLabels = graphStore.nodes();
-        var nodeProperties = new HashMap<String, Map<String, NodePropertyValues>>();
-
-        boolean hasNodeLabels = !graphStore.schema().nodeSchema().containsOnlyAllNodesLabel();
-        if (hasNodeLabels) {
-            labelCounts = HugeIntArray.newArray(graphStore.nodeCount());
-            labelCounts.setAll(i -> {
-                int labelCount = 0;
-                for (var nodeLabel : nodeLabels.availableNodeLabels()) {
-                    if (nodeLabels.hasLabel(i, nodeLabel)) {
-                        labelCount++;
-                    }
-                }
-                return labelCount;
-            });
-        }
-
-        graphStore.nodeLabels().forEach(label -> {
-            var properties = nodeProperties.computeIfAbsent(label.name, k -> new HashMap<>());
-            graphStore.schema().nodeSchema().propertySchemasFor(label).forEach(propertySchema -> {
-                properties.put(propertySchema.key(), graphStore.nodeProperty(propertySchema.key()).values());
-            });
-        });
-
-        return new NodeStore(
-            graphStore.nodeCount(),
-            labelCounts,
-            nodeLabels,
-            hasNodeLabels,
-            nodeProperties.isEmpty() ? null : nodeProperties,
-            additionalProperties,
-            nodeLabelMapping
-        );
+    Map<String, Map<String, NodePropertyValues>> labelToNodeProperties() {
+        return nodeLabelMapping.isPresent()
+            ? nodeProperties.entrySet()
+            .stream()
+            .collect(Collectors.toMap(
+                entry -> nodeLabelMapping.get().get(NodeLabel.of(entry.getKey())),
+                Map.Entry::getValue
+            ))
+            : nodeProperties;
     }
 }

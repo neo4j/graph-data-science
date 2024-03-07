@@ -19,4 +19,19 @@
  */
 package org.neo4j.gds.config;
 
-public interface MutateConfig extends AlgoBaseConfig { }
+
+import org.immutables.value.Value;
+import org.neo4j.gds.annotation.Configuration;
+import org.neo4j.gds.api.PropertyState;
+
+public interface MutateConfig extends AlgoBaseConfig {
+    @Value.Default
+    default boolean isHidden() {
+        return false;
+    }
+
+    @Configuration.Ignore
+    default PropertyState propertyState() {
+        return isHidden() ? PropertyState.HIDDEN : PropertyState.TRANSIENT;
+    }
+}

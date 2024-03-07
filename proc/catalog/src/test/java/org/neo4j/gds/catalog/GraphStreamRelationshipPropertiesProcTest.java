@@ -32,6 +32,7 @@ import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
@@ -188,7 +189,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             .nodes(graphStore.nodes())
             .relationshipType(RelationshipType.of("NEW_REL"))
             .orientation(Orientation.NATURAL)
-            .addPropertyConfig(GraphFactory.PropertyConfig.of("newRelProp3"))
+            .addPropertyConfig(GraphFactory.PropertyConfig.of("newRelProp3", PropertyState.TRANSIENT))
             .build();
 
         relImporter.addFromInternal(0, 1, 23D);
@@ -270,7 +271,7 @@ class GraphStreamRelationshipPropertiesProcTest extends BaseProcTest {
             .nodes(graphStore.nodes())
             .relationshipType(RelationshipType.of("NEW_REL"))
             .orientation(Orientation.NATURAL)
-            .addPropertyConfig(GraphFactory.PropertyConfig.of("newRelProp3"))
+            .addPropertyConfig(GraphFactory.PropertyConfig.of("newRelProp3", PropertyState.TRANSIENT))
             .build();
 
         relImporter.addFromInternal(0, 1, 23D);

@@ -78,9 +78,7 @@ class SimilarityAlgorithmsMutateBusinessFacadeTest {
             null,
             0L,
             () -> SimilaritySpecificFieldsWithDistribution.EMPTY,
-            false,
-            "foo",
-            "bar"
+            false
         );
 
         verifyNoInteractions(mutateRelationshipService);
@@ -115,9 +113,9 @@ class SimilarityAlgorithmsMutateBusinessFacadeTest {
 
         when(configurationMock.mutateProperty()).thenReturn("foo");
         when(configurationMock.mutateRelationshipType()).thenReturn("bar");
+        when(configurationMock.propertyState()).thenCallRealMethod();
 
         var businessFacade = new SimilarityAlgorithmsMutateBusinessFacade(null, mutateRelationshipService);
-
 
         var mutateResult = businessFacade.mutate(
             algorithmResult,
@@ -126,9 +124,7 @@ class SimilarityAlgorithmsMutateBusinessFacadeTest {
             (result,similarityDistribution) -> new SimilaritySpecificFieldsWithDistribution(4,2,similarityDistribution),
             20L,
             () -> SimilaritySpecificFieldsWithDistribution.EMPTY,
-            false,
-            "foo",
-            "bar"
+            false
         );
 
 
@@ -141,10 +137,10 @@ class SimilarityAlgorithmsMutateBusinessFacadeTest {
         assertThat(mutateResult.postProcessingMillis()).isGreaterThanOrEqualTo(0L);
 
 
-        var mutatedGraph=graphStore.getGraph(RelationshipType.of("foo"), Optional.of("bar"));
+        var mutatedGraph = graphStore.getGraph(RelationshipType.of("bar"), Optional.of("foo"));
         assertThat(mutatedGraph.relationshipCount()).isEqualTo(2L);
-        double[] expected=new double[]{-100,1,0.25};
-        LongAdder counter=new LongAdder();
+        double[] expected = new double[]{-100, 1, 0.25};
+        LongAdder counter = new LongAdder();
         mutatedGraph.forEachRelationship(0,  200,(s,t,w)->{
             assertThat(w).isCloseTo(expected[(int)t],Offset.offset(1e-3));
             counter.increment();
@@ -167,6 +163,7 @@ class SimilarityAlgorithmsMutateBusinessFacadeTest {
 
         when(configurationMock.mutateProperty()).thenReturn("bar");
         when(configurationMock.mutateRelationshipType()).thenReturn("foo");
+        when(configurationMock.propertyState()).thenCallRealMethod();
 
         var businessFacade = new SimilarityAlgorithmsMutateBusinessFacade(null, mutateRelationshipService);
 
@@ -178,9 +175,7 @@ class SimilarityAlgorithmsMutateBusinessFacadeTest {
             (result,similarityDistribution) -> new SimilaritySpecificFieldsWithDistribution(4,2,similarityDistribution),
             20L,
             () -> SimilaritySpecificFieldsWithDistribution.EMPTY,
-            true,
-            "foo",
-            "bar"
+            true
         );
 
 

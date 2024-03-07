@@ -24,6 +24,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.algorithms.mutateservices.SingleTypeRelationshipsProducer;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -49,7 +50,7 @@ public class SimilaritySingleTypeRelationshipsHandler implements SingleTypeRelat
     private Map<String,Object> similaritySummary;
     private long relationshipCount;
 
-    public SimilaritySingleTypeRelationshipsHandler(
+    SimilaritySingleTypeRelationshipsHandler(
         Graph graph,
         Supplier<SimilarityGraphResult> similarityGraphResultSupplier,
         boolean shouldComputeStatistics
@@ -60,12 +61,12 @@ public class SimilaritySingleTypeRelationshipsHandler implements SingleTypeRelat
         this.graph = graph;
     }
 
-    public Map<String, Object> similaritySummary() {
+    Map<String, Object> similaritySummary() {
         return similaritySummary;
     }
 
     @Override
-    public SingleTypeRelationships getRelationships(String mutateRelationshipType, String mutateProperty) {
+    public SingleTypeRelationships createRelationships(String mutateRelationshipType, String mutateProperty, PropertyState propertyState) {
 
         RelationshipType relationshipType = RelationshipType.of(mutateRelationshipType);
         var similarityGraphResult = similarityGraphResultSupplier.get();
@@ -78,7 +79,7 @@ public class SimilaritySingleTypeRelationshipsHandler implements SingleTypeRelat
                 .nodes(topKGraph)
                 .relationshipType(relationshipType)
                 .orientation(Orientation.NATURAL)
-                .addPropertyConfig(GraphFactory.PropertyConfig.of(mutateProperty))
+                .addPropertyConfig(GraphFactory.PropertyConfig.of(mutateProperty, PropertyState.TRANSIENT))
                 .concurrency(1)
                 .executorService(DefaultPool.INSTANCE)
                 .build();
@@ -99,7 +100,7 @@ public class SimilaritySingleTypeRelationshipsHandler implements SingleTypeRelat
                         return true;
                     });
             relationships = relationshipsBuilder.build();
-            similaritySummary =similarityDistributionBuilder.similaritySummary();
+            similaritySummary = similarityDistributionBuilder.similaritySummary();
         } else {
             HugeGraph similarityGraph = (HugeGraph) similarityGraphResult.similarityGraph();
 
@@ -108,7 +109,7 @@ public class SimilaritySingleTypeRelationshipsHandler implements SingleTypeRelat
                 similarityGraph.relationshipTopology(),
                 similarityGraph.schema().direction(),
                 similarityGraph.relationshipProperties(),
-                Optional.of(RelationshipPropertySchema.of(mutateProperty, ValueType.DOUBLE))
+                Optional.of(RelationshipPropertySchema.of(mutateProperty, ValueType.DOUBLE, propertyState))
             );
 
             if (shouldComputeStatistics) {

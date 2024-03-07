@@ -29,6 +29,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -80,7 +81,8 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipImportResu
             .map(mapping -> GraphFactory.PropertyConfig.of(
                 mapping.propertyKey(),
                 mapping.aggregation(),
-                mapping.defaultValue()
+                mapping.defaultValue(),
+                PropertyState.TRANSIENT
             ))
             .collect(Collectors.toList());
     }

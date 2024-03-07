@@ -22,6 +22,7 @@ package org.neo4j.gds.algorithms.mutateservices;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.huge.FilteredNodePropertyValues;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -43,6 +44,7 @@ public final class GraphStoreUpdater {
         Collection<NodeLabel> labelsToUpdate,
         String propertyKey,
         NodePropertyValues propertyValues,
+        PropertyState propertyState,
         Log log
     ) {
         var maybeFilteredNodePropertyValues = graph
@@ -61,7 +63,8 @@ public final class GraphStoreUpdater {
             graphStore.addNodeProperty(
                 new HashSet<>(labelsToUpdate),
                 propertyKey,
-                maybeFilteredNodePropertyValues
+                maybeFilteredNodePropertyValues,
+                propertyState
             );
         }
 
@@ -72,15 +75,17 @@ public final class GraphStoreUpdater {
         GraphStore graphStore,
         String mutateRelationshipType,
         String mutateProperty,
+        PropertyState propertyState,
         SingleTypeRelationshipsProducer singleTypeRelationshipsProducer,
         Log log
     ) {
         var mutateMilliseconds = new AtomicLong();
         try (ProgressTimer ignored = ProgressTimer.start(mutateMilliseconds::set)) {
 
-            var resultRelationships = singleTypeRelationshipsProducer.getRelationships(
+            var resultRelationships = singleTypeRelationshipsProducer.createRelationships(
                 mutateRelationshipType,
-                mutateProperty
+                mutateProperty,
+                propertyState
             );
 
             log.info("Updating in-memory graph store");

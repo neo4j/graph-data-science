@@ -114,7 +114,8 @@ public class KnnMutateSpecification implements AlgorithmSpec<Knn, KnnResult, Knn
                                     similarityGraph.relationshipProperties(),
                                     Optional.of(RelationshipPropertySchema.of(
                                         config.mutateProperty(),
-                                        ValueType.DOUBLE
+                                        ValueType.DOUBLE,
+                                        config.propertyState()
                                     ))
                                 )
                             );

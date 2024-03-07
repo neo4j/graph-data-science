@@ -29,6 +29,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ImmutableDatabaseInfo;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Topology;
@@ -43,6 +44,7 @@ import org.neo4j.gds.api.schema.MutableNodeSchemaEntry;
 import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.DeletionResult;
@@ -54,6 +56,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * Just enough of a graph store to illustrate some GraphInfo translation.
@@ -90,6 +93,11 @@ class DummyGraphStore implements GraphStore {
 
                     @Override
                     public NodeSchema filter(Set<NodeLabel> labelsToKeep) {
+                        throw new UnsupportedOperationException("TODO");
+                    }
+
+                    @Override
+                    public NodeSchema filterProperties(Predicate<PropertySchema> predicate) {
                         throw new UnsupportedOperationException("TODO");
                     }
 
@@ -140,6 +148,11 @@ class DummyGraphStore implements GraphStore {
 
                     @Override
                     public RelationshipSchema filter(Set<RelationshipType> elementIdentifiersToKeep) {
+                        throw new UnsupportedOperationException("TODO");
+                    }
+
+                    @Override
+                    public RelationshipSchema filterProperties(Predicate<RelationshipPropertySchema> predicate) {
                         throw new UnsupportedOperationException("TODO");
                     }
 
@@ -286,7 +299,8 @@ class DummyGraphStore implements GraphStore {
     public void addNodeProperty(
         Set<NodeLabel> nodeLabels,
         String propertyKey,
-        NodePropertyValues propertyValues
+        NodePropertyValues propertyValues,
+        PropertyState propertyState
     ) {
         throw new UnsupportedOperationException("TODO");
     }

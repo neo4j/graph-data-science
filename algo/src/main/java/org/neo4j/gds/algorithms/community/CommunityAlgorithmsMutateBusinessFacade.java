@@ -375,8 +375,11 @@ public class CommunityAlgorithmsMutateBusinessFacade {
 
             // 3. Go and mutate the graph store
             var addNodePropertyResult = mutateNodePropertyService.mutate(
-                configuration.mutateProperty(), nodePropertyValues,
-                configuration.nodeLabelIdentifiers(algorithmResult.graphStore()), algorithmResult.graph(),
+                configuration.mutateProperty(),
+                nodePropertyValues,
+                configuration.propertyState(),
+                configuration.nodeLabelIdentifiers(algorithmResult.graphStore()),
+                algorithmResult.graph(),
                 algorithmResult.graphStore()
             );
 
@@ -557,6 +560,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             var addNodePropertyResult = mutateNodePropertyService.mutate(
                 configuration.mutateProperty(),
                 nodePropertyValues,
+                configuration.propertyState(),
                 configuration.nodeLabelIdentifiers(algorithmResult.graphStore()),
                 algorithmResult.graph(), algorithmResult.graphStore()
             );

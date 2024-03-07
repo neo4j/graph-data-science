@@ -58,7 +58,7 @@ public class ShortestPathMutateResultConsumer<ALGO extends Algorithm<PathFinding
             .initRelationshipsBuilder()
             .relationshipType(mutateRelationshipType)
             .nodes(computationResult.graph())
-            .addPropertyConfig(GraphFactory.PropertyConfig.of(TOTAL_COST_KEY))
+            .addPropertyConfig(GraphFactory.PropertyConfig.of(TOTAL_COST_KEY, config.propertyState()))
             .orientation(Orientation.NATURAL)
             .build();
 

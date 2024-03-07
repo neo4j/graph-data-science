@@ -139,6 +139,7 @@ public class NodeEmbeddingsAlgorithmsMutateBusinessFacade {
             var addNodePropertyResult = mutateNodePropertyService.mutate(
                 configuration.mutateProperty(),
                 nodePropertyValues,
+                configuration.propertyState(),
                 configuration.nodeLabelIdentifiers(algorithmResult.graphStore()),
                 algorithmResult.graph(), algorithmResult.graphStore()
             );

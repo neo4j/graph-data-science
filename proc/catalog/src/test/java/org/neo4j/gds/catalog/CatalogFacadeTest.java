@@ -33,6 +33,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Topology;
@@ -410,7 +411,12 @@ class CatalogFacadeTest {
         }
 
         @Override
-        public void addNodeProperty(Set<NodeLabel> nodeLabels, String propertyKey, NodePropertyValues propertyValues) {
+        public void addNodeProperty(
+            Set<NodeLabel> nodeLabels,
+            String propertyKey,
+            NodePropertyValues propertyValues,
+            PropertyState propertyState
+        ) {
             throw new UnsupportedOperationException("TODO");
         }
 

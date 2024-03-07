@@ -21,11 +21,14 @@ package org.neo4j.gds.api.schema;
 
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.PropertyState;
 
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static java.util.function.Predicate.not;
 
 public interface GraphSchema {
 
@@ -45,10 +48,7 @@ public interface GraphSchema {
         return Map.of(
             "nodes", nodeSchema().toMap(),
             "relationships", relationshipSchema().toMap(),
-            "graphProperties", graphProperties().entrySet().stream().collect(Collectors.toMap(
-                Map.Entry::getKey,
-                schema -> GraphSchema.forPropertySchema(schema.getValue())
-            ))
+            "graphProperties", graphPropertySchemaMap()
         );
     }
 
@@ -56,10 +56,7 @@ public interface GraphSchema {
         return Map.of(
             "nodes", nodeSchema().toMap(),
             "relationships", relationshipSchema().toMapOld(),
-            "graphProperties", graphProperties().entrySet().stream().collect(Collectors.toMap(
-                Map.Entry::getKey,
-                schema -> GraphSchema.forPropertySchema(schema.getValue())
-            ))
+            "graphProperties", graphPropertySchemaMap()
         );
     }
 
@@ -69,6 +66,17 @@ public interface GraphSchema {
 
     default Direction direction() {
         return relationshipSchema().isUndirected() ? Direction.UNDIRECTED : Direction.DIRECTED;
+    }
+
+    private Map<String, String> graphPropertySchemaMap() {
+        return graphProperties()
+            .entrySet()
+            .stream()
+            .filter(not(e -> e.getValue().state() == PropertyState.HIDDEN))
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                schema -> GraphSchema.forPropertySchema(schema.getValue())
+            ));
     }
 
     static GraphSchema empty() {
@@ -97,5 +105,4 @@ public interface GraphSchema {
             propertySchema.state()
         );
     }
-
 }
