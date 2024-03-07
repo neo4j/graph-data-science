@@ -46,12 +46,10 @@ dependencies {
     implementation project(':memory-usage')
     implementation project(':ml-algo')
     implementation project(':ml-api')
-    // TODO remove this depenency
     implementation project(':ml-core')
     implementation project(':model-catalog-api')
     implementation project(':neo4j-api')
     implementation project(':neo4j-settings')
-    implementation project(':opengds-procedure-facade')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':termination')

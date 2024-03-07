@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
-import org.neo4j.gds.procedures.AlgorithmsAndCatalogFacade;
-
 import java.util.List;
 import java.util.Map;
 
@@ -76,7 +74,8 @@ final class NodePropertyStepFactoryUsingStubs {
     }
 
     ExecutableNodePropertyStep createNodePropertyStep(
-        AlgorithmsAndCatalogFacade facade, String procedureName,
+        AlgorithmsFacade facade,
+        String procedureName,
         Map<String, Object> configuration,
         List<String> contextNodeLabels,
         List<String> contextRelationshipTypes

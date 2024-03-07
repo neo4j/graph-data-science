@@ -19,12 +19,14 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
-import org.neo4j.gds.procedures.AlgorithmsAndCatalogFacade;
 
 import java.util.Map;
 
 interface Stub {
-    void validateBeforeCreatingNodePropertyStep(AlgorithmsAndCatalogFacade facade, Map<String, Object> configuration);
+    /**
+     * Like code below says: custom validation, i.e. looked up; no user
+     */
+    void validateBeforeCreatingNodePropertyStep(AlgorithmsFacade facade, Map<String, Object> configuration);
 
 
     //    private static AlgoBaseConfig tryParsingConfig(
