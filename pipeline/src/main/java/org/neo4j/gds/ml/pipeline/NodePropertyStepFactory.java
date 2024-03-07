@@ -128,7 +128,7 @@ public final class NodePropertyStepFactory {
         );
     }
 
-    public static GdsCallableFinder.GdsCallableDefinition getGdsCallableDefinition(String taskName) {
+    private static GdsCallableFinder.GdsCallableDefinition getGdsCallableDefinition(String taskName) {
         var normalizedName = normalizeName(taskName);
 
         var gdsCallableDefinition = GdsCallableFinder
@@ -149,7 +149,7 @@ public final class NodePropertyStepFactory {
         return gdsCallableDefinition;
     }
 
-    private static AlgoBaseConfig tryParsingConfig(
+    private static void tryParsingConfig(
         GdsCallableFinder.GdsCallableDefinition callableDefinition,
         Map<String, Object> configuration
     ) {
@@ -161,7 +161,7 @@ public final class NodePropertyStepFactory {
         var limits = LimitsConfiguration.Instance;
 
         // passing the EMPTY_USERNAME as we only try to check if the given configuration itself is valid
-        return new AlgoConfigParser<>(Username.EMPTY_USERNAME.username(), newConfigFunction, defaults, limits).processInput(configuration);
+        new AlgoConfigParser<>(Username.EMPTY_USERNAME.username(), newConfigFunction, defaults, limits).processInput(configuration);
     }
 
     private static void validateReservedConfigKeys(Map<String, Object> procedureConfig) {
