@@ -6,4 +6,4 @@ All GDS procedures inject this one dependency, and it forms an umbrella over fun
 
 We also here host the integration services needed to cleanly interface with Neo4j. All Neo4j dependencies should be unstacked and wrapped here, because in the layers below we would want to be Neo4j agnostic.
 
-Code in here mainly delegates to [the application layer](../../applications/README.md) for actual functionality.
+Code in here mainly uses [the applications procedure facade](../algorithms-facade/README.md) and pipelines. 

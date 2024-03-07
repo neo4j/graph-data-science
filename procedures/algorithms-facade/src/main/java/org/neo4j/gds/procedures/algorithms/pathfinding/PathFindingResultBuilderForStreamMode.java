@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.pathfinding;
+package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.paths.PathFactory.create;
-import static org.neo4j.gds.procedures.pathfinding.PathFindingStreamResult.COST_PROPERTY_NAME;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class PathFindingResultBuilderForStreamMode extends ResultBuilder<PathFindingResult, Stream<PathFindingStreamResult>> {
@@ -78,7 +77,7 @@ public class PathFindingResultBuilderForStreamMode extends ResultBuilder<PathFin
                     nodeIds,
                     costs,
                     relationshipType,
-                    COST_PROPERTY_NAME
+                    PathFindingStreamResult.COST_PROPERTY_NAME
                 );
             }
 

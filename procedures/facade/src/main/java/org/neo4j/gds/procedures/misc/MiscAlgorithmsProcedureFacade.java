@@ -25,7 +25,7 @@ import org.neo4j.gds.algorithms.misc.MiscAlgorithmStreamBusinessFacade;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmWriteBusinessFacade;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
+import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesMutateResult;
 import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesStatsResult;
 import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesStreamResult;

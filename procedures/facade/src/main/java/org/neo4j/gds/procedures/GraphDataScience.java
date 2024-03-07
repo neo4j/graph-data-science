@@ -21,19 +21,20 @@ package org.neo4j.gds.procedures;
 
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsFacade;
 import org.neo4j.gds.procedures.catalog.CatalogFacade;
 import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
-import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
-import org.neo4j.gds.procedures.pathfinding.PathFindingProcedureFacade;
 import org.neo4j.gds.procedures.embeddings.NodeEmbeddingsProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
+import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
 import org.neo4j.gds.procedures.similarity.SimilarityProcedureFacade;
 
 public class GraphDataScience {
     private final Log log;
 
-    private final AlgorithmsAndCatalogFacade algorithmsAndCatalogFacade;
+    private final AlgorithmsFacade algorithmsFacade;
     private final CatalogFacade catalogFacade;
     private final CentralityProcedureFacade centralityProcedureFacade;
     private final CommunityProcedureFacade communityProcedureFacade;
@@ -49,7 +50,7 @@ public class GraphDataScience {
      */
     GraphDataScience(
         Log log,
-        AlgorithmsAndCatalogFacade algorithmsAndCatalogFacade,
+        AlgorithmsFacade algorithmsFacade,
         CatalogFacade catalogFacade,
         CentralityProcedureFacade centralityProcedureFacade,
         CommunityProcedureFacade communityProcedureFacade,
@@ -60,7 +61,7 @@ public class GraphDataScience {
         DeprecatedProceduresMetricService deprecatedProceduresMetricService
     ) {
         this.log = log;
-        this.algorithmsAndCatalogFacade = algorithmsAndCatalogFacade;
+        this.algorithmsFacade = algorithmsFacade;
         this.catalogFacade = catalogFacade;
         this.centralityProcedureFacade = centralityProcedureFacade;
         this.communityProcedureFacade = communityProcedureFacade;
@@ -96,7 +97,7 @@ public class GraphDataScience {
     }
 
     public PathFindingProcedureFacade pathFinding() {
-        return algorithmsAndCatalogFacade.pathFinding();
+        return algorithmsFacade.pathFinding();
     }
 
     public PipelinesProcedureFacade pipelines() {

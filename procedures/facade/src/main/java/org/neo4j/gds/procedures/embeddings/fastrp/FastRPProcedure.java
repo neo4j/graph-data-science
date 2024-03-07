@@ -28,7 +28,7 @@ import org.neo4j.gds.embeddings.fastrp.FastRPMutateConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPStatsConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPStreamConfig;
 import org.neo4j.gds.embeddings.fastrp.FastRPWriteConfig;
-import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
+import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.embeddings.DefaultNodeEmbeddingsComputationalResultTransformer;
 import org.neo4j.gds.procedures.embeddings.FastRPComputationalResultTransformer;
 import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingMutateResult;

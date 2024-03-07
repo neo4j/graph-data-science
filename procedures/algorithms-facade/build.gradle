@@ -1,0 +1,32 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Algorithms Procedure Facade'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    neodeps().each {
+        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
+            transitive = false
+        }
+    }
+
+    implementation project(':algo')
+    implementation project(':annotations')
+    implementation project(':config-api')
+    implementation project(':core')
+    implementation project(':defaults-and-limits-configuration')
+    implementation project(':neo4j-api')
+    implementation project(':path-finding-algorithms')
+    implementation project(':proc-common')
+    implementation project(':progress-tracking')
+    implementation project(':string-formatting')
+
+    // test infrastructure
+//    testCompileOnly group: 'org.immutables', name: 'value', version: ver.'immutables'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: ver.'junit5bom'
+    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: ver.'junit5bom'
+//    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: ver.'junit5bom'
+    testImplementation group: 'org.mockito', name: 'mockito-junit-jupiter', version: ver.'mockito-junit-jupiter'
+    testImplementation group: 'org.assertj', name: 'assertj-core', version: ver.'assertj'
+}

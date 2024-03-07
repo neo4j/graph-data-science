@@ -236,6 +236,9 @@ project(':procedure-integration').projectDir = file('procedures/integration')
 include('opengds-procedure-facade')
 project(':opengds-procedure-facade').projectDir = file('procedures/facade')
 
+include('algorithms-procedure-facade')
+project(':algorithms-procedure-facade').projectDir = file('procedures/algorithms-facade')
+
 include('progress-tracking')
 project(':progress-tracking').projectDir = file('progress-tracking')
 

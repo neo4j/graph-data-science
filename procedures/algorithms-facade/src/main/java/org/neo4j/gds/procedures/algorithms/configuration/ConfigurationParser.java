@@ -17,9 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.configparser;
+package org.neo4j.gds.procedures.algorithms.configuration;
 
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
@@ -82,14 +81,12 @@ public class ConfigurationParser {
         //TODO: no reason creating CyperMapWrapper object for this, we should pull the logic here in a function here.
     }
 
-    @NotNull
     private HashSet<String> getIrrelevantInputtedKeys(Map<String, Object> configuration, HashSet<String> allowedKeys) {
         var irrelevantInputtedKeys = new HashSet<>(configuration.keySet());
         irrelevantInputtedKeys.removeAll(allowedKeys);
         return irrelevantInputtedKeys;
     }
 
-    @NotNull
     private HashMap<String, Object> getConfigurationForLimitValidation(
         Map<String, Object> configuration,
         HashSet<String> irrelevantInputtedKeys) {

@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.pathfinding;
+package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -25,24 +25,25 @@ import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTimi
 import org.neo4j.gds.applications.algorithms.pathfinding.ResultBuilder;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 
 import java.util.Optional;
 
-class PathFindingResultBuilderForMutateMode extends ResultBuilder<PathFindingResult, PathFindingMutateResult> {
+class PathFindingResultBuilderForWriteMode extends ResultBuilder<PathFindingResult, StandardWriteRelationshipsResult> {
     private final ToMapConvertible configuration;
 
-    PathFindingResultBuilderForMutateMode(ToMapConvertible configuration) {
+    PathFindingResultBuilderForWriteMode(ToMapConvertible configuration) {
         this.configuration = configuration;
     }
 
     @Override
-    public PathFindingMutateResult build(
+    public StandardWriteRelationshipsResult build(
         Graph graph,
         GraphStore graphStore,
         Optional<PathFindingResult> pathFindingResult,
         AlgorithmProcessingTimings timings
     ) {
-        return new PathFindingMutateResult(
+        return new StandardWriteRelationshipsResult(
             timings.preProcessingMillis,
             timings.computeMillis,
             0, // yeah, I don't understand it either :shrug:

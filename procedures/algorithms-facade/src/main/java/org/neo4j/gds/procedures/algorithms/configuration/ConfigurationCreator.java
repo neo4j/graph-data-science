@@ -17,13 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms;
+package org.neo4j.gds.procedures.algorithms.configuration;
 
 import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.procedures.configparser.ConfigurationParser;
 
 import java.util.Map;
 import java.util.function.BiFunction;

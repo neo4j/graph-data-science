@@ -17,9 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.pathfinding;
+package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.paths.PathResult;
@@ -52,14 +51,14 @@ public final class PathFindingStreamResult {
 
     public Path path;
 
-    PathFindingStreamResult(
+    public PathFindingStreamResult(
         long index,
         long sourceNode,
         long targetNode,
         double totalCost,
         List<Long> nodeIds,
         List<Double> costs,
-        @Nullable Path path
+        Path path
     ) {
         this.index = index;
         this.sourceNode = sourceNode;

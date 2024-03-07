@@ -25,7 +25,7 @@ import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStatsBusinessFaca
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
+import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.similarity.knn.KnnMutateResult;
 import org.neo4j.gds.procedures.similarity.knn.KnnStatsResult;
 import org.neo4j.gds.procedures.similarity.knn.KnnWriteResult;

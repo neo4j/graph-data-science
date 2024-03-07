@@ -21,12 +21,13 @@ package org.neo4j.gds.procedures;
 
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsFacade;
 import org.neo4j.gds.procedures.catalog.CatalogFacade;
 import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.embeddings.NodeEmbeddingsProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
 import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
-import org.neo4j.gds.procedures.pathfinding.PathFindingProcedureFacade;
 import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
 import org.neo4j.gds.procedures.similarity.SimilarityProcedureFacade;
 
@@ -82,11 +83,6 @@ public class GraphDataScienceBuilder {
         return this;
     }
 
-    public GraphDataScienceBuilder with(SimilarityProcedureFacade similarityProcedureFacade) {
-        this.similarityProcedureFacade = similarityProcedureFacade;
-        return this;
-    }
-
     /**
      * @deprecated this stops working the moment I need pipelines to use algorithms. At that point: opinionated builder
      */
@@ -96,13 +92,18 @@ public class GraphDataScienceBuilder {
         return this;
     }
 
+    public GraphDataScienceBuilder with(SimilarityProcedureFacade similarityProcedureFacade) {
+        this.similarityProcedureFacade = similarityProcedureFacade;
+        return this;
+    }
+
     public GraphDataScienceBuilder with(DeprecatedProceduresMetricService deprecatedProceduresMetricService) {
         this.deprecatedProceduresMetricService = deprecatedProceduresMetricService;
         return this;
     }
 
     public GraphDataScience build() {
-        var algorithmsAndCatalogFacade = new AlgorithmsAndCatalogFacade(pathFindingProcedureFacade);
+        var algorithmsAndCatalogFacade = new AlgorithmsFacade(pathFindingProcedureFacade);
 
         return new GraphDataScience(
             log,

@@ -25,7 +25,7 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
-import org.neo4j.gds.procedures.pathfinding.PathFindingStreamResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingStreamResult;
 
 import java.util.stream.Stream;
 

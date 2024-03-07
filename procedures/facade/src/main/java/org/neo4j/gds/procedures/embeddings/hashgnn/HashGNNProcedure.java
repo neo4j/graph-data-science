@@ -24,7 +24,7 @@ import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsEstimateBusin
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsMutateBusinessFacade;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNMutateConfig;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNStreamConfig;
-import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
+import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.embeddings.DefaultNodeEmbeddingsComputationalResultTransformer;
 import org.neo4j.gds.procedures.embeddings.HashGNNComputationalResultTransformer;
 import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingMutateResult;

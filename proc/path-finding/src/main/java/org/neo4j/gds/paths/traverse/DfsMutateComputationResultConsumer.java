@@ -23,7 +23,7 @@ import org.neo4j.gds.MutateComputationResultConsumer;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.procedures.pathfinding.PathFindingMutateResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 public class DfsMutateComputationResultConsumer extends MutateComputationResultConsumer<DFS, HugeLongArray, DfsMutateConfig, PathFindingMutateResult> {

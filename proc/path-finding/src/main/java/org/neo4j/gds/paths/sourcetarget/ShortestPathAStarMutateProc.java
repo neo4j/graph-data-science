@@ -20,7 +20,7 @@
 package org.neo4j.gds.paths.sourcetarget;
 
 import org.neo4j.gds.procedures.GraphDataScience;
-import org.neo4j.gds.procedures.pathfinding.PathFindingMutateResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;

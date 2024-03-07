@@ -17,22 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures;
+package org.neo4j.gds.procedures.algorithms;
 
-import org.neo4j.gds.procedures.pathfinding.PathFindingProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
 
 /**
  * This is the facade that faces pipelines, so everything you can pipeline I guess.
  * I assume you can't pipeline a pipeline...
  */
-public class AlgorithmsAndCatalogFacade {
+public class AlgorithmsFacade {
     private final PathFindingProcedureFacade pathFindingProcedureFacade;
 
-    AlgorithmsAndCatalogFacade(PathFindingProcedureFacade pathFindingProcedureFacade) {
+    public AlgorithmsFacade(PathFindingProcedureFacade pathFindingProcedureFacade) {
         this.pathFindingProcedureFacade = pathFindingProcedureFacade;
     }
 
-    PathFindingProcedureFacade pathFinding() {
+    public PathFindingProcedureFacade pathFinding() {
         return pathFindingProcedureFacade;
     }
 }

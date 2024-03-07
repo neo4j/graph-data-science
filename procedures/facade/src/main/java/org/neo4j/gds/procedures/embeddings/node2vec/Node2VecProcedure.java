@@ -26,7 +26,7 @@ import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsWriteBusiness
 import org.neo4j.gds.embeddings.node2vec.Node2VecMutateConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecStreamConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecWriteConfig;
-import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
+import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.embeddings.Node2VecComputationalResultTransformer;
 import org.neo4j.gds.results.MemoryEstimateResult;
 

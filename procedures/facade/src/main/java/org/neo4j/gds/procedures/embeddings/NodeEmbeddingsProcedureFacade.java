@@ -26,7 +26,7 @@ import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsMutateBusines
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsTrainBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
+import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.embeddings.fastrp.FastRPProcedure;
 import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageProcedure;
 import org.neo4j.gds.procedures.embeddings.hashgnn.HashGNNProcedure;

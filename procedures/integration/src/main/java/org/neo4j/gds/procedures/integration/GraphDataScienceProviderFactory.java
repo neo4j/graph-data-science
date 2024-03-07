@@ -30,7 +30,7 @@ import org.neo4j.gds.mem.MemoryGauge;
 import org.neo4j.gds.metrics.MetricsFacade;
 import org.neo4j.gds.modelcatalogservices.ModelCatalogServiceProvider;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
-import org.neo4j.gds.procedures.configparser.ConfigurationParser;
+import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.services.UserLogServices;
 
 import java.util.Optional;
