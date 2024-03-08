@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class TargetNodeFilterTest {
     @Test
     void shouldPrioritiseTargetNodes() {
-        var consumer = ProvidedTargetNodeFilter.create(l -> true, 3, Optional.empty(), Double.MIN_VALUE);
+        var consumer = ExistingTargetNodeFilter.create(l -> true, 3, Optional.empty(), Double.MIN_VALUE);
 
         consumer.offer(23, 3.14);
         consumer.offer(42, 1.61);
@@ -46,7 +46,7 @@ class TargetNodeFilterTest {
 
     @Test
     void shouldOnlyKeepTopK() {
-        var consumer = ProvidedTargetNodeFilter.create(l -> true, 2, Optional.empty(), Double.MIN_VALUE);
+        var consumer = ExistingTargetNodeFilter.create(l -> true, 2, Optional.empty(), Double.MIN_VALUE);
 
         consumer.offer(23, 3.14);
         consumer.offer(42, 1.61);
@@ -60,7 +60,7 @@ class TargetNodeFilterTest {
 
     @Test
     void shouldOnlyIncludeTargetNodes() {
-        var consumer = ProvidedTargetNodeFilter.create(l -> false, 3, Optional.empty(), Double.MIN_VALUE);
+        var consumer = ExistingTargetNodeFilter.create(l -> false, 3, Optional.empty(), Double.MIN_VALUE);
 
         consumer.offer(23, 3.14);
         consumer.offer(42, 1.61);
@@ -71,7 +71,7 @@ class TargetNodeFilterTest {
 
     @Test
     void shouldIgnoreExactDuplicates() {
-        var consumer = ProvidedTargetNodeFilter.create(l -> true, 4, Optional.empty(), Double.MIN_VALUE);
+        var consumer = ExistingTargetNodeFilter.create(l -> true, 4, Optional.empty(), Double.MIN_VALUE);
 
         consumer.offer(23, 3.14);
         consumer.offer(42, 1.61);
@@ -90,7 +90,7 @@ class TargetNodeFilterTest {
      */
     @Test
     void shouldAllowDuplicateElementsWithNewPriorities() {
-        var consumer = ProvidedTargetNodeFilter.create(l -> true, 4, Optional.empty(), Double.MIN_VALUE);
+        var consumer = ExistingTargetNodeFilter.create(l -> true, 4, Optional.empty(), Double.MIN_VALUE);
 
         consumer.offer(23, 3.14);
         consumer.offer(42, 1.61);
@@ -107,7 +107,7 @@ class TargetNodeFilterTest {
 
     @Test
     void shouldIgnoreLowScoringNodes() {
-        var targetNodeFilter = ProvidedTargetNodeFilter.create(l -> true, 3, Optional.empty(), 2);
+        var targetNodeFilter = ExistingTargetNodeFilter.create(l -> true, 3, Optional.empty(), 2);
 
         targetNodeFilter.offer(23, 3.14);
         targetNodeFilter.offer(42, 1.61);
@@ -128,7 +128,7 @@ class TargetNodeFilterTest {
             Pair.of(0.003, 384L)
         );
 
-        var targetNodeFilter = ProvidedTargetNodeFilter.create(l -> true, 3, Optional.of(seeds), 2);
+        var targetNodeFilter = ExistingTargetNodeFilter.create(l -> true, 3, Optional.of(seeds), 2);
 
         targetNodeFilter.offer(23, 3.14);
         targetNodeFilter.offer(42, 1.61);

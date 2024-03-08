@@ -42,7 +42,7 @@ import java.util.stream.Stream;
  * have convinced ourselves that {@link org.neo4j.gds.similarity.knn.Knn} never presents us with such cases. So this
  * data structure suffices.
  */
-public final class ProvidedTargetNodeFilter implements TargetNodeFilter {
+public final class ExistingTargetNodeFilter implements TargetNodeFilter {
     private final TreeSet<Pair<Double, Long>> priorityQueue;
     private final LongPredicate predicate;
     private final int bound;
@@ -52,7 +52,7 @@ public final class ProvidedTargetNodeFilter implements TargetNodeFilter {
     /**
      * @param seeds Optionally seed the priority queue
      */
-    static ProvidedTargetNodeFilter create(
+    static ExistingTargetNodeFilter create(
         LongPredicate targetNodePredicate,
         int bound,
         Optional<Set<Pair<Double, Long>>> seeds,
@@ -62,10 +62,16 @@ public final class ProvidedTargetNodeFilter implements TargetNodeFilter {
 
         seeds.ifPresent(priorityQueue::addAll);
 
-        return new ProvidedTargetNodeFilter(priorityQueue, seeds.isPresent(), similarityCutoff, targetNodePredicate, bound);
+        return new ExistingTargetNodeFilter(
+            priorityQueue,
+            seeds.isPresent(),
+            similarityCutoff,
+            targetNodePredicate,
+            bound
+        );
     }
 
-    ProvidedTargetNodeFilter(
+    ExistingTargetNodeFilter(
         TreeSet<Pair<Double, Long>> priorityQueue,
         boolean seeded,
         double similarityCutoff,

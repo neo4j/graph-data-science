@@ -41,7 +41,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.similarity.filteredknn.EmptyTargetNodeFilter.EMPTY_CONSUMER;
 
-public final class ProvidedTargetNodeFiltering implements TargetNodeFiltering {
+public final class ExistingTargetNodeFiltering implements TargetNodeFiltering {
 
     private final HugeObjectArray<TargetNodeFilter> targetNodeFilters;
     private final SeedingSummary seedingSummary;
@@ -50,7 +50,7 @@ public final class ProvidedTargetNodeFiltering implements TargetNodeFiltering {
      * @param optionalSimilarityFunction An actual similarity function if you want seeding, empty otherwise
      */
 
-    static ProvidedTargetNodeFiltering create(
+    static ExistingTargetNodeFiltering create(
         NodeFilter sourceNodeFilter,
         long nodeCount,
         int k,
@@ -80,7 +80,7 @@ public final class ProvidedTargetNodeFiltering implements TargetNodeFiltering {
                     nodepairAdder.add(optionalPersonalizedSeeds.get().size());
                 }
 
-                TargetNodeFilter targetNodeFilter = ProvidedTargetNodeFilter.create(
+                TargetNodeFilter targetNodeFilter = ExistingTargetNodeFilter.create(
                     targetNodePredicate,
                     k,
                     optionalPersonalizedSeeds,
@@ -91,7 +91,7 @@ public final class ProvidedTargetNodeFiltering implements TargetNodeFiltering {
         });
 
         var seededOptimally = (startingSeeds[k] == -1) && (optionalSimilarityFunction.isPresent()); //if there less than `k+1` targets, we optimally find solution just by seeding.
-        return new ProvidedTargetNodeFiltering(
+        return new ExistingTargetNodeFiltering(
             neighbourConsumers,
             new SeedingSummary(nodeCountAdder.longValue(), nodepairAdder.longValue(), seededOptimally)
         );
@@ -162,7 +162,7 @@ public final class ProvidedTargetNodeFiltering implements TargetNodeFiltering {
     }
 
 
-    private ProvidedTargetNodeFiltering(
+    private ExistingTargetNodeFiltering(
         HugeObjectArray<TargetNodeFilter> targetNodeFilters,
         SeedingSummary seedingSummary
     ) {

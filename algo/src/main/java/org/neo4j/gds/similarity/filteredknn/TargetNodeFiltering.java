@@ -54,7 +54,7 @@ public interface TargetNodeFiltering extends NeighbourConsumers {
         if (targetNodePredicate == NodeFilter.ALLOW_EVERYTHING) {
             return EmptyTargetNodeFiltering.EMPTY_TARGET_FILTERING;
         } else {
-            return ProvidedTargetNodeFiltering.create(
+            return ExistingTargetNodeFiltering.create(
                 sourceNodeFilter,
                 nodeCount,
                 k,

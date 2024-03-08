@@ -37,7 +37,7 @@ class TargetNodeFilteringTest {
         int kIsTwo = 2;
         LongPredicate evenNodesAreTargetNodes = l -> l % 2 == 0;
         double noSimilarityCutoff = Double.MIN_VALUE;
-        ProvidedTargetNodeFiltering targetNodeFiltering = ProvidedTargetNodeFiltering.create(
+        ExistingTargetNodeFiltering targetNodeFiltering = ExistingTargetNodeFiltering.create(
             NodeFilter.ALLOW_EVERYTHING,
             thereIsSixNodeInThisFilter,
             kIsTwo,
@@ -74,7 +74,7 @@ class TargetNodeFilteringTest {
             }
         });
         double noSimilarityCutoff = Double.MIN_VALUE;
-        ProvidedTargetNodeFiltering targetNodeFiltering = ProvidedTargetNodeFiltering.create(
+        ExistingTargetNodeFiltering targetNodeFiltering = ExistingTargetNodeFiltering.create(
             NodeFilter.ALLOW_EVERYTHING,
             thereIsSixNodeInThisFilter,
             kIsFive,
@@ -113,7 +113,7 @@ class TargetNodeFilteringTest {
             }
         });
         double noSimilarityCutoff = Double.MIN_VALUE;
-        ProvidedTargetNodeFiltering targetNodeFiltering = ProvidedTargetNodeFiltering.create(
+        ExistingTargetNodeFiltering targetNodeFiltering = ExistingTargetNodeFiltering.create(
             NodeFilter.ALLOW_EVERYTHING,
             thereIsSixNodeInThisFilter,
             kIsFive,
@@ -135,7 +135,7 @@ class TargetNodeFilteringTest {
         int kIsTwo = 2;
         LongPredicate evenNodesAreTargetNodes = l -> l % 2 == 0;
         double noSimilarityCutoff = Double.MIN_VALUE;
-        ProvidedTargetNodeFiltering targetNodeFiltering = ProvidedTargetNodeFiltering.create(
+        ExistingTargetNodeFiltering targetNodeFiltering = ExistingTargetNodeFiltering.create(
             l -> l > 0,
             thereIsSixNodeInThisFilter,
             kIsTwo,
@@ -148,7 +148,7 @@ class TargetNodeFilteringTest {
         var targetNodeFilterZero = targetNodeFiltering.get(0);
         var targetNodeFilterOne = targetNodeFiltering.get(1);
         assertThat(targetNodeFilterZero).isInstanceOf(EmptyTargetNodeFilter.class);
-        assertThat(targetNodeFilterOne).isInstanceOf(ProvidedTargetNodeFilter.class);
+        assertThat(targetNodeFilterOne).isInstanceOf(ExistingTargetNodeFilter.class);
 
     }
 
@@ -166,7 +166,7 @@ class TargetNodeFilteringTest {
             }
         });
 
-        ProvidedTargetNodeFiltering targetNodeFiltering = ProvidedTargetNodeFiltering.create(
+        ExistingTargetNodeFiltering targetNodeFiltering = ExistingTargetNodeFiltering.create(
             NodeFilter.ALLOW_EVERYTHING,
             gazillionNodes,
             gazillionK,
@@ -194,7 +194,7 @@ class TargetNodeFilteringTest {
             }
         });
 
-        ProvidedTargetNodeFiltering targetNodeFiltering = ProvidedTargetNodeFiltering.create(
+        ExistingTargetNodeFiltering targetNodeFiltering = ExistingTargetNodeFiltering.create(
             NodeFilter.ALLOW_EVERYTHING,
             gazillionNodes,
             gazillionK,
