@@ -26,10 +26,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
@@ -38,7 +36,6 @@ import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -53,11 +50,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
-import static org.neo4j.gds.TestSupport.assertMemoryEstimation;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -630,34 +625,6 @@ class PageRankTest {
         }
     }
 
-
-    static Stream<Arguments> expectedMemoryEstimation() {
-        return Stream.of(
-            Arguments.of(1, 2412832L, 2412832L),
-            Arguments.of(4, 2413000L, 2413000L),
-            Arguments.of(42, 2415128L, 2415128L)
-        );
-    }
-
-    @ParameterizedTest
-    @MethodSource("expectedMemoryEstimation")
-    void shouldComputeMemoryEstimation(int concurrency, long expectedMinBytes, long expectedMaxBytes) {
-        var config = PageRankConfigImpl
-            .builder()
-            .build();
-
-        var nodeCount = 100_000;
-        var relationshipCount = nodeCount * 10;
-
-        assertMemoryEstimation(
-            () -> new PageRankAlgorithmFactory<>().memoryEstimation(config),
-            nodeCount,
-            relationshipCount,
-            concurrency,
-            MemoryRange.of(expectedMinBytes, expectedMaxBytes)
-        );
-    }
-
     @ParameterizedTest
     @EnumSource(Mode.class)
     void parallelExecution(Mode mode) {
@@ -676,23 +643,6 @@ class PageRankTest {
         for (long nodeId = 0; nodeId < graph.nodeCount(); nodeId++) {
             assertThat(singleThreaded.applyAsDouble(nodeId)).isEqualTo(multiThreaded.applyAsDouble(nodeId), Offset.offset(1e-5));
         }
-    }
-
-    @Test
-    void shouldComputeMemoryEstimationFor10BElements() {
-        var config = PageRankConfigImpl
-            .builder()
-            .build();
-
-        var nodeCount = 10_000_000_000L;
-        var relationshipCount = 10_000_000_000L;
-        assertMemoryEstimation(
-            () -> new PageRankAlgorithmFactory<>().memoryEstimation(config),
-            nodeCount,
-            relationshipCount,
-            4,
-            MemoryRange.of(241_286_621_640L, 241_286_621_640L)
-        );
     }
 
     PageRankResult runOnPregel(Graph graph, PageRankConfig config) {

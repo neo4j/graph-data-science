@@ -24,10 +24,8 @@ import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelComputation;
-import org.neo4j.gds.beta.pregel.PregelSchema;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -159,8 +157,6 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Gra
 
     @Override
     public MemoryEstimation memoryEstimation(PageRankConfig configuration) {
-        return Pregel.memoryEstimation(new PregelSchema.Builder()
-            .add(PageRankComputation.PAGE_RANK, ValueType.DOUBLE)
-            .build(), false, false);
+        return new PageRankMemoryEstimateDefinition().memoryEstimation();
     }
 }
