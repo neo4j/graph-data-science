@@ -21,17 +21,16 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIPTION;
@@ -39,16 +38,16 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class ScalePropertiesStreamProc extends BaseProc {
 
+    @Context
+    public GraphDataScience facade;
+
     @Procedure("gds.scaleProperties.stream")
     @Description(SCALE_PROPERTIES_DESCRIPTION)
-    public Stream<Result> stream(
+    public Stream<ScalePropertiesStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new ScalePropertiesStreamSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.miscellaneousAlgorithms().scalePropertiesStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.scaleProperties.stream.estimate", mode = READ)
@@ -70,7 +69,7 @@ public class ScalePropertiesStreamProc extends BaseProc {
     @Deprecated(forRemoval = true)
     @Procedure(value = "gds.alpha.scaleProperties.stream", deprecatedBy = "gds.scaleProperties.stream")
     @Description(SCALE_PROPERTIES_DESCRIPTION)
-    public Stream<Result> alphaStream(
+    public Stream<ScalePropertiesStreamResult> alphaStream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -78,21 +77,8 @@ public class ScalePropertiesStreamProc extends BaseProc {
             .metricsFacade()
             .deprecatedProcedures().called("gds.alpha.scaleProperties.stream");
 
-        var spec = new ScalePropertiesStreamSpec();
-        spec.setAllowL1L2Scalers(true);
-        return new ProcedureExecutor<>(
-            spec,
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.miscellaneousAlgorithms().alphaScalePropertiesStream(graphName, configuration);
+
     }
 
-    public static class Result {
-        public final long nodeId;
-        public final List<Double> scaledProperty;
-
-        public Result(long nodeId, double[] scaledProperty) {
-            this.nodeId = nodeId;
-            this.scaledProperty = Arrays.stream(scaledProperty).boxed().collect(Collectors.toList());
-        }
-    }
 }

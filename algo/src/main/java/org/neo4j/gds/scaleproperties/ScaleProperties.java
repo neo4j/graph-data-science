@@ -21,7 +21,6 @@ package org.neo4j.gds.scaleproperties;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
@@ -34,7 +33,6 @@ import org.neo4j.gds.scaling.ScalarScaler;
 import org.neo4j.gds.scaling.Scaler;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.function.DoubleSupplier;
@@ -51,7 +49,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  * The output node property values are lists of the same size as the input lists, and contain the scaled values
  * of the input node properties.
  */
-public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
+public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
 
     private final Graph graph;
     private final ScalePropertiesBaseConfig config;
@@ -70,7 +68,7 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
     }
 
     @Override
-    public Result compute() {
+    public ScalePropertiesResult compute() {
         progressTracker.beginSubTask("ScaleProperties");
         var scaledProperties = HugeObjectArray.newArray(double[].class, graph.nodeCount());
 
@@ -100,7 +98,7 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
         progressTracker.endSubTask("Scale properties");
 
         progressTracker.endSubTask("ScaleProperties");
-        return Result.of(scaledProperties, scalerStatistics);
+        return ScalePropertiesResult.of(scaledProperties, scalerStatistics);
     }
 
     private void initializeArrays(HugeObjectArray<double[]> scaledProperties, int propertyCount) {
@@ -150,17 +148,6 @@ public class ScaleProperties extends Algorithm<ScaleProperties.Result> {
             return nodeId -> ((Scaler.ArrayScaler) scaler).scaleProperty(nodeId, scaledProperties.get(nodeId), index);
         } else {
             return nodeId -> scaledProperties.get(nodeId)[index] = scaler.scaleProperty(nodeId);
-        }
-    }
-
-    @ValueClass
-    public interface Result {
-        HugeObjectArray<double[]> scaledProperties();
-
-        Map<String, Map<String, List<Double>>> scalerStatistics();
-
-        static Result of(HugeObjectArray<double[]> properties, Map<String, Map<String, List<Double>>> stats) {
-            return ImmutableResult.of(properties, stats);
         }
     }
 

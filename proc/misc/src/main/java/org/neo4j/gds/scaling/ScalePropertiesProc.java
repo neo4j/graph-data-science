@@ -19,32 +19,33 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.neo4j.gds.api.properties.nodes.DoubleArrayNodePropertyValues;
+import org.neo4j.gds.algorithms.misc.ScaledPropertiesNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.scaleproperties.ScaleProperties;
 import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
+import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 
 public final class ScalePropertiesProc {
-
+    
     private ScalePropertiesProc() {}
 
     static final String SCALE_PROPERTIES_DESCRIPTION = "Scale node properties";
 
     static NodePropertyValues nodeProperties(
-        ComputationResult<ScaleProperties, ScaleProperties.Result, ? extends ScalePropertiesBaseConfig> computationResult
+        ComputationResult<ScaleProperties, ScalePropertiesResult, ? extends ScalePropertiesBaseConfig> computationResult
     ) {
         var size = computationResult.graph().nodeCount();
         var scaledProperties = computationResult.result()
-            .map(ScaleProperties.Result::scaledProperties)
+            .map(ScalePropertiesResult::scaledProperties)
             .orElseGet(() -> HugeObjectArray.newArray(double[].class, 0));
 
-        return new ScaledNodePropertyValues(size, scaledProperties);
+        return new ScaledPropertiesNodePropertyValues(size, scaledProperties);
     }
 
     static NodePropertyValues nodeProperties(long size, HugeObjectArray<double[]> scaledProperties) {
-        return new ScaledNodePropertyValues(size, scaledProperties);
+        return new ScaledPropertiesNodePropertyValues(size, scaledProperties);
     }
 
     static void validateLegacyScalers(ScalePropertiesBaseConfig config, boolean allowL1L2Scalers) {
@@ -54,24 +55,4 @@ public final class ScalePropertiesProc {
         }
     }
 
-    static final class ScaledNodePropertyValues implements DoubleArrayNodePropertyValues {
-
-        private final long size;
-        private final HugeObjectArray<double[]> scaledProperties;
-
-        private ScaledNodePropertyValues(long size, HugeObjectArray<double[]> scaledProperties) {
-            this.size = size;
-            this.scaledProperties = scaledProperties;
-        }
-
-        @Override
-        public long nodeCount() {
-            return size;
-        }
-
-        @Override
-        public double[] doubleArrayValue(long nodeId) {
-            return scaledProperties.get(nodeId);
-        }
-    }
 }

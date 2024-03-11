@@ -25,6 +25,7 @@ import org.neo4j.gds.procedures.catalog.CatalogFacade;
 import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.embeddings.NodeEmbeddingsProcedureFacade;
+import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.pathfinding.PathFindingProcedureFacade;
 import org.neo4j.gds.procedures.similarity.SimilarityProcedureFacade;
 
@@ -41,6 +42,8 @@ public class GraphDataScienceBuilder {
     private CommunityProcedureFacade communityProcedureFacade;
     private NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade;
     private SimilarityProcedureFacade similarityProcedureFacade;
+    private MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade;
+
     private PathFindingProcedureFacade pathFindingProcedureFacade;
     private DeprecatedProceduresMetricService deprecatedProceduresMetricService;
 
@@ -73,6 +76,11 @@ public class GraphDataScienceBuilder {
         return this;
     }
 
+    public GraphDataScienceBuilder with(MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade) {
+        this.miscAlgorithmsProcedureFacade = miscAlgorithmsProcedureFacade;
+        return this;
+    }
+
     public GraphDataScienceBuilder with(PathFindingProcedureFacade pathFindingProcedureFacade) {
         this.pathFindingProcedureFacade = pathFindingProcedureFacade;
         return this;
@@ -91,6 +99,7 @@ public class GraphDataScienceBuilder {
             communityProcedureFacade,
             nodeEmbeddingsProcedureFacade,
             similarityProcedureFacade,
+            miscAlgorithmsProcedureFacade,
             pathFindingProcedureFacade,
             deprecatedProceduresMetricService
         );

@@ -24,8 +24,10 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesStreamResult;
 import org.neo4j.gds.scaleproperties.ScaleProperties;
 import org.neo4j.gds.scaleproperties.ScalePropertiesFactory;
+import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 import org.neo4j.gds.scaleproperties.ScalePropertiesStreamConfig;
 
 import java.util.stream.LongStream;
@@ -37,7 +39,7 @@ import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIP
 import static org.neo4j.gds.scaling.ScalePropertiesProc.validateLegacyScalers;
 
 @GdsCallable(name = "gds.scaleProperties.stream", aliases = {"gds.alpha.scaleProperties.stream"}, description = SCALE_PROPERTIES_DESCRIPTION, executionMode = STREAM)
-public class ScalePropertiesStreamSpec implements AlgorithmSpec<ScaleProperties, ScaleProperties.Result, ScalePropertiesStreamConfig, Stream<ScalePropertiesStreamProc.Result>, ScalePropertiesFactory<ScalePropertiesStreamConfig>> {
+public class ScalePropertiesStreamSpec implements AlgorithmSpec<ScaleProperties, ScalePropertiesResult, ScalePropertiesStreamConfig, Stream<ScalePropertiesStreamResult>, ScalePropertiesFactory<ScalePropertiesStreamConfig>> {
 
     private boolean allowL1L2Scalers = false;
 
@@ -65,7 +67,7 @@ public class ScalePropertiesStreamSpec implements AlgorithmSpec<ScaleProperties,
     }
 
     @Override
-    public ComputationResultConsumer<ScaleProperties, ScaleProperties.Result, ScalePropertiesStreamConfig, Stream<ScalePropertiesStreamProc.Result>> computationResultConsumer() {
+    public ComputationResultConsumer<ScaleProperties, ScalePropertiesResult, ScalePropertiesStreamConfig, Stream<ScalePropertiesStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),
@@ -75,7 +77,7 @@ public class ScalePropertiesStreamSpec implements AlgorithmSpec<ScaleProperties,
                     var nodeProperties = ScalePropertiesProc.nodeProperties(graph.nodeCount(), result.scaledProperties());
                     return LongStream
                         .range(0, graph.nodeCount())
-                        .mapToObj(nodeId -> new ScalePropertiesStreamProc.Result(
+                        .mapToObj(nodeId -> new ScalePropertiesStreamResult(
                             graph.toOriginalNodeId(nodeId),
                             nodeProperties.doubleArrayValue(nodeId)
                         ));

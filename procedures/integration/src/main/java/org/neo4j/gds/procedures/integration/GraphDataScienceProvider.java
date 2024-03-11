@@ -58,7 +58,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         var pathFindingProcedureFacade = algorithmFacadeFactory.createPathFindingProcedureFacade();
         var similarityProcedureFacade = algorithmFacadeFactory.createSimilarityProcedureFacade();
         var nodeEmbeddingsProcedureFacade = algorithmFacadeFactory.createNodeEmbeddingsProcedureFacade();
-
+        var miscAlgorithmsProcedureFacade = algorithmFacadeFactory.createMiscellaneousProcedureFacade();
         return new GraphDataScienceBuilder(log)
             .with(catalogFacade)
             .with(centralityProcedureFacade)
@@ -66,6 +66,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             .with(nodeEmbeddingsProcedureFacade)
             .with(similarityProcedureFacade)
             .with(pathFindingProcedureFacade)
+            .with(miscAlgorithmsProcedureFacade)
             .with(deprecatedProceduresMetricService)
             .build();
     }
