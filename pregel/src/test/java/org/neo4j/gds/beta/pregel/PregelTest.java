@@ -540,7 +540,7 @@ class PregelTest {
         assertEquals(
             MemoryRange.of(expectedBytes).max,
             Pregel
-                .memoryEstimation(pregelSchema, isQueueBased, isAsync)
+                .memoryEstimation(pregelSchema.propertiesMap(), isQueueBased, isAsync)
                 .estimate(dimensions, concurrency)
                 .memoryUsage().max
         );

@@ -49,6 +49,8 @@ public final class BidirectionalComputationAlgorithmFactory extends GraphAlgorit
     @Override
     public MemoryEstimation memoryEstimation(PregelProcedureConfig configuration) {
         var computation = new BidirectionalComputation();
-        return Pregel.memoryEstimation(computation.schema(configuration), computation.reducer().isEmpty(), configuration.isAsynchronous());
+        return Pregel.memoryEstimation(computation.schema(configuration).propertiesMap(),
+            computation.reducer().isEmpty(), configuration.isAsynchronous()
+        );
     }
 }

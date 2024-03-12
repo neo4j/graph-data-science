@@ -19,11 +19,14 @@
  */
 package org.neo4j.gds.beta.pregel;
 
+import org.immutables.value.Value;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @ValueClass
 public interface PregelSchema {
@@ -33,6 +36,11 @@ public interface PregelSchema {
     }
 
     Set<Element> elements();
+
+    @Value.Auxiliary
+    default Map<String, ValueType> propertiesMap() {
+        return elements().stream().collect(Collectors.toMap(Element::propertyKey, Element::propertyType));
+    }
 
     class Builder {
 

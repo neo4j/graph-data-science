@@ -71,14 +71,14 @@ public abstract class NodeValue {
         return new CompositeNodeValue(schema, properties);
     }
 
-    static MemoryEstimation memoryEstimation(PregelSchema pregelSchema) {
+    static MemoryEstimation memoryEstimation(Map<String, ValueType> properties) {
         return MemoryEstimations.setup("", (dimensions, concurrency) -> {
             var builder = MemoryEstimations.builder();
 
-            pregelSchema.elements().forEach(element -> {
-                var entry = formatWithLocale("%s (%s)", element.propertyKey(), element.propertyType());
+            properties.forEach((propertyKey, propertyType) -> {
+                var entry = formatWithLocale("%s (%s)", propertyKey, propertyType);
 
-                switch (element.propertyType()) {
+                switch (propertyType) {
                     case LONG:
                         builder.fixed(entry, HugeLongArray.memoryEstimation(dimensions.nodeCount()));
                         break;

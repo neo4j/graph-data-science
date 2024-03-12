@@ -108,7 +108,7 @@ public class AlgorithmFactoryGenerator {
             .addParameter(typeNames.config(), "configuration")
             .addStatement("var computation = new $T()", typeNames.computation())
             .addStatement(
-                "return $T.memoryEstimation(computation.schema(configuration), computation.reducer().isEmpty(), configuration.isAsynchronous())",
+                "return $T.memoryEstimation(computation.schema(configuration).propertiesMap(), computation.reducer().isEmpty(), configuration.isAsynchronous())",
                 Pregel.class
             )
             .build();

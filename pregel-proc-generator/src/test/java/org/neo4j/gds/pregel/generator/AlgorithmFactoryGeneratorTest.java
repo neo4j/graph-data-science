@@ -93,7 +93,7 @@ class AlgorithmFactoryGeneratorTest {
             "public org.neo4j.gds.core.utils.mem.MemoryEstimation memoryEstimation(" + NL +
             "    gds.testconfig.TheConfig configuration) {" + NL +
             "  var computation = new gds.test.Baz();" + NL +
-            "  return org.neo4j.gds.beta.pregel.Pregel.memoryEstimation(computation.schema(configuration), computation.reducer().isEmpty(), configuration.isAsynchronous());" + NL +
+            "  return org.neo4j.gds.beta.pregel.Pregel.memoryEstimation(computation.schema(configuration).propertiesMap(), computation.reducer().isEmpty(), configuration.isAsynchronous());" + NL +
             "}" + NL
         );
     }

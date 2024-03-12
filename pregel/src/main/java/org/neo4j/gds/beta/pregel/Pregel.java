@@ -21,6 +21,7 @@ package org.neo4j.gds.beta.pregel;
 
 import org.immutables.value.Value;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
 import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -34,6 +35,7 @@ import org.neo4j.gds.utils.StringJoining;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 
 @Value.Style(builderVisibility = Value.Style.BuilderVisibility.PUBLIC, depluralize = true, deepImmutablesDetection = true)
@@ -88,11 +90,15 @@ public final class Pregel<CONFIG extends PregelConfig> {
         );
     }
 
-    public static MemoryEstimation memoryEstimation(PregelSchema pregelSchema, boolean isQueueBased, boolean isAsync) {
+    public static MemoryEstimation memoryEstimation(
+        Map<String, ValueType> propertiesMap,
+        boolean isQueueBased,
+        boolean isAsync
+    ) {
         var estimationBuilder = MemoryEstimations.builder(Pregel.class)
             .perNode("vote bits", HugeAtomicBitSet::memoryEstimation)
             .perThread("compute steps", MemoryEstimations.builder(PartitionedComputeStep.class).build())
-            .add("node value", NodeValue.memoryEstimation(pregelSchema));
+            .add("node value", NodeValue.memoryEstimation(propertiesMap));
 
         if (isQueueBased) {
             if (isAsync) {

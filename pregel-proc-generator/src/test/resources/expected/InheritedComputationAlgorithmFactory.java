@@ -50,8 +50,7 @@ public final class InheritedComputationAlgorithmFactory extends GraphAlgorithmFa
     public MemoryEstimation memoryEstimation(PregelProcedureConfig configuration) {
         var computation = new InheritedComputation();
         return Pregel.memoryEstimation(
-            computation.schema(configuration),
-            computation.reducer().isEmpty(),
+            computation.schema(configuration).propertiesMap(), computation.reducer().isEmpty(),
             configuration.isAsynchronous()
         );
     }

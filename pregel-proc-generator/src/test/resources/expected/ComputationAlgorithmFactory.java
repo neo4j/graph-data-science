@@ -50,8 +50,7 @@ public final class ComputationAlgorithmFactory extends GraphAlgorithmFactory<Com
     public MemoryEstimation memoryEstimation(PregelProcedureConfig configuration) {
         var computation = new Computation();
         return Pregel.memoryEstimation(
-            computation.schema(configuration),
-            computation.reducer().isEmpty(),
+            computation.schema(configuration).propertiesMap(), computation.reducer().isEmpty(),
             configuration.isAsynchronous()
         );
     }
