@@ -24,6 +24,7 @@ import org.neo4j.gds.algorithms.misc.MiscAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesStreamResult;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.scaleproperties.ScalePropertiesStreamConfig;
 
 import java.util.Map;
@@ -72,5 +73,13 @@ public class MiscAlgorithmsProcedureFacade {
         return ScalePropertiesComputationResultTransformer.toStreamResult(streamResult);
     }
 
+    public Stream<MemoryEstimateResult> scalePropertiesStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = configurationCreator.createConfiguration(algoConfiguration, ScalePropertiesStreamConfig::of);
+        return Stream.of(estimateBusinessFacade.scaleProperties(graphNameOrConfiguration, config));
+    }
+    
 
 }

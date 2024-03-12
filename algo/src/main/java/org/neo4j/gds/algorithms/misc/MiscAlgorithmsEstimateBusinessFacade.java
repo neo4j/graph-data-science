@@ -36,10 +36,11 @@ public class MiscAlgorithmsEstimateBusinessFacade {
         this.algorithmEstimator = algorithmEstimator;
     }
 
-    public <C extends ScalePropertiesBaseConfig> MemoryEstimateResult node2Vec(
+    public <C extends ScalePropertiesBaseConfig> MemoryEstimateResult scaleProperties(
         Object graphNameOrConfiguration,
         C configuration
     ) {
+        configuration.validateScalers(false);
         return algorithmEstimator.estimate(
             graphNameOrConfiguration,
             configuration,
@@ -47,6 +48,6 @@ public class MiscAlgorithmsEstimateBusinessFacade {
             new ScalePropertiesFactory<>()
         );
     }
-
+    
 
 }

@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -33,10 +31,11 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.ProcedureConstants.ESTIMATE_DESCRIPTION;
 import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class ScalePropertiesStreamProc extends BaseProc {
+public class ScalePropertiesStreamProc {
 
     @Context
     public GraphDataScience facade;
@@ -56,13 +55,7 @@ public class ScalePropertiesStreamProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        var spec = new ScalePropertiesStreamSpec();
-
-        return new MemoryEstimationExecutor<>(
-            spec,
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphName, configuration);
+        return facade.miscellaneousAlgorithms().scalePropertiesStreamEstimate(graphName, configuration);
     }
 
     @Internal
@@ -73,9 +66,7 @@ public class ScalePropertiesStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.alpha.scaleProperties.stream");
+        facade.deprecatedProcedures().called("gds.alpha.scaleProperties.stream");
 
         return facade.miscellaneousAlgorithms().alphaScalePropertiesStream(graphName, configuration);
 
