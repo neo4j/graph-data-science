@@ -20,7 +20,7 @@
 package org.neo4j.gds.similarity.filterednodesim;
 
 import com.carrotsearch.hppc.BitSet;
-import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
@@ -36,7 +36,7 @@ import org.neo4j.gds.wcc.WccMemoryEstimateDefinition;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
-public class FilteredNodeSimilarityMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+public class FilteredNodeSimilarityMemoryEstimateDefinition implements MemoryEstimateDefinition {
     final int normalizedK;
     final int normalizedN;
     final boolean enableComponentsOptimization;

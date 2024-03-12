@@ -19,14 +19,14 @@
  */
 package org.neo4j.gds.paths.dijkstra;
 
-import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 import org.neo4j.gds.mem.MemoryUsage;
 
-public class DijkstraMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+public class DijkstraMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
     private final DijkstraMemoryEstimateParameters parameters;
 

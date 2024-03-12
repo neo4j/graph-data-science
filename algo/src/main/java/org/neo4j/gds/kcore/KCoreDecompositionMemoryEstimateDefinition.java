@@ -19,14 +19,14 @@
  */
 package org.neo4j.gds.kcore;
 
-import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.haa.HugeAtomicIntArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 
-public class KCoreDecompositionMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+public class KCoreDecompositionMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
     @Override
     public MemoryEstimation memoryEstimation() {

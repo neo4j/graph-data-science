@@ -20,7 +20,7 @@
 package org.neo4j.gds.betweenness;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -33,7 +33,7 @@ import org.neo4j.gds.mem.MemoryUsage;
 
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
-public class BetweennessCentralityMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+public class BetweennessCentralityMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
     private final boolean hasRelationshipWeightProperty;
 

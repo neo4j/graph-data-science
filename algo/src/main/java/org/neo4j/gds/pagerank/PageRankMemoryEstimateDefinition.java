@@ -19,14 +19,14 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 
 import java.util.Map;
 
-public class PageRankMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+public class PageRankMemoryEstimateDefinition implements MemoryEstimateDefinition {
     @Override
     public MemoryEstimation memoryEstimation() {
         return Pregel.memoryEstimation(

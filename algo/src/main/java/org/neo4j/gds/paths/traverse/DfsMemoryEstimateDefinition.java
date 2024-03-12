@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.paths.traverse;
 
-import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryUsage;
 
-public class DfsMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+public class DfsMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
     @Override
     public MemoryEstimation memoryEstimation() {

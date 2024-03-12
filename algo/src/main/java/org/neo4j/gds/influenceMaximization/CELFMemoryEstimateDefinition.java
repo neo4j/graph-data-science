@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.influenceMaximization;
 
-import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -28,7 +28,7 @@ import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 import org.neo4j.gds.mem.MemoryUsage;
 
-public final class CELFMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+public final class CELFMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
     public static final int DEFAULT_BATCH_SIZE = 10;
 

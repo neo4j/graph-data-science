@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.hashgnn;
 
-import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -29,7 +29,7 @@ import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.function.LongUnaryOperator;
 
-public class HashGNNMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+public class HashGNNMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
     private final HashGNNParameters parameters;
 

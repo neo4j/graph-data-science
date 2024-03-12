@@ -19,14 +19,14 @@
  */
 package org.neo4j.gds.kmeans;
 
-import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryUsage;
 
-public class KmeansMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+public class KmeansMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
     private final KmeansParameters parameters;
 

@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.similarity.filteredknn;
 
-import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.similarity.knn.KnnMemoryEstimateDefinition;
 import org.neo4j.gds.similarity.knn.KnnMemoryEstimationParametersBuilder;
 
-public class FilteredKnnMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+public class FilteredKnnMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
     private final KnnMemoryEstimationParametersBuilder parametersSansNodeCount;
 

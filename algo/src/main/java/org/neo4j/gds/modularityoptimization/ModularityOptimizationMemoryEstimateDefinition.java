@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.modularityoptimization;
 
-import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
@@ -28,7 +28,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.mem.MemoryUsage;
 
-public class ModularityOptimizationMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+public class ModularityOptimizationMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
     @Override
     public MemoryEstimation memoryEstimation() {

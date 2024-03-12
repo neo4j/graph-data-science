@@ -19,14 +19,14 @@
  */
 package org.neo4j.gds.paths.yens;
 
-import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateDefinition;
 import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateParameters;
 
-public class YensMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+public class YensMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
     private final int numberOfShortestPathsToFind;
 

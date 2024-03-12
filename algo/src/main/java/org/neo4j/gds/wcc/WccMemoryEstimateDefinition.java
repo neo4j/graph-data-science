@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.wcc;
 
-import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
 
-public final class WccMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+public final class WccMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
     private final boolean isIncremental;
 

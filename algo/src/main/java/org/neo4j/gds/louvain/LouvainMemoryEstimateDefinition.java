@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.louvain;
 
-import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.ImmutableRelationshipProjections;
 import org.neo4j.gds.NodeProjections;
 import org.neo4j.gds.Orientation;
@@ -37,7 +37,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationMemoryEstimateDefinition;
 
-public class LouvainMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+public class LouvainMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
     private final LouvainMemoryEstimationParameters parameters;
 

@@ -21,7 +21,7 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 
-public interface AlgorithmMemoryEstimateDefinition {
+public interface MemoryEstimateDefinition {
 
     MemoryEstimation memoryEstimation();
 }

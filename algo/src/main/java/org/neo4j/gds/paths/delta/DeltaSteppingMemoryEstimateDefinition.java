@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.paths.delta;
 
-import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
@@ -27,7 +27,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 
-public class DeltaSteppingMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+public class DeltaSteppingMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
     @Override
     public MemoryEstimation memoryEstimation() {

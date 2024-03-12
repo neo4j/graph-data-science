@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.k1coloring;
 
-import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryUsage;
 
-public final class K1ColoringMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+public final class K1ColoringMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
     @Override
     public MemoryEstimation memoryEstimation() {

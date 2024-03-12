@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 
-public class IntersectingTriangleCountMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+public class IntersectingTriangleCountMemoryEstimateDefinition implements MemoryEstimateDefinition {
     @Override
     public MemoryEstimation memoryEstimation() {
         return MemoryEstimations

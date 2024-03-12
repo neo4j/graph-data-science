@@ -19,14 +19,14 @@
  */
 package org.neo4j.gds.spanningtree;
 
-import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
 import org.neo4j.gds.mem.MemoryUsage;
 
-public class SpanningTreeMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+public class SpanningTreeMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
 
     @Override

@@ -20,12 +20,12 @@
 package org.neo4j.gds.triangle;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 
-public class LocalClusteringCoefficientMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+public class LocalClusteringCoefficientMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
     private final String seedProperty;
 

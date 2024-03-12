@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.steiner;
 
-import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -27,7 +27,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
 import org.neo4j.gds.mem.MemoryUsage;
 
-public class SteinerTreeMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+public class SteinerTreeMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
     private final boolean applyRerouting;
 

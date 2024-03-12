@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
-import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.paths.astar.AStarMemoryEstimateDefinition;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
@@ -71,7 +71,7 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
 
     // TODO: remove this fella once finished with the estimate definitions
     private <CONFIGURATION extends AlgoBaseConfig> MemoryEstimateResult runEstimation(
-        AlgorithmMemoryEstimateDefinition memoryEstimateDefinition,
+        MemoryEstimateDefinition memoryEstimateDefinition,
         CONFIGURATION configuration,
         Object graphNameOrConfiguration
     ) {

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.scaleproperties;
 
-import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -28,7 +28,7 @@ import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
 
-public class ScalePropertiesMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+public class ScalePropertiesMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
     private static final int ESTIMATED_DIMENSION_PER_PROPERTY = 128;
 

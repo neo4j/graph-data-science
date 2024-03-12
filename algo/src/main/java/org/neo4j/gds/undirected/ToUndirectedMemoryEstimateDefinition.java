@@ -19,14 +19,14 @@
  */
 package org.neo4j.gds.undirected;
 
-import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.loading.AdjacencyListBehavior;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 
-public class ToUndirectedMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+public class ToUndirectedMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
     private final ToUndirectedMemoryEstimateParameters estimateParameters;
 

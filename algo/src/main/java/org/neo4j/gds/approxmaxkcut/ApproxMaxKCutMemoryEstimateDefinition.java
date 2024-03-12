@@ -19,14 +19,14 @@
  */
 package org.neo4j.gds.approxmaxkcut;
 
-import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeByteArray;
 import org.neo4j.gds.collections.haa.HugeAtomicByteArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 
-public class ApproxMaxKCutMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+public class ApproxMaxKCutMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
     private final ApproxMaxKCutMemoryEstimationParameters parameters;
 

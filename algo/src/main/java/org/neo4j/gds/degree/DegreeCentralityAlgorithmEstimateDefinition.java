@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.degree;
 
-import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 
-public final class DegreeCentralityAlgorithmEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+public final class DegreeCentralityAlgorithmEstimateDefinition implements MemoryEstimateDefinition {
 
     private final boolean hasRelationshipWeightProperty;
 

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.indexInverse;
 
-import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.loading.AdjacencyListBehavior;
@@ -28,7 +28,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 
 import java.util.Locale;
 
-public class InverseRelationshipsMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+public class InverseRelationshipsMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
     private final Iterable<String> relationshipTypes;
 

@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.traversal;
 
-import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.mem.MemoryUsage;
 
-public class RandomWalkMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+public class RandomWalkMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
     private final WalkEstimateParameters parameters;
 

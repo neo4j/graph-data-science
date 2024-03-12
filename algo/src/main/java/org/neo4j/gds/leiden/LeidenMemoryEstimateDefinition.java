@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.leiden;
 
-import org.neo4j.gds.AlgorithmMemoryEstimateDefinition;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 
-public class LeidenMemoryEstimateDefinition implements AlgorithmMemoryEstimateDefinition {
+public class LeidenMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
     private final LeidenMemoryEstimationParameters parameters;
 
