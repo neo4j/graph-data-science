@@ -19,12 +19,14 @@
  */
 package org.neo4j.gds.procedures.misc;
 
+import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.misc.ScalePropertiesSpecificFields;
 import org.neo4j.gds.algorithms.misc.ScaledPropertiesNodePropertyValues;
 import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesStatsResult;
 import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesStreamResult;
+import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesWriteResult;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 import org.neo4j.gds.scaleproperties.ScalePropertiesStatsConfig;
 
@@ -62,6 +64,21 @@ final class ScalePropertiesComputationResultTransformer {
             statsResult.preProcessingMillis(),
             statsResult.computeMillis(),
             config.toMap()
+        );
+    }
+
+    static ScalePropertiesWriteResult toWriteResult(
+        NodePropertyWriteResult<ScalePropertiesSpecificFields> writeResult,
+        boolean returnStatistics
+    ) {
+
+        return new ScalePropertiesWriteResult(
+            (returnStatistics) ? writeResult.algorithmSpecificFields().scalerStatistics() : null,
+            writeResult.preProcessingMillis(),
+            writeResult.computeMillis(),
+            writeResult.writeMillis(),
+            writeResult.nodePropertiesWritten(),
+            writeResult.configuration().toMap()
         );
     }
 

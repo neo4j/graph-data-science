@@ -27,6 +27,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesWriteResult;
 import org.neo4j.gds.scaleproperties.ScaleProperties;
 import org.neo4j.gds.scaleproperties.ScalePropertiesFactory;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
@@ -39,7 +40,7 @@ import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIP
 import static org.neo4j.gds.scaling.ScalePropertiesProc.validateLegacyScalers;
 
 @GdsCallable(name = "gds.scaleProperties.write", description = SCALE_PROPERTIES_DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
-public class ScalePropertiesWriteSpec implements AlgorithmSpec<ScaleProperties, ScalePropertiesResult, ScalePropertiesWriteConfig, Stream<ScalePropertiesWriteProc.WriteResult>, ScalePropertiesFactory<ScalePropertiesWriteConfig>> {
+public class ScalePropertiesWriteSpec implements AlgorithmSpec<ScaleProperties, ScalePropertiesResult, ScalePropertiesWriteConfig, Stream<ScalePropertiesWriteResult>, ScalePropertiesFactory<ScalePropertiesWriteConfig>> {
 
     @Override
     public String name() {
@@ -61,10 +62,10 @@ public class ScalePropertiesWriteSpec implements AlgorithmSpec<ScaleProperties, 
     }
 
     @Override
-    public ComputationResultConsumer<ScaleProperties, ScalePropertiesResult, ScalePropertiesWriteConfig, Stream<ScalePropertiesWriteProc.WriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<ScaleProperties, ScalePropertiesResult, ScalePropertiesWriteConfig, Stream<ScalePropertiesWriteResult>> computationResultConsumer() {
         return new WriteNodePropertiesComputationResultConsumer<>(
             (computationResult, __) -> {
-                var builder = new ScalePropertiesWriteProc.WriteResult.Builder();
+                var builder = new ScalePropertiesWriteResult.Builder();
                 computationResult.result()
                     .ifPresent(result -> builder.withScalerStatistics(result.scalerStatistics()));
                 return builder;

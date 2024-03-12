@@ -19,42 +19,34 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.results.StandardWriteResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.ProcedureConstants.ESTIMATE_DESCRIPTION;
 import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class ScalePropertiesWriteProc extends BaseProc {
+public class ScalePropertiesWriteProc {
 
     @Context
-    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
+    public GraphDataScience facade;
 
     @Procedure(value = "gds.scaleProperties.write", mode = WRITE)
     @Description(SCALE_PROPERTIES_DESCRIPTION)
-    public Stream<ScalePropertiesWriteProc.WriteResult> write(
+    public Stream<ScalePropertiesWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new ScalePropertiesWriteSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.miscellaneousAlgorithms().scalePropertiesWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.scaleProperties.write.estimate", mode = READ)
@@ -63,65 +55,8 @@ public class ScalePropertiesWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        var spec = new ScalePropertiesWriteSpec();
-
-        return new MemoryEstimationExecutor<>(
-            spec,
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphName, configuration);
+        return facade.miscellaneousAlgorithms().scalePropertiesWriteEstimate(graphName, configuration);
     }
 
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
-    }
 
-    @SuppressWarnings("unused")
-    public static final class WriteResult extends StandardWriteResult {
-
-        public final long nodePropertiesWritten;
-        public final Map<String, Map<String, List<Double>>> scalerStatistics;
-
-        WriteResult(
-            Map<String, Map<String, List<Double>>> scalerStatistics,
-            long preProcessingMillis,
-            long computeMillis,
-            long writeMillis,
-            long nodePropertiesWritten,
-            Map<String, Object> configuration
-        ) {
-            super(
-                preProcessingMillis,
-                computeMillis,
-                0L,
-                writeMillis,
-                configuration
-            );
-            this.nodePropertiesWritten = nodePropertiesWritten;
-            this.scalerStatistics = scalerStatistics;
-        }
-
-        static class Builder extends AbstractResultBuilder<WriteResult> {
-
-            private Map<String, Map<String, List<Double>>> scalerStatistics;
-
-            Builder withScalerStatistics(Map<String, Map<String, List<Double>>> stats) {
-                this.scalerStatistics = stats;
-                return this;
-            }
-
-            @Override
-            public WriteResult build() {
-                return new WriteResult(
-                    scalerStatistics,
-                    preProcessingMillis,
-                    computeMillis,
-                    writeMillis,
-                    nodePropertiesWritten,
-                    config.toMap()
-                );
-            }
-        }
-    }
 }

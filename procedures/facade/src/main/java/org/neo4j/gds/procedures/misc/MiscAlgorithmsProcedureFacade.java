@@ -21,14 +21,17 @@ package org.neo4j.gds.procedures.misc;
 
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmStatsBusinessFacade;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmStreamBusinessFacade;
+import org.neo4j.gds.algorithms.misc.MiscAlgorithmWriteBusinessFacade;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesStatsResult;
 import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesStreamResult;
+import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.scaleproperties.ScalePropertiesStatsConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesStreamConfig;
+import org.neo4j.gds.scaleproperties.ScalePropertiesWriteConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -41,21 +44,23 @@ public class MiscAlgorithmsProcedureFacade {
     // business logic
     private final MiscAlgorithmsEstimateBusinessFacade estimateBusinessFacade;
     private final MiscAlgorithmStatsBusinessFacade statsBusinessFacade;
-
     private final MiscAlgorithmStreamBusinessFacade streamBusinessFacade;
+    private final MiscAlgorithmWriteBusinessFacade writeBusinessFacade;
+
 
     public MiscAlgorithmsProcedureFacade(
         ConfigurationCreator configurationCreator,
         ProcedureReturnColumns procedureReturnColumns,
         MiscAlgorithmsEstimateBusinessFacade estimateBusinessFacade,
         MiscAlgorithmStatsBusinessFacade statsBusinessFacade,
-        MiscAlgorithmStreamBusinessFacade streamBusinessFacade
+        MiscAlgorithmStreamBusinessFacade streamBusinessFacade, MiscAlgorithmWriteBusinessFacade writeBusinessFacade
     ) {
         this.configurationCreator = configurationCreator;
         this.procedureReturnColumns = procedureReturnColumns;
         this.estimateBusinessFacade = estimateBusinessFacade;
         this.statsBusinessFacade = statsBusinessFacade;
         this.streamBusinessFacade = streamBusinessFacade;
+        this.writeBusinessFacade = writeBusinessFacade;
     }
 
     public Stream<ScalePropertiesStreamResult> scalePropertiesStream(
@@ -108,6 +113,28 @@ public class MiscAlgorithmsProcedureFacade {
         Map<String, Object> algoConfiguration
     ) {
         var config = configurationCreator.createConfiguration(algoConfiguration, ScalePropertiesStatsConfig::of);
+        return Stream.of(estimateBusinessFacade.scaleProperties(graphNameOrConfiguration, config));
+    }
+
+    public Stream<ScalePropertiesWriteResult> scalePropertiesWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+
+        var config = configurationCreator.createConfiguration(configuration, ScalePropertiesWriteConfig::of);
+        var returnStatistics = procedureReturnColumns.contains("scalerStatistics");
+        var writeResult = writeBusinessFacade.scaleProperties(graphName, config);
+        return Stream.of(ScalePropertiesComputationResultTransformer.toWriteResult(
+            writeResult,
+            returnStatistics
+        ));
+    }
+
+    public Stream<MemoryEstimateResult> scalePropertiesWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = configurationCreator.createConfiguration(algoConfiguration, ScalePropertiesWriteConfig::of);
         return Stream.of(estimateBusinessFacade.scaleProperties(graphNameOrConfiguration, config));
     }
 

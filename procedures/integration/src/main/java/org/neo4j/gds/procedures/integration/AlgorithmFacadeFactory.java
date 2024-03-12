@@ -42,6 +42,7 @@ import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsWriteBusiness
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmStatsBusinessFacade;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmStreamBusinessFacade;
+import org.neo4j.gds.algorithms.misc.MiscAlgorithmWriteBusinessFacade;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmsFacade;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
@@ -243,6 +244,8 @@ class AlgorithmFacadeFactory {
 
         var statsBusinessFacade = new MiscAlgorithmStatsBusinessFacade(miscAlgorithmsFacade);
 
+        var writeBusinessFacade = new MiscAlgorithmWriteBusinessFacade(miscAlgorithmsFacade, writeNodePropertyService);
+
 
         // procedure facade
         return new MiscAlgorithmsProcedureFacade(
@@ -250,7 +253,8 @@ class AlgorithmFacadeFactory {
             returnColumns,
             estimateBusinessFacade,
             statsBusinessFacade,
-            streamBusinessFacade
+            streamBusinessFacade,
+            writeBusinessFacade
         );
     }
 
