@@ -25,9 +25,6 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesStreamResult;
 import org.neo4j.gds.scaleproperties.ScalePropertiesStreamConfig;
-import org.neo4j.gds.scaling.L1Norm;
-import org.neo4j.gds.scaling.L2Norm;
-import org.neo4j.gds.scaling.ScalerFactory;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -58,31 +55,22 @@ public class MiscAlgorithmsProcedureFacade {
         Map<String, Object> configuration
        ){
 
-        return  scalePropertiesStream(graphName,configuration,false);
+        var config = configurationCreator.createConfigurationForStream(configuration, ScalePropertiesStreamConfig::of);
 
+        var streamResult = streamBusinessFacade.scaleProperties(graphName, config);
+        return ScalePropertiesComputationResultTransformer.toStreamResult(streamResult);
     }
+
     public Stream<ScalePropertiesStreamResult> alphaScalePropertiesStream(
         String graphName,
         Map<String, Object> configuration
     ){
 
-        return  scalePropertiesStream(graphName,configuration,true);
+        var config = configurationCreator.createConfigurationForStream(configuration, ScalePropertiesStreamConfig::of);
 
+        var streamResult = streamBusinessFacade.alphaScaleProperties(graphName, config);
+        return ScalePropertiesComputationResultTransformer.toStreamResult(streamResult);
     }
-    private Stream<ScalePropertiesStreamResult> scalePropertiesStream(
-        String graphName,
-        Map<String, Object> configuration,
-        boolean allowL1L2){
-        var   config = configurationCreator.createConfigurationForStream(configuration , ScalePropertiesStreamConfig::of);
-        if (!allowL1L2){
-            var specifiedScaler = config.scaler().type();
-            if ( (specifiedScaler.equals(L1Norm.TYPE) || specifiedScaler.equals(L2Norm.TYPE))) {
-                ScalerFactory.throwForInvalidScaler(specifiedScaler);
-            }
-        }
-        var streamResult = streamBusinessFacade.scaleProperties(graphName,config);
-        return  ScalePropertiesComputationResultTransformer.toStreamResult(streamResult);
 
-    }
 
 }

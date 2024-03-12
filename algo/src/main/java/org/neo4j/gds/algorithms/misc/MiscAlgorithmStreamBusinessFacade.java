@@ -37,7 +37,21 @@ public class MiscAlgorithmStreamBusinessFacade {
     ) {
         var result = this.miscAlgorithmsFacade.scaleProperties(
             graphName,
-            config
+            config,
+            false
+        );
+
+        return createStreamComputationResult(result);
+    }
+
+    public StreamComputationResult<ScalePropertiesResult> alphaScaleProperties(
+        String graphName,
+        ScalePropertiesBaseConfig config
+    ) {
+        var result = this.miscAlgorithmsFacade.scaleProperties(
+            graphName,
+            config,
+            true
         );
 
         return createStreamComputationResult(result);

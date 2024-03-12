@@ -39,8 +39,11 @@ public class MiscAlgorithmsFacade {
 
     AlgorithmComputationResult<ScalePropertiesResult> scaleProperties(
         String graphName,
-        ScalePropertiesBaseConfig config
+        ScalePropertiesBaseConfig config,
+        boolean allowL1L2
     ) {
+
+        config.validateScalers(allowL1L2);
         return algorithmRunner.run(
             graphName,
             config,
