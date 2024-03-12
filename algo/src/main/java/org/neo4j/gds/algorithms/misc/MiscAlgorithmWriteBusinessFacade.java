@@ -26,11 +26,11 @@ import org.neo4j.gds.scaleproperties.ScalePropertiesWriteConfig;
 
 public class MiscAlgorithmWriteBusinessFacade {
     private final MiscAlgorithmsFacade miscAlgorithmsFacade;
-    private  final WriteNodePropertyService writeNodePropertyService;
+    private final WriteNodePropertyService writeNodePropertyService;
 
     public MiscAlgorithmWriteBusinessFacade(MiscAlgorithmsFacade miscAlgorithmsFacade,WriteNodePropertyService writeNodePropertyService) {
         this.miscAlgorithmsFacade = miscAlgorithmsFacade;
-        this.writeNodePropertyService=writeNodePropertyService;
+        this.writeNodePropertyService = writeNodePropertyService;
     }
 
     public NodePropertyWriteResult<ScalePropertiesSpecificFields> scaleProperties(

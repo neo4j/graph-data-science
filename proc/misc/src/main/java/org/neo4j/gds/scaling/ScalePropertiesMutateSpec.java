@@ -27,6 +27,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesMutateResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.scaleproperties.ScaleProperties;
 import org.neo4j.gds.scaleproperties.ScalePropertiesFactory;
@@ -41,7 +42,7 @@ import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIP
 import static org.neo4j.gds.scaling.ScalePropertiesProc.validateLegacyScalers;
 
 @GdsCallable(name = "gds.scaleProperties.mutate", aliases = {"gds.alpha.scaleProperties.mutate"}, description = SCALE_PROPERTIES_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
-public class ScalePropertiesMutateSpec implements AlgorithmSpec<ScaleProperties, ScalePropertiesResult, ScalePropertiesMutateConfig, Stream<ScalePropertiesMutateProc.MutateResult>, ScalePropertiesFactory<ScalePropertiesMutateConfig>> {
+public class ScalePropertiesMutateSpec implements AlgorithmSpec<ScaleProperties, ScalePropertiesResult, ScalePropertiesMutateConfig, Stream<ScalePropertiesMutateResult>, ScalePropertiesFactory<ScalePropertiesMutateConfig>> {
 
     private boolean allowL1L2Scalers = false;
 
@@ -69,7 +70,7 @@ public class ScalePropertiesMutateSpec implements AlgorithmSpec<ScaleProperties,
     }
 
     @Override
-    public ComputationResultConsumer<ScaleProperties, ScalePropertiesResult, ScalePropertiesMutateConfig, Stream<ScalePropertiesMutateProc.MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<ScaleProperties, ScalePropertiesResult, ScalePropertiesMutateConfig, Stream<ScalePropertiesMutateResult>> computationResultConsumer() {
         return new MutatePropertyComputationResultConsumer<>(
             computationResult -> List.of(ImmutableNodeProperty.of(
                 computationResult.config().mutateProperty(),
@@ -79,11 +80,11 @@ public class ScalePropertiesMutateSpec implements AlgorithmSpec<ScaleProperties,
         );
     }
 
-    private AbstractResultBuilder<ScalePropertiesMutateProc.MutateResult> resultBuilder(
+    private AbstractResultBuilder<ScalePropertiesMutateResult> resultBuilder(
         ComputationResult<ScaleProperties, ScalePropertiesResult, ScalePropertiesMutateConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new ScalePropertiesMutateProc.MutateResult.Builder();
+        var builder = new ScalePropertiesMutateResult.Builder();
         computationResult.result()
             .ifPresent(result -> builder.withScalerStatistics(result.scalerStatistics()));
         return builder;
