@@ -19,12 +19,15 @@
  */
 package org.neo4j.gds.procedures.misc;
 
+import org.neo4j.gds.algorithms.misc.MiscAlgorithmStatsBusinessFacade;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmStreamBusinessFacade;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
+import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesStatsResult;
 import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.scaleproperties.ScalePropertiesStatsConfig;
 import org.neo4j.gds.scaleproperties.ScalePropertiesStreamConfig;
 
 import java.util.Map;
@@ -37,17 +40,21 @@ public class MiscAlgorithmsProcedureFacade {
 
     // business logic
     private final MiscAlgorithmsEstimateBusinessFacade estimateBusinessFacade;
+    private final MiscAlgorithmStatsBusinessFacade statsBusinessFacade;
+
     private final MiscAlgorithmStreamBusinessFacade streamBusinessFacade;
 
     public MiscAlgorithmsProcedureFacade(
         ConfigurationCreator configurationCreator,
         ProcedureReturnColumns procedureReturnColumns,
         MiscAlgorithmsEstimateBusinessFacade estimateBusinessFacade,
+        MiscAlgorithmStatsBusinessFacade statsBusinessFacade,
         MiscAlgorithmStreamBusinessFacade streamBusinessFacade
     ) {
         this.configurationCreator = configurationCreator;
         this.procedureReturnColumns = procedureReturnColumns;
         this.estimateBusinessFacade = estimateBusinessFacade;
+        this.statsBusinessFacade = statsBusinessFacade;
         this.streamBusinessFacade = streamBusinessFacade;
     }
 
@@ -80,6 +87,29 @@ public class MiscAlgorithmsProcedureFacade {
         var config = configurationCreator.createConfiguration(algoConfiguration, ScalePropertiesStreamConfig::of);
         return Stream.of(estimateBusinessFacade.scaleProperties(graphNameOrConfiguration, config));
     }
-    
+
+    public Stream<ScalePropertiesStatsResult> scalePropertiesStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+
+        var config = configurationCreator.createConfiguration(configuration, ScalePropertiesStatsConfig::of);
+        var returnStatistics = procedureReturnColumns.contains("scalerStatistics");
+        var statsResult = statsBusinessFacade.scaleProperties(graphName, config);
+        return Stream.of(ScalePropertiesComputationResultTransformer.toStatsResult(
+            statsResult,
+            returnStatistics,
+            config
+        ));
+    }
+
+    public Stream<MemoryEstimateResult> scalePropertiesStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algoConfiguration
+    ) {
+        var config = configurationCreator.createConfiguration(algoConfiguration, ScalePropertiesStatsConfig::of);
+        return Stream.of(estimateBusinessFacade.scaleProperties(graphNameOrConfiguration, config));
+    }
+
 
 }

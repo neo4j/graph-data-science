@@ -19,10 +19,14 @@
  */
 package org.neo4j.gds.procedures.misc;
 
+import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
+import org.neo4j.gds.algorithms.misc.ScalePropertiesSpecificFields;
 import org.neo4j.gds.algorithms.misc.ScaledPropertiesNodePropertyValues;
+import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesStatsResult;
 import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesStreamResult;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
+import org.neo4j.gds.scaleproperties.ScalePropertiesStatsConfig;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -47,7 +51,19 @@ final class ScalePropertiesComputationResultTransformer {
         }).orElseGet(Stream::empty);
     }
 
+    static ScalePropertiesStatsResult toStatsResult(
+        StatsResult<ScalePropertiesSpecificFields> statsResult,
+        boolean returnStatistics,
+        ScalePropertiesStatsConfig config
+    ) {
 
+        return new ScalePropertiesStatsResult(
+            (returnStatistics) ? statsResult.algorithmSpecificFields().scalerStatistics() : null,
+            statsResult.preProcessingMillis(),
+            statsResult.computeMillis(),
+            config.toMap()
+        );
+    }
 
 
 }

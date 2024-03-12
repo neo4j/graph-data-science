@@ -19,35 +19,33 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesStatsResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.results.StandardStatsResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.BaseProc.ESTIMATE_DESCRIPTION;
 import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class ScalePropertiesStatsProc extends BaseProc {
+public class ScalePropertiesStatsProc {
+
+    @Context
+    public GraphDataScience facade;
 
     @Procedure(value = "gds.scaleProperties.stats", mode = READ)
     @Description(SCALE_PROPERTIES_DESCRIPTION)
-    public Stream<StatsResult> stats(
+    public Stream<ScalePropertiesStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new ScalePropertiesStatsSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.miscellaneousAlgorithms().scalePropertiesStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.scaleProperties.stats.estimate", mode = READ)
@@ -56,52 +54,7 @@ public class ScalePropertiesStatsProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        var spec = new ScalePropertiesStatsSpec();
-
-        return new MemoryEstimationExecutor<>(
-            spec,
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphName, configuration);
+        return facade.miscellaneousAlgorithms().scalePropertiesStatsEstimate(graphName, configuration);
     }
 
-    public static final class StatsResult extends StandardStatsResult {
-
-        public final Map<String, Map<String, List<Double>>> scalerStatistics;
-
-        StatsResult(
-            Map<String, Map<String, List<Double>>> scalerStatistics,
-            long preProcessingMillis,
-            long computeMillis,
-            Map<String, Object> configuration
-        ) {
-            super(
-                preProcessingMillis,
-                computeMillis,
-                0L,
-                configuration
-            );
-            this.scalerStatistics = scalerStatistics;
-        }
-
-        static class Builder extends AbstractResultBuilder<StatsResult> {
-
-            private Map<String, Map<String, List<Double>>> scalerStatistics;
-
-            StatsResult.Builder withScalerStatistics(Map<String, Map<String, List<Double>>> stats) {
-                this.scalerStatistics = stats;
-                return this;
-            }
-
-            @Override
-            public StatsResult build() {
-                return new StatsResult(
-                    scalerStatistics,
-                    preProcessingMillis,
-                    computeMillis,
-                    config.toMap()
-                );
-            }
-        }
-    }
 }

@@ -26,12 +26,12 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesStatsResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.scaleproperties.ScaleProperties;
 import org.neo4j.gds.scaleproperties.ScalePropertiesFactory;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 import org.neo4j.gds.scaleproperties.ScalePropertiesStatsConfig;
-import org.neo4j.gds.scaling.ScalePropertiesStatsProc.StatsResult;
 
 import java.util.stream.Stream;
 
@@ -40,7 +40,7 @@ import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIP
 import static org.neo4j.gds.scaling.ScalePropertiesProc.validateLegacyScalers;
 
 @GdsCallable(name = "gds.scaleProperties.stats", description = SCALE_PROPERTIES_DESCRIPTION, executionMode = STREAM)
-public class ScalePropertiesStatsSpec implements AlgorithmSpec<ScaleProperties, ScalePropertiesResult, ScalePropertiesStatsConfig, Stream<StatsResult>, ScalePropertiesFactory<ScalePropertiesStatsConfig>> {
+public class ScalePropertiesStatsSpec implements AlgorithmSpec<ScaleProperties, ScalePropertiesResult, ScalePropertiesStatsConfig, Stream<ScalePropertiesStatsResult>, ScalePropertiesFactory<ScalePropertiesStatsConfig>> {
     @Override
     public String name() {
         return "ScalePropertiesStats";
@@ -61,15 +61,15 @@ public class ScalePropertiesStatsSpec implements AlgorithmSpec<ScaleProperties, 
     }
 
     @Override
-    public ComputationResultConsumer<ScaleProperties, ScalePropertiesResult, ScalePropertiesStatsConfig, Stream<ScalePropertiesStatsProc.StatsResult>> computationResultConsumer() {
+    public ComputationResultConsumer<ScaleProperties, ScalePropertiesResult, ScalePropertiesStatsConfig, Stream<ScalePropertiesStatsResult>> computationResultConsumer() {
         return new StatsComputationResultConsumer<>(this::resultBuilder);
     }
 
-    private AbstractResultBuilder<ScalePropertiesStatsProc.StatsResult> resultBuilder(
+    private AbstractResultBuilder<ScalePropertiesStatsResult> resultBuilder(
         ComputationResult<ScaleProperties, ScalePropertiesResult, ScalePropertiesStatsConfig> computationResult,
         ExecutionContext executionContext
     ) {
-        var builder = new StatsResult.Builder();
+        var builder = new ScalePropertiesStatsResult.Builder();
 
         computationResult.result().ifPresent(result -> builder.withScalerStatistics(result.scalerStatistics()));
 
