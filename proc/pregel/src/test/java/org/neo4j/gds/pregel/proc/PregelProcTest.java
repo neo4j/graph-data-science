@@ -28,6 +28,7 @@ import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.GraphAlgorithmFactory;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.TestTaskStore;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.ValueType;
@@ -462,6 +463,11 @@ public class PregelProcTest extends BaseProcTest {
                         .add(DOUBLE_ARRAY_KEY, ValueType.DOUBLE_ARRAY)
                         .add(PRIVATE_LONG_KEY, ValueType.LONG, PregelSchema.Visibility.PRIVATE)
                         .build();
+                }
+
+                @Override
+                public MemoryEstimateDefinition estimateDefinition(boolean isAsynchronous) {
+                    return null;
                 }
 
                 @Override

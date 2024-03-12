@@ -20,6 +20,7 @@
 package org.neo4j.gds.pagerank;
 
 import com.carrotsearch.hppc.LongSet;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.Messages;
 import org.neo4j.gds.beta.pregel.PregelComputation;
@@ -113,4 +114,8 @@ public final class ArticleRankComputation implements PregelComputation<PageRankC
         return nodeValue * relationshipWeight;
     }
 
+    @Override
+    public MemoryEstimateDefinition estimateDefinition(boolean isAsynchronous) {
+        return new PageRankMemoryEstimateDefinition();
+    }
 }

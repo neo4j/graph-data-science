@@ -78,7 +78,7 @@ class AlgorithmFactoryGeneratorTest {
             "@java.lang.Override" + NL +
             "public org.neo4j.gds.core.utils.progress.tasks.Task progressTask(org.neo4j.gds.api.Graph graph," + NL +
             "    gds.testconfig.TheConfig configuration) {" + NL +
-            "  return Pregel.progressTask(graph, configuration);" + NL +
+            "  return org.neo4j.gds.beta.pregel.Pregel.progressTask(graph, configuration);" + NL +
             "}" + NL
         );
     }
@@ -93,7 +93,7 @@ class AlgorithmFactoryGeneratorTest {
             "public org.neo4j.gds.core.utils.mem.MemoryEstimation memoryEstimation(" + NL +
             "    gds.testconfig.TheConfig configuration) {" + NL +
             "  var computation = new gds.test.Baz();" + NL +
-            "  return org.neo4j.gds.beta.pregel.Pregel.memoryEstimation(computation.schema(configuration).propertiesMap(), computation.reducer().isEmpty(), configuration.isAsynchronous());" + NL +
+            "  return computation.estimateDefinition(configuration.isAsynchronous()).memoryEstimation();" + NL +
             "}" + NL
         );
     }

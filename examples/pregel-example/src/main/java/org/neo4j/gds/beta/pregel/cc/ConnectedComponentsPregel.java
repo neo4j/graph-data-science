@@ -19,13 +19,17 @@
  */
 package org.neo4j.gds.beta.pregel.cc;
 
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.Messages;
+import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelComputation;
 import org.neo4j.gds.beta.pregel.PregelSchema;
 import org.neo4j.gds.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.gds.beta.pregel.context.ComputeContext;
 import org.neo4j.gds.beta.pregel.context.InitContext;
+
+import java.util.Map;
 
 import static org.neo4j.gds.beta.pregel.annotation.GDSMode.MUTATE;
 import static org.neo4j.gds.beta.pregel.annotation.GDSMode.STATS;
@@ -45,6 +49,16 @@ public class ConnectedComponentsPregel implements PregelComputation<ConnectedCom
     public PregelSchema schema(ConnectedComponentsConfig config) {
         return new PregelSchema.Builder().add(COMPONENT, ValueType.LONG).build();
     }
+
+    @Override
+    public MemoryEstimateDefinition estimateDefinition(boolean isAsynchronous) {
+        return () -> Pregel.memoryEstimation(
+            Map.of(COMPONENT, ValueType.LONG),
+            reducer().isEmpty(),
+            isAsynchronous
+        );
+    }
+
 
     @Override
     public void init(InitContext<ConnectedComponentsConfig> context) {

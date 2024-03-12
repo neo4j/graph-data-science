@@ -19,9 +19,11 @@
  */
 package org.neo4j.gds.beta.pregel.lp;
 
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.Messages;
+import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelComputation;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelSchema;
@@ -33,6 +35,7 @@ import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * Basic implementation potentially suffering from oscillating vertex states due to synchronous computation.
@@ -45,6 +48,16 @@ public class LabelPropagationPregel implements PregelComputation<LabelPropagatio
     @Override
     public PregelSchema schema(LabelPropagationPregel.LabelPropagationPregelConfig config) {
         return new PregelSchema.Builder().add(LABEL_KEY, ValueType.LONG).build();
+    }
+
+
+    @Override
+    public MemoryEstimateDefinition estimateDefinition(boolean isAsynchronous) {
+        return () -> Pregel.memoryEstimation(
+            Map.of(LABEL_KEY, ValueType.LONG),
+            false,
+            false
+        );
     }
 
     @Override

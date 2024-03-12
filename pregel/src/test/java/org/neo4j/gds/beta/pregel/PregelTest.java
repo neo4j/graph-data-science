@@ -28,6 +28,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.GdlBuilder;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.TestTaskStore;
@@ -513,6 +514,11 @@ class PregelTest {
                     ranMaster.set(true);
                     return true;
                 }
+
+                @Override
+                public MemoryEstimateDefinition estimateDefinition(boolean isAsynchronous) {
+                    return null;
+                }
             },
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
@@ -650,6 +656,11 @@ class PregelTest {
         }
 
         @Override
+        public MemoryEstimateDefinition estimateDefinition(boolean isAsynchronous) {
+            return null;
+        }
+
+        @Override
         public void compute(ComputeContext<PregelConfig> context, Messages messages) {
             if (context.isInitialSuperstep()) {
                 context.setNodeValue(KEY, 0.0);
@@ -691,6 +702,11 @@ class PregelTest {
         }
 
         @Override
+        public MemoryEstimateDefinition estimateDefinition(boolean isAsynchronous) {
+            return null;
+        }
+
+        @Override
         public void compute(ComputeContext<PregelConfig> context, Messages messages) {
             if (context.nodeId() == 0) {
                 var sum = StreamSupport.stream(messages.spliterator(), false).mapToDouble(d -> d).sum();
@@ -722,6 +738,11 @@ class PregelTest {
                 .add(LONG_ARRAY_KEY, ValueType.LONG_ARRAY)
                 .add(DOUBLE_ARRAY_KEY, ValueType.DOUBLE_ARRAY)
                 .build();
+        }
+
+        @Override
+        public MemoryEstimateDefinition estimateDefinition(boolean isAsynchronous) {
+            return null;
         }
 
         @Override
@@ -790,12 +811,22 @@ class PregelTest {
             });
             return context.superstep() == stopAtIteration;
         }
+
+        @Override
+        public MemoryEstimateDefinition estimateDefinition(boolean isAsynchronous) {
+            return null;
+        }
     }
 
     static class TestEmptyMessageInInitialSuperstep implements PregelComputation<PregelConfig> {
         @Override
         public PregelSchema schema(PregelConfig config) {
             return new PregelSchema.Builder().build();
+        }
+
+        @Override
+        public MemoryEstimateDefinition estimateDefinition(boolean isAsynchronous) {
+            return null;
         }
 
         @Override
@@ -836,6 +867,11 @@ class PregelTest {
         @Override
         public PregelSchema schema(PregelConfig config) {
             return new PregelSchema.Builder().build();
+        }
+
+        @Override
+        public MemoryEstimateDefinition estimateDefinition(boolean isAsynchronous) {
+            return null;
         }
 
         @Override

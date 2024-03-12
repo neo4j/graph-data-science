@@ -19,9 +19,11 @@
  */
 package org.neo4j.gds.beta.pregel.sssp;
 
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.Messages;
+import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelComputation;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelSchema;
@@ -30,6 +32,8 @@ import org.neo4j.gds.beta.pregel.annotation.PregelProcedure;
 import org.neo4j.gds.beta.pregel.context.ComputeContext;
 import org.neo4j.gds.beta.pregel.context.InitContext;
 import org.neo4j.gds.core.CypherMapWrapper;
+
+import java.util.Map;
 
 import static org.neo4j.gds.beta.pregel.sssp.SingleSourceShortestPathPregel.SingleSourceShortestPathPregelConfig;
 
@@ -44,6 +48,15 @@ public class SingleSourceShortestPathPregel implements PregelComputation<SingleS
     @Override
     public PregelSchema schema(SingleSourceShortestPathPregelConfig config) {
         return new PregelSchema.Builder().add(DISTANCE, ValueType.LONG).build();
+    }
+
+    @Override
+    public MemoryEstimateDefinition estimateDefinition(boolean isAsynchronous) {
+        return () -> Pregel.memoryEstimation(
+            Map.of(DISTANCE, ValueType.LONG),
+            false,
+            false
+        );
     }
 
     @Override

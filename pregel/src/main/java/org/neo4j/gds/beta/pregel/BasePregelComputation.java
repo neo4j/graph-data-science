@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.beta.pregel;
 
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
 
 import java.util.Optional;
@@ -88,4 +89,6 @@ public interface BasePregelComputation<C extends PregelConfig> {
      * for example (Closable)ThreadLocals.
      */
     default void close() {}
+
+    MemoryEstimateDefinition estimateDefinition(boolean isAsynchronous);
 }

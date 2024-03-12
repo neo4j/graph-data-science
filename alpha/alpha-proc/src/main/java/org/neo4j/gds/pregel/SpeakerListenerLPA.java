@@ -22,9 +22,11 @@ package org.neo4j.gds.pregel;
 import com.carrotsearch.hppc.LongArrayList;
 import com.carrotsearch.hppc.LongIntScatterMap;
 import com.carrotsearch.hppc.cursors.LongIntCursor;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.Messages;
+import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelComputation;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelSchema;
@@ -35,6 +37,7 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.util.Arrays;
+import java.util.Map;
 import java.util.SplittableRandom;
 
 @PregelProcedure(
@@ -62,6 +65,16 @@ public class SpeakerListenerLPA implements PregelComputation<SpeakerListenerLPA.
         return new PregelSchema.Builder()
             .add(LABELS_PROPERTY, ValueType.LONG_ARRAY)
             .build();
+    }
+
+
+    @Override
+    public MemoryEstimateDefinition estimateDefinition(boolean isAsynchronous) {
+        return () -> Pregel.memoryEstimation(
+            Map.of(LABELS_PROPERTY, ValueType.LONG_ARRAY),
+            false,
+            false
+        );
     }
 
     @Override

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.beta.pregel.pr;
 
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.Messages;
@@ -32,6 +33,7 @@ import org.neo4j.gds.beta.pregel.context.ComputeContext;
 import org.neo4j.gds.beta.pregel.context.InitContext;
 import org.neo4j.gds.config.SeedConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.pagerank.PageRankMemoryEstimateDefinition;
 
 import java.util.Optional;
 
@@ -45,6 +47,11 @@ public class PageRankPregel implements PregelComputation<PageRankPregel.PageRank
     @Override
     public PregelSchema schema(PageRankPregelConfig config) {
         return new PregelSchema.Builder().add(PAGE_RANK, ValueType.DOUBLE).build();
+    }
+
+    @Override
+    public MemoryEstimateDefinition estimateDefinition(boolean isAsynchronous) {
+        return new PageRankMemoryEstimateDefinition();
     }
 
     @Override

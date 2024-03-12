@@ -31,6 +31,7 @@ import java.util.Map;
 
 import static gds.example.ExamplePregelComputation.KEY;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 
 class ExamplePregelComputationProcTest extends BaseProcTest {
 
@@ -85,5 +86,21 @@ class ExamplePregelComputationProcTest extends BaseProcTest {
         );
 
         assertThat(expected).containsExactlyInAnyOrderEntriesOf(actual);
+    }
+
+    @Test
+    void memoryEstimation() {
+        runQuery("CALL gds.graph.project('graph', '*', '*')");
+
+        var query = "CALL pregel.example.stream.estimate('graph', {maxIterations: 10}) YIELD bytesMin, bytesMax";
+
+        var rowCount = runQueryWithRowConsumer(query, r -> {
+            assertThat(r.getNumber("bytesMin")).asInstanceOf(LONG).isPositive();
+            assertThat(r.getNumber("bytesMax")).asInstanceOf(LONG).isPositive();
+        });
+
+        assertThat(rowCount)
+            .as("Memory estimation should always return a single row.")
+            .isEqualTo(1);
     }
 }

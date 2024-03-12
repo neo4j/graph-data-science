@@ -96,7 +96,7 @@ public class AlgorithmFactoryGenerator {
             .addParameter(Graph.class, "graph")
             .addParameter(typeNames.config(), "configuration")
             .returns(Task.class)
-            .addStatement("return Pregel.progressTask(graph, configuration)", typeNames.algorithm())
+            .addStatement("return $T.progressTask(graph, configuration)", Pregel.class)
             .build();
     }
 
@@ -108,8 +108,8 @@ public class AlgorithmFactoryGenerator {
             .addParameter(typeNames.config(), "configuration")
             .addStatement("var computation = new $T()", typeNames.computation())
             .addStatement(
-                "return $T.memoryEstimation(computation.schema(configuration).propertiesMap(), computation.reducer().isEmpty(), configuration.isAsynchronous())",
-                Pregel.class
+                "return computation.estimateDefinition(configuration.isAsynchronous()).memoryEstimation()",
+                typeNames.algorithm()
             )
             .build();
     }

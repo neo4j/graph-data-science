@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.pregel.cc;
 
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.beta.pregel.Messages;
 import org.neo4j.gds.beta.pregel.PregelComputation;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
@@ -36,6 +37,11 @@ public class Computation implements PregelComputation<PregelProcedureConfig> {
 
     @Override
     public PregelSchema schema(PregelProcedureConfig config) {
+        return null;
+    }
+
+    @Override
+    public MemoryEstimateDefinition estimateDefinition(boolean isAsynchronous) {
         return null;
     }
 

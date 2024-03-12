@@ -20,11 +20,13 @@
 package org.neo4j.gds.pregel;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.BidirectionalPregelComputation;
 import org.neo4j.gds.beta.pregel.Messages;
 import org.neo4j.gds.beta.pregel.Partitioning;
+import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelProcedureConfig;
 import org.neo4j.gds.beta.pregel.PregelSchema;
 import org.neo4j.gds.beta.pregel.annotation.PregelProcedure;
@@ -34,6 +36,7 @@ import org.neo4j.gds.beta.pregel.context.MasterComputeContext;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.StringIdentifierValidations;
 
+import java.util.Map;
 import java.util.concurrent.atomic.DoubleAdder;
 
 @PregelProcedure(
@@ -52,6 +55,19 @@ public class Hits implements BidirectionalPregelComputation<Hits.HitsConfig> {
             .add(config.authProperty(), ValueType.DOUBLE)
             .add(config.hubProperty(), ValueType.DOUBLE)
             .build();
+    }
+
+
+    @Override
+    public MemoryEstimateDefinition estimateDefinition(boolean isAsynchronous) {
+        return () -> Pregel.memoryEstimation(
+            Map.of(
+                "auth", ValueType.DOUBLE,
+                "hub", ValueType.DOUBLE
+            ),
+            false,
+            false
+        );
     }
 
     @Override
