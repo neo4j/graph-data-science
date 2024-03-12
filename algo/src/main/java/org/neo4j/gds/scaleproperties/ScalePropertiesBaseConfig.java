@@ -52,7 +52,7 @@ public interface ScalePropertiesBaseConfig extends AlgoBaseConfig {
         Collection<NodeLabel> selectedLabels,
         Collection<RelationshipType> selectedRelationshipTypes
     ) {
-        if (nodeProperties().size() == 0) {
+        if (nodeProperties().isEmpty()) {
             throw new IllegalArgumentException("`nodeProperties` must not be empty");
         }
 
