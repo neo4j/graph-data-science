@@ -29,11 +29,11 @@ import org.neo4j.kernel.lifecycle.LifecycleAdapter;
 import java.util.HashMap;
 import java.util.Map;
 
-class InMemoryGraphTrackerLifecycleAdapter extends LifecycleAdapter implements DatabaseEventListener {
+public class InMemoryGraphTrackerLifecycleAdapter extends LifecycleAdapter implements DatabaseEventListener {
     private final DatabaseManagementService dbms;
     private final Map<String, DatabaseId> databaseIdMapping;
 
-    InMemoryGraphTrackerLifecycleAdapter(DatabaseManagementService dbms) {
+    public InMemoryGraphTrackerLifecycleAdapter(DatabaseManagementService dbms) {
         this.dbms = dbms;
         this.databaseIdMapping = new HashMap<>();
     }
@@ -58,14 +58,13 @@ class InMemoryGraphTrackerLifecycleAdapter extends LifecycleAdapter implements D
         databaseIsShuttingDown(eventContext.getDatabaseName());
     }
 
-    // The @override is missing for compatibility reasons
-    public void databaseCreate(DatabaseEventContext eventContext) {
+    @Override    public void databaseCreate(DatabaseEventContext eventContext) {
         var databaseName = eventContext.getDatabaseName();
         var db = dbms.database(databaseName);
         databaseIdMapping.put(databaseName, DatabaseId.of(db.databaseName()));
     }
 
-    // The @override is missing for compatibility reasons
+    @Override
     public void databaseDrop(DatabaseEventContext eventContext) {
         databaseIdMapping.remove(eventContext.getDatabaseName());
     }
