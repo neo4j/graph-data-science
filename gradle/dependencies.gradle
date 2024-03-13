@@ -38,6 +38,18 @@ ext {
         '5.19': '2.20.0',
     ]
 
+    shiros = [
+        '5.11': '1.13.0',
+        '5.12': '1.13.0',
+        '5.13': '1.13.0',
+        '5.14': '1.13.0',
+        '5.15': '1.13.0',
+        '5.16': '1.13.0',
+        '5.17': '1.13.0',
+        '5.18': '1.13.0',
+        '5.19': '2.0.0',
+    ]
+
     ver = [
         doc                    : [
             'asciidoctorj'        : '2.5.11',
@@ -83,6 +95,7 @@ ext {
         'sb-contrib'           : '7.6.3',
         'scala'                : scalas[neo4j_minor],
         'protobuf'             : '3.25.3',
+        'shiro'                : shiros[neo4j_minor]
     ]
     dep = [
         junit5bom:          "org.junit:junit-bom:${ver.junit5bom}",
