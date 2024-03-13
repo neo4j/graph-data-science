@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.scaling.ScalerFactory;
@@ -33,6 +34,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -167,6 +169,30 @@ class ScalePropertiesBaseConfigTest {
         ))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("`nodeProperties` must not be empty");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"l1norm", "l2norm"})
+    void shouldThrowIfNotL1L2Allowed(String scaler) {
+        var config = ScalePropertiesStreamConfigImpl.builder().scaler(scaler).nodeProperties(List.of()).build();
+
+        assertThatThrownBy(() -> config.validateScalers(false))
+            .hasMessageContaining(String.format(
+                "Unrecognised scaler type specified: `%s`",
+                scaler
+            ));
+
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"l1norm", "l2norm"})
+    void shouldNotThrowItL1L2Allowed(String scaler) {
+        var config = ScalePropertiesStreamConfigImpl.builder().scaler(scaler).nodeProperties(List.of()).build();
+
+        assertThatNoException().isThrownBy(
+            () -> config.validateScalers(true)
+        );
+
     }
 
 }

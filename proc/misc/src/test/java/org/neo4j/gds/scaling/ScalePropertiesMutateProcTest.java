@@ -104,29 +104,7 @@ class ScalePropertiesMutateProcTest extends BaseProcTest {
         Graph graph = GraphStoreCatalog.get("", DatabaseId.of(db.databaseName()), "g").graphStore().getUnion();
         assertGraphEquals(fromGdl(EXPECTED_MUTATED_GRAPH), graph);
     }
-
-    @Test
-    void betaDoesNotAllowL1OrL2() {
-        var queryL1 = GdsCypher
-            .call("g")
-            .algo("gds.scaleProperties")
-            .mutateMode()
-            .addParameter("nodeProperties", List.of("myProp"))
-            .addParameter("scaler", "L1Norm")
-            .addParameter("mutateProperty", "scaledProperty")
-            .yields();
-        var queryL2 = GdsCypher
-            .call("g")
-            .algo("gds.scaleProperties")
-            .mutateMode()
-            .addParameter("nodeProperties", List.of("myProp"))
-            .addParameter("scaler", "L2Norm")
-            .addParameter("mutateProperty", "scaledProperty")
-            .yields();
-
-        assertError(queryL1, "Unrecognised scaler type specified: `l1norm`");
-        assertError(queryL2, "Unrecognised scaler type specified: `l2norm`");
-    }
+    
 
     @Test
     void alphaMutatel1() {

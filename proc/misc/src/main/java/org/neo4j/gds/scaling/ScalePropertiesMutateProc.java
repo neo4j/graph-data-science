@@ -19,36 +19,34 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.result.AbstractResultBuilder;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.results.StandardMutateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
 
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.ProcedureConstants.ESTIMATE_DESCRIPTION;
 import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class ScalePropertiesMutateProc extends BaseProc {
+public class ScalePropertiesMutateProc {
+
+    @Context
+    public GraphDataScience facade;
 
     @Procedure("gds.scaleProperties.mutate")
     @Description(SCALE_PROPERTIES_DESCRIPTION)
-    public Stream<MutateResult> mutate(
+    public Stream<ScalePropertiesMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new ScalePropertiesMutateSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.miscellaneousAlgorithms().scalePropertiesMutate(graphName, configuration);
     }
 
     @Procedure(value = "gds.scaleProperties.mutate.estimate", mode = READ)
@@ -57,78 +55,23 @@ public class ScalePropertiesMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        var spec = new ScalePropertiesMutateSpec();
+        return facade.miscellaneousAlgorithms().scalePropertiesMutateEstimate(graphName, configuration);
 
-        return new MemoryEstimationExecutor<>(
-            spec,
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphName, configuration);
     }
 
     @Internal
     @Deprecated(forRemoval = true)
     @Procedure(value = "gds.alpha.scaleProperties.mutate", deprecatedBy = "gds.scaleProperties.mutate")
     @Description(SCALE_PROPERTIES_DESCRIPTION)
-    public Stream<MutateResult> alphaMutate(
+    public Stream<ScalePropertiesMutateResult> alphaMutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
+        facade
             .deprecatedProcedures().called("gds.alpha.scaleProperties.mutate");
-        var spec = new ScalePropertiesMutateSpec();
-        spec.setAllowL1L2Scalers(true);
-        return new ProcedureExecutor<>(
-            spec,
-            executionContext()
-        ).compute(graphName, configuration);
+
+        return facade.miscellaneousAlgorithms().alphaScalePropertiesMutate(graphName, configuration);
+
     }
 
-    public static final class MutateResult extends StandardMutateResult {
-
-        public final Map<String, Map<String, List<Double>>> scalerStatistics;
-        public final long nodePropertiesWritten;
-
-        MutateResult(
-            Map<String, Map<String, List<Double>>> scalerStatistics,
-            long preProcessingMillis,
-            long computeMillis,
-            long mutateMillis,
-            long nodePropertiesWritten,
-            Map<String, Object> configuration
-        ) {
-            super(
-                preProcessingMillis,
-                computeMillis,
-                0L,
-                mutateMillis,
-                configuration
-            );
-            this.scalerStatistics = scalerStatistics;
-            this.nodePropertiesWritten = nodePropertiesWritten;
-        }
-
-        static class Builder extends AbstractResultBuilder<MutateResult> {
-
-            private Map<String, Map<String, List<Double>>> scalerStatistics;
-
-            Builder withScalerStatistics(Map<String, Map<String, List<Double>>> stats) {
-                this.scalerStatistics = stats;
-                return this;
-            }
-
-            @Override
-            public MutateResult build() {
-                return new MutateResult(
-                    scalerStatistics,
-                    preProcessingMillis,
-                    computeMillis,
-                    mutateMillis,
-                    nodePropertiesWritten,
-                    config.toMap()
-                );
-            }
-        }
-    }
 }

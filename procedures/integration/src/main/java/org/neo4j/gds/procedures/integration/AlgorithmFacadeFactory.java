@@ -40,6 +40,12 @@ import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsMutateBusines
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsTrainBusinessFacade;
 import org.neo4j.gds.algorithms.embeddings.NodeEmbeddingsAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
+import org.neo4j.gds.algorithms.misc.MiscAlgorithmMutateBusinessFacade;
+import org.neo4j.gds.algorithms.misc.MiscAlgorithmStatsBusinessFacade;
+import org.neo4j.gds.algorithms.misc.MiscAlgorithmStreamBusinessFacade;
+import org.neo4j.gds.algorithms.misc.MiscAlgorithmWriteBusinessFacade;
+import org.neo4j.gds.algorithms.misc.MiscAlgorithmsEstimateBusinessFacade;
+import org.neo4j.gds.algorithms.misc.MiscAlgorithmsFacade;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
@@ -69,6 +75,7 @@ import org.neo4j.gds.procedures.algorithms.ConfigurationCreator;
 import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.embeddings.NodeEmbeddingsProcedureFacade;
+import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.pathfinding.PathFindingProcedureFacade;
 import org.neo4j.gds.procedures.similarity.SimilarityProcedureFacade;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -225,6 +232,37 @@ class AlgorithmFacadeFactory {
             writeBusinessFacade
         );
 
+    }
+
+    MiscAlgorithmsProcedureFacade createMiscellaneousProcedureFacade() {
+
+        // algorithm facade
+        var miscAlgorithmsFacade = new MiscAlgorithmsFacade(algorithmRunner);
+
+        var estimateBusinessFacade = new MiscAlgorithmsEstimateBusinessFacade(algorithmEstimator);
+
+        var streamBusinessFacade = new MiscAlgorithmStreamBusinessFacade(miscAlgorithmsFacade);
+
+        var statsBusinessFacade = new MiscAlgorithmStatsBusinessFacade(miscAlgorithmsFacade);
+
+        var writeBusinessFacade = new MiscAlgorithmWriteBusinessFacade(miscAlgorithmsFacade, writeNodePropertyService);
+
+        var mutateBusinessFacade = new MiscAlgorithmMutateBusinessFacade(
+            miscAlgorithmsFacade,
+            mutateNodePropertyService
+        );
+
+
+        // procedure facade
+        return new MiscAlgorithmsProcedureFacade(
+            configurationCreator,
+            returnColumns,
+            estimateBusinessFacade,
+            mutateBusinessFacade,
+            statsBusinessFacade,
+            streamBusinessFacade,
+            writeBusinessFacade
+        );
     }
 
     PathFindingProcedureFacade createPathFindingProcedureFacade() {
