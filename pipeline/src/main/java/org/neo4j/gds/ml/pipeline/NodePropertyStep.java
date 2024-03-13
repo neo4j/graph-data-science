@@ -34,6 +34,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.executor.ProcedureExecutorSpec;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -106,10 +107,11 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
 
     @Override
     public MemoryEstimation estimate(
-        ModelCatalog modelCatalog,
+        AlgorithmsProcedureFacade algorithmsProcedureFacade, ModelCatalog modelCatalog,
         String username,
         List<String> nodeLabels,
-        List<String> relTypes
+        List<String> relTypes,
+        Stub stub
     ) {
         var algoSpec = callableDefinition.algorithmSpec();
 
@@ -140,7 +142,8 @@ public final class NodePropertyStep implements ExecutableNodePropertyStep {
         String graphName,
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relTypes,
-        int trainConcurrency
+        int trainConcurrency,
+        Stub stub
     ) {
         var configCopy = new HashMap<>(config);
         var nodeLabelStrings = nodeLabels.stream().map(ElementIdentifier::name).collect(Collectors.toList());

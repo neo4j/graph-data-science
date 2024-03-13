@@ -51,6 +51,7 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationT
 import org.neo4j.gds.ml.splitting.TrainingExamplesSplit;
 import org.neo4j.gds.ml.training.CrossValidation;
 import org.neo4j.gds.ml.training.TrainingStatistics;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.ArrayList;
@@ -80,12 +81,14 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
     public static MemoryEstimation estimate(
         NodeClassificationTrainingPipeline pipeline,
         NodeClassificationPipelineTrainConfig configuration,
-        ModelCatalog modelCatalog
+        ModelCatalog modelCatalog,
+        AlgorithmsProcedureFacade algorithmsProcedureFacade
     ) {
         return new NodeClassificationTrainMemoryEstimateDefinition(
             pipeline,
             configuration,
-            modelCatalog
+            modelCatalog,
+            algorithmsProcedureFacade
         ).memoryEstimation();
     }
 

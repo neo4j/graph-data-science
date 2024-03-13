@@ -41,6 +41,7 @@ import org.neo4j.gds.ml.pipeline.PredictPipelineExecutor;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodePropertyPredictPipeline;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineModelInfo;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.train.NodeClassificationPipelineTrainConfig;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.List;
@@ -86,7 +87,8 @@ public class NodeClassificationPredictPipelineExecutor extends PredictPipelineEx
     public static MemoryEstimation estimate(
         Model<Classifier.ClassifierData, NodeClassificationPipelineTrainConfig, NodeClassificationPipelineModelInfo> model,
         NodeClassificationPredictPipelineBaseConfig configuration,
-        ModelCatalog modelCatalog
+        ModelCatalog modelCatalog,
+        AlgorithmsProcedureFacade algorithmsProcedureFacade
     ) {
         var pipeline = model.customInfo().pipeline();
         var classCount = model.customInfo().classes().size();
@@ -96,6 +98,7 @@ public class NodeClassificationPredictPipelineExecutor extends PredictPipelineEx
         var combinedRelationshipTypes = configuration.relationshipTypes().isEmpty() ? model.trainConfig().relationshipTypes() : configuration.relationshipTypes();
 
         MemoryEstimation nodePropertyStepEstimation = NodePropertyStepExecutor.estimateNodePropertySteps(
+            algorithmsProcedureFacade,
             modelCatalog,
             configuration.username(),
             pipeline.nodePropertySteps(),

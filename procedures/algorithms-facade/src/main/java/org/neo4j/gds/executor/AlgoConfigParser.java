@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.executor;
 
-import org.jetbrains.annotations.NotNull;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitViolation;
@@ -59,19 +58,17 @@ public class AlgoConfigParser<CONFIG extends AlgoBaseConfig> implements ProcConf
         //validate the original config for extra-added parameters
         validateOriginalConfig(configuration, algorithmConfiguration.configKeys());
         //ensure that limits are fine
-        validateLimits(algorithmConfiguration, username, inputWithDefaults);
+        validateLimits(algorithmConfiguration, inputWithDefaults);
 
         return algorithmConfiguration;
     }
 
-    @NotNull
     private HashSet<String> getIrrelevantInputtedKeys(Map<String, Object> configuration, HashSet<String> allowedKeys) {
         var irrelevantInputtedKeys = new HashSet<>(configuration.keySet());
         irrelevantInputtedKeys.removeAll(allowedKeys);
         return irrelevantInputtedKeys;
     }
 
-    @NotNull
     private HashMap<String, Object> getConfigurationForLimitValidation(
         Map<String, Object> configuration,
         HashSet<String> irrelevantInputtedKeys
@@ -83,7 +80,6 @@ public class AlgoConfigParser<CONFIG extends AlgoBaseConfig> implements ProcConf
 
     private void validateLimits(
         CONFIG algorithmConfiguration,
-        String username,
         Map<String, Object> userInputWithDefaults
     ) throws IllegalArgumentException {
 

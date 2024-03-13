@@ -257,6 +257,7 @@ class NodePropertyStepExecutorTest {
         var dimensions = GraphDimensions.of(10);
 
         MemoryEstimation actualEstimation = NodePropertyStepExecutor.estimateNodePropertySteps(
+            null,
             new OpenModelCatalog(),
             "user",
             steps,

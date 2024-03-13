@@ -28,7 +28,13 @@ import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMu
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.configuration.DefaultsConfiguration;
+import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.Username;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.executor.AlgoConfigParser;
+import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
@@ -533,5 +539,53 @@ public class PathFindingProcedureFacade {
         var resultBuilder = new PathFindingResultBuilderForWriteMode(configuration);
 
         return algorithm.compute(graphName, configuration, resultBuilder);
+    }
+
+    /**
+     * Obviously this is ripe for some refactoring; let's do the vertical first tho.
+     * This is the right direction: it is here we know that Dijkstra mutate means ShortestPathDijkstraMutateConfig
+     */
+    public MutateStub singlePairShortestPathDijkstraMutateStub() {
+        return new MutateStub() {
+            /**
+             * Push down
+             */
+            @Deprecated
+            @Override
+            public void validateWithNoUserButWithDefaultsAndLimits(Map<String, Object> configuration) {
+                new AlgoConfigParser<>(
+                    Username.EMPTY_USERNAME.username(),
+                    (NewConfigFunction<AlgoBaseConfig>) (__, config) -> ShortestPathDijkstraMutateConfig.of(config),
+                    DefaultsConfiguration.Instance,
+                    LimitsConfiguration.Instance
+                ).processInput(configuration);
+            }
+
+            /**
+             * Push down
+             */
+            @Deprecated
+            @Override
+            public MemoryEstimation estimateWithNoDefaultsNorLimits(
+                String username,
+                Map<String, Object> configuration
+            ) {
+                ShortestPathDijkstraMutateConfig shortestPathDijkstraMutateConfig = new AlgoConfigParser<>(
+                    username,
+                    (__, config) -> ShortestPathDijkstraMutateConfig.of(config),
+                    DefaultsConfiguration.Empty,
+                    LimitsConfiguration.Empty
+                ).processInput(configuration);
+
+                return estimationModeFacade.singleSourceShortestPathDijkstraEstimation(
+                    shortestPathDijkstraMutateConfig
+                );
+            }
+
+            @Override
+            public void execute(String graphName, Map<String, Object> configuration) {
+                singlePairShortestPathDijkstraMutate(graphName, configuration);
+            }
+        };
     }
 }

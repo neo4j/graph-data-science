@@ -62,11 +62,13 @@ import org.neo4j.gds.ml.pipeline.ImmutablePipelineGraphFilter;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepContextConfig;
 import org.neo4j.gds.ml.pipeline.NodePropertyStepContextConfigImpl;
 import org.neo4j.gds.ml.pipeline.PipelineGraphFilter;
+import org.neo4j.gds.ml.pipeline.Stub;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfig;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionSplitConfigImpl;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionTrainingPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.test.TestMutateProc;
 import org.neo4j.gds.test.TestProc;
 
@@ -826,7 +828,8 @@ final class LinkPredictionTrainPipelineExecutorTest {
             String graphName,
             Collection<NodeLabel> nodeLabels,
             Collection<RelationshipType> relTypes,
-            int trainConcurrency
+            int trainConcurrency,
+            Stub stub
         ) {
             assertThat(nodeLabels).containsExactlyInAnyOrderElementsOf(
                 Stream.concat(graphFilter.nodeLabels().stream(), contextNodeLabels().stream().map(NodeLabel::of)).distinct().collect(Collectors.toList())
@@ -848,10 +851,12 @@ final class LinkPredictionTrainPipelineExecutorTest {
 
         @Override
         public MemoryEstimation estimate(
+            AlgorithmsProcedureFacade algorithmsProcedureFacade,
             ModelCatalog modelCatalog,
             String username,
             List<String> nodeLabels,
-            List<String> relTypes
+            List<String> relTypes,
+            Stub stub
         ) {
             return MemoryEstimations.of("fake", MemoryRange.of(0));
         }

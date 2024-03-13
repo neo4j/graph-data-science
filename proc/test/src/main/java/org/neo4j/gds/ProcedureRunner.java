@@ -25,6 +25,7 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.metrics.MetricsFacade;
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -45,7 +46,8 @@ public final class ProcedureRunner {
         UserLogRegistryFactory userLogRegistryFactory,
         Transaction tx,
         Username username,
-        MetricsFacade metricsFacade
+        MetricsFacade metricsFacade,
+        GraphDataScience graphDataScience
     ) {
         P proc;
         try {
@@ -64,6 +66,7 @@ public final class ProcedureRunner {
         proc.username = username;
 
         proc.metricsFacade = metricsFacade;
+        proc.graphDataScience = graphDataScience;
 
         return proc;
     }
@@ -87,7 +90,39 @@ public final class ProcedureRunner {
             EmptyUserLogRegistryFactory.INSTANCE,
             tx,
             username,
-            MetricsFacade.PASSTHROUGH_METRICS_FACADE
+            MetricsFacade.PASSTHROUGH_METRICS_FACADE,
+            /*
+             * So, procedure runner needs _something_ to satisfy some down stream code. Null is not good enough,
+             * I already tried but failed. At the same time,
+             * it is clear that _probably_ we can get away with less than the full gamut,
+             * just like the other dependencies here that are faked out. Honestly, the whole thing is big, unwieldy,
+             *  and largely opaque to me.
+             * I'm going to go with a blanket statement of, if you run into problems with this,
+             * it is because you are trying to test some intricacies way down in the bowels of GDS,
+             * but driving from the top of Neo4j Procedures, and that this creates a very unhelpful coupling.
+             * At this juncture, better to move/ formulate those tests at the local level of the code you care about,
+             * instead of trying to fake up a big massive stack.
+             * Everything on the inside of this GDS facade is meant to be simple POJO style,
+             * direct dependency injected code that is easy to new up and in turn fake out,
+             * so testing granular bits should be a doozy.
+             * Happy to be proved wrong, so come talk to me if you get in trouble ;)
+             */
+            new GraphDataScience(
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            ) {
+                @Override
+                public String toString() {
+                    return "from Procedure Runner"; // handy for debugging
+                }
+            }
         );
         func.accept(proc);
         return proc;

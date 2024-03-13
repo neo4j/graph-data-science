@@ -97,7 +97,8 @@ public class LinkPredictionPredictPipelineAlgorithmFactory<CONFIG extends LinkPr
             modelCatalog,
             linkPredictionPipeline,
             configuration,
-            model.data()
+            model.data(),
+            executionContext.algorithmsProcedureFacade()
         );
     }
 

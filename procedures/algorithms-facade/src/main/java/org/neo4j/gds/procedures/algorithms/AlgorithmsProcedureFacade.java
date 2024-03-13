@@ -17,24 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.results;
+package org.neo4j.gds.procedures.algorithms;
 
-import java.util.Map;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
 
-@SuppressWarnings("unused")
-public class StandardModeResult {
+/**
+ * This is the facade that faces pipelines, so everything you can pipeline I guess.
+ * I assume you can't pipeline a pipeline...
+ */
+public class AlgorithmsProcedureFacade {
+    private final PathFindingProcedureFacade pathFindingProcedureFacade;
 
-    public final long preProcessingMillis;
-    public final long computeMillis;
-    public final Map<String, Object> configuration;
+    public AlgorithmsProcedureFacade(PathFindingProcedureFacade pathFindingProcedureFacade) {
+        this.pathFindingProcedureFacade = pathFindingProcedureFacade;
+    }
 
-    public StandardModeResult(
-        long preProcessingMillis,
-        long computeMillis,
-        Map<String, Object> configuration
-    ) {
-        this.preProcessingMillis = preProcessingMillis;
-        this.computeMillis = computeMillis;
-        this.configuration = configuration;
+    public PathFindingProcedureFacade pathFinding() {
+        return pathFindingProcedureFacade;
     }
 }

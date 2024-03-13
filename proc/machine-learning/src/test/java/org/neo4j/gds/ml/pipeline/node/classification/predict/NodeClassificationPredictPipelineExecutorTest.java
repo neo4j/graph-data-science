@@ -397,7 +397,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             .modelUser("user")
             .build();
 
-        var memoryEstimation = NodeClassificationPredictPipelineExecutor.estimate(model, config, new OpenModelCatalog());
+        var memoryEstimation = NodeClassificationPredictPipelineExecutor.estimate(model, config, new OpenModelCatalog(), null);
         assertMemoryEstimation(
             () -> memoryEstimation,
             graphStore.getGraph(NodeLabel.of("N")).nodeCount(),
@@ -449,7 +449,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             .build();
 
         assertMemoryEstimation(
-            () -> NodeClassificationPredictPipelineExecutor.estimate(model, config, new OpenModelCatalog()),
+            () -> NodeClassificationPredictPipelineExecutor.estimate(model, config, new OpenModelCatalog(), null),
             graphStore.getGraph(NodeLabel.of("N")).nodeCount(),
             graphStore.relationshipCount(),
             config.concurrency(),

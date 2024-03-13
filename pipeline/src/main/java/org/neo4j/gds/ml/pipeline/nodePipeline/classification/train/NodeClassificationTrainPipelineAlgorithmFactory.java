@@ -102,7 +102,8 @@ public class NodeClassificationTrainPipelineAlgorithmFactory extends
             .add(NodeClassificationTrain.estimate(
                 pipeline,
                 configuration,
-                executionContext.modelCatalog()
+                executionContext.modelCatalog(),
+                executionContext.algorithmsProcedureFacade()
             ))
             .build();
     }

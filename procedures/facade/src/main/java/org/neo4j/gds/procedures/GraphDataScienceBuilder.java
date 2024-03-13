@@ -21,7 +21,7 @@ package org.neo4j.gds.procedures;
 
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
-import org.neo4j.gds.procedures.algorithms.AlgorithmsFacade;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.catalog.CatalogFacade;
 import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
@@ -103,11 +103,11 @@ public class GraphDataScienceBuilder {
     }
 
     public GraphDataScience build() {
-        var algorithmsAndCatalogFacade = new AlgorithmsFacade(pathFindingProcedureFacade);
+        var algorithmsProcedureFacade = new AlgorithmsProcedureFacade(pathFindingProcedureFacade);
 
         return new GraphDataScience(
             log,
-            algorithmsAndCatalogFacade,
+            algorithmsProcedureFacade,
             catalogFacade,
             centralityProcedureFacade,
             communityProcedureFacade,

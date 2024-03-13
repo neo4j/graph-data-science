@@ -14,6 +14,7 @@ dependencies {
     compileOnly         group: 'com.google.auto.service',  name: 'auto-service',         version: ver.'auto-service'
 
     implementation project(':algo-common')
+    implementation project(':algorithms-procedure-facade')
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')

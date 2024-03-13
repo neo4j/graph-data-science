@@ -21,19 +21,19 @@ package org.neo4j.gds.results;
 
 import java.util.Map;
 
-@SuppressWarnings("unused")
-public class StandardMutateResult extends StandardStatsResult {
+public class StandardModeResult {
 
-    public final long mutateMillis;
+    public final long preProcessingMillis;
+    public final long computeMillis;
+    public final Map<String, Object> configuration;
 
-    public StandardMutateResult(
+    public StandardModeResult(
         long preProcessingMillis,
         long computeMillis,
-        long postProcessingMillis,
-        long mutateMillis,
         Map<String, Object> configuration
     ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
-        this.mutateMillis = mutateMillis;
+        this.preProcessingMillis = preProcessingMillis;
+        this.computeMillis = computeMillis;
+        this.configuration = configuration;
     }
 }

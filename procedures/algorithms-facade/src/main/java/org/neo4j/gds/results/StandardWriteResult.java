@@ -17,21 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.results;
 
-import org.neo4j.gds.termination.TerminationMonitor;
-import org.neo4j.kernel.api.KernelTransaction;
+import java.util.Map;
 
-public class TransactionTerminationMonitor implements TerminationMonitor {
+public class StandardWriteResult extends StandardStatsResult {
 
-    private final KernelTransaction transaction;
+    public final long writeMillis;
 
-    public TransactionTerminationMonitor(KernelTransaction transaction) {
-        this.transaction = transaction;
-    }
-
-    @Override
-    public boolean isTerminated() {
-        return transaction.getReasonIfTerminated().isPresent() || !transaction.isOpen();
+    public StandardWriteResult(
+        long preProcessingMillis,
+        long computeMillis,
+        long postProcessingMillis,
+        long writeMillis,
+        Map<String, Object> configuration
+    ) {
+        super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
+        this.writeMillis = writeMillis;
     }
 }

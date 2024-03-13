@@ -51,11 +51,13 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionTrainConfig;
 import org.neo4j.gds.ml.models.randomforest.ImmutableRandomForestClassifierData;
 import org.neo4j.gds.ml.models.randomforest.RandomForestClassifier;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
+import org.neo4j.gds.ml.pipeline.Stub;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionModelInfo;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.L2FeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.train.LinkPredictionTrainConfigImpl;
 import org.neo4j.gds.nodeproperties.LongTestPropertyValues;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 
 import java.util.Collection;
 import java.util.List;
@@ -446,7 +448,7 @@ class LinkPredictionPredictPipelineExecutorTest {
             .build();
 
         assertMemoryEstimation(
-            () -> LinkPredictionPredictPipelineExecutor.estimate(new OpenModelCatalog(), pipeline, config, modelData),
+            () -> LinkPredictionPredictPipelineExecutor.estimate(new OpenModelCatalog(), pipeline, config, modelData, null),
             graphStore.nodeCount(),
             graphStore.relationshipCount(),
             config.concurrency(),
@@ -475,7 +477,7 @@ class LinkPredictionPredictPipelineExecutorTest {
             .build();
 
         assertMemoryEstimation(
-            () -> LinkPredictionPredictPipelineExecutor.estimate(new OpenModelCatalog(), pipeline, config, modelData),
+            () -> LinkPredictionPredictPipelineExecutor.estimate(new OpenModelCatalog(), pipeline, config, modelData, null),
             graphStore.nodeCount(),
             graphStore.relationshipCount(),
             config.concurrency(),
@@ -539,7 +541,8 @@ class LinkPredictionPredictPipelineExecutorTest {
             String graphName,
             Collection<NodeLabel> nodeLabels,
             Collection<RelationshipType> relTypes,
-            int trainConcurrency
+            int trainConcurrency,
+            Stub stub
         ) {
             assertThat(nodeLabels).containsExactlyInAnyOrderElementsOf(graphStoreFilter.nodePropertyStepsBaseLabels());
             assertThat(relTypes).containsExactlyInAnyOrderElementsOf(graphStoreFilter.predictRelationshipTypes());
@@ -557,10 +560,12 @@ class LinkPredictionPredictPipelineExecutorTest {
 
         @Override
         public MemoryEstimation estimate(
+            AlgorithmsProcedureFacade algorithmsProcedureFacade,
             ModelCatalog modelCatalog,
             String username,
             List<String> nodeLabels,
-            List<String> relTypes
+            List<String> relTypes,
+            Stub stub
         ) {
             return MemoryEstimations.of("fake", MemoryRange.of(0));
         }
@@ -598,10 +603,12 @@ class LinkPredictionPredictPipelineExecutorTest {
 
         @Override
         public MemoryEstimation estimate(
+            AlgorithmsProcedureFacade algorithmsProcedureFacade,
             ModelCatalog modelCatalog,
             String username,
             List<String> nodeLabels,
-            List<String> relTypes
+            List<String> relTypes,
+            Stub stub
         ) {
             throw new MemoryEstimationNotImplementedException();
         }
@@ -617,7 +624,8 @@ class LinkPredictionPredictPipelineExecutorTest {
             String graphName,
             Collection<NodeLabel> nodeLabels,
             Collection<RelationshipType> relTypes,
-            int trainConcurrency
+            int trainConcurrency,
+            Stub stub
         ) {
             graphStore.addNodeProperty(
                 graphStore.nodeLabels(),

@@ -40,6 +40,7 @@ import org.neo4j.gds.ml.pipeline.PipelineGraphFilter;
 import org.neo4j.gds.ml.pipeline.PredictPipelineExecutor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkPredictionPredictPipeline;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.similarity.knn.KnnFactory;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -120,9 +121,11 @@ public class LinkPredictionPredictPipelineExecutor extends PredictPipelineExecut
         ModelCatalog modelCatalog,
         LinkPredictionPredictPipeline pipeline,
         LinkPredictionPredictPipelineBaseConfig configuration,
-        Classifier.ClassifierData classifierData
+        Classifier.ClassifierData classifierData,
+        AlgorithmsProcedureFacade algorithmsProcedureFacade
     ) {
         MemoryEstimation maxOverNodePropertySteps = NodePropertyStepExecutor.estimateNodePropertySteps(
+            algorithmsProcedureFacade,
             modelCatalog,
             configuration.username(),
             pipeline.nodePropertySteps(),

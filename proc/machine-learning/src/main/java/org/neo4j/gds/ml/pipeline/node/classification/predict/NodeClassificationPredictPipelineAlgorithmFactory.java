@@ -97,7 +97,7 @@ public class NodeClassificationPredictPipelineAlgorithmFactory
         );
 
         return MemoryEstimations.builder(NodeClassificationPredictPipelineExecutor.class.getSimpleName())
-            .add("Pipeline executor", NodeClassificationPredictPipelineExecutor.estimate(model, configuration, modelCatalog))
+            .add("Pipeline executor", NodeClassificationPredictPipelineExecutor.estimate(model, configuration, modelCatalog, executionContext.algorithmsProcedureFacade()))
             .build();
     }
 

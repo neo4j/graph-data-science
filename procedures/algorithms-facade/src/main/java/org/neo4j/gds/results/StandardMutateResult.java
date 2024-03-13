@@ -17,10 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.ml.pipeline;
+package org.neo4j.gds.results;
 
-/**
- * This eventually needs to be org.neo4j.gds.procedures.AlgorithmsAndCatalogFacade
- */
-public class AlgorithmsFacade {
+import java.util.Map;
+
+public class StandardMutateResult extends StandardStatsResult {
+
+    public final long mutateMillis;
+
+    public StandardMutateResult(
+        long preProcessingMillis,
+        long computeMillis,
+        long postProcessingMillis,
+        long mutateMillis,
+        Map<String, Object> configuration
+    ) {
+        super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
+        this.mutateMillis = mutateMillis;
+    }
 }

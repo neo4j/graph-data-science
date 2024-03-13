@@ -30,6 +30,7 @@ import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.nodeproperties.DoubleTestPropertyValues;
 import org.neo4j.gds.nodeproperties.LongTestPropertyValues;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.test.SumNodePropertyStepConfig;
 
 import java.util.Collection;
@@ -61,10 +62,12 @@ public class ExecutableNodePropertyStepTestUtil {
 
         @Override
         public MemoryEstimation estimate(
+            AlgorithmsProcedureFacade algorithmsProcedureFacade,
             ModelCatalog modelCatalog,
             String username,
             List<String> nodeLabels,
-            List<String> relTypes
+            List<String> relTypes,
+            Stub stub
         ) {
             throw new MemoryEstimationNotImplementedException();
         }
@@ -80,7 +83,8 @@ public class ExecutableNodePropertyStepTestUtil {
             String graphName,
             Collection<NodeLabel> nodeLabels,
             Collection<RelationshipType> relTypes,
-            int trainConcurrency
+            int trainConcurrency,
+            Stub stub
         ) {
             var featureInputNodeLabels = featureInputNodeLabels(graphStore, nodeLabels);
             var graph = graphStore.getGraph(
@@ -152,10 +156,12 @@ public class ExecutableNodePropertyStepTestUtil {
 
         @Override
         public MemoryEstimation estimate(
+            AlgorithmsProcedureFacade algorithmsProcedureFacade,
             ModelCatalog modelCatalog,
             String username,
             List<String> nodeLabels,
-            List<String> relTypes
+            List<String> relTypes,
+            Stub stub
         ) {
             throw new MemoryEstimationNotImplementedException();
         }
@@ -171,7 +177,8 @@ public class ExecutableNodePropertyStepTestUtil {
             String graphName,
             Collection<NodeLabel> nodeLabels,
             Collection<RelationshipType> relTypes,
-            int trainConcurrency
+            int trainConcurrency,
+            Stub stub
         ) {
             graphStore.addNodeProperty(
                 graphStore.nodeLabels(),
@@ -214,7 +221,8 @@ public class ExecutableNodePropertyStepTestUtil {
             String graphName,
             Collection<NodeLabel> nodeLabels,
             Collection<RelationshipType> relTypes,
-            int trainConcurrency
+            int trainConcurrency,
+            Stub stub
         ) {
             throw new NotImplementedException();
         }
@@ -231,10 +239,12 @@ public class ExecutableNodePropertyStepTestUtil {
 
         @Override
         public MemoryEstimation estimate(
+            AlgorithmsProcedureFacade algorithmsProcedureFacade,
             ModelCatalog modelCatalog,
             String username,
             List<String> nodeLabels,
-            List<String> relTypes
+            List<String> relTypes,
+            Stub stub
         ) {
             return memoryEstimation;
         }
@@ -253,7 +263,14 @@ public class ExecutableNodePropertyStepTestUtil {
         }
 
         @Override
-        public MemoryEstimation estimate(ModelCatalog modelCatalog, String username, List<String> nodeLabels, List<String> relTypes) {
+        public MemoryEstimation estimate(
+            AlgorithmsProcedureFacade algorithmsProcedureFacade,
+            ModelCatalog modelCatalog,
+            String username,
+            List<String> nodeLabels,
+            List<String> relTypes,
+            Stub stub
+        ) {
             throw new MemoryEstimationNotImplementedException();
         }
 
@@ -268,7 +285,8 @@ public class ExecutableNodePropertyStepTestUtil {
             String graphName,
             Collection<NodeLabel> nodeLabels,
             Collection<RelationshipType> relTypes,
-            int trainConcurrency
+            int trainConcurrency,
+            Stub stub
         ) {
             throw new PipelineExecutionTestExecuteNodeStepFailure();
         }

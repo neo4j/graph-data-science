@@ -32,6 +32,8 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GraphStoreFromCatalogLoader;
 import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.metrics.MetricsFacade;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.integration.TransactionTerminationMonitor;
 import org.neo4j.gds.transaction.DatabaseTransactionContext;
 import org.neo4j.gds.transaction.EmptyTransactionContext;
 import org.neo4j.gds.transaction.TransactionContext;
@@ -77,6 +79,9 @@ public abstract class BaseProc {
 
     @Context
     public MetricsFacade metricsFacade;
+
+    @Context
+    public GraphDataScience graphDataScience;
 
     protected String username() {
         return username.username();
@@ -131,6 +136,8 @@ public abstract class BaseProc {
     }
 
     public ExecutionContext executionContext() {
+        //System.out.println("which metrics facade do we get? " + metricsFacade);
+
         return databaseService == null
             ? ExecutionContext.EMPTY
             : ImmutableExecutionContext
@@ -148,6 +155,7 @@ public abstract class BaseProc {
                 .nodeLookup(new TransactionNodeLookup(transaction))
                 .isGdsAdmin(transactionContext().isGdsAdmin())
                 .metricsFacade(metricsFacade)
+                .algorithmsProcedureFacade(graphDataScience.algorithmsProcedureFacade())
                 .build();
     }
 

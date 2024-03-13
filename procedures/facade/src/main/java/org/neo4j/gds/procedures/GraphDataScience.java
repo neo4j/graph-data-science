@@ -21,7 +21,7 @@ package org.neo4j.gds.procedures;
 
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
-import org.neo4j.gds.procedures.algorithms.AlgorithmsFacade;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.catalog.CatalogFacade;
 import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
@@ -34,7 +34,7 @@ import org.neo4j.gds.procedures.similarity.SimilarityProcedureFacade;
 public class GraphDataScience {
     private final Log log;
 
-    private final AlgorithmsFacade algorithmsFacade;
+    private final AlgorithmsProcedureFacade algorithmsProcedureFacade;
     private final CatalogFacade catalogFacade;
     private final CentralityProcedureFacade centralityProcedureFacade;
     private final CommunityProcedureFacade communityProcedureFacade;
@@ -48,9 +48,9 @@ public class GraphDataScience {
     /**
      * Keeping this package private to encourage use of @{@link org.neo4j.gds.procedures.GraphDataScienceBuilder}
      */
-    GraphDataScience(
+    public GraphDataScience(
         Log log,
-        AlgorithmsFacade algorithmsFacade,
+        AlgorithmsProcedureFacade algorithmsProcedureFacade,
         CatalogFacade catalogFacade,
         CentralityProcedureFacade centralityProcedureFacade,
         CommunityProcedureFacade communityProcedureFacade,
@@ -61,7 +61,7 @@ public class GraphDataScience {
         DeprecatedProceduresMetricService deprecatedProceduresMetricService
     ) {
         this.log = log;
-        this.algorithmsFacade = algorithmsFacade;
+        this.algorithmsProcedureFacade = algorithmsProcedureFacade;
         this.catalogFacade = catalogFacade;
         this.centralityProcedureFacade = centralityProcedureFacade;
         this.communityProcedureFacade = communityProcedureFacade;
@@ -97,7 +97,7 @@ public class GraphDataScience {
     }
 
     public PathFindingProcedureFacade pathFinding() {
-        return algorithmsFacade.pathFinding();
+        return algorithmsProcedureFacade.pathFinding();
     }
 
     public PipelinesProcedureFacade pipelines() {
@@ -110,5 +110,12 @@ public class GraphDataScience {
 
     public DeprecatedProceduresMetricService deprecatedProcedures() {
         return deprecatedProceduresMetricService;
+    }
+
+    /**
+     * This exists for reasons of dependency injection; business logic should not use it.
+     */
+    public AlgorithmsProcedureFacade algorithmsProcedureFacade() {
+        return algorithmsProcedureFacade;
     }
 }

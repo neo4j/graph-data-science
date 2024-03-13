@@ -40,6 +40,7 @@ import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationT
 import org.neo4j.gds.ml.splitting.FractionSplitter;
 import org.neo4j.gds.ml.splitting.StratifiedKFoldSplitter;
 import org.neo4j.gds.ml.training.TrainingStatistics;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 
 import java.util.Collection;
 import java.util.List;
@@ -56,15 +57,18 @@ public class NodeClassificationTrainMemoryEstimateDefinition {
     private final NodeClassificationTrainingPipeline pipeline;
     private final NodeClassificationPipelineTrainConfig configuration;
     private final ModelCatalog modelCatalog;
+    private final AlgorithmsProcedureFacade algorithmsProcedureFacade;
 
     public NodeClassificationTrainMemoryEstimateDefinition(
         NodeClassificationTrainingPipeline pipeline,
         NodeClassificationPipelineTrainConfig configuration,
-        @Nullable ModelCatalog modelCatalog
+        @Nullable ModelCatalog modelCatalog,
+        AlgorithmsProcedureFacade algorithmsProcedureFacade
     ) {
         this.pipeline = pipeline;
         this.configuration = configuration;
         this.modelCatalog = modelCatalog;
+        this.algorithmsProcedureFacade = algorithmsProcedureFacade;
     }
 
 
@@ -72,6 +76,7 @@ public class NodeClassificationTrainMemoryEstimateDefinition {
         pipeline.validateTrainingParameterSpace();
 
         MemoryEstimation nodePropertyStepsEstimation = NodePropertyStepExecutor.estimateNodePropertySteps(
+            algorithmsProcedureFacade,
             modelCatalog,
             configuration.username(),
             pipeline.nodePropertySteps(),

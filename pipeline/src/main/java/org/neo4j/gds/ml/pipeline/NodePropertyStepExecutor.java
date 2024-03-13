@@ -32,6 +32,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 
 import java.util.Collection;
 import java.util.List;
@@ -70,6 +71,7 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
     }
 
     public static MemoryEstimation estimateNodePropertySteps(
+        AlgorithmsProcedureFacade algorithmsProcedureFacade,
         ModelCatalog modelCatalog,
         String username,
         List<ExecutableNodePropertyStep> nodePropertySteps,
@@ -78,7 +80,27 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
     ) {
         var nodePropertyStepEstimations = nodePropertySteps
             .stream()
-            .map(step -> step.estimate(modelCatalog, username, nodeLabels, relationshipTypes))
+            .map(step -> {
+                var procedureName = step.procName();
+
+                // short term hack; dependency injection will get here one day
+                var nodePropertyStepFactoryUsingStubs = NodePropertyStepFactoryUsingStubs.GetOrCreate(NodePropertyStepExecutor.class.getSimpleName());
+
+                Stub stub = null;
+
+                if (nodePropertyStepFactoryUsingStubs.handles(procedureName)) {
+                    stub = nodePropertyStepFactoryUsingStubs.getStub(procedureName);
+                }
+
+                return step.estimate(
+                    algorithmsProcedureFacade,
+                    modelCatalog,
+                    username,
+                    nodeLabels,
+                    relationshipTypes,
+                    stub
+                );
+            })
             .collect(Collectors.toList());
 
         // NOTE: This has the drawback, that we disregard the sizes of the mutate-properties, but it's a better approximation than adding all together.
@@ -118,12 +140,22 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
             progressTracker.beginSubTask();
             var featureInputNodeLabels = step.featureInputNodeLabels(graphStore, nodeLabels);
             var featureInputRelationshipTypes = step.featureInputRelationshipTypes(graphStore, relTypes, availableRelationshipTypesForNodeProperties);
+
+            var nodePropertyStepFactoryUsingStubs = NodePropertyStepFactoryUsingStubs.GetOrCreate(NodePropertyStepExecutor.class.getSimpleName());
+
+            Stub stub = null;
+
+            if (nodePropertyStepFactoryUsingStubs.handles(step.procName())) {
+                stub = nodePropertyStepFactoryUsingStubs.getStub(step.procName());
+            }
+
             step.execute(
                 executionContext,
                 config.graphName(),
                 featureInputNodeLabels,
                 featureInputRelationshipTypes,
-                config.concurrency()
+                config.concurrency(),
+                stub
             );
             progressTracker.endSubTask();
         }

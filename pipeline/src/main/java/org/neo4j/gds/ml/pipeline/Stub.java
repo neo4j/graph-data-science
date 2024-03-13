@@ -20,27 +20,25 @@
 package org.neo4j.gds.ml.pipeline;
 
 
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+
 import java.util.Map;
 
-interface Stub {
+public interface Stub {
     /**
-     * Like code below says: custom validation, i.e. looked up; no user
+     * Custom validation, i.e. looked up; no user
      */
-    void validateBeforeCreatingNodePropertyStep(AlgorithmsFacade facade, Map<String, Object> configuration);
+    void validateBeforeCreatingNodePropertyStep(AlgorithmsProcedureFacade facade, Map<String, Object> configuration);
 
+    /**
+     * Do the estimate
+     *
+     * @param configuration it is a little bit enhanced and should not be modified
+     * @throws MemoryEstimationNotImplementedException this is valid in some cases, caller can handle
+     */
+    MemoryEstimation estimate(AlgorithmsProcedureFacade facade, String username, Map<String, Object> configuration) throws MemoryEstimationNotImplementedException;
 
-    //    private static AlgoBaseConfig tryParsingConfig(
-//        GdsCallableFinder.GdsCallableDefinition callableDefinition,
-//        Map<String, Object> configuration
-//    ) {
-//        NewConfigFunction<AlgoBaseConfig> newConfigFunction = callableDefinition
-//            .algorithmSpec()
-//            .newConfigFunction();
-//
-//        var defaults = DefaultsConfiguration.Instance;
-//        var limits = LimitsConfiguration.Instance;
-//
-//        // passing the EMPTY_USERNAME as we only try to check if the given configuration itself is valid
-//        return new AlgoConfigParser<>(Username.EMPTY_USERNAME.username(), newConfigFunction, defaults, limits).processInput(configuration);
-//    }
+    void execute(AlgorithmsProcedureFacade algorithmsProcedureFacade, String graphName, Map<String, Object> configuration);
 }

@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.paths.astar.AStarMemoryEstimateDefinition;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateDefinition;
@@ -84,4 +85,15 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         );
     }
 
+    /**
+     * @deprecated remove duplication!
+     */
+    @Deprecated
+    public MemoryEstimation singleSourceShortestPathDijkstraEstimation(DijkstraBaseConfig dijkstraBaseConfig) {
+        var memoryEstimateParameters = dijkstraBaseConfig.toMemoryEstimateParameters();
+
+        var memoryEstimateDefinition = new DijkstraMemoryEstimateDefinition(memoryEstimateParameters);
+
+        return memoryEstimateDefinition.memoryEstimation();
+    }
 }

@@ -19,39 +19,19 @@
  */
 package org.neo4j.gds.results;
 
-import org.neo4j.gds.result.AbstractResultBuilder;
-
 import java.util.Map;
 
-@SuppressWarnings("unused")
-public final class StandardWriteRelationshipsResult extends StandardWriteResult {
+public class StandardStatsResult extends StandardModeResult {
 
-    public final long relationshipsWritten;
+    public final long postProcessingMillis;
 
-    public StandardWriteRelationshipsResult(
+    public StandardStatsResult(
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
-        long writeMillis,
-        long relationshipsWritten,
         Map<String, Object> configuration
     ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, writeMillis, configuration);
-        this.relationshipsWritten = relationshipsWritten;
-    }
-
-    public static class Builder extends AbstractResultBuilder<StandardWriteRelationshipsResult> {
-
-        @Override
-        public StandardWriteRelationshipsResult build() {
-            return new StandardWriteRelationshipsResult(
-                preProcessingMillis,
-                computeMillis,
-                0L,
-                writeMillis,
-                relationshipsWritten,
-                config.toMap()
-            );
-        }
+        super(preProcessingMillis, computeMillis, configuration);
+        this.postProcessingMillis = postProcessingMillis;
     }
 }

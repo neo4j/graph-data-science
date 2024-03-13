@@ -27,6 +27,7 @@ import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 
 import java.util.Collection;
 import java.util.List;
@@ -36,13 +37,17 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public interface ExecutableNodePropertyStep extends ToMapConvertible {
-
+    /**
+     * In the short term this is a bit funky: stub is there when it is needed,
+     * and availability is handled on the outside :shrug:
+     */
     void execute(
         ExecutionContext executionContext,
         String graphName,
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relTypes,
-        int trainConcurrency
+        int trainConcurrency,
+        Stub stub
     );
 
     Map<String, Object> config();
@@ -83,11 +88,17 @@ public interface ExecutableNodePropertyStep extends ToMapConvertible {
         return procName();
     }
 
+    /**
+     * In the short term this is a bit funky: stub is there when it is needed,
+     * and availability is handled on the outside :shrug:
+     */
     MemoryEstimation estimate(
+        AlgorithmsProcedureFacade algorithmsProcedureFacade,
         ModelCatalog modelCatalog,
         String username,
         List<String> nodeLabels,
-        List<String> relTypes
+        List<String> relTypes,
+        Stub stub
     );
 
     String mutateNodeProperty();

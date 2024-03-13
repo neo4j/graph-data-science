@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds;
 
+import org.neo4j.gds.procedures.integration.TransactionTerminationMonitor;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.logging.Log;

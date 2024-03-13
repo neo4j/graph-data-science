@@ -27,6 +27,7 @@ import org.neo4j.gds.executor.AlgoConfigParser;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.utils.StringJoining;
 
 import java.util.HashMap;
@@ -88,11 +89,10 @@ public final class NodePropertyStepFactory {
     }
 
     /**
-     *
      * @param facade optional that needs to be present when needed :shrug: short term thinking, will improve
      */
     private static ExecutableNodePropertyStep createNodePropertyStep(
-        Optional<AlgorithmsFacade> facade,
+        Optional<AlgorithmsProcedureFacade> facade,
         Map<String, Object> procConfigMap,
         String taskName,
         List<String> contextNodeLabels,

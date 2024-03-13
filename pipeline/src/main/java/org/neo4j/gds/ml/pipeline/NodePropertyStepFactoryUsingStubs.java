@@ -19,6 +19,9 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+
 import java.util.List;
 import java.util.Map;
 
@@ -59,7 +62,34 @@ final class NodePropertyStepFactoryUsingStubs {
     }
 
     private static NodePropertyStepFactoryUsingStubs create() {
-        return new NodePropertyStepFactoryUsingStubs(Map.of());
+        return new NodePropertyStepFactoryUsingStubs(
+            Map.of(
+                CanonicalProcedureName.parse("gds.shortestpath.dijkstra.mutate"),
+                new Stub() {
+                    @Override
+                    public void validateBeforeCreatingNodePropertyStep(
+                        AlgorithmsProcedureFacade facade,
+                        Map<String, Object> configuration
+                    ) {
+                        facade.pathFinding().singlePairShortestPathDijkstraMutateStub().validateWithNoUserButWithDefaultsAndLimits(configuration);
+                    }
+
+                    @Override
+                    public MemoryEstimation estimate(AlgorithmsProcedureFacade facade, String username, Map<String, Object> configuration) {
+                        return facade.pathFinding().singlePairShortestPathDijkstraMutateStub().estimateWithNoDefaultsNorLimits(username, configuration);
+                    }
+
+                    @Override
+                    public void execute(
+                        AlgorithmsProcedureFacade algorithmsProcedureFacade,
+                        String graphName,
+                        Map<String, Object> configuration
+                    ) {
+                        algorithmsProcedureFacade.pathFinding().singlePairShortestPathDijkstraMutateStub().execute(graphName, configuration);
+                    }
+                }
+            )
+        );
     }
 
     /**
@@ -74,7 +104,7 @@ final class NodePropertyStepFactoryUsingStubs {
     }
 
     ExecutableNodePropertyStep createNodePropertyStep(
-        AlgorithmsFacade facade,
+        AlgorithmsProcedureFacade facade,
         String procedureName,
         Map<String, Object> configuration,
         List<String> contextNodeLabels,
@@ -95,5 +125,9 @@ final class NodePropertyStepFactoryUsingStubs {
             contextNodeLabels,
             contextRelationshipTypes
         );
+    }
+
+    Stub getStub(String procedureName) {
+        return supportedProcedures.get(CanonicalProcedureName.parse(procedureName));
     }
 }

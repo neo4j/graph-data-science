@@ -19,24 +19,44 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
+import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import static org.neo4j.gds.config.MutateNodePropertyConfig.MUTATE_PROPERTY_KEY;
+import static org.neo4j.gds.ml.pipeline.NodePropertyStepContextConfig.CONTEXT_NODE_LABELS;
+import static org.neo4j.gds.ml.pipeline.NodePropertyStepContextConfig.CONTEXT_RELATIONSHIP_TYPES;
 
 class StubPoweredNodePropertyStep implements ExecutableNodePropertyStep {
+    private final CanonicalProcedureName canonicalProcedureName;
+    private final Map<String, Object> configuration;
+    private final List<String> contextNodeLabels;
+    private final List<String> contextRelationshipTypes;
+
     StubPoweredNodePropertyStep(
         CanonicalProcedureName canonicalProcedureName,
         Map<String, Object> configuration,
         List<String> contextNodeLabels,
         List<String> contextRelationshipTypes
     ) {
-        throw new UnsupportedOperationException("TODO");
+        this.canonicalProcedureName = canonicalProcedureName;
+        this.configuration = configuration;
+        this.contextNodeLabels = contextNodeLabels;
+        this.contextRelationshipTypes = contextRelationshipTypes;
     }
 
     @Override
@@ -45,38 +65,62 @@ class StubPoweredNodePropertyStep implements ExecutableNodePropertyStep {
         String graphName,
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relTypes,
-        int trainConcurrency
+        int trainConcurrency,
+        Stub stub
     ) {
-        throw new UnsupportedOperationException("TODO");
+        var configCopy = new HashMap<>(configuration);
+        var nodeLabelStrings = nodeLabels.stream().map(ElementIdentifier::name).collect(Collectors.toList());
+        var relTypeStrings = relTypes.stream().map(ElementIdentifier::name).collect(Collectors.toList());
+        configCopy.put("nodeLabels", nodeLabelStrings);
+        configCopy.put("relationshipTypes", relTypeStrings);
+        configCopy.putIfAbsent("concurrency", trainConcurrency);
+
+        stub.execute(executionContext.algorithmsProcedureFacade(), graphName, configCopy);
     }
 
     @Override
     public Map<String, Object> config() {
-        throw new UnsupportedOperationException("TODO");
+        return configuration;
     }
 
     @Override
     public String procName() {
-        throw new UnsupportedOperationException("TODO");
+        return canonicalProcedureName.getValue();
     }
 
     @Override
     public MemoryEstimation estimate(
+        AlgorithmsProcedureFacade algorithmsProcedureFacade,
         ModelCatalog modelCatalog,
         String username,
         List<String> nodeLabels,
-        List<String> relTypes
+        List<String> relTypes,
+        Stub stub
     ) {
-        throw new UnsupportedOperationException("TODO");
+        var configCopy = new HashMap<>(configuration);
+        configCopy.put("relationshipTypes", relTypes);
+        configCopy.put("nodeLabels", nodeLabels);
+
+        try {
+
+            return stub.estimate(algorithmsProcedureFacade, username, configCopy);
+        } catch (MemoryEstimationNotImplementedException exception) {
+            // If a single node property step cannot be estimated, we ignore this step in the estimation
+            return MemoryEstimations.of(canonicalProcedureName.getValue(), MemoryRange.of(0));
+        }
     }
 
     @Override
     public String mutateNodeProperty() {
-        throw new UnsupportedOperationException("TODO");
+        return config().get(MUTATE_PROPERTY_KEY).toString();
     }
 
     @Override
     public Map<String, Object> toMap() {
-        throw new UnsupportedOperationException("TODO");
+        var configWithContext = new LinkedHashMap<>(configuration);
+        configWithContext.put(CONTEXT_NODE_LABELS, contextNodeLabels);
+        configWithContext.put(CONTEXT_RELATIONSHIP_TYPES, contextRelationshipTypes);
+
+        return Map.of("name", procName(), "config", configWithContext);
     }
 }

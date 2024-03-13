@@ -50,11 +50,13 @@ import org.neo4j.gds.ml.models.randomforest.RandomForestClassifierTrainerConfigI
 import org.neo4j.gds.ml.pipeline.AutoTuningConfig;
 import org.neo4j.gds.ml.pipeline.ExecutableNodePropertyStep;
 import org.neo4j.gds.ml.pipeline.NodePropertyStep;
+import org.neo4j.gds.ml.pipeline.Stub;
 import org.neo4j.gds.ml.pipeline.TestGdsCallableFinder;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.CosineFeatureStep;
 import org.neo4j.gds.ml.pipeline.linkPipeline.linkfunctions.HadamardFeatureStep;
 import org.neo4j.gds.model.catalog.TestTrainConfigImpl;
 import org.neo4j.gds.model.catalog.TestWeightedTrainConfigImpl;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.termination.TerminationMonitor;
 import org.neo4j.logging.NullLog;
 
@@ -313,7 +315,8 @@ class LinkPredictionTrainingPipelineTest {
             String graphName,
             Collection<NodeLabel> nodeLabels,
             Collection<RelationshipType> relTypes,
-            int trainConcurrency
+            int trainConcurrency,
+            Stub stub
         ) {
 
         }
@@ -330,10 +333,12 @@ class LinkPredictionTrainingPipelineTest {
 
         @Override
         public MemoryEstimation estimate(
+            AlgorithmsProcedureFacade algorithmsProcedureFacade,
             ModelCatalog modelCatalog,
             String username,
             List<String> nodeLabels,
-            List<String> relTypes
+            List<String> relTypes,
+            Stub stub
         ) {
             return null;
         }

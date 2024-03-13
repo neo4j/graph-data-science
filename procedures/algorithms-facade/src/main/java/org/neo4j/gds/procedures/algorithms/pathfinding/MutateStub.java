@@ -17,22 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms;
+package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 
-/**
- * This is the facade that faces pipelines, so everything you can pipeline I guess.
- * I assume you can't pipeline a pipeline...
- */
-public class AlgorithmsFacade {
-    private final PathFindingProcedureFacade pathFindingProcedureFacade;
+import java.util.Map;
 
-    public AlgorithmsFacade(PathFindingProcedureFacade pathFindingProcedureFacade) {
-        this.pathFindingProcedureFacade = pathFindingProcedureFacade;
-    }
+public interface MutateStub {
+    void validateWithNoUserButWithDefaultsAndLimits(Map<String, Object> configuration);
 
-    public PathFindingProcedureFacade pathFinding() {
-        return pathFindingProcedureFacade;
-    }
+    MemoryEstimation estimateWithNoDefaultsNorLimits(String username, Map<String, Object> configuration);
+
+    void execute(String graphName, Map<String, Object> configuration);
 }

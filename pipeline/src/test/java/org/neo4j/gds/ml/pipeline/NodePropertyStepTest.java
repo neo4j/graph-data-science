@@ -34,8 +34,11 @@ import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.executor.GdsCallableFinder;
 import org.neo4j.gds.extension.Neo4jGraph;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.test.TestProc;
 
 import java.util.List;
@@ -91,7 +94,8 @@ class NodePropertyStepTest extends BaseProcTest {
                 GRAPH_NAME,
                 List.of(NodeLabel.ALL_NODES),
                 List.of(RelationshipType.ALL_RELATIONSHIPS),
-                4
+                4,
+                null
             )
         );
 
@@ -116,10 +120,12 @@ class NodePropertyStepTest extends BaseProcTest {
         // verify exception is caught
         assertThat(step
             .estimate(
+                null,
                 new OpenModelCatalog(),
                 "myUser",
                 List.of(ElementProjection.PROJECT_ALL),
-                List.of(ElementProjection.PROJECT_ALL)
+                List.of(ElementProjection.PROJECT_ALL),
+                null
             )
             .estimate(GraphDimensions.of(1), 4)
             .memoryUsage().max).isZero();

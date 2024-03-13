@@ -74,7 +74,7 @@ class NodeClassificationTrainMemoryEstimateDefinitionTest {
             .metrics(List.of(ClassificationMetricSpecification.Parser.parse("F1_WEIGHTED")))
             .build();
 
-        var memoryEstimation = new NodeClassificationTrainMemoryEstimateDefinition(pipeline, config, new OpenModelCatalog()).memoryEstimation();
+        var memoryEstimation = new NodeClassificationTrainMemoryEstimateDefinition(pipeline, config, new OpenModelCatalog(), null).memoryEstimation();
 
         // TODO: replace this with proper asserts
         assertMemoryEstimation(

@@ -116,6 +116,7 @@ public class LinkPredictionTrainPipelineExecutor extends PipelineExecutor
         );
 
         MemoryEstimation maxOverNodePropertySteps = NodePropertyStepExecutor.estimateNodePropertySteps(
+            executionContext.algorithmsProcedureFacade(),
             executionContext.modelCatalog(),
             configuration.username(),
             pipeline.nodePropertySteps(),
