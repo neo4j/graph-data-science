@@ -97,7 +97,6 @@ public abstract class BaseTest {
                 );
                 return new LifecycleAdapter();
             }
-
         });
     }
 
