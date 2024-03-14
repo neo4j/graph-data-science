@@ -25,7 +25,6 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -116,7 +115,6 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
                         .map(NodeSimilarityResult::graphResult)
                         .orElseGet(() -> new SimilarityGraphResult(computationResult.graph(), 0, false)),
                     config.mutateProperty(),
-                    config.propertyState(),
                     (SimilarityResultBuilder<SimilarityMutateResult>) resultBuilder,
                     executionContext.returnColumns()
                 );
@@ -137,7 +135,6 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
         ComputationResult<NodeSimilarity, NodeSimilarityResult, FilteredNodeSimilarityMutateConfig> computationResult,
         SimilarityGraphResult similarityGraphResult,
         String relationshipPropertyKey,
-        PropertyState propertyState,
         SimilarityResultBuilder<SimilarityMutateResult> resultBuilder,
         ProcedureReturnColumns returnColumns
     ) {
@@ -151,7 +148,7 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
                 .nodes(topKGraph)
                 .relationshipType(relationshipType)
                 .orientation(Orientation.NATURAL)
-                .addPropertyConfig(GraphFactory.PropertyConfig.of(relationshipPropertyKey, propertyState))
+                .addPropertyConfig(GraphFactory.PropertyConfig.of(relationshipPropertyKey))
                 .concurrency(1)
                 .executorService(DefaultPool.INSTANCE)
                 .build();
@@ -187,7 +184,7 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
                 similarityGraph.relationshipTopology(),
                 similarityGraph.schema().direction(),
                 similarityGraph.relationshipProperties(),
-                Optional.of(RelationshipPropertySchema.of(relationshipPropertyKey, ValueType.DOUBLE, propertyState))
+                Optional.of(RelationshipPropertySchema.of(relationshipPropertyKey, ValueType.DOUBLE))
             );
             if (shouldComputeHistogram(returnColumns)) {
                 resultBuilder.withHistogram(computeHistogram(similarityGraph));

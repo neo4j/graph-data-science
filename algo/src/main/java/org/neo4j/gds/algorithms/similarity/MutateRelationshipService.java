@@ -23,7 +23,6 @@ import org.neo4j.gds.algorithms.mutateservices.AddRelationshipResult;
 import org.neo4j.gds.algorithms.mutateservices.GraphStoreUpdater;
 import org.neo4j.gds.algorithms.mutateservices.SingleTypeRelationshipsProducer;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.logging.Log;
 
 public class MutateRelationshipService {
@@ -40,14 +39,12 @@ public class MutateRelationshipService {
         GraphStore graphStore,
         String mutateRelationshipType,
         String mutateProperty,
-        PropertyState propertyState,
         SingleTypeRelationshipsProducer singleTypeRelationshipsProducer
     ){
         return GraphStoreUpdater.addRelationship(
             graphStore,
             mutateRelationshipType,
             mutateProperty,
-            propertyState,
             singleTypeRelationshipsProducer,
             log
         );

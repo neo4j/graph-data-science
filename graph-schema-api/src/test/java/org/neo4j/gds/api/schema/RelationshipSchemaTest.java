@@ -299,25 +299,15 @@ class RelationshipSchemaTest {
                 RelationshipType.of("Z"),
                 Direction.UNDIRECTED,
                 "z",
-                RelationshipPropertySchema.of("z", ValueType.DOUBLE, PropertyState.TRANSIENT)
+                RelationshipPropertySchema.of("z", ValueType.DOUBLE)
             );
 
         assertThat(schema.isUndirected()).isFalse();
         assertThat(schema.availableTypes()).contains(RelationshipType.of("X"), RelationshipType.of("Y"));
 
-        assertThat(schema.get(RelationshipType.of("X")).properties()).containsExactlyInAnyOrderEntriesOf(Map.of(
-            "x",
-            RelationshipPropertySchema.of("x", ValueType.DOUBLE, PropertyState.TRANSIENT)
-        ));
-        assertThat(schema.get(RelationshipType.of("Y")).properties()).containsExactlyInAnyOrderEntriesOf(Map.of(
-            "y",
-            RelationshipPropertySchema.of("y", ValueType.DOUBLE, Aggregation.MIN, PropertyState.TRANSIENT)
-        ));
-        assertThat(schema.get(RelationshipType.of("Z")).properties()).containsExactlyInAnyOrderEntriesOf(Map.of(
-            "z",
-            RelationshipPropertySchema.of("z", ValueType.DOUBLE, PropertyState.TRANSIENT)
-        ));
-
+        assertThat(schema.get(RelationshipType.of("X")).properties()).containsExactlyInAnyOrderEntriesOf(Map.of("x", RelationshipPropertySchema.of("x", ValueType.DOUBLE)));
+        assertThat(schema.get(RelationshipType.of("Y")).properties()).containsExactlyInAnyOrderEntriesOf(Map.of("y", RelationshipPropertySchema.of("y", ValueType.DOUBLE, Aggregation.MIN)));
+        assertThat(schema.get(RelationshipType.of("Z")).properties()).containsExactlyInAnyOrderEntriesOf(Map.of("z", RelationshipPropertySchema.of("z", ValueType.DOUBLE)));
 
         assertThat(schema.get(RelationshipType.of("X")).direction()).isEqualTo(Direction.UNDIRECTED);
         assertThat(schema.get(RelationshipType.of("Y")).direction()).isEqualTo(Direction.DIRECTED);
@@ -340,56 +330,5 @@ class RelationshipSchemaTest {
         assertThat(relationshipSchema.get(relType).properties())
             .doesNotContainKey("shouldNotExistInOriginalSchema")
             .containsOnlyKeys("prop");
-    }
-
-    @Test
-    void shouldFilterPropertySchemas() {
-        var relSchema = MutableRelationshipSchema.empty();
-
-        relSchema.addProperty(
-            RelationshipType.of("A"),
-            Direction.DIRECTED,
-            "foo",
-            RelationshipPropertySchema.of("foo", ValueType.LONG, PropertyState.PERSISTENT)
-        );
-
-        relSchema.addProperty(
-            RelationshipType.of("A"),
-            Direction.DIRECTED,
-            "bar",
-            RelationshipPropertySchema.of("bar", ValueType.LONG, PropertyState.HIDDEN)
-        );
-
-        var filteredRelSchema = relSchema.filterProperties(schema -> schema.state() != PropertyState.HIDDEN);
-
-        assertThat(filteredRelSchema.allProperties()).containsExactly("foo");
-    }
-
-    @Test
-    void shouldNotShowHiddenPropertiesInToMap() {
-        var relSchema = MutableRelationshipSchema.empty();
-
-        relSchema.addProperty(
-            RelationshipType.of("A"),
-            Direction.DIRECTED,
-            "foo",
-            RelationshipPropertySchema.of("foo", ValueType.LONG, PropertyState.PERSISTENT)
-        );
-
-        relSchema.addProperty(
-            RelationshipType.of("A"),
-            Direction.DIRECTED,
-            "bar",
-            RelationshipPropertySchema.of("bar", ValueType.LONG, PropertyState.HIDDEN)
-        );
-
-        assertThat(relSchema.toMap()).containsAllEntriesOf(Map.of(
-            "A", Map.of(
-                "direction", "DIRECTED",
-                "properties", Map.of(
-                    "foo", "Integer (DefaultValue(-9223372036854775808), PERSISTENT, Aggregation.NONE)"
-                )
-            )
-        ));
     }
 }

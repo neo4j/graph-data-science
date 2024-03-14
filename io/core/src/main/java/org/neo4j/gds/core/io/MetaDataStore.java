@@ -75,7 +75,7 @@ public interface MetaDataStore {
             relTypeCounts,
             graphStore.inverseIndexedRelationshipTypes()
         );
-        var schema = SchemaHelper.filterInvisibleProperties(graphStore.schema());
+        var schema = graphStore.schema();
         return ImmutableMetaDataStore.of(
             graphInfo,
             schema.nodeSchema(),

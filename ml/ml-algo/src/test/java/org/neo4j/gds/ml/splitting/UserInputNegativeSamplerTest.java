@@ -25,7 +25,6 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
@@ -79,10 +78,10 @@ class UserInputNegativeSamplerTest {
         );
 
         RelationshipsBuilder testBuilder = new RelationshipsBuilderBuilder().nodes(graph).addPropertyConfig(
-            GraphFactory.PropertyConfig.of("property", Aggregation.SINGLE, DefaultValue.forDouble(), PropertyState.TRANSIENT)
+            GraphFactory.PropertyConfig.of("property", Aggregation.SINGLE, DefaultValue.forDouble())
         ).relationshipType(RelationshipType.of("TEST")).build();
         RelationshipsBuilder trainBuilder = new RelationshipsBuilderBuilder().nodes(graph).addPropertyConfig(
-            GraphFactory.PropertyConfig.of("property", Aggregation.SINGLE, DefaultValue.forDouble(), PropertyState.TRANSIENT)
+            GraphFactory.PropertyConfig.of("property", Aggregation.SINGLE, DefaultValue.forDouble())
         ).relationshipType(RelationshipType.of("TRAIN")).build();
 
         sampler.produceNegativeSamples(testBuilder, trainBuilder);

@@ -189,7 +189,6 @@ public class CentralityAlgorithmsMutateBusinessFacade {
             var addNodePropertyResult = mutateNodePropertyService.mutate(
                 configuration.mutateProperty(),
                 nodePropertyValues,
-                configuration.propertyState(),
                 configuration.nodeLabelIdentifiers(algorithmResult.graphStore()),
                 algorithmResult.graph(),
                 algorithmResult.graphStore()
@@ -240,7 +239,6 @@ public class CentralityAlgorithmsMutateBusinessFacade {
                 var mutateResult = mutateNodePropertyService.mutate(
                     configuration.mutateProperty(),
                     nodeProperties,
-                    configuration.propertyState(),
                     configuration.nodeLabelIdentifiers(algorithmResult.graphStore()),
                     algorithmResult.graph(),
                     algorithmResult.graphStore()
@@ -316,7 +314,6 @@ public class CentralityAlgorithmsMutateBusinessFacade {
             var addNodePropertyResult = mutateNodePropertyService.mutate(
                 configuration.mutateProperty(),
                 nodePropertyValues,
-                configuration.propertyState(),
                 configuration.nodeLabelIdentifiers(algorithmResult.graphStore()),
                 algorithmResult.graph(),
                 algorithmResult.graphStore()

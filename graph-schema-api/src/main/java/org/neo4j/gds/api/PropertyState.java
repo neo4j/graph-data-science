@@ -34,11 +34,5 @@ public enum PropertyState {
     /**
      * The property is projected from a remote source graph.
      */
-    REMOTE,
-
-    /**
-     * The property is auxiliary and should not be visible to the user
-     * or serialized as part of a backup.
-     */
-    HIDDEN
+    REMOTE
 }

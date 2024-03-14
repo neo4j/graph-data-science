@@ -113,7 +113,6 @@ class SimilarityAlgorithmsMutateBusinessFacadeTest {
 
         when(configurationMock.mutateProperty()).thenReturn("foo");
         when(configurationMock.mutateRelationshipType()).thenReturn("bar");
-        when(configurationMock.propertyState()).thenCallRealMethod();
 
         var businessFacade = new SimilarityAlgorithmsMutateBusinessFacade(null, mutateRelationshipService);
 
@@ -163,7 +162,6 @@ class SimilarityAlgorithmsMutateBusinessFacadeTest {
 
         when(configurationMock.mutateProperty()).thenReturn("bar");
         when(configurationMock.mutateRelationshipType()).thenReturn("foo");
-        when(configurationMock.propertyState()).thenCallRealMethod();
 
         var businessFacade = new SimilarityAlgorithmsMutateBusinessFacade(null, mutateRelationshipService);
 

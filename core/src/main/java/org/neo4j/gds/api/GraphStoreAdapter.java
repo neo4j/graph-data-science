@@ -161,13 +161,8 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
     }
 
     @Override
-    public void addNodeProperty(
-        Set<NodeLabel> nodeLabels,
-        String propertyKey,
-        NodePropertyValues propertyValues,
-        PropertyState propertyState
-    ) {
-        graphStore.addNodeProperty(nodeLabels, propertyKey, propertyValues, propertyState);
+    public void addNodeProperty(Set<NodeLabel> nodeLabels, String propertyKey, NodePropertyValues propertyValues) {
+        graphStore.addNodeProperty(nodeLabels, propertyKey, propertyValues);
     }
 
     @Override

@@ -26,7 +26,6 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public final class MutableNodeSchema implements NodeSchema {
@@ -68,26 +67,6 @@ public final class MutableNodeSchema implements NodeSchema {
                 Map.Entry::getKey,
                 entry -> MutableNodeSchemaEntry.from(entry.getValue())
             )));
-    }
-
-    @Override
-    public NodeSchema filterProperties(Predicate<PropertySchema> predicate) {
-        return new MutableNodeSchema(entries
-            .entrySet()
-            .stream()
-            .map(entry -> new MutableNodeSchemaEntry(entry.getKey(), entry
-                .getValue()
-                .properties()
-                .entrySet()
-                .stream()
-                .filter(property -> predicate.test(property.getValue()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))
-            ))
-            .collect(Collectors.toMap(
-                MutableNodeSchemaEntry::identifier,
-                entry -> entry
-            ))
-        );
     }
 
     @Override

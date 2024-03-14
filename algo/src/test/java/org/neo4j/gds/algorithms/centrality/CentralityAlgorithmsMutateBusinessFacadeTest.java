@@ -98,7 +98,6 @@ class CentralityAlgorithmsMutateBusinessFacadeTest {
 
         var configMock = mock(MutateNodePropertyConfig.class);
         when(configMock.mutateProperty()).thenReturn("foo");
-        when(configMock.propertyState()).thenCallRealMethod();
 
 
         var result = HugeDoubleArray.of(0.1, 0.2, 0.3, 0.4);
@@ -151,7 +150,6 @@ class CentralityAlgorithmsMutateBusinessFacadeTest {
 
         var configMock = mock(MutateNodePropertyConfig.class);
         when(configMock.mutateProperty()).thenReturn("foo");
-        when(configMock.propertyState()).thenCallRealMethod();
 
 
         var result = HugeDoubleArray.of(0.1, 0.2, 0.3, 0.4);

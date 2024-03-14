@@ -74,7 +74,6 @@ public class MiscAlgorithmMutateBusinessFacade {
                 var mutateResult = mutateNodePropertyService.mutate(
                     configuration.mutateProperty(),
                     nodeProperties,
-                    configuration.propertyState(),
                     configuration.nodeLabelIdentifiers(algorithmResult.graphStore()),
                     algorithmResult.graph(),
                     algorithmResult.graphStore()

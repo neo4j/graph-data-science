@@ -187,24 +187,26 @@ public final class GraphFactory {
             return DefaultValue.forDouble();
         }
 
+        static PropertyConfig of(String propertyKey) {
+            return ImmutablePropertyConfig.builder().propertyKey(propertyKey).build();
+        }
+
         static ImmutablePropertyConfig.Builder builder() {
             return ImmutablePropertyConfig.builder();
         }
 
-        static PropertyConfig of(String propertyKey, PropertyState propertyState) {
-            return ImmutablePropertyConfig.builder().propertyKey(propertyKey).propertyState(propertyState).build();
-        }
-
-        static PropertyConfig of(String propertyKey, Aggregation aggregation, DefaultValue defaultValue, PropertyState propertyState) {
+        static PropertyConfig of(String propertyKey, Aggregation aggregation, DefaultValue defaultValue) {
             return ImmutablePropertyConfig.builder()
                 .propertyKey(propertyKey)
                 .aggregation(aggregation)
                 .defaultValue(defaultValue)
-                .propertyState(propertyState)
                 .build();
         }
 
-        PropertyState propertyState();
+        @Value.Default
+        default PropertyState propertyState() {
+            return PropertyState.TRANSIENT;
+        }
     }
 
     public static RelationshipsBuilderBuilder initRelationshipsBuilder() {

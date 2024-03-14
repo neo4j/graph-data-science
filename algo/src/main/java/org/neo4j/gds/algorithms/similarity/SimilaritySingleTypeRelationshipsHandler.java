@@ -24,7 +24,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.algorithms.mutateservices.SingleTypeRelationshipsProducer;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -66,7 +65,7 @@ public class SimilaritySingleTypeRelationshipsHandler implements SingleTypeRelat
     }
 
     @Override
-    public SingleTypeRelationships createRelationships(String mutateRelationshipType, String mutateProperty, PropertyState propertyState) {
+    public SingleTypeRelationships createRelationships(String mutateRelationshipType, String mutateProperty) {
 
         RelationshipType relationshipType = RelationshipType.of(mutateRelationshipType);
         var similarityGraphResult = similarityGraphResultSupplier.get();
@@ -79,7 +78,7 @@ public class SimilaritySingleTypeRelationshipsHandler implements SingleTypeRelat
                 .nodes(topKGraph)
                 .relationshipType(relationshipType)
                 .orientation(Orientation.NATURAL)
-                .addPropertyConfig(GraphFactory.PropertyConfig.of(mutateProperty, PropertyState.TRANSIENT))
+                .addPropertyConfig(GraphFactory.PropertyConfig.of(mutateProperty))
                 .concurrency(1)
                 .executorService(DefaultPool.INSTANCE)
                 .build();
@@ -109,7 +108,7 @@ public class SimilaritySingleTypeRelationshipsHandler implements SingleTypeRelat
                 similarityGraph.relationshipTopology(),
                 similarityGraph.schema().direction(),
                 similarityGraph.relationshipProperties(),
-                Optional.of(RelationshipPropertySchema.of(mutateProperty, ValueType.DOUBLE, propertyState))
+                Optional.of(RelationshipPropertySchema.of(mutateProperty, ValueType.DOUBLE))
             );
 
             if (shouldComputeStatistics) {

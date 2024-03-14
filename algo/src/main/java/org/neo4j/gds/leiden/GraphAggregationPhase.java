@@ -28,7 +28,6 @@ import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
@@ -154,7 +153,6 @@ class GraphAggregationPhase {
             .addPropertyConfig(GraphFactory.PropertyConfig.builder()
                 .propertyKey("property")
                 .aggregation(Aggregation.SUM)
-                .propertyState(PropertyState.TRANSIENT)
                 .build())
             .executorService(executorService)
             .build();

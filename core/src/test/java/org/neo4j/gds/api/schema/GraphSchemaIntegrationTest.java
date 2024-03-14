@@ -104,7 +104,7 @@ class GraphSchemaIntegrationTest extends BaseTest {
     private static Stream<Arguments> relationshipPropertyMappingsAndExpectedResults() {
         return Stream.of(
             Arguments.of(
-                RelationshipPropertySchema.of("relProp", ValueType.DOUBLE, PropertyState.TRANSIENT),
+                RelationshipPropertySchema.of("relProp", ValueType.DOUBLE),
                 PropertyMapping.of("relProp")
             ),
             Arguments.of(

@@ -23,7 +23,6 @@ import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 
@@ -112,11 +111,10 @@ public final class NodeStore {
 
         graphStore.nodeLabels().forEach(label -> {
             var properties = nodeProperties.computeIfAbsent(label.name, k -> new HashMap<>());
-            graphStore.schema().nodeSchema().propertySchemasFor(label).forEach(propertySchema -> {
-                if (propertySchema.state() != PropertyState.HIDDEN) {
-                    properties.put(propertySchema.key(), graphStore.nodeProperty(propertySchema.key()).values());
-                }
-            });
+            graphStore.schema().nodeSchema().propertySchemasFor(label).forEach(propertySchema -> properties.put(
+                propertySchema.key(),
+                graphStore.nodeProperty(propertySchema.key()).values()
+            ));
         });
 
         return new NodeStore(

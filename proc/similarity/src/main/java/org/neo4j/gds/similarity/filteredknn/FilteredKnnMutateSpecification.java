@@ -119,8 +119,7 @@ public class FilteredKnnMutateSpecification implements AlgorithmSpec<FilteredKnn
                                         similarityGraph.relationshipProperties(),
                                         Optional.of(RelationshipPropertySchema.of(
                                             config.mutateProperty(),
-                                            ValueType.DOUBLE,
-                                            config.propertyState()
+                                            ValueType.DOUBLE
                                         ))
                                     )
                                 );

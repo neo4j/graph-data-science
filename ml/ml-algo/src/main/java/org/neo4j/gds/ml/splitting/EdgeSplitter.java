@@ -27,7 +27,6 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.core.Aggregation;
@@ -168,7 +167,7 @@ public abstract class EdgeSplitter {
             .nodes(rootNodes)
             .orientation(direction.toOrientation())
             .addAllPropertyConfigs(propertyKey
-                .map(key -> List.of(GraphFactory.PropertyConfig.of(key, Aggregation.SINGLE, DefaultValue.forDouble(), PropertyState.TRANSIENT)))
+                .map(key -> List.of(GraphFactory.PropertyConfig.of(key, Aggregation.SINGLE, DefaultValue.forDouble())))
                 .orElse(List.of()))
             .concurrency(1)
             .executorService(DefaultPool.INSTANCE)

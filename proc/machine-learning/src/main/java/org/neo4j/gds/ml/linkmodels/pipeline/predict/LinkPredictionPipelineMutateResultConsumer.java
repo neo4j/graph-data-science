@@ -63,7 +63,7 @@ class LinkPredictionPipelineMutateResultConsumer extends MutateComputationResult
             .nodes(graph)
             .relationshipType(mutateRelationshipType)
             .orientation(Orientation.UNDIRECTED)
-            .addPropertyConfig(GraphFactory.PropertyConfig.of(config.mutateProperty(), config.propertyState()))
+            .addPropertyConfig(GraphFactory.PropertyConfig.of(config.mutateProperty()))
             .concurrency(concurrency)
             .executorService(DefaultPool.INSTANCE)
             .build();

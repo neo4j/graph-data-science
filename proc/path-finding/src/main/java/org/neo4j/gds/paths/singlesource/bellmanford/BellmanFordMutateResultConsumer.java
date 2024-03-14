@@ -60,7 +60,7 @@ public class BellmanFordMutateResultConsumer extends MutateComputationResultCons
                 .initRelationshipsBuilder()
                 .relationshipType(mutateRelationshipType)
                 .nodes(computationResult.graph())
-                .addPropertyConfig(GraphFactory.PropertyConfig.of(TOTAL_COST_KEY, config.propertyState()))
+                .addPropertyConfig(GraphFactory.PropertyConfig.of(TOTAL_COST_KEY))
                 .orientation(Orientation.NATURAL)
                 .build();
 

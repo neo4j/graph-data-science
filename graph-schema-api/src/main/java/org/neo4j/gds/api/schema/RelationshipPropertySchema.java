@@ -32,22 +32,22 @@ public interface RelationshipPropertySchema extends PropertySchema {
 
     Aggregation aggregation();
 
-    static RelationshipPropertySchema of(String propertyKey, ValueType valueType, PropertyState propertyState) {
+    static RelationshipPropertySchema of(String propertyKey, ValueType valueType) {
         return ImmutableRelationshipPropertySchema.of(
             propertyKey,
             valueType,
             valueType.fallbackValue(),
-            propertyState,
+            PropertyState.PERSISTENT,
             Aggregation.DEFAULT
         );
     }
 
-    static RelationshipPropertySchema of(String propertyKey, ValueType valueType, Aggregation aggregation, PropertyState propertyState) {
+    static RelationshipPropertySchema of(String propertyKey, ValueType valueType, Aggregation aggregation) {
         return ImmutableRelationshipPropertySchema.of(
             propertyKey,
             valueType,
             valueType.fallbackValue(),
-            propertyState,
+            PropertyState.PERSISTENT,
             aggregation
         );
     }

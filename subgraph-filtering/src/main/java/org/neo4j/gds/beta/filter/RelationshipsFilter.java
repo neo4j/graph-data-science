@@ -112,8 +112,7 @@ public final class RelationshipsFilter {
                 propertyKey -> GraphFactory.PropertyConfig.of(
                     propertyKey,
                     Aggregation.NONE,
-                    graphStore.relationshipPropertyValues(relType, propertyKey).defaultValue(),
-                    graphStore.schema().relationshipSchema().get(relType).properties().get(propertyKey).state()
+                    graphStore.relationshipPropertyValues(relType, propertyKey).defaultValue()
                 )
             )
             .collect(Collectors.toList());

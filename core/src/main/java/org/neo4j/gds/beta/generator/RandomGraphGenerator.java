@@ -25,7 +25,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.api.schema.Direction;
@@ -140,8 +139,7 @@ public final class RandomGraphGenerator {
                 .map(propertyProducer -> List.of(GraphFactory.PropertyConfig.of(
                     propertyProducer.getPropertyName(),
                     aggregation,
-                    DefaultValue.forDouble(),
-                    PropertyState.TRANSIENT
+                    DefaultValue.forDouble()
                 )))
                 .orElseGet(List::of)
             ).indexInverse(inverseIndex)

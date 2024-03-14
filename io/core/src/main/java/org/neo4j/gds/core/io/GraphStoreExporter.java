@@ -23,7 +23,6 @@ import org.neo4j.common.Validator;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.PropertyState;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -32,8 +31,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.LongFunction;
 import java.util.stream.Collectors;
-
-import static java.util.function.Predicate.not;
 
 public abstract class GraphStoreExporter {
 
@@ -120,7 +117,6 @@ public abstract class GraphStoreExporter {
             .graphPropertyKeys()
             .stream()
             .map(graphStore::graphProperty)
-            .filter(not(graphProperty -> graphProperty.propertyState() == PropertyState.HIDDEN))
             .collect(Collectors.toSet());
 
         var graphStoreInput = GraphStoreInput.of(

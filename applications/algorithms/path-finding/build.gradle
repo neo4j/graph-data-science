@@ -14,7 +14,6 @@ dependencies {
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-write')
-    implementation project(':graph-schema-api')
     implementation project(':logging')
     implementation project(':memory-estimation')
     implementation project(':memory-usage')

@@ -50,7 +50,7 @@ class ShortestPathMutateStep implements MutateOrWriteStep<PathFindingResult> {
             .initRelationshipsBuilder()
             .relationshipType(mutateRelationshipType)
             .nodes(graph)
-            .addPropertyConfig(GraphFactory.PropertyConfig.of(TOTAL_COST_KEY, configuration.propertyState()))
+            .addPropertyConfig(GraphFactory.PropertyConfig.of(TOTAL_COST_KEY))
             .orientation(Orientation.NATURAL)
             .build();
 

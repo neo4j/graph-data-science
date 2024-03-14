@@ -177,7 +177,6 @@ public class SimilarityAlgorithmsMutateBusinessFacade {
                 algorithmResult.graphStore(),
                 configuration.mutateRelationshipType(),
                 configuration.mutateProperty(),
-                configuration.propertyState(),
                 similaritySingleTypeRelationshipsHandler
             );
 

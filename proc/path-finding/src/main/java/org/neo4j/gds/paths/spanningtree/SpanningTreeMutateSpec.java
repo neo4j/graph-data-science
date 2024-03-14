@@ -83,10 +83,7 @@ public class SpanningTreeMutateSpec implements AlgorithmSpec<Prim, SpanningTree,
                 .initRelationshipsBuilder()
                 .relationshipType(mutateRelationshipType)
                 .nodes(computationResult.graph())
-                .addPropertyConfig(GraphFactory.PropertyConfig.builder()
-                    .propertyKey(config.mutateProperty())
-                    .propertyState(config.propertyState())
-                    .build())
+                .addPropertyConfig(GraphFactory.PropertyConfig.builder().propertyKey(config.mutateProperty()).build())
                 .orientation(Orientation.NATURAL)
                 .build();
 

@@ -28,8 +28,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterParameters;
@@ -810,60 +808,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             List.of(
                 List.of("writeMode"),
                 List.of(WriteMode.LOCAL.name())
-            )
-        );
-    }
-
-    @Test
-    void shouldIgnoreHiddenProperties() {
-        var parameters = GraphStoreToFileExporterParameters.create(
-            tempDir.toString(),
-            "",
-            true,
-            false,
-            RelationshipType.ALL_RELATIONSHIPS.name,
-            1,
-            10_000
-        );
-
-        noPropertiesGraphStore.addNodeProperty(
-            noPropertiesGraphStore.nodeLabels(),
-            "hidden",
-            NodePropertyValuesAdapter.adapt(HugeLongArray.newArray(noPropertiesGraphStore.nodeCount())),
-            PropertyState.HIDDEN
-        );
-
-        var exporter = GraphStoreToCsvExporter.create(
-            noPropertiesGraphStore,
-            parameters,
-            tempDir,
-            Optional.empty(),
-            TaskRegistryFactory.empty(),
-            NullLog.getInstance(),
-            DefaultPool.INSTANCE
-        );
-        exporter.run();
-
-        assertCsvFiles(List.of(NODE_SCHEMA_FILE_NAME, RELATIONSHIP_SCHEMA_FILE_NAME, GRAPH_INFO_FILE_NAME));
-
-        assertDataContent(
-            NODE_SCHEMA_FILE_NAME,
-            List.of(
-                NODE_SCHEMA_COLUMNS,
-                List.of("A"),
-                List.of("B"),
-                List.of("C")
-            )
-        );
-
-        assertDataContent(
-            RELATIONSHIP_SCHEMA_FILE_NAME,
-            List.of(
-                CsvRelationshipSchemaVisitorTest.RELATIONSHIP_SCHEMA_COLUMNS,
-                List.of("REL1", "DIRECTED"),
-                List.of("REL2", "DIRECTED"),
-                List.of("REL3", "DIRECTED"),
-                List.of("REL4", "DIRECTED")
             )
         );
     }
