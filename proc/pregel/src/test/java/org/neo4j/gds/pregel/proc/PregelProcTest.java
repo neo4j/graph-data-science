@@ -58,6 +58,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.metrics.MetricsFacade;
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
 import org.neo4j.logging.NullLog;
 import org.neo4j.procedure.Context;
@@ -73,6 +74,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.compat.GraphDatabaseApiProxy.newKernelTransaction;
@@ -213,6 +215,7 @@ public class PregelProcTest extends BaseProcTest {
             proc.callContext = ProcedureCallContext.EMPTY;
 
             proc.metricsFacade = MetricsFacade.PASSTHROUGH_METRICS_FACADE;
+            proc.graphDataScience = mock(GraphDataScience.class);
 
             Map<String, Object> config = Map.of(
                 "maxIterations", 20,
@@ -241,6 +244,7 @@ public class PregelProcTest extends BaseProcTest {
             proc.callContext = ProcedureCallContext.EMPTY;
 
             proc.metricsFacade = MetricsFacade.PASSTHROUGH_METRICS_FACADE;
+            proc.graphDataScience = mock(GraphDataScience.class);
 
             Map<String, Object> config = Map.of(
                 "maxIterations", 20,
@@ -268,6 +272,7 @@ public class PregelProcTest extends BaseProcTest {
             proc.callContext = ProcedureCallContext.EMPTY;
 
             proc.metricsFacade = MetricsFacade.PASSTHROUGH_METRICS_FACADE;
+            proc.graphDataScience = mock(GraphDataScience.class);
 
             Map<String, Object> config = Map.of(
                 "maxIterations", 20,

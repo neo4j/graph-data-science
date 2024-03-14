@@ -33,6 +33,8 @@ dependencies {
 
     testImplementation project(':memory-usage')
     testImplementation project(':licensing')
+    testImplementation project(':logging')
+    testImplementation project(':opengds-procedure-facade')
     testImplementation project(':open-licensing')
     testImplementation project(':test-utils')
     testImplementation project(':proc-catalog')
