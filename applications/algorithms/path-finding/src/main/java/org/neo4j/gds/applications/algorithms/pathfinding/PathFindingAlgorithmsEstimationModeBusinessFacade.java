@@ -46,14 +46,24 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         ShortestPathAStarBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        return runEstimation(new AStarMemoryEstimateDefinition(), configuration,  graphNameOrConfiguration);
+        return runEstimation(new AStarMemoryEstimateDefinition(), configuration, graphNameOrConfiguration);
     }
 
     public MemoryEstimateResult singlePairShortestPathDijkstraEstimate(
         DijkstraSourceTargetsBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        return runEstimation(new DijkstraMemoryEstimateDefinition(configuration.toMemoryEstimateParameters()), configuration, graphNameOrConfiguration);
+        var memoryEstimation = singleSourceShortestPathDijkstraEstimation(configuration);
+
+        return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
+    }
+
+    public MemoryEstimation singleSourceShortestPathDijkstraEstimation(DijkstraBaseConfig dijkstraBaseConfig) {
+        var memoryEstimateParameters = dijkstraBaseConfig.toMemoryEstimateParameters();
+
+        var memoryEstimateDefinition = new DijkstraMemoryEstimateDefinition(memoryEstimateParameters);
+
+        return memoryEstimateDefinition.memoryEstimation();
     }
 
     public MemoryEstimateResult singlePairShortestPathYensEstimate(
@@ -78,22 +88,18 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
     ) {
         var memoryEstimation = memoryEstimateDefinition.memoryEstimation();
 
+        return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
+    }
+
+    public <CONFIGURATION extends AlgoBaseConfig> MemoryEstimateResult runEstimation(
+        CONFIGURATION configuration,
+        Object graphNameOrConfiguration,
+        MemoryEstimation memoryEstimation
+    ) {
         return algorithmEstimationTemplate.estimate(
             configuration,
             graphNameOrConfiguration,
             memoryEstimation
         );
-    }
-
-    /**
-     * @deprecated remove duplication!
-     */
-    @Deprecated
-    public MemoryEstimation singleSourceShortestPathDijkstraEstimation(DijkstraBaseConfig dijkstraBaseConfig) {
-        var memoryEstimateParameters = dijkstraBaseConfig.toMemoryEstimateParameters();
-
-        var memoryEstimateDefinition = new DijkstraMemoryEstimateDefinition(memoryEstimateParameters);
-
-        return memoryEstimateDefinition.memoryEstimation();
     }
 }

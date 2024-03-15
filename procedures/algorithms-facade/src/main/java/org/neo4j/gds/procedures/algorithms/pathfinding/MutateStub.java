@@ -22,11 +22,34 @@ package org.neo4j.gds.procedures.algorithms.pathfinding;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 
 import java.util.Map;
+import java.util.stream.Stream;
 
-public interface MutateStub {
-    void validateWithNoUserButWithDefaultsAndLimits(Map<String, Object> configuration);
+/**
+ * Mutate mode is used from Neo4j Procedures as well as from pipelines, so there is variation in the logic we need.
+ */
+public interface MutateStub<CONFIGURATION, RESULT> {
+    /**
+     * For pipelines, when adding steps, we need to validate them without considering the current user.
+     * So we effectively get validation against global defaults and limits.
+     */
+    void validateConfiguration(Map<String, Object> configuration);
 
-    MemoryEstimation estimateWithNoDefaultsNorLimits(String username, Map<String, Object> configuration);
+    /**
+     * Bog-standard configuration parsing with implicit validation,
+     * using the current user and globally configured defaults and limits
+     */
+    CONFIGURATION parseConfiguration(Map<String, Object> configuration);
 
-    void execute(String graphName, Map<String, Object> configuration);
+    /**
+     * We need this directly for pipelines,
+     * and also for procedure calls where we enrich and transform before returning results.
+     * This captures the correct (delegation of) business logic.
+     */
+    MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration);
+
+    /**
+     * Bog-standard execution of the algorithm in mutate mode, with ordinary input validation, defaults application,
+     * limit checks, memory guards etc.
+     */
+    Stream<RESULT> execute(String graphName, Map<String, Object> configuration);
 }

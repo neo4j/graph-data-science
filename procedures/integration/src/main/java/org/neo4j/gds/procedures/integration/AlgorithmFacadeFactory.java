@@ -59,6 +59,7 @@ import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.NodeLookup;
+import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
@@ -66,12 +67,15 @@ import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEs
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsWriteModeBusinessFacade;
+import org.neo4j.gds.configuration.DefaultsConfiguration;
+import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.modelcatalogservices.ModelCatalogService;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
+import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
 import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
@@ -83,10 +87,13 @@ import org.neo4j.gds.termination.TerminationFlag;
 class AlgorithmFacadeFactory {
     // Global scoped dependencies
     private final Log log;
+    private final DefaultsConfiguration defaultsConfiguration;
+    private final LimitsConfiguration limitsConfiguration;
 
     // Request scoped parameters
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final ConfigurationCreator configurationCreator;
+    private final ConfigurationParser configurationParser;
     private final NodeLookup nodeLookup;
     private final ProcedureCallContextReturnColumns returnColumns;
     private final MutateNodePropertyService mutateNodePropertyService;
@@ -100,13 +107,17 @@ class AlgorithmFacadeFactory {
     private final RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationFlag terminationFlag;
+    private final User user;
     private final UserLogRegistryFactory userLogRegistryFactory;
     private final ModelCatalogService modelCatalogService;
 
     AlgorithmFacadeFactory(
         Log log,
+        DefaultsConfiguration defaultsConfiguration,
+        LimitsConfiguration limitsConfiguration,
         CloseableResourceRegistry closeableResourceRegistry,
         ConfigurationCreator configurationCreator,
+        ConfigurationParser configurationParser,
         NodeLookup nodeLookup,
         ProcedureCallContextReturnColumns returnColumns,
         MutateNodePropertyService mutateNodePropertyService,
@@ -120,15 +131,20 @@ class AlgorithmFacadeFactory {
         RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
+        User user,
         UserLogRegistryFactory userLogRegistryFactory,
         ModelCatalogService modelCatalogService
     ) {
         this.log = log;
+        this.defaultsConfiguration = defaultsConfiguration;
+        this.limitsConfiguration = limitsConfiguration;
 
         this.closeableResourceRegistry = closeableResourceRegistry;
         this.configurationCreator = configurationCreator;
+        this.configurationParser = configurationParser;
         this.nodeLookup = nodeLookup;
         this.returnColumns = returnColumns;
+        this.user = user;
         this.mutateNodePropertyService = mutateNodePropertyService;
         this.writeNodePropertyService = writeNodePropertyService;
         this.mutateRelationshipService = mutateRelationshipService;
@@ -294,11 +310,15 @@ class AlgorithmFacadeFactory {
             pathFindingAlgorithms
         );
 
-        return new PathFindingProcedureFacade(
+        return PathFindingProcedureFacade.create(
+            defaultsConfiguration,
+            limitsConfiguration,
             closeableResourceRegistry,
             configurationCreator,
+            configurationParser,
             nodeLookup,
             returnColumns,
+            user,
             estimationModeFacade,
             mutateModeFacade,
             streamModeFacade,

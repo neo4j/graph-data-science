@@ -55,7 +55,7 @@ class ConfigurationParserTest {
 
         Map<String, Object> userInput = Map.of("concurrency", 4);
 
-        var updatedUserInput = configurationParser.applyDefaults(userInput, "bogus");
+        var updatedUserInput = configurationParser.applyDefaults(userInput, "bogus", defaultsMock);
 
         assertThat(updatedUserInput)
             .hasSize(2)
@@ -78,7 +78,7 @@ class ConfigurationParserTest {
         Map<String, Object> userInputWithDefaults = Map.of("concurrency", 87L, "sudo", true);
 
         assertThatIllegalArgumentException().isThrownBy(() ->
-            configurationParser.validateLimits(algorithmConfigurationMock, "bogus", userInputWithDefaults)
+            configurationParser.validateLimits(algorithmConfigurationMock, "bogus", userInputWithDefaults, limitsConfiguration)
         ).withMessage("Configuration parameter 'concurrency' with value '87' exceeds it's limit of '8'");
     }
 
@@ -99,7 +99,8 @@ class ConfigurationParserTest {
         assertThatNoException().isThrownBy(() -> configurationParser.validateLimits(
             algorithmConfigurationMock,
             "bogus",
-            userInputWithDefaults
+            userInputWithDefaults,
+            limitsConfiguration
         ));
     }
 

@@ -71,12 +71,12 @@ final class NodePropertyStepFactoryUsingStubs {
                         AlgorithmsProcedureFacade facade,
                         Map<String, Object> configuration
                     ) {
-                        facade.pathFinding().singlePairShortestPathDijkstraMutateStub().validateWithNoUserButWithDefaultsAndLimits(configuration);
+                        facade.pathFinding().singlePairShortestPathDijkstraMutateStub().validateConfiguration(configuration);
                     }
 
                     @Override
                     public MemoryEstimation estimate(AlgorithmsProcedureFacade facade, String username, Map<String, Object> configuration) {
-                        return facade.pathFinding().singlePairShortestPathDijkstraMutateStub().estimateWithNoDefaultsNorLimits(username, configuration);
+                        return facade.pathFinding().singlePairShortestPathDijkstraMutateStub().getMemoryEstimation(username, configuration);
                     }
 
                     @Override

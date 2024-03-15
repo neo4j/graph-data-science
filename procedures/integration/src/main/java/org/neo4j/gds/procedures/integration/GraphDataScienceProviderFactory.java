@@ -41,6 +41,13 @@ import java.util.function.Function;
  * We want to keep Neo4j out from here, this could be reusable.
  */
 final class GraphDataScienceProviderFactory {
+    /**
+     * These are currently global singletons; when they seize to be, this is the place to initialise them.
+     * They are similar in lifecycle to {@link org.neo4j.gds.core.loading.GraphStoreCatalogService}
+     */
+    private final DefaultsConfiguration defaultsConfiguration = DefaultsConfiguration.Instance;
+    private final LimitsConfiguration limitsConfiguration = LimitsConfiguration.Instance;
+
     private final Log log;
 
     private final CatalogFacadeProviderFactory catalogFacadeProviderFactory;
@@ -84,7 +91,9 @@ final class GraphDataScienceProviderFactory {
         );
 
         var algorithmFacadeService = createAlgorithmService(
+            defaultsConfiguration,
             graphStoreCatalogService,
+            limitsConfiguration,
             taskRegistryFactoryService,
             useMaxMemoryEstimation,
             userLogServices
@@ -126,19 +135,23 @@ final class GraphDataScienceProviderFactory {
     }
 
     private AlgorithmFacadeFactoryProvider createAlgorithmService(
+        DefaultsConfiguration defaultsConfiguration,
         GraphStoreCatalogService graphStoreCatalogService,
+        LimitsConfiguration limitsConfiguration,
         TaskRegistryFactoryService taskRegistryFactoryService,
         boolean useMaxMemoryEstimation,
         UserLogServices userLogServices
     ) {
         // Defaults and limits is a big shared thing (or, will be)
-        var configurationParser = new ConfigurationParser(DefaultsConfiguration.Instance, LimitsConfiguration.Instance);
+        var configurationParser = new ConfigurationParser(defaultsConfiguration, limitsConfiguration);
         var modelCatalogServiceProvider = new ModelCatalogServiceProvider(modelCatalog);
 
         return new AlgorithmFacadeFactoryProvider(
             log,
             configurationParser,
+            defaultsConfiguration,
             graphStoreCatalogService,
+            limitsConfiguration,
             memoryGauge,
             useMaxMemoryEstimation,
             metricsFacade.algorithmMetrics(),

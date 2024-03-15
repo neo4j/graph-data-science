@@ -28,12 +28,12 @@ import java.util.Map;
 
 public interface Stub {
     /**
-     * Custom validation, i.e. looked up; no user
+     * Validate user input, but not in relation to the user. This translates to validating with global defaults and limits only.
      */
     void validateBeforeCreatingNodePropertyStep(AlgorithmsProcedureFacade facade, Map<String, Object> configuration);
 
     /**
-     * Do the estimate
+     * Do the estimate. Note that here we do not apply defaults and limits when parsing configuration.
      *
      * @param configuration it is a little bit enhanced and should not be modified
      * @throws MemoryEstimationNotImplementedException this is valid in some cases, caller can handle

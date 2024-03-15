@@ -137,6 +137,8 @@ public final class GraphDataScienceExtensionBuilder {
             freeMemoryAfterLastGc
         );
 
+        var componentRegistration = new ComponentRegistration(log, globalProcedures);
+
         var graphDataScienceProviderFactory = GraphDataScienceProviderFactory.create(
             log,
             algorithmProcessingTemplateDecorator,
@@ -149,7 +151,8 @@ public final class GraphDataScienceExtensionBuilder {
 
         return new GraphDataScienceExtensionBuilder(
             log,
-            new ComponentRegistration(log, globalProcedures), graphDataScienceProviderFactory,
+            componentRegistration,
+            graphDataScienceProviderFactory,
             metricsFacade,
             modelCatalog,
             taskStoreService,

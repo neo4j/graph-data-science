@@ -34,6 +34,8 @@ import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmEstimationTemp
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.pathfinding.DefaultAlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.pathfinding.DefaultMemoryGuard;
+import org.neo4j.gds.configuration.DefaultsConfiguration;
+import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.write.ExporterContext;
 import org.neo4j.gds.logging.Log;
@@ -68,7 +70,9 @@ class AlgorithmFacadeFactoryProvider {
     // Global state and services
     private final Log log;
     private final ConfigurationParser configurationParser;
+    private final DefaultsConfiguration defaultsConfiguration;
     private final GraphStoreCatalogService graphStoreCatalogService;
+    private final LimitsConfiguration limitsConfiguration;
     private final MemoryGauge memoryGauge;
     private final boolean useMaxMemoryEstimation;
 
@@ -84,7 +88,9 @@ class AlgorithmFacadeFactoryProvider {
     AlgorithmFacadeFactoryProvider(
         Log log,
         ConfigurationParser configurationParser,
+        DefaultsConfiguration defaultsConfiguration,
         GraphStoreCatalogService graphStoreCatalogService,
+        LimitsConfiguration limitsConfiguration,
         MemoryGauge memoryGauge,
         boolean useMaxMemoryEstimation,
         AlgorithmMetricsService algorithmMetricsService,
@@ -96,7 +102,9 @@ class AlgorithmFacadeFactoryProvider {
     ) {
         this.log = log;
         this.configurationParser = configurationParser;
+        this.defaultsConfiguration = defaultsConfiguration;
         this.graphStoreCatalogService = graphStoreCatalogService;
+        this.limitsConfiguration = limitsConfiguration;
         this.memoryGauge = memoryGauge;
         this.useMaxMemoryEstimation = useMaxMemoryEstimation;
 
@@ -213,8 +221,11 @@ class AlgorithmFacadeFactoryProvider {
         // procedure facade
         return new AlgorithmFacadeFactory(
             log,
+            defaultsConfiguration,
+            limitsConfiguration,
             closeableResourceRegistry,
             configurationCreator,
+            configurationParser,
             nodeLookup,
             returnColumns,
             mutateNodePropertyService,
@@ -228,6 +239,7 @@ class AlgorithmFacadeFactoryProvider {
             relationshipStreamExporterBuilder,
             taskRegistryFactory,
             terminationFlag,
+            user,
             userLogRegistryFactory,
             modelCatalogServiceProvider.createService(graphDatabaseService, log)
         );
