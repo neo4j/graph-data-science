@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.write;
 
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -40,6 +41,7 @@ public abstract class RelationshipStreamExporterBuilder {
     protected int concurrency = Runtime.getRuntime().availableProcessors();
     protected Optional<ArrowConnectionInfo> arrowConnectionInfo;
     protected Optional<String> remoteDatabaseName; // coupled with arrowConnectionInfo, but should not appear in external API
+    protected Optional<ResultStore> resultStore;
 
     public abstract RelationshipStreamExporter build();
 
@@ -91,6 +93,11 @@ public abstract class RelationshipStreamExporterBuilder {
 
     public RelationshipStreamExporterBuilder withConcurrency(int concurrency) {
         this.concurrency = concurrency;
+        return this;
+    }
+
+    public RelationshipStreamExporterBuilder withResultStore(Optional<ResultStore> resultStore) {
+        this.resultStore = resultStore;
         return this;
     }
 }

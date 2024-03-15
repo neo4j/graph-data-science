@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -44,7 +45,7 @@ public abstract class RelationshipPropertiesExporterBuilder {
     protected long batchSize = NativeNodePropertyExporter.MIN_BATCH_SIZE;
     protected Optional<ArrowConnectionInfo> arrowConnectionInfo;
     protected Optional<String> remoteDatabaseName; // coupled with arrowConnectionInfo, but should not appear in external API
-
+    protected Optional<ResultStore> resultStore;
 
     public abstract RelationshipPropertiesExporter build();
 
@@ -109,6 +110,11 @@ public abstract class RelationshipPropertiesExporterBuilder {
 
     public RelationshipPropertiesExporterBuilder withBatchSize(long batchSize) {
         this.batchSize = batchSize;
+        return this;
+    }
+
+    public RelationshipPropertiesExporterBuilder withResultStore(Optional<ResultStore> resultStore) {
+        this.resultStore = resultStore;
         return this;
     }
 }
