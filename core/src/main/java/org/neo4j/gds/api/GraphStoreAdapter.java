@@ -36,17 +36,12 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 
-public abstract class GraphStoreAdapter implements GraphStoreWrapper {
+public abstract class GraphStoreAdapter implements GraphStore {
 
     private final GraphStore graphStore;
 
     protected GraphStoreAdapter(GraphStore graphStore) {
         this.graphStore = graphStore;
-    }
-
-    @Override
-    public GraphStore innerGraphStore() {
-        return graphStore;
     }
 
     @Override
@@ -68,7 +63,6 @@ public abstract class GraphStoreAdapter implements GraphStoreWrapper {
     public ZonedDateTime modificationTime() {
         return graphStore.modificationTime();
     }
-
 
     @Override
     public Set<String> graphPropertyKeys() {
