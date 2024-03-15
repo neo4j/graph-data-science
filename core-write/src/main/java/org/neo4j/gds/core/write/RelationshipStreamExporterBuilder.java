@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.write;
 
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.api.ExportedRelationship;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;

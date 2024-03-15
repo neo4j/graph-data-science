@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.write;
 
+import org.neo4j.gds.api.ExportedRelationship;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.concurrency.DefaultPool;
