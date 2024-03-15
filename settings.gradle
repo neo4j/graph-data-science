@@ -310,3 +310,8 @@ include('neo4j-kernel-adapter-5.17')
 project(':neo4j-kernel-adapter-5.17').projectDir = file('compatibility/5.17/neo4j-kernel-adapter')
 include('storage-engine-adapter-5.17')
 project(':storage-engine-adapter-5.17').projectDir = file('compatibility/5.17/storage-engine-adapter')
+
+include('neo4j-kernel-adapter-5.18')
+project(':neo4j-kernel-adapter-5.18').projectDir = file('compatibility/5.18/neo4j-kernel-adapter')
+include('storage-engine-adapter-5.18')
+project(':storage-engine-adapter-5.18').projectDir = file('compatibility/5.18/storage-engine-adapter')
