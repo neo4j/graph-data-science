@@ -19,17 +19,31 @@
  */
 package org.neo4j.gds.core.write.resultstore;
 
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.core.write.NodeLabelExporter;
+
+import java.util.function.LongUnaryOperator;
+import java.util.stream.LongStream;
 
 public class ResultStoreNodeLabelExporter implements NodeLabelExporter {
 
+    private final ResultStore resultStore;
+    private final long nodeCount;
+    private final LongUnaryOperator toOriginalId;
+
+    ResultStoreNodeLabelExporter(ResultStore resultStore, long nodeCount, LongUnaryOperator toOriginalId) {
+        this.resultStore = resultStore;
+        this.nodeCount = nodeCount;
+        this.toOriginalId = toOriginalId;
+    }
+
     @Override
     public void write(String nodeLabel) {
-
+        resultStore.addNodeLabel(nodeLabel, LongStream.range(0, nodeCount).map(toOriginalId).iterator());
     }
 
     @Override
     public long nodeLabelsWritten() {
-        return 0;
+        return nodeCount;
     }
 }

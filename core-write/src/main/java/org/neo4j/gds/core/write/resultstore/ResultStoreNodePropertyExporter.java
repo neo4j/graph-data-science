@@ -19,31 +19,48 @@
  */
 package org.neo4j.gds.core.write.resultstore;
 
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.write.ImmutableNodeProperty;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 
 import java.util.Collection;
+import java.util.List;
 
 public class ResultStoreNodePropertyExporter implements NodePropertyExporter {
 
+    private final ResultStore resultStore;
+    private long writtenProperties;
+
+    ResultStoreNodePropertyExporter(ResultStore resultStore) {
+        this.resultStore = resultStore;
+    }
+
     @Override
     public void write(String property, NodePropertyValues properties) {
-
+        write(ImmutableNodeProperty.of(property, properties));
     }
 
     @Override
     public void write(NodeProperty nodeProperty) {
-
+        write(List.of(nodeProperty));
     }
 
     @Override
     public void write(Collection<NodeProperty> nodeProperties) {
-
+        nodeProperties.forEach(nodeProperty -> {
+            var propertyValues = nodeProperty.properties();
+            resultStore.addNodeProperty(
+                nodeProperty.propertyKey(),
+                propertyValues
+            );
+            writtenProperties += propertyValues.nodeCount();
+        });
     }
 
     @Override
     public long propertiesWritten() {
-        return 0;
+        return writtenProperties;
     }
 }

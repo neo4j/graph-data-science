@@ -45,6 +45,8 @@ import static java.util.Collections.singletonList;
 
 public interface GraphStore {
 
+//    ResultStore resultStore();
+
     DatabaseInfo databaseInfo();
 
     GraphSchema schema();

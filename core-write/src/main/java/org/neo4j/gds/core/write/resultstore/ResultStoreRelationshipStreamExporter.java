@@ -19,15 +19,34 @@
  */
 package org.neo4j.gds.core.write.resultstore;
 
+import org.neo4j.gds.api.ExportedRelationship;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 
 import java.util.List;
+import java.util.function.LongUnaryOperator;
+import java.util.stream.Stream;
 
 public class ResultStoreRelationshipStreamExporter implements RelationshipStreamExporter {
 
+    private final ResultStore resultStore;
+    private final Stream<ExportedRelationship> relationshipStream;
+    private final LongUnaryOperator toOriginalId;
+
+    ResultStoreRelationshipStreamExporter(
+        ResultStore resultStore,
+        Stream<ExportedRelationship> relationshipStream,
+        LongUnaryOperator toOriginalId
+    ) {
+        this.resultStore = resultStore;
+        this.relationshipStream = relationshipStream;
+        this.toOriginalId = toOriginalId;
+    }
+
     @Override
     public long write(String relationshipType, List<String> propertyKeys, List<ValueType> propertyTypes) {
+        resultStore.addRelationshipStream(relationshipType, propertyKeys, propertyTypes, relationshipStream, toOriginalId);
         return 0;
     }
 }

@@ -20,27 +20,45 @@
 package org.neo4j.gds.core.write.resultstore;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.core.write.RelationshipExporter;
+
+import java.util.function.LongUnaryOperator;
 
 public class ResultStoreRelationshipExporter implements RelationshipExporter {
 
+    private final ResultStore resultStore;
+    private final Graph graph;
+    private final LongUnaryOperator toOriginalId;
+
+    ResultStoreRelationshipExporter(
+        ResultStore resultStore,
+        Graph graph,
+        LongUnaryOperator toOriginalId
+    ) {
+        this.resultStore = resultStore;
+        this.graph = graph;
+        this.toOriginalId = toOriginalId;
+    }
+
     @Override
     public void write(String relationshipType) {
-
+        resultStore.addRelationship(relationshipType, graph, toOriginalId);
     }
 
     @Override
     public void write(String relationshipType, String propertyKey) {
-
+        write(relationshipType, propertyKey, null);
     }
 
     @Override
     public void write(
         String relationshipType,
-        @Nullable String propertyKey,
+        String propertyKey,
         @Nullable RelationshipWithPropertyConsumer afterWriteConsumer
     ) {
-
+        resultStore.addRelationship(relationshipType, propertyKey, graph, toOriginalId);
     }
 }

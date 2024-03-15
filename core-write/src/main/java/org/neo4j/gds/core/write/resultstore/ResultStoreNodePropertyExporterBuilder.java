@@ -26,6 +26,6 @@ public class ResultStoreNodePropertyExporterBuilder extends NodePropertyExporter
 
     @Override
     public NodePropertyExporter build() {
-        return new ResultStoreNodePropertyExporter();
+        return new ResultStoreNodePropertyExporter(resultStore.orElseThrow());
     }
 }
