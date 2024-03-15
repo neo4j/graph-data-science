@@ -58,6 +58,11 @@ public interface WriteConfig extends ConcurrencyConfig {
     @Configuration.ToMapValue(value = "org.neo4j.gds.config.ArrowConnectionInfo#toMap")
     Optional<ArrowConnectionInfo> arrowConnectionInfo();
 
+    @Value.Default
+    default boolean writeToResultStore() {
+        return false;
+    }
+
     @Configuration.GraphStoreValidationCheck
     @Value.Default
     default void validateGraphIsSuitableForWrite(
