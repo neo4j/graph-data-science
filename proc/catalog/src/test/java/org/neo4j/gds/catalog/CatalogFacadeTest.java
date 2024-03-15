@@ -35,6 +35,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.nodeproperties.ValueType;
@@ -317,6 +318,11 @@ class CatalogFacadeTest {
         @Override
         public ZonedDateTime modificationTime() {
             return ZonedDateTime.now();
+        }
+
+        @Override
+        public ResultStore resultStore() {
+            throw new UnsupportedOperationException("TODO");
         }
 
         @Override

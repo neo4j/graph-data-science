@@ -31,6 +31,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.graph.GraphProperty;
@@ -392,6 +393,11 @@ class DummyGraphStore implements GraphStore {
         RelationshipType relationshipType,
         Collection<String> propertyKeys
     ) {
+        throw new UnsupportedOperationException("TODO");
+    }
+
+    @Override
+    public ResultStore resultStore() {
         throw new UnsupportedOperationException("TODO");
     }
 }
