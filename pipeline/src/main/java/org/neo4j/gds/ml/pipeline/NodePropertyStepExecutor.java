@@ -84,7 +84,7 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
                 var procedureName = step.procName();
 
                 // short term hack; dependency injection will get here one day
-                var nodePropertyStepFactoryUsingStubs = NodePropertyStepFactoryUsingStubs.GetOrCreate(NodePropertyStepExecutor.class.getSimpleName());
+                var nodePropertyStepFactoryUsingStubs = NodePropertyStepFactoryUsingStubs.GetOrCreate();
 
                 Stub stub = null;
 
@@ -141,7 +141,7 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
             var featureInputNodeLabels = step.featureInputNodeLabels(graphStore, nodeLabels);
             var featureInputRelationshipTypes = step.featureInputRelationshipTypes(graphStore, relTypes, availableRelationshipTypesForNodeProperties);
 
-            var nodePropertyStepFactoryUsingStubs = NodePropertyStepFactoryUsingStubs.GetOrCreate(NodePropertyStepExecutor.class.getSimpleName());
+            var nodePropertyStepFactoryUsingStubs = NodePropertyStepFactoryUsingStubs.GetOrCreate();
 
             Stub stub = null;
 
