@@ -180,6 +180,24 @@ class DefaultValueTest {
         assertThat(fn.apply(defaultValue)).isEqualTo(expectedValue);
     }
 
+    public static Stream<Arguments> defaultValuesEqual() {
+        return Stream.of(
+            Arguments.of(DefaultValue.of(42), DefaultValue.of(42), true),
+            Arguments.of(DefaultValue.of(43), DefaultValue.of(42), false),
+            Arguments.of(DefaultValue.of(new double[] {1.0, 2.0, 3.0}), DefaultValue.of(new double[] {1.0, 2.0, 3.0}), true),
+            Arguments.of(DefaultValue.of(new long[] {1, 2, 3}), DefaultValue.of(new long[] {1, 2, 3}), true),
+            Arguments.of(DefaultValue.of(new long[] {1, 2, 3}), DefaultValue.of(new double[] {1, 2, 3}), false)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("defaultValuesEqual")
+    void shouldEqualArrayDefaultValues(DefaultValue v1, DefaultValue v2, boolean expected) {
+        var actual = v1.equals(v2);
+
+        assertThat(actual).isEqualTo(expected);
+    }
+
     private static Stream<Arguments> values() {
         return Stream.of(
             Arguments.of(42, (Function<DefaultValue, ?>) DefaultValue::longValue, 42L),

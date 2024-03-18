@@ -239,6 +239,19 @@ class NodeProjectionsTest {
         assertThat(actual.labelProjection(), equalTo("A"));
     }
 
+    @Test
+    void shouldSupportArrayDefaultValues() {
+        NodeProjections.fromObject(Map.of(
+                "MY_LABEL", Map.of(
+                    "properties", Map.of("prop1", Map.of("defaultValue", new long[]{1, 2, 3}))
+                ),
+                "OTHER_LABEL", Map.of(
+                    "properties", Map.of("prop1", Map.of("defaultValue", new long[]{1, 2, 3}))
+                )
+            )
+        );
+    }
+
     static Stream<Arguments> syntacticSugarsSimple() {
         return Stream.of(
             Arguments.of(
