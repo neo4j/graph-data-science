@@ -292,8 +292,9 @@ class AlgorithmFacadeFactory {
         var estimationModeFacade = new PathFindingAlgorithmsEstimationModeBusinessFacade(algorithmEstimationTemplate);
 
         var mutateModeFacade = new PathFindingAlgorithmsMutateModeBusinessFacade(
-            algorithmProcessingTemplate,
-            pathFindingAlgorithms
+            estimationModeFacade,
+            pathFindingAlgorithms,
+            algorithmProcessingTemplate
         );
 
         var streamModeFacade = new PathFindingAlgorithmsStreamModeBusinessFacade(

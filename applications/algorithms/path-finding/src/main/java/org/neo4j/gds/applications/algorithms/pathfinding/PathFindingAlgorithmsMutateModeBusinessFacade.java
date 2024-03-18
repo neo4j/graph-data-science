@@ -20,13 +20,10 @@
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.paths.astar.AStarMemoryEstimateDefinition;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
-import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateDefinition;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraMutateConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraMutateConfig;
-import org.neo4j.gds.paths.yens.YensMemoryEstimateDefinition;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensMutateConfig;
 
 import java.util.Optional;
@@ -40,16 +37,18 @@ import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.
  * It will have all pathfinding algorithms on it, in mutate mode.
  */
 public class PathFindingAlgorithmsMutateModeBusinessFacade {
+    private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
+    private final PathFindingAlgorithms pathFindingAlgorithms;
     private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
 
-    private final PathFindingAlgorithms pathFindingAlgorithms;
-
     public PathFindingAlgorithmsMutateModeBusinessFacade(
-        AlgorithmProcessingTemplate algorithmProcessingTemplate,
-        PathFindingAlgorithms pathFindingAlgorithms
+        PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
+        PathFindingAlgorithms pathFindingAlgorithms,
+        AlgorithmProcessingTemplate algorithmProcessingTemplate
     ) {
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
         this.pathFindingAlgorithms = pathFindingAlgorithms;
+        this.estimationFacade = estimationFacade;
     }
 
     public <RESULT> RESULT singlePairShortestPathAStarMutate(
@@ -63,7 +62,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             A_STAR,
-            () -> new AStarMemoryEstimateDefinition().memoryEstimation(),
+            () -> estimationFacade.singlePairShortestPathAStarEstimation(configuration),
             graph -> pathFindingAlgorithms.singlePairShortestPathAStar(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
@@ -81,7 +80,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             DIJKSTRA,
-            () -> new DijkstraMemoryEstimateDefinition(configuration.toMemoryEstimateParameters()).memoryEstimation(),
+            () -> estimationFacade.singlePairShortestPathDijkstraEstimation(configuration),
             graph -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
@@ -99,7 +98,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             YENS,
-            () -> new YensMemoryEstimateDefinition(configuration.k()).memoryEstimation(),
+            () -> estimationFacade.singlePairShortestPathYensEstimation(configuration),
             graph -> pathFindingAlgorithms.singlePairShortestPathYens(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
@@ -111,13 +110,15 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         AllShortestPathsDijkstraMutateConfig configuration,
         ResultBuilder<PathFindingResult, RESULT> resultBuilder
     ) {
+        var mutateStep = new ShortestPathMutateStep(configuration);
+
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,
             DIJKSTRA,
-            () -> new DijkstraMemoryEstimateDefinition(configuration.toMemoryEstimateParameters()).memoryEstimation(),
+            () -> estimationFacade.singleSourceShortestPathDijkstraEstimation(configuration),
             graph -> pathFindingAlgorithms.singleSourceShortestPathDijkstra(graph, configuration),
-            Optional.of(new ShortestPathMutateStep(configuration)),
+            Optional.of(mutateStep),
             resultBuilder
         );
     }
