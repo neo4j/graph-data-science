@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
-import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.paths.astar.AStarMemoryEstimateDefinition;
@@ -46,7 +45,13 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         ShortestPathAStarBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        return runEstimation(new AStarMemoryEstimateDefinition(), configuration, graphNameOrConfiguration);
+        var memoryEstimation = singlePairShortestPathAStarEstimation(configuration);
+
+        return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
+    }
+
+    public MemoryEstimation singlePairShortestPathAStarEstimation(ShortestPathAStarBaseConfig ignored) {
+        return new AStarMemoryEstimateDefinition().memoryEstimation();
     }
 
     public MemoryEstimateResult singlePairShortestPathDijkstraEstimate(
@@ -85,22 +90,15 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         DijkstraBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        return runEstimation(
-            new DijkstraMemoryEstimateDefinition(configuration.toMemoryEstimateParameters()),
-            configuration,
-            graphNameOrConfiguration
-        );
-    }
-
-    // TODO: remove this fella once finished with the estimate definitions
-    private <CONFIGURATION extends AlgoBaseConfig> MemoryEstimateResult runEstimation(
-        MemoryEstimateDefinition memoryEstimateDefinition,
-        CONFIGURATION configuration,
-        Object graphNameOrConfiguration
-    ) {
-        var memoryEstimation = memoryEstimateDefinition.memoryEstimation();
+        var memoryEstimation = singleSourceShortestPathDijkstraEstimation(configuration);
 
         return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
+    }
+
+    public MemoryEstimation singleSourceShortestPathDijkstraEstimation(DijkstraBaseConfig configuration) {
+        var memoryEstimateDefinition = new DijkstraMemoryEstimateDefinition(configuration.toMemoryEstimateParameters());
+
+        return memoryEstimateDefinition.memoryEstimation();
     }
 
     public <CONFIGURATION extends AlgoBaseConfig> MemoryEstimateResult runEstimation(

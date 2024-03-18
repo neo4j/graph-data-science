@@ -44,7 +44,7 @@ public class ShortestPathAStarMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().singlePairShortestPathAStarMutate(graphName, configuration);
+        return facade.pathFinding().singlePairShortestPathAStarMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(name = "gds.shortestPath.astar.mutate.estimate", mode = READ)
@@ -53,7 +53,7 @@ public class ShortestPathAStarMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.pathFinding().singlePairShortestPathAStarMutateEstimate(
+        return facade.pathFinding().singlePairShortestPathAStarMutateStub().estimate(
             graphNameOrConfiguration,
             algoConfiguration
         );

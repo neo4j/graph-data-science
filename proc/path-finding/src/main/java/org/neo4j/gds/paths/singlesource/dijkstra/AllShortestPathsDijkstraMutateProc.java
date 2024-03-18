@@ -44,7 +44,7 @@ public class AllShortestPathsDijkstraMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().singleSourceShortestPathDijkstraMutate(graphName, configuration);
+        return facade.pathFinding().singleSourceShortestPathDijkstraMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(name = "gds.allShortestPaths.dijkstra.mutate.estimate", mode = READ)
@@ -53,7 +53,7 @@ public class AllShortestPathsDijkstraMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.pathFinding().singleSourceShortestPathDijkstraMutateEstimate(
+        return facade.pathFinding().singleSourceShortestPathDijkstraMutateStub().estimate(
             graphNameOrConfiguration,
             algoConfiguration
         );
