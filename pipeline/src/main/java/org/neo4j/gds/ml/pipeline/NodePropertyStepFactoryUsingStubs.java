@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.pipeline;
 
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathDijkstraStub;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 
 import java.util.List;
@@ -45,10 +45,8 @@ final class NodePropertyStepFactoryUsingStubs {
      * I was defeated.
      * Therefore, we capture those definitions in here: which procedure names to which stubs.
      * And we use it from several places.
-     *
-     * @param requestor something for debugging later
      */
-    static NodePropertyStepFactoryUsingStubs GetOrCreate(String requestor) {
+    static NodePropertyStepFactoryUsingStubs GetOrCreate() {
         // do people still do this double clutch singleton trick? Smells like to noughties :)
         if (INSTANCE == null) {
             synchronized (NodePropertyStepFactoryUsingStubs.class) {
@@ -64,30 +62,7 @@ final class NodePropertyStepFactoryUsingStubs {
     private static NodePropertyStepFactoryUsingStubs create() {
         return new NodePropertyStepFactoryUsingStubs(
             Map.of(
-                CanonicalProcedureName.parse("gds.shortestpath.dijkstra.mutate"),
-                new Stub() {
-                    @Override
-                    public void validateBeforeCreatingNodePropertyStep(
-                        AlgorithmsProcedureFacade facade,
-                        Map<String, Object> configuration
-                    ) {
-                        facade.pathFinding().singlePairShortestPathDijkstraMutateStub().validateConfiguration(configuration);
-                    }
-
-                    @Override
-                    public MemoryEstimation estimate(AlgorithmsProcedureFacade facade, String username, Map<String, Object> configuration) {
-                        return facade.pathFinding().singlePairShortestPathDijkstraMutateStub().getMemoryEstimation(username, configuration);
-                    }
-
-                    @Override
-                    public void execute(
-                        AlgorithmsProcedureFacade algorithmsProcedureFacade,
-                        String graphName,
-                        Map<String, Object> configuration
-                    ) {
-                        algorithmsProcedureFacade.pathFinding().singlePairShortestPathDijkstraMutateStub().execute(graphName, configuration);
-                    }
-                }
+                CanonicalProcedureName.parse("gds.shortestpath.dijkstra.mutate"), new SinglePairShortestPathDijkstraStub()
             )
         );
     }

@@ -100,7 +100,7 @@ public final class NodePropertyStepFactory {
     ) {
         validateReservedConfigKeys(procConfigMap);
 
-        var nodePropertyStepFactoryUsingStubs = NodePropertyStepFactoryUsingStubs.GetOrCreate(NodePropertyStepFactory.class.getSimpleName());
+        var nodePropertyStepFactoryUsingStubs = NodePropertyStepFactoryUsingStubs.GetOrCreate();
 
         // this is the last possible moment to decide to use the new approach
         if (nodePropertyStepFactoryUsingStubs.handles(taskName)) {
