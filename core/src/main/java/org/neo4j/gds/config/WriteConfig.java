@@ -58,7 +58,9 @@ public interface WriteConfig extends ConcurrencyConfig {
     @Configuration.ToMapValue(value = "org.neo4j.gds.config.ArrowConnectionInfo#toMap")
     Optional<ArrowConnectionInfo> arrowConnectionInfo();
 
+    @Configuration.Ignore
     @Value.Default
+    @Value.Auxiliary
     default boolean writeToResultStore() {
         return false;
     }
