@@ -251,7 +251,8 @@ public final class DefaultValue {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DefaultValue that = (DefaultValue) o;
-        return Objects.equals(defaultValue, that.defaultValue);
+
+        return Objects.deepEquals(defaultValue, that.defaultValue);
     }
 
     @Override
