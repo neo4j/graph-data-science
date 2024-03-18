@@ -53,7 +53,7 @@ public class ShortestPathDijkstraMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.pathFinding().singlePairShortestPathDijkstraMutateEstimate(
+        return facade.pathFinding().singlePairShortestPathDijkstraMutateStub().estimate(
             graphNameOrConfiguration,
             algoConfiguration
         );

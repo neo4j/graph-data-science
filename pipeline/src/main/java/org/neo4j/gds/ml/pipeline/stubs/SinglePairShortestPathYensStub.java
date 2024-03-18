@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.ml.pipeline.stubs;
 
-import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraMutateConfig;
+import org.neo4j.gds.paths.yens.config.ShortestPathYensMutateConfig;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.pathfinding.MutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
 
-public class SinglePairShortestPathDijkstraStub extends AbstractStub<ShortestPathDijkstraMutateConfig, PathFindingMutateResult> {
-    protected MutateStub<ShortestPathDijkstraMutateConfig, PathFindingMutateResult> stub(AlgorithmsProcedureFacade facade) {
-        return facade.pathFinding().singlePairShortestPathDijkstraMutateStub();
+public class SinglePairShortestPathYensStub extends AbstractStub<ShortestPathYensMutateConfig, PathFindingMutateResult> {
+    protected MutateStub<ShortestPathYensMutateConfig, PathFindingMutateResult> stub(AlgorithmsProcedureFacade facade) {
+        return facade.pathFinding().singlePairShortestPathYensMutateStub();
     }
 }

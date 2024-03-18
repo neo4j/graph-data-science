@@ -35,6 +35,7 @@ dependencies {
 
     implementation group: 'org.reflections',  name: 'reflections',       version: ver.doc.'reflections'
 
+    implementation project(':algo')
     implementation project(':algo-common')
     implementation project(':algorithms-procedure-facade')
     implementation project(':annotations')

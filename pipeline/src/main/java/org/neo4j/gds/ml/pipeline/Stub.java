@@ -38,7 +38,7 @@ public interface Stub {
      * @param configuration it is a little bit enhanced and should not be modified
      * @throws MemoryEstimationNotImplementedException this is valid in some cases, caller can handle
      */
-    MemoryEstimation estimate(AlgorithmsProcedureFacade facade, String username, Map<String, Object> configuration) throws MemoryEstimationNotImplementedException;
+    MemoryEstimation getMemoryEstimation(AlgorithmsProcedureFacade facade, String username, Map<String, Object> configuration) throws MemoryEstimationNotImplementedException;
 
-    void execute(AlgorithmsProcedureFacade algorithmsProcedureFacade, String graphName, Map<String, Object> configuration);
+    void execute(AlgorithmsProcedureFacade facade, String graphName, Map<String, Object> configuration);
 }

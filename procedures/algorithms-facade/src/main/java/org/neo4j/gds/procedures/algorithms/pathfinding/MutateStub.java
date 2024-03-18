@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.results.MemoryEstimateResult;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -46,6 +47,11 @@ public interface MutateStub<CONFIGURATION, RESULT> {
      * This captures the correct (delegation of) business logic.
      */
     MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration);
+
+    /**
+     * Plain old Neo4j Procedure style memory estimate mode
+     */
+    Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration);
 
     /**
      * Bog-standard execution of the algorithm in mutate mode, with ordinary input validation, defaults application,

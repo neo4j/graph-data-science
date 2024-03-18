@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathDijkstraStub;
+import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathYensStub;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 
 import java.util.List;
@@ -60,11 +61,12 @@ final class NodePropertyStepFactoryUsingStubs {
     }
 
     private static NodePropertyStepFactoryUsingStubs create() {
-        return new NodePropertyStepFactoryUsingStubs(
-            Map.of(
-                CanonicalProcedureName.parse("gds.shortestpath.dijkstra.mutate"), new SinglePairShortestPathDijkstraStub()
-            )
+        Map<CanonicalProcedureName, Stub> supportedProcedures = Map.of(
+            CanonicalProcedureName.parse("gds.shortestpath.dijkstra.mutate"), new SinglePairShortestPathDijkstraStub(),
+            CanonicalProcedureName.parse("gds.shortestpath.yens.mutate"), new SinglePairShortestPathYensStub()
         );
+
+        return new NodePropertyStepFactoryUsingStubs(supportedProcedures);
     }
 
     /**

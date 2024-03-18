@@ -17,12 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.pathfinding;
+package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
@@ -30,39 +29,32 @@ import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
-import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraMutateConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
+import org.neo4j.gds.procedures.algorithms.pathfinding.AlgorithmHandle;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingResultBuilderForMutateMode;
+import org.neo4j.gds.results.MemoryEstimateResult;
 
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-/**
- * This is every single thing under the heading of Dijkstra mutate.
- */
-public class DijkstraStub implements MutateStub<ShortestPathDijkstraMutateConfig, PathFindingMutateResult> {
-    // global scope
+public class GenericStub {
     private final DefaultsConfiguration defaultsConfiguration;
     private final LimitsConfiguration limitsConfiguration;
-
-    // request scoped dependencies
     private final ConfigurationCreator configurationCreator;
-    private final User user;
-
-    // structure
-    private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final PathFindingAlgorithmsMutateModeBusinessFacade mutateFacade;
     private final ConfigurationParser configurationParser;
+    private final User user;
+    private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
 
-    DijkstraStub(
+    public GenericStub(
         DefaultsConfiguration defaultsConfiguration,
         LimitsConfiguration limitsConfiguration,
         ConfigurationCreator configurationCreator,
         ConfigurationParser configurationParser,
         User user,
-        PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        PathFindingAlgorithmsMutateModeBusinessFacade mutateFacade
+        PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade
     ) {
         this.defaultsConfiguration = defaultsConfiguration;
         this.limitsConfiguration = limitsConfiguration;
@@ -70,78 +62,96 @@ public class DijkstraStub implements MutateStub<ShortestPathDijkstraMutateConfig
         this.configurationParser = configurationParser;
         this.user = user;
         this.estimationFacade = estimationFacade;
-        this.mutateFacade = mutateFacade;
     }
 
-    @Override
-    public void validateConfiguration(Map<String, Object> configuration) {
-        var ignored = parseAndValidateConfiguration(
+    /**
+     * @see org.neo4j.gds.procedures.algorithms.pathfinding.MutateStub#validateConfiguration(java.util.Map)
+     */
+    <CONFIGURATION extends AlgoBaseConfig> void validateConfiguration(
+        Function<CypherMapWrapper, CONFIGURATION> parser,
+        Map<String, Object> configuration
+    ) {
+        configurationParser.parse(
+            defaultsConfiguration,
+            limitsConfiguration,
             Username.EMPTY_USERNAME.username(),
             configuration,
-            defaultsConfiguration,
-            limitsConfiguration
-        );
-    }
-
-    @Override
-    public ShortestPathDijkstraMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return parseAndValidateConfiguration(
-            user.getUsername(),
-            configuration,
-            defaultsConfiguration,
-            limitsConfiguration
-        );
-    }
-
-    @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration) {
-        var configuration = parseAndValidateConfiguration(
-            username,
-            rawConfiguration,
-            DefaultsConfiguration.Empty,
-            LimitsConfiguration.Empty
-        );
-
-        return estimationFacade.singleSourceShortestPathDijkstraEstimation(configuration);
-    }
-
-    @Override
-    public Stream<PathFindingMutateResult> execute(String graphName, Map<String, Object> configuration) {
-        return Stream.of(
-            runMutateAlgorithm(
-                graphName,
-                configuration,
-                ShortestPathDijkstraMutateConfig::of,
-                mutateFacade::singlePairShortestPathDijkstraMutate
-            )
+            (__, cmw) -> parser.apply(cmw)
         );
     }
 
     /**
-     * Fully configurable so we can capture all variants
-     *
-     * @deprecated Reuse between stubs
+     * @see org.neo4j.gds.procedures.algorithms.pathfinding.MutateStub#parseConfiguration(java.util.Map)
      */
-    @Deprecated
-    private ShortestPathDijkstraMutateConfig parseAndValidateConfiguration(
-        String username,
-        Map<String, Object> configuration,
-        DefaultsConfiguration defaultsConfiguration,
-        LimitsConfiguration limitsConfiguration
+    <CONFIGURATION extends AlgoBaseConfig> CONFIGURATION parseConfiguration(
+        Function<CypherMapWrapper, CONFIGURATION> parser,
+        Map<String, Object> configuration
     ) {
         return configurationParser.parse(
             defaultsConfiguration,
             limitsConfiguration,
-            username,
+            user.getUsername(),
             configuration,
-            (__, cypherMapWrapper) -> ShortestPathDijkstraMutateConfig.of(cypherMapWrapper)
+            (__, cmw) -> parser.apply(cmw)
         );
     }
 
     /**
-     * @deprecated Reuse this between stubs
+     * @see org.neo4j.gds.procedures.algorithms.pathfinding.MutateStub#getMemoryEstimation(String, java.util.Map)
      */
-    @Deprecated
+    <CONFIGURATION extends AlgoBaseConfig> MemoryEstimation getMemoryEstimation(
+        String username,
+        Map<String, Object> rawConfiguration,
+        Function<CypherMapWrapper, CONFIGURATION> parser,
+        Function<CONFIGURATION, MemoryEstimation> estimator
+    ) {
+        var configuration = configurationParser.parse(
+            DefaultsConfiguration.Empty,
+            LimitsConfiguration.Empty,
+            username,
+            rawConfiguration,
+            (__, cmw) -> parser.apply(cmw)
+        );
+
+        return estimator.apply(configuration);
+    }
+
+    /**
+     * @see org.neo4j.gds.procedures.algorithms.pathfinding.MutateStub#estimate(Object, java.util.Map)
+     */
+    <CONFIGURATION extends AlgoBaseConfig> Stream<MemoryEstimateResult> estimate(
+        Object graphName,
+        Map<String, Object> rawConfiguration,
+        Function<CypherMapWrapper, CONFIGURATION> parser,
+        Function<CONFIGURATION, MemoryEstimation> estimator
+    ) {
+        var memoryEstimation = getMemoryEstimation(user.getUsername(), rawConfiguration, parser, estimator);
+
+        var configuration = parseConfiguration(parser, rawConfiguration);
+
+        var memoryEstimateResult = estimationFacade.runEstimation(
+            configuration,
+            graphName,
+            memoryEstimation
+        );
+
+        return Stream.of(memoryEstimateResult);
+    }
+
+    /**
+     * @see org.neo4j.gds.procedures.algorithms.pathfinding.MutateStub#execute(String, java.util.Map)
+     */
+    <CONFIGURATION extends AlgoBaseConfig> Stream<PathFindingMutateResult> execute(
+        String graphName,
+        Map<String, Object> configuration,
+        Function<CypherMapWrapper, CONFIGURATION> parser,
+        AlgorithmHandle<CONFIGURATION, PathFindingResult, PathFindingMutateResult> executor
+    ) {
+        var result = runMutateAlgorithm(graphName, configuration, parser, executor);
+
+        return Stream.of(result);
+    }
+
     private <CONFIGURATION extends AlgoBaseConfig> PathFindingMutateResult runMutateAlgorithm(
         String graphNameAsString,
         Map<String, Object> rawConfiguration,

@@ -28,10 +28,10 @@ import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
 import java.util.Optional;
 
-class PathFindingResultBuilderForMutateMode extends ResultBuilder<PathFindingResult, PathFindingMutateResult> {
+public class PathFindingResultBuilderForMutateMode extends ResultBuilder<PathFindingResult, PathFindingMutateResult> {
     private final ToMapConvertible configuration;
 
-    PathFindingResultBuilderForMutateMode(ToMapConvertible configuration) {
+    public PathFindingResultBuilderForMutateMode(ToMapConvertible configuration) {
         this.configuration = configuration;
     }
 

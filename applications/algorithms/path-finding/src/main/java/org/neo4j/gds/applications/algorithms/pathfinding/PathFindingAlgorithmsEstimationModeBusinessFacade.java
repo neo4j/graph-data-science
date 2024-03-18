@@ -53,12 +53,12 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         DijkstraSourceTargetsBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        var memoryEstimation = singleSourceShortestPathDijkstraEstimation(configuration);
+        var memoryEstimation = singlePairShortestPathDijkstraEstimation(configuration);
 
         return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
     }
 
-    public MemoryEstimation singleSourceShortestPathDijkstraEstimation(DijkstraBaseConfig dijkstraBaseConfig) {
+    public MemoryEstimation singlePairShortestPathDijkstraEstimation(DijkstraBaseConfig dijkstraBaseConfig) {
         var memoryEstimateParameters = dijkstraBaseConfig.toMemoryEstimateParameters();
 
         var memoryEstimateDefinition = new DijkstraMemoryEstimateDefinition(memoryEstimateParameters);
@@ -70,14 +70,26 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         ShortestPathYensBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        return runEstimation(new YensMemoryEstimateDefinition(configuration.k()), configuration, graphNameOrConfiguration);
+        var memoryEstimation = singlePairShortestPathYensEstimation(configuration);
+
+        return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
+    }
+
+    public MemoryEstimation singlePairShortestPathYensEstimation(ShortestPathYensBaseConfig configuration) {
+        var memoryEstimateDefinition = new YensMemoryEstimateDefinition(configuration.k());
+
+        return memoryEstimateDefinition.memoryEstimation();
     }
 
     public MemoryEstimateResult singleSourceShortestPathDijkstraEstimate(
         DijkstraBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        return runEstimation(new DijkstraMemoryEstimateDefinition(configuration.toMemoryEstimateParameters()), configuration, graphNameOrConfiguration);
+        return runEstimation(
+            new DijkstraMemoryEstimateDefinition(configuration.toMemoryEstimateParameters()),
+            configuration,
+            graphNameOrConfiguration
+        );
     }
 
     // TODO: remove this fella once finished with the estimate definitions

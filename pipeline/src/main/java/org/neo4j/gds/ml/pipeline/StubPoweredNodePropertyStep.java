@@ -103,7 +103,7 @@ class StubPoweredNodePropertyStep implements ExecutableNodePropertyStep {
 
         try {
 
-            return stub.estimate(algorithmsProcedureFacade, username, configCopy);
+            return stub.getMemoryEstimation(algorithmsProcedureFacade, username, configCopy);
         } catch (MemoryEstimationNotImplementedException exception) {
             // If a single node property step cannot be estimated, we ignore this step in the estimation
             return MemoryEstimations.of(canonicalProcedureName.getValue(), MemoryRange.of(0));

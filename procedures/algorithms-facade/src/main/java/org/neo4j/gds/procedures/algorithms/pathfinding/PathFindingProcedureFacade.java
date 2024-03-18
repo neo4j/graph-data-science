@@ -39,14 +39,15 @@ import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraMutateConfig;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraWriteConfig;
-import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraMutateConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig;
-import org.neo4j.gds.paths.yens.config.ShortestPathYensMutateConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
+import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.GenericStub;
+import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestPathDijkstraMutateStub;
+import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestPathYensMutateStub;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 
@@ -67,7 +68,6 @@ public final class PathFindingProcedureFacade {
     private final ConfigurationCreator configurationCreator;
     private final NodeLookup nodeLookup;
     private final ProcedureReturnColumns procedureReturnColumns;
-    private final User user;
 
     // delegate
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeFacade;
@@ -76,32 +76,33 @@ public final class PathFindingProcedureFacade {
     private final PathFindingAlgorithmsWriteModeBusinessFacade writeModeFacade;
 
     // applications
-    private final DijkstraStub dijkstraStub;
+    private final SinglePairShortestPathDijkstraMutateStub singlePairShortestPathDijkstraMutateStub;
+    private final SinglePairShortestPathYensMutateStub singlePairShortestPathYensMutateStub;
 
     private PathFindingProcedureFacade(
         CloseableResourceRegistry closeableResourceRegistry,
         ConfigurationCreator configurationCreator,
         NodeLookup nodeLookup,
         ProcedureReturnColumns procedureReturnColumns,
-        User user,
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeFacade,
         PathFindingAlgorithmsMutateModeBusinessFacade mutateModeFacade,
         PathFindingAlgorithmsStreamModeBusinessFacade streamModeFacade,
         PathFindingAlgorithmsWriteModeBusinessFacade writeModeFacade,
-        DijkstraStub dijkstraStub
+        SinglePairShortestPathDijkstraMutateStub singlePairShortestPathDijkstraMutateStub,
+        SinglePairShortestPathYensMutateStub singlePairShortestPathYensMutateStub
     ) {
         this.closeableResourceRegistry = closeableResourceRegistry;
         this.configurationCreator = configurationCreator;
         this.nodeLookup = nodeLookup;
         this.procedureReturnColumns = procedureReturnColumns;
-        this.user = user;
 
         this.estimationModeFacade = estimationModeFacade;
         this.mutateModeFacade = mutateModeFacade;
         this.streamModeFacade = streamModeFacade;
         this.writeModeFacade = writeModeFacade;
 
-        this.dijkstraStub = dijkstraStub;
+        this.singlePairShortestPathDijkstraMutateStub = singlePairShortestPathDijkstraMutateStub;
+        this.singlePairShortestPathYensMutateStub = singlePairShortestPathYensMutateStub;
     }
 
     /**
@@ -121,12 +122,23 @@ public final class PathFindingProcedureFacade {
         PathFindingAlgorithmsStreamModeBusinessFacade pathFindingAlgorithmsStreamModeBusinessFacade,
         PathFindingAlgorithmsWriteModeBusinessFacade pathFindingAlgorithmsWriteModeBusinessFacade
     ) {
-        var dijkstraStub = new DijkstraStub(
+        var genericStub = new GenericStub(
             defaultsConfiguration,
             limitsConfiguration,
             configurationCreator,
             configurationParser,
             user,
+            pathFindingAlgorithmsEstimationModeBusinessFacade
+        );
+
+        var dijkstraStub = new SinglePairShortestPathDijkstraMutateStub(
+            genericStub,
+            pathFindingAlgorithmsEstimationModeBusinessFacade,
+            pathFindingAlgorithmsMutateModeBusinessFacade
+        );
+
+        var yensStub = new SinglePairShortestPathYensMutateStub(
+            genericStub,
             pathFindingAlgorithmsEstimationModeBusinessFacade,
             pathFindingAlgorithmsMutateModeBusinessFacade
         );
@@ -136,12 +148,12 @@ public final class PathFindingProcedureFacade {
             configurationCreator,
             nodeLookup,
             procedureReturnColumns,
-            user,
             pathFindingAlgorithmsEstimationModeBusinessFacade,
             pathFindingAlgorithmsMutateModeBusinessFacade,
             pathFindingAlgorithmsStreamModeBusinessFacade,
             pathFindingAlgorithmsWriteModeBusinessFacade,
-            dijkstraStub
+            dijkstraStub,
+            yensStub
         );
     }
 
@@ -233,31 +245,8 @@ public final class PathFindingProcedureFacade {
         return Stream.of(result);
     }
 
-    public Stream<MemoryEstimateResult> singlePairShortestPathDijkstraMutateEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algorithmConfiguration
-    ) {
-        var stub = singlePairShortestPathDijkstraMutateStub();
-
-        // below lines are generic enough to be reused when we do A* or Yens
-        var memoryEstimation = stub.getMemoryEstimation(
-            user.getUsername(),
-            algorithmConfiguration
-        );
-
-        var configuration = stub.parseConfiguration(algorithmConfiguration);
-
-        var memoryEstimateResult = estimationModeFacade.runEstimation(
-            configuration,
-            graphNameOrConfiguration,
-            memoryEstimation
-        );
-
-        return Stream.of(memoryEstimateResult);
-    }
-
-    public MutateStub<ShortestPathDijkstraMutateConfig, PathFindingMutateResult> singlePairShortestPathDijkstraMutateStub() {
-        return dijkstraStub;
+    public SinglePairShortestPathDijkstraMutateStub singlePairShortestPathDijkstraMutateStub() {
+        return singlePairShortestPathDijkstraMutateStub;
     }
 
     public Stream<PathFindingStreamResult> singlePairShortestPathDijkstraStream(
@@ -318,34 +307,8 @@ public final class PathFindingProcedureFacade {
         return Stream.of(result);
     }
 
-    public Stream<PathFindingMutateResult> singlePairShortestPathYensMutate(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        return Stream.of(
-            runMutateAlgorithm(
-                graphName,
-                configuration,
-                ShortestPathYensMutateConfig::of,
-                mutateModeFacade::singlePairShortestPathYensMutate
-            )
-        );
-    }
-
-    public Stream<MemoryEstimateResult> singlePairShortestPathYensMutateEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algorithmConfiguration
-    ) {
-        var result = runEstimation(
-            algorithmConfiguration,
-            ShortestPathYensMutateConfig::of,
-            configuration -> estimationModeFacade.singlePairShortestPathYensEstimate(
-                configuration,
-                graphNameOrConfiguration
-            )
-        );
-
-        return Stream.of(result);
+    public SinglePairShortestPathYensMutateStub singlePairShortestPathYensMutateStub() {
+        return singlePairShortestPathYensMutateStub;
     }
 
     public Stream<PathFindingStreamResult> singlePairShortestPathYensStream(

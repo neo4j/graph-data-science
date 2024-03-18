@@ -44,7 +44,7 @@ public class ShortestPathYensMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().singlePairShortestPathYensMutate(graphName, configuration);
+        return facade.pathFinding().singlePairShortestPathYensMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(name = "gds.shortestPath.yens.mutate.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class ShortestPathYensMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().singlePairShortestPathYensMutateEstimate(graphName, configuration);
+        return facade.pathFinding().singlePairShortestPathYensMutateStub().estimate(graphName, configuration);
     }
 }
