@@ -21,7 +21,6 @@ package org.neo4j.gds.paths.steiner;
 
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SteinerTreeStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
