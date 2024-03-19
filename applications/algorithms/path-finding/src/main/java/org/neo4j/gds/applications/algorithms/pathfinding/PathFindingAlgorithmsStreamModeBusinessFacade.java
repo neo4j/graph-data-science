@@ -28,11 +28,15 @@ import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
 import org.neo4j.gds.paths.yens.YensMemoryEstimateDefinition;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
+import org.neo4j.gds.steiner.SteinerTreeMemoryEstimateDefinition;
+import org.neo4j.gds.steiner.SteinerTreeResult;
+import org.neo4j.gds.steiner.SteinerTreeStreamConfig;
 
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.A_STAR;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DIJKSTRA;
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.STEINER;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.YENS;
 
 /**
@@ -111,6 +115,22 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             DIJKSTRA,
             () -> new DijkstraMemoryEstimateDefinition(configuration.toMemoryEstimateParameters()).memoryEstimation(),
             graph -> pathFindingAlgorithms.singleSourceShortestPathDijkstra(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT steinerTreeStream(
+        GraphName graphName,
+        SteinerTreeStreamConfig configuration,
+        ResultBuilder<SteinerTreeResult, RESULT> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            STEINER,
+            () -> new SteinerTreeMemoryEstimateDefinition(configuration.applyRerouting()).memoryEstimation(),
+            graph -> pathFindingAlgorithms.steinerTree(graph, configuration),
             Optional.empty(),
             resultBuilder
         );

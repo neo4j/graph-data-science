@@ -28,6 +28,7 @@ import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEs
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsWriteModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.pathfinding.ResultBuilder;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
@@ -50,6 +51,7 @@ import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestP
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SingleSourceShortestPathDijkstraMutateStub;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
+import org.neo4j.gds.steiner.SteinerTreeStreamConfig;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -181,7 +183,7 @@ public final class PathFindingProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        return runStreamAlgorithm(
+        return runPathOrientedAlgorithmInStreamMode(
             graphName,
             configuration,
             ShortestPathAStarStreamConfig::of,
@@ -243,7 +245,7 @@ public final class PathFindingProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        return runStreamAlgorithm(
+        return runPathOrientedAlgorithmInStreamMode(
             graphName,
             configuration,
             ShortestPathDijkstraStreamConfig::of,
@@ -305,7 +307,7 @@ public final class PathFindingProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        return runStreamAlgorithm(
+        return runPathOrientedAlgorithmInStreamMode(
             graphName,
             configuration,
             ShortestPathYensStreamConfig::of,
@@ -367,7 +369,7 @@ public final class PathFindingProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        return runStreamAlgorithm(
+        return runPathOrientedAlgorithmInStreamMode(
             graphName,
             configuration,
             AllShortestPathsDijkstraStreamConfig::of,
@@ -422,6 +424,25 @@ public final class PathFindingProcedureFacade {
     }
 
     /**
+     * We should probably give the configuration to the result builder as a parameter.
+     * Or am I just trying to save a bit of code, having to parse configuration here?
+     */
+    @Deprecated
+    public Stream<SteinerTreeStreamResult> steinerTreeStream(String graphName, Map<String, Object> configuration) {
+        // butt ugly!
+        var steinerTreeStreamConfig = SteinerTreeStreamConfig.of(CypherMapWrapper.create(configuration));
+        var resultBuilder = new SteinerTreeResultBuilderForStreamMode(steinerTreeStreamConfig.sourceNode());
+
+        return runStreamAlgorithm(
+            graphName,
+            configuration,
+            SteinerTreeStreamConfig::of,
+            resultBuilder,
+            streamModeFacade::steinerTreeStream
+        );
+    }
+
+    /**
      * Just a bit of reuse
      */
     private <CONFIGURATION extends AlgoBaseConfig> MemoryEstimateResult runEstimation(
@@ -438,8 +459,24 @@ public final class PathFindingProcedureFacade {
     }
 
     /**
-     * This is kind of a template method: Dijkstra and A* both use the same code structure.
-     * It is quite banal:
+     * A*, Dijkstra, Yens all share the same result builder
+     */
+    private <CONFIGURATION extends AlgoBaseConfig> Stream<PathFindingStreamResult> runPathOrientedAlgorithmInStreamMode(
+        String graphNameAsString,
+        Map<String, Object> rawConfiguration,
+        Function<CypherMapWrapper, CONFIGURATION> configurationSupplier,
+        AlgorithmHandle<CONFIGURATION, PathFindingResult, Stream<PathFindingStreamResult>> algorithm
+    ) {
+        var resultBuilder = new PathFindingResultBuilderForStreamMode(
+            nodeLookup,
+            procedureReturnColumns.contains("path")
+        );
+
+        return runStreamAlgorithm(graphNameAsString, rawConfiguration, configurationSupplier, resultBuilder, algorithm);
+    }
+
+    /**
+     * Some reuse, all the algorithms use the same high level structure:
      * <ol>
      *     <li> configuration parsing
      *     <li> parameter marshalling
@@ -447,18 +484,15 @@ public final class PathFindingProcedureFacade {
      *     <li> handle resource closure
      * </ol>
      */
-    private <CONFIGURATION extends AlgoBaseConfig> Stream<PathFindingStreamResult> runStreamAlgorithm(
+    private <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> Stream<RESULT_TO_CALLER> runStreamAlgorithm(
         String graphNameAsString,
         Map<String, Object> rawConfiguration,
         Function<CypherMapWrapper, CONFIGURATION> configurationSupplier,
-        AlgorithmHandle<CONFIGURATION, PathFindingResult, Stream<PathFindingStreamResult>> algorithm
+        ResultBuilder<RESULT_FROM_ALGORITHM, Stream<RESULT_TO_CALLER>> resultBuilder,
+        AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, Stream<RESULT_TO_CALLER>> algorithm
     ) {
         var graphName = GraphName.parse(graphNameAsString);
         var configuration = configurationCreator.createConfigurationForStream(rawConfiguration, configurationSupplier);
-        var resultBuilder = new PathFindingResultBuilderForStreamMode(
-            nodeLookup,
-            procedureReturnColumns.contains("path")
-        );
 
         var resultStream = algorithm.compute(graphName, configuration, resultBuilder);
 

@@ -25,6 +25,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.pathfinding.SteinerTreeStreamResult;
 import org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm;
 import org.neo4j.gds.steiner.SteinerTreeAlgorithmFactory;
 import org.neo4j.gds.steiner.SteinerTreeResult;
@@ -42,7 +43,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
     description = Constants.DESCRIPTION,
     executionMode = STREAM
 )
-public class SteinerTreeStreamSpec implements AlgorithmSpec<ShortestPathsSteinerAlgorithm, SteinerTreeResult, SteinerTreeStreamConfig, Stream<StreamResult>, SteinerTreeAlgorithmFactory<SteinerTreeStreamConfig>> {
+public class SteinerTreeStreamSpec implements AlgorithmSpec<ShortestPathsSteinerAlgorithm, SteinerTreeResult, SteinerTreeStreamConfig, Stream<SteinerTreeStreamResult>, SteinerTreeAlgorithmFactory<SteinerTreeStreamConfig>> {
 
     @Override
     public String name() {
@@ -60,7 +61,7 @@ public class SteinerTreeStreamSpec implements AlgorithmSpec<ShortestPathsSteiner
 
     }
 
-    public ComputationResultConsumer<ShortestPathsSteinerAlgorithm, SteinerTreeResult, SteinerTreeStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<ShortestPathsSteinerAlgorithm, SteinerTreeResult, SteinerTreeStreamConfig, Stream<SteinerTreeStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),
@@ -74,7 +75,7 @@ public class SteinerTreeStreamSpec implements AlgorithmSpec<ShortestPathsSteiner
                         .filter(nodeId -> parents.get(nodeId) != ShortestPathsSteinerAlgorithm.PRUNED)
                         .mapToObj(nodeId -> {
                             var originalId = graph.toOriginalNodeId(nodeId);
-                            return new StreamResult(
+                            return new SteinerTreeStreamResult(
                                 originalId,
                                 (sourceNode == originalId) ? sourceNode : graph.toOriginalNodeId(parents.get(nodeId)),
                                 costs.get(nodeId)

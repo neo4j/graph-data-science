@@ -55,23 +55,23 @@ public final class SteinerTreeParameters {
         this.applyRerouting = applyRerouting;
     }
 
-    int concurrency() {
+    public int concurrency() {
         return concurrency;
     }
 
-    long sourceNode() {
+    public long sourceNode() {
         return sourceNode;
     }
 
-    List<Long> targetNodes() {
+    public List<Long> targetNodes() {
         return targetNodes;
     }
 
-    double delta() {
+    public double delta() {
         return delta;
     }
 
-    boolean applyRerouting() {
+    public boolean applyRerouting() {
         return applyRerouting;
     }
 }

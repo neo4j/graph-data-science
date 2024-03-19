@@ -17,18 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.steiner;
+package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-public class StreamResult {
+public class SteinerTreeStreamResult {
+    public final long nodeId;
+    public final long parentId;
+    public final double weight;
 
-        public final long nodeId;
-        public final long parentId;
-        public final double weight;
-
-        StreamResult(long nodeId, long parentId, double cost) {
-            this.nodeId = nodeId;
-            this.parentId = parentId;
-            this.weight = cost;
-        }
-
+    public SteinerTreeStreamResult(long nodeId, long parentId, double cost) {
+        this.nodeId = nodeId;
+        this.parentId = parentId;
+        this.weight = cost;
+    }
 }

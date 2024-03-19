@@ -22,7 +22,10 @@ package org.neo4j.gds.paths.steiner;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.algorithms.pathfinding.SteinerTreeStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -35,17 +38,16 @@ import static org.neo4j.gds.paths.steiner.Constants.DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class SteinerTreeStreamProc extends BaseProc {
+    @Context
+    public GraphDataScience facade;
 
     @Procedure(value = "gds.steinerTree.stream", mode = READ)
     @Description(DESCRIPTION)
-    public Stream<StreamResult> spanningTree(
+    public Stream<SteinerTreeStreamResult> spanningTree(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new SteinerTreeStreamSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.pathFinding().steinerTreeStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.steinerTree.stream.estimate", mode = READ)
@@ -66,7 +68,7 @@ public class SteinerTreeStreamProc extends BaseProc {
     @Procedure(value = "gds.beta.steinerTree.stream", mode = READ, deprecatedBy = "gds.steinerTree.stream")
     @Description(DESCRIPTION)
     @Internal
-    public Stream<StreamResult> spanningTreeBeta(
+    public Stream<SteinerTreeStreamResult> spanningTreeBeta(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

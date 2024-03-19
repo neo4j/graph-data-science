@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
@@ -37,9 +38,14 @@ import org.neo4j.gds.paths.dijkstra.config.DijkstraBaseConfig;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
 import org.neo4j.gds.paths.yens.Yens;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
+import org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm;
+import org.neo4j.gds.steiner.SteinerTreeBaseConfig;
+import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
+import java.util.ArrayList;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Here is the bottom business facade for path finding (or top layer in another module, or maybe not even a facade, ...).
@@ -76,7 +82,7 @@ public class PathFindingAlgorithms {
     ) {
         var progressTracker = createProgressTracker(
             configuration,
-            Tasks.leaf("AStar", graph.relationshipCount())
+            Tasks.leaf("AStar", graph.relationshipCount()) // here
         );
 
         var algorithm = AStar.sourceTarget(graph, configuration, progressTracker, terminationFlag);
@@ -96,7 +102,7 @@ public class PathFindingAlgorithms {
     ) {
         var progressTracker = createProgressTracker(
             configuration,
-            Tasks.leaf("Dijkstra", graph.relationshipCount())
+            Tasks.leaf("Dijkstra", graph.relationshipCount()) // here
         );
 
         var dijkstra = Dijkstra.sourceTarget(
@@ -116,7 +122,7 @@ public class PathFindingAlgorithms {
         Graph graph,
         ShortestPathYensBaseConfig configuration
     ) {
-        var initialTask = Tasks.leaf("Dijkstra", graph.relationshipCount());
+        var initialTask = Tasks.leaf("Dijkstra", graph.relationshipCount()); // here
         var pathGrowingTask = Tasks.leaf("Path growing", configuration.k() - 1);
         var yensTask = Tasks.task("Yens", initialTask, pathGrowingTask);
 
@@ -136,7 +142,7 @@ public class PathFindingAlgorithms {
     ) {
         var progressTracker = createProgressTracker(
             configuration,
-            Tasks.leaf("Dijkstra", graph.relationshipCount())
+            Tasks.leaf("Dijkstra", graph.relationshipCount()) // here
         );
 
         var dijkstra = Dijkstra.singleSource(
@@ -149,6 +155,35 @@ public class PathFindingAlgorithms {
         );
 
         return dijkstra.compute();
+    }
+
+    SteinerTreeResult steinerTree(Graph graph, SteinerTreeBaseConfig configuration) {
+        var parameters = configuration.toParameters();
+        var mappedSourceNodeId = graph.toMappedNodeId(parameters.sourceNode());
+        var mappedTargetNodeIds = parameters.targetNodes().stream()
+            .map(graph::safeToMappedNodeId)
+            .collect(Collectors.toList());
+
+        var subtasks = new ArrayList<Task>();
+        subtasks.add(Tasks.leaf("Traverse", configuration.targetNodes().size()));
+        if (configuration.applyRerouting()) {
+            var nodeCount = graph.nodeCount();
+            subtasks.add(Tasks.leaf("Reroute", nodeCount));
+        }
+        var progressTracker = createProgressTracker(configuration, Tasks.task("Steiner Tree", subtasks)); // here
+
+        var steiner = new ShortestPathsSteinerAlgorithm(
+            graph,
+            mappedSourceNodeId,
+            mappedTargetNodeIds,
+            parameters.delta(),
+            parameters.concurrency(),
+            parameters.applyRerouting(),
+            DefaultPool.INSTANCE,
+            progressTracker
+        );
+
+        return steiner.compute();
     }
 
     private ProgressTracker createProgressTracker(
