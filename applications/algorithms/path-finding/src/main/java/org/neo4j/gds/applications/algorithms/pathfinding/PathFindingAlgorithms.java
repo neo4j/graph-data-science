@@ -82,7 +82,7 @@ public class PathFindingAlgorithms {
     ) {
         var progressTracker = createProgressTracker(
             configuration,
-            Tasks.leaf("AStar", graph.relationshipCount()) // here
+            Tasks.leaf(AlgorithmLabels.A_STAR, graph.relationshipCount())
         );
 
         var algorithm = AStar.sourceTarget(graph, configuration, progressTracker, terminationFlag);
@@ -102,7 +102,7 @@ public class PathFindingAlgorithms {
     ) {
         var progressTracker = createProgressTracker(
             configuration,
-            Tasks.leaf("Dijkstra", graph.relationshipCount()) // here
+            Tasks.leaf(AlgorithmLabels.DIJKSTRA, graph.relationshipCount())
         );
 
         var dijkstra = Dijkstra.sourceTarget(
@@ -122,9 +122,9 @@ public class PathFindingAlgorithms {
         Graph graph,
         ShortestPathYensBaseConfig configuration
     ) {
-        var initialTask = Tasks.leaf("Dijkstra", graph.relationshipCount()); // here
+        var initialTask = Tasks.leaf(AlgorithmLabels.DIJKSTRA, graph.relationshipCount());
         var pathGrowingTask = Tasks.leaf("Path growing", configuration.k() - 1);
-        var yensTask = Tasks.task("Yens", initialTask, pathGrowingTask);
+        var yensTask = Tasks.task(AlgorithmLabels.YENS, initialTask, pathGrowingTask);
 
         var progressTracker = createProgressTracker(
             configuration,
@@ -142,7 +142,7 @@ public class PathFindingAlgorithms {
     ) {
         var progressTracker = createProgressTracker(
             configuration,
-            Tasks.leaf("Dijkstra", graph.relationshipCount()) // here
+            Tasks.leaf(AlgorithmLabels.DIJKSTRA, graph.relationshipCount())
         );
 
         var dijkstra = Dijkstra.singleSource(
@@ -170,7 +170,7 @@ public class PathFindingAlgorithms {
             var nodeCount = graph.nodeCount();
             subtasks.add(Tasks.leaf("Reroute", nodeCount));
         }
-        var progressTracker = createProgressTracker(configuration, Tasks.task("Steiner Tree", subtasks)); // here
+        var progressTracker = createProgressTracker(configuration, Tasks.task(AlgorithmLabels.STEINER, subtasks));
 
         var steiner = new ShortestPathsSteinerAlgorithm(
             graph,
