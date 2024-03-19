@@ -28,13 +28,10 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.paths.WritePathOptionsConfig;
-import org.neo4j.gds.paths.astar.AStarMemoryEstimateDefinition;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
-import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateDefinition;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraWriteConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig;
-import org.neo4j.gds.paths.yens.YensMemoryEstimateDefinition;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -57,6 +54,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationFlag terminationFlag;
 
+    private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final PathFindingAlgorithms pathFindingAlgorithms;
 
     public PathFindingAlgorithmsWriteModeBusinessFacade(
@@ -65,14 +63,16 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
+        PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         PathFindingAlgorithms pathFindingAlgorithms
     ) {
         this.log = log;
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
         this.relationshipStreamExporterBuilder = relationshipStreamExporterBuilder;
-        this.terminationFlag = terminationFlag;
-        this.pathFindingAlgorithms = pathFindingAlgorithms;
         this.taskRegistryFactory = taskRegistryFactory;
+        this.terminationFlag = terminationFlag;
+        this.estimationFacade = estimationFacade;
+        this.pathFindingAlgorithms = pathFindingAlgorithms;
     }
 
     public <RESULT> RESULT singlePairShortestPathAStarWrite(
@@ -84,7 +84,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             graphName,
             configuration,
             A_STAR,
-            () -> new AStarMemoryEstimateDefinition().memoryEstimation(),
+            () -> estimationFacade.singlePairShortestPathAStarEstimation(configuration),
             graph -> pathFindingAlgorithms.singlePairShortestPathAStar(graph, configuration),
             resultBuilder
         );
@@ -99,7 +99,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             graphName,
             configuration,
             DIJKSTRA,
-            () -> new DijkstraMemoryEstimateDefinition(configuration.toMemoryEstimateParameters()).memoryEstimation(),
+            () -> estimationFacade.singlePairShortestPathDijkstraEstimation(configuration),
             graph -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
             resultBuilder
         );
@@ -114,7 +114,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             graphName,
             configuration,
             YENS,
-            () -> new YensMemoryEstimateDefinition(configuration.k()).memoryEstimation(),
+            () -> estimationFacade.singlePairShortestPathYensEstimation(configuration),
             graph -> pathFindingAlgorithms.singlePairShortestPathYens(graph, configuration),
             resultBuilder
         );
@@ -129,7 +129,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             graphName,
             configuration,
             DIJKSTRA,
-            () -> new DijkstraMemoryEstimateDefinition(configuration.toMemoryEstimateParameters()).memoryEstimation(),
+            () -> estimationFacade.singleSourceShortestPathDijkstraEstimation(configuration),
             graph -> pathFindingAlgorithms.singleSourceShortestPathDijkstra(graph, configuration),
             resultBuilder
         );
@@ -143,7 +143,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         AlgorithmComputation<PathFindingResult> algorithm,
         ResultBuilder<PathFindingResult, RESULT> resultBuilder
     ) {
-        ShortestPathWriteStep<CONFIGURATION> writeStep = new ShortestPathWriteStep<>(
+        MutateOrWriteStep<PathFindingResult> writeStep = new ShortestPathWriteStep<>(
             log,
             relationshipStreamExporterBuilder,
             taskRegistryFactory,

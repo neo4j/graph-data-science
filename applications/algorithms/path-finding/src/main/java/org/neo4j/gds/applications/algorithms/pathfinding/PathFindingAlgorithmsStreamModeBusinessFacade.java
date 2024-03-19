@@ -20,15 +20,11 @@
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.paths.astar.AStarMemoryEstimateDefinition;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
-import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateDefinition;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
-import org.neo4j.gds.paths.yens.YensMemoryEstimateDefinition;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
-import org.neo4j.gds.steiner.SteinerTreeMemoryEstimateDefinition;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.steiner.SteinerTreeStreamConfig;
 
@@ -46,14 +42,17 @@ import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.
 public class PathFindingAlgorithmsStreamModeBusinessFacade {
     private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
 
+    private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final PathFindingAlgorithms pathFindingAlgorithms;
 
     public PathFindingAlgorithmsStreamModeBusinessFacade(
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
+        PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         PathFindingAlgorithms pathFindingAlgorithms
     ) {
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
         this.pathFindingAlgorithms = pathFindingAlgorithms;
+        this.estimationFacade = estimationFacade;
     }
 
     public <RESULT> RESULT singlePairShortestPathAStarStream(
@@ -65,7 +64,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             graphName,
             configuration,
             A_STAR,
-            () -> new AStarMemoryEstimateDefinition().memoryEstimation(),
+            () -> estimationFacade.singlePairShortestPathAStarEstimation(configuration),
             graph -> pathFindingAlgorithms.singlePairShortestPathAStar(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -81,7 +80,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             graphName,
             configuration,
             DIJKSTRA,
-            () -> new DijkstraMemoryEstimateDefinition(configuration.toMemoryEstimateParameters()).memoryEstimation(),
+            () -> estimationFacade.singlePairShortestPathDijkstraEstimation(configuration),
             graph -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -97,7 +96,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             graphName,
             configuration,
             YENS,
-            () -> new YensMemoryEstimateDefinition(configuration.k()).memoryEstimation(),
+            () -> estimationFacade.singlePairShortestPathYensEstimation(configuration),
             graph -> pathFindingAlgorithms.singlePairShortestPathYens(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -113,7 +112,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             graphName,
             configuration,
             DIJKSTRA,
-            () -> new DijkstraMemoryEstimateDefinition(configuration.toMemoryEstimateParameters()).memoryEstimation(),
+            () -> estimationFacade.singleSourceShortestPathDijkstraEstimation(configuration),
             graph -> pathFindingAlgorithms.singleSourceShortestPathDijkstra(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -129,7 +128,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             graphName,
             configuration,
             STEINER,
-            () -> new SteinerTreeMemoryEstimateDefinition(configuration.applyRerouting()).memoryEstimation(),
+            () -> estimationFacade.steinerTreeEstimation(configuration),
             graph -> pathFindingAlgorithms.steinerTree(graph, configuration),
             Optional.empty(),
             resultBuilder

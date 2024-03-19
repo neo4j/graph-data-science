@@ -298,8 +298,7 @@ class AlgorithmFacadeFactory {
         );
 
         var streamModeFacade = new PathFindingAlgorithmsStreamModeBusinessFacade(
-            algorithmProcessingTemplate,
-            pathFindingAlgorithms
+            algorithmProcessingTemplate, estimationModeFacade, pathFindingAlgorithms
         );
 
         var writeModeFacade = new PathFindingAlgorithmsWriteModeBusinessFacade(
@@ -308,6 +307,7 @@ class AlgorithmFacadeFactory {
             relationshipStreamExporterBuilder,
             taskRegistryFactory,
             terminationFlag,
+            estimationModeFacade,
             pathFindingAlgorithms
         );
 

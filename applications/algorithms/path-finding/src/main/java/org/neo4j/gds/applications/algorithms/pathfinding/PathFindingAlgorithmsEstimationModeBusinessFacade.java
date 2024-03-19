@@ -29,6 +29,8 @@ import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
 import org.neo4j.gds.paths.yens.YensMemoryEstimateDefinition;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.steiner.SteinerTreeBaseConfig;
+import org.neo4j.gds.steiner.SteinerTreeMemoryEstimateDefinition;
 
 /**
  * Here is the top level business facade for all your path finding memory estimation needs.
@@ -99,6 +101,10 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimateDefinition = new DijkstraMemoryEstimateDefinition(configuration.toMemoryEstimateParameters());
 
         return memoryEstimateDefinition.memoryEstimation();
+    }
+
+    public MemoryEstimation steinerTreeEstimation(SteinerTreeBaseConfig configuration) {
+        return new SteinerTreeMemoryEstimateDefinition(configuration.applyRerouting()).memoryEstimation();
     }
 
     public <CONFIGURATION extends AlgoBaseConfig> MemoryEstimateResult runEstimation(
