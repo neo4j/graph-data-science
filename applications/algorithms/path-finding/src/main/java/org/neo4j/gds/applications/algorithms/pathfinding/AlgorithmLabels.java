@@ -25,6 +25,6 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 interface AlgorithmLabels {
     String A_STAR = "AStar";
     String DIJKSTRA = "Dijkstra";
-    String STEINER = "Steiner Tree";
+    String STEINER = "SteinerTree";
     String YENS = "Yens";
 }
