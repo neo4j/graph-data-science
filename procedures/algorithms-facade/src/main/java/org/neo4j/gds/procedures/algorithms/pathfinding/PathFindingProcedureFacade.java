@@ -423,15 +423,8 @@ public final class PathFindingProcedureFacade {
         return Stream.of(result);
     }
 
-    /**
-     * We should probably give the configuration to the result builder as a parameter.
-     * Or am I just trying to save a bit of code, having to parse configuration here?
-     */
-    @Deprecated
     public Stream<SteinerTreeStreamResult> steinerTreeStream(String graphName, Map<String, Object> configuration) {
-        // butt ugly!
-        var steinerTreeStreamConfig = SteinerTreeStreamConfig.of(CypherMapWrapper.create(configuration));
-        var resultBuilder = new SteinerTreeResultBuilderForStreamMode(steinerTreeStreamConfig.sourceNode());
+        var resultBuilder = new SteinerTreeResultBuilderForStreamMode();
 
         return runStreamAlgorithm(
             graphName,
@@ -483,7 +476,7 @@ public final class PathFindingProcedureFacade {
         Function<CypherMapWrapper, CONFIGURATION> configurationSupplier,
         AlgorithmHandle<CONFIGURATION, PathFindingResult, Stream<PathFindingStreamResult>> algorithm
     ) {
-        var resultBuilder = new PathFindingResultBuilderForStreamMode(
+        var resultBuilder = new PathFindingResultBuilderForStreamMode<CONFIGURATION>(
             nodeLookup,
             procedureReturnColumns.contains("path")
         );
@@ -504,7 +497,7 @@ public final class PathFindingProcedureFacade {
         String graphNameAsString,
         Map<String, Object> rawConfiguration,
         Function<CypherMapWrapper, CONFIGURATION> configurationSupplier,
-        ResultBuilder<RESULT_FROM_ALGORITHM, Stream<RESULT_TO_CALLER>> resultBuilder,
+        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, Stream<RESULT_TO_CALLER>> resultBuilder,
         AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, Stream<RESULT_TO_CALLER>> algorithm
     ) {
         var graphName = GraphName.parse(graphNameAsString);
@@ -532,7 +525,7 @@ public final class PathFindingProcedureFacade {
         var configuration = configurationCreator.createConfiguration(rawConfiguration, configurationSupplier);
 
         // write
-        var resultBuilder = new PathFindingResultBuilderForWriteMode(configuration);
+        var resultBuilder = new PathFindingResultBuilderForWriteMode<CONFIGURATION>();
 
         return algorithm.compute(graphName, configuration, resultBuilder);
     }

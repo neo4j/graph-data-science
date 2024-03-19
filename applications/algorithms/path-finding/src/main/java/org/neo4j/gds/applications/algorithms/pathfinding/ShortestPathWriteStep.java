@@ -47,7 +47,7 @@ import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfi
 /**
  * This is relationship writes as needed by path finding algorithms (for now).
  */
-class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & WritePathOptionsConfig> implements MutateOrWriteStep<PathFindingResult> {
+class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & WritePathOptionsConfig> implements MutateOrWriteStep<CONFIGURATION, PathFindingResult> {
     private final Log log;
 
     private final RelationshipStreamExporterBuilder exporterBuilder;
@@ -79,7 +79,7 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
         Graph graph,
         GraphStore graphStore,
         PathFindingResult result,
-        ResultBuilder<PathFindingResult, RESULT_TO_CALLER> resultBuilder
+        ResultBuilder<CONFIGURATION, PathFindingResult, RESULT_TO_CALLER> resultBuilder
     ) {
         var writeNodeIds = configuration.writeNodeIds();
         var writeCosts = configuration.writeCosts();

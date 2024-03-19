@@ -60,7 +60,7 @@ public interface AlgorithmProcessingTemplate {
         String humanReadableAlgorithmName,
         Supplier<MemoryEstimation> estimationFactory,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
-        Optional<MutateOrWriteStep<RESULT_FROM_ALGORITHM>> mutateOrWriteStep,
-        ResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
+        Optional<MutateOrWriteStep<CONFIGURATION, RESULT_FROM_ALGORITHM>> mutateOrWriteStep,
+        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
     );
 }

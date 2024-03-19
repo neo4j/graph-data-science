@@ -54,9 +54,9 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     public <RESULT> RESULT singlePairShortestPathAStarMutate(
         GraphName graphName,
         ShortestPathAStarMutateConfig configuration,
-        ResultBuilder<PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<ShortestPathAStarMutateConfig, PathFindingResult, RESULT> resultBuilder
     ) {
-        var mutateStep = new ShortestPathMutateStep(configuration);
+        var mutateStep = new ShortestPathMutateStep<ShortestPathAStarMutateConfig>(configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
@@ -72,9 +72,9 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     public <RESULT> RESULT singlePairShortestPathDijkstraMutate(
         GraphName graphName,
         ShortestPathDijkstraMutateConfig configuration,
-        ResultBuilder<PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<ShortestPathDijkstraMutateConfig, PathFindingResult, RESULT> resultBuilder
     ) {
-        var mutateStep = new ShortestPathMutateStep(configuration);
+        var mutateStep = new ShortestPathMutateStep<ShortestPathDijkstraMutateConfig>(configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
@@ -90,9 +90,9 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     public <RESULT> RESULT singlePairShortestPathYensMutate(
         GraphName graphName,
         ShortestPathYensMutateConfig configuration,
-        ResultBuilder<PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<ShortestPathYensMutateConfig, PathFindingResult, RESULT> resultBuilder
     ) {
-        var mutateStep = new ShortestPathMutateStep(configuration);
+        var mutateStep = new ShortestPathMutateStep<ShortestPathYensMutateConfig>(configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
@@ -108,9 +108,9 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     public <RESULT> RESULT singleSourceShortestPathDijkstraMutate(
         GraphName graphName,
         AllShortestPathsDijkstraMutateConfig configuration,
-        ResultBuilder<PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<AllShortestPathsDijkstraMutateConfig, PathFindingResult, RESULT> resultBuilder
     ) {
-        var mutateStep = new ShortestPathMutateStep(configuration);
+        var mutateStep = new ShortestPathMutateStep<AllShortestPathsDijkstraMutateConfig>(configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,

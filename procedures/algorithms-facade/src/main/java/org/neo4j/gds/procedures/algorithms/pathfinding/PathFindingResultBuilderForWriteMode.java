@@ -29,17 +29,12 @@ import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 
 import java.util.Optional;
 
-class PathFindingResultBuilderForWriteMode extends ResultBuilder<PathFindingResult, StandardWriteRelationshipsResult> {
-    private final ToMapConvertible configuration;
-
-    PathFindingResultBuilderForWriteMode(ToMapConvertible configuration) {
-        this.configuration = configuration;
-    }
-
+class PathFindingResultBuilderForWriteMode<CONFIGURATION extends ToMapConvertible> extends ResultBuilder<CONFIGURATION, PathFindingResult, StandardWriteRelationshipsResult> {
     @Override
     public StandardWriteRelationshipsResult build(
         Graph graph,
         GraphStore graphStore,
+        CONFIGURATION configuration,
         Optional<PathFindingResult> pathFindingResult,
         AlgorithmProcessingTimings timings
     ) {

@@ -26,26 +26,18 @@ import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTimi
 import org.neo4j.gds.applications.algorithms.pathfinding.ResultBuilder;
 import org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm;
 import org.neo4j.gds.steiner.SteinerTreeResult;
+import org.neo4j.gds.steiner.SteinerTreeStreamConfig;
 
 import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class SteinerTreeResultBuilderForStreamMode extends ResultBuilder<SteinerTreeResult, Stream<SteinerTreeStreamResult>> {
-    /**
-     * This ought to be passed as a parameter via a config, probably
-     */
-    @Deprecated
-    private final long sourceNodeId;
-
-    SteinerTreeResultBuilderForStreamMode(long sourceNodeId) {
-        this.sourceNodeId = sourceNodeId;
-    }
-
+class SteinerTreeResultBuilderForStreamMode extends ResultBuilder<SteinerTreeStreamConfig, SteinerTreeResult, Stream<SteinerTreeStreamResult>> {
     @Override
     public Stream<SteinerTreeStreamResult> build(
         Graph graph,
         GraphStore graphStore,
+        SteinerTreeStreamConfig configuration,
         Optional<SteinerTreeResult> result,
         AlgorithmProcessingTimings timings
     ) {
@@ -53,6 +45,7 @@ class SteinerTreeResultBuilderForStreamMode extends ResultBuilder<SteinerTreeRes
 
         var steinerTreeResult = result.get();
 
+        var sourceNodeId = configuration.sourceNode();
         var parents = steinerTreeResult.parentArray();
         var costs = steinerTreeResult.relationshipToParentCost();
 

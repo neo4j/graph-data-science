@@ -34,7 +34,7 @@ import java.util.Optional;
  * This class is generic in the union type sense, it has fields and accessors for lots of stuff,
  * where any given usage probably won't need all of them.
  */
-public abstract class ResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> {
+public abstract class ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> {
     // a marker
     private static final int NOT_AVAILABLE = -1;
 
@@ -59,11 +59,13 @@ public abstract class ResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> {
      * You implement this and use as much or as little of the gathered data as is appropriate.
      * Plus your own injected dependencies of course.
      *
-     * @param result empty when graph was empty
+     * @param configuration
+     * @param result        empty when graph was empty
      */
     public abstract RESULT_TO_CALLER build(
         Graph graph,
         GraphStore graphStore,
+        CONFIGURATION configuration,
         Optional<RESULT_FROM_ALGORITHM> result,
         AlgorithmProcessingTimings timings
     );

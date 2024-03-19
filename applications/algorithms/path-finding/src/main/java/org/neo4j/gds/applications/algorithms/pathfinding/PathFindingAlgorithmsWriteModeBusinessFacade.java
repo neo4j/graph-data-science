@@ -78,7 +78,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     public <RESULT> RESULT singlePairShortestPathAStarWrite(
         GraphName graphName,
         ShortestPathAStarWriteConfig configuration,
-        ResultBuilder<PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<ShortestPathAStarWriteConfig, PathFindingResult, RESULT> resultBuilder
     ) {
         return runAlgorithmAndWrite(
             graphName,
@@ -93,7 +93,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     public <RESULT> RESULT singlePairShortestPathDijkstraWrite(
         GraphName graphName,
         ShortestPathDijkstraWriteConfig configuration,
-        ResultBuilder<PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<ShortestPathDijkstraWriteConfig, PathFindingResult, RESULT> resultBuilder
     ) {
         return runAlgorithmAndWrite(
             graphName,
@@ -108,7 +108,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     public <RESULT> RESULT singlePairShortestPathYensWrite(
         GraphName graphName,
         ShortestPathYensWriteConfig configuration,
-        ResultBuilder<PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<ShortestPathYensWriteConfig, PathFindingResult, RESULT> resultBuilder
     ) {
         return runAlgorithmAndWrite(
             graphName,
@@ -123,7 +123,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     public <RESULT> RESULT singleSourceShortestPathDijkstraWrite(
         GraphName graphName,
         AllShortestPathsDijkstraWriteConfig configuration,
-        ResultBuilder<PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<AllShortestPathsDijkstraWriteConfig, PathFindingResult, RESULT> resultBuilder
     ) {
         return runAlgorithmAndWrite(
             graphName,
@@ -141,9 +141,9 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         String label,
         Supplier<MemoryEstimation> memoryEstimation,
         AlgorithmComputation<PathFindingResult> algorithm,
-        ResultBuilder<PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<CONFIGURATION, PathFindingResult, RESULT> resultBuilder
     ) {
-        MutateOrWriteStep<PathFindingResult> writeStep = new ShortestPathWriteStep<>(
+        MutateOrWriteStep<CONFIGURATION, PathFindingResult> writeStep = new ShortestPathWriteStep<>(
             log,
             relationshipStreamExporterBuilder,
             taskRegistryFactory,

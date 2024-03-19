@@ -30,7 +30,7 @@ import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
 import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
 
-class ShortestPathMutateStep implements MutateOrWriteStep<PathFindingResult> {
+class ShortestPathMutateStep<CONFIGURATION> implements MutateOrWriteStep<CONFIGURATION, PathFindingResult> {
     private final MutateRelationshipConfig configuration;
 
     ShortestPathMutateStep(MutateRelationshipConfig configuration) {
@@ -42,7 +42,7 @@ class ShortestPathMutateStep implements MutateOrWriteStep<PathFindingResult> {
         Graph graph,
         GraphStore graphStore,
         PathFindingResult result,
-        ResultBuilder<PathFindingResult, RESULT_TO_CALLER> resultBuilder
+        ResultBuilder<CONFIGURATION, PathFindingResult, RESULT_TO_CALLER> resultBuilder
     ) {
         var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
 
@@ -56,13 +56,11 @@ class ShortestPathMutateStep implements MutateOrWriteStep<PathFindingResult> {
 
         SingleTypeRelationships relationships;
 
-        result.forEachPath(pathResult -> {
-            relationshipsBuilder.addFromInternal(
-                pathResult.sourceNode(),
-                pathResult.targetNode(),
-                pathResult.totalCost()
-            );
-        });
+        result.forEachPath(pathResult -> relationshipsBuilder.addFromInternal(
+            pathResult.sourceNode(),
+            pathResult.targetNode(),
+            pathResult.totalCost()
+        ));
 
         relationships = relationshipsBuilder.build();
 

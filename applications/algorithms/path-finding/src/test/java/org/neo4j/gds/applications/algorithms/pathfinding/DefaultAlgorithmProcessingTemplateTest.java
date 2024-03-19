@@ -78,11 +78,12 @@ class DefaultAlgorithmProcessingTemplateTest {
         var pathFindingResult = mock(PathFindingResult.class);
         when(computation.compute(graph)).thenReturn(pathFindingResult);
 
-        var resultBuilder = new ResultBuilder<PathFindingResult, Stream<String>>() {
+        var resultBuilder = new ResultBuilder<ExampleConfiguration, PathFindingResult, Stream<String>>() {
             @Override
             public Stream<String> build(
                 Graph graph,
                 GraphStore graphStore,
+                ExampleConfiguration configuration,
                 Optional<PathFindingResult> pathFindingResult,
                 AlgorithmProcessingTimings timings
             ) {
@@ -146,11 +147,12 @@ class DefaultAlgorithmProcessingTemplateTest {
         )).thenReturn(Pair.of(graph, graphStore));
 
         var pathFindingResult = mock(PathFindingResult.class);
-        var resultBuilder = new ResultBuilder<PathFindingResult, Long>() {
+        var resultBuilder = new ResultBuilder<ExampleConfiguration, PathFindingResult, Long>() {
             @Override
             public Long build(
                 Graph actualGraph,
                 GraphStore actualGraphStore,
+                ExampleConfiguration configuration,
                 Optional<PathFindingResult> actualResult,
                 AlgorithmProcessingTimings timings
             ) {
@@ -169,13 +171,13 @@ class DefaultAlgorithmProcessingTemplateTest {
         AlgorithmComputation<PathFindingResult> computation = mock(AlgorithmComputation.class);
         when(computation.compute(graph)).thenReturn(pathFindingResult);
 
-        var mutateOrWriteStep = new MutateOrWriteStep<PathFindingResult>() {
+        var mutateOrWriteStep = new MutateOrWriteStep<ExampleConfiguration, PathFindingResult>() {
             @Override
             public <RESULT_TO_CALLER> void execute(
                 Graph graph,
                 GraphStore graphStore,
                 PathFindingResult resultFromAlgorithm,
-                ResultBuilder<PathFindingResult, RESULT_TO_CALLER> resultBuilder
+                ResultBuilder<ExampleConfiguration, PathFindingResult, RESULT_TO_CALLER> resultBuilder
             ) {
                 resultBuilder.withRelationshipsWritten(42);
             }
@@ -209,18 +211,18 @@ class DefaultAlgorithmProcessingTemplateTest {
                 AlgorithmProcessingTimingsBuilder timingsBuilder,
                 GraphName graphName,
                 CONFIGURATION configuration,
-                ResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
+                ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
             ) {
                 timingsBuilder.withPreProcessingMillis(23);
                 return Pair.of(mock(Graph.class), null);
             }
 
             @Override
-            <RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> RESULT_FROM_ALGORITHM computeWithTiming(
+            <CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> RESULT_FROM_ALGORITHM computeWithTiming(
                 AlgorithmProcessingTimingsBuilder timingsBuilder,
                 String humanReadableAlgorithmName,
                 AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
-                ResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder,
+                ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder,
                 Graph graph
             ) {
                 timingsBuilder.withComputeMillis(117);
@@ -228,23 +230,24 @@ class DefaultAlgorithmProcessingTemplateTest {
             }
 
             @Override
-            <RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> void mutateOrWriteWithTiming(
-                Optional<MutateOrWriteStep<RESULT_FROM_ALGORITHM>> mutateOrWriteStep,
+            <CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> void mutateOrWriteWithTiming(
+                Optional<MutateOrWriteStep<CONFIGURATION, RESULT_FROM_ALGORITHM>> mutateOrWriteStep,
                 AlgorithmProcessingTimingsBuilder timingsBuilder,
                 Graph graph,
                 GraphStore graphStore,
                 RESULT_FROM_ALGORITHM resultFromAlgorithm,
-                ResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
+                ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
             ) {
                 timingsBuilder.withPostProcessingMillis(87);
             }
         };
 
-        var resultBuilder = new ResultBuilder<Void, Map<String, Long>>() {
+        var resultBuilder = new ResultBuilder<ExampleConfiguration, Void, Map<String, Long>>() {
             @Override
             public Map<String, Long> build(
                 Graph graph,
                 GraphStore graphStore,
+                ExampleConfiguration configuration,
                 Optional<Void> unused,
                 AlgorithmProcessingTimings timings
             ) {
@@ -268,7 +271,7 @@ class DefaultAlgorithmProcessingTemplateTest {
                     Graph graph,
                     GraphStore graphStore,
                     Void unused,
-                    ResultBuilder<Void, RESULT_TO_CALLER> resultBuilder
+                    ResultBuilder<ExampleConfiguration, Void, RESULT_TO_CALLER> resultBuilder
                 ) {
                     // do nothing, we are just catching timings
                 }

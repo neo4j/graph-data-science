@@ -58,7 +58,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> RESULT singlePairShortestPathAStarStream(
         GraphName graphName,
         ShortestPathAStarStreamConfig configuration,
-        ResultBuilder<PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<ShortestPathAStarStreamConfig, PathFindingResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
@@ -74,7 +74,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> RESULT singlePairShortestPathDijkstraStream(
         GraphName graphName,
         ShortestPathDijkstraStreamConfig configuration,
-        ResultBuilder<PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<ShortestPathDijkstraStreamConfig, PathFindingResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
@@ -90,7 +90,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> RESULT singlePairShortestPathYensStream(
         GraphName graphName,
         ShortestPathYensStreamConfig configuration,
-        ResultBuilder<PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<ShortestPathYensStreamConfig, PathFindingResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
@@ -106,7 +106,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> RESULT singleSourceShortestPathDijkstraStream(
         GraphName graphName,
         AllShortestPathsDijkstraStreamConfig configuration,
-        ResultBuilder<PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<AllShortestPathsDijkstraStreamConfig, PathFindingResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
@@ -122,7 +122,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
     public <RESULT> RESULT steinerTreeStream(
         GraphName graphName,
         SteinerTreeStreamConfig configuration,
-        ResultBuilder<SteinerTreeResult, RESULT> resultBuilder
+        ResultBuilder<SteinerTreeStreamConfig, SteinerTreeResult, RESULT> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,

@@ -162,7 +162,7 @@ public class GenericStub {
         var configuration = configurationCreator.createConfiguration(rawConfiguration, configurationSupplier);
 
         // mutation
-        var resultBuilder = new PathFindingResultBuilderForMutateMode(configuration);
+        var resultBuilder = new PathFindingResultBuilderForMutateMode<CONFIGURATION>();
 
         return algorithm.compute(graphName, configuration, resultBuilder);
     }

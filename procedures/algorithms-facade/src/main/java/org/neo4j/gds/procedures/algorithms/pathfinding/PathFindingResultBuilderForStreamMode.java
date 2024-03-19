@@ -37,7 +37,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.paths.PathFactory.create;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class PathFindingResultBuilderForStreamMode extends ResultBuilder<PathFindingResult, Stream<PathFindingStreamResult>> {
+public class PathFindingResultBuilderForStreamMode<CONFIGURATION> extends ResultBuilder<CONFIGURATION, PathFindingResult, Stream<PathFindingStreamResult>> {
     private final NodeLookup nodeLookup;
     private final boolean pathRequested;
 
@@ -50,6 +50,7 @@ public class PathFindingResultBuilderForStreamMode extends ResultBuilder<PathFin
     public Stream<PathFindingStreamResult> build(
         Graph graph,
         GraphStore graphStore,
+        CONFIGURATION configuration,
         Optional<PathFindingResult> result,
         AlgorithmProcessingTimings timings
     ) {

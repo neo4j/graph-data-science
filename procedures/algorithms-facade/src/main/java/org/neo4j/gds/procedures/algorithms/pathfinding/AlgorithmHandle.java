@@ -26,6 +26,6 @@ public interface AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO
     RESULT_TO_CALLER compute(
         GraphName graphName,
         CONFIGURATION configuration,
-        ResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
+        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
     );
 }

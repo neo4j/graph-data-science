@@ -22,11 +22,11 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 
-public interface MutateOrWriteStep<RESULT_FROM_ALGORITHM> {
+public interface MutateOrWriteStep<CONFIGURATION, RESULT_FROM_ALGORITHM> {
     <RESULT_TO_CALLER> void execute(
         Graph graph,
         GraphStore graphStore,
         RESULT_FROM_ALGORITHM result,
-        ResultBuilder<RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
+        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
     );
 }
