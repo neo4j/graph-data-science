@@ -442,6 +442,22 @@ public final class PathFindingProcedureFacade {
         );
     }
 
+    public Stream<MemoryEstimateResult> steinerTreeStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = runEstimation(
+            algorithmConfiguration,
+            SteinerTreeStreamConfig::of,
+            configuration -> estimationModeFacade.steinerTreeStreamEstimate(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
     /**
      * Just a bit of reuse
      */

@@ -20,7 +20,7 @@
 package org.neo4j.gds.paths.steiner;
 
 final class Constants {
-    static final String DESCRIPTION =
+    static final String STEINER_DESCRIPTION =
         "The steiner tree algorithm accepts a source node, as well as a list of target nodes. " +
             "It then attempts to find a spanning tree where there is a path from the source node to each target node, " +
             "such that the total weight of the relationships is as low as possible.";

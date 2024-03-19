@@ -40,7 +40,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 @GdsCallable(
     name = "gds.steinerTree.stream",
     aliases = {"gds.beta.steinerTree.stream"},
-    description = Constants.DESCRIPTION,
+    description = Constants.STEINER_DESCRIPTION,
     executionMode = STREAM
 )
 public class SteinerTreeStreamSpec implements AlgorithmSpec<ShortestPathsSteinerAlgorithm, SteinerTreeResult, SteinerTreeStreamConfig, Stream<SteinerTreeStreamResult>, SteinerTreeAlgorithmFactory<SteinerTreeStreamConfig>> {

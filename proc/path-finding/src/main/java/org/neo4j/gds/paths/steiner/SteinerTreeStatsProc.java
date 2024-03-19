@@ -31,13 +31,13 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.paths.steiner.Constants.DESCRIPTION;
+import static org.neo4j.gds.paths.steiner.Constants.STEINER_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class SteinerTreeStatsProc extends BaseProc {
 
     @Procedure(value = "gds.steinerTree.stats", mode = READ)
-    @Description(DESCRIPTION)
+    @Description(STEINER_DESCRIPTION)
     public Stream<StatsResult> compute(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -63,7 +63,7 @@ public class SteinerTreeStatsProc extends BaseProc {
 
     @Deprecated
     @Procedure(value = "gds.beta.steinerTree.stats", mode = READ, deprecatedBy = "gds.steinerTree.stats")
-    @Description(DESCRIPTION)
+    @Description(STEINER_DESCRIPTION)
     @Internal
     public Stream<StatsResult> computeBeta(
         @Name(value = "graphName") String graphName,

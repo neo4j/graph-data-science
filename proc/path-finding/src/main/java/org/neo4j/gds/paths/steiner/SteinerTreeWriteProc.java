@@ -43,7 +43,7 @@ public class SteinerTreeWriteProc extends BaseProc {
     public RelationshipExporterBuilder relationshipExporterBuilder;
 
     @Procedure(value = "gds.steinerTree.write", mode = WRITE)
-    @Description(Constants.DESCRIPTION)
+    @Description(Constants.STEINER_DESCRIPTION)
     public Stream<WriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -70,7 +70,7 @@ public class SteinerTreeWriteProc extends BaseProc {
 
     @Deprecated
     @Procedure(value = "gds.beta.steinerTree.write", mode = WRITE, deprecatedBy = "gds.steinerTree.write")
-    @Description(Constants.DESCRIPTION)
+    @Description(Constants.STEINER_DESCRIPTION)
     @Internal
     public Stream<WriteResult> writeBeta(
         @Name(value = "graphName") String graphName,

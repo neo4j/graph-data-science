@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.paths.steiner;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SteinerTreeStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -33,16 +31,17 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.paths.steiner.Constants.DESCRIPTION;
+import static org.neo4j.gds.ProcedureConstants.ESTIMATE_DESCRIPTION;
+import static org.neo4j.gds.paths.steiner.Constants.STEINER_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class SteinerTreeStreamProc extends BaseProc {
+public class SteinerTreeStreamProc {
     @Context
     public GraphDataScience facade;
 
     @Procedure(value = "gds.steinerTree.stream", mode = READ)
-    @Description(DESCRIPTION)
-    public Stream<SteinerTreeStreamResult> spanningTree(
+    @Description(STEINER_DESCRIPTION)
+    public Stream<SteinerTreeStreamResult> steinerTree(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -55,29 +54,21 @@ public class SteinerTreeStreamProc extends BaseProc {
         @Name(value = "graphName") Object graphNameOrConfiguration,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new SteinerTreeStreamSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, configuration);
+        return facade.pathFinding().steinerTreeStreamEstimate(graphNameOrConfiguration, configuration);
     }
-
 
     @Deprecated
     @Procedure(value = "gds.beta.steinerTree.stream", mode = READ, deprecatedBy = "gds.steinerTree.stream")
-    @Description(DESCRIPTION)
+    @Description(STEINER_DESCRIPTION)
     @Internal
     public Stream<SteinerTreeStreamResult> spanningTreeBeta(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.steinerTree.stream");
-        executionContext()
+        facade.deprecatedProcedures().called("gds.beta.steinerTree.stream");
+        facade
             .log()
             .warn("Procedure `gds.beta.steinerTree.stream` has been deprecated, please use `gds.steinerTree.stream`.");
-        return spanningTree(graphName, configuration);
+        return steinerTree(graphName, configuration);
     }
-
 }

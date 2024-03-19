@@ -22,6 +22,7 @@ dependencies {
     implementation project(':core-write')
     implementation project(':executor')
     implementation project(':graph-schema-api')
+    implementation project(':logging')
     implementation project(':memory-usage')
     implementation project(':neo4j-api')
     implementation project(':opengds-procedure-facade')

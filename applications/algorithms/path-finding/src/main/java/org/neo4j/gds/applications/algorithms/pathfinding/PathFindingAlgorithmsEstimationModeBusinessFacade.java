@@ -31,6 +31,7 @@ import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.steiner.SteinerTreeBaseConfig;
 import org.neo4j.gds.steiner.SteinerTreeMemoryEstimateDefinition;
+import org.neo4j.gds.steiner.SteinerTreeStreamConfig;
 
 /**
  * Here is the top level business facade for all your path finding memory estimation needs.
@@ -105,6 +106,15 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
 
     public MemoryEstimation steinerTreeEstimation(SteinerTreeBaseConfig configuration) {
         return new SteinerTreeMemoryEstimateDefinition(configuration.applyRerouting()).memoryEstimation();
+    }
+
+    public MemoryEstimateResult steinerTreeStreamEstimate(
+        SteinerTreeStreamConfig configuration,
+        Object graphNameOrConfiguration
+    ) {
+        var memoryEstimation = steinerTreeEstimation(configuration);
+
+        return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
     }
 
     public <CONFIGURATION extends AlgoBaseConfig> MemoryEstimateResult runEstimation(

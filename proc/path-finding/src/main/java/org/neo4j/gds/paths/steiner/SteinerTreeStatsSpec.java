@@ -37,7 +37,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STATS;
 @GdsCallable(
     name = "gds.steinerTree.stats",
     aliases = {"gds.beta.steinerTree.stats"},
-    description = Constants.DESCRIPTION,
+    description = Constants.STEINER_DESCRIPTION,
     executionMode = STATS
 )
 public class SteinerTreeStatsSpec implements AlgorithmSpec<ShortestPathsSteinerAlgorithm, SteinerTreeResult, SteinerTreeStatsConfig, Stream<StatsResult>, SteinerTreeAlgorithmFactory<SteinerTreeStatsConfig>> {

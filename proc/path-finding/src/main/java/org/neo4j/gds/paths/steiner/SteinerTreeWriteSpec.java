@@ -42,7 +42,7 @@ import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
 @GdsCallable(
     name = "gds.steinerTree.write",
     aliases = {"gds.beta.steinerTree.write"},
-    description = Constants.DESCRIPTION,
+    description = Constants.STEINER_DESCRIPTION,
     executionMode = WRITE_RELATIONSHIP)
 public class SteinerTreeWriteSpec implements
     AlgorithmSpec<ShortestPathsSteinerAlgorithm, SteinerTreeResult, SteinerTreeWriteConfig, Stream<WriteResult>, SteinerTreeAlgorithmFactory<SteinerTreeWriteConfig>> {
