@@ -17,19 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.steiner;
+package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
-public final class MutateResult extends StatsResult {
+public final class SteinerMutateResult extends SteinerStatsResult {
 
 
     public final long mutateMillis;
     public final long relationshipsWritten;
 
-    public MutateResult(
+    public SteinerMutateResult(
         long preProcessingMillis,
         long computeMillis,
         long mutateMillis,
@@ -44,30 +44,30 @@ public final class MutateResult extends StatsResult {
         this.relationshipsWritten = relationshipsWritten;
     }
 
-    public static class Builder extends AbstractResultBuilder<MutateResult> {
+    public static class Builder extends AbstractResultBuilder<SteinerMutateResult> {
 
         long effectiveNodeCount;
         long effectiveTargetNodesCount;
         double totalWeight;
 
-        Builder withEffectiveNodeCount(long effectiveNodeCount) {
+        public Builder withEffectiveNodeCount(long effectiveNodeCount) {
             this.effectiveNodeCount = effectiveNodeCount;
             return this;
         }
 
-        Builder withEffectiveTargetNodeCount(long effectiveTargetNodesCount) {
+        public Builder withEffectiveTargetNodeCount(long effectiveTargetNodesCount) {
             this.effectiveTargetNodesCount = effectiveTargetNodesCount;
             return this;
         }
 
-        Builder withTotalWeight(double totalWeight) {
+        public Builder withTotalWeight(double totalWeight) {
             this.totalWeight = totalWeight;
             return this;
         }
 
         @Override
-        public MutateResult build() {
-            return new MutateResult(
+        public SteinerMutateResult build() {
+            return new SteinerMutateResult(
                 preProcessingMillis,
                 computeMillis,
                 mutateMillis,

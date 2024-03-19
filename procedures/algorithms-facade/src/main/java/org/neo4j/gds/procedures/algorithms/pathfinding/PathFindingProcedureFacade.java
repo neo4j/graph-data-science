@@ -52,6 +52,7 @@ import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SingleSourceShortes
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 import org.neo4j.gds.steiner.SteinerTreeStreamConfig;
+import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -442,7 +443,37 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             SteinerTreeStreamConfig::of,
-            configuration -> estimationModeFacade.steinerTreeStreamEstimate(
+            configuration -> estimationModeFacade.steinerTreeEstimate(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<SteinerWriteResult> steinerTreeWrite(String graphName, Map<String, Object> configuration) {
+        var resultBuilder = new SteinerTreeResultBuilderForWriteMode();
+
+        return Stream.of(
+            runWriteAlgorithm(
+                graphName,
+                configuration,
+                SteinerTreeWriteConfig::of,
+                writeModeFacade::steinerTreeWrite,
+                resultBuilder
+            )
+        );
+    }
+
+    public Stream<MemoryEstimateResult> steinerTreeWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = runEstimation(
+            algorithmConfiguration,
+            SteinerTreeWriteConfig::of,
+            configuration -> estimationModeFacade.steinerTreeEstimate(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -512,8 +543,7 @@ public final class PathFindingProcedureFacade {
     }
 
     /**
-     * Writes are like mutate: the usual pre-processing, then the actual algorithm call,
-     * and finally post-processing: the side effect (the writes) and result rendering.
+     * A*, Dijkstra and Yens use the same variant of result builder
      */
     private <CONFIGURATION extends AlgoBaseConfig> StandardWriteRelationshipsResult runWriteAlgorithm(
         String graphNameAsString,
@@ -521,11 +551,26 @@ public final class PathFindingProcedureFacade {
         Function<CypherMapWrapper, CONFIGURATION> configurationSupplier,
         AlgorithmHandle<CONFIGURATION, PathFindingResult, StandardWriteRelationshipsResult> algorithm
     ) {
+        var resultBuilder = new PathFindingResultBuilderForWriteMode<CONFIGURATION>();
+
+        return runWriteAlgorithm(
+            graphNameAsString,
+            rawConfiguration,
+            configurationSupplier,
+            algorithm,
+            resultBuilder
+        );
+    }
+
+    private <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> RESULT_TO_CALLER runWriteAlgorithm(
+        String graphNameAsString,
+        Map<String, Object> rawConfiguration,
+        Function<CypherMapWrapper, CONFIGURATION> configurationSupplier,
+        AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> algorithm,
+        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
+    ) {
         var graphName = GraphName.parse(graphNameAsString);
         var configuration = configurationCreator.createConfiguration(rawConfiguration, configurationSupplier);
-
-        // write
-        var resultBuilder = new PathFindingResultBuilderForWriteMode<CONFIGURATION>();
 
         return algorithm.compute(graphName, configuration, resultBuilder);
     }

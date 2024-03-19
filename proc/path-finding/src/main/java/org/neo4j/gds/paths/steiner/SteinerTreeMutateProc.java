@@ -22,6 +22,7 @@ package org.neo4j.gds.paths.steiner;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
 import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.algorithms.pathfinding.SteinerMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -38,7 +39,7 @@ public class SteinerTreeMutateProc extends BaseProc {
 
     @Procedure(value = "gds.steinerTree.mutate", mode = READ)
     @Description(STEINER_DESCRIPTION)
-    public Stream<MutateResult> mutate(
+    public Stream<SteinerMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
@@ -65,7 +66,7 @@ public class SteinerTreeMutateProc extends BaseProc {
     @Procedure(value = "gds.beta.steinerTree.mutate", mode = READ, deprecatedBy = "gds.steinerTree.mutate")
     @Description(STEINER_DESCRIPTION)
     @Internal
-    public Stream<MutateResult> mutateBeta(
+    public Stream<SteinerMutateResult> mutateBeta(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {

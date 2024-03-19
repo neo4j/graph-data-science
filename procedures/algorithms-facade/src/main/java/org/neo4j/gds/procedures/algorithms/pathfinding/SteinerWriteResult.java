@@ -17,19 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.steiner;
+package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
-public final class WriteResult extends StatsResult {
+public final class SteinerWriteResult extends SteinerStatsResult {
 
 
     public final long writeMillis;
     public final long relationshipsWritten;
 
-    public WriteResult(
+    public SteinerWriteResult(
         long preProcessingMillis,
         long computeMillis,
         long writeMillis,
@@ -44,30 +44,30 @@ public final class WriteResult extends StatsResult {
         this.relationshipsWritten = relationshipsWritten;
     }
 
-    public static class Builder extends AbstractResultBuilder<WriteResult> {
+    public static class Builder extends AbstractResultBuilder<SteinerWriteResult> {
 
         long effectiveNodeCount;
         long effectiveTargetNodesCount;
         double totalWeight;
 
-        Builder withEffectiveNodeCount(long effectiveNodeCount) {
+        public Builder withEffectiveNodeCount(long effectiveNodeCount) {
             this.effectiveNodeCount = effectiveNodeCount;
             return this;
         }
 
-        Builder withEffectiveTargetNodeCount(long effectiveTargetNodesCount) {
+        public Builder withEffectiveTargetNodeCount(long effectiveTargetNodesCount) {
             this.effectiveTargetNodesCount = effectiveTargetNodesCount;
             return this;
         }
 
-        Builder withTotalWeight(double totalWeight) {
+        public Builder withTotalWeight(double totalWeight) {
             this.totalWeight = totalWeight;
             return this;
         }
 
         @Override
-        public WriteResult build() {
-            return new WriteResult(
+        public SteinerWriteResult build() {
+            return new SteinerWriteResult(
                 preProcessingMillis,
                 computeMillis,
                 writeMillis,

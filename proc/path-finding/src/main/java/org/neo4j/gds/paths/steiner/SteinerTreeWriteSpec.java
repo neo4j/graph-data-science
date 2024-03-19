@@ -28,6 +28,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.pathfinding.SteinerWriteResult;
 import org.neo4j.gds.spanningtree.SpanningGraph;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm;
@@ -45,7 +46,7 @@ import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
     description = Constants.STEINER_DESCRIPTION,
     executionMode = WRITE_RELATIONSHIP)
 public class SteinerTreeWriteSpec implements
-    AlgorithmSpec<ShortestPathsSteinerAlgorithm, SteinerTreeResult, SteinerTreeWriteConfig, Stream<WriteResult>, SteinerTreeAlgorithmFactory<SteinerTreeWriteConfig>> {
+    AlgorithmSpec<ShortestPathsSteinerAlgorithm, SteinerTreeResult, SteinerTreeWriteConfig, Stream<SteinerWriteResult>, SteinerTreeAlgorithmFactory<SteinerTreeWriteConfig>> {
 
     @Override
     public String name() {
@@ -62,7 +63,7 @@ public class SteinerTreeWriteSpec implements
         return (__, config) -> SteinerTreeWriteConfig.of(config);
     }
 
-    public ComputationResultConsumer<ShortestPathsSteinerAlgorithm, SteinerTreeResult, SteinerTreeWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<ShortestPathsSteinerAlgorithm, SteinerTreeResult, SteinerTreeWriteConfig, Stream<SteinerWriteResult>> computationResultConsumer() {
 
         return (computationResult, executionContext) -> {
             var config = computationResult.config();
@@ -70,7 +71,7 @@ public class SteinerTreeWriteSpec implements
             var sourceNode = config.sourceNode();
             var graph = computationResult.graph();
 
-            var builder = new WriteResult.Builder();
+            var builder = new SteinerWriteResult.Builder();
 
             computationResult.result().ifPresent(steinerTreeResult -> {
                 builder

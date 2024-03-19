@@ -23,6 +23,9 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 
 public interface MutateOrWriteStep<CONFIGURATION, RESULT_FROM_ALGORITHM> {
+    /**
+     * Timings belong on the outside.
+     */
     <RESULT_TO_CALLER> void execute(
         Graph graph,
         GraphStore graphStore,

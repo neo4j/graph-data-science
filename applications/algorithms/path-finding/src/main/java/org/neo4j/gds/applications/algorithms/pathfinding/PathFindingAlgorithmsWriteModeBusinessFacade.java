@@ -25,6 +25,7 @@ import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.paths.WritePathOptionsConfig;
@@ -33,6 +34,8 @@ import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraWriteConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
+import org.neo4j.gds.steiner.SteinerTreeResult;
+import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
@@ -40,6 +43,7 @@ import java.util.function.Supplier;
 
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.A_STAR;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DIJKSTRA;
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.STEINER;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.YENS;
 
 /**
@@ -50,6 +54,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     private final Log log;
 
     private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
+    private final RelationshipExporterBuilder relationshipExporterBuilder;
     private final RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationFlag terminationFlag;
@@ -60,6 +65,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     public PathFindingAlgorithmsWriteModeBusinessFacade(
         Log log,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
+        RelationshipExporterBuilder relationshipExporterBuilder,
         RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
@@ -68,6 +74,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     ) {
         this.log = log;
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
+        this.relationshipExporterBuilder = relationshipExporterBuilder;
         this.relationshipStreamExporterBuilder = relationshipStreamExporterBuilder;
         this.taskRegistryFactory = taskRegistryFactory;
         this.terminationFlag = terminationFlag;
@@ -135,15 +142,36 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         );
     }
 
-    private <CONFIGURATION extends AlgoBaseConfig & RelationshipWeightConfig & WriteRelationshipConfig & WritePathOptionsConfig, RESULT> RESULT runAlgorithmAndWrite(
+    public <RESULT> RESULT steinerTreeWrite(
+        GraphName graphName,
+        SteinerTreeWriteConfig configuration,
+        ResultBuilder<SteinerTreeWriteConfig, SteinerTreeResult, RESULT> resultBuilder
+    ) {
+        var writeStep = new SteinerTreeWriteStep(relationshipExporterBuilder, terminationFlag, configuration);
+
+        return runAlgorithmAndWrite(
+            graphName,
+            configuration,
+            STEINER,
+            () -> estimationFacade.steinerTreeEstimation(configuration),
+            graph -> pathFindingAlgorithms.steinerTree(graph, configuration),
+            writeStep,
+            resultBuilder
+        );
+    }
+
+    /**
+     * A*, Dijkstra and Yens use the same variant of write step
+     */
+    private <CONFIGURATION extends AlgoBaseConfig & RelationshipWeightConfig & WriteRelationshipConfig & WritePathOptionsConfig, RESULT_TO_CALLER> RESULT_TO_CALLER runAlgorithmAndWrite(
         GraphName graphName,
         CONFIGURATION configuration,
         String label,
         Supplier<MemoryEstimation> memoryEstimation,
         AlgorithmComputation<PathFindingResult> algorithm,
-        ResultBuilder<CONFIGURATION, PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<CONFIGURATION, PathFindingResult, RESULT_TO_CALLER> resultBuilder
     ) {
-        MutateOrWriteStep<CONFIGURATION, PathFindingResult> writeStep = new ShortestPathWriteStep<>(
+        var writeStep = new ShortestPathWriteStep<>(
             log,
             relationshipStreamExporterBuilder,
             taskRegistryFactory,
@@ -151,6 +179,26 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             configuration
         );
 
+        return runAlgorithmAndWrite(
+            graphName,
+            configuration,
+            label,
+            memoryEstimation,
+            algorithm,
+            writeStep,
+            resultBuilder
+        );
+    }
+
+    private <CONFIGURATION extends AlgoBaseConfig & RelationshipWeightConfig & WriteRelationshipConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> RESULT_TO_CALLER runAlgorithmAndWrite(
+        GraphName graphName,
+        CONFIGURATION configuration,
+        String label,
+        Supplier<MemoryEstimation> memoryEstimation,
+        AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithm,
+        MutateOrWriteStep<CONFIGURATION, RESULT_FROM_ALGORITHM> writeStep,
+        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
+    ) {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
             configuration,

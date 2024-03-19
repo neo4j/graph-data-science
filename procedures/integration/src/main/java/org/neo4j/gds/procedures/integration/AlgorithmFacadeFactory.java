@@ -71,6 +71,7 @@ import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.modelcatalogservices.ModelCatalogService;
@@ -104,6 +105,7 @@ class AlgorithmFacadeFactory {
     private final AlgorithmRunner algorithmRunner;
     private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
     private final AlgorithmEstimationTemplate algorithmEstimationTemplate;
+    private final RelationshipExporterBuilder relationshipExporterBuilder;
     private final RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationFlag terminationFlag;
@@ -128,6 +130,7 @@ class AlgorithmFacadeFactory {
         AlgorithmEstimator algorithmEstimator,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
+        RelationshipExporterBuilder relationshipExporterBuilder,
         RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
@@ -155,6 +158,7 @@ class AlgorithmFacadeFactory {
 
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
         this.algorithmEstimationTemplate = algorithmEstimationTemplate;
+        this.relationshipExporterBuilder = relationshipExporterBuilder;
         this.relationshipStreamExporterBuilder = relationshipStreamExporterBuilder;
         this.taskRegistryFactory = taskRegistryFactory;
         this.terminationFlag = terminationFlag;
@@ -304,6 +308,7 @@ class AlgorithmFacadeFactory {
         var writeModeFacade = new PathFindingAlgorithmsWriteModeBusinessFacade(
             log,
             algorithmProcessingTemplate,
+            relationshipExporterBuilder,
             relationshipStreamExporterBuilder,
             taskRegistryFactory,
             terminationFlag,

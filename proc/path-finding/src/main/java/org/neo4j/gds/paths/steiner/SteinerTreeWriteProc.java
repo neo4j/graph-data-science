@@ -19,11 +19,8 @@
  */
 package org.neo4j.gds.paths.steiner;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.RelationshipExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.algorithms.pathfinding.SteinerWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -34,59 +31,46 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.paths.steiner.Constants.STEINER_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class SteinerTreeWriteProc extends BaseProc {
-
+public class SteinerTreeWriteProc {
     @Context
-    public RelationshipExporterBuilder relationshipExporterBuilder;
+    public GraphDataScience facade;
 
     @Procedure(value = "gds.steinerTree.write", mode = WRITE)
-    @Description(Constants.STEINER_DESCRIPTION)
-    public Stream<WriteResult> write(
+    @Description(STEINER_DESCRIPTION)
+    public Stream<SteinerWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new SteinerTreeWriteSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.pathFinding().steinerTreeWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.steinerTree.write.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphNameOrConfiguration,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new SteinerTreeWriteSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, configuration);
+        return facade.pathFinding().steinerTreeWriteEstimate(graphNameOrConfiguration, configuration);
     }
 
 
     @Deprecated
     @Procedure(value = "gds.beta.steinerTree.write", mode = WRITE, deprecatedBy = "gds.steinerTree.write")
-    @Description(Constants.STEINER_DESCRIPTION)
+    @Description(STEINER_DESCRIPTION)
     @Internal
-    public Stream<WriteResult> writeBeta(
+    public Stream<SteinerWriteResult> writeBeta(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.steinerTree.write");
-        executionContext()
+        facade.deprecatedProcedures().called("gds.beta.steinerTree.write");
+        facade
             .log()
             .warn("Procedure `gds.beta.steinerTree.write` has been deprecated, please use `gds.steinerTree.write`.");
         return write(graphName, configuration);
-    }
-
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withRelationshipExporterBuilder(relationshipExporterBuilder);
     }
 }

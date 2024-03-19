@@ -17,20 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.steiner;
+package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.StandardModeResult;
 
 import java.util.Map;
 
-public class StatsResult extends StandardModeResult {
+public class SteinerStatsResult extends StandardModeResult {
 
     public final long effectiveNodeCount;
     public final long effectiveTargetNodesCount;
     public final double totalWeight;
 
-    public StatsResult(
+    public SteinerStatsResult(
         long preProcessingMillis,
         long computeMillis,
         long effectiveNodeCount,
@@ -41,18 +41,18 @@ public class StatsResult extends StandardModeResult {
         super(preProcessingMillis, computeMillis, configuration);
         this.effectiveNodeCount = effectiveNodeCount;
         this.totalWeight = totalWeight;
-        this.effectiveTargetNodesCount=effectiveTargetNodesCount;
+        this.effectiveTargetNodesCount = effectiveTargetNodesCount;
     }
 
-    static final class Builder extends AbstractResultBuilder<StatsResult> {
+    public static final class Builder extends AbstractResultBuilder<SteinerStatsResult> {
 
         private long effectiveNodeCount;
         private double totalWeight;
         private long effectiveTargetNodesCount;
 
         @Override
-        public StatsResult build() {
-            return new StatsResult(
+        public SteinerStatsResult build() {
+            return new SteinerStatsResult(
                 preProcessingMillis,
                 computeMillis,
                 effectiveNodeCount,
@@ -62,18 +62,19 @@ public class StatsResult extends StandardModeResult {
             );
         }
 
-        Builder withEffectiveNodeCount(long effectiveNodeCount) {
+        public Builder withEffectiveNodeCount(long effectiveNodeCount) {
             this.effectiveNodeCount = effectiveNodeCount;
             return this;
         }
 
-       Builder withTotalWeight(double totalWeight) {
+        public Builder withTotalWeight(double totalWeight) {
             this.totalWeight = totalWeight;
             return this;
         }
-        Builder withEffectiveTargetNodesCount(long effectiveTargetNodesCount){
-            this.effectiveTargetNodesCount=effectiveTargetNodesCount;
-            return  this;
+
+        public Builder withEffectiveTargetNodesCount(long effectiveTargetNodesCount) {
+            this.effectiveTargetNodesCount = effectiveTargetNodesCount;
+            return this;
         }
 
     }

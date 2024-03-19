@@ -29,6 +29,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.pathfinding.SteinerMutateResult;
 import org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm;
 import org.neo4j.gds.steiner.SteinerTreeAlgorithmFactory;
 import org.neo4j.gds.steiner.SteinerTreeMutateConfig;
@@ -45,7 +46,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
     description = Constants.STEINER_DESCRIPTION,
     executionMode = STREAM
 )
-public class SteinerTreeMutateSpec implements AlgorithmSpec<ShortestPathsSteinerAlgorithm, SteinerTreeResult, SteinerTreeMutateConfig, Stream<MutateResult>, SteinerTreeAlgorithmFactory<SteinerTreeMutateConfig>> {
+public class SteinerTreeMutateSpec implements AlgorithmSpec<ShortestPathsSteinerAlgorithm, SteinerTreeResult, SteinerTreeMutateConfig, Stream<SteinerMutateResult>, SteinerTreeAlgorithmFactory<SteinerTreeMutateConfig>> {
 
     @Override
     public String name() {
@@ -63,9 +64,9 @@ public class SteinerTreeMutateSpec implements AlgorithmSpec<ShortestPathsSteiner
 
     }
 
-    public ComputationResultConsumer<ShortestPathsSteinerAlgorithm, SteinerTreeResult, SteinerTreeMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<ShortestPathsSteinerAlgorithm, SteinerTreeResult, SteinerTreeMutateConfig, Stream<SteinerMutateResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
-            var builder = new MutateResult.Builder();
+            var builder = new SteinerMutateResult.Builder();
 
             if (computationResult.result().isEmpty()) {
                 return Stream.of(builder.build());
