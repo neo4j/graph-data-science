@@ -19,33 +19,17 @@
  */
 package org.neo4j.gds.core.write.resultstore;
 
-import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.core.write.RelationshipPropertiesExporter;
 
 import java.util.List;
-import java.util.function.LongUnaryOperator;
 
 public class ResultStoreRelationshipPropertiesExporter implements RelationshipPropertiesExporter {
 
-    private final ResultStore resultStore;
-    private final GraphStore graphStore;
-    private final LongUnaryOperator toOriginalId;
-
-    ResultStoreRelationshipPropertiesExporter(
-        ResultStore resultStore,
-        GraphStore graphStore,
-        LongUnaryOperator toOriginalId
-    ) {
-        this.resultStore = resultStore;
-        this.graphStore = graphStore;
-        this.toOriginalId = toOriginalId;
-    }
+    ResultStoreRelationshipPropertiesExporter() {}
 
     @Override
     public void write(String relationshipType, List<String> propertyKeys) {
-        var graph = graphStore.getGraph(RelationshipType.of(relationshipType));
-        resultStore.addRelationship(relationshipType, propertyKeys, graph, toOriginalId);
+        // Multiple relationship properties are not result of any algorithm and are always
+        // fetched from the graph store directly. Therefore, no action is needed here.
     }
 }

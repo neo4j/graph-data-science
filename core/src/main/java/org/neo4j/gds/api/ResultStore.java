@@ -31,39 +31,15 @@ public interface ResultStore {
 
     void addNodeProperty(String propertyKey, NodePropertyValues propertyValues);
 
-    void removeNodeProperty(String propertyKey);
-
     NodePropertyValues getNodePropertyValues(String propertyKey);
 
     void addNodeLabel(String nodeLabel, PrimitiveIterator.OfLong nodeIds);
-
-    void removeNodeLabel(String nodeLabel);
 
     PrimitiveIterator.OfLong getNodeIdsByLabel(String nodeLabel);
 
     void addRelationship(String relationshipType, Graph graph, LongUnaryOperator toOriginalId);
 
-    void addRelationship(String relationshipType, List<String> propertyKeys, Graph graph, LongUnaryOperator toOriginalId);
-
-    default void addRelationship(String relationshipType, String propertyKey, Graph graph, LongUnaryOperator toOriginalId) {
-        addRelationship(relationshipType, List.of(propertyKey), graph, toOriginalId);
-    }
-
-    void removeRelationship(String relationshipType);
-
-    void removeRelationship(String relationshipType, List<String> propertyKeys);
-
-    default void removeRelationship(String relationshipType, String propertyKey) {
-        removeRelationship(relationshipType, List.of(propertyKey));
-    }
-
-    RelationshipEntry getRelationships(String relationshipType);
-
-    RelationshipEntry getRelationships(String relationshipType, List<String> propertyKeys);
-
-    default RelationshipEntry getRelationships(String relationshipType, String propertyKey) {
-        return getRelationships(relationshipType, List.of(propertyKey));
-    }
+    void addRelationship(String relationshipType, String propertyKey, Graph graph, LongUnaryOperator toOriginalId);
 
     void addRelationshipStream(
         String relationshipType,
@@ -73,9 +49,15 @@ public interface ResultStore {
         LongUnaryOperator toOriginalId
     );
 
-    void removeRelationshipStream(String relationshipType, List<String> propertyKeys);
+    RelationshipStreamEntry getRelationshipStream(String relationshipType);
 
     RelationshipStreamEntry getRelationshipStream(String relationshipType, List<String> propertyKeys);
+
+    RelationshipEntry getRelationship(String relationshipType);
+
+    RelationshipEntry getRelationship(String relationshipType, String propertyKey);
+
+    boolean hasRelationship(String relationshipType);
 
     record RelationshipEntry(Graph graph, LongUnaryOperator toOriginalId) {}
 

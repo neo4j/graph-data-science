@@ -22,6 +22,7 @@ package org.neo4j.gds.api;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +33,7 @@ import java.util.stream.Stream;
 public class EphemeralResultStore implements ResultStore {
 
     private static final String NO_PROPERTY_KEY = "";
+    private static final List<String> NO_PROPERTIES_LIST = List.of(NO_PROPERTY_KEY);
 
     private final Map<String, NodePropertyValues> nodeProperties;
     private final Map<String, PrimitiveIterator.OfLong> nodeIdsByLabel;
@@ -51,11 +53,6 @@ public class EphemeralResultStore implements ResultStore {
     }
 
     @Override
-    public void removeNodeProperty(String propertyKey) {
-        this.nodeProperties.remove(propertyKey);
-    }
-
-    @Override
     public NodePropertyValues getNodePropertyValues(String propertyKey) {
         return this.nodeProperties.get(propertyKey);
     }
@@ -63,11 +60,6 @@ public class EphemeralResultStore implements ResultStore {
     @Override
     public void addNodeLabel(String nodeLabel, PrimitiveIterator.OfLong nodeIds) {
         this.nodeIdsByLabel.put(nodeLabel, nodeIds);
-    }
-
-    @Override
-    public void removeNodeLabel(String nodeLabel) {
-        this.nodeIdsByLabel.remove(nodeLabel);
     }
 
     @Override
@@ -83,31 +75,11 @@ public class EphemeralResultStore implements ResultStore {
     @Override
     public void addRelationship(
         String relationshipType,
-        List<String> propertyKeys,
+        String propertyKey,
         Graph graph,
         LongUnaryOperator toOriginalId
     ) {
-        this.relationships.put(new RelationshipKey(relationshipType, propertyKeys), new RelationshipEntry(graph, toOriginalId));
-    }
-
-    @Override
-    public void removeRelationship(String relationshipType) {
-        removeRelationship(relationshipType, NO_PROPERTY_KEY);
-    }
-
-    @Override
-    public void removeRelationship(String relationshipType, List<String> propertyKey) {
-        this.relationships.remove(new RelationshipKey(relationshipType, propertyKey));
-    }
-
-    @Override
-    public RelationshipEntry getRelationships(String relationshipType) {
-        return getRelationships(relationshipType, NO_PROPERTY_KEY);
-    }
-
-    @Override
-    public RelationshipEntry getRelationships(String relationshipType, List<String> propertyKey) {
-        return this.relationships.get(new RelationshipKey(relationshipType, propertyKey));
+        this.relationships.put(new RelationshipKey(relationshipType, List.of(propertyKey)), new RelationshipEntry(graph, toOriginalId));
     }
 
     @Override
@@ -125,8 +97,8 @@ public class EphemeralResultStore implements ResultStore {
     }
 
     @Override
-    public void removeRelationshipStream(String relationshipType, List<String> propertyKeys) {
-        this.relationshipStreams.remove(new RelationshipKey(relationshipType, propertyKeys));
+    public RelationshipStreamEntry getRelationshipStream(String relationshipType) {
+        return getRelationshipStream(relationshipType, NO_PROPERTIES_LIST);
     }
 
     @Override
@@ -134,5 +106,20 @@ public class EphemeralResultStore implements ResultStore {
         return this.relationshipStreams.get(new RelationshipKey(relationshipType, propertyKeys));
     }
 
-    private record RelationshipKey(String relationshipType, List<String> propertyKeys) {}
+    @Override
+    public RelationshipEntry getRelationship(String relationshipType) {
+        return getRelationship(relationshipType, NO_PROPERTY_KEY);
+    }
+
+    @Override
+    public RelationshipEntry getRelationship(String relationshipType, String propertyKey) {
+        return this.relationships.get(new RelationshipKey(relationshipType, List.of(propertyKey)));
+    }
+
+    @Override
+    public boolean hasRelationship(String relationshipType) {
+        return this.relationships.containsKey(new RelationshipKey(relationshipType, NO_PROPERTIES_LIST));
+    }
+
+    private record RelationshipKey(String relationshipType, Collection<String> propertyKeys) {}
 }
