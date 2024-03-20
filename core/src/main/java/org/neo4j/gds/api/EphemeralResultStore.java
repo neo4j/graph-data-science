@@ -26,7 +26,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.PrimitiveIterator;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Stream;
 
@@ -36,7 +35,7 @@ public class EphemeralResultStore implements ResultStore {
     private static final List<String> NO_PROPERTIES_LIST = List.of(NO_PROPERTY_KEY);
 
     private final Map<String, NodePropertyValues> nodeProperties;
-    private final Map<String, PrimitiveIterator.OfLong> nodeIdsByLabel;
+    private final Map<String, NodeLabelEntry> nodeIdsByLabel;
     private final Map<RelationshipKey, RelationshipEntry> relationships;
     private final Map<RelationshipKey, RelationshipStreamEntry> relationshipStreams;
 
@@ -58,12 +57,12 @@ public class EphemeralResultStore implements ResultStore {
     }
 
     @Override
-    public void addNodeLabel(String nodeLabel, PrimitiveIterator.OfLong nodeIds) {
-        this.nodeIdsByLabel.put(nodeLabel, nodeIds);
+    public void addNodeLabel(String nodeLabel, long nodeCount, LongUnaryOperator toOriginalId) {
+        this.nodeIdsByLabel.put(nodeLabel, new NodeLabelEntry(nodeCount, toOriginalId));
     }
 
     @Override
-    public PrimitiveIterator.OfLong getNodeIdsByLabel(String nodeLabel) {
+    public NodeLabelEntry getNodeIdsByLabel(String nodeLabel) {
         return this.nodeIdsByLabel.get(nodeLabel);
     }
 

@@ -47,10 +47,13 @@ class EphemeralResultStoreTest {
     void shouldStoreNodeLabel() {
         var resultStore = new EphemeralResultStore();
 
-        var nodeIds = mock(PrimitiveIterator.OfLong.class);
-        resultStore.addNodeLabel("Label", nodeIds);
+        var nodeCount = 1337L;
+        var toOriginalId = mock(LongUnaryOperator.class);
+        resultStore.addNodeLabel("Label", nodeCount, toOriginalId);
 
-        assertThat(resultStore.getNodeIdsByLabel("Label")).isEqualTo(nodeIds);
+        var nodeLabelEntry = resultStore.getNodeIdsByLabel("Label");
+        assertThat(nodeLabelEntry.nodeCount()).isEqualTo(1337L);
+        assertThat(nodeLabelEntry.toOriginalId()).isEqualTo(toOriginalId);
     }
 
     @Test
