@@ -40,6 +40,12 @@ class SteinerTreeResultBuilderForWriteMode extends ResultBuilder<SteinerTreeWrit
         var builder = new SteinerWriteResult.Builder();
         builder.withConfig(steinerTreeWriteConfig);
 
+        builder.withPreProcessingMillis(timings.preProcessingMillis);
+        builder.withComputeMillis(timings.computeMillis);
+        builder.withWriteMillis(timings.postProcessingMillis);
+
+        builder.withRelationshipsWritten(this.relationshipsWritten);
+
         steinerTreeResult.ifPresent(result -> {
             builder.withEffectiveNodeCount(result.effectiveNodeCount());
             builder.withEffectiveTargetNodeCount(result.effectiveTargetNodesCount());
