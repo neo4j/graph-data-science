@@ -26,7 +26,7 @@ import java.util.Locale;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-class CanonicalProcedureName {
+final class CanonicalProcedureName {
     private final String value;
 
     private CanonicalProcedureName(String value) {

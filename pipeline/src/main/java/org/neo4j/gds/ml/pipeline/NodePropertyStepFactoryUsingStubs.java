@@ -23,6 +23,7 @@ import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathAStarStub;
 import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathDijkstraStub;
 import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathYensStub;
 import org.neo4j.gds.ml.pipeline.stubs.SingleSourceShortestPathDijkstraStub;
+import org.neo4j.gds.ml.pipeline.stubs.SteinerTreeStub;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 
 import java.util.List;
@@ -64,10 +65,11 @@ final class NodePropertyStepFactoryUsingStubs {
 
     private static NodePropertyStepFactoryUsingStubs create() {
         Map<CanonicalProcedureName, Stub> supportedProcedures = Map.of(
+            CanonicalProcedureName.parse("gds.allshortestpaths.dijkstra.mutate"), new SingleSourceShortestPathDijkstraStub(),
             CanonicalProcedureName.parse("gds.shortestpath.astar.mutate"), new SinglePairShortestPathAStarStub(),
             CanonicalProcedureName.parse("gds.shortestpath.dijkstra.mutate"), new SinglePairShortestPathDijkstraStub(),
             CanonicalProcedureName.parse("gds.shortestpath.yens.mutate"), new SinglePairShortestPathYensStub(),
-            CanonicalProcedureName.parse("gds.allshortestpaths.dijkstra.mutate"), new SingleSourceShortestPathDijkstraStub()
+            CanonicalProcedureName.parse("gds.steinertree.mutate"), new SteinerTreeStub()
         );
 
         return new NodePropertyStepFactoryUsingStubs(supportedProcedures);
