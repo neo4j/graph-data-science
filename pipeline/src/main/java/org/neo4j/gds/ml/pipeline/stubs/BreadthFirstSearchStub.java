@@ -17,12 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.traverse;
+package org.neo4j.gds.ml.pipeline.stubs;
 
-final class Constants {
-    static final String BFS_DESCRIPTION =
-        "BFS is a traversal algorithm, which explores all of the neighbor nodes at " +
-            "the present depth prior to moving on to the nodes at the next depth level.";
+import org.neo4j.gds.paths.traverse.BfsMutateConfig;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.pathfinding.MutateStub;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
 
-    private Constants() {}
+public class BreadthFirstSearchStub extends AbstractStub<BfsMutateConfig, PathFindingMutateResult> {
+    protected MutateStub<BfsMutateConfig, PathFindingMutateResult> stub(AlgorithmsProcedureFacade facade) {
+        return facade.pathFinding().breadthFirstSearchMutateStub();
+    }
 }

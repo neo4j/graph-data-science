@@ -38,7 +38,7 @@ import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraBaseConfig;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
-import org.neo4j.gds.paths.traverse.BfsStreamConfig;
+import org.neo4j.gds.paths.traverse.BfsBaseConfig;
 import org.neo4j.gds.paths.yens.Yens;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm;
@@ -79,7 +79,7 @@ public class PathFindingAlgorithms {
         this.userLogRegistryFactory = userLogRegistryFactory;
     }
 
-    HugeLongArray breadthFirstSearch(Graph graph, BfsStreamConfig configuration) {
+    HugeLongArray breadthFirstSearch(Graph graph, BfsBaseConfig configuration) {
         var progressTracker = createProgressTracker(configuration, Tasks.leaf(AlgorithmLabels.BFS));
 
         var algorithm = new BreadthFirstSearch();

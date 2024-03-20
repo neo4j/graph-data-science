@@ -24,7 +24,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.paths.traverse.Aggregator;
 import org.neo4j.gds.paths.traverse.BFS;
-import org.neo4j.gds.paths.traverse.BfsStreamConfig;
+import org.neo4j.gds.paths.traverse.BfsBaseConfig;
 import org.neo4j.gds.paths.traverse.ExitPredicate;
 import org.neo4j.gds.paths.traverse.OneHopAggregator;
 import org.neo4j.gds.paths.traverse.TargetExitPredicate;
@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class BreadthFirstSearch {
-    public HugeLongArray compute(Graph graph, BfsStreamConfig configuration, ProgressTracker progressTracker) {
+    public HugeLongArray compute(Graph graph, BfsBaseConfig configuration, ProgressTracker progressTracker) {
         ExitPredicate exitFunction;
         Aggregator aggregatorFunction;
         // target node given; terminate if target is reached

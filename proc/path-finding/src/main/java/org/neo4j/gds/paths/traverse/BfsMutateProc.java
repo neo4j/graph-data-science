@@ -19,11 +19,10 @@
  */
 package org.neo4j.gds.paths.traverse;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -32,9 +31,12 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.paths.traverse.Constants.BFS_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class BfsMutateProc extends BaseProc {
+public class BfsMutateProc {
+    @Context
+    public GraphDataScience facade;
 
     @Procedure(name = "gds.bfs.mutate", mode = READ)
     @Description(BFS_DESCRIPTION)
@@ -42,26 +44,18 @@ public class BfsMutateProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var mutateSpec = new BfsMutateSpec();
-
-        return new ProcedureExecutor<>(
-            mutateSpec,
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.pathFinding().breadthFirstSearchMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(name = "gds.bfs.mutate.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        var mutateSpec = new BfsMutateSpec();
-
-        return new MemoryEstimationExecutor<>(
-            mutateSpec,
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.pathFinding().breadthFirstSearchMutateStub().estimate(
+            graphNameOrConfiguration,
+            algoConfiguration
+        );
     }
 }

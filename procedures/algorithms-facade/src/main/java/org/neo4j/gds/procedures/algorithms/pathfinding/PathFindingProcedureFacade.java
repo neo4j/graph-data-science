@@ -45,6 +45,7 @@ import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
+import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.BreadthFirstSearchMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestPathAStarMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestPathDijkstraMutateStub;
@@ -79,8 +80,9 @@ public final class PathFindingProcedureFacade {
     private final PathFindingAlgorithmsStreamModeBusinessFacade streamModeFacade;
     private final PathFindingAlgorithmsWriteModeBusinessFacade writeModeFacade;
 
-    private final SinglePairShortestPathAStarMutateStub singlePairShortestPathAStarMutateStub;
     // applications
+    private final BreadthFirstSearchMutateStub breadthFirstSearchMutateStub;
+    private final SinglePairShortestPathAStarMutateStub singlePairShortestPathAStarMutateStub;
     private final SinglePairShortestPathDijkstraMutateStub singlePairShortestPathDijkstraMutateStub;
     private final SinglePairShortestPathYensMutateStub singlePairShortestPathYensMutateStub;
     private final SingleSourceShortestPathDijkstraMutateStub singleSourceShortestPathDijkstraMutateStub;
@@ -94,6 +96,7 @@ public final class PathFindingProcedureFacade {
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeFacade,
         PathFindingAlgorithmsStreamModeBusinessFacade streamModeFacade,
         PathFindingAlgorithmsWriteModeBusinessFacade writeModeFacade,
+        BreadthFirstSearchMutateStub breadthFirstSearchMutateStub,
         SinglePairShortestPathAStarMutateStub singlePairShortestPathAStarMutateStub,
         SinglePairShortestPathDijkstraMutateStub singlePairShortestPathDijkstraMutateStub,
         SinglePairShortestPathYensMutateStub singlePairShortestPathYensMutateStub,
@@ -109,6 +112,7 @@ public final class PathFindingProcedureFacade {
         this.streamModeFacade = streamModeFacade;
         this.writeModeFacade = writeModeFacade;
 
+        this.breadthFirstSearchMutateStub = breadthFirstSearchMutateStub;
         this.singlePairShortestPathAStarMutateStub = singlePairShortestPathAStarMutateStub;
         this.singlePairShortestPathDijkstraMutateStub = singlePairShortestPathDijkstraMutateStub;
         this.singlePairShortestPathYensMutateStub = singlePairShortestPathYensMutateStub;
@@ -172,6 +176,12 @@ public final class PathFindingProcedureFacade {
             pathFindingAlgorithmsMutateModeBusinessFacade
         );
 
+        var breadthFirstSearchMutateStub = new BreadthFirstSearchMutateStub(
+            genericStub,
+            pathFindingAlgorithmsEstimationModeBusinessFacade,
+            pathFindingAlgorithmsMutateModeBusinessFacade
+        );
+
         return new PathFindingProcedureFacade(
             closeableResourceRegistry,
             configurationCreator,
@@ -180,12 +190,17 @@ public final class PathFindingProcedureFacade {
             pathFindingAlgorithmsEstimationModeBusinessFacade,
             pathFindingAlgorithmsStreamModeBusinessFacade,
             pathFindingAlgorithmsWriteModeBusinessFacade,
+            breadthFirstSearchMutateStub,
             aStarStub,
             singlePairDijkstraStub,
             yensStub,
             singleSourceDijkstraStub,
             steinerTreeMutateStub
         );
+    }
+
+    public BreadthFirstSearchMutateStub breadthFirstSearchMutateStub() {
+        return breadthFirstSearchMutateStub;
     }
 
     public Stream<BfsStreamResult> breadthFirstSearchStream(String graphName, Map<String, Object> configuration) {
