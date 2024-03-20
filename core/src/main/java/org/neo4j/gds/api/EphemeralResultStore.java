@@ -97,11 +97,6 @@ public class EphemeralResultStore implements ResultStore {
     }
 
     @Override
-    public RelationshipStreamEntry getRelationshipStream(String relationshipType) {
-        return getRelationshipStream(relationshipType, NO_PROPERTIES_LIST);
-    }
-
-    @Override
     public RelationshipStreamEntry getRelationshipStream(String relationshipType, List<String> propertyKeys) {
         return this.relationshipStreams.get(new RelationshipKey(relationshipType, propertyKeys));
     }

@@ -49,8 +49,6 @@ public interface ResultStore {
         LongUnaryOperator toOriginalId
     );
 
-    RelationshipStreamEntry getRelationshipStream(String relationshipType);
-
     RelationshipStreamEntry getRelationshipStream(String relationshipType, List<String> propertyKeys);
 
     RelationshipEntry getRelationship(String relationshipType);
