@@ -22,18 +22,16 @@ package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.pathfinding.ResultBuilder;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.pathfinding.AlgorithmHandle;
-import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
-import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingResultBuilderForMutateMode;
 import org.neo4j.gds.results.MemoryEstimateResult;
 
 import java.util.Map;
@@ -141,29 +139,18 @@ public class GenericStub {
     /**
      * @see org.neo4j.gds.procedures.algorithms.pathfinding.MutateStub#execute(String, java.util.Map)
      */
-    <CONFIGURATION extends AlgoBaseConfig> Stream<PathFindingMutateResult> execute(
-        String graphName,
-        Map<String, Object> configuration,
-        Function<CypherMapWrapper, CONFIGURATION> parser,
-        AlgorithmHandle<CONFIGURATION, PathFindingResult, PathFindingMutateResult> executor
-    ) {
-        var result = runMutateAlgorithm(graphName, configuration, parser, executor);
-
-        return Stream.of(result);
-    }
-
-    private <CONFIGURATION extends AlgoBaseConfig> PathFindingMutateResult runMutateAlgorithm(
+    <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> Stream<RESULT_TO_CALLER> execute(
         String graphNameAsString,
         Map<String, Object> rawConfiguration,
-        Function<CypherMapWrapper, CONFIGURATION> configurationSupplier,
-        AlgorithmHandle<CONFIGURATION, PathFindingResult, PathFindingMutateResult> algorithm
+        Function<CypherMapWrapper, CONFIGURATION> parser,
+        AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> executor,
+        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
     ) {
         var graphName = GraphName.parse(graphNameAsString);
-        var configuration = configurationCreator.createConfiguration(rawConfiguration, configurationSupplier);
+        var configuration = configurationCreator.createConfiguration(rawConfiguration, parser);
 
-        // mutation
-        var resultBuilder = new PathFindingResultBuilderForMutateMode<CONFIGURATION>();
+        var result = executor.compute(graphName, configuration, resultBuilder);
 
-        return algorithm.compute(graphName, configuration, resultBuilder);
+        return Stream.of(result);
     }
 }

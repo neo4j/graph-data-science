@@ -22,21 +22,20 @@ package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraMutateConfig;
 import org.neo4j.gds.procedures.algorithms.pathfinding.MutateStub;
-import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
-import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingResultBuilderForMutateMode;
+import org.neo4j.gds.procedures.algorithms.pathfinding.SteinerMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.steiner.SteinerTreeMutateConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class SinglePairShortestPathDijkstraMutateStub implements MutateStub<ShortestPathDijkstraMutateConfig, PathFindingMutateResult> {
+public class SteinerTreeMutateStub implements MutateStub<SteinerTreeMutateConfig, SteinerMutateResult> {
     private final GenericStub genericStub;
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final PathFindingAlgorithmsMutateModeBusinessFacade mutateFacade;
 
-    public SinglePairShortestPathDijkstraMutateStub(
+    public SteinerTreeMutateStub(
         GenericStub genericStub,
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         PathFindingAlgorithmsMutateModeBusinessFacade mutateFacade
@@ -48,12 +47,12 @@ public class SinglePairShortestPathDijkstraMutateStub implements MutateStub<Shor
 
     @Override
     public void validateConfiguration(Map<String, Object> configuration) {
-        genericStub.validateConfiguration(ShortestPathDijkstraMutateConfig::of, configuration);
+        genericStub.validateConfiguration(SteinerTreeMutateConfig::of, configuration);
     }
 
     @Override
-    public ShortestPathDijkstraMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(ShortestPathDijkstraMutateConfig::of, configuration);
+    public SteinerTreeMutateConfig parseConfiguration(Map<String, Object> configuration) {
+        return genericStub.parseConfiguration(SteinerTreeMutateConfig::of, configuration);
     }
 
     @Override
@@ -61,8 +60,8 @@ public class SinglePairShortestPathDijkstraMutateStub implements MutateStub<Shor
         return genericStub.getMemoryEstimation(
             username,
             rawConfiguration,
-            ShortestPathDijkstraMutateConfig::of,
-            estimationFacade::singlePairShortestPathDijkstraEstimation
+            SteinerTreeMutateConfig::of,
+            estimationFacade::steinerTreeEstimation
         );
     }
 
@@ -71,19 +70,21 @@ public class SinglePairShortestPathDijkstraMutateStub implements MutateStub<Shor
         return genericStub.estimate(
             graphName,
             configuration,
-            ShortestPathDijkstraMutateConfig::of,
-            estimationFacade::singlePairShortestPathDijkstraEstimation
+            SteinerTreeMutateConfig::of,
+            estimationFacade::steinerTreeEstimation
         );
     }
 
     @Override
-    public Stream<PathFindingMutateResult> execute(String graphName, Map<String, Object> configuration) {
+    public Stream<SteinerMutateResult> execute(String graphName, Map<String, Object> configuration) {
+        var resultBuilder = new SteinerTreeResultBuilderForMutateMode();
+
         return genericStub.execute(
             graphName,
             configuration,
-            ShortestPathDijkstraMutateConfig::of,
-            mutateFacade::singlePairShortestPathDijkstraMutate,
-            new PathFindingResultBuilderForMutateMode<>()
+            SteinerTreeMutateConfig::of,
+            mutateFacade::steinerTreeMutate,
+            resultBuilder
         );
     }
 }

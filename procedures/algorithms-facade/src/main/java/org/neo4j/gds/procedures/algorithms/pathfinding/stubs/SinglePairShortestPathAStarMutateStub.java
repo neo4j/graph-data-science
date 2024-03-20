@@ -26,6 +26,7 @@ import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraMutateConfig;
 import org.neo4j.gds.procedures.algorithms.pathfinding.MutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingResultBuilderForMutateMode;
 import org.neo4j.gds.results.MemoryEstimateResult;
 
 import java.util.Map;
@@ -82,7 +83,8 @@ public class SinglePairShortestPathAStarMutateStub implements MutateStub<Shortes
             graphName,
             configuration,
             ShortestPathAStarMutateConfig::of,
-            mutateFacade::singlePairShortestPathAStarMutate
+            mutateFacade::singlePairShortestPathAStarMutate,
+            new PathFindingResultBuilderForMutateMode<>()
         );
     }
 }

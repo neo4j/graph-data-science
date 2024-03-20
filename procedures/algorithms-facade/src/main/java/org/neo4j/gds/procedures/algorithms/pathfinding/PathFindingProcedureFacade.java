@@ -49,6 +49,7 @@ import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestP
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestPathDijkstraMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestPathYensMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SingleSourceShortestPathDijkstraMutateStub;
+import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SteinerTreeMutateStub;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 import org.neo4j.gds.steiner.SteinerTreeStreamConfig;
@@ -82,6 +83,7 @@ public final class PathFindingProcedureFacade {
     private final SinglePairShortestPathDijkstraMutateStub singlePairShortestPathDijkstraMutateStub;
     private final SinglePairShortestPathYensMutateStub singlePairShortestPathYensMutateStub;
     private final SingleSourceShortestPathDijkstraMutateStub singleSourceShortestPathDijkstraMutateStub;
+    private final SteinerTreeMutateStub steinerTreeMutateStub;
 
     private PathFindingProcedureFacade(
         CloseableResourceRegistry closeableResourceRegistry,
@@ -94,7 +96,8 @@ public final class PathFindingProcedureFacade {
         SinglePairShortestPathAStarMutateStub singlePairShortestPathAStarMutateStub,
         SinglePairShortestPathDijkstraMutateStub singlePairShortestPathDijkstraMutateStub,
         SinglePairShortestPathYensMutateStub singlePairShortestPathYensMutateStub,
-        SingleSourceShortestPathDijkstraMutateStub singleSourceShortestPathDijkstraMutateStub
+        SingleSourceShortestPathDijkstraMutateStub singleSourceShortestPathDijkstraMutateStub,
+        SteinerTreeMutateStub steinerTreeMutateStub
     ) {
         this.closeableResourceRegistry = closeableResourceRegistry;
         this.configurationCreator = configurationCreator;
@@ -109,6 +112,7 @@ public final class PathFindingProcedureFacade {
         this.singlePairShortestPathDijkstraMutateStub = singlePairShortestPathDijkstraMutateStub;
         this.singlePairShortestPathYensMutateStub = singlePairShortestPathYensMutateStub;
         this.singleSourceShortestPathDijkstraMutateStub = singleSourceShortestPathDijkstraMutateStub;
+        this.steinerTreeMutateStub = steinerTreeMutateStub;
     }
 
     /**
@@ -161,6 +165,12 @@ public final class PathFindingProcedureFacade {
             pathFindingAlgorithmsMutateModeBusinessFacade
         );
 
+        var steinerTreeMutateStub = new SteinerTreeMutateStub(
+            genericStub,
+            pathFindingAlgorithmsEstimationModeBusinessFacade,
+            pathFindingAlgorithmsMutateModeBusinessFacade
+        );
+
         return new PathFindingProcedureFacade(
             closeableResourceRegistry,
             configurationCreator,
@@ -172,7 +182,8 @@ public final class PathFindingProcedureFacade {
             aStarStub,
             singlePairDijkstraStub,
             yensStub,
-            singleSourceDijkstraStub
+            singleSourceDijkstraStub,
+            steinerTreeMutateStub
         );
     }
 
@@ -422,6 +433,10 @@ public final class PathFindingProcedureFacade {
         );
 
         return Stream.of(result);
+    }
+
+    public SteinerTreeMutateStub steinerTreeMutateStub() {
+        return steinerTreeMutateStub;
     }
 
     public Stream<SteinerTreeStreamResult> steinerTreeStream(String graphName, Map<String, Object> configuration) {

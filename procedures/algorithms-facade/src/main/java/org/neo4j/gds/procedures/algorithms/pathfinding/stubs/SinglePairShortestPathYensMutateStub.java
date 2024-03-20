@@ -25,6 +25,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensMutateConfig;
 import org.neo4j.gds.procedures.algorithms.pathfinding.MutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingResultBuilderForMutateMode;
 import org.neo4j.gds.results.MemoryEstimateResult;
 
 import java.util.Map;
@@ -81,7 +82,8 @@ public class SinglePairShortestPathYensMutateStub implements MutateStub<Shortest
             graphName,
             configuration,
             ShortestPathYensMutateConfig::of,
-            mutateFacade::singlePairShortestPathYensMutate
+            mutateFacade::singlePairShortestPathYensMutate,
+            new PathFindingResultBuilderForMutateMode<>()
         );
     }
 }
