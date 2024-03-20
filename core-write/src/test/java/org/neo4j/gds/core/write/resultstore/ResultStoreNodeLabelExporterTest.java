@@ -29,7 +29,10 @@ class ResultStoreNodeLabelExporterTest {
     @Test
     void shouldWriteToResultStore() {
         var resultStore = new EphemeralResultStore();
-        new ResultStoreNodeLabelExporter(resultStore, 5, l -> l + 42).write("label");
+        var nodeLabelExporter = new ResultStoreNodeLabelExporter(resultStore, 5, l -> l + 42);
+        nodeLabelExporter.write("label");
+
+        assertThat(nodeLabelExporter.nodeLabelsWritten()).isEqualTo(5);
 
         assertThat(resultStore.getNodeIdsByLabel("label"))
             .toIterable()
