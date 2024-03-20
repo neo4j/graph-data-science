@@ -27,7 +27,6 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.metrics.ExecutionMetric;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
@@ -207,7 +206,7 @@ class DefaultAlgorithmProcessingTemplateTest {
             null
         ) {
             @Override
-            <CONFIGURATION extends AlgoBaseConfig & RelationshipWeightConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> Pair<Graph, GraphStore> graphLoadAndValidationWithTiming(
+            <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> Pair<Graph, GraphStore> graphLoadAndValidationWithTiming(
                 AlgorithmProcessingTimingsBuilder timingsBuilder,
                 GraphName graphName,
                 CONFIGURATION configuration,

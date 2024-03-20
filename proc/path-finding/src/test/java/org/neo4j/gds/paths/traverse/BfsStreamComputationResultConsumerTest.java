@@ -29,6 +29,7 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFactoryFacade;
 import org.neo4j.graphdb.Path;
 
 import java.util.Optional;

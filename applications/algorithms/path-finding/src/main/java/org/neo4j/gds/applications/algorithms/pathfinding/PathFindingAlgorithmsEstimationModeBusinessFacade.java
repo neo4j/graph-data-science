@@ -26,6 +26,8 @@ import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateDefinition;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraBaseConfig;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
+import org.neo4j.gds.paths.traverse.BfsMemoryEstimateDefinition;
+import org.neo4j.gds.paths.traverse.BfsStreamConfig;
 import org.neo4j.gds.paths.yens.YensMemoryEstimateDefinition;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -41,6 +43,19 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
 
     public PathFindingAlgorithmsEstimationModeBusinessFacade(AlgorithmEstimationTemplate algorithmEstimationTemplate) {
         this.algorithmEstimationTemplate = algorithmEstimationTemplate;
+    }
+
+    public MemoryEstimateResult breadthFirstSearchEstimate(
+        BfsStreamConfig configuration,
+        Object graphNameOrConfiguration
+    ) {
+        var memoryEstimation = breadthFirstSearchEstimation(configuration);
+
+        return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
+    }
+
+    public MemoryEstimation breadthFirstSearchEstimation(BfsStreamConfig ignored) {
+        return new BfsMemoryEstimateDefinition().memoryEstimation();
     }
 
     public MemoryEstimateResult singlePairShortestPathAStarEstimate(

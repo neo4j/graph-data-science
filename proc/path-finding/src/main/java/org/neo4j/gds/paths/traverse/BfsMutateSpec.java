@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 
-@GdsCallable(name = "gds.bfs.mutate", description = BfsStreamProc.DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
+@GdsCallable(name = "gds.bfs.mutate", description = Constants.BFS_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
 public class BfsMutateSpec implements AlgorithmSpec<BFS, HugeLongArray, BfsMutateConfig, Stream<PathFindingMutateResult>, BfsAlgorithmFactory<BfsMutateConfig>> {
     @Override
     public String name() {

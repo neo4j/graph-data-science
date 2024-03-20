@@ -25,13 +25,15 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.pathfinding.BfsStreamResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFactoryFacade;
 
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.paths.traverse.BfsStreamProc.DESCRIPTION;
+import static org.neo4j.gds.paths.traverse.Constants.BFS_DESCRIPTION;
 
-@GdsCallable(name = "gds.bfs.stream", description = DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.bfs.stream", description = BFS_DESCRIPTION, executionMode = STREAM)
 public class BfsStreamSpec implements AlgorithmSpec<BFS, HugeLongArray, BfsStreamConfig, Stream<BfsStreamResult>, BfsAlgorithmFactory<BfsStreamConfig>> {
     @Override
     public String name() {

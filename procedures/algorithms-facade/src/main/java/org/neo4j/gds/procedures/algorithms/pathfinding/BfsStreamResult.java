@@ -17,9 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.traverse;
+package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.graphdb.Path;
 
 import java.util.List;
@@ -29,7 +28,7 @@ public final class BfsStreamResult {
     public final List<Long> nodeIds;
     public final Path path;
 
-    BfsStreamResult(long sourceNode, @Nullable List<Long> nodes, @Nullable Path path) {
+    public BfsStreamResult(long sourceNode, List<Long> nodes, Path path) {
         this.sourceNode = sourceNode;
         this.nodeIds = nodes;
         this.path = path;

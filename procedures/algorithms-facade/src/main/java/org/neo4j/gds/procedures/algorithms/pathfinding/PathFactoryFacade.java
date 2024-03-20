@@ -17,15 +17,25 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.pathfinding;
+package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-/**
- * We need human-readable labels for e.g. progress tracking
- */
-interface AlgorithmLabels {
-    String A_STAR = "AStar";
-    String BFS = "BFS";
-    String DIJKSTRA = "Dijkstra";
-    String STEINER = "SteinerTree";
-    String YENS = "Yens";
+import org.neo4j.gds.api.NodeLookup;
+import org.neo4j.gds.paths.PathFactory;
+import org.neo4j.graphdb.Path;
+import org.neo4j.graphdb.RelationshipType;
+
+import java.util.List;
+
+public class PathFactoryFacade {
+    public Path createPath(
+        NodeLookup nodeLookup,
+        List<Long> nodeList,
+        RelationshipType relationshipType
+    ) {
+        return PathFactory.create(
+            nodeLookup,
+            nodeList,
+            relationshipType
+        );
+    }
 }

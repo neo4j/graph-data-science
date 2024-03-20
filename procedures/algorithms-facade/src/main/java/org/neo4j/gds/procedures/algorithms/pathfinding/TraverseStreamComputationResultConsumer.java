@@ -17,25 +17,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.traverse;
+package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.RelationshipType;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-final class TraverseStreamComputationResultConsumer {
-
+public final class TraverseStreamComputationResultConsumer {
     private TraverseStreamComputationResultConsumer() {}
 
-    static <T> Stream<T> consume(
+    public static <T> Stream<T> consume(
         long sourceNodeId,
         HugeLongArray nodes,
         LongUnaryOperator toOriginalNodeId,
@@ -66,10 +63,5 @@ final class TraverseStreamComputationResultConsumer {
             nodeList,
             path
         ));
-    }
-
-    @FunctionalInterface
-    interface ConcreteResultTransformer<T> {
-        T transform(long sourceNodeId, @Nullable List<Long> nodeList, @Nullable Path path);
     }
 }

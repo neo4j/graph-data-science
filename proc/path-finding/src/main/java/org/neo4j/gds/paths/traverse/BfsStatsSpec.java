@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 
-@GdsCallable(name = "gds.bfs.stats", description = BfsStreamProc.DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
+@GdsCallable(name = "gds.bfs.stats", description = Constants.BFS_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
 public class BfsStatsSpec implements AlgorithmSpec<BFS, HugeLongArray, BfsStatsConfig, Stream<StandardStatsResult>, BfsAlgorithmFactory<BfsStatsConfig>> {
     @Override
     public String name() {

@@ -23,6 +23,10 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.procedures.algorithms.pathfinding.BfsStreamResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFactoryFacade;
+import org.neo4j.gds.procedures.algorithms.pathfinding.TraverseStreamComputationResultConsumer;
+import org.neo4j.graphdb.RelationshipType;
 
 import java.util.stream.Stream;
 
@@ -52,7 +56,7 @@ class BfsStreamComputationResultConsumer implements ComputationResultConsumer<BF
                     BfsStreamResult::new,
                     executionContext.returnColumns().contains("path"),
                     pathFactoryFacade,
-                    BfsStreamProc.NEXT,
+                    RelationshipType.withName("NEXT"),
                     executionContext.nodeLookup()
                 )).orElseGet(Stream::empty)
         );

@@ -64,7 +64,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
     }
 
     @Override
-    public <CONFIGURATION extends AlgoBaseConfig & RelationshipWeightConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> RESULT_TO_CALLER processAlgorithm(
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> RESULT_TO_CALLER processAlgorithm(
         GraphName graphName,
         CONFIGURATION configuration,
         String humanReadableAlgorithmName,
@@ -130,7 +130,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
      *     We can add that when needed as more instrumentation.</li>
      * </ul>
      */
-    <CONFIGURATION extends AlgoBaseConfig & RelationshipWeightConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> Pair<Graph, GraphStore> graphLoadAndValidationWithTiming(
+    <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> Pair<Graph, GraphStore> graphLoadAndValidationWithTiming(
         AlgorithmProcessingTimingsBuilder timingsBuilder,
         GraphName graphName,
         CONFIGURATION configuration,
@@ -138,10 +138,12 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
     ) {
         try (ProgressTimer ignored = ProgressTimer.start(timingsBuilder::withPreProcessingMillis)) {
             // tee up the graph we want to work on
+            var relationshipProperty = extractRelationshipProperty(configuration);
+
             var graphWithGraphStore = graphStoreCatalogService.getGraphWithGraphStore(
                 graphName,
                 configuration,
-                configuration.relationshipWeightProperty(),
+                relationshipProperty,
                 user,
                 databaseId
             );
@@ -150,6 +152,16 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
 
             return graphWithGraphStore;
         }
+    }
+
+    /**
+     * Not the prettiest. Better to pass an Optional for this flag? Debatable. This is quick tho.
+     */
+    private static <CONFIGURATION> Optional<String> extractRelationshipProperty(CONFIGURATION configuration) {
+        if (configuration instanceof RelationshipWeightConfig)
+            return ((RelationshipWeightConfig) configuration).relationshipWeightProperty();
+
+        return Optional.empty();
     }
 
     <CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> RESULT_FROM_ALGORITHM computeWithTiming(

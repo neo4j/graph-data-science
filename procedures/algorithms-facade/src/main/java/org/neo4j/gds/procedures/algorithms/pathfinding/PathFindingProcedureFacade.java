@@ -40,6 +40,7 @@ import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraWriteConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig;
+import org.neo4j.gds.paths.traverse.BfsStreamConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
@@ -185,6 +186,34 @@ public final class PathFindingProcedureFacade {
             singleSourceDijkstraStub,
             steinerTreeMutateStub
         );
+    }
+
+    public Stream<BfsStreamResult> breadthFirstSearchStream(String graphName, Map<String, Object> configuration) {
+        var resultBuilder = new BfsStreamResultBuilder(nodeLookup, procedureReturnColumns.contains("path"));
+
+        return runStreamAlgorithm(
+            graphName,
+            configuration,
+            BfsStreamConfig::of,
+            resultBuilder,
+            streamModeFacade::breadthFirstSearchStream
+        );
+    }
+
+    public Stream<MemoryEstimateResult> breadthFirstSearchStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = runEstimation(
+            algorithmConfiguration,
+            BfsStreamConfig::of,
+            configuration -> estimationModeFacade.breadthFirstSearchEstimate(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
     }
 
     public SinglePairShortestPathAStarMutateStub singlePairShortestPathAStarMutateStub() {

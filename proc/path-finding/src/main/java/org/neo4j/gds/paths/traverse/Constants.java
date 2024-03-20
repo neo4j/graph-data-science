@@ -19,24 +19,8 @@
  */
 package org.neo4j.gds.paths.traverse;
 
-import org.neo4j.gds.api.NodeLookup;
-import org.neo4j.gds.paths.PathFactory;
-import org.neo4j.graphdb.Path;
-import org.neo4j.graphdb.RelationshipType;
-
-import java.util.List;
-
-class PathFactoryFacade {
-
-    Path createPath(
-        NodeLookup nodeLookup,
-        List<Long> nodeList,
-        RelationshipType relationshipType
-    ) {
-        return PathFactory.create(
-            nodeLookup,
-            nodeList,
-            relationshipType
-        );
-    }
+class Constants {
+    static final String BFS_DESCRIPTION =
+        "BFS is a traversal algorithm, which explores all of the neighbor nodes at " +
+            "the present depth prior to moving on to the nodes at the next depth level.";
 }

@@ -31,12 +31,13 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.paths.traverse.Constants.BFS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class BfsStatsProc extends BaseProc {
 
     @Procedure(name = "gds.bfs.stats", mode = READ)
-    @Description(BfsStreamProc.DESCRIPTION)
+    @Description(BFS_DESCRIPTION)
     public Stream<StandardStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
