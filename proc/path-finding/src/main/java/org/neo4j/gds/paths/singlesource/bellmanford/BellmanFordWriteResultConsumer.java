@@ -21,10 +21,10 @@ package org.neo4j.gds.paths.singlesource.bellmanford;
 
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.ImmutableExportedRelationship;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.write.ImmutableExportedRelationship;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;

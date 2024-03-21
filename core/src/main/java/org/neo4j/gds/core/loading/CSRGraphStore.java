@@ -28,6 +28,7 @@ import org.neo4j.gds.api.AdjacencyProperties;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.DatabaseInfo;
+import org.neo4j.gds.api.EphemeralResultStore;
 import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.GraphCharacteristics;
 import org.neo4j.gds.api.GraphStore;
@@ -36,6 +37,7 @@ import org.neo4j.gds.api.Properties;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.RelationshipProperty;
 import org.neo4j.gds.api.RelationshipPropertyStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.graph.GraphProperty;
@@ -87,6 +89,8 @@ public final class CSRGraphStore implements GraphStore {
 
     private final Map<RelationshipType, SingleTypeRelationships> relationships;
 
+    private final ResultStore resultStore;
+
     private MutableGraphSchema schema;
 
     private GraphPropertyStore graphProperties;
@@ -118,6 +122,8 @@ public final class CSRGraphStore implements GraphStore {
         // We want mutable collections inside the GraphStore
         this.relationships = new HashMap<>(relationships);
 
+        this.resultStore = new EphemeralResultStore();
+
         this.concurrency = concurrency;
         this.modificationTime = TimeUtil.now();
     }
@@ -142,6 +148,11 @@ public final class CSRGraphStore implements GraphStore {
             graphProperties.orElseGet(GraphPropertyStore::empty),
             concurrency
         );
+    }
+
+    @Override
+    public ResultStore resultStore() {
+        return resultStore;
     }
 
     @Override

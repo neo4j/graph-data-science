@@ -45,6 +45,11 @@ public abstract class GraphStoreAdapter implements GraphStore {
     }
 
     @Override
+    public ResultStore resultStore() {
+        return graphStore.resultStore();
+    }
+
+    @Override
     public DatabaseInfo databaseInfo() {
         return graphStore.databaseInfo();
     }

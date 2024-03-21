@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -40,6 +41,7 @@ public abstract class NodeLabelExporterBuilder {
     protected ProgressTracker progressTracker = ProgressTracker.NULL_TRACKER;
     protected Optional<ArrowConnectionInfo> arrowConnectionInfo = Optional.empty();
     protected Optional<String> databaseName; // coupled with arrowConnectionInfo, but should not appear in external API
+    protected Optional<ResultStore> resultStore;
 
     public abstract NodeLabelExporter build();
 
@@ -81,4 +83,8 @@ public abstract class NodeLabelExporterBuilder {
         return this;
     }
 
+    public NodeLabelExporterBuilder withResultStore(Optional<ResultStore> resultStore) {
+        this.resultStore = resultStore;
+        return this;
+    }
 }

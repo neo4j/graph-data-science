@@ -17,16 +17,26 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.write;
+package org.neo4j.gds.core.write.resultstore;
 
-import org.neo4j.gds.annotation.ValueClass;
-import org.neo4j.values.storable.Value;
+import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.EphemeralResultStore;
 
-@ValueClass
-public interface ExportedRelationship {
-    long sourceNode();
+import static org.assertj.core.api.Assertions.assertThat;
 
-    long targetNode();
+class ResultStoreNodeLabelExporterTest {
 
-    Value[] values();
+    @Test
+    void shouldWriteToResultStore() {
+        var resultStore = new EphemeralResultStore();
+        var nodeLabelExporter = new ResultStoreNodeLabelExporter(resultStore, 5, l -> l + 42);
+        nodeLabelExporter.write("label");
+
+        assertThat(nodeLabelExporter.nodeLabelsWritten()).isEqualTo(5);
+
+        assertThat(resultStore.getNodeIdsByLabel("label"))
+            .toIterable()
+            .containsExactly(42L, 43L, 44L, 45L, 46L);
+    }
+
 }
