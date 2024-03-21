@@ -22,29 +22,26 @@ package org.neo4j.gds.similarity.nodesim;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.mem.MemoryTree;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class NodeSimilarityMemoryEstimateDefinitionTest {
 
 
-    @ParameterizedTest(name = "topK = {0}")
-    @ValueSource(ints = {10, 100})
-    void shouldComputeMemrec(int topK) {
+    @ParameterizedTest
+    @CsvSource({"10, 248000016", "100, 1688000016"})
+    void shouldComputeMemrec(int topK, long expectedTopKMemory) {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(1_000_000)
             .relCountUpperBound(5_000_000)
             .build();
 
         var estimateParams = NodeSimilarityEstimateParameters.create(topK, 0, false, false, true);
-        MemoryTree actual = new NodeSimilarityMemoryEstimateDefinition(estimateParams).memoryEstimation()
-            .estimate(dimensions, 1);
+        var actual = new NodeSimilarityMemoryEstimateDefinition(estimateParams).memoryEstimation()
+            .estimate(dimensions, 1).memoryUsage();
 
         long nodeFilterRangeMin = 125_016L;
         long nodeFilterRangeMax = 125_016L;
@@ -64,33 +61,28 @@ class NodeSimilarityMemoryEstimateDefinitionTest {
             .fixed("weights", weightsRange)
             .fixed("similarityComputer", 8);
 
-        long topKMapRangeMin;
-        long topKMapRangeMax;
-        if (topK == 10) {
-            topKMapRangeMin = 248_000_016L;
-            topKMapRangeMax = 248_000_016L;
-        } else {
-            topKMapRangeMin = 1_688_000_016L;
-            topKMapRangeMax = 1_688_000_016L;
-        }
-        builder.fixed("topK map", MemoryRange.of(topKMapRangeMin, topKMapRangeMax));
 
-        MemoryTree expected = builder.build().estimate(dimensions, 1);
+        builder.fixed("topK map", MemoryRange.of(expectedTopKMemory));
+        var expected = builder.build().estimate(dimensions, 1).memoryUsage();
 
-        assertEquals(expected.memoryUsage(), actual.memoryUsage());
+        SoftAssertions softAssertions = new SoftAssertions();
+        softAssertions.assertThat(actual.max).isEqualTo(expected.max);
+        softAssertions.assertThat(actual.min).isEqualTo(expected.min);
+        softAssertions.assertAll();
+
     }
 
-    @ParameterizedTest(name = "topK = {0}")
-    @ValueSource(ints = {10, 100})
-    void shouldComputeMemrecWithTop(int topK) {
+    @ParameterizedTest
+    @CsvSource({"10, 248000016", "100, 1688000016"})
+    void shouldComputeMemrecWithTop(int topK, long expectedTopKMemory) {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(1_000_000)
             .relCountUpperBound(5_000_000)
             .build();
 
         var estimateParams = NodeSimilarityEstimateParameters.create(topK, 100, false, false, true);
-        MemoryTree actual = new NodeSimilarityMemoryEstimateDefinition(estimateParams).memoryEstimation()
-            .estimate(dimensions, 1);
+        var actual = new NodeSimilarityMemoryEstimateDefinition(estimateParams).memoryEstimation()
+            .estimate(dimensions, 1).memoryUsage();
 
         long nodeFilterRangeMin = 125_016L;
         long nodeFilterRangeMax = 125_016L;
@@ -115,20 +107,14 @@ class NodeSimilarityMemoryEstimateDefinitionTest {
             .fixed("topNList", topNListRange)
             .fixed("similarityComputer", 8);
 
-        long topKMapRangeMin;
-        long topKMapRangeMax;
-        if (topK == 10) {
-            topKMapRangeMin = 248_000_016L;
-            topKMapRangeMax = 248_000_016L;
-        } else {
-            topKMapRangeMin = 1_688_000_016L;
-            topKMapRangeMax = 1_688_000_016L;
-        }
-        builder.fixed("topK map", MemoryRange.of(topKMapRangeMin, topKMapRangeMax));
+        builder.fixed("topK map", MemoryRange.of(expectedTopKMemory));
 
-        MemoryTree expected = builder.build().estimate(dimensions, 1);
+        var expected = builder.build().estimate(dimensions, 1).memoryUsage();
 
-        assertEquals(expected.memoryUsage(), actual.memoryUsage());
+        SoftAssertions softAssertions = new SoftAssertions();
+        softAssertions.assertThat(actual.max).isEqualTo(expected.max);
+        softAssertions.assertThat(actual.min).isEqualTo(expected.min);
+        softAssertions.assertAll();
     }
 
     @Test
@@ -144,17 +130,19 @@ class NodeSimilarityMemoryEstimateDefinitionTest {
             false, false, true
         );
 
-        MemoryTree actual = new NodeSimilarityMemoryEstimateDefinition(estimateParams).memoryEstimation()
-            .estimate(dimensions, 1);
+        var actual = new NodeSimilarityMemoryEstimateDefinition(estimateParams).memoryEstimation()
+            .estimate(dimensions, 1).memoryUsage();
 
-        assertEquals(570592, actual.memoryUsage().min);
-        assertEquals(732192, actual.memoryUsage().max);
+        SoftAssertions softAssertions = new SoftAssertions();
+        softAssertions.assertThat(actual.min).isEqualTo(570592);
+        softAssertions.assertThat(actual.max).isEqualTo(732192);
+        softAssertions.assertAll();
 
     }
 
     @ParameterizedTest(name = "componentProperty = {0}")
-    @ValueSource(booleans = {true, false})
-    void shouldComputeMemrecWithOrWithoutComponentMapping(boolean componentPropertySet) {
+    @CsvSource({"true, 8000040", "false, 8000064 "})
+    void shouldComputeMemrecWithOrWithoutComponentMapping(boolean componentPropertySet, long extraMemory) {
         GraphDimensions dimensions = ImmutableGraphDimensions.builder()
             .nodeCount(1_000_000)
             .relCountUpperBound(5_000_000)
@@ -163,8 +151,8 @@ class NodeSimilarityMemoryEstimateDefinitionTest {
 
         var estimateParams = NodeSimilarityEstimateParameters
             .create(10, 0, true, !componentPropertySet, true);
-        MemoryTree actual = new NodeSimilarityMemoryEstimateDefinition(estimateParams).memoryEstimation()
-            .estimate(dimensions, 1);
+        var actual = new NodeSimilarityMemoryEstimateDefinition(estimateParams).memoryEstimation()
+            .estimate(dimensions, 1).memoryUsage();
 
 
         long nodeFilterRangeMin = 125_016L;
@@ -186,21 +174,16 @@ class NodeSimilarityMemoryEstimateDefinitionTest {
             .fixed("vectors", vectorsRange)
             .fixed("weights", weightsRange)
             .fixed("similarityComputer", 8);
-        if (componentPropertySet) {
-            builder.fixed("component mapping", 8000040);
-        } else {
-            builder.fixed("wcc", 8000064);
-        }
 
-        long topKMapRangeMin = 248_000_016L;
-        long topKMapRangeMax = 248_000_016L;
-        builder.fixed("topK map", MemoryRange.of(topKMapRangeMin, topKMapRangeMax));
+        builder.fixed("extra", extraMemory);
 
-        MemoryTree expected = builder.build().estimate(dimensions, 1);
+        builder.fixed("topK map", MemoryRange.of(248_000_016L));
+
+        var expected = builder.build().estimate(dimensions, 1).memoryUsage();
+
         SoftAssertions softAssertions = new SoftAssertions();
-        softAssertions.assertThat(expected.memoryUsage().max).isEqualTo(actual.memoryUsage().max);
-        softAssertions.assertThat(expected.memoryUsage().min).isEqualTo(actual.memoryUsage().min);
-
+        softAssertions.assertThat(actual.max).isEqualTo(expected.max);
+        softAssertions.assertThat(actual.min).isEqualTo(expected.min);
         softAssertions.assertAll();
     }
 
