@@ -177,6 +177,7 @@ class GraphSageStreamProcTest extends BaseProcTest {
             .addParameter("concurrency", 1)
             .addParameter("modelName", modelName)
             .yields();
+
         long[] nodeIds = idFunction.of("a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o");
         var rowCount = runQueryWithRowConsumer(streamQuery, (resultRow) -> {
             assertThat(nodeIds).contains((long) resultRow.getNumber("nodeId"));
