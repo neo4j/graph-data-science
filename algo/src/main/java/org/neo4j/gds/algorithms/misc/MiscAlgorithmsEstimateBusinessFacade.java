@@ -45,7 +45,7 @@ public class MiscAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
-            new ScalePropertiesMemoryEstimateDefinition(configuration.nodeProperties()).memoryEstimation()
+            new ScalePropertiesMemoryEstimateDefinition(configuration.nodeProperties())
         );
     }
     

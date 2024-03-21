@@ -50,7 +50,7 @@ public class CentralityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new BetweennessCentralityMemoryEstimateDefinition(configuration.hasRelationshipWeightProperty()).memoryEstimation()
+            new BetweennessCentralityMemoryEstimateDefinition(configuration.hasRelationshipWeightProperty())
         );
     }
 
@@ -62,7 +62,7 @@ public class CentralityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new DegreeCentralityAlgorithmEstimateDefinition(configuration.hasRelationshipWeightProperty()).memoryEstimation()
+            new DegreeCentralityAlgorithmEstimateDefinition(configuration.hasRelationshipWeightProperty())
 
         );
     }
@@ -76,7 +76,7 @@ public class CentralityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
-            new CELFMemoryEstimateDefinition(configuration.toParameters()).memoryEstimation()
+            new CELFMemoryEstimateDefinition(configuration.toParameters())
         );
     }
 
@@ -109,7 +109,7 @@ public class CentralityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new PageRankMemoryEstimateDefinition().memoryEstimation()
+            new PageRankMemoryEstimateDefinition()
         );
     }
 }

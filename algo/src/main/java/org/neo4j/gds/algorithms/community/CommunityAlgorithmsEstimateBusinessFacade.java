@@ -65,7 +65,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new WccMemoryEstimateDefinition(configuration.isIncremental()).memoryEstimation()
+            new WccMemoryEstimateDefinition(configuration.isIncremental())
         );
     }
 
@@ -75,7 +75,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new ApproxMaxKCutMemoryEstimateDefinition(configuration.toMemoryEstimationParameters()).memoryEstimation()
+            new ApproxMaxKCutMemoryEstimateDefinition(configuration.toMemoryEstimationParameters())
         );
     }
 
@@ -87,7 +87,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
-            new K1ColoringMemoryEstimateDefinition().memoryEstimation()
+            new K1ColoringMemoryEstimateDefinition()
         );
     }
 
@@ -99,7 +99,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
-            new KCoreDecompositionMemoryEstimateDefinition().memoryEstimation()
+            new KCoreDecompositionMemoryEstimateDefinition()
         );
     }
 
@@ -111,7 +111,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
-            new KmeansMemoryEstimateDefinition(configuration.toParameters()).memoryEstimation()
+            new KmeansMemoryEstimateDefinition(configuration.toParameters())
         );
     }
 
@@ -123,7 +123,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new LabelPropagationMemoryEstimateDefinition().memoryEstimation()
+            new LabelPropagationMemoryEstimateDefinition()
         );
     }
     public <C extends TriangleCountBaseConfig> MemoryEstimateResult triangleCount(
@@ -134,7 +134,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
-            new IntersectingTriangleCountMemoryEstimateDefinition().memoryEstimation()
+            new IntersectingTriangleCountMemoryEstimateDefinition()
         );
     }
 
@@ -147,7 +147,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new LeidenMemoryEstimateDefinition(configuration.toMemoryEstimationParameters()).memoryEstimation()
+            new LeidenMemoryEstimateDefinition(configuration.toMemoryEstimationParameters())
         );
     }
 
@@ -159,7 +159,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new LouvainMemoryEstimateDefinition(configuration.toMemoryEstimationParameters()).memoryEstimation()
+            new LouvainMemoryEstimateDefinition(configuration.toMemoryEstimationParameters())
         );
     }
 
@@ -171,7 +171,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
-            new SccMemoryEstimateDefinition().memoryEstimation()
+            new SccMemoryEstimateDefinition()
         );
     }
 
@@ -183,7 +183,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
-            new LocalClusteringCoefficientMemoryEstimateDefinition(configuration.seedProperty()).memoryEstimation()
+            new LocalClusteringCoefficientMemoryEstimateDefinition(configuration.seedProperty())
         );
     }
 
@@ -195,7 +195,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new ModularityCalculatorMemoryEstimateDefinition().memoryEstimation()
+            new ModularityCalculatorMemoryEstimateDefinition()
         );
     }
 
@@ -207,7 +207,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new ModularityOptimizationMemoryEstimateDefinition().memoryEstimation()
+            new ModularityOptimizationMemoryEstimateDefinition()
         );
     }
 }

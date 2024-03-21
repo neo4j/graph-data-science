@@ -47,7 +47,7 @@ public class SimilarityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new NodeSimilarityMemoryEstimateDefinition(configuration.toMemoryEstimateParameters()).memoryEstimation()
+            new NodeSimilarityMemoryEstimateDefinition(configuration.toMemoryEstimateParameters())
         );
     }
 
@@ -59,7 +59,7 @@ public class SimilarityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new FilteredNodeSimilarityMemoryEstimateDefinition(configuration.toParameters()).memoryEstimation()
+            new FilteredNodeSimilarityMemoryEstimateDefinition(configuration.toParameters())
         );
     }
 
@@ -71,7 +71,7 @@ public class SimilarityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
-            new KnnMemoryEstimateDefinition(configuration.tomMemoryEstimationParameters()).memoryEstimation()
+            new KnnMemoryEstimateDefinition(configuration.tomMemoryEstimationParameters())
         );
     }
 
@@ -83,7 +83,7 @@ public class SimilarityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
-            new FilteredKnnMemoryEstimateDefinition(configuration.tomMemoryEstimationParameters()).memoryEstimation()
+            new FilteredKnnMemoryEstimateDefinition(configuration.tomMemoryEstimationParameters())
         );
     }
 }

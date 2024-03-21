@@ -58,7 +58,7 @@ public class NodeEmbeddingsAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new Node2VecMemoryEstimateDefinition(configuration.node2VecParameters()).memoryEstimation()
+            new Node2VecMemoryEstimateDefinition(configuration.node2VecParameters())
         );
     }
 
@@ -76,7 +76,7 @@ public class NodeEmbeddingsAlgorithmsEstimateBusinessFacade {
             new GraphSageMemoryEstimateDefinition(
                 model.trainConfig().toMemoryEstimateParameters(),
                 mutating
-            ).memoryEstimation()
+            )
         );
     }
 
@@ -88,7 +88,7 @@ public class NodeEmbeddingsAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new GraphSageTrainEstimateDefinition(configuration.toMemoryEstimateParameters()).memoryEstimation()
+            new GraphSageTrainEstimateDefinition(configuration.toMemoryEstimateParameters())
         );
     }
 
@@ -100,7 +100,7 @@ public class NodeEmbeddingsAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new FastRPMemoryEstimateDefinition(configuration.toParameters()).memoryEstimation()
+            new FastRPMemoryEstimateDefinition(configuration.toParameters())
         );
     }
 
@@ -112,7 +112,7 @@ public class NodeEmbeddingsAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
-            new HashGNNMemoryEstimateDefinition(configuration.toParameters()).memoryEstimation()
+            new HashGNNMemoryEstimateDefinition(configuration.toParameters())
         );
     }
 }
