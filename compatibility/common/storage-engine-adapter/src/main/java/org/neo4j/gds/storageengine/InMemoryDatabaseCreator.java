@@ -27,6 +27,10 @@ import org.neo4j.gds.core.cypher.CypherGraphStore;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.graphdb.GraphDatabaseService;
+import org.neo4j.graphdb.event.DatabaseEventContext;
+import org.neo4j.graphdb.event.DatabaseEventListener;
+
+import java.util.concurrent.CountDownLatch;
 
 import static org.neo4j.gds.core.cypher.CypherGraphStoreCatalogHelper.setWrappedGraphStore;
 
@@ -55,11 +59,51 @@ public final class InMemoryDatabaseCreator {
             var graphStoreWithConfig = GraphStoreCatalog.get(CatalogRequest.of(username, databaseService.databaseName()), graphName);
             var cypherGraphStore = new CypherGraphStore(graphStoreWithConfig.graphStore());
             setWrappedGraphStore(graphStoreWithConfig.config(), cypherGraphStore);
-            StorageEngineProxy.createInMemoryDatabase(dbms, dbName, graphName, config);
+            createAndAwaitDatabase(dbms, dbName, graphName, config);
         } catch (Exception e) {
             InMemoryDatabaseCreationCatalog.removeDatabaseEntry(dbName);
             throw e;
         }
     }
 
+    private static void createAndAwaitDatabase(DatabaseManagementService dbms, String dbName, String graphName, Config config) {
+        var databaseCreationLatch = new CountDownLatch(1);
+        dbms.registerDatabaseEventListener(new DatabaseEventListener() {
+            @Override
+            public void databaseStart(DatabaseEventContext eventContext) {
+                if (eventContext.getDatabaseName().equals(dbName)) {
+                    databaseCreationLatch.countDown();
+                }
+            }
+
+            @Override
+            public void databaseShutdown(DatabaseEventContext eventContext) {
+
+            }
+
+            @Override
+            public void databasePanic(DatabaseEventContext eventContext) {
+                if (eventContext.getDatabaseName().equals(dbName)) {
+                    databaseCreationLatch.countDown();
+                }
+            }
+
+            @Override
+            public void databaseCreate(DatabaseEventContext eventContext) {
+
+            }
+
+            @Override
+            public void databaseDrop(DatabaseEventContext eventContext) {
+
+            }
+        });
+
+        StorageEngineProxy.createInMemoryDatabase(dbms, dbName, graphName, config);
+        try {
+            databaseCreationLatch.await();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
