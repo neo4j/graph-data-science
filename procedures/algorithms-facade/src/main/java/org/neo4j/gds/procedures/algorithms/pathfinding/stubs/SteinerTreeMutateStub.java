@@ -56,10 +56,10 @@ public class SteinerTreeMutateStub implements MutateStub<SteinerTreeMutateConfig
     }
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration) {
+    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
             username,
-            rawConfiguration,
+            configuration,
             SteinerTreeMutateConfig::of,
             estimationFacade::steinerTreeEstimation
         );

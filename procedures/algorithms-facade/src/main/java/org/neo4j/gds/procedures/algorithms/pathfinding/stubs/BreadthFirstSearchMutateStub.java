@@ -56,10 +56,10 @@ public class BreadthFirstSearchMutateStub implements MutateStub<BfsMutateConfig,
     }
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration) {
+    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
             username,
-            rawConfiguration,
+            configuration,
             BfsMutateConfig::of,
             estimationFacade::breadthFirstSearchEstimation
         );

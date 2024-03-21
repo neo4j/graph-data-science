@@ -57,10 +57,10 @@ public class SinglePairShortestPathYensMutateStub implements MutateStub<Shortest
     }
 
     @Override
-    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> rawConfiguration) {
+    public MemoryEstimation getMemoryEstimation(String username, Map<String, Object> configuration) {
         return genericStub.getMemoryEstimation(
             username,
-            rawConfiguration,
+            configuration,
             ShortestPathYensMutateConfig::of,
             estimationFacade::singlePairShortestPathYensEstimation
         );

@@ -34,12 +34,12 @@ class BreadthFirstSearchResultBuilderForMutateMode extends ResultBuilder<BfsMuta
     public PathFindingMutateResult build(
         Graph graph,
         GraphStore graphStore,
-        BfsMutateConfig bfsMutateConfig,
-        Optional<HugeLongArray> hugeLongArray,
+        BfsMutateConfig configuration,
+        Optional<HugeLongArray> result, // unused
         AlgorithmProcessingTimings timings
     ) {
         return new PathFindingMutateResult.Builder()
-            .withConfig(bfsMutateConfig)
+            .withConfig(configuration)
             .withPreProcessingMillis(timings.preProcessingMillis)
             .withComputeMillis(timings.computeMillis)
             .withMutateMillis(timings.postProcessingMillis)
