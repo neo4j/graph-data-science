@@ -26,6 +26,7 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.ResultBuilder;
@@ -54,6 +55,7 @@ import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SingleSourceShortes
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SteinerTreeMutateStub;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
+import org.neo4j.gds.steiner.SteinerTreeStatsConfig;
 import org.neo4j.gds.steiner.SteinerTreeStreamConfig;
 import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
 
@@ -77,6 +79,7 @@ public final class PathFindingProcedureFacade {
 
     // delegate
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeFacade;
+    private final PathFindingAlgorithmsStatsModeBusinessFacade statsModeFacade;
     private final PathFindingAlgorithmsStreamModeBusinessFacade streamModeFacade;
     private final PathFindingAlgorithmsWriteModeBusinessFacade writeModeFacade;
 
@@ -94,6 +97,7 @@ public final class PathFindingProcedureFacade {
         NodeLookup nodeLookup,
         ProcedureReturnColumns procedureReturnColumns,
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeFacade,
+        PathFindingAlgorithmsStatsModeBusinessFacade statsModeFacade,
         PathFindingAlgorithmsStreamModeBusinessFacade streamModeFacade,
         PathFindingAlgorithmsWriteModeBusinessFacade writeModeFacade,
         BreadthFirstSearchMutateStub breadthFirstSearchMutateStub,
@@ -109,6 +113,7 @@ public final class PathFindingProcedureFacade {
         this.procedureReturnColumns = procedureReturnColumns;
 
         this.estimationModeFacade = estimationModeFacade;
+        this.statsModeFacade = statsModeFacade;
         this.streamModeFacade = streamModeFacade;
         this.writeModeFacade = writeModeFacade;
 
@@ -134,6 +139,7 @@ public final class PathFindingProcedureFacade {
         User user,
         PathFindingAlgorithmsEstimationModeBusinessFacade pathFindingAlgorithmsEstimationModeBusinessFacade,
         PathFindingAlgorithmsMutateModeBusinessFacade pathFindingAlgorithmsMutateModeBusinessFacade,
+        PathFindingAlgorithmsStatsModeBusinessFacade pathFindingAlgorithmsStatsModeBusinessFacade,
         PathFindingAlgorithmsStreamModeBusinessFacade pathFindingAlgorithmsStreamModeBusinessFacade,
         PathFindingAlgorithmsWriteModeBusinessFacade pathFindingAlgorithmsWriteModeBusinessFacade
     ) {
@@ -188,6 +194,7 @@ public final class PathFindingProcedureFacade {
             nodeLookup,
             procedureReturnColumns,
             pathFindingAlgorithmsEstimationModeBusinessFacade,
+            pathFindingAlgorithmsStatsModeBusinessFacade,
             pathFindingAlgorithmsStreamModeBusinessFacade,
             pathFindingAlgorithmsWriteModeBusinessFacade,
             breadthFirstSearchMutateStub,
@@ -483,6 +490,34 @@ public final class PathFindingProcedureFacade {
         return steinerTreeMutateStub;
     }
 
+    public Stream<SteinerStatsResult> steinerTreeStats(String graphName, Map<String, Object> configuration) {
+        var resultBuilder = new SteinerTreeResultBuilderForStatsMode();
+
+        return runStatsAlgorithm(
+            graphName,
+            configuration,
+            SteinerTreeStatsConfig::of,
+            resultBuilder,
+            statsModeFacade::steinerTree
+        );
+    }
+
+    public Stream<MemoryEstimateResult> steinerTreeStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = runEstimation(
+            algorithmConfiguration,
+            SteinerTreeStatsConfig::of,
+            configuration -> estimationModeFacade.steinerTreeEstimate(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
     public Stream<SteinerTreeStreamResult> steinerTreeStream(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new SteinerTreeResultBuilderForStreamMode();
 
@@ -572,6 +607,19 @@ public final class PathFindingProcedureFacade {
         );
 
         return runStreamAlgorithm(graphNameAsString, rawConfiguration, configurationSupplier, resultBuilder, algorithm);
+    }
+
+    private <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> Stream<RESULT_TO_CALLER> runStatsAlgorithm(
+        String graphNameAsString,
+        Map<String, Object> rawConfiguration,
+        Function<CypherMapWrapper, CONFIGURATION> configurationSupplier,
+        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, Stream<RESULT_TO_CALLER>> resultBuilder,
+        AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, Stream<RESULT_TO_CALLER>> algorithm
+    ) {
+        var graphName = GraphName.parse(graphNameAsString);
+        var configuration = configurationCreator.createConfiguration(rawConfiguration, configurationSupplier);
+
+        return algorithm.compute(graphName, configuration, resultBuilder);
     }
 
     /**

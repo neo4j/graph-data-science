@@ -65,6 +65,7 @@ import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTemp
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
@@ -301,6 +302,12 @@ class AlgorithmFacadeFactory {
             algorithmProcessingTemplate
         );
 
+        var statsModeFacade = new PathFindingAlgorithmsStatsModeBusinessFacade(
+            algorithmProcessingTemplate,
+            estimationModeFacade,
+            pathFindingAlgorithms
+        );
+
         var streamModeFacade = new PathFindingAlgorithmsStreamModeBusinessFacade(
             algorithmProcessingTemplate, estimationModeFacade, pathFindingAlgorithms
         );
@@ -327,6 +334,7 @@ class AlgorithmFacadeFactory {
             user,
             estimationModeFacade,
             mutateModeFacade,
+            statsModeFacade,
             streamModeFacade,
             writeModeFacade
         );
