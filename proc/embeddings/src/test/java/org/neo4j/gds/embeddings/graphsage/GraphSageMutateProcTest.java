@@ -42,6 +42,7 @@ import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.graphdb.QueryExecutionException;
+import org.neo4j.graphdb.Result;
 
 import java.util.List;
 import java.util.Map;
@@ -260,6 +261,39 @@ class GraphSageMutateProcTest extends BaseProcTest {
                 List.of("__ALL__")
             )
         );
+    }
+
+    @Test
+    void shouldEstimateMemory() {
+        var trainQuery = GdsCypher.call(graphName)
+            .algo("gds.beta.graphSage")
+            .trainMode()
+            .addParameter("sampleSizes", List.of(2, 4))
+            .addParameter("featureProperties", List.of("age", "birth_year", "death_year"))
+            .addParameter("embeddingDimension", 16)
+            .addParameter("activationFunction", ActivationFunction.SIGMOID)
+            .addParameter("aggregator", "mean")
+            .addParameter("modelName", modelName)
+            .yields();
+
+        runQuery(trainQuery);
+
+        var mutatePropertyKey = "embedding";
+        var query = GdsCypher.call("embeddingsGraph")
+            .algo("gds.beta.graphSage")
+            .mutateEstimation()
+            .addParameter("mutateProperty", mutatePropertyKey)
+            .addParameter("modelName", modelName)
+            .yields("requiredMemory");
+
+        assertThat(runQuery(query, Result::resultAsString)).isEqualTo("+-------------------------+\n" +
+            "| requiredMemory          |\n" +
+            "+-------------------------+\n" +
+            "| \"[233 KiB ... 237 KiB]\" |\n" +
+            "+-------------------------+\n" +
+            "1 row\n");
+
+
     }
 
 }

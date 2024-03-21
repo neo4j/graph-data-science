@@ -358,7 +358,10 @@ class AlgorithmFacadeFactory {
             writeNodePropertyService
         );
 
-        var estimateBusinessFacade = new NodeEmbeddingsAlgorithmsEstimateBusinessFacade(algorithmEstimator);
+        var estimateBusinessFacade = new NodeEmbeddingsAlgorithmsEstimateBusinessFacade(
+            algorithmEstimator,
+            modelCatalogService
+        );
 
         // procedure facade
         return new NodeEmbeddingsProcedureFacade(
