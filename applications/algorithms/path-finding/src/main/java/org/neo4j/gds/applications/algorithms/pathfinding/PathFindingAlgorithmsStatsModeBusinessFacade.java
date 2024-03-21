@@ -20,11 +20,14 @@
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.paths.traverse.BfsStatsConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.steiner.SteinerTreeStatsConfig;
 
 import java.util.Optional;
 
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BFS;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.STEINER;
 
 public class PathFindingAlgorithmsStatsModeBusinessFacade {
@@ -41,6 +44,22 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
         this.estimationFacade = estimationFacade;
         this.pathFindingAlgorithms = pathFindingAlgorithms;
+    }
+
+    public <RESULT> RESULT breadthFirstSearch(
+        GraphName graphName,
+        BfsStatsConfig configuration,
+        ResultBuilder<BfsStatsConfig, HugeLongArray, RESULT> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            BFS,
+            () -> estimationFacade.breadthFirstSearchEstimation(configuration),
+            graph -> pathFindingAlgorithms.breadthFirstSearch(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
     }
 
     public <RESULT> RESULT steinerTree(

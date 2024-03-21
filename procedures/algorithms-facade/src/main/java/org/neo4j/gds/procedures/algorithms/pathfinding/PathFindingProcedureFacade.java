@@ -41,6 +41,7 @@ import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraWriteConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig;
+import org.neo4j.gds.paths.traverse.BfsStatsConfig;
 import org.neo4j.gds.paths.traverse.BfsStreamConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
@@ -54,6 +55,7 @@ import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestP
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SingleSourceShortestPathDijkstraMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SteinerTreeMutateStub;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.results.StandardStatsResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 import org.neo4j.gds.steiner.SteinerTreeStatsConfig;
 import org.neo4j.gds.steiner.SteinerTreeStreamConfig;
@@ -208,6 +210,34 @@ public final class PathFindingProcedureFacade {
 
     public BreadthFirstSearchMutateStub breadthFirstSearchMutateStub() {
         return breadthFirstSearchMutateStub;
+    }
+
+    public Stream<StandardStatsResult> breadthFirstSearchStats(String graphName, Map<String, Object> configuration) {
+        var resultBuilder = new BfsStatsResultBuilder();
+
+        return runStatsAlgorithm(
+            graphName,
+            configuration,
+            BfsStatsConfig::of,
+            resultBuilder,
+            statsModeFacade::breadthFirstSearch
+        );
+    }
+
+    public Stream<MemoryEstimateResult> breadthFirstSearchStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = runEstimation(
+            algorithmConfiguration,
+            BfsStatsConfig::of,
+            configuration -> estimationModeFacade.breadthFirstSearchEstimate(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
     }
 
     public Stream<BfsStreamResult> breadthFirstSearchStream(String graphName, Map<String, Object> configuration) {
