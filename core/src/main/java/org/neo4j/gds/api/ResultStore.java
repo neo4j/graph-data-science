@@ -101,9 +101,15 @@ public interface ResultStore {
 
     /**
      * Checks if this store has a relationship of the given type.
-     * This does not include relationship streams.
+     * Does not include relationship streams.
      */
     boolean hasRelationship(String relationshipType);
+
+    /**
+     * Checks if this store has a relationship stream of the given type and properties.
+     * Does not include non-stream relationships.
+     */
+    boolean hasRelationshipStream(String relationshipType, List<String> propertyKeys);
 
     record NodeLabelEntry(long nodeCount, LongUnaryOperator toOriginalId) {}
 

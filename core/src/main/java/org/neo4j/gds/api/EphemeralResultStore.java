@@ -115,6 +115,11 @@ public class EphemeralResultStore implements ResultStore {
         return this.relationships.containsKey(new RelationshipKey(relationshipType, NO_PROPERTIES_LIST));
     }
 
+    @Override
+    public boolean hasRelationshipStream(String relationshipType, List<String> propertyKeys) {
+        return this.relationshipStreams.containsKey(new RelationshipKey(relationshipType, propertyKeys));
+    }
+
     private record NodeKey(List<String> nodeLabels, String propertyKey) {}
 
     private record RelationshipKey(String relationshipType, Collection<String> propertyKeys) {}

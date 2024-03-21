@@ -104,8 +104,11 @@ class EphemeralResultStoreTest {
 
         resultStore.addRelationshipStream("Type", List.of("foo"), List.of(ValueType.DOUBLE), relationshipStream, toOriginalId);
 
-        var relationshipStreamEntry = resultStore. getRelationshipStream("Type", List.of("foo"));
+        var relationshipStreamEntry = resultStore.getRelationshipStream("Type", List.of("foo"));
         assertThat(relationshipStreamEntry.relationshipStream()).isEqualTo(relationshipStream);
         assertThat(relationshipStreamEntry.toOriginalId()).isEqualTo(toOriginalId);
+
+        assertThat(resultStore.hasRelationshipStream("Type", List.of("foo"))).isTrue();
+        assertThat(resultStore.hasRelationshipStream("Type", List.of())).isFalse();
     }
 }
