@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.write;
 
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.ArrowConnectionInfo;
@@ -28,12 +29,14 @@ import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.function.LongUnaryOperator;
 
 public abstract class NodePropertyExporterBuilder {
-    protected LongUnaryOperator toOriginalId;
     protected long nodeCount;
+    protected Set<NodeLabel> nodeLabels;
+    protected LongUnaryOperator toOriginalId;
     protected TerminationFlag terminationFlag;
 
     protected ExecutorService executorService;
@@ -48,6 +51,7 @@ public abstract class NodePropertyExporterBuilder {
     public NodePropertyExporterBuilder withIdMap(IdMap idMap) {
         Objects.requireNonNull(idMap);
         this.nodeCount = idMap.nodeCount();
+        this.nodeLabels = idMap.availableNodeLabels();
         this.toOriginalId = idMap::toOriginalNodeId;
         return this;
     }

@@ -37,12 +37,12 @@ public interface ResultStore {
     /**
      * Stores node property values under the given property key.
      */
-    void addNodePropertyValues(String propertyKey, NodePropertyValues propertyValues);
+    void addNodePropertyValues(List<String> nodeLabels, String propertyKey, NodePropertyValues propertyValues);
 
     /**
      * Retrieves node property values from this store based on the property key.
      */
-    NodePropertyValues getNodePropertyValues(String propertyKey);
+    NodePropertyValues getNodePropertyValues(List<String> nodeLabels, String propertyKey);
 
     /**
      * Stores node id information for the given label in this store.

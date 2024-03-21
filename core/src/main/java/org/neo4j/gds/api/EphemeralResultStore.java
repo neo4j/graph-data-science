@@ -34,7 +34,7 @@ public class EphemeralResultStore implements ResultStore {
     private static final String NO_PROPERTY_KEY = "";
     private static final List<String> NO_PROPERTIES_LIST = List.of(NO_PROPERTY_KEY);
 
-    private final Map<String, NodePropertyValues> nodeProperties;
+    private final Map<NodeKey, NodePropertyValues> nodeProperties;
     private final Map<String, NodeLabelEntry> nodeIdsByLabel;
     private final Map<RelationshipKey, RelationshipEntry> relationships;
     private final Map<RelationshipKey, RelationshipStreamEntry> relationshipStreams;
@@ -47,13 +47,13 @@ public class EphemeralResultStore implements ResultStore {
     }
 
     @Override
-    public void addNodePropertyValues(String propertyKey, NodePropertyValues propertyValues) {
-        this.nodeProperties.put(propertyKey, propertyValues);
+    public void addNodePropertyValues(List<String> nodeLabels, String propertyKey, NodePropertyValues propertyValues) {
+        this.nodeProperties.put(new NodeKey(nodeLabels, propertyKey), propertyValues);
     }
 
     @Override
-    public NodePropertyValues getNodePropertyValues(String propertyKey) {
-        return this.nodeProperties.get(propertyKey);
+    public NodePropertyValues getNodePropertyValues(List<String> nodeLabels, String propertyKey) {
+        return this.nodeProperties.get(new NodeKey(nodeLabels, propertyKey));
     }
 
     @Override
@@ -114,6 +114,8 @@ public class EphemeralResultStore implements ResultStore {
     public boolean hasRelationship(String relationshipType) {
         return this.relationships.containsKey(new RelationshipKey(relationshipType, NO_PROPERTIES_LIST));
     }
+
+    private record NodeKey(List<String> nodeLabels, String propertyKey) {}
 
     private record RelationshipKey(String relationshipType, Collection<String> propertyKeys) {}
 }

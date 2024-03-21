@@ -29,6 +29,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.neo4j.gds.ElementProjection.PROJECT_ALL;
 
 class ResultStoreNodePropertyExporterTest {
 
@@ -38,20 +39,20 @@ class ResultStoreNodePropertyExporterTest {
         var nodePropertyValues = mock(NodePropertyValues.class);
         when(nodePropertyValues.nodeCount()).thenReturn(42L);
 
-        var nodePropertyExporter = new ResultStoreNodePropertyExporter(resultStore);
+        var nodePropertyExporter = new ResultStoreNodePropertyExporter(resultStore, List.of("A"));
         nodePropertyExporter.write("prop", nodePropertyValues);
 
         assertThat(nodePropertyExporter.propertiesWritten()).isEqualTo(42L);
-        assertThat(resultStore.getNodePropertyValues("prop")).isEqualTo(nodePropertyValues);
+        assertThat(resultStore.getNodePropertyValues(List.of("A"), "prop")).isEqualTo(nodePropertyValues);
 
         var newNodePropertyValues = mock(NodePropertyValues.class);
         when(newNodePropertyValues.nodeCount()).thenReturn(43L);
 
-        var newNodePropertyExporter1 = new ResultStoreNodePropertyExporter(resultStore);
+        var newNodePropertyExporter1 = new ResultStoreNodePropertyExporter(resultStore, List.of("A", "B"));
         newNodePropertyExporter1.write( ImmutableNodeProperty.of("newProp", newNodePropertyValues));
 
         assertThat(newNodePropertyExporter1.propertiesWritten()).isEqualTo(43L);
-        assertThat(resultStore.getNodePropertyValues("newProp")).isEqualTo(newNodePropertyValues);
+        assertThat(resultStore.getNodePropertyValues(List.of("A", "B"), "newProp")).isEqualTo(newNodePropertyValues);
     }
 
     @Test
@@ -62,7 +63,7 @@ class ResultStoreNodePropertyExporterTest {
         var nodePropertyValues2 = mock(NodePropertyValues.class);
         when(nodePropertyValues2.nodeCount()).thenReturn(43L);
 
-        var nodePropertyExporter = new ResultStoreNodePropertyExporter(resultStore);
+        var nodePropertyExporter = new ResultStoreNodePropertyExporter(resultStore, List.of(PROJECT_ALL));
         nodePropertyExporter.write(List.of(
                 ImmutableNodeProperty.of("prop1", nodePropertyValues1),
                 ImmutableNodeProperty.of("prop2", nodePropertyValues2)
@@ -70,7 +71,7 @@ class ResultStoreNodePropertyExporterTest {
         );
 
         assertThat(nodePropertyExporter.propertiesWritten()).isEqualTo(85L);
-        assertThat(resultStore.getNodePropertyValues("prop1")).isEqualTo(nodePropertyValues1);
-        assertThat(resultStore.getNodePropertyValues("prop2")).isEqualTo(nodePropertyValues2);
+        assertThat(resultStore.getNodePropertyValues(List.of(PROJECT_ALL), "prop1")).isEqualTo(nodePropertyValues1);
+        assertThat(resultStore.getNodePropertyValues(List.of(PROJECT_ALL), "prop2")).isEqualTo(nodePropertyValues2);
     }
 }
