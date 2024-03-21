@@ -45,6 +45,10 @@ import static java.util.Collections.singletonList;
 
 public interface GraphStore {
 
+    /**
+     * A store that is an alternative write-back target in the case that the algorithm
+     * result computation and the actual write-back are seperated steps.
+     */
     ResultStore resultStore();
 
     DatabaseInfo databaseInfo();
