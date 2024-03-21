@@ -48,7 +48,7 @@ public class EphemeralResultStore implements ResultStore {
     }
 
     @Override
-    public void addNodeProperty(String propertyKey, NodePropertyValues propertyValues) {
+    public void addNodePropertyValues(String propertyKey, NodePropertyValues propertyValues) {
         this.nodeProperties.put(propertyKey, propertyValues);
     }
 

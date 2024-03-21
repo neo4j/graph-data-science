@@ -38,7 +38,7 @@ class EphemeralResultStoreTest {
         var resultStore = new EphemeralResultStore();
 
         var propertyValues = mock(NodePropertyValues.class);
-        resultStore.addNodeProperty("foo", propertyValues);
+        resultStore.addNodePropertyValues("foo", propertyValues);
 
         assertThat(resultStore.getNodePropertyValues("foo")).isEqualTo(propertyValues);
     }

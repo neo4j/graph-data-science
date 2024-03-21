@@ -27,20 +27,66 @@ import java.util.PrimitiveIterator;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Stream;
 
+/**
+ * A store for write results that are not immediately persisted in the database.
+ * This is mainly used for the session architecture, where algorithms results are first
+ * written into this store and then streamed via arrow to persist them in a
+ * remote database.
+ */
 public interface ResultStore {
 
-    void addNodeProperty(String propertyKey, NodePropertyValues propertyValues);
+    /**
+     * Stores node property values under the given property key.
+     */
+    void addNodePropertyValues(String propertyKey, NodePropertyValues propertyValues);
 
+    /**
+     * Retrieves node property values from this store based on the property key.
+     */
     NodePropertyValues getNodePropertyValues(String propertyKey);
 
+    /**
+     * Stores node id information for the given label in this store.
+     */
     void addNodeLabel(String nodeLabel, PrimitiveIterator.OfLong nodeIds);
 
+    /**
+     * Retrieves node id information for the given label.
+     */
     PrimitiveIterator.OfLong getNodeIdsByLabel(String nodeLabel);
 
+    /**
+     * Stores a relationship information in this store, held by the given graph.
+     *
+     * @param toOriginalId a mapping function to for the relationship source and target ids
+     */
     void addRelationship(String relationshipType, Graph graph, LongUnaryOperator toOriginalId);
 
+    /**
+     * Stores a relationship information in this store, held by the given graph.
+     *
+     * @param propertyKey the property key for the relationship
+     * @param toOriginalId a mapping function to for the relationship source and target ids
+     */
     void addRelationship(String relationshipType, String propertyKey, Graph graph, LongUnaryOperator toOriginalId);
 
+    /**
+     * Retrieves relationship information from this store based on the relationship type.
+     */
+    RelationshipEntry getRelationship(String relationshipType);
+
+    /**
+     * Retrieves relationship information from this store based on the relationship type and property key.
+     */
+    RelationshipEntry getRelationship(String relationshipType, String propertyKey);
+
+    /**
+     * Stores a stream of relationships in this store.
+     *
+     * @param propertyKeys the property keys for the relationships
+     * @param propertyTypes the property types for the relationship properties, expected to match the order of the property keys
+     * @param toOriginalId a mapping function to for the relationship source and target ids
+     */
     void addRelationshipStream(
         String relationshipType,
         List<String> propertyKeys,
@@ -49,12 +95,15 @@ public interface ResultStore {
         LongUnaryOperator toOriginalId
     );
 
+    /**
+     * Retrieves a stream of relationships from this store based on the relationship type and property keys.
+     */
     RelationshipStreamEntry getRelationshipStream(String relationshipType, List<String> propertyKeys);
 
-    RelationshipEntry getRelationship(String relationshipType);
-
-    RelationshipEntry getRelationship(String relationshipType, String propertyKey);
-
+    /**
+     * Checks if this store has a relationship of the given type.
+     * This does not include relationship streams.
+     */
     boolean hasRelationship(String relationshipType);
 
     record RelationshipEntry(Graph graph, LongUnaryOperator toOriginalId) {}
