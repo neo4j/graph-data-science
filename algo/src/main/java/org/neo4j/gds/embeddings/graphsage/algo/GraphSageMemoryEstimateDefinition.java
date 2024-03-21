@@ -33,7 +33,7 @@ public class GraphSageMemoryEstimateDefinition {
     private final GraphSageTrainMemoryEstimateParameters trainEstimationParameters;
     private final boolean mutating;
 
-    GraphSageMemoryEstimateDefinition(
+    public GraphSageMemoryEstimateDefinition(
         GraphSageTrainMemoryEstimateParameters trainEstimationParameters,
         boolean mutating
     ) {

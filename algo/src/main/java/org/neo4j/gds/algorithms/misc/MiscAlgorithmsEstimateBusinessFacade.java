@@ -22,7 +22,7 @@ package org.neo4j.gds.algorithms.misc;
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.scaleproperties.ScalePropertiesBaseConfig;
-import org.neo4j.gds.scaleproperties.ScalePropertiesFactory;
+import org.neo4j.gds.scaleproperties.ScalePropertiesMemoryEstimateDefinition;
 
 import java.util.Optional;
 
@@ -45,7 +45,7 @@ public class MiscAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
-            new ScalePropertiesFactory<>()
+            new ScalePropertiesMemoryEstimateDefinition(configuration.nodeProperties()).memoryEstimation()
         );
     }
     

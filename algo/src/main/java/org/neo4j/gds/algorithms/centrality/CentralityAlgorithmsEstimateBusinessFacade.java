@@ -21,13 +21,13 @@ package org.neo4j.gds.algorithms.centrality;
 
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
-import org.neo4j.gds.betweenness.BetweennessCentralityFactory;
+import org.neo4j.gds.betweenness.BetweennessCentralityMemoryEstimateDefinition;
+import org.neo4j.gds.degree.DegreeCentralityAlgorithmEstimateDefinition;
 import org.neo4j.gds.degree.DegreeCentralityConfig;
-import org.neo4j.gds.degree.DegreeCentralityFactory;
-import org.neo4j.gds.influenceMaximization.CELFAlgorithmFactory;
+import org.neo4j.gds.influenceMaximization.CELFMemoryEstimateDefinition;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationBaseConfig;
-import org.neo4j.gds.pagerank.PageRankAlgorithmFactory;
 import org.neo4j.gds.pagerank.PageRankConfig;
+import org.neo4j.gds.pagerank.PageRankMemoryEstimateDefinition;
 import org.neo4j.gds.results.MemoryEstimateResult;
 
 import java.util.Optional;
@@ -50,7 +50,7 @@ public class CentralityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new BetweennessCentralityFactory<>()
+            new BetweennessCentralityMemoryEstimateDefinition(configuration.hasRelationshipWeightProperty()).memoryEstimation()
         );
     }
 
@@ -62,7 +62,8 @@ public class CentralityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new DegreeCentralityFactory<>()
+            new DegreeCentralityAlgorithmEstimateDefinition(configuration.hasRelationshipWeightProperty()).memoryEstimation()
+
         );
     }
 
@@ -70,11 +71,12 @@ public class CentralityAlgorithmsEstimateBusinessFacade {
         Object graphNameOrConfiguration,
         C configuration
     ) {
+
         return algorithmEstimator.estimate(
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
-            new CELFAlgorithmFactory<>()
+            new CELFMemoryEstimateDefinition(configuration.toParameters()).memoryEstimation()
         );
     }
 
@@ -82,33 +84,32 @@ public class CentralityAlgorithmsEstimateBusinessFacade {
         Object graphNameOrConfiguration,
         C configuration
     ) {
-        return pageRankVariant(graphNameOrConfiguration, configuration, PageRankAlgorithmFactory.Mode.PAGE_RANK);
+        return pageRankVariant(graphNameOrConfiguration, configuration);
     }
 
     public <C extends PageRankConfig> MemoryEstimateResult articleRank(
         Object graphNameOrConfiguration,
         C configuration
     ) {
-        return pageRankVariant(graphNameOrConfiguration, configuration, PageRankAlgorithmFactory.Mode.ARTICLE_RANK);
+        return pageRankVariant(graphNameOrConfiguration, configuration);
     }
 
     public <C extends PageRankConfig> MemoryEstimateResult eigenvector(
         Object graphNameOrConfiguration,
         C configuration
     ) {
-        return pageRankVariant(graphNameOrConfiguration, configuration, PageRankAlgorithmFactory.Mode.EIGENVECTOR);
+        return pageRankVariant(graphNameOrConfiguration, configuration);
     }
 
     private <C extends PageRankConfig> MemoryEstimateResult pageRankVariant(
         Object graphNameOrConfiguration,
-        C configuration,
-        PageRankAlgorithmFactory.Mode variant
+        C configuration
     ) {
         return algorithmEstimator.estimate(
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new PageRankAlgorithmFactory<>(variant)
+            new PageRankMemoryEstimateDefinition().memoryEstimation()
         );
     }
 }

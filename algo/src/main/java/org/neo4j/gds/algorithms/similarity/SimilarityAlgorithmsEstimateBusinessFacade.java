@@ -22,13 +22,13 @@ package org.neo4j.gds.algorithms.similarity;
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnBaseConfig;
-import org.neo4j.gds.similarity.filteredknn.FilteredKnnFactory;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnMemoryEstimateDefinition;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityBaseConfig;
-import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityFactory;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityMemoryEstimateDefinition;
 import org.neo4j.gds.similarity.knn.KnnBaseConfig;
-import org.neo4j.gds.similarity.knn.KnnFactory;
+import org.neo4j.gds.similarity.knn.KnnMemoryEstimateDefinition;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfig;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityFactory;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityMemoryEstimateDefinition;
 
 import java.util.Optional;
 
@@ -47,7 +47,7 @@ public class SimilarityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new NodeSimilarityFactory<>()
+            new NodeSimilarityMemoryEstimateDefinition(configuration.toParameters()).memoryEstimation()
         );
     }
 
@@ -59,7 +59,7 @@ public class SimilarityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new FilteredNodeSimilarityFactory<>()
+            new FilteredNodeSimilarityMemoryEstimateDefinition(configuration.toParameters()).memoryEstimation()
         );
     }
 
@@ -71,7 +71,7 @@ public class SimilarityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
-            new KnnFactory<>()
+            new KnnMemoryEstimateDefinition(configuration.tomMemoryEstimationParameters()).memoryEstimation()
         );
     }
 
@@ -83,7 +83,7 @@ public class SimilarityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
-            new FilteredKnnFactory<>()
+            new FilteredKnnMemoryEstimateDefinition(configuration.tomMemoryEstimationParameters()).memoryEstimation()
         );
     }
 }

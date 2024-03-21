@@ -20,13 +20,13 @@
 package org.neo4j.gds.algorithms.estimation;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
@@ -65,7 +65,7 @@ public class AlgorithmEstimator {
         Object graphNameOrConfiguration,
         C config,
         Optional<String> maybeRelationshipProperty,
-        AlgorithmFactory<G, A, C> algorithmFactory
+        MemoryEstimation memoryEstimation
     ) {
         GraphDimensions dimensions;
 
@@ -98,7 +98,7 @@ public class AlgorithmEstimator {
         }
 
         var memoryTree = estimationBuilder
-            .add("algorithm", algorithmFactory.memoryEstimation(config))
+            .add("algorithm", memoryEstimation)
             .build()
             .estimate(dimensions, config.concurrency());
 
