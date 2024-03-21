@@ -19,104 +19,22 @@
  */
 package org.neo4j.gds.similarity.filterednodesim;
 
-import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.MemoryEstimateDefinition;
-import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
-import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.similarity.SimilarityGraphBuilder;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarity;
-import org.neo4j.gds.similarity.nodesim.TopKMap;
-import org.neo4j.gds.similarity.nodesim.TopNList;
-import org.neo4j.gds.wcc.WccMemoryEstimateDefinition;
-
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityMemoryEstimateDefinition;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityParameters;
 
 public class FilteredNodeSimilarityMemoryEstimateDefinition implements MemoryEstimateDefinition {
-    final int normalizedK;
-    final int normalizedN;
-    final boolean enableComponentsOptimization;
-    final boolean actuallyRunWCC;
-    final boolean computeToGraph;
+    private final NodeSimilarityParameters nodeSimilarityParameters;
 
     public FilteredNodeSimilarityMemoryEstimateDefinition(
-        int normalizedK,
-        int normalizedN,
-        boolean enableComponentsOptimization,
-        boolean actuallyRunWCC,
-        boolean computeToGraph
+        NodeSimilarityParameters nodeSimilarityParameters
     ) {
-        this.normalizedK = normalizedK;
-        this.normalizedN = normalizedN;
-        this.enableComponentsOptimization = enableComponentsOptimization;
-        this.actuallyRunWCC = actuallyRunWCC;
-        this.computeToGraph = computeToGraph;
+        this.nodeSimilarityParameters = nodeSimilarityParameters;
     }
 
     @Override
     public MemoryEstimation memoryEstimation() {
-        int topN = Math.abs(normalizedN);
-        int topK = Math.abs(normalizedK);
-        boolean hasTopN = topN != 0;
-        boolean hasTopK = topK != 0;
-
-        MemoryEstimations.Builder builder = MemoryEstimations.builder(NodeSimilarity.class.getSimpleName())
-            .perNode("node filter", nodeCount -> sizeOfLongArray(BitSet.bits2words(nodeCount)))
-            .add(
-                "vectors",
-                MemoryEstimations.setup("", (dimensions, concurrency) -> {
-                    int averageDegree = dimensions.nodeCount() == 0
-                        ? 0
-                        : Math.toIntExact(dimensions.relCountUpperBound() / dimensions.nodeCount());
-                    long averageVectorSize = sizeOfLongArray(averageDegree);
-                    return MemoryEstimations.builder(HugeObjectArray.class)
-                        .perNode("array", nodeCount -> nodeCount * averageVectorSize).build();
-                })
-            )
-            .add("weights",
-                MemoryEstimations.setup("", (dimensions, concurrency) -> {
-                    int averageDegree = dimensions.nodeCount() == 0
-                        ? 0
-                        : Math.toIntExact(dimensions.relCountUpperBound() / dimensions.nodeCount());
-                    long averageVectorSize = sizeOfDoubleArray(averageDegree);
-                    return MemoryEstimations.builder(HugeObjectArray.class)
-                        .rangePerNode("array", nodeCount -> MemoryRange.of(0, nodeCount * averageVectorSize))
-                        .build();
-                }));
-        if (enableComponentsOptimization) {
-            builder.perNode("nodes sorted by component", HugeLongArray::memoryEstimation);
-            builder.perNode("upper bound per component", HugeAtomicLongArray::memoryEstimation);
-
-            if (actuallyRunWCC) {
-                builder.add("wcc", new WccMemoryEstimateDefinition(false).memoryEstimation());
-            } else {
-                builder.perNode("component mapping", HugeLongArray::memoryEstimation);
-            }
-        }
-        if (computeToGraph && !hasTopK) {
-            builder.add(
-                "similarity graph",
-                SimilarityGraphBuilder.memoryEstimation(topK, topN)
-            );
-        }
-        if (hasTopK) {
-            builder.add(
-                "topK map",
-                MemoryEstimations.setup("", (dimensions, concurrency) ->
-                    TopKMap.memoryEstimation(dimensions.nodeCount(), topK))
-            );
-        }
-        if (hasTopN) {
-            builder.add(
-                "topN list",
-                MemoryEstimations.setup("", (dimensions, concurrency) ->
-                    TopNList.memoryEstimation(dimensions.nodeCount(), topN))
-            );
-        }
-        return builder.build();
+        return new NodeSimilarityMemoryEstimateDefinition(nodeSimilarityParameters).memoryEstimation();
     }
 }
