@@ -30,6 +30,7 @@ import org.neo4j.gds.embeddings.hashgnn.HashGNNConfig;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNFactory;
 import org.neo4j.gds.embeddings.node2vec.Node2VecAlgorithmFactory;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
+import org.neo4j.gds.modelcatalogservices.ModelCatalogService;
 import org.neo4j.gds.results.MemoryEstimateResult;
 
 import java.util.Optional;
@@ -37,11 +38,15 @@ import java.util.Optional;
 public class NodeEmbeddingsAlgorithmsEstimateBusinessFacade {
 
     private final AlgorithmEstimator algorithmEstimator;
+    private final ModelCatalogService modelCatalogService;
+
 
     public NodeEmbeddingsAlgorithmsEstimateBusinessFacade(
-        AlgorithmEstimator algorithmEstimator
+        AlgorithmEstimator algorithmEstimator,
+        ModelCatalogService modelCatalogService
     ) {
         this.algorithmEstimator = algorithmEstimator;
+        this.modelCatalogService = modelCatalogService;
     }
 
     public <C extends Node2VecBaseConfig> MemoryEstimateResult node2Vec(
@@ -64,7 +69,7 @@ public class NodeEmbeddingsAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
-            new GraphSageAlgorithmFactory(null)
+            new GraphSageAlgorithmFactory(modelCatalogService.get())
         );
     }
 
