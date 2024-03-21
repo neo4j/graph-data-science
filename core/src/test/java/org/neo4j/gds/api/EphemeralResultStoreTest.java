@@ -93,6 +93,8 @@ class EphemeralResultStoreTest {
         var relationshipEntry = resultStore.getRelationship("Type", "prop");
         assertThat(relationshipEntry.graph()).isEqualTo(graph);
         assertThat(relationshipEntry.toOriginalId()).isEqualTo(toOriginalId);
+
+        assertThat(resultStore.hasRelationship("Type", List.of("prop"))).isTrue();
     }
 
     @Test

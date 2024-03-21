@@ -112,7 +112,12 @@ public class EphemeralResultStore implements ResultStore {
 
     @Override
     public boolean hasRelationship(String relationshipType) {
-        return this.relationships.containsKey(new RelationshipKey(relationshipType, NO_PROPERTIES_LIST));
+        return hasRelationship(relationshipType, NO_PROPERTIES_LIST);
+    }
+
+    @Override
+    public boolean hasRelationship(String relationshipType, List<String> propertyKeys) {
+        return this.relationships.containsKey(new RelationshipKey(relationshipType, propertyKeys));
     }
 
     @Override
