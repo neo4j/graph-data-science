@@ -23,26 +23,43 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 
 import java.util.OptionalLong;
+import java.util.function.LongUnaryOperator;
 
 public class OriginalIdNodePropertyValues implements LongNodePropertyValues {
-    private final IdMap idMap;
+    private final LongUnaryOperator toOriginalNodeId;
+    private final long nodeCount;
+    private final OptionalLong maxOriginalId;
 
     public OriginalIdNodePropertyValues(IdMap idMap) {
-        this.idMap = idMap;
+        this(
+            idMap::toOriginalNodeId,
+            idMap.nodeCount(),
+            OptionalLong.of(idMap.highestOriginalId())
+        );
+    }
+
+    public OriginalIdNodePropertyValues(
+        LongUnaryOperator toOriginalNodeId,
+        long nodeCount,
+        OptionalLong maxOriginalId
+    ) {
+        this.toOriginalNodeId = toOriginalNodeId;
+        this.nodeCount = nodeCount;
+        this.maxOriginalId = maxOriginalId;
     }
 
     @Override
     public long longValue(long nodeId) {
-        return idMap.toOriginalNodeId(nodeId);
+        return toOriginalNodeId.applyAsLong(nodeId);
     }
 
     @Override
     public OptionalLong getMaxLongPropertyValue() {
-        return OptionalLong.of(idMap.highestOriginalId());
+        return maxOriginalId;
     }
 
     @Override
     public long nodeCount() {
-        return idMap.nodeCount();
+        return nodeCount;
     }
 }
