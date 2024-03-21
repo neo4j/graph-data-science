@@ -35,6 +35,6 @@ public class FilteredNodeSimilarityMemoryEstimateDefinition implements MemoryEst
 
     @Override
     public MemoryEstimation memoryEstimation() {
-        return new NodeSimilarityMemoryEstimateDefinition(nodeSimilarityParameters).memoryEstimation();
+        return new NodeSimilarityMemoryEstimateDefinition(nodeSimilarityParameters.memoryParameters()).memoryEstimation();
     }
 }

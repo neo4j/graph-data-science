@@ -42,8 +42,8 @@ class NodeSimilarityMemoryEstimateDefinitionTest {
             .relCountUpperBound(5_000_000)
             .build();
 
-        MemoryTree actual = new NodeSimilarityFactory<>()
-            .memoryEstimation(topK, 0, false, false, true)
+        var estimateParams = NodeSimilarityEstimateParameters.create(topK, 0, false, false, true);
+        MemoryTree actual = new NodeSimilarityMemoryEstimateDefinition(estimateParams).memoryEstimation()
             .estimate(dimensions, 1);
 
         long nodeFilterRangeMin = 125_016L;
@@ -88,8 +88,8 @@ class NodeSimilarityMemoryEstimateDefinitionTest {
             .relCountUpperBound(5_000_000)
             .build();
 
-        MemoryTree actual = new NodeSimilarityFactory<>()
-            .memoryEstimation(topK, 100, false, false, true)
+        var estimateParams = NodeSimilarityEstimateParameters.create(topK, 100, false, false, true);
+        MemoryTree actual = new NodeSimilarityMemoryEstimateDefinition(estimateParams).memoryEstimation()
             .estimate(dimensions, 1);
 
         long nodeFilterRangeMin = 125_016L;
@@ -138,8 +138,13 @@ class NodeSimilarityMemoryEstimateDefinitionTest {
             .relCountUpperBound(20_000)
             .build();
 
-        MemoryTree actual = new NodeSimilarityFactory<>()
-            .memoryEstimation(Integer.MAX_VALUE, Integer.MAX_VALUE, false, false, true)
+        var estimateParams = NodeSimilarityEstimateParameters.create(
+            Integer.MAX_VALUE,
+            Integer.MAX_VALUE,
+            false, false, true
+        );
+
+        MemoryTree actual = new NodeSimilarityMemoryEstimateDefinition(estimateParams).memoryEstimation()
             .estimate(dimensions, 1);
 
         assertEquals(570592, actual.memoryUsage().min);
@@ -155,9 +160,12 @@ class NodeSimilarityMemoryEstimateDefinitionTest {
             .relCountUpperBound(5_000_000)
             .build();
 
-        MemoryTree actual = new NodeSimilarityFactory<>()
-            .memoryEstimation(10, 0, true, !componentPropertySet, true)
+
+        var estimateParams = NodeSimilarityEstimateParameters
+            .create(10, 0, true, !componentPropertySet, true);
+        MemoryTree actual = new NodeSimilarityMemoryEstimateDefinition(estimateParams).memoryEstimation()
             .estimate(dimensions, 1);
+
 
         long nodeFilterRangeMin = 125_016L;
         long nodeFilterRangeMax = 125_016L;

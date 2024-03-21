@@ -134,5 +134,12 @@ public final class NodeSimilarityParameters {
         return useComponents && componentProperty == null;
     }
 
+    public NodeSimilarityEstimateParameters memoryParameters() {
 
+        return NodeSimilarityEstimateParameters.create(
+            normalizedK,
+            normalizedN,
+            useComponents, runWCC(), computeToGraph()
+        );
+    }
 }

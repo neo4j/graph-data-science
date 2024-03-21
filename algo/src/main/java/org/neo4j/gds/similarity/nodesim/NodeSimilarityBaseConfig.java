@@ -167,5 +167,11 @@ public interface NodeSimilarityBaseConfig extends AlgoBaseConfig, RelationshipWe
             componentUsage.useComponents(),
             componentUsage.componentProperty()
         );
-    };
+    }
+
+    @Configuration.Ignore
+    default NodeSimilarityEstimateParameters toMemoryEstimateParameters() {
+        return toParameters().memoryParameters();
+    }
+
 }

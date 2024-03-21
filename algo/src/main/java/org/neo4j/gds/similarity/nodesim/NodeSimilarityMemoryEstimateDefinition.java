@@ -34,10 +34,10 @@ import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
 
 public class NodeSimilarityMemoryEstimateDefinition implements MemoryEstimateDefinition {
-    private final NodeSimilarityParameters parameters;
+    private final NodeSimilarityEstimateParameters parameters;
 
     public NodeSimilarityMemoryEstimateDefinition(
-        NodeSimilarityParameters parameters
+        NodeSimilarityEstimateParameters parameters
     ) {
         this.parameters = parameters;
     }
@@ -46,7 +46,7 @@ public class NodeSimilarityMemoryEstimateDefinition implements MemoryEstimateDef
     public MemoryEstimation memoryEstimation() {
 
         var topK = Math.abs(parameters.normalizedK());
-        var topN = Math.abs(parameters.normalizedK());
+        var topN = Math.abs(parameters.normalizedN());
 
         MemoryEstimations.Builder builder = MemoryEstimations.builder(NodeSimilarity.class.getSimpleName())
             .perNode("node filter", nodeCount -> sizeOfLongArray(BitSet.bits2words(nodeCount)))
@@ -101,7 +101,7 @@ public class NodeSimilarityMemoryEstimateDefinition implements MemoryEstimateDef
             builder.add(
                 "topN list",
                 MemoryEstimations.setup("", (dimensions, concurrency) ->
-                    TopNList.memoryEstimation(dimensions.nodeCount(), topK))
+                    TopNList.memoryEstimation(dimensions.nodeCount(), topN))
             );
         }
         return builder.build();

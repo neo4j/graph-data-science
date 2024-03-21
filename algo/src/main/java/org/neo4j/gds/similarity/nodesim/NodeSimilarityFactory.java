@@ -62,7 +62,7 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
-        return new NodeSimilarityMemoryEstimateDefinition(config.toParameters()).memoryEstimation();
+        return new NodeSimilarityMemoryEstimateDefinition(config.toMemoryEstimateParameters()).memoryEstimation();
     }
 
     @Override

@@ -47,7 +47,7 @@ public class SimilarityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new NodeSimilarityMemoryEstimateDefinition(configuration.toParameters()).memoryEstimation()
+            new NodeSimilarityMemoryEstimateDefinition(configuration.toMemoryEstimateParameters()).memoryEstimation()
         );
     }
 
