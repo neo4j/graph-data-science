@@ -106,6 +106,12 @@ public interface ResultStore {
     boolean hasRelationship(String relationshipType);
 
     /**
+     * Checks if this store has a relationship of the given type and property keys.
+     * Does not include relationship streams.
+     */
+    boolean hasRelationship(String relationshipType, List<String> propertyKeys);
+
+    /**
      * Checks if this store has a relationship stream of the given type and properties.
      * Does not include non-stream relationships.
      */
