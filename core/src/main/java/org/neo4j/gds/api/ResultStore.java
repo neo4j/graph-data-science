@@ -50,6 +50,11 @@ public interface ResultStore {
     void addNodeLabel(String nodeLabel, long nodeCount, LongUnaryOperator toOriginalId);
 
     /**
+     * Checks if this store has node id information for the given label.
+     */
+    boolean hasNodeLabel(String nodeLabel);
+
+    /**
      * Retrieves node id information for the given label.
      */
     NodeLabelEntry getNodeIdsByLabel(String nodeLabel);

@@ -63,6 +63,8 @@ class EphemeralResultStoreTest {
         var nodeLabelEntry = resultStore.getNodeIdsByLabel("Label");
         assertThat(nodeLabelEntry.nodeCount()).isEqualTo(1337L);
         assertThat(nodeLabelEntry.toOriginalId()).isEqualTo(toOriginalId);
+
+        assertThat(resultStore.hasNodeLabel("Label")).isTrue();
     }
 
     @Test

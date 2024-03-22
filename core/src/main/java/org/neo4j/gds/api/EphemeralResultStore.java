@@ -62,6 +62,11 @@ public class EphemeralResultStore implements ResultStore {
     }
 
     @Override
+    public boolean hasNodeLabel(String nodeLabel) {
+        return this.nodeIdsByLabel.containsKey(nodeLabel);
+    }
+
+    @Override
     public NodeLabelEntry getNodeIdsByLabel(String nodeLabel) {
         return this.nodeIdsByLabel.get(nodeLabel);
     }

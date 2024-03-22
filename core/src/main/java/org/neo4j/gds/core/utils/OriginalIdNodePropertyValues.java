@@ -28,24 +28,14 @@ import java.util.function.LongUnaryOperator;
 public class OriginalIdNodePropertyValues implements LongNodePropertyValues {
     private final LongUnaryOperator toOriginalNodeId;
     private final long nodeCount;
-    private final OptionalLong maxOriginalId;
 
     public OriginalIdNodePropertyValues(IdMap idMap) {
-        this(
-            idMap::toOriginalNodeId,
-            idMap.nodeCount(),
-            OptionalLong.of(idMap.highestOriginalId())
-        );
+        this(idMap::toOriginalNodeId, idMap.nodeCount());
     }
 
-    public OriginalIdNodePropertyValues(
-        LongUnaryOperator toOriginalNodeId,
-        long nodeCount,
-        OptionalLong maxOriginalId
-    ) {
+    public OriginalIdNodePropertyValues(LongUnaryOperator toOriginalNodeId, long nodeCount) {
         this.toOriginalNodeId = toOriginalNodeId;
         this.nodeCount = nodeCount;
-        this.maxOriginalId = maxOriginalId;
     }
 
     @Override
@@ -55,7 +45,7 @@ public class OriginalIdNodePropertyValues implements LongNodePropertyValues {
 
     @Override
     public OptionalLong getMaxLongPropertyValue() {
-        return maxOriginalId;
+        return OptionalLong.empty();
     }
 
     @Override
