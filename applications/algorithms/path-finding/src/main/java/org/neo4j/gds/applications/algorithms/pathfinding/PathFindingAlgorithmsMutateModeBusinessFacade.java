@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
@@ -64,7 +65,8 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         BfsMutateConfig configuration,
         ResultBuilder<BfsMutateConfig, HugeLongArray, RESULT> resultBuilder
     ) {
-        var mutateStep = new BreadthFirstSearchMutateStep(configuration);
+        var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
+        var mutateStep = new SearchMutateStep(mutateRelationshipType);
 
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
@@ -82,7 +84,8 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         DfsMutateConfig configuration,
         ResultBuilder<DfsMutateConfig, HugeLongArray, RESULT> resultBuilder
     ) {
-        var mutateStep = new DepthFirstSearchMutateStep(configuration);
+        var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
+        var mutateStep = new SearchMutateStep(mutateRelationshipType);
 
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,

@@ -25,12 +25,11 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.paths.traverse.DfsMutateConfig;
 
-class DepthFirstSearchMutateStep implements MutateOrWriteStep<HugeLongArray> {
-    private final DfsMutateConfig configuration;
+class SearchMutateStep implements MutateOrWriteStep<HugeLongArray> {
+    private final RelationshipType mutateRelationshipType;
 
-    DepthFirstSearchMutateStep(DfsMutateConfig configuration) {this.configuration = configuration;}
+    SearchMutateStep(RelationshipType mutateRelationshipType) {this.mutateRelationshipType = mutateRelationshipType;}
 
     @Override
     public void execute(
@@ -39,7 +38,6 @@ class DepthFirstSearchMutateStep implements MutateOrWriteStep<HugeLongArray> {
         HugeLongArray result,
         SideEffectProcessingCountsBuilder countsBuilder
     ) {
-        var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
 
         var relationshipsBuilder = GraphFactory
             .initRelationshipsBuilder()
