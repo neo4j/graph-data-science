@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.write.resultstore;
 
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 
@@ -26,6 +27,9 @@ public class ResultStoreNodePropertyExporterBuilder extends NodePropertyExporter
 
     @Override
     public NodePropertyExporter build() {
-        return new ResultStoreNodePropertyExporter(resultStore.orElseThrow());
+        return new ResultStoreNodePropertyExporter(
+            resultStore.orElseThrow(),
+            nodeLabels.stream().map(NodeLabel::name).toList()
+        );
     }
 }

@@ -22,6 +22,8 @@ package org.neo4j.gds.core.write.resultstore;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.EphemeralResultStore;
 
+import java.util.function.LongUnaryOperator;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ResultStoreNodeLabelExporterTest {
@@ -29,14 +31,18 @@ class ResultStoreNodeLabelExporterTest {
     @Test
     void shouldWriteToResultStore() {
         var resultStore = new EphemeralResultStore();
-        var nodeLabelExporter = new ResultStoreNodeLabelExporter(resultStore, 5, l -> l + 42);
+        LongUnaryOperator toOriginalId = l -> l + 42;
+        var nodeLabelExporter = new ResultStoreNodeLabelExporter(resultStore, 5, toOriginalId);
         nodeLabelExporter.write("label");
 
         assertThat(nodeLabelExporter.nodeLabelsWritten()).isEqualTo(5);
 
-        assertThat(resultStore.getNodeIdsByLabel("label"))
-            .toIterable()
-            .containsExactly(42L, 43L, 44L, 45L, 46L);
+        var nodeLabelEntry = resultStore.getNodeIdsByLabel("label");
+        assertThat(nodeLabelEntry.nodeCount()).isEqualTo(5);
+
+        for (int i = 0; i < 5; i++) {
+            assertThat(nodeLabelEntry.toOriginalId().applyAsLong(i)).isEqualTo(i + 42);
+        }
     }
 
 }

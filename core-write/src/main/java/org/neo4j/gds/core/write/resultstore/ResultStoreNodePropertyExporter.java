@@ -31,10 +31,12 @@ import java.util.List;
 public class ResultStoreNodePropertyExporter implements NodePropertyExporter {
 
     private final ResultStore resultStore;
+    private final List<String> nodeLabels;
     private long writtenProperties;
 
-    ResultStoreNodePropertyExporter(ResultStore resultStore) {
+    ResultStoreNodePropertyExporter(ResultStore resultStore, List<String> nodeLabels) {
         this.resultStore = resultStore;
+        this.nodeLabels = nodeLabels;
     }
 
     @Override
@@ -52,6 +54,7 @@ public class ResultStoreNodePropertyExporter implements NodePropertyExporter {
         nodeProperties.forEach(nodeProperty -> {
             var propertyValues = nodeProperty.properties();
             resultStore.addNodePropertyValues(
+                nodeLabels,
                 nodeProperty.propertyKey(),
                 propertyValues
             );

@@ -24,7 +24,6 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
 import java.util.List;
-import java.util.PrimitiveIterator;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Stream;
 
@@ -38,19 +37,32 @@ class EphemeralResultStoreTest {
         var resultStore = new EphemeralResultStore();
 
         var propertyValues = mock(NodePropertyValues.class);
-        resultStore.addNodePropertyValues("foo", propertyValues);
+        resultStore.addNodePropertyValues(List.of("A", "B"), "foo", propertyValues);
 
-        assertThat(resultStore.getNodePropertyValues("foo")).isEqualTo(propertyValues);
+        assertThat(resultStore.getNodePropertyValues(List.of("A", "B"), "foo")).isEqualTo(propertyValues);
+    }
+
+    @Test
+    void shouldNotResolveNodePropertiesWhenLabelsDoNotMatch() {
+        var resultStore = new EphemeralResultStore();
+
+        var propertyValues = mock(NodePropertyValues.class);
+        resultStore.addNodePropertyValues(List.of("A"), "foo", propertyValues);
+
+        assertThat(resultStore.getNodePropertyValues(List.of("B"), "foo")).isNull();
     }
 
     @Test
     void shouldStoreNodeLabel() {
         var resultStore = new EphemeralResultStore();
 
-        var nodeIds = mock(PrimitiveIterator.OfLong.class);
-        resultStore.addNodeLabel("Label", nodeIds);
+        var nodeCount = 1337L;
+        var toOriginalId = mock(LongUnaryOperator.class);
+        resultStore.addNodeLabel("Label", nodeCount, toOriginalId);
 
-        assertThat(resultStore.getNodeIdsByLabel("Label")).isEqualTo(nodeIds);
+        var nodeLabelEntry = resultStore.getNodeIdsByLabel("Label");
+        assertThat(nodeLabelEntry.nodeCount()).isEqualTo(1337L);
+        assertThat(nodeLabelEntry.toOriginalId()).isEqualTo(toOriginalId);
     }
 
     @Test

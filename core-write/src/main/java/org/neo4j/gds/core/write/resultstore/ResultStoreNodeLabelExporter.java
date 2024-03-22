@@ -23,7 +23,6 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.core.write.NodeLabelExporter;
 
 import java.util.function.LongUnaryOperator;
-import java.util.stream.LongStream;
 
 public class ResultStoreNodeLabelExporter implements NodeLabelExporter {
 
@@ -39,7 +38,7 @@ public class ResultStoreNodeLabelExporter implements NodeLabelExporter {
 
     @Override
     public void write(String nodeLabel) {
-        resultStore.addNodeLabel(nodeLabel, LongStream.range(0, nodeCount).map(toOriginalId).iterator());
+        resultStore.addNodeLabel(nodeLabel, nodeCount, toOriginalId);
     }
 
     @Override

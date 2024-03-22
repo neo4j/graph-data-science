@@ -23,7 +23,6 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 
 import java.util.List;
-import java.util.PrimitiveIterator;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Stream;
 
@@ -38,22 +37,22 @@ public interface ResultStore {
     /**
      * Stores node property values under the given property key.
      */
-    void addNodePropertyValues(String propertyKey, NodePropertyValues propertyValues);
+    void addNodePropertyValues(List<String> nodeLabels, String propertyKey, NodePropertyValues propertyValues);
 
     /**
      * Retrieves node property values from this store based on the property key.
      */
-    NodePropertyValues getNodePropertyValues(String propertyKey);
+    NodePropertyValues getNodePropertyValues(List<String> nodeLabels, String propertyKey);
 
     /**
      * Stores node id information for the given label in this store.
      */
-    void addNodeLabel(String nodeLabel, PrimitiveIterator.OfLong nodeIds);
+    void addNodeLabel(String nodeLabel, long nodeCount, LongUnaryOperator toOriginalId);
 
     /**
      * Retrieves node id information for the given label.
      */
-    PrimitiveIterator.OfLong getNodeIdsByLabel(String nodeLabel);
+    NodeLabelEntry getNodeIdsByLabel(String nodeLabel);
 
     /**
      * Stores a relationship information in this store, held by the given graph.
@@ -105,6 +104,8 @@ public interface ResultStore {
      * This does not include relationship streams.
      */
     boolean hasRelationship(String relationshipType);
+
+    record NodeLabelEntry(long nodeCount, LongUnaryOperator toOriginalId) {}
 
     record RelationshipEntry(Graph graph, LongUnaryOperator toOriginalId) {}
 
