@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.ml.pipeline.stubs.BreadthFirstSearchStub;
+import org.neo4j.gds.ml.pipeline.stubs.DepthFirstSearchStub;
 import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathAStarStub;
 import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathDijkstraStub;
 import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathYensStub;
@@ -68,6 +69,7 @@ final class NodePropertyStepFactoryUsingStubs {
         Map<CanonicalProcedureName, Stub> supportedProcedures = Map.of(
             CanonicalProcedureName.parse("gds.allshortestpaths.dijkstra.mutate"), new SingleSourceShortestPathDijkstraStub(),
             CanonicalProcedureName.parse("gds.bfs.mutate"), new BreadthFirstSearchStub(),
+            CanonicalProcedureName.parse("gds.dfs.mutate"), new DepthFirstSearchStub(),
             CanonicalProcedureName.parse("gds.shortestpath.astar.mutate"), new SinglePairShortestPathAStarStub(),
             CanonicalProcedureName.parse("gds.shortestpath.dijkstra.mutate"), new SinglePairShortestPathDijkstraStub(),
             CanonicalProcedureName.parse("gds.shortestpath.yens.mutate"), new SinglePairShortestPathYensStub(),

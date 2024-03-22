@@ -17,22 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.traverse;
+package org.neo4j.gds.ml.pipeline.stubs;
 
-import org.jetbrains.annotations.Nullable;
-import org.neo4j.graphdb.Path;
+import org.neo4j.gds.paths.traverse.DfsMutateConfig;
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.pathfinding.MutateStub;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
 
-import java.util.List;
-
-public final class DfsStreamResult {
-
-    public final long sourceNode;
-    public final List<Long> nodeIds;
-    public final Path path;
-
-    DfsStreamResult(long sourceNode, @Nullable List<Long> nodeIds, @Nullable Path path) {
-        this.sourceNode = sourceNode;
-        this.nodeIds = nodeIds;
-        this.path = path;
+public class DepthFirstSearchStub extends AbstractStub<DfsMutateConfig, PathFindingMutateResult> {
+    protected MutateStub<DfsMutateConfig, PathFindingMutateResult> stub(AlgorithmsProcedureFacade facade) {
+        return facade.pathFinding().depthFirstSearchMutateStub();
     }
 }

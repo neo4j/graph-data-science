@@ -25,14 +25,15 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.pathfinding.DfsStreamResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFactoryFacade;
 
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.paths.traverse.DfsStreamProc.DESCRIPTION;
+import static org.neo4j.gds.paths.traverse.Constants.DFS_DESCRIPTION;
 
-@GdsCallable(name = "gds.dfs.stream", description = DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.dfs.stream", description = DFS_DESCRIPTION, executionMode = STREAM)
 public class DfsStreamSpec implements AlgorithmSpec<DFS, HugeLongArray, DfsStreamConfig, Stream<DfsStreamResult>, DfsAlgorithmFactory<DfsStreamConfig>> {
     @Override
     public String name() {

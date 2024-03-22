@@ -19,11 +19,10 @@
  */
 package org.neo4j.gds.paths.traverse;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.algorithms.pathfinding.DfsStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.graphdb.RelationshipType;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -31,42 +30,29 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.paths.traverse.Constants.DFS_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class DfsStreamProc extends BaseProc {
-    static final RelationshipType NEXT = RelationshipType.withName("NEXT");
-
-    static final String DESCRIPTION =
-        "Depth-first search (DFS) is an algorithm for traversing or searching tree or graph data structures. " +
-        "The algorithm starts at the root node (selecting some arbitrary node as the root node in the case of a graph) " +
-        "and explores as far as possible along each branch before backtracking.";
+public class DfsStreamProc {
+    @Context
+    public GraphDataScience facade;
 
     @Procedure(name = "gds.dfs.stream", mode = READ)
-    @Description(DESCRIPTION)
+    @Description(DFS_DESCRIPTION)
     public Stream<DfsStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var streamSpec = new DfsStreamSpec();
-
-        return new ProcedureExecutor<>(
-            streamSpec,
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.pathFinding().depthFirstSearchStream(graphName, configuration);
     }
 
     @Procedure(name = "gds.dfs.stream.estimate", mode = READ)
-    @Description(DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphName") Object graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var streamSpec = new DfsStreamSpec();
-
-        return new MemoryEstimationExecutor<>(
-            streamSpec,
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphName, configuration);
+        return facade.pathFinding().depthFirstSearchStreamEstimate(graphName, configuration);
     }
 }

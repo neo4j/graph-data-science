@@ -25,19 +25,19 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
-import org.neo4j.gds.paths.traverse.BfsMutateConfig;
+import org.neo4j.gds.paths.traverse.DfsMutateConfig;
 
-class BreadthFirstSearchMutateStep implements MutateOrWriteStep<BfsMutateConfig, HugeLongArray> {
-    private final BfsMutateConfig configuration;
+class DepthFirstSearchMutateStep implements MutateOrWriteStep<DfsMutateConfig, HugeLongArray> {
+    private DfsMutateConfig configuration;
 
-    BreadthFirstSearchMutateStep(BfsMutateConfig configuration) {this.configuration = configuration;}
+    DepthFirstSearchMutateStep(DfsMutateConfig configuration) {this.configuration = configuration;}
 
     @Override
     public <RESULT_TO_CALLER> void execute(
         Graph graph,
         GraphStore graphStore,
         HugeLongArray result,
-        ResultBuilder<BfsMutateConfig, HugeLongArray, RESULT_TO_CALLER> resultBuilder
+        ResultBuilder<DfsMutateConfig, HugeLongArray, RESULT_TO_CALLER> resultBuilder
     ) {
         var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
 

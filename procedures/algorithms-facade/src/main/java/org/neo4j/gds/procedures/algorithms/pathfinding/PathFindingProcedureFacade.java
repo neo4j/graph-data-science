@@ -43,11 +43,13 @@ import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig;
 import org.neo4j.gds.paths.traverse.BfsStatsConfig;
 import org.neo4j.gds.paths.traverse.BfsStreamConfig;
+import org.neo4j.gds.paths.traverse.DfsStreamConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.BreadthFirstSearchMutateStub;
+import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.DepthFirstSearchMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestPathAStarMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestPathDijkstraMutateStub;
@@ -87,6 +89,7 @@ public final class PathFindingProcedureFacade {
 
     // applications
     private final BreadthFirstSearchMutateStub breadthFirstSearchMutateStub;
+    private final DepthFirstSearchMutateStub depthFirstSearchMutateStub;
     private final SinglePairShortestPathAStarMutateStub singlePairShortestPathAStarMutateStub;
     private final SinglePairShortestPathDijkstraMutateStub singlePairShortestPathDijkstraMutateStub;
     private final SinglePairShortestPathYensMutateStub singlePairShortestPathYensMutateStub;
@@ -103,6 +106,7 @@ public final class PathFindingProcedureFacade {
         PathFindingAlgorithmsStreamModeBusinessFacade streamModeFacade,
         PathFindingAlgorithmsWriteModeBusinessFacade writeModeFacade,
         BreadthFirstSearchMutateStub breadthFirstSearchMutateStub,
+        DepthFirstSearchMutateStub depthFirstSearchMutateStub,
         SinglePairShortestPathAStarMutateStub singlePairShortestPathAStarMutateStub,
         SinglePairShortestPathDijkstraMutateStub singlePairShortestPathDijkstraMutateStub,
         SinglePairShortestPathYensMutateStub singlePairShortestPathYensMutateStub,
@@ -120,6 +124,7 @@ public final class PathFindingProcedureFacade {
         this.writeModeFacade = writeModeFacade;
 
         this.breadthFirstSearchMutateStub = breadthFirstSearchMutateStub;
+        this.depthFirstSearchMutateStub = depthFirstSearchMutateStub;
         this.singlePairShortestPathAStarMutateStub = singlePairShortestPathAStarMutateStub;
         this.singlePairShortestPathDijkstraMutateStub = singlePairShortestPathDijkstraMutateStub;
         this.singlePairShortestPathYensMutateStub = singlePairShortestPathYensMutateStub;
@@ -190,6 +195,12 @@ public final class PathFindingProcedureFacade {
             pathFindingAlgorithmsMutateModeBusinessFacade
         );
 
+        var depthFirstSearchMutateStub = new DepthFirstSearchMutateStub(
+            genericStub,
+            pathFindingAlgorithmsEstimationModeBusinessFacade,
+            pathFindingAlgorithmsMutateModeBusinessFacade
+        );
+
         return new PathFindingProcedureFacade(
             closeableResourceRegistry,
             configurationCreator,
@@ -200,6 +211,7 @@ public final class PathFindingProcedureFacade {
             pathFindingAlgorithmsStreamModeBusinessFacade,
             pathFindingAlgorithmsWriteModeBusinessFacade,
             breadthFirstSearchMutateStub,
+            depthFirstSearchMutateStub,
             aStarStub,
             singlePairDijkstraStub,
             yensStub,
@@ -260,6 +272,38 @@ public final class PathFindingProcedureFacade {
             algorithmConfiguration,
             BfsStreamConfig::of,
             configuration -> estimationModeFacade.breadthFirstSearchEstimate(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
+    public DepthFirstSearchMutateStub depthFirstSearchMutateStub() {
+        return depthFirstSearchMutateStub;
+    }
+
+    public Stream<DfsStreamResult> depthFirstSearchStream(String graphName, Map<String, Object> configuration) {
+        var resultBuilder = new DfsStreamResultBuilder(nodeLookup, procedureReturnColumns.contains("path"));
+
+        return runStreamAlgorithm(
+            graphName,
+            configuration,
+            DfsStreamConfig::of,
+            resultBuilder,
+            streamModeFacade::depthFirstSearchStream
+        );
+    }
+
+    public Stream<MemoryEstimateResult> depthFirstSearchStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = runEstimation(
+            algorithmConfiguration,
+            DfsStreamConfig::of,
+            configuration -> estimationModeFacade.depthFirstSearchEstimate(
                 configuration,
                 graphNameOrConfiguration
             )

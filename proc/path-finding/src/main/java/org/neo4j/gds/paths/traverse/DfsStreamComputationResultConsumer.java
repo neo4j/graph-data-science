@@ -23,8 +23,10 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
+import org.neo4j.gds.procedures.algorithms.pathfinding.DfsStreamResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFactoryFacade;
 import org.neo4j.gds.procedures.algorithms.pathfinding.TraverseStreamComputationResultConsumer;
+import org.neo4j.graphdb.RelationshipType;
 
 import java.util.stream.Stream;
 
@@ -54,7 +56,7 @@ class DfsStreamComputationResultConsumer implements ComputationResultConsumer<DF
                     DfsStreamResult::new,
                     executionContext.returnColumns().contains("path"),
                     pathFactoryFacade,
-                    DfsStreamProc.NEXT,
+                    RelationshipType.withName("NEXT"),
                     executionContext.nodeLookup()
                 )).orElseGet(Stream::empty)
         );

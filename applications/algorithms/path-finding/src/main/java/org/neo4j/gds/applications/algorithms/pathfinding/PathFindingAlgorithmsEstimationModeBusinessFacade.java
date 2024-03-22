@@ -28,6 +28,8 @@ import org.neo4j.gds.paths.dijkstra.config.DijkstraBaseConfig;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
 import org.neo4j.gds.paths.traverse.BfsMemoryEstimateDefinition;
+import org.neo4j.gds.paths.traverse.DfsBaseConfig;
+import org.neo4j.gds.paths.traverse.DfsMemoryEstimateDefinition;
 import org.neo4j.gds.paths.yens.YensMemoryEstimateDefinition;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -56,6 +58,19 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
 
     public MemoryEstimation breadthFirstSearchEstimation(BfsBaseConfig ignored) {
         return new BfsMemoryEstimateDefinition().memoryEstimation();
+    }
+
+    public MemoryEstimateResult depthFirstSearchEstimate(
+        DfsBaseConfig configuration,
+        Object graphNameOrConfiguration
+    ) {
+        var memoryEstimation = depthFirstSearchEstimation(configuration);
+
+        return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
+    }
+
+    public MemoryEstimation depthFirstSearchEstimation(DfsBaseConfig ignored) {
+        return new DfsMemoryEstimateDefinition().memoryEstimation();
     }
 
     public MemoryEstimateResult singlePairShortestPathAStarEstimate(

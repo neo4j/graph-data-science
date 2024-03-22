@@ -23,6 +23,10 @@ final class Constants {
     static final String BFS_DESCRIPTION =
         "BFS is a traversal algorithm, which explores all of the neighbor nodes at " +
             "the present depth prior to moving on to the nodes at the next depth level.";
+    static final String DFS_DESCRIPTION =
+        "Depth-first search (DFS) is an algorithm for traversing or searching tree or graph data structures. " +
+        "The algorithm starts at the root node (selecting some arbitrary node as the root node in the case of a graph) " +
+        "and explores as far as possible along each branch before backtracking.";
 
     private Constants() {}
 }

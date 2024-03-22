@@ -19,11 +19,10 @@
  */
 package org.neo4j.gds.paths.traverse;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -31,36 +30,29 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.paths.traverse.Constants.DFS_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class DfsMutateProc extends BaseProc {
+public class DfsMutateProc {
+    @Context
+    public GraphDataScience facade;
 
     @Procedure(name = "gds.dfs.mutate", mode = READ)
-    @Description(DfsStreamProc.DESCRIPTION)
+    @Description(DFS_DESCRIPTION)
     public Stream<PathFindingMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var mutateSpec = new DfsMutateSpec();
-
-        return new ProcedureExecutor<>(
-            mutateSpec,
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.pathFinding().depthFirstSearchMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(name = "gds.dfs.mutate.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        var mutateSpec = new DfsMutateSpec();
-
-        return new MemoryEstimationExecutor<>(
-            mutateSpec,
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.pathFinding().depthFirstSearchMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 
-@GdsCallable(name = "gds.dfs.mutate", description = DfsStreamProc.DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
+@GdsCallable(name = "gds.dfs.mutate", description = Constants.DFS_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
 public class DfsMutateSpec implements AlgorithmSpec<DFS, HugeLongArray, DfsMutateConfig, Stream<PathFindingMutateResult>, DfsAlgorithmFactory<DfsMutateConfig>> {
     @Override
     public String name() {

@@ -17,16 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.pathfinding;
+package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-/**
- * We need human-readable labels for e.g. progress tracking
- */
-interface AlgorithmLabels {
-    String A_STAR = "AStar";
-    String BFS = "BFS";
-    String DFS = "DFS";
-    String DIJKSTRA = "Dijkstra";
-    String STEINER = "SteinerTree";
-    String YENS = "Yens";
+import org.neo4j.graphdb.Path;
+
+import java.util.List;
+
+public final class DfsStreamResult {
+    public final long sourceNode;
+    public final List<Long> nodeIds;
+    public final Path path;
+
+    public DfsStreamResult(long sourceNode, List<Long> nodeIds, Path path) {
+        this.sourceNode = sourceNode;
+        this.nodeIds = nodeIds;
+        this.path = path;
+    }
 }

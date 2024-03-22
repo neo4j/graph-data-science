@@ -26,6 +26,7 @@ import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraMutateConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraMutateConfig;
 import org.neo4j.gds.paths.traverse.BfsMutateConfig;
+import org.neo4j.gds.paths.traverse.DfsMutateConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensMutateConfig;
 import org.neo4j.gds.steiner.SteinerTreeMutateConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
@@ -34,6 +35,7 @@ import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.A_STAR;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BFS;
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DFS;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DIJKSTRA;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.STEINER;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.YENS;
@@ -70,6 +72,24 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             BFS,
             () -> estimationFacade.breadthFirstSearchEstimation(configuration),
             graph -> pathFindingAlgorithms.breadthFirstSearch(graph, configuration),
+            Optional.of(mutateStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT depthFirstSearch(
+        GraphName graphName,
+        DfsMutateConfig configuration,
+        ResultBuilder<DfsMutateConfig, HugeLongArray, RESULT> resultBuilder
+    ) {
+        var mutateStep = new DepthFirstSearchMutateStep(configuration);
+
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            DFS,
+            () -> estimationFacade.depthFirstSearchEstimation(configuration),
+            graph -> pathFindingAlgorithms.depthFirstSearch(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
         );

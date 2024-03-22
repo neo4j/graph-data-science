@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.pathfinding.traverse.BreadthFirstSearch;
+import org.neo4j.gds.applications.algorithms.pathfinding.traverse.DepthFirstSearch;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -39,6 +40,7 @@ import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraBaseConfig;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
 import org.neo4j.gds.paths.traverse.BfsBaseConfig;
+import org.neo4j.gds.paths.traverse.DfsBaseConfig;
 import org.neo4j.gds.paths.yens.Yens;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm;
@@ -49,6 +51,13 @@ import org.neo4j.gds.termination.TerminationFlag;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.A_STAR;
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BFS;
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DFS;
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DIJKSTRA;
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.STEINER;
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.YENS;
 
 /**
  * Here is the bottom business facade for path finding (or top layer in another module, or maybe not even a facade, ...).
@@ -80,9 +89,21 @@ public class PathFindingAlgorithms {
     }
 
     HugeLongArray breadthFirstSearch(Graph graph, BfsBaseConfig configuration) {
-        var progressTracker = createProgressTracker(configuration, Tasks.leaf(AlgorithmLabels.BFS));
+        var progressTracker = createProgressTracker(configuration, Tasks.leaf(BFS));
 
         var algorithm = new BreadthFirstSearch();
+
+        return algorithm.compute(
+            graph,
+            configuration,
+            progressTracker
+        );
+    }
+
+    HugeLongArray depthFirstSearch(Graph graph, DfsBaseConfig configuration) {
+        var progressTracker = createProgressTracker(configuration, Tasks.leaf(DFS));
+
+        var algorithm = new DepthFirstSearch();
 
         return algorithm.compute(
             graph,
@@ -94,7 +115,7 @@ public class PathFindingAlgorithms {
     PathFindingResult singlePairShortestPathAStar(Graph graph, ShortestPathAStarBaseConfig configuration) {
         var progressTracker = createProgressTracker(
             configuration,
-            Tasks.leaf(AlgorithmLabels.A_STAR, graph.relationshipCount())
+            Tasks.leaf(A_STAR, graph.relationshipCount())
         );
 
         var algorithm = AStar.sourceTarget(graph, configuration, progressTracker, terminationFlag);
@@ -111,7 +132,7 @@ public class PathFindingAlgorithms {
     PathFindingResult singlePairShortestPathDijkstra(Graph graph, DijkstraSourceTargetsBaseConfig configuration) {
         var progressTracker = createProgressTracker(
             configuration,
-            Tasks.leaf(AlgorithmLabels.DIJKSTRA, graph.relationshipCount())
+            Tasks.leaf(DIJKSTRA, graph.relationshipCount())
         );
 
         var dijkstra = Dijkstra.sourceTarget(
@@ -128,9 +149,9 @@ public class PathFindingAlgorithms {
     }
 
     PathFindingResult singlePairShortestPathYens(Graph graph, ShortestPathYensBaseConfig configuration) {
-        var initialTask = Tasks.leaf(AlgorithmLabels.DIJKSTRA, graph.relationshipCount());
+        var initialTask = Tasks.leaf(DIJKSTRA, graph.relationshipCount());
         var pathGrowingTask = Tasks.leaf("Path growing", configuration.k() - 1);
-        var yensTask = Tasks.task(AlgorithmLabels.YENS, initialTask, pathGrowingTask);
+        var yensTask = Tasks.task(YENS, initialTask, pathGrowingTask);
 
         var progressTracker = createProgressTracker(
             configuration,
@@ -145,7 +166,7 @@ public class PathFindingAlgorithms {
     PathFindingResult singleSourceShortestPathDijkstra(Graph graph, DijkstraBaseConfig configuration) {
         var progressTracker = createProgressTracker(
             configuration,
-            Tasks.leaf(AlgorithmLabels.DIJKSTRA, graph.relationshipCount())
+            Tasks.leaf(DIJKSTRA, graph.relationshipCount())
         );
 
         var dijkstra = Dijkstra.singleSource(
@@ -173,7 +194,7 @@ public class PathFindingAlgorithms {
             var nodeCount = graph.nodeCount();
             subtasks.add(Tasks.leaf("Reroute", nodeCount));
         }
-        var progressTracker = createProgressTracker(configuration, Tasks.task(AlgorithmLabels.STEINER, subtasks));
+        var progressTracker = createProgressTracker(configuration, Tasks.task(STEINER, subtasks));
 
         var steiner = new ShortestPathsSteinerAlgorithm(
             graph,
