@@ -243,7 +243,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             BfsStatsConfig::of,
-            configuration -> estimationModeFacade.breadthFirstSearchEstimate(
+            configuration -> estimationModeFacade.breadthFirstSearch(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -260,7 +260,7 @@ public final class PathFindingProcedureFacade {
             configuration,
             BfsStreamConfig::of,
             resultBuilder,
-            streamModeFacade::breadthFirstSearchStream
+            streamModeFacade::breadthFirstSearch
         );
     }
 
@@ -271,7 +271,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             BfsStreamConfig::of,
-            configuration -> estimationModeFacade.breadthFirstSearchEstimate(
+            configuration -> estimationModeFacade.breadthFirstSearch(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -292,7 +292,7 @@ public final class PathFindingProcedureFacade {
             configuration,
             DfsStreamConfig::of,
             resultBuilder,
-            streamModeFacade::depthFirstSearchStream
+            streamModeFacade::depthFirstSearch
         );
     }
 
@@ -303,7 +303,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             DfsStreamConfig::of,
-            configuration -> estimationModeFacade.depthFirstSearchEstimate(
+            configuration -> estimationModeFacade.depthFirstSearch(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -324,7 +324,7 @@ public final class PathFindingProcedureFacade {
             graphName,
             configuration,
             ShortestPathAStarStreamConfig::of,
-            streamModeFacade::singlePairShortestPathAStarStream
+            streamModeFacade::singlePairShortestPathAStar
         );
     }
 
@@ -335,7 +335,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             ShortestPathAStarStreamConfig::of,
-            configuration -> estimationModeFacade.singlePairShortestPathAStarEstimate(
+            configuration -> estimationModeFacade.singlePairShortestPathAStar(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -353,7 +353,7 @@ public final class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 ShortestPathAStarWriteConfig::of,
-                writeModeFacade::singlePairShortestPathAStarWrite
+                writeModeFacade::singlePairShortestPathAStar
             )
         );
     }
@@ -365,7 +365,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             ShortestPathAStarWriteConfig::of,
-            configuration -> estimationModeFacade.singlePairShortestPathAStarEstimate(
+            configuration -> estimationModeFacade.singlePairShortestPathAStar(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -386,7 +386,7 @@ public final class PathFindingProcedureFacade {
             graphName,
             configuration,
             ShortestPathDijkstraStreamConfig::of,
-            streamModeFacade::singlePairShortestPathDijkstraStream
+            streamModeFacade::singlePairShortestPathDijkstra
         );
     }
 
@@ -397,7 +397,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             ShortestPathDijkstraStreamConfig::of,
-            configuration -> estimationModeFacade.singlePairShortestPathDijkstraEstimate(
+            configuration -> estimationModeFacade.singlePairShortestPathDijkstra(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -415,7 +415,7 @@ public final class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 ShortestPathDijkstraWriteConfig::of,
-                writeModeFacade::singlePairShortestPathDijkstraWrite
+                writeModeFacade::singlePairShortestPathDijkstra
             )
         );
     }
@@ -427,7 +427,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             ShortestPathDijkstraWriteConfig::of,
-            configuration -> estimationModeFacade.singlePairShortestPathDijkstraEstimate(
+            configuration -> estimationModeFacade.singlePairShortestPathDijkstra(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -448,7 +448,7 @@ public final class PathFindingProcedureFacade {
             graphName,
             configuration,
             ShortestPathYensStreamConfig::of,
-            streamModeFacade::singlePairShortestPathYensStream
+            streamModeFacade::singlePairShortestPathYens
         );
     }
 
@@ -459,7 +459,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             ShortestPathYensStreamConfig::of,
-            configuration -> estimationModeFacade.singlePairShortestPathYensEstimate(
+            configuration -> estimationModeFacade.singlePairShortestPathYens(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -477,7 +477,7 @@ public final class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 ShortestPathYensWriteConfig::of,
-                writeModeFacade::singlePairShortestPathYensWrite
+                writeModeFacade::singlePairShortestPathYens
             )
         );
     }
@@ -489,7 +489,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             ShortestPathYensWriteConfig::of,
-            configuration -> estimationModeFacade.singlePairShortestPathYensEstimate(
+            configuration -> estimationModeFacade.singlePairShortestPathYens(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -510,7 +510,7 @@ public final class PathFindingProcedureFacade {
             graphName,
             configuration,
             AllShortestPathsDijkstraStreamConfig::of,
-            streamModeFacade::singleSourceShortestPathDijkstraStream
+            streamModeFacade::singleSourceShortestPathDijkstra
         );
     }
 
@@ -521,7 +521,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             AllShortestPathsDijkstraStreamConfig::of,
-            configuration -> estimationModeFacade.singleSourceShortestPathDijkstraEstimate(
+            configuration -> estimationModeFacade.singleSourceShortestPathDijkstra(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -539,7 +539,7 @@ public final class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 AllShortestPathsDijkstraWriteConfig::of,
-                writeModeFacade::singleSourceShortestPathDijkstraWrite
+                writeModeFacade::singleSourceShortestPathDijkstra
             )
         );
     }
@@ -551,7 +551,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             AllShortestPathsDijkstraWriteConfig::of,
-            configuration -> estimationModeFacade.singleSourceShortestPathDijkstraEstimate(
+            configuration -> estimationModeFacade.singleSourceShortestPathDijkstra(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -583,7 +583,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             SteinerTreeStatsConfig::of,
-            configuration -> estimationModeFacade.steinerTreeEstimate(
+            configuration -> estimationModeFacade.steinerTree(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -600,7 +600,7 @@ public final class PathFindingProcedureFacade {
             configuration,
             SteinerTreeStreamConfig::of,
             resultBuilder,
-            streamModeFacade::steinerTreeStream
+            streamModeFacade::steinerTree
         );
     }
 
@@ -611,7 +611,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             SteinerTreeStreamConfig::of,
-            configuration -> estimationModeFacade.steinerTreeEstimate(
+            configuration -> estimationModeFacade.steinerTree(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -628,7 +628,7 @@ public final class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 SteinerTreeWriteConfig::of,
-                writeModeFacade::steinerTreeWrite,
+                writeModeFacade::steinerTree,
                 resultBuilder
             )
         );
@@ -641,7 +641,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             SteinerTreeWriteConfig::of,
-            configuration -> estimationModeFacade.steinerTreeEstimate(
+            configuration -> estimationModeFacade.steinerTree(
                 configuration,
                 graphNameOrConfiguration
             )

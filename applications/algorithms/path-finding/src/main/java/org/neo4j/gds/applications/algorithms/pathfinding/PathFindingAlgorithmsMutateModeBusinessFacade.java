@@ -59,7 +59,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         this.estimationFacade = estimationFacade;
     }
 
-    public <RESULT> RESULT breadthFirstSearchMutate(
+    public <RESULT> RESULT breadthFirstSearch(
         GraphName graphName,
         BfsMutateConfig configuration,
         ResultBuilder<BfsMutateConfig, HugeLongArray, RESULT> resultBuilder
@@ -95,7 +95,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT singlePairShortestPathAStarMutate(
+    public <RESULT> RESULT singlePairShortestPathAStar(
         GraphName graphName,
         ShortestPathAStarMutateConfig configuration,
         ResultBuilder<ShortestPathAStarMutateConfig, PathFindingResult, RESULT> resultBuilder
@@ -113,7 +113,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT singlePairShortestPathDijkstraMutate(
+    public <RESULT> RESULT singlePairShortestPathDijkstra(
         GraphName graphName,
         ShortestPathDijkstraMutateConfig configuration,
         ResultBuilder<ShortestPathDijkstraMutateConfig, PathFindingResult, RESULT> resultBuilder
@@ -131,7 +131,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT singlePairShortestPathYensMutate(
+    public <RESULT> RESULT singlePairShortestPathYens(
         GraphName graphName,
         ShortestPathYensMutateConfig configuration,
         ResultBuilder<ShortestPathYensMutateConfig, PathFindingResult, RESULT> resultBuilder
@@ -149,7 +149,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT singleSourceShortestPathDijkstraMutate(
+    public <RESULT> RESULT singleSourceShortestPathDijkstra(
         GraphName graphName,
         AllShortestPathsDijkstraMutateConfig configuration,
         ResultBuilder<AllShortestPathsDijkstraMutateConfig, PathFindingResult, RESULT> resultBuilder
@@ -167,7 +167,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT steinerTreeMutate(
+    public <RESULT> RESULT steinerTree(
         GraphName graphName,
         SteinerTreeMutateConfig configuration,
         ResultBuilder<SteinerTreeMutateConfig, SteinerTreeResult, RESULT> resultBuilder

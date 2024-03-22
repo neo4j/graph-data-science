@@ -82,7 +82,7 @@ public class SingleSourceShortestPathDijkstraMutateStub implements MutateStub<Al
             graphName,
             configuration,
             AllShortestPathsDijkstraMutateConfig::of,
-            mutateFacade::singleSourceShortestPathDijkstraMutate,
+            mutateFacade::singleSourceShortestPathDijkstra,
             new PathFindingResultBuilderForMutateMode<>()
         );
     }

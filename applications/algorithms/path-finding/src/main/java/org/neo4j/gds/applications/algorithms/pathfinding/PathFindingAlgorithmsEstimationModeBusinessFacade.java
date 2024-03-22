@@ -47,7 +47,7 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         this.algorithmEstimationTemplate = algorithmEstimationTemplate;
     }
 
-    public MemoryEstimateResult breadthFirstSearchEstimate(
+    public MemoryEstimateResult breadthFirstSearch(
         BfsBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
@@ -60,7 +60,7 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         return new BfsMemoryEstimateDefinition().memoryEstimation();
     }
 
-    public MemoryEstimateResult depthFirstSearchEstimate(
+    public MemoryEstimateResult depthFirstSearch(
         DfsBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
@@ -73,7 +73,7 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         return new DfsMemoryEstimateDefinition().memoryEstimation();
     }
 
-    public MemoryEstimateResult singlePairShortestPathAStarEstimate(
+    public MemoryEstimateResult singlePairShortestPathAStar(
         ShortestPathAStarBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
@@ -86,7 +86,7 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         return new AStarMemoryEstimateDefinition().memoryEstimation();
     }
 
-    public MemoryEstimateResult singlePairShortestPathDijkstraEstimate(
+    public MemoryEstimateResult singlePairShortestPathDijkstra(
         DijkstraSourceTargetsBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
@@ -103,7 +103,7 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         return memoryEstimateDefinition.memoryEstimation();
     }
 
-    public MemoryEstimateResult singlePairShortestPathYensEstimate(
+    public MemoryEstimateResult singlePairShortestPathYens(
         ShortestPathYensBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
@@ -118,7 +118,7 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         return memoryEstimateDefinition.memoryEstimation();
     }
 
-    public MemoryEstimateResult singleSourceShortestPathDijkstraEstimate(
+    public MemoryEstimateResult singleSourceShortestPathDijkstra(
         DijkstraBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
@@ -133,17 +133,17 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         return memoryEstimateDefinition.memoryEstimation();
     }
 
-    public MemoryEstimation steinerTreeEstimation(SteinerTreeBaseConfig configuration) {
-        return new SteinerTreeMemoryEstimateDefinition(configuration.applyRerouting()).memoryEstimation();
-    }
-
-    public MemoryEstimateResult steinerTreeEstimate(
+    public MemoryEstimateResult steinerTree(
         SteinerTreeBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
         var memoryEstimation = steinerTreeEstimation(configuration);
 
         return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
+    }
+
+    public MemoryEstimation steinerTreeEstimation(SteinerTreeBaseConfig configuration) {
+        return new SteinerTreeMemoryEstimateDefinition(configuration.applyRerouting()).memoryEstimation();
     }
 
     public <CONFIGURATION extends AlgoBaseConfig> MemoryEstimateResult runEstimation(

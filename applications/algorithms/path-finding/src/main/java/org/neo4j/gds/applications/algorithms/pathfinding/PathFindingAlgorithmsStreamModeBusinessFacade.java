@@ -60,7 +60,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         this.estimationFacade = estimationFacade;
     }
 
-    public <RESULT> RESULT breadthFirstSearchStream(
+    public <RESULT> RESULT breadthFirstSearch(
         GraphName graphName,
         BfsStreamConfig configuration,
         ResultBuilder<BfsStreamConfig, HugeLongArray, RESULT> resultBuilder
@@ -76,7 +76,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT depthFirstSearchStream(
+    public <RESULT> RESULT depthFirstSearch(
         GraphName graphName,
         DfsStreamConfig configuration,
         ResultBuilder<DfsStreamConfig, HugeLongArray, RESULT> resultBuilder
@@ -92,7 +92,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT singlePairShortestPathAStarStream(
+    public <RESULT> RESULT singlePairShortestPathAStar(
         GraphName graphName,
         ShortestPathAStarStreamConfig configuration,
         ResultBuilder<ShortestPathAStarStreamConfig, PathFindingResult, RESULT> resultBuilder
@@ -108,7 +108,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT singlePairShortestPathDijkstraStream(
+    public <RESULT> RESULT singlePairShortestPathDijkstra(
         GraphName graphName,
         ShortestPathDijkstraStreamConfig configuration,
         ResultBuilder<ShortestPathDijkstraStreamConfig, PathFindingResult, RESULT> resultBuilder
@@ -124,7 +124,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT singlePairShortestPathYensStream(
+    public <RESULT> RESULT singlePairShortestPathYens(
         GraphName graphName,
         ShortestPathYensStreamConfig configuration,
         ResultBuilder<ShortestPathYensStreamConfig, PathFindingResult, RESULT> resultBuilder
@@ -140,7 +140,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT singleSourceShortestPathDijkstraStream(
+    public <RESULT> RESULT singleSourceShortestPathDijkstra(
         GraphName graphName,
         AllShortestPathsDijkstraStreamConfig configuration,
         ResultBuilder<AllShortestPathsDijkstraStreamConfig, PathFindingResult, RESULT> resultBuilder
@@ -156,7 +156,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT steinerTreeStream(
+    public <RESULT> RESULT steinerTree(
         GraphName graphName,
         SteinerTreeStreamConfig configuration,
         ResultBuilder<SteinerTreeStreamConfig, SteinerTreeResult, RESULT> resultBuilder

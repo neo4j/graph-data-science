@@ -82,7 +82,7 @@ public class SinglePairShortestPathYensMutateStub implements MutateStub<Shortest
             graphName,
             configuration,
             ShortestPathYensMutateConfig::of,
-            mutateFacade::singlePairShortestPathYensMutate,
+            mutateFacade::singlePairShortestPathYens,
             new PathFindingResultBuilderForMutateMode<>()
         );
     }

@@ -83,7 +83,7 @@ public class SinglePairShortestPathAStarMutateStub implements MutateStub<Shortes
             graphName,
             configuration,
             ShortestPathAStarMutateConfig::of,
-            mutateFacade::singlePairShortestPathAStarMutate,
+            mutateFacade::singlePairShortestPathAStar,
             new PathFindingResultBuilderForMutateMode<>()
         );
     }

@@ -82,7 +82,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         this.pathFindingAlgorithms = pathFindingAlgorithms;
     }
 
-    public <RESULT> RESULT singlePairShortestPathAStarWrite(
+    public <RESULT> RESULT singlePairShortestPathAStar(
         GraphName graphName,
         ShortestPathAStarWriteConfig configuration,
         ResultBuilder<ShortestPathAStarWriteConfig, PathFindingResult, RESULT> resultBuilder
@@ -97,7 +97,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT singlePairShortestPathDijkstraWrite(
+    public <RESULT> RESULT singlePairShortestPathDijkstra(
         GraphName graphName,
         ShortestPathDijkstraWriteConfig configuration,
         ResultBuilder<ShortestPathDijkstraWriteConfig, PathFindingResult, RESULT> resultBuilder
@@ -112,7 +112,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT singlePairShortestPathYensWrite(
+    public <RESULT> RESULT singlePairShortestPathYens(
         GraphName graphName,
         ShortestPathYensWriteConfig configuration,
         ResultBuilder<ShortestPathYensWriteConfig, PathFindingResult, RESULT> resultBuilder
@@ -127,7 +127,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT singleSourceShortestPathDijkstraWrite(
+    public <RESULT> RESULT singleSourceShortestPathDijkstra(
         GraphName graphName,
         AllShortestPathsDijkstraWriteConfig configuration,
         ResultBuilder<AllShortestPathsDijkstraWriteConfig, PathFindingResult, RESULT> resultBuilder
@@ -142,7 +142,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         );
     }
 
-    public <RESULT> RESULT steinerTreeWrite(
+    public <RESULT> RESULT steinerTree(
         GraphName graphName,
         SteinerTreeWriteConfig configuration,
         ResultBuilder<SteinerTreeWriteConfig, SteinerTreeResult, RESULT> resultBuilder

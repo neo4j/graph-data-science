@@ -83,7 +83,7 @@ public class SteinerTreeMutateStub implements MutateStub<SteinerTreeMutateConfig
             graphName,
             configuration,
             SteinerTreeMutateConfig::of,
-            mutateFacade::steinerTreeMutate,
+            mutateFacade::steinerTree,
             resultBuilder
         );
     }

@@ -83,7 +83,7 @@ public class BreadthFirstSearchMutateStub implements MutateStub<BfsMutateConfig,
             graphName,
             configuration,
             BfsMutateConfig::of,
-            mutateFacade::breadthFirstSearchMutate,
+            mutateFacade::breadthFirstSearch,
             resultBuilder
         );
     }
