@@ -61,7 +61,8 @@ public class MiscAlgorithmWriteBusinessFacade {
                     configuration.writeConcurrency(),
                     configuration.writeProperty(),
                     "CELFWrite",
-                    configuration.arrowConnectionInfo()
+                    configuration.arrowConnectionInfo(),
+                    configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
                 );
                 writeResultBuilder.writeMillis(writeResult.writeMilliseconds());
                 writeResultBuilder.nodePropertiesWritten(writeResult.nodePropertiesWritten());

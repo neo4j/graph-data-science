@@ -21,6 +21,7 @@ package org.neo4j.gds.algorithms.writeservices;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -56,7 +57,8 @@ public class WriteNodePropertyService {
         int writeConcurrency,
         String writeProperty,
         String procedureName,
-        Optional<ArrowConnectionInfo> arrowConnectionInfo
+        Optional<ArrowConnectionInfo> arrowConnectionInfo,
+        Optional<ResultStore> resultStore
     ) {
         return Neo4jDatabaseNodePropertyWriter.writeNodeProperty(
             nodePropertyExporterBuilder,
@@ -68,6 +70,7 @@ public class WriteNodePropertyService {
             writeProperty,
             procedureName,
             arrowConnectionInfo,
+            resultStore,
             terminationFlag,
             log
         );

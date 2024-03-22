@@ -80,6 +80,8 @@ public class KSpanningTreeWriteSpec implements
             builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount());
             try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
 
+                var graphStore = computationResult.graphStore();
+                var resultStore = config.resolveResultStore(graphStore.resultStore());
                 executionContext.nodePropertyExporterBuilder()
                     .withIdMap(graph)
                     .withTerminationFlag(algorithm.getTerminationFlag())
@@ -93,8 +95,9 @@ public class KSpanningTreeWriteSpec implements
                     )
                     .withArrowConnectionInfo(
                         config.arrowConnectionInfo(),
-                        computationResult.graphStore().databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
+                        graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                     )
+                    .withResultStore(resultStore)
                     .build()
                     .write(config.writeProperty(), properties);
             }

@@ -24,6 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
 
 import java.util.Collection;
@@ -63,6 +64,15 @@ public interface WriteConfig extends ConcurrencyConfig {
     @Value.Auxiliary
     default boolean writeToResultStore() {
         return false;
+    }
+
+    @Configuration.Ignore
+    @Value.Auxiliary
+    @Value.Default
+    default Optional<ResultStore> resolveResultStore(ResultStore resultStore) {
+        return writeToResultStore()
+            ? Optional.of(resultStore)
+            : Optional.empty();
     }
 
     @Configuration.GraphStoreValidationCheck

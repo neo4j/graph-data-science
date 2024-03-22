@@ -115,6 +115,7 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
                     configuration.arrowConnectionInfo(),
                     graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                 )
+                .withResultStore(configuration.resolveResultStore(graphStore.resultStore()))
                 .withIdMappingOperator(graph::toOriginalNodeId)
                 .withProgressTracker(progressTracker)
                 .withRelationships(relationshipStream)

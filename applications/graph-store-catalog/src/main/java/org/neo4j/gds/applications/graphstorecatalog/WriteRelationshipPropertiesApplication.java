@@ -60,6 +60,7 @@ public class WriteRelationshipPropertiesApplication {
                 configuration.arrowConnectionInfo(),
                 graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
             )
+            .withResultStore(configuration.resolveResultStore(graphStore.resultStore()))
             .withRelationshipCount(relationshipCount)
             .build();
 

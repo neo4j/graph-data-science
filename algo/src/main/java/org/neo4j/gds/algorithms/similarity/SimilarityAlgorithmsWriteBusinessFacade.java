@@ -200,21 +200,24 @@ public class SimilarityAlgorithmsWriteBusinessFacade {
 
             var similarityGraph = similarityGraphResult.similarityGraph();
 
+            var graphStore = algorithmResult.graphStore();
             var rootIdMap = similarityGraphResult.isTopKGraph()
                 ? similarityGraph
-                : algorithmResult.graphStore().nodes();
+                : graphStore.nodes();
 
 
             var similarityDistributionBuilder = SimilaritySummaryBuilder.of(shouldComputeSimilarityDistribution);
+            var resultStore = configuration.resolveResultStore(graphStore.resultStore());
             var writeResult = writeRelationshipService.write(
                 writeRelationshipType,
                 writeProperty,
                 similarityGraph,
-                algorithmResult.graphStore(),
+                graphStore,
                 rootIdMap,
                 taskName,
                 configuration.writeConcurrency(),
                 arrowConnectionInfo,
+                resultStore,
                 similarityDistributionBuilder.similarityConsumer()
             );
 

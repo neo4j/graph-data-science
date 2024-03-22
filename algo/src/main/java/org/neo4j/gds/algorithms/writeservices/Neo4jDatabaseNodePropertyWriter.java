@@ -24,6 +24,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.PropertyState;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.config.ArrowConnectionInfo;
@@ -68,6 +69,7 @@ final class Neo4jDatabaseNodePropertyWriter {
         String writeProperty,
         String procedureName,
         Optional<ArrowConnectionInfo> arrowConnectionInfo,
+        Optional<ResultStore> resultStore,
         TerminationFlag terminationFlag,
         Log log
     ) {
@@ -102,6 +104,7 @@ final class Neo4jDatabaseNodePropertyWriter {
                     arrowConnectionInfo,
                     graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                 )
+                .withResultStore(resultStore)
                 .parallel(DefaultPool.INSTANCE, writeConcurrency)
                 .build();
 

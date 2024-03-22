@@ -23,6 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
@@ -58,6 +59,7 @@ public class WriteRelationshipService {
         String taskName,
         Integer concurrency,
         Optional<ArrowConnectionInfo> arrowConnectionInfo,
+        Optional<ResultStore> resultStore,
         RelationshipWithPropertyConsumer relationshipWithPropertyConsumer
     ) {
         return Neo4jDatabaseRelationshipWriter.writeRelationship(
@@ -73,6 +75,7 @@ public class WriteRelationshipService {
             terminationFlag,
             concurrency,
             arrowConnectionInfo,
+            resultStore,
             relationshipWithPropertyConsumer
         );
     }

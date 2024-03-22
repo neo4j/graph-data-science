@@ -74,6 +74,7 @@ class SteinerTreeWriteStep implements MutateOrWriteStep<SteinerTreeResult> {
                 configuration.arrowConnectionInfo(),
                 graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
             )
+            .withResultStore(configuration.resolveResultStore(graphStore.resultStore()))
             .build();
 
         relationshipExporter.write(configuration.writeRelationshipType(), configuration.writeProperty());

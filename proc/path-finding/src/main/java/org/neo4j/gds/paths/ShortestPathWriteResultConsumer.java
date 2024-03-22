@@ -113,6 +113,7 @@ public class ShortestPathWriteResultConsumer<ALGO extends Algorithm<PathFindingR
                         config.arrowConnectionInfo(),
                         computationResult.graphStore().databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                     )
+                    .withResultStore(config.resolveResultStore(computationResult.graphStore().resultStore()))
                     .build();
 
                 try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {

@@ -35,6 +35,7 @@ import org.neo4j.gds.algorithms.community.specificfields.StandardCommunityStatis
 import org.neo4j.gds.algorithms.community.specificfields.TriangleCountSpecificFields;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ArrowConnectionInfo;
@@ -104,19 +105,18 @@ public class CommunityAlgorithmsWriteBusinessFacade {
                 () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
             ),
             (result -> result::setIdOf),
-            (result, componentCount, communitySummary) -> {
-                return new StandardCommunityStatisticsSpecificFields(
-                    componentCount,
-                    communitySummary
-                );
-            },
+            (result, componentCount, communitySummary) -> new StandardCommunityStatisticsSpecificFields(
+                componentCount,
+                communitySummary
+            ),
             statisticsComputationInstructions,
             intermediateResult.computeMilliseconds,
             () -> StandardCommunityStatisticsSpecificFields.EMPTY,
             "WccWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
-            configuration.arrowConnectionInfo()
+            configuration.arrowConnectionInfo(),
+            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
         );
 
     }
@@ -142,7 +142,8 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             "KCoreWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
-            configuration.arrowConnectionInfo()
+            configuration.arrowConnectionInfo(),
+            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
         );
 
     }
@@ -169,19 +170,18 @@ public class CommunityAlgorithmsWriteBusinessFacade {
                 config.concurrency()
             ),
             (result -> result::get),
-            (result, componentCount, communitySummary) -> {
-                return new StandardCommunityStatisticsSpecificFields(
-                    componentCount,
-                    communitySummary
-                );
-            },
+            (result, componentCount, communitySummary) -> new StandardCommunityStatisticsSpecificFields(
+                componentCount,
+                communitySummary
+            ),
             statisticsComputationInstructions,
             intermediateResult.computeMilliseconds,
             () -> StandardCommunityStatisticsSpecificFields.EMPTY,
             "SccWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
-            configuration.arrowConnectionInfo()
+            configuration.arrowConnectionInfo(),
+            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
         );
 
     }
@@ -203,20 +203,19 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             configuration,
             (result, config) -> NodePropertyValuesAdapter.adapt(result),
             (result -> result::get),
-            (result, componentCount, communitySummary) -> {
-                return new AlphaSccSpecificFields(
-                    result.size(),
-                    componentCount,
-                    communitySummary
-                );
-            },
+            (result, componentCount, communitySummary) -> new AlphaSccSpecificFields(
+                result.size(),
+                componentCount,
+                communitySummary
+            ),
             statisticsComputationInstructions,
             intermediateResult.computeMilliseconds,
             () -> AlphaSccSpecificFields.EMPTY,
             "SccWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
-            configuration.arrowConnectionInfo()
+            configuration.arrowConnectionInfo(),
+            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
         );
 
     }
@@ -233,42 +232,39 @@ public class CommunityAlgorithmsWriteBusinessFacade {
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
-        NodePropertyValuesMapper<LouvainResult, LouvainWriteConfig> mapper = ((result, config) -> {
-            return config.includeIntermediateCommunities()
-                ? createIntermediateCommunitiesNodePropertyValues(result::getIntermediateCommunities, result.size())
-                : CommunityResultCompanion.nodePropertyValues(
-                    config.isIncremental(),
-                    config.writeProperty(),
-                    config.seedProperty(),
-                    config.consecutiveIds(),
-                    NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent()),
-                    config.minCommunitySize(),
-                    config.concurrency(),
-                    () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
-                );
-        });
+        NodePropertyValuesMapper<LouvainResult, LouvainWriteConfig> mapper = ((result, config) -> config.includeIntermediateCommunities()
+            ? createIntermediateCommunitiesNodePropertyValues(result::getIntermediateCommunities, result.size())
+            : CommunityResultCompanion.nodePropertyValues(
+                config.isIncremental(),
+                config.writeProperty(),
+                config.seedProperty(),
+                config.consecutiveIds(),
+                NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent()),
+                config.minCommunitySize(),
+                config.concurrency(),
+                () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
+            ));
 
         return writeToDatabase(
             algorithmResult,
             configuration,
             mapper,
             (result -> result::getCommunity),
-            (result, componentCount, communitySummary) -> {
-                return new LouvainSpecificFields(
-                    result.modularity(),
-                    Arrays.stream(result.modularities()).boxed().collect(Collectors.toList()),
-                    result.ranLevels(),
-                    componentCount,
-                    communitySummary
-                );
-            },
+            (result, componentCount, communitySummary) -> new LouvainSpecificFields(
+                result.modularity(),
+                Arrays.stream(result.modularities()).boxed().collect(Collectors.toList()),
+                result.ranLevels(),
+                componentCount,
+                communitySummary
+            ),
             statisticsComputationInstructions,
             intermediateResult.computeMilliseconds,
             () -> LouvainSpecificFields.EMPTY,
             "LouvainWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
-            configuration.arrowConnectionInfo()
+            configuration.arrowConnectionInfo(),
+            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
         );
     }
 
@@ -286,34 +282,31 @@ public class CommunityAlgorithmsWriteBusinessFacade {
         return writeToDatabase(
             algorithmResult,
             configuration,
-            ((result, config) -> {
-                return CommunityResultCompanion.nodePropertyValues(
-                    config.isIncremental(),
-                    config.writeProperty(),
-                    config.seedProperty(),
-                    config.consecutiveIds(),
-                    NodePropertyValuesAdapter.adapt(result.labels()),
-                    config.minCommunitySize(),
-                    config.concurrency(),
-                    () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
-                );
-            }),
+            ((result, config) -> CommunityResultCompanion.nodePropertyValues(
+                config.isIncremental(),
+                config.writeProperty(),
+                config.seedProperty(),
+                config.consecutiveIds(),
+                NodePropertyValuesAdapter.adapt(result.labels()),
+                config.minCommunitySize(),
+                config.concurrency(),
+                () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
+            )),
             (result -> result.labels()::get),
-            (result, componentCount, communitySummary) -> {
-                return LabelPropagationSpecificFields.from(
-                    result.ranIterations(),
-                    result.didConverge(),
-                    componentCount,
-                    communitySummary
-                );
-            },
+            (result, componentCount, communitySummary) -> LabelPropagationSpecificFields.from(
+                result.ranIterations(),
+                result.didConverge(),
+                componentCount,
+                communitySummary
+            ),
             statisticsComputationInstructions,
             intermediateResult.computeMilliseconds,
             () -> LabelPropagationSpecificFields.EMPTY,
             "LabelPropagationWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
-            configuration.arrowConnectionInfo()
+            configuration.arrowConnectionInfo(),
+            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
         );
     }
 
@@ -328,47 +321,44 @@ public class CommunityAlgorithmsWriteBusinessFacade {
         );
         var algorithmResult = intermediateResult.algorithmResult;
 
-        NodePropertyValuesMapper<LeidenResult, LeidenWriteConfig> mapper = ((result, config) -> {
-            return config.includeIntermediateCommunities()
-                ? createIntermediateCommunitiesNodePropertyValues(
-                result::getIntermediateCommunities,
-                result.communities().size()
-            )
-                : CommunityResultCompanion.nodePropertyValues(
-                    config.isIncremental(),
-                    config.writeProperty(),
-                    config.seedProperty(),
-                    config.consecutiveIds(),
-                    NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent()),
-                    config.minCommunitySize(),
-                    config.concurrency(),
-                    () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
-                );
-        });
+        NodePropertyValuesMapper<LeidenResult, LeidenWriteConfig> mapper = ((result, config) -> config.includeIntermediateCommunities()
+            ? createIntermediateCommunitiesNodePropertyValues(
+            result::getIntermediateCommunities,
+            result.communities().size()
+        )
+            : CommunityResultCompanion.nodePropertyValues(
+                config.isIncremental(),
+                config.writeProperty(),
+                config.seedProperty(),
+                config.consecutiveIds(),
+                NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent()),
+                config.minCommunitySize(),
+                config.concurrency(),
+                () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
+            ));
 
         return writeToDatabase(
             algorithmResult,
             configuration,
             mapper,
             (result -> result.communities()::get),
-            (result, componentCount, communitySummary) -> {
-                return LeidenSpecificFields.from(
-                    result.communities().size(),
-                    result.modularity(),
-                    result.modularities(),
-                    componentCount,
-                    result.ranLevels(),
-                    result.didConverge(),
-                    communitySummary
-                );
-            },
+            (result, componentCount, communitySummary) -> LeidenSpecificFields.from(
+                result.communities().size(),
+                result.modularity(),
+                result.modularities(),
+                componentCount,
+                result.ranLevels(),
+                result.didConverge(),
+                communitySummary
+            ),
             statisticsComputationInstructions,
             intermediateResult.computeMilliseconds,
             () -> LeidenSpecificFields.EMPTY,
             "LeidenWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
-            configuration.arrowConnectionInfo()
+            configuration.arrowConnectionInfo(),
+            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
         );
     }
 
@@ -393,21 +383,20 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             configuration,
             mapper,
             (result -> result.communities()::get),
-            (result, componentCount, communitySummary) -> {
-                return new KmeansSpecificFields(
-                    communitySummary,
-                    arrayMatrixToListMatrix(computeListOfCentroids, result.centers()),
-                    result.averageDistanceToCentroid(),
-                    result.averageSilhouette()
-                );
-            },
+            (result, componentCount, communitySummary) -> new KmeansSpecificFields(
+                communitySummary,
+                arrayMatrixToListMatrix(computeListOfCentroids, result.centers()),
+                result.averageDistanceToCentroid(),
+                result.averageSilhouette()
+            ),
             statisticsComputationInstructions,
             intermediateResult.computeMilliseconds,
             () -> KmeansSpecificFields.EMPTY,
             "KmeansWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
-            configuration.arrowConnectionInfo()
+            configuration.arrowConnectionInfo(),
+            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
         );
     }
 
@@ -447,7 +436,8 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             "K1ColoringWrite",
             config.writeConcurrency(),
             config.writeProperty(),
-            config.arrowConnectionInfo()
+            config.arrowConnectionInfo(),
+            config.resolveResultStore(algorithmResult.graphStore().resultStore())
         );
     }
 
@@ -478,23 +468,22 @@ public class CommunityAlgorithmsWriteBusinessFacade {
                 () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
             ),
             result -> result::communityId,
-            (result, componentCount, communitySummary) -> {
-                return new ModularityOptimizationSpecificFields(
-                    result.modularity(),
-                    result.ranIterations(),
-                    result.didConverge(),
-                    result.asNodeProperties().nodeCount(),
-                    componentCount,
-                    communitySummary
-                );
-            },
+            (result, componentCount, communitySummary) -> new ModularityOptimizationSpecificFields(
+                result.modularity(),
+                result.ranIterations(),
+                result.didConverge(),
+                result.asNodeProperties().nodeCount(),
+                componentCount,
+                communitySummary
+            ),
             statisticsComputationInstructions,
             intermediateResult.computeMilliseconds,
             emptySupplier,
             "ModularityOptimizationWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
-            configuration.arrowConnectionInfo()
+            configuration.arrowConnectionInfo(),
+            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
         );
     }
 
@@ -519,7 +508,8 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             "TriangleCountWrite",
             config.writeConcurrency(),
             config.writeProperty(),
-            config.arrowConnectionInfo()
+            config.arrowConnectionInfo(),
+            config.resolveResultStore(algorithmResult.graphStore().resultStore())
         );
     }
 
@@ -547,7 +537,8 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             "LocalClusteringCoefficientWrite",
             config.writeConcurrency(),
             config.writeProperty(),
-            config.arrowConnectionInfo()
+            config.arrowConnectionInfo(),
+            config.resolveResultStore(algorithmResult.graphStore().resultStore())
         );
     }
 
@@ -564,7 +555,8 @@ public class CommunityAlgorithmsWriteBusinessFacade {
         String procedureName,
         int writeConcurrency,
         String writeProperty,
-        Optional<ArrowConnectionInfo> arrowConnectionInfo
+        Optional<ArrowConnectionInfo> arrowConnectionInfo,
+        Optional<ResultStore> resultStore
     ) {
 
         return algorithmResult.result().map(result -> {
@@ -583,7 +575,8 @@ public class CommunityAlgorithmsWriteBusinessFacade {
                 writeConcurrency,
                 writeProperty,
                 procedureName,
-                arrowConnectionInfo
+                arrowConnectionInfo,
+                resultStore
             );
 
             // 4. Compute result statistics
@@ -622,7 +615,8 @@ public class CommunityAlgorithmsWriteBusinessFacade {
         String procedureName,
         int writeConcurrency,
         String writeProperty,
-        Optional<ArrowConnectionInfo> arrowConnectionInfo
+        Optional<ArrowConnectionInfo> arrowConnectionInfo,
+        Optional<ResultStore> resultStore
     ) {
 
         return algorithmResult.result().map(result -> {
@@ -641,7 +635,8 @@ public class CommunityAlgorithmsWriteBusinessFacade {
                 writeConcurrency,
                 writeProperty,
                 procedureName,
-                arrowConnectionInfo
+                arrowConnectionInfo,
+                resultStore
             );
 
 

@@ -26,22 +26,23 @@ import org.neo4j.gds.algorithms.centrality.specificfields.AlphaHarmonicSpecificF
 import org.neo4j.gds.algorithms.centrality.specificfields.CELFSpecificFields;
 import org.neo4j.gds.algorithms.centrality.specificfields.CentralityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
-import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.algorithms.centrality.specificfields.PageRankSpecificFields;
 import org.neo4j.gds.algorithms.runner.AlgorithmResultWithTiming;
+import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.degree.DegreeCentralityWriteConfig;
-import org.neo4j.gds.pagerank.PageRankResult;
-import org.neo4j.gds.pagerank.PageRankWriteConfig;
 import org.neo4j.gds.harmonic.DeprecatedTieredHarmonicCentralityWriteConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityWriteConfig;
 import org.neo4j.gds.influenceMaximization.CELFNodeProperties;
 import org.neo4j.gds.influenceMaximization.InfluenceMaximizationWriteConfig;
+import org.neo4j.gds.pagerank.PageRankResult;
+import org.neo4j.gds.pagerank.PageRankWriteConfig;
 import org.neo4j.gds.result.CentralityStatistics;
 
 import java.util.Optional;
@@ -80,7 +81,8 @@ public class CentralityAlgorithmsWriteBusinessFacade {
             "BetweennessCentralityWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
-            configuration.arrowConnectionInfo()
+            configuration.arrowConnectionInfo(),
+            configuration.resolveResultStore(intermediateResult.algorithmResult.graphStore().resultStore())
         );
     }
 
@@ -102,7 +104,8 @@ public class CentralityAlgorithmsWriteBusinessFacade {
             "DegreeCentralityWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
-            configuration.arrowConnectionInfo()
+            configuration.arrowConnectionInfo(),
+            configuration.resolveResultStore(intermediateResult.algorithmResult.graphStore().resultStore())
         );
     }
 
@@ -124,7 +127,8 @@ public class CentralityAlgorithmsWriteBusinessFacade {
             "ClosenessCentralityWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
-            configuration.arrowConnectionInfo()
+            configuration.arrowConnectionInfo(),
+            configuration.resolveResultStore(intermediateResult.algorithmResult.graphStore().resultStore())
         );
     }
 
@@ -186,14 +190,16 @@ public class CentralityAlgorithmsWriteBusinessFacade {
             var nodePropertyValues = result.nodePropertyValues();
 
             // 3. Write to database
+            var graphStore = algorithmResult.graphStore();
             var writeNodePropertyResult = writeNodePropertyService.write(
                 algorithmResult.graph(),
-                algorithmResult.graphStore(),
+                graphStore,
                 nodePropertyValues,
                 configuration.writeConcurrency(),
                 configuration.writeProperty(),
                 "PageRankWrite",
-                configuration.arrowConnectionInfo()
+                configuration.arrowConnectionInfo(),
+                configuration.resolveResultStore(graphStore.resultStore())
             );
 
             var pageRankDistribution = PageRankDistributionComputer.computeDistribution(
@@ -237,7 +243,8 @@ public class CentralityAlgorithmsWriteBusinessFacade {
             "HarmonicCentralityWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
-            configuration.arrowConnectionInfo()
+            configuration.arrowConnectionInfo(),
+            configuration.resolveResultStore(intermediateResult.algorithmResult.graphStore().resultStore())
         );
     }
 
@@ -267,8 +274,8 @@ public class CentralityAlgorithmsWriteBusinessFacade {
             "HarmonicCentralityWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
-            configuration.arrowConnectionInfo()
-
+            configuration.arrowConnectionInfo(),
+            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
         );
 
     }
@@ -299,7 +306,8 @@ public class CentralityAlgorithmsWriteBusinessFacade {
                     configuration.writeConcurrency(),
                     configuration.writeProperty(),
                     "CELFWrite",
-                    configuration.arrowConnectionInfo()
+                    configuration.arrowConnectionInfo(),
+                    configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
                 );
                 writeResultBuilder.writeMillis(writeResult.writeMilliseconds());
                 writeResultBuilder.nodePropertiesWritten(writeResult.nodePropertiesWritten());
@@ -319,7 +327,8 @@ public class CentralityAlgorithmsWriteBusinessFacade {
         String procedureName,
         int writeConcurrency,
         String writeProperty,
-        Optional<ArrowConnectionInfo> arrowConnectionInfo
+        Optional<ArrowConnectionInfo> arrowConnectionInfo,
+        Optional<ResultStore> resultStore
     ) {
 
         CentralityFunctionSupplier<RESULT> centralityFunctionSupplier = CentralityAlgorithmResult::centralityScoreProvider;
@@ -341,7 +350,8 @@ public class CentralityAlgorithmsWriteBusinessFacade {
             procedureName,
             writeConcurrency,
             writeProperty,
-            arrowConnectionInfo
+            arrowConnectionInfo,
+            resultStore
         );
     }
 
@@ -357,7 +367,8 @@ public class CentralityAlgorithmsWriteBusinessFacade {
         String procedureName,
         int writeConcurrency,
         String writeProperty,
-        Optional<ArrowConnectionInfo> arrowConnectionInfo
+        Optional<ArrowConnectionInfo> arrowConnectionInfo,
+        Optional<ResultStore> resultStore
     ) {
 
         return algorithmResult.result().map(result -> {
@@ -375,7 +386,8 @@ public class CentralityAlgorithmsWriteBusinessFacade {
                 writeConcurrency,
                 writeProperty,
                 procedureName,
-                arrowConnectionInfo
+                arrowConnectionInfo,
+                resultStore
             );
 
             // Compute result statistics

@@ -23,6 +23,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -81,6 +82,7 @@ public class WriteRelationshipsApplication {
                     progressTracker,
                     configuration.writeConcurrency(),
                     configuration.arrowConnectionInfo(),
+                    configuration.resolveResultStore(graphStore.resultStore()),
                     graphStore,
                     relationshipType,
                     configuration.relationshipProperty()
@@ -103,6 +105,7 @@ public class WriteRelationshipsApplication {
         ProgressTracker progressTracker,
         int concurrency,
         Optional<ArrowConnectionInfo> arrowConnectionInfo,
+        Optional<ResultStore> resultStore,
         GraphStore graphStore,
         RelationshipType relationshipType,
         Optional<String> relationshipProperty
@@ -115,6 +118,7 @@ public class WriteRelationshipsApplication {
             .withTerminationFlag(terminationFlag)
             .withConcurrency(concurrency)
             .withArrowConnectionInfo(arrowConnectionInfo, graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName))
+            .withResultStore(resultStore)
             .withProgressTracker(progressTracker);
 
         if (relationshipProperty.isPresent()) {

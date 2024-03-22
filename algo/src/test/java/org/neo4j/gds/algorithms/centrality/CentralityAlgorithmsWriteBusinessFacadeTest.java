@@ -27,6 +27,7 @@ import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyResult;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
@@ -72,6 +73,7 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
             "FOO",
             4,
             "foo",
+            Optional.empty(),
             Optional.empty()
         );
 
@@ -118,6 +120,7 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
             eq(4),
             eq("foo"),
             eq("FooWrite"),
+            eq(Optional.empty()),
             eq(Optional.empty())
         )).thenReturn(new WriteNodePropertyResult(4, 100));
 
@@ -135,6 +138,7 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
             "FooWrite",
             4,
             "foo",
+            Optional.empty(),
             Optional.empty()
         );
 
@@ -184,6 +188,7 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
             eq(4),
             eq("foo"),
             eq("FooWrite"),
+            eq(Optional.empty()),
             eq(Optional.empty())
         )).thenReturn(new WriteNodePropertyResult(4, 100));
 
@@ -201,6 +206,7 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
             "FooWrite",
             4,
             "foo",
+            Optional.empty(),
             Optional.empty()
         );
 
@@ -305,7 +311,8 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
             int writeConcurrency,
             String writeProperty,
             String procedureName,
-            Optional<ArrowConnectionInfo> arrowConnectionInfo
+            Optional<ArrowConnectionInfo> arrowConnectionInfo,
+            Optional<ResultStore> resultStore
         ) {
             return new WriteNodePropertyResult(nodePropertiesWritten, writeMilliseconds);
         }

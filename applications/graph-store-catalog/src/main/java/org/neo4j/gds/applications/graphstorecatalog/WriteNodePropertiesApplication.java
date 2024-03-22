@@ -127,6 +127,7 @@ public class WriteNodePropertiesApplication {
                     Optional.empty()
                 );
 
+                var resultStore = config.resolveResultStore(graphStore.resultStore());
                 var exporter = nodePropertyExporterBuilder
                     .withIdMap(subGraph)
                     .withTerminationFlag(terminationFlag)
@@ -136,6 +137,7 @@ public class WriteNodePropertiesApplication {
                         config.arrowConnectionInfo(),
                         graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                     )
+                    .withResultStore(resultStore)
                     .build();
 
                 var writeNodeProperties = config.nodeProperties()

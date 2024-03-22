@@ -65,6 +65,7 @@ package org.neo4j.gds.algorithms.community;
             "FOO",
             4,
             "foo",
+            Optional.empty(),
             Optional.empty()
         );
 
@@ -113,6 +114,7 @@ package org.neo4j.gds.algorithms.community;
                 eq(4),
                 eq("foo"),
                 eq("FooWrite"),
+                eq(Optional.empty()),
                 eq(Optional.empty())
             )).thenReturn(new WriteNodePropertyResult(4, 100));
 
@@ -128,6 +130,7 @@ package org.neo4j.gds.algorithms.community;
                 "FooWrite",
                 4,
                 "foo",
+                Optional.empty(),
                 Optional.empty()
             );
 
@@ -182,6 +185,7 @@ package org.neo4j.gds.algorithms.community;
                 eq(4),
                 eq("foo"),
                 eq("FooWrite"),
+                eq(Optional.empty()),
                 eq(Optional.empty())
             )).thenReturn(new WriteNodePropertyResult(4, 100));
 
@@ -202,6 +206,7 @@ package org.neo4j.gds.algorithms.community;
                 "FooWrite",
                 4,
                 "foo",
+                Optional.empty(),
                 Optional.empty()
             );
 

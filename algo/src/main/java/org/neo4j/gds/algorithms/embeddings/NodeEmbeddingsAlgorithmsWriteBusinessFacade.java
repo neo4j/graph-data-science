@@ -24,6 +24,7 @@ import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.embeddings.specificfields.Node2VecSpecificFields;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -71,7 +72,8 @@ public class NodeEmbeddingsAlgorithmsWriteBusinessFacade {
             "Node2VecWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
-            configuration.arrowConnectionInfo()
+            configuration.arrowConnectionInfo(),
+            configuration.resolveResultStore(intermediateResult.algorithmResult.graphStore().resultStore())
         );
     }
 
@@ -94,7 +96,8 @@ public class NodeEmbeddingsAlgorithmsWriteBusinessFacade {
             "GraphSageWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
-            configuration.arrowConnectionInfo()
+            configuration.arrowConnectionInfo(),
+            configuration.resolveResultStore(intermediateResult.algorithmResult.graphStore().resultStore())
         );
     }
 
@@ -117,8 +120,9 @@ public class NodeEmbeddingsAlgorithmsWriteBusinessFacade {
             "FastRPWrite",
             configuration.writeConcurrency(),
             configuration.writeProperty(),
-            configuration.arrowConnectionInfo()
+            configuration.arrowConnectionInfo(),
 
+            configuration.resolveResultStore(intermediateResult.algorithmResult.graphStore().resultStore())
         );
     }
 
@@ -132,7 +136,8 @@ public class NodeEmbeddingsAlgorithmsWriteBusinessFacade {
         String procedureName,
         int writeConcurrency,
         String writeProperty,
-        Optional<ArrowConnectionInfo> arrowConnectionInfo
+        Optional<ArrowConnectionInfo> arrowConnectionInfo,
+        Optional<ResultStore> resultStore
     ) {
 
         return algorithmResult.result().map(result -> {
@@ -149,7 +154,8 @@ public class NodeEmbeddingsAlgorithmsWriteBusinessFacade {
                 writeConcurrency,
                 writeProperty,
                 procedureName,
-                arrowConnectionInfo
+                arrowConnectionInfo,
+                resultStore
             );
 
 

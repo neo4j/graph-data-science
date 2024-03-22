@@ -189,6 +189,7 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
                 config.arrowConnectionInfo().isPresent()
             );
 
+            var resultStore = config.resolveResultStore(computationResult.graphStore().resultStore());
             var exporter = executionContext
                 .nodePropertyExporterBuilder()
                 .withIdMap(graph)
@@ -198,6 +199,7 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
                     config.arrowConnectionInfo(),
                     computationResult.graphStore().databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                 )
+                .withResultStore(resultStore)
                 .parallel(DefaultPool.INSTANCE, config.writeConcurrency())
                 .build();
 

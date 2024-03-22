@@ -63,6 +63,7 @@ public class WriteNodeLabelApplication {
                 ProgressTracker.NULL_TRACKER
             );
 
+            var resultStore = configuration.resolveResultStore(graphStore.resultStore());
             var nodeLabelExporter = nodeLabelExporterBuilder
                 .withIdMap(filteredNodes.idMap())
                 .withTerminationFlag(terminationFlag)
@@ -70,6 +71,7 @@ public class WriteNodeLabelApplication {
                     configuration.arrowConnectionInfo(),
                     graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                 )
+                .withResultStore(resultStore)
                 .parallel(DefaultPool.INSTANCE, configuration.concurrency())
                 .build();
 
