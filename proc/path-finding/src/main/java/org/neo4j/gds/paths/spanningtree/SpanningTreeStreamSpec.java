@@ -39,7 +39,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 @GdsCallable(
     name = "gds.spanningTree.stream",
     aliases = {"gds.beta.spanningTree.stream"},
-    description = SpanningTreeWriteProc.DESCRIPTION,
+    description = Constants.SPANNING_TREE_DESCRIPTION,
     executionMode = STREAM
 )
 public class SpanningTreeStreamSpec implements AlgorithmSpec<Prim, SpanningTree, SpanningTreeStreamConfig, Stream<StreamResult>, SpanningTreeAlgorithmFactory<SpanningTreeStreamConfig>> {

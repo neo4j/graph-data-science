@@ -20,6 +20,7 @@
 package org.neo4j.gds.paths.spanningtree;
 
 import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.ProcedureConstants;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.MemoryEstimationExecutor;
@@ -34,21 +35,17 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.ProcedureConstants.ESTIMATE_DESCRIPTION;
+import static org.neo4j.gds.paths.spanningtree.Constants.SPANNING_TREE_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 public class SpanningTreeWriteProc extends BaseProc {
-
-    static final String procedure = "gds.spanningTree.write";
-    static final String betaProcedure = "gds.beta.spanningTree.write";
-
-    static final String DESCRIPTION =
-        "The spanning tree algorithm visits all nodes that are in the same connected component as the starting node, " +
-            "and returns a spanning tree of all nodes in the component where the total weight of the relationships is either minimized or maximized.";
     @Context
     public RelationshipExporterBuilder relationshipExporterBuilder;
 
-    @Procedure(value = procedure, mode = WRITE)
-    @Description(DESCRIPTION)
+    @Procedure(value = "gds.spanningTree.write", mode = WRITE)
+    @Description(SPANNING_TREE_DESCRIPTION)
     public Stream<WriteResult> spanningTree(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -59,8 +56,8 @@ public class SpanningTreeWriteProc extends BaseProc {
         ).compute(graphName, configuration);
     }
 
-    @Procedure(value = procedure + ".estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Procedure(value = "gds.spanningTree.write" + ".estimate", mode = READ)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
@@ -73,8 +70,8 @@ public class SpanningTreeWriteProc extends BaseProc {
         ).computeEstimate(graphName, configuration);
     }
 
-    @Procedure(value = betaProcedure, mode = WRITE, deprecatedBy = procedure)
-    @Description(DESCRIPTION)
+    @Procedure(value = "gds.beta.spanningTree.write", mode = WRITE, deprecatedBy = "gds.spanningTree.write")
+    @Description(SPANNING_TREE_DESCRIPTION)
     @Internal
     @Deprecated
     public Stream<WriteResult> betaSpanningTree(
@@ -83,24 +80,24 @@ public class SpanningTreeWriteProc extends BaseProc {
     ) {
         executionContext()
             .metricsFacade()
-            .deprecatedProcedures().called(betaProcedure);
+            .deprecatedProcedures().called("gds.beta.spanningTree.write");
         executionContext()
             .log()
             .warn("Procedure `gds.beta.spanningTree.write` has been deprecated, please use `gds.spanningTree.write`.");
         return spanningTree(graphName, configuration);
     }
 
-    @Procedure(value = betaProcedure + ".estimate", mode = READ, deprecatedBy = procedure + ".estimate")
+    @Procedure(value = "gds.beta.spanningTree.write" + ".estimate", mode = READ, deprecatedBy = "gds.spanningTree.write" + ".estimate")
     @Internal
     @Deprecated
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> betaEstimate(
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
         executionContext()
             .metricsFacade()
-            .deprecatedProcedures().called(betaProcedure + ".estimate");
+            .deprecatedProcedures().called("gds.beta.spanningTree.write" + ".estimate");
         executionContext()
             .log()
             .warn(

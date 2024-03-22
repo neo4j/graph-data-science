@@ -36,7 +36,7 @@ import static org.neo4j.gds.executor.ExecutionMode.STATS;
 @GdsCallable(
     name = "gds.spanningTree.stats",
     aliases = {"gds.beta.spanningTree.stats"},
-    description = SpanningTreeWriteProc.DESCRIPTION,
+    description = Constants.SPANNING_TREE_DESCRIPTION,
     executionMode = STATS
 )
 public class SpanningTreeStatsSpec implements AlgorithmSpec<Prim, SpanningTree, SpanningTreeStatsConfig, Stream<StatsResult>, SpanningTreeAlgorithmFactory<SpanningTreeStatsConfig>> {

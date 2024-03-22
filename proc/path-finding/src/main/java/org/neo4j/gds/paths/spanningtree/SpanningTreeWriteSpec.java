@@ -41,7 +41,7 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
 @GdsCallable(
     name = "gds.spanningTree.write",
     aliases = {"gds.beta.spanningTree.write"},
-    description = SpanningTreeWriteProc.DESCRIPTION,
+    description = Constants.SPANNING_TREE_DESCRIPTION,
     executionMode = MUTATE_RELATIONSHIP)
 public class SpanningTreeWriteSpec implements
     AlgorithmSpec<Prim, SpanningTree, SpanningTreeWriteConfig, Stream<WriteResult>, SpanningTreeAlgorithmFactory<SpanningTreeWriteConfig>> {
