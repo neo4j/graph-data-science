@@ -19,17 +19,20 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
+/**
+ * When doing mutate or write, we count e.g. the number of relationships written,
+ * and we want to report that up the call chain. This is the facility for it.
+ */
+public class SideEffectProcessingCountsBuilder {
+    private static final int NOT_AVAILABLE = -1;
 
-public interface MutateOrWriteStep<RESULT_FROM_ALGORITHM> {
-    /**
-     * Timings belong on the outside.
-     */
-    void execute(
-        Graph graph,
-        GraphStore graphStore,
-        RESULT_FROM_ALGORITHM result,
-        SideEffectProcessingCountsBuilder countsBuilder
-    );
+    private long relationshipsWritten = NOT_AVAILABLE;
+
+    void withRelationshipsWritten(long relationshipsWritten) {
+        this.relationshipsWritten = relationshipsWritten;
+    }
+
+    SideEffectProcessingCounts build() {
+        return new SideEffectProcessingCounts(relationshipsWritten);
+    }
 }

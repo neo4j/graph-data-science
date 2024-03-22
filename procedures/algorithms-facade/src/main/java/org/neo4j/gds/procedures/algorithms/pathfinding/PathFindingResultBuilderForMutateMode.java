@@ -23,26 +23,28 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.pathfinding.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.pathfinding.SideEffectProcessingCounts;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
 import java.util.Optional;
 
-public class PathFindingResultBuilderForMutateMode<CONFIGURATION extends ToMapConvertible> extends ResultBuilder<CONFIGURATION, PathFindingResult, PathFindingMutateResult> {
+public class PathFindingResultBuilderForMutateMode<CONFIGURATION extends ToMapConvertible> implements ResultBuilder<CONFIGURATION, PathFindingResult, PathFindingMutateResult> {
     @Override
     public PathFindingMutateResult build(
         Graph graph,
         GraphStore graphStore,
         CONFIGURATION configuration,
         Optional<PathFindingResult> pathFindingResult,
-        AlgorithmProcessingTimings timings
+        AlgorithmProcessingTimings timings,
+        SideEffectProcessingCounts counts
     ) {
         return new PathFindingMutateResult(
             timings.preProcessingMillis,
             timings.computeMillis,
             0, // yeah, I don't understand it either :shrug:
             timings.postProcessingMillis,
-            relationshipsWritten,
+            counts.relationshipsWritten,
             configuration.toMap()
         );
     }

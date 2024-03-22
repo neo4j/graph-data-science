@@ -41,6 +41,11 @@ import static org.assertj.core.api.Assertions.entry;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+/**
+ * Pinky promise: next time we add or change functionality here,
+ * we break this class apart so that we can test it more sensibly. Smaller chunks, more readable class,
+ * and tests that are not pages long.
+ */
 class DefaultAlgorithmProcessingTemplateTest {
     @Test
     void shouldProcessStreamAlgorithm() {
@@ -84,7 +89,8 @@ class DefaultAlgorithmProcessingTemplateTest {
                 GraphStore graphStore,
                 ExampleConfiguration configuration,
                 Optional<PathFindingResult> pathFindingResult,
-                AlgorithmProcessingTimings timings
+                AlgorithmProcessingTimings timings,
+                SideEffectProcessingCounts counts
             ) {
                 // we skip timings when no side effects requested
                 assertThat(timings.postProcessingMillis).isEqualTo(-1);
@@ -115,7 +121,7 @@ class DefaultAlgorithmProcessingTemplateTest {
     }
 
     /**
-     * From pathfinding, the contract is that the mutate and write side effects will set relationshipsWritten.
+     * From Dijkstra, the contract is that the mutate and write side effects will set relationshipsWritten.
      * So that's the example we go with.
      */
     @Test
@@ -146,20 +152,23 @@ class DefaultAlgorithmProcessingTemplateTest {
         )).thenReturn(Pair.of(graph, graphStore));
 
         var pathFindingResult = mock(PathFindingResult.class);
-        var resultBuilder = new ResultBuilder<ExampleConfiguration, PathFindingResult, Long>() {
+        var resultBuilder = new ResultBuilder<ExampleConfiguration, PathFindingResult, String>() {
             @Override
-            public Long build(
+            public String build(
                 Graph actualGraph,
                 GraphStore actualGraphStore,
                 ExampleConfiguration configuration,
                 Optional<PathFindingResult> actualResult,
-                AlgorithmProcessingTimings timings
+                AlgorithmProcessingTimings timings,
+                SideEffectProcessingCounts counts
             ) {
                 assertThat(actualGraph).isEqualTo(graph);
                 assertThat(actualGraphStore).isEqualTo(graphStore);
                 assertThat(actualResult).hasValue(pathFindingResult);
 
-                return relationshipsWritten;
+                assertThat(counts.relationshipsWritten).isEqualTo(42L);
+
+                return "all assertions green!";
             }
         };
 
@@ -170,15 +179,15 @@ class DefaultAlgorithmProcessingTemplateTest {
         AlgorithmComputation<PathFindingResult> computation = mock(AlgorithmComputation.class);
         when(computation.compute(graph)).thenReturn(pathFindingResult);
 
-        var mutateOrWriteStep = new MutateOrWriteStep<ExampleConfiguration, PathFindingResult>() {
+        var mutateOrWriteStep = new MutateOrWriteStep<PathFindingResult>() {
             @Override
-            public <RESULT_TO_CALLER> void execute(
+            public void execute(
                 Graph graph,
                 GraphStore graphStore,
                 PathFindingResult resultFromAlgorithm,
-                ResultBuilder<ExampleConfiguration, PathFindingResult, RESULT_TO_CALLER> resultBuilder
+                SideEffectProcessingCountsBuilder countsBuilder
             ) {
-                resultBuilder.withRelationshipsWritten(42);
+                countsBuilder.withRelationshipsWritten(42);
             }
         };
 
@@ -192,11 +201,11 @@ class DefaultAlgorithmProcessingTemplateTest {
             resultBuilder
         );
 
-        assertThat(relationshipsWritten).isEqualTo(42L);
+        assertThat(relationshipsWritten).isEqualTo("all assertions green!");
     }
 
     @Test
-    void shouldDoTimings() {
+    void shouldDoTimingsAndCounts() {
         var algorithmProcessingTemplate = new DefaultAlgorithmProcessingTemplate(
             null,
             null,
@@ -229,14 +238,15 @@ class DefaultAlgorithmProcessingTemplateTest {
             }
 
             @Override
-            <CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> void mutateOrWriteWithTiming(
-                Optional<MutateOrWriteStep<CONFIGURATION, RESULT_FROM_ALGORITHM>> mutateOrWriteStep,
+            <RESULT_FROM_ALGORITHM> void mutateOrWriteWithTiming(
+                Optional<MutateOrWriteStep<RESULT_FROM_ALGORITHM>> mutateOrWriteStep,
                 AlgorithmProcessingTimingsBuilder timingsBuilder,
+                SideEffectProcessingCountsBuilder countsBuilder,
                 Graph graph,
                 GraphStore graphStore,
-                RESULT_FROM_ALGORITHM resultFromAlgorithm,
-                ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
+                RESULT_FROM_ALGORITHM resultFromAlgorithm
             ) {
+                mutateOrWriteStep.orElseThrow().execute(graph, graphStore, resultFromAlgorithm, countsBuilder);
                 timingsBuilder.withPostProcessingMillis(87);
             }
         };
@@ -248,12 +258,14 @@ class DefaultAlgorithmProcessingTemplateTest {
                 GraphStore graphStore,
                 ExampleConfiguration configuration,
                 Optional<Void> unused,
-                AlgorithmProcessingTimings timings
+                AlgorithmProcessingTimings timings,
+                SideEffectProcessingCounts counts
             ) {
                 return Map.of(
                     "preProcessingMillis", timings.preProcessingMillis,
                     "computeMillis", timings.computeMillis,
-                    "postProcessingMillis", timings.postProcessingMillis
+                    "postProcessingMillis", timings.postProcessingMillis,
+                    "relationshipsWritten", counts.relationshipsWritten
                 );
             }
         };
@@ -264,17 +276,7 @@ class DefaultAlgorithmProcessingTemplateTest {
             null,
             null,
             null,
-            Optional.of(new MutateOrWriteStep<>() {
-                @Override
-                public <RESULT_TO_CALLER> void execute(
-                    Graph graph,
-                    GraphStore graphStore,
-                    Void unused,
-                    ResultBuilder<ExampleConfiguration, Void, RESULT_TO_CALLER> resultBuilder
-                ) {
-                    // do nothing, we are just catching timings
-                }
-            }),
+            Optional.of((__, ___, ____, countsBuilder) -> countsBuilder.withRelationshipsWritten(6573)),
             resultBuilder
         );
 
@@ -282,7 +284,8 @@ class DefaultAlgorithmProcessingTemplateTest {
             .containsOnly(
                 entry("preProcessingMillis", 23L),
                 entry("computeMillis", 117L),
-                entry("postProcessingMillis", 87L)
+                entry("postProcessingMillis", 87L),
+                entry("relationshipsWritten", 6573L)
             );
     }
 }

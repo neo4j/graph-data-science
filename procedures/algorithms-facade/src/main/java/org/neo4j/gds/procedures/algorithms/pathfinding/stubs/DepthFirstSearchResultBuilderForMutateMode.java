@@ -23,27 +23,29 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.pathfinding.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.pathfinding.SideEffectProcessingCounts;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.paths.traverse.DfsMutateConfig;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
 
 import java.util.Optional;
 
-class DepthFirstSearchResultBuilderForMutateMode extends ResultBuilder<DfsMutateConfig, HugeLongArray, PathFindingMutateResult> {
+class DepthFirstSearchResultBuilderForMutateMode implements ResultBuilder<DfsMutateConfig, HugeLongArray, PathFindingMutateResult> {
     @Override
     public PathFindingMutateResult build(
         Graph graph,
         GraphStore graphStore,
         DfsMutateConfig configuration,
-        Optional<HugeLongArray> result, // unused
-        AlgorithmProcessingTimings timings
+        Optional<HugeLongArray> result,
+        AlgorithmProcessingTimings timings,
+        SideEffectProcessingCounts counts
     ) {
         return new PathFindingMutateResult.Builder()
             .withConfig(configuration)
             .withPreProcessingMillis(timings.preProcessingMillis)
             .withComputeMillis(timings.computeMillis)
             .withMutateMillis(timings.postProcessingMillis)
-            .withRelationshipsWritten(relationshipsWritten)
+            .withRelationshipsWritten(counts.relationshipsWritten)
             .build();
     }
 }

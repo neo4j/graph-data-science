@@ -23,20 +23,22 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.pathfinding.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.pathfinding.SideEffectProcessingCounts;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.steiner.SteinerTreeStatsConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class SteinerTreeResultBuilderForStatsMode extends ResultBuilder<SteinerTreeStatsConfig, SteinerTreeResult, Stream<SteinerStatsResult>> {
+class SteinerTreeResultBuilderForStatsMode implements ResultBuilder<SteinerTreeStatsConfig, SteinerTreeResult, Stream<SteinerStatsResult>> {
     @Override
     public Stream<SteinerStatsResult> build(
         Graph graph,
         GraphStore graphStore,
         SteinerTreeStatsConfig configuration,
         Optional<SteinerTreeResult> result,
-        AlgorithmProcessingTimings timings
+        AlgorithmProcessingTimings timings,
+        SideEffectProcessingCounts counts
     ) {
         var builder = new SteinerStatsResult.Builder();
 

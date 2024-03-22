@@ -24,6 +24,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.pathfinding.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.pathfinding.SideEffectProcessingCounts;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.paths.traverse.BfsStreamConfig;
 import org.neo4j.graphdb.RelationshipType;
@@ -31,7 +32,7 @@ import org.neo4j.graphdb.RelationshipType;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class BfsStreamResultBuilder extends ResultBuilder<BfsStreamConfig, HugeLongArray, Stream<BfsStreamResult>> {
+class BfsStreamResultBuilder implements ResultBuilder<BfsStreamConfig, HugeLongArray, Stream<BfsStreamResult>> {
     private final NodeLookup nodeLookup;
     private final boolean pathRequested;
 
@@ -46,7 +47,8 @@ class BfsStreamResultBuilder extends ResultBuilder<BfsStreamConfig, HugeLongArra
         GraphStore graphStore,
         BfsStreamConfig bfsStreamConfig,
         Optional<HugeLongArray> result,
-        AlgorithmProcessingTimings timings
+        AlgorithmProcessingTimings timings,
+        SideEffectProcessingCounts counts
     ) {
         //noinspection OptionalIsPresent
         if (result.isEmpty()) return Stream.empty();

@@ -196,7 +196,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         String label,
         Supplier<MemoryEstimation> memoryEstimation,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithm,
-        MutateOrWriteStep<CONFIGURATION, RESULT_FROM_ALGORITHM> writeStep,
+        MutateOrWriteStep<RESULT_FROM_ALGORITHM> writeStep,
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(

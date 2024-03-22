@@ -24,6 +24,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.pathfinding.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.pathfinding.SideEffectProcessingCounts;
 import org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.steiner.SteinerTreeStreamConfig;
@@ -32,14 +33,15 @@ import java.util.Optional;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-class SteinerTreeResultBuilderForStreamMode extends ResultBuilder<SteinerTreeStreamConfig, SteinerTreeResult, Stream<SteinerTreeStreamResult>> {
+class SteinerTreeResultBuilderForStreamMode implements ResultBuilder<SteinerTreeStreamConfig, SteinerTreeResult, Stream<SteinerTreeStreamResult>> {
     @Override
     public Stream<SteinerTreeStreamResult> build(
         Graph graph,
         GraphStore graphStore,
         SteinerTreeStreamConfig configuration,
         Optional<SteinerTreeResult> result,
-        AlgorithmProcessingTimings timings
+        AlgorithmProcessingTimings timings,
+        SideEffectProcessingCounts counts
     ) {
         if (result.isEmpty()) return Stream.of();
 

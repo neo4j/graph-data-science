@@ -30,7 +30,7 @@ import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
 import org.neo4j.gds.termination.TerminationFlag;
 
-class SteinerTreeWriteStep implements MutateOrWriteStep<SteinerTreeWriteConfig, SteinerTreeResult> {
+class SteinerTreeWriteStep implements MutateOrWriteStep<SteinerTreeResult> {
     private final RelationshipExporterBuilder exporterBuilder;
     private final TerminationFlag terminationFlag;
 
@@ -47,11 +47,11 @@ class SteinerTreeWriteStep implements MutateOrWriteStep<SteinerTreeWriteConfig, 
     }
 
     @Override
-    public <RESULT_TO_CALLER> void execute(
+    public void execute(
         Graph graph,
         GraphStore graphStore,
         SteinerTreeResult steinerTreeResult,
-        ResultBuilder<SteinerTreeWriteConfig, SteinerTreeResult, RESULT_TO_CALLER> resultBuilder
+        SideEffectProcessingCountsBuilder countsBuilder
     ) {
         var sourceNodeId = configuration.sourceNode();
 
@@ -78,6 +78,6 @@ class SteinerTreeWriteStep implements MutateOrWriteStep<SteinerTreeWriteConfig, 
 
         relationshipExporter.write(configuration.writeRelationshipType(), configuration.writeProperty());
 
-        resultBuilder.withRelationshipsWritten(steinerTreeResult.effectiveNodeCount() - 1);
+        countsBuilder.withRelationshipsWritten(steinerTreeResult.effectiveNodeCount() - 1);
     }
 }

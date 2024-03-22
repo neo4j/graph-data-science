@@ -30,7 +30,7 @@ import org.neo4j.gds.steiner.SteinerTreeResult;
 
 import java.util.stream.LongStream;
 
-class SteinerTreeMutateStep implements MutateOrWriteStep<SteinerTreeMutateConfig, SteinerTreeResult> {
+class SteinerTreeMutateStep implements MutateOrWriteStep<SteinerTreeResult> {
     private final SteinerTreeMutateConfig configuration;
 
     SteinerTreeMutateStep(SteinerTreeMutateConfig configuration) {
@@ -38,11 +38,11 @@ class SteinerTreeMutateStep implements MutateOrWriteStep<SteinerTreeMutateConfig
     }
 
     @Override
-    public <RESULT_TO_CALLER> void execute(
+    public void execute(
         Graph graph,
         GraphStore graphStore,
         SteinerTreeResult steinerTreeResult,
-        ResultBuilder<SteinerTreeMutateConfig, SteinerTreeResult, RESULT_TO_CALLER> resultBuilder
+        SideEffectProcessingCountsBuilder countsBuilder
     ) {
         var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
 
@@ -73,6 +73,6 @@ class SteinerTreeMutateStep implements MutateOrWriteStep<SteinerTreeMutateConfig
         graphStore.addRelationshipType(relationships);
 
         // the reporting
-        resultBuilder.withRelationshipsWritten(steinerTreeResult.effectiveNodeCount() - 1);
+        countsBuilder.withRelationshipsWritten(steinerTreeResult.effectiveNodeCount() - 1);
     }
 }

@@ -47,7 +47,7 @@ import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfi
 /**
  * This is relationship writes as needed by path finding algorithms (for now).
  */
-class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & WritePathOptionsConfig> implements MutateOrWriteStep<CONFIGURATION, PathFindingResult> {
+class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & WritePathOptionsConfig> implements MutateOrWriteStep<PathFindingResult> {
     private final Log log;
 
     private final RelationshipStreamExporterBuilder exporterBuilder;
@@ -75,11 +75,11 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
      * We do it synchronously, time it, and gather metadata about how many relationships we wrote.
      */
     @Override
-    public <RESULT_TO_CALLER> void execute(
+    public void execute(
         Graph graph,
         GraphStore graphStore,
         PathFindingResult result,
-        ResultBuilder<CONFIGURATION, PathFindingResult, RESULT_TO_CALLER> resultBuilder
+        SideEffectProcessingCountsBuilder countsBuilder
     ) {
         var writeNodeIds = configuration.writeNodeIds();
         var writeCosts = configuration.writeCosts();
@@ -137,7 +137,7 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
             var relationshipsWritten = relationshipStreamExporter.write(writeRelationshipType, keys, types);
 
             // the final result is the side effect of writing to the database, plus this metadata
-            resultBuilder.withRelationshipsWritten(relationshipsWritten);
+            countsBuilder.withRelationshipsWritten(relationshipsWritten);
         }
     }
 

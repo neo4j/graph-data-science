@@ -27,17 +27,17 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.paths.traverse.BfsMutateConfig;
 
-class BreadthFirstSearchMutateStep implements MutateOrWriteStep<BfsMutateConfig, HugeLongArray> {
+class BreadthFirstSearchMutateStep implements MutateOrWriteStep<HugeLongArray> {
     private final BfsMutateConfig configuration;
 
     BreadthFirstSearchMutateStep(BfsMutateConfig configuration) {this.configuration = configuration;}
 
     @Override
-    public <RESULT_TO_CALLER> void execute(
+    public void execute(
         Graph graph,
         GraphStore graphStore,
         HugeLongArray result,
-        ResultBuilder<BfsMutateConfig, HugeLongArray, RESULT_TO_CALLER> resultBuilder
+        SideEffectProcessingCountsBuilder countsBuilder
     ) {
         var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
 
@@ -61,6 +61,6 @@ class BreadthFirstSearchMutateStep implements MutateOrWriteStep<BfsMutateConfig,
         graphStore.addRelationshipType(relationships);
 
         //reporting
-        resultBuilder.withRelationshipsWritten(relationships.topology().elementCount());
+        countsBuilder.withRelationshipsWritten(relationships.topology().elementCount());
     }
 }

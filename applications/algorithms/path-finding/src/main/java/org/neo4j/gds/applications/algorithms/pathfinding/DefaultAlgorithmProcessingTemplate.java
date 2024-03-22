@@ -70,10 +70,12 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         String humanReadableAlgorithmName,
         Supplier<MemoryEstimation> estimationFactory,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
-        Optional<MutateOrWriteStep<CONFIGURATION, RESULT_FROM_ALGORITHM>> mutateOrWriteStep,
+        Optional<MutateOrWriteStep<RESULT_FROM_ALGORITHM>> mutateOrWriteStep,
         ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
     ) {
+        // as we progress through the steps we gather some metadata
         var timingsBuilder = new AlgorithmProcessingTimingsBuilder();
+        var countsBuilder = new SideEffectProcessingCountsBuilder();
 
         Pair<Graph, GraphStore> graphWithGraphStore = graphLoadAndValidationWithTiming(
             timingsBuilder,
@@ -90,7 +92,8 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             graphStore,
             configuration,
             Optional.empty(),
-            timingsBuilder.build()
+            timingsBuilder.build(),
+            countsBuilder.build()
         );
 
         memoryGuard.assertAlgorithmCanRun(humanReadableAlgorithmName, configuration, graph, estimationFactory);
@@ -105,7 +108,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         );
 
         // do any side effects
-        mutateOrWriteWithTiming(mutateOrWriteStep, timingsBuilder, graph, graphStore, result, resultBuilder);
+        mutateOrWriteWithTiming(mutateOrWriteStep, timingsBuilder, countsBuilder, graph, graphStore, result);
 
         // inject dependencies to render results
         return resultBuilder.build(
@@ -113,7 +116,8 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             graphStore,
             configuration,
             Optional.ofNullable(result),
-            timingsBuilder.build()
+            timingsBuilder.build(),
+            countsBuilder.build()
         );
     }
 
@@ -194,17 +198,17 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         }
     }
 
-    <CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> void mutateOrWriteWithTiming(
-        Optional<MutateOrWriteStep<CONFIGURATION, RESULT_FROM_ALGORITHM>> mutateOrWriteStep,
+    <RESULT_FROM_ALGORITHM> void mutateOrWriteWithTiming(
+        Optional<MutateOrWriteStep<RESULT_FROM_ALGORITHM>> mutateOrWriteStep,
         AlgorithmProcessingTimingsBuilder timingsBuilder,
+        SideEffectProcessingCountsBuilder countsBuilder,
         Graph graph,
         GraphStore graphStore,
-        RESULT_FROM_ALGORITHM result,
-        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
+        RESULT_FROM_ALGORITHM result
     ) {
         mutateOrWriteStep.ifPresent(step -> {
             try (ProgressTimer ignored = ProgressTimer.start(timingsBuilder::withPostProcessingMillis)) {
-                step.execute(graph, graphStore, result, resultBuilder);
+                step.execute(graph, graphStore, result, countsBuilder);
             }
         });
     }

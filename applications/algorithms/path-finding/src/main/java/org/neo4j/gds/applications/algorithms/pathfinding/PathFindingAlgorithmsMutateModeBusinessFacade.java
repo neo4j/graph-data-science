@@ -100,7 +100,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         ShortestPathAStarMutateConfig configuration,
         ResultBuilder<ShortestPathAStarMutateConfig, PathFindingResult, RESULT> resultBuilder
     ) {
-        var mutateStep = new ShortestPathMutateStep<ShortestPathAStarMutateConfig>(configuration);
+        var mutateStep = new ShortestPathMutateStep(configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
@@ -118,7 +118,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         ShortestPathDijkstraMutateConfig configuration,
         ResultBuilder<ShortestPathDijkstraMutateConfig, PathFindingResult, RESULT> resultBuilder
     ) {
-        var mutateStep = new ShortestPathMutateStep<ShortestPathDijkstraMutateConfig>(configuration);
+        var mutateStep = new ShortestPathMutateStep(configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
@@ -136,7 +136,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         ShortestPathYensMutateConfig configuration,
         ResultBuilder<ShortestPathYensMutateConfig, PathFindingResult, RESULT> resultBuilder
     ) {
-        var mutateStep = new ShortestPathMutateStep<ShortestPathYensMutateConfig>(configuration);
+        var mutateStep = new ShortestPathMutateStep(configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
@@ -154,7 +154,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         AllShortestPathsDijkstraMutateConfig configuration,
         ResultBuilder<AllShortestPathsDijkstraMutateConfig, PathFindingResult, RESULT> resultBuilder
     ) {
-        var mutateStep = new ShortestPathMutateStep<AllShortestPathsDijkstraMutateConfig>(configuration);
+        var mutateStep = new ShortestPathMutateStep(configuration);
 
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,

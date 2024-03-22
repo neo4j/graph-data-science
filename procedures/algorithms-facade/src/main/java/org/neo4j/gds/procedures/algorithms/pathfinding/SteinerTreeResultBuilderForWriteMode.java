@@ -23,19 +23,21 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.pathfinding.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.pathfinding.SideEffectProcessingCounts;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
 
 import java.util.Optional;
 
-class SteinerTreeResultBuilderForWriteMode extends ResultBuilder<SteinerTreeWriteConfig, SteinerTreeResult, SteinerWriteResult> {
+class SteinerTreeResultBuilderForWriteMode implements ResultBuilder<SteinerTreeWriteConfig, SteinerTreeResult, SteinerWriteResult> {
     @Override
     public SteinerWriteResult build(
         Graph graph,
         GraphStore graphStore,
         SteinerTreeWriteConfig steinerTreeWriteConfig,
         Optional<SteinerTreeResult> steinerTreeResult,
-        AlgorithmProcessingTimings timings
+        AlgorithmProcessingTimings timings,
+        SideEffectProcessingCounts counts
     ) {
         var builder = new SteinerWriteResult.Builder();
         builder.withConfig(steinerTreeWriteConfig);
@@ -44,7 +46,7 @@ class SteinerTreeResultBuilderForWriteMode extends ResultBuilder<SteinerTreeWrit
         builder.withComputeMillis(timings.computeMillis);
         builder.withWriteMillis(timings.postProcessingMillis);
 
-        builder.withRelationshipsWritten(this.relationshipsWritten);
+        builder.withRelationshipsWritten(counts.relationshipsWritten);
 
         steinerTreeResult.ifPresent(result -> {
             builder.withEffectiveNodeCount(result.effectiveNodeCount());

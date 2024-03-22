@@ -25,36 +25,14 @@ import org.neo4j.gds.api.GraphStore;
 import java.util.Optional;
 
 /**
- * This builder gathers data as part of algorithm processing
- * You specialise it for use cases, but a lot of what it needs is generic,
- * and it is part of algorithm processing instrumentation.
+ * This builder supports any type of result you could want to build - famous last words.
+ * The idea is, you specialise it for use cases, and the wide parameter lists functions like a union type
+ * , so not every implementation will make use of every parameter, but the abstraction covers all.
  * In-layer generic usage includes injecting the Graph, hence it is a parameter to the build method.
- * Out-layer would be injecting custom dependencies as part of the constructor.
- * And the whole build method is bespoke, of course.
- * This class is generic in the union type sense, it has fields and accessors for lots of stuff,
- * where any given usage probably won't need all of them.
+ * Out-layer would be injecting custom dependencies as part of a constructor in the implementing class.
+ * An example could be a boolean determined at runtime, governing which bits of data to output.
  */
-public abstract class ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> {
-    // a marker
-    private static final int NOT_AVAILABLE = -1;
-
-    // union type: zero or more of these get populated by your own hooks
-    protected long nodeCount = NOT_AVAILABLE;
-    protected long nodePropertiesWritten = NOT_AVAILABLE;
-    protected long relationshipsWritten = NOT_AVAILABLE;
-
-    public void withNodeCount(long nodeCount) {
-        this.nodeCount = nodeCount;
-    }
-
-    public void withNodePropertiesWritten(long nodePropertiesWritten) {
-        this.nodePropertiesWritten = nodePropertiesWritten;
-    }
-
-    public void withRelationshipsWritten(long relationshipsWritten) {
-        this.relationshipsWritten = relationshipsWritten;
-    }
-
+public interface ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> {
     /**
      * You implement this and use as much or as little of the gathered data as is appropriate.
      * Plus your own injected dependencies of course.
@@ -62,11 +40,12 @@ public abstract class ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT
      * @param configuration
      * @param result        empty when graph was empty
      */
-    public abstract RESULT_TO_CALLER build(
+    RESULT_TO_CALLER build(
         Graph graph,
         GraphStore graphStore,
         CONFIGURATION configuration,
         Optional<RESULT_FROM_ALGORITHM> result,
-        AlgorithmProcessingTimings timings
+        AlgorithmProcessingTimings timings,
+        SideEffectProcessingCounts counts
     );
 }

@@ -23,20 +23,22 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.pathfinding.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.pathfinding.SideEffectProcessingCounts;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SteinerMutateResult;
 import org.neo4j.gds.steiner.SteinerTreeMutateConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 
 import java.util.Optional;
 
-class SteinerTreeResultBuilderForMutateMode extends ResultBuilder<SteinerTreeMutateConfig, SteinerTreeResult, SteinerMutateResult> {
+class SteinerTreeResultBuilderForMutateMode implements ResultBuilder<SteinerTreeMutateConfig, SteinerTreeResult, SteinerMutateResult> {
     @Override
     public SteinerMutateResult build(
         Graph graph,
         GraphStore graphStore,
         SteinerTreeMutateConfig steinerTreeMutateConfig,
         Optional<SteinerTreeResult> steinerTreeResult,
-        AlgorithmProcessingTimings timings
+        AlgorithmProcessingTimings timings,
+        SideEffectProcessingCounts counts
     ) {
         var builder = new SteinerMutateResult.Builder();
         builder.withConfig(steinerTreeMutateConfig);
@@ -45,7 +47,7 @@ class SteinerTreeResultBuilderForMutateMode extends ResultBuilder<SteinerTreeMut
         builder.withComputeMillis(timings.computeMillis);
         builder.withMutateMillis(timings.postProcessingMillis);
 
-        builder.withRelationshipsWritten(this.relationshipsWritten);
+        builder.withRelationshipsWritten(counts.relationshipsWritten);
 
         steinerTreeResult.ifPresent(result -> {
             builder.withEffectiveNodeCount(result.effectiveNodeCount());

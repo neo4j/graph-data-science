@@ -19,17 +19,10 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
+public class SideEffectProcessingCounts {
+    public final long relationshipsWritten;
 
-public interface MutateOrWriteStep<RESULT_FROM_ALGORITHM> {
-    /**
-     * Timings belong on the outside.
-     */
-    void execute(
-        Graph graph,
-        GraphStore graphStore,
-        RESULT_FROM_ALGORITHM result,
-        SideEffectProcessingCountsBuilder countsBuilder
-    );
+    public SideEffectProcessingCounts(long relationshipsWritten) {
+        this.relationshipsWritten = relationshipsWritten;
+    }
 }

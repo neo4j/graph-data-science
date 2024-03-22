@@ -23,6 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.pathfinding.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.pathfinding.SideEffectProcessingCounts;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.paths.traverse.BfsStatsConfig;
 import org.neo4j.gds.results.StandardStatsResult;
@@ -30,14 +31,15 @@ import org.neo4j.gds.results.StandardStatsResult;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class BfsStatsResultBuilder extends ResultBuilder<BfsStatsConfig, HugeLongArray, Stream<StandardStatsResult>> {
+class BfsStatsResultBuilder implements ResultBuilder<BfsStatsConfig, HugeLongArray, Stream<StandardStatsResult>> {
     @Override
     public Stream<StandardStatsResult> build(
         Graph graph,
         GraphStore graphStore,
         BfsStatsConfig configuration,
-        Optional<HugeLongArray> result, // unused
-        AlgorithmProcessingTimings timings
+        Optional<HugeLongArray> result,
+        AlgorithmProcessingTimings timings,
+        SideEffectProcessingCounts counts
     ) {
         return Stream.of(
             new StandardStatsResult(
