@@ -29,6 +29,8 @@ import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraMutateConfig;
 import org.neo4j.gds.paths.traverse.BfsMutateConfig;
 import org.neo4j.gds.paths.traverse.DfsMutateConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensMutateConfig;
+import org.neo4j.gds.spanningtree.SpanningTree;
+import org.neo4j.gds.spanningtree.SpanningTreeMutateConfig;
 import org.neo4j.gds.steiner.SteinerTreeMutateConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 
@@ -38,6 +40,7 @@ import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BFS;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DFS;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DIJKSTRA;
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.SPANNING_TREE;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.STEINER;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.YENS;
 
@@ -166,6 +169,24 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             () -> estimationFacade.singleSourceShortestPathDijkstraEstimation(configuration),
             graph -> pathFindingAlgorithms.singleSourceShortestPathDijkstra(graph, configuration),
             Optional.of(mutateStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT spanningTree(
+        GraphName graphName,
+        SpanningTreeMutateConfig configuration,
+        ResultBuilder<SpanningTreeMutateConfig, SpanningTree, RESULT> resultBuilder
+    ) {
+        var mutateOrWriteStep = new SpanningTreeMutateStep(configuration);
+
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            SPANNING_TREE,
+            () -> estimationFacade.spanningTreeEstimation(configuration),
+            graph -> pathFindingAlgorithms.spanningTree(graph, configuration),
+            Optional.of(mutateOrWriteStep),
             resultBuilder
         );
     }

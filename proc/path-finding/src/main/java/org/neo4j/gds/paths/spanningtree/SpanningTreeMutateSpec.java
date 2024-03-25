@@ -30,6 +30,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeMutateResult;
 import org.neo4j.gds.spanningtree.Prim;
 import org.neo4j.gds.spanningtree.SpanningGraph;
 import org.neo4j.gds.spanningtree.SpanningTree;
@@ -46,7 +47,7 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
     description = Constants.SPANNING_TREE_DESCRIPTION,
     executionMode = MUTATE_RELATIONSHIP
 )
-public class SpanningTreeMutateSpec implements AlgorithmSpec<Prim, SpanningTree, SpanningTreeMutateConfig, Stream<MutateResult>, SpanningTreeAlgorithmFactory<SpanningTreeMutateConfig>> {
+public class SpanningTreeMutateSpec implements AlgorithmSpec<Prim, SpanningTree, SpanningTreeMutateConfig, Stream<SpanningTreeMutateResult>, SpanningTreeAlgorithmFactory<SpanningTreeMutateConfig>> {
 
     @Override
     public String name() {
@@ -64,10 +65,10 @@ public class SpanningTreeMutateSpec implements AlgorithmSpec<Prim, SpanningTree,
 
     }
 
-    public ComputationResultConsumer<Prim, SpanningTree, SpanningTreeMutateConfig, Stream<MutateResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Prim, SpanningTree, SpanningTreeMutateConfig, Stream<SpanningTreeMutateResult>> computationResultConsumer() {
 
         return (computationResult, executionContext) -> {
-            MutateResult.Builder builder = new MutateResult.Builder();
+            SpanningTreeMutateResult.Builder builder = new SpanningTreeMutateResult.Builder();
 
             if (computationResult.result().isEmpty()) {
                 return Stream.of(builder.build());

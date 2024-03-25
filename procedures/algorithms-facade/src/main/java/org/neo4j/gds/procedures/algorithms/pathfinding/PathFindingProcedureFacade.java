@@ -55,6 +55,7 @@ import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestP
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestPathDijkstraMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestPathYensMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SingleSourceShortestPathDijkstraMutateStub;
+import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SpanningTreeMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SteinerTreeMutateStub;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardStatsResult;
@@ -97,6 +98,7 @@ public final class PathFindingProcedureFacade {
     private final SinglePairShortestPathDijkstraMutateStub singlePairShortestPathDijkstraMutateStub;
     private final SinglePairShortestPathYensMutateStub singlePairShortestPathYensMutateStub;
     private final SingleSourceShortestPathDijkstraMutateStub singleSourceShortestPathDijkstraMutateStub;
+    private final SpanningTreeMutateStub spanningTreeMutateStub;
     private final SteinerTreeMutateStub steinerTreeMutateStub;
 
     private PathFindingProcedureFacade(
@@ -114,6 +116,7 @@ public final class PathFindingProcedureFacade {
         SinglePairShortestPathDijkstraMutateStub singlePairShortestPathDijkstraMutateStub,
         SinglePairShortestPathYensMutateStub singlePairShortestPathYensMutateStub,
         SingleSourceShortestPathDijkstraMutateStub singleSourceShortestPathDijkstraMutateStub,
+        SpanningTreeMutateStub spanningTreeMutateStub,
         SteinerTreeMutateStub steinerTreeMutateStub
     ) {
         this.closeableResourceRegistry = closeableResourceRegistry;
@@ -132,6 +135,7 @@ public final class PathFindingProcedureFacade {
         this.singlePairShortestPathDijkstraMutateStub = singlePairShortestPathDijkstraMutateStub;
         this.singlePairShortestPathYensMutateStub = singlePairShortestPathYensMutateStub;
         this.singleSourceShortestPathDijkstraMutateStub = singleSourceShortestPathDijkstraMutateStub;
+        this.spanningTreeMutateStub = spanningTreeMutateStub;
         this.steinerTreeMutateStub = steinerTreeMutateStub;
     }
 
@@ -168,6 +172,18 @@ public final class PathFindingProcedureFacade {
             pathFindingAlgorithmsMutateModeBusinessFacade
         );
 
+        var breadthFirstSearchMutateStub = new BreadthFirstSearchMutateStub(
+            genericStub,
+            pathFindingAlgorithmsEstimationModeBusinessFacade,
+            pathFindingAlgorithmsMutateModeBusinessFacade
+        );
+
+        var depthFirstSearchMutateStub = new DepthFirstSearchMutateStub(
+            genericStub,
+            pathFindingAlgorithmsEstimationModeBusinessFacade,
+            pathFindingAlgorithmsMutateModeBusinessFacade
+        );
+
         var singlePairDijkstraStub = new SinglePairShortestPathDijkstraMutateStub(
             genericStub,
             pathFindingAlgorithmsEstimationModeBusinessFacade,
@@ -186,19 +202,13 @@ public final class PathFindingProcedureFacade {
             pathFindingAlgorithmsMutateModeBusinessFacade
         );
 
+        var spanningTreeMutateStub = new SpanningTreeMutateStub(
+            genericStub,
+            pathFindingAlgorithmsEstimationModeBusinessFacade,
+            pathFindingAlgorithmsMutateModeBusinessFacade
+        );
+
         var steinerTreeMutateStub = new SteinerTreeMutateStub(
-            genericStub,
-            pathFindingAlgorithmsEstimationModeBusinessFacade,
-            pathFindingAlgorithmsMutateModeBusinessFacade
-        );
-
-        var breadthFirstSearchMutateStub = new BreadthFirstSearchMutateStub(
-            genericStub,
-            pathFindingAlgorithmsEstimationModeBusinessFacade,
-            pathFindingAlgorithmsMutateModeBusinessFacade
-        );
-
-        var depthFirstSearchMutateStub = new DepthFirstSearchMutateStub(
             genericStub,
             pathFindingAlgorithmsEstimationModeBusinessFacade,
             pathFindingAlgorithmsMutateModeBusinessFacade
@@ -219,6 +229,7 @@ public final class PathFindingProcedureFacade {
             singlePairDijkstraStub,
             yensStub,
             singleSourceDijkstraStub,
+            spanningTreeMutateStub,
             steinerTreeMutateStub
         );
     }
@@ -561,6 +572,10 @@ public final class PathFindingProcedureFacade {
         );
 
         return Stream.of(result);
+    }
+
+    public SpanningTreeMutateStub spanningTreeMutateStub() {
+        return spanningTreeMutateStub;
     }
 
     public Stream<SpanningTreeStatsResult> spanningTreeStats(

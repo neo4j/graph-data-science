@@ -17,18 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.spanningtree;
+package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeStatsResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
-public final class MutateResult extends SpanningTreeStatsResult {
+public final class SpanningTreeMutateResult extends SpanningTreeStatsResult {
     public final long mutateMillis;
     public final long relationshipsWritten;
 
-    public MutateResult(
+    public SpanningTreeMutateResult(
         long preProcessingMillis,
         long computeMillis,
         long mutateMillis,
@@ -42,22 +41,21 @@ public final class MutateResult extends SpanningTreeStatsResult {
         this.relationshipsWritten = relationshipsWritten;
     }
 
-    public static class Builder extends AbstractResultBuilder<MutateResult> {
-
+    public static class Builder extends AbstractResultBuilder<SpanningTreeMutateResult> {
         long effectiveNodeCount;
         double totalWeight;
 
-        void withEffectiveNodeCount(long effectiveNodeCount) {
+        public void withEffectiveNodeCount(long effectiveNodeCount) {
             this.effectiveNodeCount = effectiveNodeCount;
         }
 
-        void withTotalWeight(double totalWeight) {
+        public void withTotalWeight(double totalWeight) {
             this.totalWeight = totalWeight;
         }
 
         @Override
-        public MutateResult build() {
-            return new MutateResult(
+        public SpanningTreeMutateResult build() {
+            return new SpanningTreeMutateResult(
                 preProcessingMillis,
                 computeMillis,
                 mutateMillis,
