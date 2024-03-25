@@ -22,12 +22,15 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.paths.traverse.BfsStatsConfig;
+import org.neo4j.gds.spanningtree.SpanningTree;
+import org.neo4j.gds.spanningtree.SpanningTreeStatsConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.steiner.SteinerTreeStatsConfig;
 
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BFS;
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.SPANNING_TREE;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.STEINER;
 
 public class PathFindingAlgorithmsStatsModeBusinessFacade {
@@ -57,6 +60,22 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
             BFS,
             () -> estimationFacade.breadthFirstSearchEstimation(configuration),
             graph -> pathFindingAlgorithms.breadthFirstSearch(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT spanningTree(
+        GraphName graphName,
+        SpanningTreeStatsConfig configuration,
+        ResultBuilder<SpanningTreeStatsConfig, SpanningTree, RESULT> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            SPANNING_TREE,
+            () -> estimationFacade.spanningTreeEstimation(configuration),
+            graph -> pathFindingAlgorithms.spanningTree(graph, configuration),
             Optional.empty(),
             resultBuilder
         );

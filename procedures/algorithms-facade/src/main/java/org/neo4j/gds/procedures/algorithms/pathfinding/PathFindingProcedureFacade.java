@@ -59,6 +59,7 @@ import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SteinerTreeMutateSt
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardStatsResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
+import org.neo4j.gds.spanningtree.SpanningTreeStatsConfig;
 import org.neo4j.gds.spanningtree.SpanningTreeStreamConfig;
 import org.neo4j.gds.steiner.SteinerTreeStatsConfig;
 import org.neo4j.gds.steiner.SteinerTreeStreamConfig;
@@ -561,30 +562,29 @@ public final class PathFindingProcedureFacade {
         return Stream.of(result);
     }
 
-    public SteinerTreeMutateStub steinerTreeMutateStub() {
-        return steinerTreeMutateStub;
-    }
-
-    public Stream<SteinerStatsResult> steinerTreeStats(String graphName, Map<String, Object> configuration) {
-        var resultBuilder = new SteinerTreeResultBuilderForStatsMode();
+    public Stream<SpanningTreeStatsResult> spanningTreeStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new SpanningTreeResultBuilderForStatsMode();
 
         return runStatsAlgorithm(
             graphName,
             configuration,
-            SteinerTreeStatsConfig::of,
+            SpanningTreeStatsConfig::of,
             resultBuilder,
-            statsModeFacade::steinerTree
+            statsModeFacade::spanningTree
         );
     }
 
-    public Stream<MemoryEstimateResult> steinerTreeStatsEstimate(
+    public Stream<MemoryEstimateResult> spanningTreeStatsEstimate(
         Object graphNameOrConfiguration,
         Map<String, Object> algorithmConfiguration
     ) {
         var result = runEstimation(
             algorithmConfiguration,
-            SteinerTreeStatsConfig::of,
-            configuration -> estimationModeFacade.steinerTree(
+            SpanningTreeStatsConfig::of,
+            configuration -> estimationModeFacade.spanningTree(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -613,6 +613,38 @@ public final class PathFindingProcedureFacade {
             algorithmConfiguration,
             SpanningTreeStreamConfig::of,
             configuration -> estimationModeFacade.spanningTree(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
+    public SteinerTreeMutateStub steinerTreeMutateStub() {
+        return steinerTreeMutateStub;
+    }
+
+    public Stream<SteinerStatsResult> steinerTreeStats(String graphName, Map<String, Object> configuration) {
+        var resultBuilder = new SteinerTreeResultBuilderForStatsMode();
+
+        return runStatsAlgorithm(
+            graphName,
+            configuration,
+            SteinerTreeStatsConfig::of,
+            resultBuilder,
+            statsModeFacade::steinerTree
+        );
+    }
+
+    public Stream<MemoryEstimateResult> steinerTreeStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = runEstimation(
+            algorithmConfiguration,
+            SteinerTreeStatsConfig::of,
+            configuration -> estimationModeFacade.steinerTree(
                 configuration,
                 graphNameOrConfiguration
             )

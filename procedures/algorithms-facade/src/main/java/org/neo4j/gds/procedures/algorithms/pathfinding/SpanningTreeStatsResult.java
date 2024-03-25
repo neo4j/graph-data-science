@@ -17,19 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.spanningtree;
+package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.StandardModeResult;
 
 import java.util.Map;
 
-public class StatsResult extends StandardModeResult {
-
+public class SpanningTreeStatsResult extends StandardModeResult {
     public final long effectiveNodeCount;
     public final double totalWeight;
 
-    public StatsResult(
+    public SpanningTreeStatsResult(
         long preProcessingMillis,
         long computeMillis,
         long effectiveNodeCount,
@@ -41,14 +40,13 @@ public class StatsResult extends StandardModeResult {
         this.totalWeight = totalWeight;
     }
 
-    static final class Builder extends AbstractResultBuilder<StatsResult> {
-
+    public static final class Builder extends AbstractResultBuilder<SpanningTreeStatsResult> {
         private long effectiveNodeCount;
         private double totalWeight;
 
         @Override
-        public StatsResult build() {
-            return new StatsResult(
+        public SpanningTreeStatsResult build() {
+            return new SpanningTreeStatsResult(
                 preProcessingMillis,
                 computeMillis,
                 effectiveNodeCount,
@@ -57,15 +55,14 @@ public class StatsResult extends StandardModeResult {
             );
         }
 
-        Builder withEffectiveNodeCount(long effectiveNodeCount) {
+        public Builder withEffectiveNodeCount(long effectiveNodeCount) {
             this.effectiveNodeCount = effectiveNodeCount;
             return this;
         }
 
-        Builder withTotalWeight(double totalWeight) {
+        public Builder withTotalWeight(double totalWeight) {
             this.totalWeight = totalWeight;
             return this;
         }
-
     }
 }

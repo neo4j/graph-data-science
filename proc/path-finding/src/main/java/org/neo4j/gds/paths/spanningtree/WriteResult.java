@@ -19,17 +19,16 @@
  */
 package org.neo4j.gds.paths.spanningtree;
 
+import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeStatsResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
-public final class WriteResult extends StatsResult {
-
-
+public final class WriteResult extends SpanningTreeStatsResult {
     public final long writeMillis;
     public final long relationshipsWritten;
 
-    public WriteResult(
+    private WriteResult(
         long preProcessingMillis,
         long computeMillis,
         long writeMillis,
@@ -53,9 +52,8 @@ public final class WriteResult extends StatsResult {
             return this;
         }
 
-        Builder withTotalWeight(double totalWeight) {
+        void withTotalWeight(double totalWeight) {
             this.totalWeight = totalWeight;
-            return this;
         }
 
         @Override

@@ -19,13 +19,12 @@
  */
 package org.neo4j.gds.paths.spanningtree;
 
+import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeStatsResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
-public final class MutateResult extends StatsResult {
-
-
+public final class MutateResult extends SpanningTreeStatsResult {
     public final long mutateMillis;
     public final long relationshipsWritten;
 
@@ -48,14 +47,12 @@ public final class MutateResult extends StatsResult {
         long effectiveNodeCount;
         double totalWeight;
 
-        Builder withEffectiveNodeCount(long effectiveNodeCount) {
+        void withEffectiveNodeCount(long effectiveNodeCount) {
             this.effectiveNodeCount = effectiveNodeCount;
-            return this;
         }
 
-        Builder withTotalWeight(double totalWeight) {
+        void withTotalWeight(double totalWeight) {
             this.totalWeight = totalWeight;
-            return this;
         }
 
         @Override
