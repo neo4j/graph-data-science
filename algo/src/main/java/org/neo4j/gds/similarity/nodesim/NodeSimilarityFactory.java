@@ -58,35 +58,11 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
         return build(graph, configuration.toParameters(), configuration.concurrency(), progressTracker);
     }
 
-    public MemoryEstimation memoryEstimation(
-        int normalizedK,
-        int normalizedN,
-        boolean enableComponentsOptimization,
-        boolean actuallyRunWCC,
-        boolean computeToGraph
-    ) {
-        return new NodeSimilarityMemoryEstimateDefinition(
-            normalizedK,
-            normalizedN,
-            enableComponentsOptimization,
-            actuallyRunWCC,
-            computeToGraph
-        ).memoryEstimation();
-    }
 
-    public MemoryEstimation memoryEstimation(NodeSimilarityParameters parameters) {
-        return memoryEstimation(
-            parameters.normalizedK(),
-            parameters.normalizedN(),
-            parameters.useComponents(),
-            parameters.componentProperty() == null,
-            !parameters.computeToStream()
-        );
-    }
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
-        return memoryEstimation(config.toParameters());
+        return new NodeSimilarityMemoryEstimateDefinition(config.toMemoryEstimateParameters()).memoryEstimation();
     }
 
     @Override

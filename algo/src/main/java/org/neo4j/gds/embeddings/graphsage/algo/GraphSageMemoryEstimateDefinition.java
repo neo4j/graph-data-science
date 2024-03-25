@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -28,12 +29,12 @@ import static org.neo4j.gds.core.utils.mem.MemoryEstimations.RESIDENT_MEMORY;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.TEMPORARY_MEMORY;
 import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
 
-public class GraphSageMemoryEstimateDefinition {
+public class GraphSageMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
     private final GraphSageTrainMemoryEstimateParameters trainEstimationParameters;
     private final boolean mutating;
 
-    GraphSageMemoryEstimateDefinition(
+    public GraphSageMemoryEstimateDefinition(
         GraphSageTrainMemoryEstimateParameters trainEstimationParameters,
         boolean mutating
     ) {
@@ -41,6 +42,7 @@ public class GraphSageMemoryEstimateDefinition {
         this.mutating = mutating;
     }
 
+    @Override
     public MemoryEstimation memoryEstimation() {
         return MemoryEstimations.setup(
             "",

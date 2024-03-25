@@ -105,6 +105,8 @@ public final class NodeSimilarityParameters {
         return computeToStream;
     }
 
+    public boolean computeToGraph() {return !computeToStream;} //adding for clarity
+
     boolean hasRelationshipWeightProperty() {
         return hasRelationshipWeightProperty;
     }
@@ -130,5 +132,14 @@ public final class NodeSimilarityParameters {
 
     boolean runWCC() {
         return useComponents && componentProperty == null;
+    }
+
+    public NodeSimilarityEstimateParameters memoryParameters() {
+
+        return NodeSimilarityEstimateParameters.create(
+            normalizedK,
+            normalizedN,
+            useComponents, runWCC(), computeToGraph()
+        );
     }
 }

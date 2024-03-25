@@ -35,7 +35,7 @@ public class GraphSageTrainEstimateDefinition implements MemoryEstimateDefinitio
 
     private final GraphSageTrainMemoryEstimateParameters parameters;
 
-    GraphSageTrainEstimateDefinition(GraphSageTrainMemoryEstimateParameters parameters) {
+    public GraphSageTrainEstimateDefinition(GraphSageTrainMemoryEstimateParameters parameters) {
         this.parameters = parameters;
     }
 

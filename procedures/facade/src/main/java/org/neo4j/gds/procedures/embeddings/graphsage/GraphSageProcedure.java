@@ -110,7 +110,7 @@ public class GraphSageProcedure {
     ) {
         var config = configurationCreator.createConfiguration(configuration, GraphSageStreamConfig::of);
 
-        return Stream.of(estimateBusinessFacade.graphSage(graphNameOrConfiguration, config));
+        return Stream.of(estimateBusinessFacade.graphSage(graphNameOrConfiguration, config, false));
     }
 
     public Stream<MemoryEstimateResult> mutateEstimate(
@@ -119,7 +119,7 @@ public class GraphSageProcedure {
     ) {
         var config = configurationCreator.createConfiguration(configuration, GraphSageMutateConfig::of);
 
-        return Stream.of(estimateBusinessFacade.graphSage(graphNameOrConfiguration, config));
+        return Stream.of(estimateBusinessFacade.graphSage(graphNameOrConfiguration, config, true));
     }
 
     public Stream<MemoryEstimateResult> writeEstimate(
@@ -128,7 +128,7 @@ public class GraphSageProcedure {
     ) {
         var config = configurationCreator.createConfiguration(configuration, GraphSageWriteConfig::of);
 
-        return Stream.of(estimateBusinessFacade.graphSage(graphNameOrConfiguration, config));
+        return Stream.of(estimateBusinessFacade.graphSage(graphNameOrConfiguration, config, false));
     }
 
     public Stream<GraphSageTrainResult> train(

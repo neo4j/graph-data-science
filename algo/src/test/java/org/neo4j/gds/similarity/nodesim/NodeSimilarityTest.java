@@ -29,12 +29,7 @@ import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
-import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.mem.MemoryTree;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -809,118 +804,6 @@ final class NodeSimilarityTest {
         assertEquals(orientation == REVERSE ? EXPECTED_INCOMING : EXPECTED_OUTGOING, result);
     }
 
-    @ParameterizedTest(name = "topK = {0}")
-    @ValueSource(ints = {10, 100})
-    void shouldComputeMemrec(int topK) {
-        GraphDimensions dimensions = ImmutableGraphDimensions.builder()
-            .nodeCount(1_000_000)
-            .relCountUpperBound(5_000_000)
-            .build();
-
-        MemoryTree actual = new NodeSimilarityFactory<>()
-            .memoryEstimation(topK, 0, false, false, true)
-            .estimate(dimensions, 1);
-
-        long nodeFilterRangeMin = 125_016L;
-        long nodeFilterRangeMax = 125_016L;
-        MemoryRange nodeFilterRange = MemoryRange.of(nodeFilterRangeMin, nodeFilterRangeMax);
-
-        long vectorsRangeMin = 56_000_016L;
-        long vectorsRangeMax = 56_000_016L;
-        MemoryRange vectorsRange = MemoryRange.of(vectorsRangeMin, vectorsRangeMax);
-
-        long weightsRangeMin = 16L;
-        long weightsRangeMax = 56_000_016L;
-        MemoryRange weightsRange = MemoryRange.of(weightsRangeMin, weightsRangeMax);
-
-        MemoryEstimations.Builder builder = MemoryEstimations.builder()
-            .fixed("node filter", nodeFilterRange)
-            .fixed("vectors", vectorsRange)
-            .fixed("weights", weightsRange)
-            .fixed("similarityComputer", 8);
-
-        long topKMapRangeMin;
-        long topKMapRangeMax;
-        if (topK == 10) {
-            topKMapRangeMin = 248_000_016L;
-            topKMapRangeMax = 248_000_016L;
-        } else {
-            topKMapRangeMin = 1_688_000_016L;
-            topKMapRangeMax = 1_688_000_016L;
-        }
-        builder.fixed("topK map", MemoryRange.of(topKMapRangeMin, topKMapRangeMax));
-
-        MemoryTree expected = builder.build().estimate(dimensions, 1);
-
-        assertEquals(expected.memoryUsage(), actual.memoryUsage());
-    }
-
-    @ParameterizedTest(name = "topK = {0}")
-    @ValueSource(ints = {10, 100})
-    void shouldComputeMemrecWithTop(int topK) {
-        GraphDimensions dimensions = ImmutableGraphDimensions.builder()
-            .nodeCount(1_000_000)
-            .relCountUpperBound(5_000_000)
-            .build();
-
-        MemoryTree actual = new NodeSimilarityFactory<>()
-            .memoryEstimation(topK, 100, false, false, true)
-            .estimate(dimensions, 1);
-
-        long nodeFilterRangeMin = 125_016L;
-        long nodeFilterRangeMax = 125_016L;
-        MemoryRange nodeFilterRange = MemoryRange.of(nodeFilterRangeMin, nodeFilterRangeMax);
-
-        long vectorsRangeMin = 56_000_016L;
-        long vectorsRangeMax = 56_000_016L;
-        MemoryRange vectorsRange = MemoryRange.of(vectorsRangeMin, vectorsRangeMax);
-
-        long weightsRangeMin = 16L;
-        long weightsRangeMax = 56_000_016L;
-        MemoryRange weightsRange = MemoryRange.of(weightsRangeMin, weightsRangeMax);
-
-        long topNListMin = 2_504L;
-        long topNListMax = 2_504L;
-        MemoryRange topNListRange = MemoryRange.of(topNListMin, topNListMax);
-
-        MemoryEstimations.Builder builder = MemoryEstimations.builder()
-            .fixed("node filter", nodeFilterRange)
-            .fixed("vectors", vectorsRange)
-            .fixed("weights", weightsRange)
-            .fixed("topNList", topNListRange)
-            .fixed("similarityComputer", 8);
-
-        long topKMapRangeMin;
-        long topKMapRangeMax;
-        if (topK == 10) {
-            topKMapRangeMin = 248_000_016L;
-            topKMapRangeMax = 248_000_016L;
-        } else {
-            topKMapRangeMin = 1_688_000_016L;
-            topKMapRangeMax = 1_688_000_016L;
-        }
-        builder.fixed("topK map", MemoryRange.of(topKMapRangeMin, topKMapRangeMax));
-
-        MemoryTree expected = builder.build().estimate(dimensions, 1);
-
-        assertEquals(expected.memoryUsage(), actual.memoryUsage());
-    }
-
-    @Test
-    void shouldComputeMemrecWithTopKAndTopNGreaterThanNodeCount() {
-        GraphDimensions dimensions = ImmutableGraphDimensions.builder()
-            .nodeCount(100)
-            .relCountUpperBound(20_000)
-            .build();
-
-        MemoryTree actual = new NodeSimilarityFactory<>()
-            .memoryEstimation(Integer.MAX_VALUE, Integer.MAX_VALUE, false, false, true)
-            .estimate(dimensions, 1);
-
-        assertEquals(570592, actual.memoryUsage().min);
-        assertEquals(732192, actual.memoryUsage().max);
-
-    }
 
     @ParameterizedTest(name = "topK = {0}, concurrency = {1}")
     @MethodSource("topKAndConcurrencies")

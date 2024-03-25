@@ -20,33 +20,33 @@
 package org.neo4j.gds.algorithms.community;
 
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
-import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutAlgorithmFactory;
+import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutMemoryEstimateDefinition;
 import org.neo4j.gds.approxmaxkcut.config.ApproxMaxKCutBaseConfig;
-import org.neo4j.gds.k1coloring.K1ColoringAlgorithmFactory;
 import org.neo4j.gds.k1coloring.K1ColoringBaseConfig;
-import org.neo4j.gds.kcore.KCoreDecompositionAlgorithmFactory;
+import org.neo4j.gds.k1coloring.K1ColoringMemoryEstimateDefinition;
 import org.neo4j.gds.kcore.KCoreDecompositionBaseConfig;
-import org.neo4j.gds.kmeans.KmeansAlgorithmFactory;
+import org.neo4j.gds.kcore.KCoreDecompositionMemoryEstimateDefinition;
 import org.neo4j.gds.kmeans.KmeansBaseConfig;
+import org.neo4j.gds.kmeans.KmeansMemoryEstimateDefinition;
 import org.neo4j.gds.labelpropagation.LabelPropagationBaseConfig;
-import org.neo4j.gds.labelpropagation.LabelPropagationFactory;
-import org.neo4j.gds.leiden.LeidenAlgorithmFactory;
+import org.neo4j.gds.labelpropagation.LabelPropagationMemoryEstimateDefinition;
 import org.neo4j.gds.leiden.LeidenBaseConfig;
-import org.neo4j.gds.louvain.LouvainAlgorithmFactory;
+import org.neo4j.gds.leiden.LeidenMemoryEstimateDefinition;
 import org.neo4j.gds.louvain.LouvainBaseConfig;
+import org.neo4j.gds.louvain.LouvainMemoryEstimateDefinition;
 import org.neo4j.gds.modularity.ModularityBaseConfig;
-import org.neo4j.gds.modularity.ModularityCalculatorFactory;
+import org.neo4j.gds.modularity.ModularityCalculatorMemoryEstimateDefinition;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationBaseConfig;
-import org.neo4j.gds.modularityoptimization.ModularityOptimizationFactory;
+import org.neo4j.gds.modularityoptimization.ModularityOptimizationMemoryEstimateDefinition;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.scc.SccAlgorithmFactory;
 import org.neo4j.gds.scc.SccBaseConfig;
-import org.neo4j.gds.triangle.IntersectingTriangleCountFactory;
+import org.neo4j.gds.scc.SccMemoryEstimateDefinition;
+import org.neo4j.gds.triangle.IntersectingTriangleCountMemoryEstimateDefinition;
 import org.neo4j.gds.triangle.LocalClusteringCoefficientBaseConfig;
-import org.neo4j.gds.triangle.LocalClusteringCoefficientFactory;
+import org.neo4j.gds.triangle.LocalClusteringCoefficientMemoryEstimateDefinition;
 import org.neo4j.gds.triangle.TriangleCountBaseConfig;
-import org.neo4j.gds.wcc.WccAlgorithmFactory;
 import org.neo4j.gds.wcc.WccBaseConfig;
+import org.neo4j.gds.wcc.WccMemoryEstimateDefinition;
 
 import java.util.Optional;
 
@@ -65,7 +65,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new WccAlgorithmFactory<>()
+            new WccMemoryEstimateDefinition(configuration.isIncremental())
         );
     }
 
@@ -75,7 +75,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new ApproxMaxKCutAlgorithmFactory<>()
+            new ApproxMaxKCutMemoryEstimateDefinition(configuration.toMemoryEstimationParameters())
         );
     }
 
@@ -87,7 +87,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
-            new K1ColoringAlgorithmFactory<>()
+            new K1ColoringMemoryEstimateDefinition()
         );
     }
 
@@ -99,7 +99,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
-            new KCoreDecompositionAlgorithmFactory<>()
+            new KCoreDecompositionMemoryEstimateDefinition()
         );
     }
 
@@ -111,7 +111,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
-            new KmeansAlgorithmFactory<>()
+            new KmeansMemoryEstimateDefinition(configuration.toParameters())
         );
     }
 
@@ -123,7 +123,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new LabelPropagationFactory<>()
+            new LabelPropagationMemoryEstimateDefinition()
         );
     }
     public <C extends TriangleCountBaseConfig> MemoryEstimateResult triangleCount(
@@ -134,7 +134,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
-            new IntersectingTriangleCountFactory<>()
+            new IntersectingTriangleCountMemoryEstimateDefinition()
         );
     }
 
@@ -147,7 +147,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new LeidenAlgorithmFactory<>()
+            new LeidenMemoryEstimateDefinition(configuration.toMemoryEstimationParameters())
         );
     }
 
@@ -159,7 +159,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new LouvainAlgorithmFactory<>()
+            new LouvainMemoryEstimateDefinition(configuration.toMemoryEstimationParameters())
         );
     }
 
@@ -171,7 +171,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
-            new SccAlgorithmFactory<>()
+            new SccMemoryEstimateDefinition()
         );
     }
 
@@ -183,7 +183,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
-            new LocalClusteringCoefficientFactory<>()
+            new LocalClusteringCoefficientMemoryEstimateDefinition(configuration.seedProperty())
         );
     }
 
@@ -195,7 +195,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new ModularityCalculatorFactory<>()
+            new ModularityCalculatorMemoryEstimateDefinition()
         );
     }
 
@@ -207,7 +207,7 @@ public class CommunityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new ModularityOptimizationFactory<>()
+            new ModularityOptimizationMemoryEstimateDefinition()
         );
     }
 }

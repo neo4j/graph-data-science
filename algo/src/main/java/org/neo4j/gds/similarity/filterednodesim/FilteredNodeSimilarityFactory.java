@@ -71,35 +71,9 @@ public class FilteredNodeSimilarityFactory<CONFIG extends FilteredNodeSimilarity
         );
     }
 
-    public MemoryEstimation memoryEstimation(
-        int normalizedK,
-        int normalizedN,
-        boolean enableComponentsOptimization,
-        boolean actuallyRunWCC,
-        boolean computeToGraph
-    ) {
-        return new FilteredNodeSimilarityMemoryEstimateDefinition(
-            normalizedK,
-            normalizedN,
-            enableComponentsOptimization,
-            actuallyRunWCC,
-            computeToGraph
-        ).memoryEstimation();
-    }
-
-    public MemoryEstimation memoryEstimation(NodeSimilarityParameters parameters) {
-        return memoryEstimation(
-            parameters.normalizedK(),
-            parameters.normalizedN(),
-            parameters.useComponents(),
-            parameters.componentProperty() == null,
-            !parameters.computeToStream()
-        );
-    }
-
     @Override
     public MemoryEstimation memoryEstimation(CONFIG config) {
-        return memoryEstimation(config.toParameters());
+        return new FilteredNodeSimilarityMemoryEstimateDefinition(config.toParameters()).memoryEstimation();
     }
 
     @Override

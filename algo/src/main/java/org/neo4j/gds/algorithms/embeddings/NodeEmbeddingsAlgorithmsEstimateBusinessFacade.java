@@ -21,19 +21,21 @@ package org.neo4j.gds.algorithms.embeddings;
 
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.embeddings.fastrp.FastRPBaseConfig;
-import org.neo4j.gds.embeddings.fastrp.FastRPFactory;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
+import org.neo4j.gds.embeddings.fastrp.FastRPMemoryEstimateDefinition;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageBaseConfig;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainAlgorithmFactory;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageMemoryEstimateDefinition;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
+import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainEstimateDefinition;
 import org.neo4j.gds.embeddings.hashgnn.HashGNNConfig;
-import org.neo4j.gds.embeddings.hashgnn.HashGNNFactory;
-import org.neo4j.gds.embeddings.node2vec.Node2VecAlgorithmFactory;
+import org.neo4j.gds.embeddings.hashgnn.HashGNNMemoryEstimateDefinition;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
+import org.neo4j.gds.embeddings.node2vec.Node2VecMemoryEstimateDefinition;
 import org.neo4j.gds.modelcatalogservices.ModelCatalogService;
 import org.neo4j.gds.results.MemoryEstimateResult;
 
 import java.util.Optional;
+
+import static org.neo4j.gds.embeddings.graphsage.algo.GraphSageModelResolver.resolveModel;
 
 public class NodeEmbeddingsAlgorithmsEstimateBusinessFacade {
 
@@ -56,19 +58,25 @@ public class NodeEmbeddingsAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new Node2VecAlgorithmFactory<>()
+            new Node2VecMemoryEstimateDefinition(configuration.node2VecParameters())
         );
     }
 
     public <C extends GraphSageBaseConfig> MemoryEstimateResult graphSage(
         Object graphNameOrConfiguration,
-        C configuration
+        C configuration,
+        boolean mutating
     ) {
+        var model = resolveModel(modelCatalogService.get(), configuration.username(), configuration.modelName());
+
         return algorithmEstimator.estimate(
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
-            new GraphSageAlgorithmFactory(modelCatalogService.get())
+            new GraphSageMemoryEstimateDefinition(
+                model.trainConfig().toMemoryEstimateParameters(),
+                mutating
+            )
         );
     }
 
@@ -80,7 +88,7 @@ public class NodeEmbeddingsAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new GraphSageTrainAlgorithmFactory()
+            new GraphSageTrainEstimateDefinition(configuration.toMemoryEstimateParameters())
         );
     }
 
@@ -92,7 +100,7 @@ public class NodeEmbeddingsAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             configuration.relationshipWeightProperty(),
-            new FastRPFactory<>()
+            new FastRPMemoryEstimateDefinition(configuration.toParameters())
         );
     }
 
@@ -104,7 +112,7 @@ public class NodeEmbeddingsAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
-            new HashGNNFactory<>()
+            new HashGNNMemoryEstimateDefinition(configuration.toParameters())
         );
     }
 }

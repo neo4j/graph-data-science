@@ -20,7 +20,7 @@
 package org.neo4j.gds.algorithms.estimation;
 
 import org.neo4j.gds.Algorithm;
-import org.neo4j.gds.AlgorithmFactory;
+import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
@@ -65,7 +65,7 @@ public class AlgorithmEstimator {
         Object graphNameOrConfiguration,
         C config,
         Optional<String> maybeRelationshipProperty,
-        AlgorithmFactory<G, A, C> algorithmFactory
+        MemoryEstimateDefinition memoryEstimateDefinition
     ) {
         GraphDimensions dimensions;
 
@@ -98,7 +98,7 @@ public class AlgorithmEstimator {
         }
 
         var memoryTree = estimationBuilder
-            .add("algorithm", algorithmFactory.memoryEstimation(config))
+            .add("algorithm", memoryEstimateDefinition.memoryEstimation())
             .build()
             .estimate(dimensions, config.concurrency());
 
