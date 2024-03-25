@@ -43,6 +43,9 @@ import org.neo4j.gds.paths.traverse.BfsBaseConfig;
 import org.neo4j.gds.paths.traverse.DfsBaseConfig;
 import org.neo4j.gds.paths.yens.Yens;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
+import org.neo4j.gds.spanningtree.Prim;
+import org.neo4j.gds.spanningtree.SpanningTree;
+import org.neo4j.gds.spanningtree.SpanningTreeBaseConfig;
 import org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm;
 import org.neo4j.gds.steiner.SteinerTreeBaseConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
@@ -56,6 +59,7 @@ import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BFS;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DFS;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DIJKSTRA;
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.SPANNING_TREE;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.STEINER;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.YENS;
 
@@ -179,6 +183,25 @@ public class PathFindingAlgorithms {
         );
 
         return dijkstra.compute();
+    }
+
+    SpanningTree spanningTree(Graph graph, SpanningTreeBaseConfig configuration) {
+        if (!graph.schema().isUndirected()) {
+            throw new IllegalArgumentException(
+                "The Spanning Tree algorithm works only with undirected graphs. Please orient the edges properly");
+        }
+
+        var parameters = configuration.toParameters();
+        var progressTracker = createProgressTracker(configuration, Tasks.leaf(SPANNING_TREE));
+
+        var prim = new Prim(
+            graph,
+            parameters.objective(),
+            graph.toMappedNodeId(parameters.sourceNode()),
+            progressTracker
+        );
+
+        return prim.compute();
     }
 
     SteinerTreeResult steinerTree(Graph graph, SteinerTreeBaseConfig configuration) {

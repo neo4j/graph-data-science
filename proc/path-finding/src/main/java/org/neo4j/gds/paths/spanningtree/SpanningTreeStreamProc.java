@@ -19,11 +19,10 @@
  */
 package org.neo4j.gds.paths.spanningtree;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.procedures.ProcedureConstants;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -35,17 +34,18 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.paths.spanningtree.Constants.SPANNING_TREE_DESCRIPTION;
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
-public class SpanningTreeStreamProc extends BaseProc {
+
+public class SpanningTreeStreamProc {
+    @Context
+    public GraphDataScience facade;
+
     @Procedure(value = "gds.spanningTree.stream", mode = READ)
     @Description(SPANNING_TREE_DESCRIPTION)
-    public Stream<StreamResult> spanningTree(
+    public Stream<SpanningTreeStreamResult> spanningTree(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new SpanningTreeStreamSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.pathFinding().spanningTreeStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.spanningTree.stream" + ".estimate", mode = READ)
@@ -54,26 +54,19 @@ public class SpanningTreeStreamProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        var spec = new SpanningTreeStreamSpec();
-        return new MemoryEstimationExecutor<>(
-            spec,
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphName, configuration);
+        return facade.pathFinding().spanningTreeStreamEstimate(graphName, configuration);
     }
 
     @Procedure(value = "gds.beta.spanningTree.stream", mode = READ, deprecatedBy = "gds.spanningTree.stream")
     @Description(SPANNING_TREE_DESCRIPTION)
     @Internal
     @Deprecated
-    public Stream<StreamResult> betaSpanningTree(
+    public Stream<SpanningTreeStreamResult> betaSpanningTree(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.spanningTree.stream");
-        executionContext()
+        facade.deprecatedProcedures().called("gds.beta.spanningTree.stream");
+        facade
             .log()
             .warn("Procedure `gds.beta.spanningTree.stream` has been deprecated, please use `gds.spanningTree.stream`.");
         return spanningTree(graphName, configuration);
@@ -87,10 +80,8 @@ public class SpanningTreeStreamProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.spanningTree.stream" + ".estimate");
-        executionContext()
+        facade.deprecatedProcedures().called("gds.beta.spanningTree.stream" + ".estimate");
+        facade
             .log()
             .warn(
                 "Procedure `gds.beta.spanningTree.stream.estimate` has been deprecated, please use `gds.spanningTree.stream.estimate`.");

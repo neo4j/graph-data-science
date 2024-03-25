@@ -33,6 +33,8 @@ import org.neo4j.gds.paths.traverse.DfsMemoryEstimateDefinition;
 import org.neo4j.gds.paths.yens.YensMemoryEstimateDefinition;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.spanningtree.SpanningTreeBaseConfig;
+import org.neo4j.gds.spanningtree.SpanningTreeMemoryEstimateDefinition;
 import org.neo4j.gds.steiner.SteinerTreeBaseConfig;
 import org.neo4j.gds.steiner.SteinerTreeMemoryEstimateDefinition;
 
@@ -131,6 +133,19 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimateDefinition = new DijkstraMemoryEstimateDefinition(configuration.toMemoryEstimateParameters());
 
         return memoryEstimateDefinition.memoryEstimation();
+    }
+
+    public MemoryEstimateResult spanningTree(
+        SpanningTreeBaseConfig configuration,
+        Object graphNameOrConfiguration
+    ) {
+        var memoryEstimation = spanningTreeEstimation(configuration);
+
+        return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
+    }
+
+    public MemoryEstimation spanningTreeEstimation(SpanningTreeBaseConfig ignored) {
+        return new SpanningTreeMemoryEstimateDefinition().memoryEstimation();
     }
 
     public MemoryEstimateResult steinerTree(

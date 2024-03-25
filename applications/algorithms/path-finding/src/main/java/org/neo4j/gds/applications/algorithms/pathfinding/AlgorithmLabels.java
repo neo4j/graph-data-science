@@ -27,6 +27,7 @@ interface AlgorithmLabels {
     String BFS = "BFS";
     String DFS = "DFS";
     String DIJKSTRA = "Dijkstra";
+    String SPANNING_TREE = "SpanningTree";
     String STEINER = "SteinerTree";
     String YENS = "Yens";
 }

@@ -59,6 +59,7 @@ import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SteinerTreeMutateSt
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardStatsResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
+import org.neo4j.gds.spanningtree.SpanningTreeStreamConfig;
 import org.neo4j.gds.steiner.SteinerTreeStatsConfig;
 import org.neo4j.gds.steiner.SteinerTreeStreamConfig;
 import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
@@ -584,6 +585,34 @@ public final class PathFindingProcedureFacade {
             algorithmConfiguration,
             SteinerTreeStatsConfig::of,
             configuration -> estimationModeFacade.steinerTree(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<SpanningTreeStreamResult> spanningTreeStream(String graphName, Map<String, Object> configuration) {
+        var resultBuilder = new SpanningTreeResultBuilderForStreamMode();
+
+        return runStreamAlgorithm(
+            graphName,
+            configuration,
+            SpanningTreeStreamConfig::of,
+            resultBuilder,
+            streamModeFacade::spanningTree
+        );
+    }
+
+    public Stream<MemoryEstimateResult> spanningTreeStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = runEstimation(
+            algorithmConfiguration,
+            SpanningTreeStreamConfig::of,
+            configuration -> estimationModeFacade.spanningTree(
                 configuration,
                 graphNameOrConfiguration
             )
