@@ -17,18 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.spanningtree;
+package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeStatsResult;
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
-public final class WriteResult extends SpanningTreeStatsResult {
+public final class SpanningTreeWriteResult extends SpanningTreeStatsResult {
     public final long writeMillis;
     public final long relationshipsWritten;
 
-    private WriteResult(
+    private SpanningTreeWriteResult(
         long preProcessingMillis,
         long computeMillis,
         long writeMillis,
@@ -42,23 +41,23 @@ public final class WriteResult extends SpanningTreeStatsResult {
         this.relationshipsWritten = relationshipsWritten;
     }
 
-    public static class Builder extends AbstractResultBuilder<WriteResult> {
+    public static class Builder extends AbstractResultBuilder<SpanningTreeWriteResult> {
 
         long effectiveNodeCount;
         double totalWeight;
 
-        Builder withEffectiveNodeCount(long effectiveNodeCount) {
+        public Builder withEffectiveNodeCount(long effectiveNodeCount) {
             this.effectiveNodeCount = effectiveNodeCount;
             return this;
         }
 
-        void withTotalWeight(double totalWeight) {
+        public void withTotalWeight(double totalWeight) {
             this.totalWeight = totalWeight;
         }
 
         @Override
-        public WriteResult build() {
-            return new WriteResult(
+        public SpanningTreeWriteResult build() {
+            return new SpanningTreeWriteResult(
                 preProcessingMillis,
                 computeMillis,
                 writeMillis,

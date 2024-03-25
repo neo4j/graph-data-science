@@ -28,6 +28,7 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeWriteResult;
 import org.neo4j.gds.spanningtree.Prim;
 import org.neo4j.gds.spanningtree.SpanningGraph;
 import org.neo4j.gds.spanningtree.SpanningTree;
@@ -44,7 +45,7 @@ import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
     description = Constants.SPANNING_TREE_DESCRIPTION,
     executionMode = MUTATE_RELATIONSHIP)
 public class SpanningTreeWriteSpec implements
-    AlgorithmSpec<Prim, SpanningTree, SpanningTreeWriteConfig, Stream<WriteResult>, SpanningTreeAlgorithmFactory<SpanningTreeWriteConfig>> {
+    AlgorithmSpec<Prim, SpanningTree, SpanningTreeWriteConfig, Stream<SpanningTreeWriteResult>, SpanningTreeAlgorithmFactory<SpanningTreeWriteConfig>> {
 
     @Override
     public String name() {
@@ -62,10 +63,10 @@ public class SpanningTreeWriteSpec implements
 
     }
 
-    public ComputationResultConsumer<Prim, SpanningTree, SpanningTreeWriteConfig, Stream<WriteResult>> computationResultConsumer() {
+    public ComputationResultConsumer<Prim, SpanningTree, SpanningTreeWriteConfig, Stream<SpanningTreeWriteResult>> computationResultConsumer() {
 
         return (computationResult, executionContext) -> {
-            WriteResult.Builder builder = new WriteResult.Builder();
+            SpanningTreeWriteResult.Builder builder = new SpanningTreeWriteResult.Builder();
 
             if (computationResult.result().isEmpty()) {
                 return Stream.of(builder.build());

@@ -34,6 +34,8 @@ import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraWriteConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
+import org.neo4j.gds.spanningtree.SpanningTree;
+import org.neo4j.gds.spanningtree.SpanningTreeWriteConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -43,6 +45,7 @@ import java.util.function.Supplier;
 
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.A_STAR;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DIJKSTRA;
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.SPANNING_TREE;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.STEINER;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.YENS;
 
@@ -138,6 +141,30 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             DIJKSTRA,
             () -> estimationFacade.singleSourceShortestPathDijkstraEstimation(configuration),
             graph -> pathFindingAlgorithms.singleSourceShortestPathDijkstra(graph, configuration),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT spanningTree(
+        GraphName graphName,
+        SpanningTreeWriteConfig configuration,
+        ResultBuilder<SpanningTreeWriteConfig, SpanningTree, RESULT> resultBuilder
+    ) {
+        var writeStep = new SpanningTreeWriteStep(
+            log,
+            relationshipExporterBuilder,
+            terminationFlag,
+            taskRegistryFactory,
+            configuration
+        );
+
+        return runAlgorithmAndWrite(
+            graphName,
+            configuration,
+            SPANNING_TREE,
+            () -> estimationFacade.spanningTreeEstimation(configuration),
+            graph -> pathFindingAlgorithms.spanningTree(graph, configuration),
+            writeStep,
             resultBuilder
         );
     }

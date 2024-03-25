@@ -19,11 +19,8 @@
  */
 package org.neo4j.gds.paths.spanningtree;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.RelationshipExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -38,20 +35,18 @@ import static org.neo4j.gds.paths.spanningtree.Constants.SPANNING_TREE_DESCRIPTI
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
-public class SpanningTreeWriteProc extends BaseProc {
+
+public class SpanningTreeWriteProc {
     @Context
-    public RelationshipExporterBuilder relationshipExporterBuilder;
+    public GraphDataScience facade;
 
     @Procedure(value = "gds.spanningTree.write", mode = WRITE)
     @Description(SPANNING_TREE_DESCRIPTION)
-    public Stream<WriteResult> spanningTree(
+    public Stream<SpanningTreeWriteResult> spanningTree(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new SpanningTreeWriteSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.pathFinding().spanningTreeWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.spanningTree.write" + ".estimate", mode = READ)
@@ -60,26 +55,19 @@ public class SpanningTreeWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        var spec = new SpanningTreeWriteSpec();
-        return new MemoryEstimationExecutor<>(
-            spec,
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphName, configuration);
+        return facade.pathFinding().spanningTreeWriteEstimate(graphName, configuration);
     }
 
     @Procedure(value = "gds.beta.spanningTree.write", mode = WRITE, deprecatedBy = "gds.spanningTree.write")
     @Description(SPANNING_TREE_DESCRIPTION)
     @Internal
     @Deprecated
-    public Stream<WriteResult> betaSpanningTree(
+    public Stream<SpanningTreeWriteResult> betaSpanningTree(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.spanningTree.write");
-        executionContext()
+        facade.deprecatedProcedures().called("gds.beta.spanningTree.write");
+        facade
             .log()
             .warn("Procedure `gds.beta.spanningTree.write` has been deprecated, please use `gds.spanningTree.write`.");
         return spanningTree(graphName, configuration);
@@ -93,18 +81,11 @@ public class SpanningTreeWriteProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.beta.spanningTree.write" + ".estimate");
-        executionContext()
+        facade.deprecatedProcedures().called("gds.beta.spanningTree.write" + ".estimate");
+        facade
             .log()
             .warn(
                 "Procedure `gds.beta.spanningTree.write.estimate` has been deprecated, please use `gds.spanningTree.write.estimate`.");
         return estimate(graphName, configuration);
-    }
-
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withRelationshipExporterBuilder(relationshipExporterBuilder);
     }
 }

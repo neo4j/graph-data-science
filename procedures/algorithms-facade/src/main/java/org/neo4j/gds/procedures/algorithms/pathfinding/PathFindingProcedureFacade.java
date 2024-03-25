@@ -61,6 +61,7 @@ import org.neo4j.gds.results.StandardStatsResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 import org.neo4j.gds.spanningtree.SpanningTreeStatsConfig;
 import org.neo4j.gds.spanningtree.SpanningTreeStreamConfig;
+import org.neo4j.gds.spanningtree.SpanningTreeWriteConfig;
 import org.neo4j.gds.steiner.SteinerTreeStatsConfig;
 import org.neo4j.gds.steiner.SteinerTreeStreamConfig;
 import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
@@ -612,6 +613,36 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             SpanningTreeStreamConfig::of,
+            configuration -> estimationModeFacade.spanningTree(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<SpanningTreeWriteResult> spanningTreeWrite(String graphName, Map<String, Object> configuration) {
+        var resultBuilder = new SpanningTreeResultBuilderForWriteMode();
+
+        return Stream.of(
+            runWriteAlgorithm(
+                graphName,
+                configuration,
+                SpanningTreeWriteConfig::of,
+                writeModeFacade::spanningTree,
+                resultBuilder
+            )
+        );
+    }
+
+    public Stream<MemoryEstimateResult> spanningTreeWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = runEstimation(
+            algorithmConfiguration,
+            SpanningTreeWriteConfig::of,
             configuration -> estimationModeFacade.spanningTree(
                 configuration,
                 graphNameOrConfiguration
