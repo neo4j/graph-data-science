@@ -101,7 +101,7 @@ final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
         long nodeCount = labelTokenNodeLabelMappings.keyStream()
             .mapToLong(label -> Neo4jProxy.estimateNodeCount(dataRead, label))
             .sum();
-        final long allNodesCount = Neo4jProxy.getHighestPossibleNodeCount(dataRead, idGeneratorFactory);
+        final long allNodesCount = Neo4jProxy.getHighestPossibleNodeCount(idGeneratorFactory);
         long finalNodeCount = labelTokenNodeLabelMappings.keys().contains(ANY_LABEL)
             ? allNodesCount
             : Math.min(nodeCount, allNodesCount);
@@ -113,7 +113,7 @@ final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
             typeTokenRelTypeMappings
         );
         long relCountUpperBound = relationshipCounts.values().stream().mapToLong(Long::longValue).sum();
-        long allRelationshipsCount = Neo4jProxy.getHighestPossibleRelationshipCount(dataRead, idGeneratorFactory);
+        long allRelationshipsCount = Neo4jProxy.getHighestPossibleRelationshipCount(idGeneratorFactory);
 
         return ImmutableGraphDimensions.builder()
             .nodeCount(finalNodeCount)

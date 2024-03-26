@@ -28,7 +28,19 @@ import java.util.OptionalLong;
 
 public final class InternalReadOps {
 
-    public static OptionalLong countByIdGenerator(@Nullable IdGeneratorFactory idGeneratorFactory, IdType idType) {
+    public static long countByIdGenerator(
+        @Nullable IdGeneratorFactory idGeneratorFactory,
+        IdType idType,
+        IdType idType2
+    ) {
+        return countByIdGenerator(idGeneratorFactory, idType)
+            .orElseGet(() -> countByIdGenerator(idGeneratorFactory, idType2)
+                .orElseThrow(() -> new IllegalStateException(
+                    "Unsupported store format for GDS; GDS cannot read data from this database. " +
+                        "Please try to use Cypher projection instead.")));
+    }
+
+    private static OptionalLong countByIdGenerator(@Nullable IdGeneratorFactory idGeneratorFactory, IdType idType) {
         if (idGeneratorFactory != null) {
             try {
                 final IdGenerator idGenerator = idGeneratorFactory.get(idType);
