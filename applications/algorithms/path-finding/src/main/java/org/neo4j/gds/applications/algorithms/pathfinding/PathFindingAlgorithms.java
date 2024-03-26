@@ -32,6 +32,9 @@ import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.dag.topologicalsort.TopologicalSort;
+import org.neo4j.gds.dag.topologicalsort.TopologicalSortBaseConfig;
+import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.degree.DegreeCentralityFactory;
 import org.neo4j.gds.kspanningtree.KSpanningTree;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
@@ -57,6 +60,7 @@ import org.neo4j.gds.traversal.RandomWalk;
 import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -286,6 +290,22 @@ public class PathFindingAlgorithms {
         );
 
         return steiner.compute();
+    }
+
+    public TopologicalSortResult topologicalSort(Graph graph, TopologicalSortBaseConfig configuration) {
+        var initializationTask = Tasks.leaf("Initialization", graph.nodeCount());
+        var traversalTask = Tasks.leaf("Traversal", graph.nodeCount());
+        var task = Tasks.task(AlgorithmLabels.TOPOLOGICAL_SORT, List.of(initializationTask, traversalTask));
+        var progressTracker = createProgressTracker(configuration, task);
+
+        var algorithm = new TopologicalSort(
+            graph,
+            progressTracker,
+            configuration.concurrency(),
+            configuration.computeMaxDistanceFromSource()
+        );
+
+        return algorithm.compute();
     }
 
     private ProgressTracker createProgressTracker(

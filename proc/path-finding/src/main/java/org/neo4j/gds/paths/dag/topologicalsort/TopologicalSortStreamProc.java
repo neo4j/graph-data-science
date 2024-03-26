@@ -19,8 +19,9 @@
  */
 package org.neo4j.gds.paths.dag.topologicalsort;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.algorithms.pathfinding.TopologicalSortStreamResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -28,11 +29,12 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.paths.dag.topologicalsort.Constants.TOPOLOGICAL_SORT_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class TopologicalSortStreamProc extends BaseProc {
-    static final String TOPOLOGICAL_SORT_DESCRIPTION =
-        "Returns all the nodes in the graph that are not part of a cycle or depend on a cycle, sorted in a topological order";
+public class TopologicalSortStreamProc {
+    @Context
+    public GraphDataScience facade;
 
     @Procedure(value = "gds.dag.topologicalSort.stream", mode = READ)
     @Description(TOPOLOGICAL_SORT_DESCRIPTION)
@@ -40,10 +42,6 @@ public class TopologicalSortStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new TopologicalSortStreamSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.pathFinding().topologicalSortStream(graphName, configuration);
     }
-
 }

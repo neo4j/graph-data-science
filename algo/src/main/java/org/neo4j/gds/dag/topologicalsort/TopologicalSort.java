@@ -63,7 +63,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
     // Saves the maximal distance from a source node, which is also the longest path in DAG
     private final Optional<HugeAtomicDoubleArray> longestPathDistances;
 
-    protected TopologicalSort(
+    public TopologicalSort(
         Graph graph,
         ProgressTracker progressTracker,
         int concurrency,

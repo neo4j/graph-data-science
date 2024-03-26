@@ -19,14 +19,7 @@
  */
 package org.neo4j.gds.paths.dag.topologicalsort;
 
-@SuppressWarnings("unused")
-public class TopologicalSortStreamResult {
-
-    public final long nodeId;
-    public final Double maxDistanceFromSource;
-
-    public TopologicalSortStreamResult(long nodeId, Double maxDistanceFromSource) {
-        this.nodeId = nodeId;
-        this.maxDistanceFromSource = maxDistanceFromSource;
-    }
+class Constants {
+    static final String TOPOLOGICAL_SORT_DESCRIPTION =
+        "Returns all the nodes in the graph that are not part of a cycle or depend on a cycle, sorted in a topological order";
 }

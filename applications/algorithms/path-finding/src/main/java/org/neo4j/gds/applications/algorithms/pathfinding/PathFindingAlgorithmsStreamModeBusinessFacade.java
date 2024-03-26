@@ -21,6 +21,8 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
+import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
@@ -44,6 +46,7 @@ import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.RANDOM_WALK;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.SPANNING_TREE;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.STEINER;
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.TOPOLOGICAL_SORT;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.YENS;
 
 /**
@@ -205,6 +208,22 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             STEINER,
             () -> estimationFacade.steinerTreeEstimation(configuration),
             graph -> pathFindingAlgorithms.steinerTree(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT topologicalSort(
+        GraphName graphName,
+        TopologicalSortStreamConfig configuration,
+        ResultBuilder<TopologicalSortStreamConfig, TopologicalSortResult, RESULT> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            TOPOLOGICAL_SORT,
+            () -> estimationFacade.topologicalSortEstimation(configuration),
+            graph -> pathFindingAlgorithms.topologicalSort(graph, configuration),
             Optional.empty(),
             resultBuilder
         );

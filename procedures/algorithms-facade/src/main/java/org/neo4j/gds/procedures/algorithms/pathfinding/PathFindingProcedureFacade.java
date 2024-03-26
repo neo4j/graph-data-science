@@ -34,6 +34,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
@@ -832,6 +833,21 @@ public final class PathFindingProcedureFacade {
         );
 
         return Stream.of(result);
+    }
+
+    public Stream<TopologicalSortStreamResult> topologicalSortStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new TopologicalSortResultBuilderForStreamMode();
+
+        return runStreamAlgorithm(
+            graphName,
+            configuration,
+            TopologicalSortStreamConfig::of,
+            resultBuilder,
+            streamModeFacade::topologicalSort
+        );
     }
 
     /**

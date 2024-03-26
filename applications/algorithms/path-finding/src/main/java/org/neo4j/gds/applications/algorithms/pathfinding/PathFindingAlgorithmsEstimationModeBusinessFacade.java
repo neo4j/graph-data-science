@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.paths.astar.AStarMemoryEstimateDefinition;
@@ -180,6 +181,10 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
 
     public MemoryEstimation steinerTreeEstimation(SteinerTreeBaseConfig configuration) {
         return new SteinerTreeMemoryEstimateDefinition(configuration.applyRerouting()).memoryEstimation();
+    }
+
+    public MemoryEstimation topologicalSortEstimation(TopologicalSortStreamConfig configuration) {
+        throw new MemoryEstimationNotImplementedException();
     }
 
     public <CONFIGURATION extends AlgoBaseConfig> MemoryEstimateResult runEstimation(

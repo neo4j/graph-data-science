@@ -17,20 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.pathfinding;
+package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-/**
- * We need human-readable labels for e.g. progress tracking
- */
-interface AlgorithmLabels {
-    String A_STAR = "AStar";
-    String BFS = "BFS";
-    String DFS = "DFS";
-    String DIJKSTRA = "Dijkstra";
-    String K_SPANNING_TREE = "K Spanning Tree";
-    String RANDOM_WALK = "RandomWalk";
-    String SPANNING_TREE = "SpanningTree";
-    String STEINER = "SteinerTree";
-    String TOPOLOGICAL_SORT = "TopologicalSort";
-    String YENS = "Yens";
+public class TopologicalSortStreamResult {
+    public final long nodeId;
+    public final Double maxDistanceFromSource;
+
+    public TopologicalSortStreamResult(long nodeId, Double maxDistanceFromSource) {
+        this.nodeId = nodeId;
+        this.maxDistanceFromSource = maxDistanceFromSource;
+    }
 }

@@ -29,6 +29,7 @@ import org.neo4j.gds.dag.topologicalsort.TopologicalSort;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortFactory;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
+import org.neo4j.gds.procedures.algorithms.pathfinding.TopologicalSortStreamResult;
 
 import java.util.function.LongFunction;
 import java.util.stream.LongStream;
@@ -37,7 +38,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
-@GdsCallable(name = "gds.dag.topologicalSort.stream", description = TopologicalSortStreamProc.TOPOLOGICAL_SORT_DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.dag.topologicalSort.stream", description = Constants.TOPOLOGICAL_SORT_DESCRIPTION, executionMode = STREAM)
 public class TopologicalSortStreamSpec implements AlgorithmSpec<TopologicalSort, TopologicalSortResult, TopologicalSortStreamConfig, Stream<TopologicalSortStreamResult>, TopologicalSortFactory<TopologicalSortStreamConfig>> {
 
     @Override
