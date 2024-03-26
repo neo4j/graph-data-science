@@ -32,7 +32,7 @@ import org.neo4j.token.api.TokenConstants;
 import java.util.Optional;
 
 import static org.neo4j.gds.utils.GdsFeatureToggles.SKIP_ORPHANS;
-import static org.neo4j.kernel.impl.store.record.AbstractBaseRecord.NO_ID;
+import static org.neo4j.internal.kernel.api.Read.NO_ID;
 
 public final class BufferedNodeConsumer implements StoreScanner.RecordConsumer<NodeReference> {
 
