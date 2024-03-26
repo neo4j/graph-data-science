@@ -28,7 +28,7 @@ interface AlgorithmLabels {
     String DFS = "DFS";
     String DIJKSTRA = "Dijkstra";
     String K_SPANNING_TREE = "K Spanning Tree";
-    String RANDOM_WALK = "Random Walk";
+    String RANDOM_WALK = "RandomWalk";
     String SPANNING_TREE = "SpanningTree";
     String STEINER = "SteinerTree";
     String YENS = "Yens";
