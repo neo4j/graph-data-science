@@ -26,10 +26,13 @@ import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeStatsConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.steiner.SteinerTreeStatsConfig;
+import org.neo4j.gds.traversal.RandomWalkStatsConfig;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BFS;
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.RANDOM_WALK;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.SPANNING_TREE;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.STEINER;
 
@@ -60,6 +63,22 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
             BFS,
             () -> estimationFacade.breadthFirstSearchEstimation(configuration),
             graph -> pathFindingAlgorithms.breadthFirstSearch(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT randomWalk(
+        GraphName graphName,
+        RandomWalkStatsConfig configuration,
+        ResultBuilder<RandomWalkStatsConfig, Stream<long[]>, RESULT> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            RANDOM_WALK,
+            () -> estimationFacade.randomWalkEstimation(configuration),
+            graph -> pathFindingAlgorithms.randomWalk(graph, configuration),
             Optional.empty(),
             resultBuilder
         );

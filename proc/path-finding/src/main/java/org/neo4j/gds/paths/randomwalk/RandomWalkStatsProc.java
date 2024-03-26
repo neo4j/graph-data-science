@@ -19,11 +19,10 @@
  */
 package org.neo4j.gds.paths.randomwalk;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardModeResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -31,37 +30,29 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.paths.randomwalk.RandomWalkStreamProc.DESCRIPTION;
+import static org.neo4j.gds.paths.randomwalk.Constants.RANDOM_WALK_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class RandomWalkStatsProc extends BaseProc {
+public class RandomWalkStatsProc {
+    @Context
+    public GraphDataScience facade;
 
-    @Description(DESCRIPTION)
+    @Description(RANDOM_WALK_DESCRIPTION)
     @Procedure(name = "gds.randomWalk.stats", mode = READ)
     public Stream<StandardModeResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new RandomWalkStatsSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.pathFinding().randomWalkStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.randomWalk.stats.estimate", mode = READ)
-    @Description(BaseProc.ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return new MemoryEstimationExecutor<>(
-            new RandomWalkStatsSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.pathFinding().randomWalkStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
-
-
-
-
 }

@@ -59,6 +59,7 @@ import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SingleSourceShortes
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SpanningTreeMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SteinerTreeMutateStub;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.results.StandardModeResult;
 import org.neo4j.gds.results.StandardStatsResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 import org.neo4j.gds.spanningtree.SpanningTreeStatsConfig;
@@ -67,6 +68,8 @@ import org.neo4j.gds.spanningtree.SpanningTreeWriteConfig;
 import org.neo4j.gds.steiner.SteinerTreeStatsConfig;
 import org.neo4j.gds.steiner.SteinerTreeStreamConfig;
 import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
+import org.neo4j.gds.traversal.RandomWalkStatsConfig;
+import org.neo4j.gds.traversal.RandomWalkStreamConfig;
 
 import java.util.Map;
 import java.util.function.Function;
@@ -339,6 +342,65 @@ public final class PathFindingProcedureFacade {
                 resultBuilder
             )
         );
+    }
+
+    public Stream<StandardModeResult> randomWalkStats(String graphName, Map<String, Object> configuration) {
+        var resultBuilder = new RandomWalkResultBuilderForStatsMode();
+
+        return runStatsAlgorithm(
+            graphName,
+            configuration,
+            RandomWalkStatsConfig::of,
+            resultBuilder,
+            statsModeFacade::randomWalk
+        );
+    }
+
+    public Stream<MemoryEstimateResult> randomWalkStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = runEstimation(
+            algorithmConfiguration,
+            RandomWalkStatsConfig::of,
+            configuration -> estimationModeFacade.randomWalk(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<RandomWalkStreamResult> randomWalkStream(String graphName, Map<String, Object> configuration) {
+        var resultBuilder = new RandomWalkResultBuilderForStreamMode(
+            nodeLookup,
+            procedureReturnColumns.contains("path")
+        );
+
+        return runStreamAlgorithm(
+            graphName,
+            configuration,
+            RandomWalkStreamConfig::of,
+            resultBuilder,
+            streamModeFacade::randomWalk
+        );
+    }
+
+    public Stream<MemoryEstimateResult> randomWalkStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = runEstimation(
+            algorithmConfiguration,
+            RandomWalkStreamConfig::of,
+            configuration -> estimationModeFacade.randomWalk(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
     }
 
     public SinglePairShortestPathAStarMutateStub singlePairShortestPathAStarMutateStub() {

@@ -19,17 +19,8 @@
  */
 package org.neo4j.gds.paths.randomwalk;
 
-import org.neo4j.graphdb.Path;
-
-import java.util.List;
-
-public class StreamResult {
-
-    public List<Long> nodeIds;
-    public Path path;
-
-    StreamResult(List<Long> nodeIds, Path path) {
-        this.nodeIds = nodeIds;
-        this.path = path;
-    }
+class Constants {
+    static final String RANDOM_WALK_DESCRIPTION =
+        "Random Walk is an algorithm that provides random paths in a graph. " +
+            "It’s similar to how a drunk person traverses a city.";
 }

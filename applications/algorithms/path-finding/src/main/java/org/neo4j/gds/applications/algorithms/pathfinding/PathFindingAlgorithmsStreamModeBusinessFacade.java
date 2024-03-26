@@ -32,13 +32,16 @@ import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeStreamConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.steiner.SteinerTreeStreamConfig;
+import org.neo4j.gds.traversal.RandomWalkStreamConfig;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.A_STAR;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BFS;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DFS;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DIJKSTRA;
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.RANDOM_WALK;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.SPANNING_TREE;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.STEINER;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.YENS;
@@ -90,6 +93,22 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             DFS,
             () -> estimationFacade.depthFirstSearchEstimation(configuration),
             graph -> pathFindingAlgorithms.depthFirstSearch(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT randomWalk(
+        GraphName graphName,
+        RandomWalkStreamConfig configuration,
+        ResultBuilder<RandomWalkStreamConfig, Stream<long[]>, RESULT> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            RANDOM_WALK,
+            () -> estimationFacade.randomWalkEstimation(configuration),
+            graph -> pathFindingAlgorithms.randomWalk(graph, configuration),
             Optional.empty(),
             resultBuilder
         );

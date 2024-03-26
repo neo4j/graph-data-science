@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.paths.randomwalk;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.algorithms.pathfinding.RandomWalkStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -30,44 +30,29 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.paths.randomwalk.Constants.RANDOM_WALK_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class RandomWalkStreamProc extends BaseProc {
-
-    static final String DESCRIPTION =
-        "Random Walk is an algorithm that provides random paths in a graph. " +
-        "It’s similar to how a drunk person traverses a city.";
+public class RandomWalkStreamProc {
+    @Context
+    public GraphDataScience facade;
 
     @Procedure(name = "gds.randomWalk.stream", mode = READ)
-    @Description(DESCRIPTION)
-
-    public Stream<StreamResult> stream(
+    @Description(RANDOM_WALK_DESCRIPTION)
+    public Stream<RandomWalkStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new RandomWalkStreamSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.pathFinding().randomWalkStream(graphName, configuration);
     }
 
-
     @Procedure(value = "gds.randomWalk.stream.estimate", mode = READ)
-    @Description(BaseProc.ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        var streamSpec = new RandomWalkStreamSpec();
-
-        return new MemoryEstimationExecutor<>(
-            streamSpec,
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.pathFinding().randomWalkStreamEstimate(graphNameOrConfiguration, algoConfiguration);
     }
-
-
-
-
 }

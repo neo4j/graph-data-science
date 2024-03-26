@@ -32,6 +32,7 @@ import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.degree.DegreeCentralityFactory;
 import org.neo4j.gds.kspanningtree.KSpanningTree;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.logging.Log;
@@ -52,16 +53,20 @@ import org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm;
 import org.neo4j.gds.steiner.SteinerTreeBaseConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.traversal.RandomWalk;
+import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.A_STAR;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BFS;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DFS;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DIJKSTRA;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.K_SPANNING_TREE;
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.RANDOM_WALK;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.SPANNING_TREE;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.STEINER;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.YENS;
@@ -139,6 +144,28 @@ public class PathFindingAlgorithms {
             graph.toMappedNodeId(parameters.sourceNode()),
             parameters.k(),
             progressTracker
+        );
+
+        return algorithm.compute();
+    }
+
+    Stream<long[]> randomWalk(Graph graph, RandomWalkBaseConfig configuration) {
+        var tasks = new ArrayList<Task>();
+        if (graph.hasRelationshipProperty()) {
+            tasks.add(DegreeCentralityFactory.degreeCentralityProgressTask(graph));
+        }
+        tasks.add(Tasks.leaf("create walks", graph.nodeCount()));
+        var progressTracker = createProgressTracker(configuration, Tasks.task(RANDOM_WALK, tasks));
+
+        var algorithm = RandomWalk.create(
+            graph,
+            configuration.concurrency(),
+            configuration.walkParameters(),
+            configuration.sourceNodes(),
+            configuration.walkBufferSize(),
+            configuration.randomSeed(),
+            progressTracker,
+            DefaultPool.INSTANCE
         );
 
         return algorithm.compute();

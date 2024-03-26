@@ -26,6 +26,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.paths.PathFactory;
+import org.neo4j.gds.procedures.algorithms.pathfinding.RandomWalkStreamResult;
 import org.neo4j.gds.traversal.RandomWalk;
 import org.neo4j.gds.traversal.RandomWalkAlgorithmFactory;
 import org.neo4j.gds.traversal.RandomWalkStreamConfig;
@@ -41,8 +42,8 @@ import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 
-@GdsCallable(name = "gds.randomWalk.stream", description = RandomWalkStreamProc.DESCRIPTION, executionMode = STREAM)
-public class RandomWalkStreamSpec implements AlgorithmSpec<RandomWalk, Stream<long[]>, RandomWalkStreamConfig, Stream<StreamResult>, RandomWalkAlgorithmFactory<RandomWalkStreamConfig>> {
+@GdsCallable(name = "gds.randomWalk.stream", description = Constants.RANDOM_WALK_DESCRIPTION, executionMode = STREAM)
+public class RandomWalkStreamSpec implements AlgorithmSpec<RandomWalk, Stream<long[]>, RandomWalkStreamConfig, Stream<RandomWalkStreamResult>, RandomWalkAlgorithmFactory<RandomWalkStreamConfig>> {
     @Override
     public String name() {
         return "RandomWalkStream";
@@ -59,7 +60,7 @@ public class RandomWalkStreamSpec implements AlgorithmSpec<RandomWalk, Stream<lo
     }
 
     @Override
-    public ComputationResultConsumer<RandomWalk, Stream<long[]>, RandomWalkStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<RandomWalk, Stream<long[]>, RandomWalkStreamConfig, Stream<RandomWalkStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> {
             var returnPath = executionContext.returnColumns().contains("path");
             Function<List<Long>, Path> pathCreator = returnPath
@@ -75,7 +76,7 @@ public class RandomWalkStreamSpec implements AlgorithmSpec<RandomWalk, Stream<lo
                             .map(nodes -> {
                                 var translatedNodes = translateInternalToNeoIds(nodes, graph);
                                 var path = pathCreator.apply(translatedNodes);
-                                return new StreamResult(translatedNodes, path);
+                                return new RandomWalkStreamResult(translatedNodes, path);
                             });
                     }).orElseGet(Stream::empty)
             );

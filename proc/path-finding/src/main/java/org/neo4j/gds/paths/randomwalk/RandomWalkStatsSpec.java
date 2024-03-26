@@ -32,9 +32,9 @@ import org.neo4j.gds.traversal.RandomWalkStatsConfig;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
-import static org.neo4j.gds.paths.randomwalk.RandomWalkStreamProc.DESCRIPTION;
+import static org.neo4j.gds.paths.randomwalk.Constants.RANDOM_WALK_DESCRIPTION;
 
-@GdsCallable(name = "gds.randomWalk.stats", description = DESCRIPTION, executionMode = STATS)
+@GdsCallable(name = "gds.randomWalk.stats", description = RANDOM_WALK_DESCRIPTION, executionMode = STATS)
 public class RandomWalkStatsSpec implements AlgorithmSpec<RandomWalk, Stream<long[]>, RandomWalkStatsConfig, Stream<StandardModeResult>, RandomWalkAlgorithmFactory<RandomWalkStatsConfig>> {
 
     @Override

@@ -39,6 +39,8 @@ import org.neo4j.gds.spanningtree.SpanningTreeBaseConfig;
 import org.neo4j.gds.spanningtree.SpanningTreeMemoryEstimateDefinition;
 import org.neo4j.gds.steiner.SteinerTreeBaseConfig;
 import org.neo4j.gds.steiner.SteinerTreeMemoryEstimateDefinition;
+import org.neo4j.gds.traversal.RandomWalkBaseConfig;
+import org.neo4j.gds.traversal.RandomWalkMemoryEstimateDefinition;
 
 /**
  * Here is the top level business facade for all your path finding memory estimation needs.
@@ -79,6 +81,19 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
 
     MemoryEstimation kSpanningTreeEstimation(KSpanningTreeWriteConfig ignored) {
         throw new MemoryEstimationNotImplementedException();
+    }
+
+    public MemoryEstimateResult randomWalk(
+        RandomWalkBaseConfig configuration,
+        Object graphNameOrConfiguration
+    ) {
+        var memoryEstimation = randomWalkEstimation(configuration);
+
+        return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
+    }
+
+    MemoryEstimation randomWalkEstimation(RandomWalkBaseConfig configuration) {
+        return new RandomWalkMemoryEstimateDefinition(configuration.toMemoryEstimateParameters()).memoryEstimation();
     }
 
     public MemoryEstimateResult singlePairShortestPathAStar(
