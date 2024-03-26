@@ -124,6 +124,7 @@ import java.nio.ByteOrder;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -452,14 +453,45 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
     public long getHighestPossibleNodeCount(
         Read read, IdGeneratorFactory idGeneratorFactory
     ) {
-        return countByIdGenerator(idGeneratorFactory, RecordIdType.NODE).orElseGet(read::nodesGetCount);
+        return countByIdGenerator(idGeneratorFactory, RecordIdType.NODE, BlockFormat.INSTANCE.nodeType);
     }
 
     @Override
     public long getHighestPossibleRelationshipCount(
         Read read, IdGeneratorFactory idGeneratorFactory
     ) {
-        return countByIdGenerator(idGeneratorFactory, RecordIdType.RELATIONSHIP).orElseGet(read::relationshipsGetCount);
+        return countByIdGenerator(idGeneratorFactory, RecordIdType.RELATIONSHIP, BlockFormat.INSTANCE.relationshipType);
+    }
+
+    private static final class BlockFormat {
+        private static final BlockFormat INSTANCE = new BlockFormat();
+
+        private final org.neo4j.internal.id.IdType nodeType;
+        private final org.neo4j.internal.id.IdType relationshipType;
+
+        BlockFormat() {
+            org.neo4j.internal.id.IdType nodeType = null;
+            org.neo4j.internal.id.IdType relationshipType = null;
+
+            try {
+                var blockIdType = Class.forName("com.neo4j.internal.blockformat.BlockIdType");
+                var blockTypes = Objects.requireNonNull(blockIdType.getEnumConstants());
+                for (Object blockType : blockTypes) {
+                    var type = (Enum<?>) blockType;
+                    if (type.name().equals("NODE")) {
+                        nodeType = (org.neo4j.internal.id.IdType) type;
+                    } else if (type.name().equals("RELATIONSHIP")) {
+                        relationshipType = (org.neo4j.internal.id.IdType) type;
+                    }
+                }
+            } catch (ClassNotFoundException | NullPointerException | ClassCastException e) {
+                nodeType = null;
+                relationshipType = null;
+            }
+
+            this.nodeType = Objects.requireNonNullElse(nodeType, RecordIdType.NODE);
+            this.relationshipType = Objects.requireNonNullElse(relationshipType, RecordIdType.RELATIONSHIP);
+        }
     }
 
     @Override
