@@ -21,6 +21,8 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
+import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.paths.astar.AStarMemoryEstimateDefinition;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateDefinition;
@@ -73,6 +75,10 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
 
     public MemoryEstimation depthFirstSearchEstimation(DfsBaseConfig ignored) {
         return new DfsMemoryEstimateDefinition().memoryEstimation();
+    }
+
+    MemoryEstimation kSpanningTreeEstimation(KSpanningTreeWriteConfig ignored) {
+        throw new MemoryEstimationNotImplementedException();
     }
 
     public MemoryEstimateResult singlePairShortestPathAStar(

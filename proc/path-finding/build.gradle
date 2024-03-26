@@ -26,6 +26,7 @@ dependencies {
     implementation project(':memory-usage')
     implementation project(':neo4j-api')
     implementation project(':opengds-procedure-facade')
+    implementation project(':path-finding-algorithms')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':termination')

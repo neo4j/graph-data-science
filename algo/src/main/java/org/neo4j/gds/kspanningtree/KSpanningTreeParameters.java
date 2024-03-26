@@ -38,7 +38,7 @@ public final class KSpanningTreeParameters extends SpanningTreeParameters {
         this.k = k;
     }
 
-    long k() {
+    public long k() {
         return k;
     }
 }

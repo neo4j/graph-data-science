@@ -34,6 +34,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
@@ -324,6 +325,20 @@ public final class PathFindingProcedureFacade {
         );
 
         return Stream.of(result);
+    }
+
+    public Stream<KSpanningTreeWriteResult> kSpanningTreeWrite(String graphName, Map<String, Object> configuration) {
+        var resultBuilder = new KSpanningTreeResultBuilderForWriteMode();
+
+        return Stream.of(
+            runWriteAlgorithm(
+                graphName,
+                configuration,
+                KSpanningTreeWriteConfig::of,
+                writeModeFacade::kSpanningTree,
+                resultBuilder
+            )
+        );
     }
 
     public SinglePairShortestPathAStarMutateStub singlePairShortestPathAStarMutateStub() {

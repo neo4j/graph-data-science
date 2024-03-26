@@ -236,6 +236,7 @@ class AlgorithmFacadeFactoryProvider {
             algorithmEstimator,
             algorithmProcessingTemplate,
             algorithmEstimationTemplate,
+            nodePropertyExporterBuilder,
             relationshipExporterBuilder,
             relationshipStreamExporterBuilder,
             taskRegistryFactory,

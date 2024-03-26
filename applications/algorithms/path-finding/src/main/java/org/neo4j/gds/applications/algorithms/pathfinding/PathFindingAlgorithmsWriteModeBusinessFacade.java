@@ -25,8 +25,10 @@ import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
+import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.paths.WritePathOptionsConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
@@ -45,6 +47,7 @@ import java.util.function.Supplier;
 
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.A_STAR;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DIJKSTRA;
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.K_SPANNING_TREE;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.SPANNING_TREE;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.STEINER;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.YENS;
@@ -57,6 +60,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     private final Log log;
 
     private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
+    private final NodePropertyExporterBuilder nodePropertyExporterBuilder;
     private final RelationshipExporterBuilder relationshipExporterBuilder;
     private final RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
     private final TaskRegistryFactory taskRegistryFactory;
@@ -68,6 +72,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     public PathFindingAlgorithmsWriteModeBusinessFacade(
         Log log,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
+        NodePropertyExporterBuilder nodePropertyExporterBuilder,
         RelationshipExporterBuilder relationshipExporterBuilder,
         RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
@@ -77,12 +82,37 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     ) {
         this.log = log;
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
+        this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
         this.relationshipExporterBuilder = relationshipExporterBuilder;
         this.relationshipStreamExporterBuilder = relationshipStreamExporterBuilder;
         this.taskRegistryFactory = taskRegistryFactory;
         this.terminationFlag = terminationFlag;
         this.estimationFacade = estimationFacade;
         this.pathFindingAlgorithms = pathFindingAlgorithms;
+    }
+
+    public <RESULT> RESULT kSpanningTree(
+        GraphName graphName,
+        KSpanningTreeWriteConfig configuration,
+        ResultBuilder<KSpanningTreeWriteConfig, SpanningTree, RESULT> resultBuilder
+    ) {
+        var writeStep = new KSpanningTreeWriteStep(
+            log,
+            nodePropertyExporterBuilder,
+            taskRegistryFactory,
+            terminationFlag,
+            configuration
+        );
+
+        return runAlgorithmAndWrite(
+            graphName,
+            configuration,
+            K_SPANNING_TREE,
+            () -> estimationFacade.kSpanningTreeEstimation(configuration),
+            graph -> pathFindingAlgorithms.kSpanningTree(graph, configuration),
+            writeStep,
+            resultBuilder
+        );
     }
 
     public <RESULT> RESULT singlePairShortestPathAStar(
@@ -217,7 +247,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         );
     }
 
-    private <CONFIGURATION extends AlgoBaseConfig & RelationshipWeightConfig & WriteRelationshipConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> RESULT_TO_CALLER runAlgorithmAndWrite(
+    private <CONFIGURATION extends AlgoBaseConfig & RelationshipWeightConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> RESULT_TO_CALLER runAlgorithmAndWrite(
         GraphName graphName,
         CONFIGURATION configuration,
         String label,

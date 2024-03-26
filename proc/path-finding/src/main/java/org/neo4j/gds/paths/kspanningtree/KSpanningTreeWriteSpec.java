@@ -21,7 +21,7 @@ package org.neo4j.gds.paths.kspanningtree;
 
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.applications.algorithms.pathfinding.SpanningTreeBackedNodePropertyValues;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.AlgorithmSpecProgressTrackerProvider;
@@ -32,6 +32,7 @@ import org.neo4j.gds.executor.NewConfigFunction;
 import org.neo4j.gds.kspanningtree.KSpanningTree;
 import org.neo4j.gds.kspanningtree.KSpanningTreeAlgorithmFactory;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
+import org.neo4j.gds.procedures.algorithms.pathfinding.KSpanningTreeWriteResult;
 import org.neo4j.gds.spanningtree.SpanningTree;
 
 import java.util.stream.Stream;
@@ -41,7 +42,7 @@ import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
 @GdsCallable(
     name = "gds.kSpanningTree.write",
     aliases = "gds.alpha.kSpanningTree.write",
-    description = KSpanningTreeWriteProc.DESCRIPTION,
+    description = Constants.K_SPANNING_TREE_DESCRIPTION,
     executionMode = WRITE_RELATIONSHIP)
 public class KSpanningTreeWriteSpec implements
     AlgorithmSpec<KSpanningTree, SpanningTree, KSpanningTreeWriteConfig, Stream<KSpanningTreeWriteResult>, KSpanningTreeAlgorithmFactory<KSpanningTreeWriteConfig>> {
@@ -106,28 +107,5 @@ public class KSpanningTreeWriteSpec implements
             builder.withConfig(config);
             return Stream.of(builder.build());
         };
-    }
-
-    private static class SpanningTreeBackedNodePropertyValues implements LongNodePropertyValues {
-        private final SpanningTree spanningTree;
-        private final long nodeCount;
-
-        SpanningTreeBackedNodePropertyValues(
-            SpanningTree spanningTree,
-            long nodeCount
-        ) {
-            this.nodeCount = nodeCount;
-            this.spanningTree = spanningTree;
-        }
-
-        @Override
-        public long nodeCount() {
-            return nodeCount;
-        }
-
-        @Override
-        public long longValue(long nodeId) {
-            return spanningTree.head(nodeId);
-        }
     }
 }

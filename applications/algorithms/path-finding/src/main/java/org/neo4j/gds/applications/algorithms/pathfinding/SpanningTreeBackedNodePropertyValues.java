@@ -19,16 +19,28 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
-/**
- * We need human-readable labels for e.g. progress tracking
- */
-interface AlgorithmLabels {
-    String A_STAR = "AStar";
-    String BFS = "BFS";
-    String DFS = "DFS";
-    String DIJKSTRA = "Dijkstra";
-    String K_SPANNING_TREE = "K Spanning Tree";
-    String SPANNING_TREE = "SpanningTree";
-    String STEINER = "SteinerTree";
-    String YENS = "Yens";
+import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
+import org.neo4j.gds.spanningtree.SpanningTree;
+
+public class SpanningTreeBackedNodePropertyValues implements LongNodePropertyValues {
+    private final SpanningTree spanningTree;
+    private final long nodeCount;
+
+    public SpanningTreeBackedNodePropertyValues(
+        SpanningTree spanningTree,
+        long nodeCount
+    ) {
+        this.nodeCount = nodeCount;
+        this.spanningTree = spanningTree;
+    }
+
+    @Override
+    public long nodeCount() {
+        return nodeCount;
+    }
+
+    @Override
+    public long longValue(long nodeId) {
+        return spanningTree.head(nodeId);
+    }
 }

@@ -72,6 +72,7 @@ import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.logging.Log;
@@ -106,6 +107,7 @@ class AlgorithmFacadeFactory {
     private final AlgorithmRunner algorithmRunner;
     private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
     private final AlgorithmEstimationTemplate algorithmEstimationTemplate;
+    private final NodePropertyExporterBuilder nodePropertyExporterBuilder;
     private final RelationshipExporterBuilder relationshipExporterBuilder;
     private final RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
     private final TaskRegistryFactory taskRegistryFactory;
@@ -131,6 +133,7 @@ class AlgorithmFacadeFactory {
         AlgorithmEstimator algorithmEstimator,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
+        NodePropertyExporterBuilder nodePropertyExporterBuilder,
         RelationshipExporterBuilder relationshipExporterBuilder,
         RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
@@ -159,6 +162,7 @@ class AlgorithmFacadeFactory {
 
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
         this.algorithmEstimationTemplate = algorithmEstimationTemplate;
+        this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
         this.relationshipExporterBuilder = relationshipExporterBuilder;
         this.relationshipStreamExporterBuilder = relationshipStreamExporterBuilder;
         this.taskRegistryFactory = taskRegistryFactory;
@@ -315,6 +319,7 @@ class AlgorithmFacadeFactory {
         var writeModeFacade = new PathFindingAlgorithmsWriteModeBusinessFacade(
             log,
             algorithmProcessingTemplate,
+            nodePropertyExporterBuilder,
             relationshipExporterBuilder,
             relationshipStreamExporterBuilder,
             taskRegistryFactory,

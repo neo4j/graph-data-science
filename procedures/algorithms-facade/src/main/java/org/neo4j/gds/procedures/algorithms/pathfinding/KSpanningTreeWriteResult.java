@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.kspanningtree;
+package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.StandardWriteResult;
@@ -25,7 +25,6 @@ import org.neo4j.gds.results.StandardWriteResult;
 import java.util.Map;
 
 public final class KSpanningTreeWriteResult extends StandardWriteResult {
-
     public final long effectiveNodeCount;
 
     public KSpanningTreeWriteResult(
@@ -40,10 +39,9 @@ public final class KSpanningTreeWriteResult extends StandardWriteResult {
     }
 
     public static class Builder extends AbstractResultBuilder<KSpanningTreeWriteResult> {
+        private long effectiveNodeCount;
 
-        long effectiveNodeCount;
-
-        Builder withEffectiveNodeCount(long effectiveNodeCount) {
+        public Builder withEffectiveNodeCount(long effectiveNodeCount) {
             this.effectiveNodeCount = effectiveNodeCount;
             return this;
         }

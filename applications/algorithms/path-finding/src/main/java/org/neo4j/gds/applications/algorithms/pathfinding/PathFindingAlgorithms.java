@@ -32,6 +32,8 @@ import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.kspanningtree.KSpanningTree;
+import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
@@ -59,6 +61,7 @@ import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BFS;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DFS;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DIJKSTRA;
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.K_SPANNING_TREE;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.SPANNING_TREE;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.STEINER;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.YENS;
@@ -114,6 +117,31 @@ public class PathFindingAlgorithms {
             configuration,
             progressTracker
         );
+    }
+
+    SpanningTree kSpanningTree(Graph graph, KSpanningTreeWriteConfig configuration) {
+        if (!graph.schema().isUndirected()) {
+            throw new IllegalArgumentException(
+                "The K-Spanning Tree algorithm works only with undirected graphs. Please orient the edges properly");
+        }
+
+        var parameters = configuration.toParameters();
+
+        var progressTracker = createProgressTracker(configuration, Tasks.task(
+            K_SPANNING_TREE,
+            Tasks.leaf(SPANNING_TREE, graph.relationshipCount()),
+            Tasks.leaf("Remove relationships")
+        ));
+
+        var algorithm = new KSpanningTree(
+            graph,
+            parameters.objective(),
+            graph.toMappedNodeId(parameters.sourceNode()),
+            parameters.k(),
+            progressTracker
+        );
+
+        return algorithm.compute();
     }
 
     PathFindingResult singlePairShortestPathAStar(Graph graph, ShortestPathAStarBaseConfig configuration) {

@@ -19,10 +19,8 @@
  */
 package org.neo4j.gds.paths.kspanningtree;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.algorithms.pathfinding.KSpanningTreeWriteResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -32,50 +30,34 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.paths.kspanningtree.Constants.K_SPANNING_TREE_DESCRIPTION;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class KSpanningTreeWriteProc extends BaseProc {
-
-    static final String DESCRIPTION =
-        "The K-spanning tree algorithm starts from a root node and returns a spanning tree with exactly k nodes";
-
+public class KSpanningTreeWriteProc {
     @Context
-    public NodePropertyExporterBuilder nodePropertyExporterBuilder;
+    public GraphDataScience facade;
 
     @Procedure(value = "gds.kSpanningTree.write", mode = WRITE)
-    @Description(DESCRIPTION)
+    @Description(K_SPANNING_TREE_DESCRIPTION)
     public Stream<KSpanningTreeWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new KSpanningTreeWriteSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.pathFinding().kSpanningTreeWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.alpha.kSpanningTree.write", mode = WRITE, deprecatedBy = "gds.kSpanningTree.write")
-    @Description(DESCRIPTION)
+    @Description(K_SPANNING_TREE_DESCRIPTION)
     @Internal
     @Deprecated(forRemoval = true)
     public Stream<KSpanningTreeWriteResult> alphaWrite(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.alpha.kSpanningTree.write");
-
-        executionContext()
+        facade.deprecatedProcedures().called("gds.alpha.kSpanningTree.write");
+        facade
             .log()
             .warn("Procedure `gds.alpha.kSpanningTree.write` has been deprecated, please use `gds.kSpanningTree.write`.");
-
         return write(graphName, configuration);
     }
-
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withNodePropertyExporterBuilder(nodePropertyExporterBuilder);
-    }
-
 }
