@@ -19,6 +19,11 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
+import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
+import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
+import org.neo4j.gds.allshortestpaths.MSBFSASPAlgorithm;
+import org.neo4j.gds.allshortestpaths.MSBFSAllShortestPaths;
+import org.neo4j.gds.allshortestpaths.WeightedAllShortestPaths;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.applications.algorithms.pathfinding.traverse.BreadthFirstSearch;
 import org.neo4j.gds.applications.algorithms.pathfinding.traverse.DepthFirstSearch;
@@ -104,6 +109,28 @@ public class PathFindingAlgorithms {
         this.taskRegistryFactory = taskRegistryFactory;
         this.terminationFlag = terminationFlag;
         this.userLogRegistryFactory = userLogRegistryFactory;
+    }
+
+    Stream<AllShortestPathsStreamResult> allShortestPaths(Graph graph, AllShortestPathsConfig configuration) {
+        var algorithm = selectAlgorithm(graph, configuration);
+
+        return algorithm.compute();
+    }
+
+    private MSBFSASPAlgorithm selectAlgorithm(Graph graph, AllShortestPathsConfig configuration) {
+        if (configuration.hasRelationshipWeightProperty()) {
+            return new WeightedAllShortestPaths(
+                graph,
+                DefaultPool.INSTANCE,
+                configuration.concurrency()
+            );
+        } else {
+            return new MSBFSAllShortestPaths(
+                graph,
+                configuration.concurrency(),
+                DefaultPool.INSTANCE
+            );
+        }
     }
 
     HugeLongArray breadthFirstSearch(Graph graph, BfsBaseConfig configuration) {

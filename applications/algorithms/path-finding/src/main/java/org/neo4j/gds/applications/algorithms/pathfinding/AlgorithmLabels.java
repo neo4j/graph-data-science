@@ -23,6 +23,7 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
  * We need human-readable labels for e.g. progress tracking
  */
 interface AlgorithmLabels {
+    String ALL_SHORTEST_PATHS = "All Shortest Paths";
     String A_STAR = "AStar";
     String BFS = "BFS";
     String DFS = "DFS";

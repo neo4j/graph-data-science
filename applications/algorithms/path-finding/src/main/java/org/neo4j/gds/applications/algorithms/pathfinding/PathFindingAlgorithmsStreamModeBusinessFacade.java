@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
+import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
+import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.dag.longestPath.DagLongestPathStreamConfig;
@@ -40,6 +42,7 @@ import org.neo4j.gds.traversal.RandomWalkStreamConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.ALL_SHORTEST_PATHS;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.A_STAR;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BFS;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DFS;
@@ -69,6 +72,22 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
         this.pathFindingAlgorithms = pathFindingAlgorithms;
         this.estimationFacade = estimationFacade;
+    }
+
+    public <RESULT> RESULT allShortestPaths(
+        GraphName graphName,
+        AllShortestPathsConfig configuration,
+        ResultBuilder<AllShortestPathsConfig, Stream<AllShortestPathsStreamResult>, RESULT> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            ALL_SHORTEST_PATHS,
+            () -> estimationFacade.allShortestPathsEstimation(configuration),
+            graph -> pathFindingAlgorithms.allShortestPaths(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
     }
 
     public <RESULT> RESULT breadthFirstSearch(
