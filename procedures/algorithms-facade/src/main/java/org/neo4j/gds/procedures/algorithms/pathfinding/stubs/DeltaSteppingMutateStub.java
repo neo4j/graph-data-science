@@ -22,20 +22,21 @@ package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.paths.traverse.BfsMutateConfig;
+import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaMutateConfig;
 import org.neo4j.gds.procedures.algorithms.pathfinding.MutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingResultBuilderForMutateMode;
 import org.neo4j.gds.results.MemoryEstimateResult;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class BreadthFirstSearchMutateStub implements MutateStub<BfsMutateConfig, PathFindingMutateResult> {
+public class DeltaSteppingMutateStub implements MutateStub<AllShortestPathsDeltaMutateConfig, PathFindingMutateResult> {
     private final GenericStub genericStub;
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final PathFindingAlgorithmsMutateModeBusinessFacade mutateFacade;
 
-    public BreadthFirstSearchMutateStub(
+    public DeltaSteppingMutateStub(
         GenericStub genericStub,
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         PathFindingAlgorithmsMutateModeBusinessFacade mutateFacade
@@ -47,12 +48,12 @@ public class BreadthFirstSearchMutateStub implements MutateStub<BfsMutateConfig,
 
     @Override
     public void validateConfiguration(Map<String, Object> configuration) {
-        genericStub.validateConfiguration(BfsMutateConfig::of, configuration);
+        genericStub.validateConfiguration(AllShortestPathsDeltaMutateConfig::of, configuration);
     }
 
     @Override
-    public BfsMutateConfig parseConfiguration(Map<String, Object> configuration) {
-        return genericStub.parseConfiguration(BfsMutateConfig::of, configuration);
+    public AllShortestPathsDeltaMutateConfig parseConfiguration(Map<String, Object> configuration) {
+        return genericStub.parseConfiguration(AllShortestPathsDeltaMutateConfig::of, configuration);
     }
 
     @Override
@@ -60,31 +61,29 @@ public class BreadthFirstSearchMutateStub implements MutateStub<BfsMutateConfig,
         return genericStub.getMemoryEstimation(
             username,
             configuration,
-            BfsMutateConfig::of,
-            __ -> estimationFacade.breadthFirstSearchEstimation()
+            AllShortestPathsDeltaMutateConfig::of,
+            __ -> estimationFacade.deltaSteppingEstimation()
         );
     }
 
     @Override
-    public Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> configuration) {
+    public Stream<MemoryEstimateResult> estimate(Object graphName, Map<String, Object> rawConfiguration) {
         return genericStub.estimate(
             graphName,
-            configuration,
-            BfsMutateConfig::of,
-            __ -> estimationFacade.breadthFirstSearchEstimation()
+            rawConfiguration,
+            AllShortestPathsDeltaMutateConfig::of,
+            __ -> estimationFacade.deltaSteppingEstimation()
         );
     }
 
     @Override
     public Stream<PathFindingMutateResult> execute(String graphName, Map<String, Object> configuration) {
-        var resultBuilder = new BreadthFirstSearchResultBuilderForMutateMode();
-
         return genericStub.execute(
             graphName,
             configuration,
-            BfsMutateConfig::of,
-            mutateFacade::breadthFirstSearch,
-            resultBuilder
+            AllShortestPathsDeltaMutateConfig::of,
+            mutateFacade::deltaStepping,
+            new PathFindingResultBuilderForMutateMode<>()
         );
     }
 }

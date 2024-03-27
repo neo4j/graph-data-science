@@ -23,6 +23,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
+import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaMutateConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraMutateConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraMutateConfig;
@@ -38,6 +39,7 @@ import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.A_STAR;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BFS;
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DELTA_STEPPING;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DFS;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DIJKSTRA;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.SPANNING_TREE;
@@ -77,6 +79,24 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             BFS,
             estimationFacade::breadthFirstSearchEstimation,
             graph -> pathFindingAlgorithms.breadthFirstSearch(graph, configuration),
+            Optional.of(mutateStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT deltaStepping(
+        GraphName graphName,
+        AllShortestPathsDeltaMutateConfig configuration,
+        ResultBuilder<AllShortestPathsDeltaMutateConfig, PathFindingResult, RESULT> resultBuilder
+    ) {
+        var mutateStep = new ShortestPathMutateStep(configuration);
+
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            DELTA_STEPPING,
+            estimationFacade::deltaSteppingEstimation,
+            graph -> pathFindingAlgorithms.deltaStepping(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
         );

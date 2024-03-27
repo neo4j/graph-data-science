@@ -24,6 +24,7 @@ import org.neo4j.gds.ml.pipeline.stubs.DepthFirstSearchStub;
 import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathAStarStub;
 import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathDijkstraStub;
 import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathYensStub;
+import org.neo4j.gds.ml.pipeline.stubs.SingleSourceShortestPathDeltaStub;
 import org.neo4j.gds.ml.pipeline.stubs.SingleSourceShortestPathDijkstraStub;
 import org.neo4j.gds.ml.pipeline.stubs.SpanningTreeStub;
 import org.neo4j.gds.ml.pipeline.stubs.SteinerTreeStub;
@@ -68,6 +69,7 @@ final class NodePropertyStepFactoryUsingStubs {
 
     private static NodePropertyStepFactoryUsingStubs create() {
         Map<CanonicalProcedureName, Stub> supportedProcedures = Map.of(
+            CanonicalProcedureName.parse("gds.allshortestpaths.delta.mutate"), new SingleSourceShortestPathDeltaStub(),
             CanonicalProcedureName.parse("gds.allshortestpaths.dijkstra.mutate"), new SingleSourceShortestPathDijkstraStub(),
             CanonicalProcedureName.parse("gds.bfs.mutate"), new BreadthFirstSearchStub(),
             CanonicalProcedureName.parse("gds.dfs.mutate"), new DepthFirstSearchStub(),

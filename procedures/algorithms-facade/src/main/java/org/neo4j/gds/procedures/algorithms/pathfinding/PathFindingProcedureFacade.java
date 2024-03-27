@@ -57,6 +57,7 @@ import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.BreadthFirstSearchMutateStub;
+import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.DeltaSteppingMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.DepthFirstSearchMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestPathAStarMutateStub;
@@ -104,6 +105,7 @@ public final class PathFindingProcedureFacade {
 
     // applications
     private final BreadthFirstSearchMutateStub breadthFirstSearchMutateStub;
+    private final DeltaSteppingMutateStub deltaSteppingMutateStub;
     private final DepthFirstSearchMutateStub depthFirstSearchMutateStub;
     private final SinglePairShortestPathAStarMutateStub singlePairShortestPathAStarMutateStub;
     private final SinglePairShortestPathDijkstraMutateStub singlePairShortestPathDijkstraMutateStub;
@@ -122,6 +124,7 @@ public final class PathFindingProcedureFacade {
         PathFindingAlgorithmsStreamModeBusinessFacade streamModeFacade,
         PathFindingAlgorithmsWriteModeBusinessFacade writeModeFacade,
         BreadthFirstSearchMutateStub breadthFirstSearchMutateStub,
+        DeltaSteppingMutateStub deltaSteppingMutateStub,
         DepthFirstSearchMutateStub depthFirstSearchMutateStub,
         SinglePairShortestPathAStarMutateStub singlePairShortestPathAStarMutateStub,
         SinglePairShortestPathDijkstraMutateStub singlePairShortestPathDijkstraMutateStub,
@@ -141,6 +144,7 @@ public final class PathFindingProcedureFacade {
         this.writeModeFacade = writeModeFacade;
 
         this.breadthFirstSearchMutateStub = breadthFirstSearchMutateStub;
+        this.deltaSteppingMutateStub = deltaSteppingMutateStub;
         this.depthFirstSearchMutateStub = depthFirstSearchMutateStub;
         this.singlePairShortestPathAStarMutateStub = singlePairShortestPathAStarMutateStub;
         this.singlePairShortestPathDijkstraMutateStub = singlePairShortestPathDijkstraMutateStub;
@@ -184,6 +188,12 @@ public final class PathFindingProcedureFacade {
         );
 
         var breadthFirstSearchMutateStub = new BreadthFirstSearchMutateStub(
+            genericStub,
+            pathFindingAlgorithmsEstimationModeBusinessFacade,
+            pathFindingAlgorithmsMutateModeBusinessFacade
+        );
+
+        var deltaSteppingMutateStub = new DeltaSteppingMutateStub(
             genericStub,
             pathFindingAlgorithmsEstimationModeBusinessFacade,
             pathFindingAlgorithmsMutateModeBusinessFacade
@@ -235,6 +245,7 @@ public final class PathFindingProcedureFacade {
             pathFindingAlgorithmsStreamModeBusinessFacade,
             pathFindingAlgorithmsWriteModeBusinessFacade,
             breadthFirstSearchMutateStub,
+            deltaSteppingMutateStub,
             depthFirstSearchMutateStub,
             aStarStub,
             singlePairDijkstraStub,
@@ -319,6 +330,10 @@ public final class PathFindingProcedureFacade {
         );
 
         return Stream.of(result);
+    }
+
+    public DeltaSteppingMutateStub deltaSteppingMutateStub() {
+        return deltaSteppingMutateStub;
     }
 
     public Stream<StandardStatsResult> deltaSteppingStats(String graphName, Map<String, Object> configuration) {

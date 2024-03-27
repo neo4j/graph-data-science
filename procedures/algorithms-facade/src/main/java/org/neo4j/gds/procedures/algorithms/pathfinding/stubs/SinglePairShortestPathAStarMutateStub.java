@@ -63,7 +63,7 @@ public class SinglePairShortestPathAStarMutateStub implements MutateStub<Shortes
             username,
             configuration,
             ShortestPathAStarMutateConfig::of,
-            shortestPathAStarMutateConfig -> estimationFacade.singlePairShortestPathAStarEstimation()
+            __ -> estimationFacade.singlePairShortestPathAStarEstimation()
         );
     }
 
@@ -73,7 +73,7 @@ public class SinglePairShortestPathAStarMutateStub implements MutateStub<Shortes
             graphName,
             configuration,
             ShortestPathAStarMutateConfig::of,
-            shortestPathAStarMutateConfig -> estimationFacade.singlePairShortestPathAStarEstimation()
+            __ -> estimationFacade.singlePairShortestPathAStarEstimation()
         );
     }
 
