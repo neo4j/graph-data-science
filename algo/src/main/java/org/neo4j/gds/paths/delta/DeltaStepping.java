@@ -162,7 +162,7 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
         return new PathFindingResult(pathResults(distances, startNode, concurrency), progressTracker::endSubTask);
     }
 
-    enum Phase {
+    public enum Phase {
         RELAX,
         SYNC
     }

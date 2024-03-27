@@ -108,7 +108,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             graphName,
             configuration,
             K_SPANNING_TREE,
-            () -> estimationFacade.kSpanningTreeEstimation(configuration),
+            estimationFacade::kSpanningTreeEstimation,
             graph -> pathFindingAlgorithms.kSpanningTree(graph, configuration),
             writeStep,
             resultBuilder
@@ -124,7 +124,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             graphName,
             configuration,
             A_STAR,
-            () -> estimationFacade.singlePairShortestPathAStarEstimation(configuration),
+            estimationFacade::singlePairShortestPathAStarEstimation,
             graph -> pathFindingAlgorithms.singlePairShortestPathAStar(graph, configuration),
             resultBuilder
         );
@@ -192,7 +192,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             graphName,
             configuration,
             SPANNING_TREE,
-            () -> estimationFacade.spanningTreeEstimation(configuration),
+            estimationFacade::spanningTreeEstimation,
             graph -> pathFindingAlgorithms.spanningTree(graph, configuration),
             writeStep,
             resultBuilder

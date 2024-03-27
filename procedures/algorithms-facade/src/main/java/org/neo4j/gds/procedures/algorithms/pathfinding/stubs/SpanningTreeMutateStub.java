@@ -61,7 +61,7 @@ public class SpanningTreeMutateStub implements MutateStub<SpanningTreeMutateConf
             username,
             configuration,
             SpanningTreeMutateConfig::of,
-            estimationFacade::spanningTreeEstimation
+            spanningTreeMutateConfig -> estimationFacade.spanningTreeEstimation()
         );
     }
 
@@ -71,7 +71,7 @@ public class SpanningTreeMutateStub implements MutateStub<SpanningTreeMutateConf
             graphName,
             configuration,
             SpanningTreeMutateConfig::of,
-            estimationFacade::spanningTreeEstimation
+            spanningTreeMutateConfig -> estimationFacade.spanningTreeEstimation()
         );
     }
 

@@ -19,15 +19,13 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
-import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.dag.longestPath.DagLongestPathStreamConfig;
-import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
-import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.paths.astar.AStarMemoryEstimateDefinition;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
+import org.neo4j.gds.paths.delta.DeltaSteppingMemoryEstimateDefinition;
+import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfig;
 import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateDefinition;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraBaseConfig;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
@@ -56,41 +54,54 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         this.algorithmEstimationTemplate = algorithmEstimationTemplate;
     }
 
+    MemoryEstimation allShortestPathsEstimation() {
+        throw new MemoryEstimationNotImplementedException();
+    }
+
     public MemoryEstimateResult breadthFirstSearch(
         BfsBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        var memoryEstimation = breadthFirstSearchEstimation(configuration);
+        var memoryEstimation = breadthFirstSearchEstimation();
 
         return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
     }
 
-    MemoryEstimation allShortestPathsEstimation(AllShortestPathsConfig ignored) {
-        throw new MemoryEstimationNotImplementedException();
+    public MemoryEstimation breadthFirstSearchEstimation() {
+        return new BfsMemoryEstimateDefinition().memoryEstimation();
     }
 
-    public MemoryEstimation breadthFirstSearchEstimation(BfsBaseConfig ignored) {
-        return new BfsMemoryEstimateDefinition().memoryEstimation();
+    public MemoryEstimateResult deltaStepping(
+        AllShortestPathsDeltaStreamConfig configuration,
+        Object graphNameOrConfiguration
+    ) {
+        var memoryEstimation = deltaSteppingEstimation();
+
+        return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
+    }
+
+    public MemoryEstimation deltaSteppingEstimation() {
+        return new DeltaSteppingMemoryEstimateDefinition().memoryEstimation();
     }
 
     public MemoryEstimateResult depthFirstSearch(
         DfsBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        var memoryEstimation = depthFirstSearchEstimation(configuration);
+        var memoryEstimation = depthFirstSearchEstimation();
 
         return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
     }
 
-    public MemoryEstimation depthFirstSearchEstimation(DfsBaseConfig ignored) {
+    public MemoryEstimation depthFirstSearchEstimation() {
         return new DfsMemoryEstimateDefinition().memoryEstimation();
     }
 
-    MemoryEstimation kSpanningTreeEstimation(KSpanningTreeWriteConfig ignored) {
+    MemoryEstimation kSpanningTreeEstimation() {
         throw new MemoryEstimationNotImplementedException();
     }
 
-    MemoryEstimation longestPathEstimation(DagLongestPathStreamConfig ignored) {
+    MemoryEstimation longestPathEstimation() {
         throw new MemoryEstimationNotImplementedException();
     }
 
@@ -111,12 +122,12 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         ShortestPathAStarBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        var memoryEstimation = singlePairShortestPathAStarEstimation(configuration);
+        var memoryEstimation = singlePairShortestPathAStarEstimation();
 
         return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
     }
 
-    public MemoryEstimation singlePairShortestPathAStarEstimation(ShortestPathAStarBaseConfig ignored) {
+    public MemoryEstimation singlePairShortestPathAStarEstimation() {
         return new AStarMemoryEstimateDefinition().memoryEstimation();
     }
 
@@ -171,12 +182,12 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         SpanningTreeBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        var memoryEstimation = spanningTreeEstimation(configuration);
+        var memoryEstimation = spanningTreeEstimation();
 
         return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
     }
 
-    public MemoryEstimation spanningTreeEstimation(SpanningTreeBaseConfig ignored) {
+    public MemoryEstimation spanningTreeEstimation() {
         return new SpanningTreeMemoryEstimateDefinition().memoryEstimation();
     }
 
@@ -193,7 +204,7 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         return new SteinerTreeMemoryEstimateDefinition(configuration.applyRerouting()).memoryEstimation();
     }
 
-    public MemoryEstimation topologicalSortEstimation(TopologicalSortStreamConfig configuration) {
+    public MemoryEstimation topologicalSortEstimation() {
         throw new MemoryEstimationNotImplementedException();
     }
 

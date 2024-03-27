@@ -27,6 +27,7 @@ import org.neo4j.gds.dag.longestPath.DagLongestPathStreamConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
+import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraStreamConfig;
@@ -45,6 +46,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.ALL_SHORTEST_PATHS;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.A_STAR;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BFS;
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DELTA_STEPPING;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DFS;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DIJKSTRA;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.LONGEST_PATH;
@@ -83,7 +85,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             graphName,
             configuration,
             ALL_SHORTEST_PATHS,
-            () -> estimationFacade.allShortestPathsEstimation(configuration),
+            estimationFacade::allShortestPathsEstimation,
             graph -> pathFindingAlgorithms.allShortestPaths(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -99,8 +101,24 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             graphName,
             configuration,
             BFS,
-            () -> estimationFacade.breadthFirstSearchEstimation(configuration),
+            estimationFacade::breadthFirstSearchEstimation,
             graph -> pathFindingAlgorithms.breadthFirstSearch(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT deltaStepping(
+        GraphName graphName,
+        AllShortestPathsDeltaStreamConfig configuration,
+        ResultBuilder<AllShortestPathsDeltaStreamConfig, PathFindingResult, RESULT> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            DELTA_STEPPING,
+            estimationFacade::deltaSteppingEstimation,
+            graph -> pathFindingAlgorithms.deltaStepping(graph, configuration),
             Optional.empty(),
             resultBuilder
         );
@@ -115,7 +133,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             graphName,
             configuration,
             DFS,
-            () -> estimationFacade.depthFirstSearchEstimation(configuration),
+            estimationFacade::depthFirstSearchEstimation,
             graph -> pathFindingAlgorithms.depthFirstSearch(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -131,7 +149,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             graphName,
             configuration,
             LONGEST_PATH,
-            () -> estimationFacade.longestPathEstimation(configuration),
+            estimationFacade::longestPathEstimation,
             graph -> pathFindingAlgorithms.longestPath(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -163,7 +181,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             graphName,
             configuration,
             A_STAR,
-            () -> estimationFacade.singlePairShortestPathAStarEstimation(configuration),
+            estimationFacade::singlePairShortestPathAStarEstimation,
             graph -> pathFindingAlgorithms.singlePairShortestPathAStar(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -227,7 +245,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             graphName,
             configuration,
             SPANNING_TREE,
-            () -> estimationFacade.spanningTreeEstimation(configuration),
+            estimationFacade::spanningTreeEstimation,
             graph -> pathFindingAlgorithms.spanningTree(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -259,7 +277,7 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             graphName,
             configuration,
             TOPOLOGICAL_SORT,
-            () -> estimationFacade.topologicalSortEstimation(configuration),
+            estimationFacade::topologicalSortEstimation,
             graph -> pathFindingAlgorithms.topologicalSort(graph, configuration),
             Optional.empty(),
             resultBuilder

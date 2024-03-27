@@ -61,7 +61,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
             graphName,
             configuration,
             BFS,
-            () -> estimationFacade.breadthFirstSearchEstimation(configuration),
+            estimationFacade::breadthFirstSearchEstimation,
             graph -> pathFindingAlgorithms.breadthFirstSearch(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -93,7 +93,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
             graphName,
             configuration,
             SPANNING_TREE,
-            () -> estimationFacade.spanningTreeEstimation(configuration),
+            estimationFacade::spanningTreeEstimation,
             graph -> pathFindingAlgorithms.spanningTree(graph, configuration),
             Optional.empty(),
             resultBuilder

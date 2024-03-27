@@ -61,7 +61,7 @@ public class DepthFirstSearchMutateStub implements MutateStub<DfsMutateConfig, P
             username,
             configuration,
             DfsMutateConfig::of,
-            estimationFacade::depthFirstSearchEstimation
+            dfsMutateConfig -> estimationFacade.depthFirstSearchEstimation()
         );
     }
 
@@ -71,7 +71,7 @@ public class DepthFirstSearchMutateStub implements MutateStub<DfsMutateConfig, P
             graphName,
             configuration,
             DfsMutateConfig::of,
-            estimationFacade::depthFirstSearchEstimation
+            dfsMutateConfig -> estimationFacade.depthFirstSearchEstimation()
         );
     }
 

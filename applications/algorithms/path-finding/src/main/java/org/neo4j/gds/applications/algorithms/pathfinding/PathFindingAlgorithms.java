@@ -47,6 +47,8 @@ import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
+import org.neo4j.gds.paths.delta.DeltaStepping;
+import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraBaseConfig;
@@ -73,6 +75,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.A_STAR;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BFS;
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DELTA_STEPPING;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DFS;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DIJKSTRA;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.K_SPANNING_TREE;
@@ -143,6 +146,19 @@ public class PathFindingAlgorithms {
             configuration,
             progressTracker
         );
+    }
+
+    PathFindingResult deltaStepping(Graph graph, AllShortestPathsDeltaBaseConfig configuration) {
+        var iterativeTask = Tasks.iterativeOpen(
+            DELTA_STEPPING,
+            () -> List.of(
+                Tasks.leaf(DeltaStepping.Phase.RELAX.name()),
+                Tasks.leaf(DeltaStepping.Phase.SYNC.name())
+            )
+        );
+        var progressTracker = createProgressTracker(configuration, iterativeTask);
+        var algorithm = DeltaStepping.of(graph, configuration, DefaultPool.INSTANCE, progressTracker);
+        return algorithm.compute();
     }
 
     HugeLongArray depthFirstSearch(Graph graph, DfsBaseConfig configuration) {

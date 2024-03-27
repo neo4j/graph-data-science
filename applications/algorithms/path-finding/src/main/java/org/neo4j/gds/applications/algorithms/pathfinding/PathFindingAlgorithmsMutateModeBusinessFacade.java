@@ -75,7 +75,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             BFS,
-            () -> estimationFacade.breadthFirstSearchEstimation(configuration),
+            estimationFacade::breadthFirstSearchEstimation,
             graph -> pathFindingAlgorithms.breadthFirstSearch(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
@@ -94,7 +94,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             DFS,
-            () -> estimationFacade.depthFirstSearchEstimation(configuration),
+            estimationFacade::depthFirstSearchEstimation,
             graph -> pathFindingAlgorithms.depthFirstSearch(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
@@ -112,7 +112,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             A_STAR,
-            () -> estimationFacade.singlePairShortestPathAStarEstimation(configuration),
+            estimationFacade::singlePairShortestPathAStarEstimation,
             graph -> pathFindingAlgorithms.singlePairShortestPathAStar(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
@@ -184,7 +184,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             SPANNING_TREE,
-            () -> estimationFacade.spanningTreeEstimation(configuration),
+            estimationFacade::spanningTreeEstimation,
             graph -> pathFindingAlgorithms.spanningTree(graph, configuration),
             Optional.of(mutateOrWriteStep),
             resultBuilder

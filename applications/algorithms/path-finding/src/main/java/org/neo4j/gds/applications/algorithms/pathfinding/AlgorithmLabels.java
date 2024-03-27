@@ -26,6 +26,7 @@ interface AlgorithmLabels {
     String ALL_SHORTEST_PATHS = "All Shortest Paths";
     String A_STAR = "AStar";
     String BFS = "BFS";
+    String DELTA_STEPPING = "Delta Stepping";
     String DFS = "DFS";
     String DIJKSTRA = "Dijkstra";
     String K_SPANNING_TREE = "K Spanning Tree";
