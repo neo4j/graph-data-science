@@ -537,14 +537,14 @@ public final class Neo4jProxyImpl implements Neo4jProxyApi {
     public long getHighestPossibleNodeCount(
         Read read, IdGeneratorFactory idGeneratorFactory
     ) {
-        return countByIdGenerator(idGeneratorFactory, RecordIdType.NODE, RecordIdType.NODE);
+        return countByIdGenerator(idGeneratorFactory, RecordIdType.NODE);
     }
 
     @Override
     public long getHighestPossibleRelationshipCount(
         Read read, IdGeneratorFactory idGeneratorFactory
     ) {
-        return countByIdGenerator(idGeneratorFactory, RecordIdType.RELATIONSHIP, RecordIdType.RELATIONSHIP);
+        return countByIdGenerator(idGeneratorFactory, RecordIdType.RELATIONSHIP);
     }
 
     @Override

@@ -178,7 +178,7 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
         int batchSize,
         boolean allowPartitionedScan
     ) {
-        return PartitionedStoreScan.createScans(transaction, batchSize, this,  labelIds);
+        return PartitionedStoreScan.createScans(transaction, batchSize, this, labelIds);
     }
 
     @Override
@@ -187,7 +187,7 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
         int batchSize,
         int... labelIds
     ) {
-        return PartitionedStoreScan.createScans(transaction, batchSize, this,  labelIds);
+        return PartitionedStoreScan.createScans(transaction, batchSize, this, labelIds);
     }
 
     @Override
@@ -453,44 +453,49 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
     public long getHighestPossibleNodeCount(
         Read read, IdGeneratorFactory idGeneratorFactory
     ) {
-        return countByIdGenerator(idGeneratorFactory, RecordIdType.NODE, BlockFormat.INSTANCE.nodeType);
+        return countByIdGenerator(
+            idGeneratorFactory,
+            RecordIdType.NODE,
+            BlockFormat.INSTANCE.nodeType,
+            BlockFormat.INSTANCE.dynamicNodeType
+        );
     }
 
     @Override
     public long getHighestPossibleRelationshipCount(
         Read read, IdGeneratorFactory idGeneratorFactory
     ) {
-        return countByIdGenerator(idGeneratorFactory, RecordIdType.RELATIONSHIP, BlockFormat.INSTANCE.relationshipType);
+        return countByIdGenerator(
+            idGeneratorFactory,
+            RecordIdType.RELATIONSHIP,
+            BlockFormat.INSTANCE.relationshipType,
+            BlockFormat.INSTANCE.dynamicRelationshipType
+        );
     }
 
     private static final class BlockFormat {
         private static final BlockFormat INSTANCE = new BlockFormat();
 
-        private final org.neo4j.internal.id.IdType nodeType;
-        private final org.neo4j.internal.id.IdType relationshipType;
+        private org.neo4j.internal.id.IdType nodeType = null;
+        private org.neo4j.internal.id.IdType dynamicNodeType = null;
+        private org.neo4j.internal.id.IdType relationshipType = null;
+        private org.neo4j.internal.id.IdType dynamicRelationshipType = null;
 
         BlockFormat() {
-            org.neo4j.internal.id.IdType nodeType = null;
-            org.neo4j.internal.id.IdType relationshipType = null;
-
             try {
                 var blockIdType = Class.forName("com.neo4j.internal.blockformat.BlockIdType");
                 var blockTypes = Objects.requireNonNull(blockIdType.getEnumConstants());
                 for (Object blockType : blockTypes) {
                     var type = (Enum<?>) blockType;
-                    if (type.name().equals("NODE")) {
-                        nodeType = (org.neo4j.internal.id.IdType) type;
-                    } else if (type.name().equals("RELATIONSHIP")) {
-                        relationshipType = (org.neo4j.internal.id.IdType) type;
+                    switch (type.name()) {
+                        case "NODE" -> this.nodeType = (org.neo4j.internal.id.IdType) type;
+                        case "DYNAMIC_NODE" -> this.dynamicNodeType = (org.neo4j.internal.id.IdType) type;
+                        case "RELATIONSHIP" -> this.relationshipType = (org.neo4j.internal.id.IdType) type;
+                        case "DYNAMIC_RELATIONSHIP" -> this.dynamicRelationshipType = (org.neo4j.internal.id.IdType) type;
                     }
                 }
-            } catch (ClassNotFoundException | NullPointerException | ClassCastException e) {
-                nodeType = null;
-                relationshipType = null;
+            } catch (ClassNotFoundException | NullPointerException | ClassCastException ignored) {
             }
-
-            this.nodeType = Objects.requireNonNullElse(nodeType, RecordIdType.NODE);
-            this.relationshipType = Objects.requireNonNullElse(relationshipType, RecordIdType.RELATIONSHIP);
         }
     }
 
