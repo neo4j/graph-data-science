@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.paths.dag.longestPath;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingStreamResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -29,11 +29,12 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.paths.dag.longestPath.Constants.LONGEST_PATH_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class DagLongestPathStreamProc extends BaseProc {
-    static final String LONGEST_PATH_DESCRIPTION =
-        "Returns the longest paths ending in given target nodes";
+public class DagLongestPathStreamProc {
+    @Context
+    public GraphDataScience facade;
 
     @Procedure(value = "gds.dag.longestPath.stream", mode = READ)
     @Description(LONGEST_PATH_DESCRIPTION)
@@ -41,10 +42,6 @@ public class DagLongestPathStreamProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new DagLongestPathStreamSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.pathFinding().longestPathStream(graphName, configuration);
     }
-
 }

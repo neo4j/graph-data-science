@@ -32,6 +32,7 @@ import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.dag.longestPath.DagLongestPath;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSort;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortBaseConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
@@ -70,6 +71,7 @@ import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DFS;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DIJKSTRA;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.K_SPANNING_TREE;
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.LONGEST_PATH;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.RANDOM_WALK;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.SPANNING_TREE;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.STEINER;
@@ -148,6 +150,21 @@ public class PathFindingAlgorithms {
             graph.toMappedNodeId(parameters.sourceNode()),
             parameters.k(),
             progressTracker
+        );
+
+        return algorithm.compute();
+    }
+
+    PathFindingResult longestPath(Graph graph, AlgoBaseConfig configuration) {
+        var initializationTask = Tasks.leaf("Initialization", graph.nodeCount());
+        var traversalTask = Tasks.leaf("Traversal", graph.nodeCount());
+        var task = Tasks.task(LONGEST_PATH, List.of(initializationTask, traversalTask));
+        var progressTracker = createProgressTracker(configuration, task);
+
+        var algorithm = new DagLongestPath(
+            graph,
+            progressTracker,
+            configuration.concurrency()
         );
 
         return algorithm.compute();

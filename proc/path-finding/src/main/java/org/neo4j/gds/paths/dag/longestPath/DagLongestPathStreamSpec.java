@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
-@GdsCallable(name = "gds.dag.longestPath.stream", description = DagLongestPathStreamProc.LONGEST_PATH_DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.dag.longestPath.stream", description = Constants.LONGEST_PATH_DESCRIPTION, executionMode = STREAM)
 public class DagLongestPathStreamSpec implements AlgorithmSpec<DagLongestPath, PathFindingResult, DagLongestPathStreamConfig, Stream<PathFindingStreamResult>, DagLongestPathFactory<DagLongestPathStreamConfig>> {
 
     @Override
