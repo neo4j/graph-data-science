@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.paths.all;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
-import org.neo4j.gds.executor.ProcedureExecutor;
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -30,39 +30,35 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.paths.all.Constants.ALL_PAIRS_SHORTEST_PATH_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class AllShortestPathsStreamProc extends BaseProc {
+public class AllShortestPathsStreamProc {
+    @Context
+    public GraphDataScience facade;
+
     @Procedure(name = "gds.allShortestPaths.stream", mode = READ)
-    @Description(AllShortestPathsConstants.DESCRIPTION)
+    @Description(ALL_PAIRS_SHORTEST_PATH_DESCRIPTION)
     public Stream<AllShortestPathsStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new AllShortestPathsStreamSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.pathFinding().allShortestPathStream(graphName, configuration);
     }
 
     @Procedure(name = "gds.alpha.allShortestPaths.stream", mode = READ, deprecatedBy = "gds.allShortestPaths.stream")
-    @Description(AllShortestPathsConstants.DESCRIPTION)
+    @Description(ALL_PAIRS_SHORTEST_PATH_DESCRIPTION)
     @Internal
     @Deprecated(forRemoval = true)
     public Stream<AllShortestPathsStreamResult> alphaStream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.alpha.allShortestPaths.stream");
-
-        executionContext()
+        facade.deprecatedProcedures().called("gds.alpha.allShortestPaths.stream");
+        facade
             .log()
             .warn(
                 "Procedure `gds.alpha.allShortestPaths.stream` has been deprecated, please use `gds.allShortestPaths.stream`.");
-
         return stream(graphName, configuration);
     }
-
 }

@@ -19,7 +19,9 @@
  */
 package org.neo4j.gds.paths.dag.longestPath;
 
-class Constants {
+final class Constants {
     static final String LONGEST_PATH_DESCRIPTION =
         "Returns the longest paths ending in given target nodes";
+
+    private Constants() {}
 }

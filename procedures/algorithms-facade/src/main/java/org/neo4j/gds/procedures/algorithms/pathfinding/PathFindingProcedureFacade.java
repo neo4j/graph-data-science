@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
+import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
+import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.NodeLookup;
@@ -237,6 +239,22 @@ public final class PathFindingProcedureFacade {
             singleSourceDijkstraStub,
             spanningTreeMutateStub,
             steinerTreeMutateStub
+        );
+    }
+
+    public Stream<AllShortestPathsStreamResult> allShortestPathStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        ResultBuilder<AllShortestPathsConfig, Stream<AllShortestPathsStreamResult>, Stream<AllShortestPathsStreamResult>> resultBuilder =
+            (__, ___, ____, result, _____, ______) -> result.orElse(Stream.empty());
+
+        return runStreamAlgorithm(
+            graphName,
+            configuration,
+            AllShortestPathsConfig::of,
+            resultBuilder,
+            streamModeFacade::allShortestPaths
         );
     }
 

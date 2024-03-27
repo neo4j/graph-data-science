@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
+import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.dag.longestPath.DagLongestPathStreamConfig;
@@ -62,6 +63,10 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         var memoryEstimation = breadthFirstSearchEstimation(configuration);
 
         return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
+    }
+
+    MemoryEstimation allShortestPathsEstimation(AllShortestPathsConfig ignored) {
+        throw new MemoryEstimationNotImplementedException();
     }
 
     public MemoryEstimation breadthFirstSearchEstimation(BfsBaseConfig ignored) {
