@@ -32,6 +32,7 @@ import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.paths.WritePathOptionsConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
+import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaWriteConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraWriteConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig;
@@ -46,6 +47,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.A_STAR;
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DELTA_STEPPING;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DIJKSTRA;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.K_SPANNING_TREE;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.SPANNING_TREE;
@@ -89,6 +91,21 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         this.terminationFlag = terminationFlag;
         this.estimationFacade = estimationFacade;
         this.pathFindingAlgorithms = pathFindingAlgorithms;
+    }
+
+    public <RESULT> RESULT deltaStepping(
+        GraphName graphName,
+        AllShortestPathsDeltaWriteConfig configuration,
+        ResultBuilder<AllShortestPathsDeltaWriteConfig, PathFindingResult, RESULT> resultBuilder
+    ) {
+        return runAlgorithmAndWrite(
+            graphName,
+            configuration,
+            DELTA_STEPPING,
+            estimationFacade::deltaSteppingEstimation,
+            graph -> pathFindingAlgorithms.deltaStepping(graph, configuration),
+            resultBuilder
+        );
     }
 
     public <RESULT> RESULT kSpanningTree(

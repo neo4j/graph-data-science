@@ -19,16 +19,7 @@
  */
 package org.neo4j.gds.paths.singlesource.delta;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
-import org.neo4j.gds.executor.ProcedureExecutorSpec;
-import org.neo4j.gds.paths.delta.DeltaStepping;
-import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaWriteConfig;
-import org.neo4j.gds.paths.dijkstra.PathFindingResult;
-
+import org.neo4j.gds.procedures.GraphDataScience;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.results.StandardWriteRelationshipsResult;
 import org.neo4j.procedure.Context;
@@ -40,13 +31,13 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants.DELTA_STEPPING_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class AllShortestPathsDeltaWriteProc extends BaseProc {
-
+public class AllShortestPathsDeltaWriteProc {
     @Context
-    public RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
+    public GraphDataScience facade;
 
     @Procedure(name = "gds.allShortestPaths.delta.write", mode = WRITE)
     @Description(DELTA_STEPPING_DESCRIPTION)
@@ -54,35 +45,15 @@ public class AllShortestPathsDeltaWriteProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        var writeSpec = new AllShortestPathsDeltaWriteSpec();
-        var pipelineSpec = new ProcedureExecutorSpec<DeltaStepping, PathFindingResult, AllShortestPathsDeltaWriteConfig>();
-
-        return new ProcedureExecutor<>(
-            writeSpec,
-            pipelineSpec,
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.pathFinding().deltaSteppingWrite(graphName, configuration);
     }
 
     @Procedure(name = "gds.allShortestPaths.delta.write.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        var writeSpec = new AllShortestPathsDeltaWriteSpec();
-        var pipelineSpec = new ProcedureExecutorSpec<DeltaStepping, PathFindingResult, AllShortestPathsDeltaWriteConfig>();
-
-        return new MemoryEstimationExecutor<>(
-            writeSpec,
-            pipelineSpec,
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withRelationshipStreamExporterBuilder(relationshipStreamExporterBuilder);
+        return facade.pathFinding().deltaSteppingWriteEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

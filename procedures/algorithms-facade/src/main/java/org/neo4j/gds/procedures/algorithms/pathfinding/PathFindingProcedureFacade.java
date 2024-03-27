@@ -43,6 +43,7 @@ import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStatsConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfig;
+import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaWriteConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraWriteConfig;
@@ -370,6 +371,36 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             AllShortestPathsDeltaStreamConfig::of,
+            configuration -> estimationModeFacade.deltaStepping(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<StandardWriteRelationshipsResult> deltaSteppingWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        return Stream.of(
+            runWriteAlgorithm(
+                graphName,
+                configuration,
+                AllShortestPathsDeltaWriteConfig::of,
+                writeModeFacade::deltaStepping
+            )
+        );
+    }
+
+    public Stream<MemoryEstimateResult> deltaSteppingWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = runEstimation(
+            algorithmConfiguration,
+            AllShortestPathsDeltaWriteConfig::of,
             configuration -> estimationModeFacade.deltaStepping(
                 configuration,
                 graphNameOrConfiguration
