@@ -17,21 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.pathfinding;
+package org.neo4j.gds.paths.dag.longestPath;
 
-/**
- * We need human-readable labels for e.g. progress tracking
- */
-interface AlgorithmLabels {
-    String A_STAR = "AStar";
-    String BFS = "BFS";
-    String DFS = "DFS";
-    String DIJKSTRA = "Dijkstra";
-    String K_SPANNING_TREE = "K Spanning Tree";
-    String LONGEST_PATH = "LongestPath";
-    String RANDOM_WALK = "RandomWalk";
-    String SPANNING_TREE = "SpanningTree";
-    String STEINER = "SteinerTree";
-    String TOPOLOGICAL_SORT = "TopologicalSort";
-    String YENS = "Yens";
+class Constants {
+    static final String LONGEST_PATH_DESCRIPTION =
+        "Returns the longest paths ending in given target nodes";
 }

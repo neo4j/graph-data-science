@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.dag.longestPath.DagLongestPathStreamConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
@@ -43,6 +44,7 @@ import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BFS;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DFS;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DIJKSTRA;
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.LONGEST_PATH;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.RANDOM_WALK;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.SPANNING_TREE;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.STEINER;
@@ -96,6 +98,22 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             DFS,
             () -> estimationFacade.depthFirstSearchEstimation(configuration),
             graph -> pathFindingAlgorithms.depthFirstSearch(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT longestPath(
+        GraphName graphName,
+        DagLongestPathStreamConfig configuration,
+        ResultBuilder<DagLongestPathStreamConfig, PathFindingResult, RESULT> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            LONGEST_PATH,
+            () -> estimationFacade.longestPathEstimation(configuration),
+            graph -> pathFindingAlgorithms.longestPath(graph, configuration),
             Optional.empty(),
             resultBuilder
         );
