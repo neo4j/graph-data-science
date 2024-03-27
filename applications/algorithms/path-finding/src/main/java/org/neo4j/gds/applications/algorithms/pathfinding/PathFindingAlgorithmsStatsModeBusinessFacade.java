@@ -21,6 +21,8 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStatsConfig;
+import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.traverse.BfsStatsConfig;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeStatsConfig;
@@ -32,6 +34,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BFS;
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DELTA_STEPPING;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.RANDOM_WALK;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.SPANNING_TREE;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.STEINER;
@@ -63,6 +66,22 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
             BFS,
             estimationFacade::breadthFirstSearchEstimation,
             graph -> pathFindingAlgorithms.breadthFirstSearch(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT deltaStepping(
+        GraphName graphName,
+        AllShortestPathsDeltaStatsConfig configuration,
+        ResultBuilder<AllShortestPathsDeltaStatsConfig, PathFindingResult, RESULT> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            DELTA_STEPPING,
+            estimationFacade::deltaSteppingEstimation,
+            graph -> pathFindingAlgorithms.deltaStepping(graph, configuration),
             Optional.empty(),
             resultBuilder
         );

@@ -41,6 +41,7 @@ import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
+import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStatsConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
@@ -311,6 +312,34 @@ public final class PathFindingProcedureFacade {
             algorithmConfiguration,
             BfsStreamConfig::of,
             configuration -> estimationModeFacade.breadthFirstSearch(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<StandardStatsResult> deltaSteppingStats(String graphName, Map<String, Object> configuration) {
+        var resultBuilder = new DeltaSteppingResultBuilderForStatsMode();
+
+        return runStatsAlgorithm(
+            graphName,
+            configuration,
+            AllShortestPathsDeltaStatsConfig::of,
+            resultBuilder,
+            statsModeFacade::deltaStepping
+        );
+    }
+
+    public Stream<MemoryEstimateResult> deltaSteppingStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = runEstimation(
+            algorithmConfiguration,
+            AllShortestPathsDeltaStatsConfig::of,
+            configuration -> estimationModeFacade.deltaStepping(
                 configuration,
                 graphNameOrConfiguration
             )

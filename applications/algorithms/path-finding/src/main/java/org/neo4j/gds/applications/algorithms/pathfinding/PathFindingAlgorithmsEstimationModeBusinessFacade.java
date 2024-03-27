@@ -25,7 +25,7 @@ import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.paths.astar.AStarMemoryEstimateDefinition;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.delta.DeltaSteppingMemoryEstimateDefinition;
-import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfig;
+import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
 import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateDefinition;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraBaseConfig;
 import org.neo4j.gds.paths.dijkstra.config.DijkstraSourceTargetsBaseConfig;
@@ -72,7 +72,7 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
     }
 
     public MemoryEstimateResult deltaStepping(
-        AllShortestPathsDeltaStreamConfig configuration,
+        AllShortestPathsDeltaBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
         var memoryEstimation = deltaSteppingEstimation();
