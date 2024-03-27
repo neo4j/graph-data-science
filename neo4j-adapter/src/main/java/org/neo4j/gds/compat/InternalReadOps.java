@@ -30,18 +30,25 @@ public final class InternalReadOps {
 
     public static long countByIdGenerator(
         @Nullable IdGeneratorFactory idGeneratorFactory,
-        IdType idType,
-        IdType idType2
+        IdType... idTypes
     ) {
-        return countByIdGenerator(idGeneratorFactory, idType)
-            .orElseGet(() -> countByIdGenerator(idGeneratorFactory, idType2)
-                .orElseThrow(() -> new IllegalStateException(
-                    "Unsupported store format for GDS; GDS cannot read data from this database. " +
-                        "Please try to use Cypher projection instead.")));
+        long highestId = Long.MIN_VALUE;
+        for (IdType idType : idTypes) {
+            final OptionalLong count = countByIdGenerator(idGeneratorFactory, idType);
+            if (count.isPresent()) {
+                highestId = Math.max(highestId, count.getAsLong());
+            }
+        }
+        if (highestId == Long.MIN_VALUE) {
+            throw new IllegalStateException(
+                "Unsupported store format for GDS; GDS cannot read data from this database. " +
+                    "Please try to use Cypher projection instead.");
+        }
+        return highestId;
     }
 
-    private static OptionalLong countByIdGenerator(@Nullable IdGeneratorFactory idGeneratorFactory, IdType idType) {
-        if (idGeneratorFactory != null) {
+    private static OptionalLong countByIdGenerator(@Nullable IdGeneratorFactory idGeneratorFactory, @Nullable IdType idType) {
+        if (idGeneratorFactory != null && idType != null) {
             try {
                 final IdGenerator idGenerator = idGeneratorFactory.get(idType);
                 if (idGenerator != null) {
