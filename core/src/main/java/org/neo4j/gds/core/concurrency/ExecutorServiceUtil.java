@@ -29,6 +29,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.RejectedExecutionHandler;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -47,6 +48,10 @@ public final class ExecutorServiceUtil {
 
     public static ExecutorService createSingleThreadPool(String threadPrefix) {
         return Executors.newSingleThreadExecutor(NamedThreadFactory.daemon(threadPrefix));
+    }
+
+    public static ScheduledExecutorService createSingleThreadScheduler(String threadPrefix) {
+        return Executors.newSingleThreadScheduledExecutor(NamedThreadFactory.daemon(threadPrefix));
     }
 
     static ExecutorService createThreadPool(int corePoolSize, int maxPoolSize) {
