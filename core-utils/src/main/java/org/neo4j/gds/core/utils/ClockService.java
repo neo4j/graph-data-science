@@ -21,6 +21,7 @@ package org.neo4j.gds.core.utils;
 
 import java.time.Clock;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 public final class ClockService {
 
@@ -37,4 +38,13 @@ public final class ClockService {
     }
 
     private ClockService() {}
+
+    public static <T extends Clock> void runWithClock(T clock, Consumer<T> runnable) {
+        Clock previousClock = CLOCK.getAndSet(clock);
+        try {
+            runnable.accept(clock);
+        } finally {
+            CLOCK.set(previousClock);
+        }
+    }
 }
