@@ -32,6 +32,8 @@ import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.paths.WritePathOptionsConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
+import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
+import org.neo4j.gds.paths.bellmanford.BellmanFordWriteConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaWriteConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraWriteConfig;
@@ -47,6 +49,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.A_STAR;
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BELLMAN_FORD;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DELTA_STEPPING;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DIJKSTRA;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.K_SPANNING_TREE;
@@ -91,6 +94,30 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         this.terminationFlag = terminationFlag;
         this.estimationFacade = estimationFacade;
         this.pathFindingAlgorithms = pathFindingAlgorithms;
+    }
+
+    public <RESULT> RESULT bellmanFord(
+        GraphName graphName,
+        BellmanFordWriteConfig configuration,
+        ResultBuilder<BellmanFordWriteConfig, BellmanFordResult, RESULT> resultBuilder
+    ) {
+        var writeStep = new BellmanFordWriteStep(
+            log,
+            relationshipStreamExporterBuilder,
+            taskRegistryFactory,
+            terminationFlag,
+            configuration
+        );
+
+        return runAlgorithmAndWrite(
+            graphName,
+            configuration,
+            BELLMAN_FORD,
+            () -> estimationFacade.bellmanFordEstimation(configuration),
+            graph -> pathFindingAlgorithms.bellmanFord(graph, configuration),
+            writeStep,
+            resultBuilder
+        );
     }
 
     public <RESULT> RESULT deltaStepping(

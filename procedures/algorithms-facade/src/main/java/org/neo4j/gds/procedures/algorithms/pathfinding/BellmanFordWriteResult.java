@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.singlesource.bellmanford;
+package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.StandardWriteResult;
@@ -25,8 +25,6 @@ import org.neo4j.gds.results.StandardWriteResult;
 import java.util.Map;
 
 public class BellmanFordWriteResult extends StandardWriteResult {
-
-
     public final long relationshipsWritten;
     public final boolean containsNegativeCycle;
 
@@ -44,14 +42,14 @@ public class BellmanFordWriteResult extends StandardWriteResult {
         this.containsNegativeCycle = containsNegativeCycle;
     }
 
-    static Builder builder() {
+    public static Builder builder() {
         return new Builder();
     }
 
     public static class Builder extends AbstractResultBuilder<BellmanFordWriteResult> {
         private boolean containsNegativeCycle;
 
-        Builder withContainsNegativeCycle(boolean containsNegativeCycle) {
+        public Builder withContainsNegativeCycle(boolean containsNegativeCycle) {
             this.containsNegativeCycle = containsNegativeCycle;
             return this;
         }

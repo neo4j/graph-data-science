@@ -19,12 +19,8 @@
  */
 package org.neo4j.gds.paths.singlesource.bellmanford;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
-import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
-
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -35,12 +31,13 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants.BELLMAN_FORD_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class BellmanFordWriteProc extends BaseProc {
+public class BellmanFordWriteProc {
     @Context
-    public RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
+    public GraphDataScience facade;
 
     @Procedure(name = "gds.bellmanFord.write", mode = WRITE)
     @Description(BELLMAN_FORD_DESCRIPTION)
@@ -48,28 +45,15 @@ public class BellmanFordWriteProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new BellmanFordWriteSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.pathFinding().bellmanFordWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.bellmanFord.write.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-
-        return new MemoryEstimationExecutor<>(
-            new BellmanFordWriteSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
-    }
-
-    @Override
-    public ExecutionContext executionContext() {
-        return super.executionContext().withRelationshipStreamExporterBuilder(relationshipStreamExporterBuilder);
+        return facade.pathFinding().bellmanFordWriteEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

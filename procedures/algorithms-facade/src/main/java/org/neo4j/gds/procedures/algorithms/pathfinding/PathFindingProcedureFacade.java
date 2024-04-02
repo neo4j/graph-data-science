@@ -43,6 +43,7 @@ import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordStatsConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordStreamConfig;
+import org.neo4j.gds.paths.bellmanford.BellmanFordWriteConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStatsConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaWriteConfig;
@@ -322,6 +323,39 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             BellmanFordStatsConfig::of,
+            configuration -> estimationModeFacade.bellmanFord(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<BellmanFordWriteResult> bellmanFordWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new BellmanFordResultBuilderForWriteMode();
+
+        return Stream.of(
+            runWriteAlgorithm(
+                graphName,
+                configuration,
+                BellmanFordWriteConfig::of,
+                writeModeFacade::bellmanFord,
+                resultBuilder
+            )
+        );
+    }
+
+    public Stream<MemoryEstimateResult> bellmanFordWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = runEstimation(
+            algorithmConfiguration,
+            BellmanFordWriteConfig::of,
             configuration -> estimationModeFacade.bellmanFord(
                 configuration,
                 graphNameOrConfiguration

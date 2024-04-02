@@ -33,6 +33,7 @@ import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.bellmanford.BellmanFord;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.bellmanford.BellmanFordWriteConfig;
+import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordWriteResult;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
