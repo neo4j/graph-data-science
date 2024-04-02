@@ -20,20 +20,31 @@
 package org.neo4j.gds.core.utils;
 
 import java.time.Clock;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 public final class ClockService {
 
     private static final Clock SYSTEM_CLOCK = Clock.systemUTC();
 
-    private static Clock CLOCK = SYSTEM_CLOCK;
+    private static final AtomicReference<Clock> CLOCK = new AtomicReference<>(SYSTEM_CLOCK);
 
     public static void setClock(Clock clock) {
-        CLOCK = clock;
+        CLOCK.set(clock);
     }
 
     public static Clock clock() {
-        return CLOCK;
+        return CLOCK.get();
     }
 
     private ClockService() {}
+
+    public static <T extends Clock> void runWithClock(T clock, Consumer<T> runnable) {
+        Clock previousClock = CLOCK.getAndSet(clock);
+        try {
+            runnable.accept(clock);
+        } finally {
+            CLOCK.set(previousClock);
+        }
+    }
 }
