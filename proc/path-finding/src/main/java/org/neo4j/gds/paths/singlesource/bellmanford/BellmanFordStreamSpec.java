@@ -29,6 +29,7 @@ import org.neo4j.gds.paths.bellmanford.BellmanFordAlgorithmFactory;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.bellmanford.BellmanFordStreamConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordStreamResult;
 
 
 import java.util.stream.Stream;
@@ -39,7 +40,7 @@ import static org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants
 
 @GdsCallable(name = "gds.bellmanFord.stream", description = BELLMAN_FORD_DESCRIPTION, executionMode = STREAM)
 public class BellmanFordStreamSpec implements
-    AlgorithmSpec<BellmanFord, BellmanFordResult, BellmanFordStreamConfig, Stream<StreamResult>, BellmanFordAlgorithmFactory<BellmanFordStreamConfig>> {
+    AlgorithmSpec<BellmanFord, BellmanFordResult, BellmanFordStreamConfig, Stream<BellmanFordStreamResult>, BellmanFordAlgorithmFactory<BellmanFordStreamConfig>> {
 
     @Override
     public String name() {
@@ -57,7 +58,7 @@ public class BellmanFordStreamSpec implements
     }
 
     @Override
-    public ComputationResultConsumer<BellmanFord, BellmanFordResult, BellmanFordStreamConfig, Stream<StreamResult>> computationResultConsumer() {
+    public ComputationResultConsumer<BellmanFord, BellmanFordResult, BellmanFordStreamConfig, Stream<BellmanFordStreamResult>> computationResultConsumer() {
         return (computationResult, executionContext) -> runWithExceptionLogging(
             "Result streaming failed",
             executionContext.log(),
@@ -70,7 +71,7 @@ public class BellmanFordStreamSpec implements
 
                     var containsNegativeCycle = result.containsNegativeCycle();
 
-                    var resultBuilder = new StreamResult.Builder(graph, executionContext.nodeLookup())
+                    var resultBuilder = new BellmanFordStreamResult.Builder(graph, executionContext.nodeLookup())
                         .withIsCycle(containsNegativeCycle);
 
                     PathFindingResult algorithmResult;

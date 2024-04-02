@@ -25,6 +25,7 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 interface AlgorithmLabels {
     String ALL_SHORTEST_PATHS = "All Shortest Paths";
     String A_STAR = "AStar";
+    String BELLMAN_FORD = "Bellman-Ford";
     String BFS = "BFS";
     String DELTA_STEPPING = "Delta Stepping";
     String DFS = "DFS";

@@ -19,11 +19,10 @@
  */
 package org.neo4j.gds.paths.singlesource.bellmanford;
 
-import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.executor.MemoryEstimationExecutor;
-import org.neo4j.gds.executor.ProcedureExecutor;
-
+import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
 import org.neo4j.procedure.Procedure;
@@ -32,34 +31,28 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants.BELLMAN_FORD_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class BellmanFordStreamProc extends BaseProc {
+public class BellmanFordStreamProc {
+    @Context
+    public GraphDataScience facade;
 
     @Procedure(name = "gds.bellmanFord.stream", mode = READ)
     @Description(BELLMAN_FORD_DESCRIPTION)
-    public Stream<StreamResult> stream(
+    public Stream<BellmanFordStreamResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return new ProcedureExecutor<>(
-            new BellmanFordStreamSpec(),
-            executionContext()
-        ).compute(graphName, configuration);
+        return facade.pathFinding().bellmanFordStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.bellmanFord.stream.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-
-        return new MemoryEstimationExecutor<>(
-            new BellmanFordStreamSpec(),
-            executionContext(),
-            transactionContext()
-        ).computeEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.pathFinding().bellmanFordStreamEstimate(graphNameOrConfiguration, algoConfiguration);
     }
-
 }

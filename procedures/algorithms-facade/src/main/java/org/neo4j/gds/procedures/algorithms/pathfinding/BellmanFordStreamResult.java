@@ -17,9 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.singlesource.bellmanford;
+package org.neo4j.gds.procedures.algorithms.pathfinding;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.paths.PathResult;
@@ -34,10 +33,8 @@ import java.util.stream.Collectors;
 import static org.neo4j.gds.paths.PathFactory.create;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-@SuppressWarnings("unused")
-public final class StreamResult {
-
-    public static final String COST_PROPERTY_NAME = "cost";
+public final class BellmanFordStreamResult {
+    private static final String COST_PROPERTY_NAME = "cost";
 
     public long index;
 
@@ -55,14 +52,14 @@ public final class StreamResult {
 
     public boolean isNegativeCycle;
 
-    private StreamResult(
+    private BellmanFordStreamResult(
         long index,
         long sourceNode,
         long targetNode,
         double totalCost,
         List<Long> nodeIds,
         List<Double> costs,
-        @Nullable Path route,
+        Path route,
         boolean isNegativeCycle
     ) {
         this.index = index;
@@ -90,7 +87,7 @@ public final class StreamResult {
             return this;
         }
 
-        public StreamResult build(PathResult pathResult, boolean createCypherPath) {
+        public BellmanFordStreamResult build(PathResult pathResult, boolean createCypherPath) {
             var nodeIds = pathResult.nodeIds();
             var costs = pathResult.costs();
             var pathIndex = pathResult.index();
@@ -113,7 +110,7 @@ public final class StreamResult {
                 );
             }
 
-            return new StreamResult(
+            return new BellmanFordStreamResult(
                 pathIndex,
                 idMap.toOriginalNodeId(pathResult.sourceNode()),
                 idMap.toOriginalNodeId(pathResult.targetNode()),

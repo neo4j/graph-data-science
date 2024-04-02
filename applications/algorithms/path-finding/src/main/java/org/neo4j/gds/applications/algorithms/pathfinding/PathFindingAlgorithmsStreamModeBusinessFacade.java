@@ -27,6 +27,8 @@ import org.neo4j.gds.dag.longestPath.DagLongestPathStreamConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
+import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
+import org.neo4j.gds.paths.bellmanford.BellmanFordStreamConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraStreamConfig;
@@ -45,6 +47,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.ALL_SHORTEST_PATHS;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.A_STAR;
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BELLMAN_FORD;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BFS;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DELTA_STEPPING;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DFS;
@@ -87,6 +90,22 @@ public class PathFindingAlgorithmsStreamModeBusinessFacade {
             ALL_SHORTEST_PATHS,
             estimationFacade::allShortestPathsEstimation,
             graph -> pathFindingAlgorithms.allShortestPaths(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT bellmanFord(
+        GraphName graphName,
+        BellmanFordStreamConfig configuration,
+        ResultBuilder<BellmanFordStreamConfig, BellmanFordResult, RESULT> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            BELLMAN_FORD,
+            () -> estimationFacade.bellmanFordEstimation(configuration),
+            graph -> pathFindingAlgorithms.bellmanFord(graph, configuration),
             Optional.empty(),
             resultBuilder
         );

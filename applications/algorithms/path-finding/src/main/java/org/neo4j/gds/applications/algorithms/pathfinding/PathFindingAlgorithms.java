@@ -47,6 +47,9 @@ import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
+import org.neo4j.gds.paths.bellmanford.BellmanFord;
+import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
+import org.neo4j.gds.paths.bellmanford.BellmanFordStreamConfig;
 import org.neo4j.gds.paths.delta.DeltaStepping;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
@@ -74,6 +77,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.A_STAR;
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BELLMAN_FORD;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BFS;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DELTA_STEPPING;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DFS;
@@ -120,20 +124,26 @@ public class PathFindingAlgorithms {
         return algorithm.compute();
     }
 
-    private MSBFSASPAlgorithm selectAlgorithm(Graph graph, AllShortestPathsConfig configuration) {
-        if (configuration.hasRelationshipWeightProperty()) {
-            return new WeightedAllShortestPaths(
-                graph,
-                DefaultPool.INSTANCE,
-                configuration.concurrency()
-            );
-        } else {
-            return new MSBFSAllShortestPaths(
-                graph,
-                configuration.concurrency(),
-                DefaultPool.INSTANCE
-            );
-        }
+    BellmanFordResult bellmanFord(Graph graph, BellmanFordStreamConfig configuration) {
+        var task = Tasks.iterativeOpen(
+            BELLMAN_FORD,
+            () -> List.of(
+                Tasks.leaf("Relax"),
+                Tasks.leaf("Sync")
+            )
+        );
+        var progressTracker = createProgressTracker(configuration, task);
+
+        var algorithm = new BellmanFord(
+            graph,
+            progressTracker,
+            graph.toMappedNodeId(configuration.sourceNode()),
+            configuration.trackNegativeCycles(),
+            configuration.trackPaths(),
+            configuration.concurrency()
+        );
+
+        return algorithm.compute();
     }
 
     HugeLongArray breadthFirstSearch(Graph graph, BfsBaseConfig configuration) {
@@ -366,6 +376,22 @@ public class PathFindingAlgorithms {
         );
 
         return algorithm.compute();
+    }
+
+    private MSBFSASPAlgorithm selectAlgorithm(Graph graph, AllShortestPathsConfig configuration) {
+        if (configuration.hasRelationshipWeightProperty()) {
+            return new WeightedAllShortestPaths(
+                graph,
+                DefaultPool.INSTANCE,
+                configuration.concurrency()
+            );
+        } else {
+            return new MSBFSAllShortestPaths(
+                graph,
+                configuration.concurrency(),
+                DefaultPool.INSTANCE
+            );
+        }
     }
 
     private ProgressTracker createProgressTracker(

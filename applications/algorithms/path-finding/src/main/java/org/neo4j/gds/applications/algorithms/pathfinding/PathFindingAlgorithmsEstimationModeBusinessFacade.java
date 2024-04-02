@@ -24,6 +24,8 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
 import org.neo4j.gds.paths.astar.AStarMemoryEstimateDefinition;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
+import org.neo4j.gds.paths.bellmanford.BellmanFordBaseConfig;
+import org.neo4j.gds.paths.bellmanford.BellmanFordMemoryEstimateDefinition;
 import org.neo4j.gds.paths.delta.DeltaSteppingMemoryEstimateDefinition;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
 import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateDefinition;
@@ -56,6 +58,19 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
 
     MemoryEstimation allShortestPathsEstimation() {
         throw new MemoryEstimationNotImplementedException();
+    }
+
+    public MemoryEstimateResult bellmanFord(
+        BellmanFordBaseConfig configuration,
+        Object graphNameOrConfiguration
+    ) {
+        var memoryEstimation = bellmanFordEstimation(configuration);
+
+        return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
+    }
+
+    MemoryEstimation bellmanFordEstimation(BellmanFordBaseConfig configuration) {
+        return new BellmanFordMemoryEstimateDefinition(configuration.trackNegativeCycles()).memoryEstimation();
     }
 
     public MemoryEstimateResult breadthFirstSearch(

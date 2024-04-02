@@ -41,6 +41,7 @@ import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
+import org.neo4j.gds.paths.bellmanford.BellmanFordStreamConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStatsConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaWriteConfig;
@@ -270,6 +271,35 @@ public final class PathFindingProcedureFacade {
             resultBuilder,
             streamModeFacade::allShortestPaths
         );
+    }
+
+    public Stream<BellmanFordStreamResult> bellmanFordStream(String graphName, Map<String, Object> configuration) {
+        var routeRequested = procedureReturnColumns.contains("route");
+        var resultBuilder = new BellmanFordResultBuilderForStreamMode(nodeLookup, routeRequested);
+
+        return runStreamAlgorithm(
+            graphName,
+            configuration,
+            BellmanFordStreamConfig::of,
+            resultBuilder,
+            streamModeFacade::bellmanFord
+        );
+    }
+
+    public Stream<MemoryEstimateResult> bellmanFordStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = runEstimation(
+            algorithmConfiguration,
+            BellmanFordStreamConfig::of,
+            configuration -> estimationModeFacade.bellmanFord(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
     }
 
     public BreadthFirstSearchMutateStub breadthFirstSearchMutateStub() {
