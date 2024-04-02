@@ -48,8 +48,8 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.paths.astar.AStar;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarBaseConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFord;
+import org.neo4j.gds.paths.bellmanford.BellmanFordBaseConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
-import org.neo4j.gds.paths.bellmanford.BellmanFordStreamConfig;
 import org.neo4j.gds.paths.delta.DeltaStepping;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaBaseConfig;
 import org.neo4j.gds.paths.dijkstra.Dijkstra;
@@ -124,7 +124,7 @@ public class PathFindingAlgorithms {
         return algorithm.compute();
     }
 
-    BellmanFordResult bellmanFord(Graph graph, BellmanFordStreamConfig configuration) {
+    BellmanFordResult bellmanFord(Graph graph, BellmanFordBaseConfig configuration) {
         var task = Tasks.iterativeOpen(
             BELLMAN_FORD,
             () -> List.of(

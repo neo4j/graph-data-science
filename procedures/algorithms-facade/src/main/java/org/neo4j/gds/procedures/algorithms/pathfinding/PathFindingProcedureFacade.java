@@ -41,6 +41,7 @@ import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarStreamConfig;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarWriteConfig;
+import org.neo4j.gds.paths.bellmanford.BellmanFordStatsConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordStreamConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStatsConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStreamConfig;
@@ -293,6 +294,34 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             BellmanFordStreamConfig::of,
+            configuration -> estimationModeFacade.bellmanFord(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<BellmanFordStatsResult> bellmanFordStats(String graphName, Map<String, Object> configuration) {
+        var resultBuilder = new BellmanFordResultBuilderForStatsMode();
+
+        return runStatsAlgorithm(
+            graphName,
+            configuration,
+            BellmanFordStatsConfig::of,
+            resultBuilder,
+            statsModeFacade::bellmanFord
+        );
+    }
+
+    public Stream<MemoryEstimateResult> bellmanFordStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = runEstimation(
+            algorithmConfiguration,
+            BellmanFordStatsConfig::of,
             configuration -> estimationModeFacade.bellmanFord(
                 configuration,
                 graphNameOrConfiguration

@@ -21,6 +21,8 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
+import org.neo4j.gds.paths.bellmanford.BellmanFordStatsConfig;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStatsConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.traverse.BfsStatsConfig;
@@ -33,6 +35,7 @@ import org.neo4j.gds.traversal.RandomWalkStatsConfig;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BELLMAN_FORD;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BFS;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DELTA_STEPPING;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.RANDOM_WALK;
@@ -53,6 +56,22 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
         this.estimationFacade = estimationFacade;
         this.pathFindingAlgorithms = pathFindingAlgorithms;
+    }
+
+    public <RESULT> RESULT bellmanFord(
+        GraphName graphName,
+        BellmanFordStatsConfig configuration,
+        ResultBuilder<BellmanFordStatsConfig, BellmanFordResult, RESULT> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            BELLMAN_FORD,
+            () -> estimationFacade.bellmanFordEstimation(configuration),
+            graph -> pathFindingAlgorithms.bellmanFord(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
     }
 
     public <RESULT> RESULT breadthFirstSearch(
