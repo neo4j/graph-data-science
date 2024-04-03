@@ -59,6 +59,7 @@ import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
+import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.BellmanFordMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.BreadthFirstSearchMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.DeltaSteppingMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.DepthFirstSearchMutateStub;
@@ -107,6 +108,7 @@ public final class PathFindingProcedureFacade {
     private final PathFindingAlgorithmsWriteModeBusinessFacade writeModeFacade;
 
     // applications
+    private final BellmanFordMutateStub bellmanFordMutateStub;
     private final BreadthFirstSearchMutateStub breadthFirstSearchMutateStub;
     private final DeltaSteppingMutateStub deltaSteppingMutateStub;
     private final DepthFirstSearchMutateStub depthFirstSearchMutateStub;
@@ -126,6 +128,7 @@ public final class PathFindingProcedureFacade {
         PathFindingAlgorithmsStatsModeBusinessFacade statsModeFacade,
         PathFindingAlgorithmsStreamModeBusinessFacade streamModeFacade,
         PathFindingAlgorithmsWriteModeBusinessFacade writeModeFacade,
+        BellmanFordMutateStub bellmanFordMutateStub,
         BreadthFirstSearchMutateStub breadthFirstSearchMutateStub,
         DeltaSteppingMutateStub deltaSteppingMutateStub,
         DepthFirstSearchMutateStub depthFirstSearchMutateStub,
@@ -146,6 +149,7 @@ public final class PathFindingProcedureFacade {
         this.streamModeFacade = streamModeFacade;
         this.writeModeFacade = writeModeFacade;
 
+        this.bellmanFordMutateStub = bellmanFordMutateStub;
         this.breadthFirstSearchMutateStub = breadthFirstSearchMutateStub;
         this.deltaSteppingMutateStub = deltaSteppingMutateStub;
         this.depthFirstSearchMutateStub = depthFirstSearchMutateStub;
@@ -185,6 +189,12 @@ public final class PathFindingProcedureFacade {
         );
 
         var aStarStub = new SinglePairShortestPathAStarMutateStub(
+            genericStub,
+            pathFindingAlgorithmsEstimationModeBusinessFacade,
+            pathFindingAlgorithmsMutateModeBusinessFacade
+        );
+
+        var bellmanFordMutateStub = new BellmanFordMutateStub(
             genericStub,
             pathFindingAlgorithmsEstimationModeBusinessFacade,
             pathFindingAlgorithmsMutateModeBusinessFacade
@@ -247,6 +257,7 @@ public final class PathFindingProcedureFacade {
             pathFindingAlgorithmsStatsModeBusinessFacade,
             pathFindingAlgorithmsStreamModeBusinessFacade,
             pathFindingAlgorithmsWriteModeBusinessFacade,
+            bellmanFordMutateStub,
             breadthFirstSearchMutateStub,
             deltaSteppingMutateStub,
             depthFirstSearchMutateStub,
@@ -273,6 +284,10 @@ public final class PathFindingProcedureFacade {
             resultBuilder,
             streamModeFacade::allShortestPaths
         );
+    }
+
+    public BellmanFordMutateStub bellmanFordMutateStub() {
+        return bellmanFordMutateStub;
     }
 
     public Stream<BellmanFordStreamResult> bellmanFordStream(String graphName, Map<String, Object> configuration) {

@@ -23,6 +23,8 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
+import org.neo4j.gds.paths.bellmanford.BellmanFordMutateConfig;
+import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaMutateConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraMutateConfig;
@@ -38,6 +40,7 @@ import org.neo4j.gds.steiner.SteinerTreeResult;
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.A_STAR;
+import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BELLMAN_FORD;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.BFS;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DELTA_STEPPING;
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.DFS;
@@ -63,6 +66,24 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
         this.pathFindingAlgorithms = pathFindingAlgorithms;
         this.estimationFacade = estimationFacade;
+    }
+
+    public <RESULT> RESULT bellmanFord(
+        GraphName graphName,
+        BellmanFordMutateConfig configuration,
+        ResultBuilder<BellmanFordMutateConfig, BellmanFordResult, RESULT> resultBuilder
+    ) {
+        var mutateStep = new BellmanFordMutateStep(configuration);
+
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            BELLMAN_FORD,
+            () -> estimationFacade.bellmanFordEstimation(configuration),
+            graph -> pathFindingAlgorithms.bellmanFord(graph, configuration),
+            Optional.of(mutateStep),
+            resultBuilder
+        );
     }
 
     public <RESULT> RESULT breadthFirstSearch(
