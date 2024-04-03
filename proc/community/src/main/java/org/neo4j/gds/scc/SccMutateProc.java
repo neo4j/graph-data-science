@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.scc;
 
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.community.scc.SccMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
@@ -36,7 +36,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class SccMutateProc {
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.scc.mutate", mode = READ)
     @Description(SCC_DESCRIPTION)

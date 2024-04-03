@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.betweenness;
 
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.centrality.CentralityWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
@@ -37,7 +37,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 public class BetweennessCentralityWriteProc {
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.betweenness.write", mode = WRITE)
     @Description(BETWEENNESS_DESCRIPTION)

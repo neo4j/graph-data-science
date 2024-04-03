@@ -77,7 +77,7 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
-import org.neo4j.gds.procedures.GraphDataScienceBuilder;
+import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
@@ -342,7 +342,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
         );
 
         TestProcedureRunner.applyOnProcedure(db, LabelPropagationMutateProc.class, procedure -> {
-            procedure.facade = new GraphDataScienceBuilder(Log.noOpLog())
+            procedure.facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
                 .with(new CommunityProcedureFacade(
                     new ConfigurationCreator(
                         ConfigurationParser.EMPTY,
@@ -471,7 +471,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
         );
 
         TestProcedureRunner.applyOnProcedure(db, LabelPropagationMutateProc.class, procedure -> {
-            procedure.facade = new GraphDataScienceBuilder(Log.noOpLog())
+            procedure.facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
                 .with(                new CommunityProcedureFacade(
                     new ConfigurationCreator(
                         ConfigurationParser.EMPTY,
@@ -554,7 +554,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
         );
 
         TestProcedureRunner.applyOnProcedure(db, LabelPropagationMutateProc.class, (procedure) -> {
-            procedure.facade = new GraphDataScienceBuilder(Log.noOpLog())
+            procedure.facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
                 .with(new CommunityProcedureFacade(
                     new ConfigurationCreator(
                         ConfigurationParser.EMPTY,
@@ -643,7 +643,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
         );
 
         TestProcedureRunner.applyOnProcedure(db, LabelPropagationMutateProc.class, procedure -> {
-            procedure.facade = new GraphDataScienceBuilder(Log.noOpLog())
+            procedure.facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
                 .with(new CommunityProcedureFacade(
                     new ConfigurationCreator(
                         ConfigurationParser.EMPTY,

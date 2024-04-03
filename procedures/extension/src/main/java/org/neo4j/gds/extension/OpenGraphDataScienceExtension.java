@@ -37,7 +37,7 @@ import java.util.Optional;
 
 /**
  * The OpenGDS extension for Neo4j.
- * We register a single component, @{@link org.neo4j.gds.procedures.GraphDataScience},
+ * We register a single component, @{@link org.neo4j.gds.procedures.GraphDataScienceProcedures},
  * that all OpenGDS procedures can inject and use.
  */
 @SuppressWarnings("unused")

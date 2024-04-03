@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.kcore;
 
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
@@ -36,7 +36,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class KCoreDecompositionStreamProc {
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.kcore.stream", mode = READ)
     @Description(KCORE_DESCRIPTION)

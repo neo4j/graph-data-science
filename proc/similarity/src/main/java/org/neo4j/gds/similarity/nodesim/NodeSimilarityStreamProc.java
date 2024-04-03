@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.procedure.Context;
@@ -37,7 +37,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class NodeSimilarityStreamProc {
 
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
 
     @Procedure(value = "gds.nodeSimilarity.stream", mode = READ)

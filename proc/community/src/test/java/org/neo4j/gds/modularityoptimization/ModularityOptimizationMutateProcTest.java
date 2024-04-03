@@ -79,8 +79,8 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
-import org.neo4j.gds.procedures.GraphDataScience;
-import org.neo4j.gds.procedures.GraphDataScienceBuilder;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
@@ -568,7 +568,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             .build();
     }
 
-    private GraphDataScience createFacade() {
+    private GraphDataScienceProcedures createFacade() {
         var logMock = mock(org.neo4j.gds.logging.Log.class);
         when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
 
@@ -597,7 +597,7 @@ class ModularityOptimizationMutateProcTest extends BaseProcTest {
             new MutateNodePropertyService(logMock)
         );
 
-        return new GraphDataScienceBuilder(Log.noOpLog())
+        return new GraphDataScienceProceduresBuilder(Log.noOpLog())
             .with(new CommunityProcedureFacade(
                 new ConfigurationCreator(
                     ConfigurationParser.EMPTY,

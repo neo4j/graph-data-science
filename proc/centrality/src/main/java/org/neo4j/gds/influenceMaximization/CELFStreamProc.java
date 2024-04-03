@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.influenceMaximization;
 
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.centrality.celf.CELFStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
@@ -38,7 +38,7 @@ public class CELFStreamProc {
     public static final String DESCRIPTION = "The Cost Effective Lazy Forward (CELF) algorithm aims to find k nodes that maximize the expected spread of influence in the network.";
 
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.influenceMaximization.celf.stream", mode = READ)
     @Description(DESCRIPTION)

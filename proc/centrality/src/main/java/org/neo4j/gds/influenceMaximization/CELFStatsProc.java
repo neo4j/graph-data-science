@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.influenceMaximization;
 
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.centrality.celf.CELFStatsResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
@@ -38,7 +38,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class CELFStatsProc {
 
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.influenceMaximization.celf.stats", mode = READ)
     @Description(STATS_DESCRIPTION)

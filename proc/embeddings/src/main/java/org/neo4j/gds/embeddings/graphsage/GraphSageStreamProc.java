@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
@@ -37,7 +37,7 @@ import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPH_SAGE_D
 public class GraphSageStreamProc {
 
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     @Description(GRAPH_SAGE_DESCRIPTION)
     @Procedure(name = "gds.beta.graphSage.stream", mode = Mode.READ)

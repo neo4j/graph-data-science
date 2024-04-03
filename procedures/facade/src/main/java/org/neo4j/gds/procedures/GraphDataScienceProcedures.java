@@ -31,7 +31,7 @@ import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
 import org.neo4j.gds.procedures.similarity.SimilarityProcedureFacade;
 
-public class GraphDataScience {
+public class GraphDataScienceProcedures {
     private final Log log;
 
     private final AlgorithmsProcedureFacade algorithmsProcedureFacade;
@@ -46,9 +46,9 @@ public class GraphDataScience {
     private final DeprecatedProceduresMetricService deprecatedProceduresMetricService;
 
     /**
-     * Keeping this package private to encourage use of @{@link org.neo4j.gds.procedures.GraphDataScienceBuilder}
+     * Keeping this package private to encourage use of @{@link GraphDataScienceProceduresBuilder}
      */
-    public GraphDataScience(
+    GraphDataScienceProcedures(
         Log log,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
         CatalogFacade catalogFacade,

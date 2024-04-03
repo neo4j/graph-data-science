@@ -22,15 +22,15 @@ package org.neo4j.gds.procedures.integration;
 import org.neo4j.function.ThrowingFunction;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
-import org.neo4j.gds.procedures.GraphDataScience;
-import org.neo4j.gds.procedures.GraphDataScienceBuilder;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
 /**
  * We use this at request time to construct the facade that the procedures call.
  */
-public class GraphDataScienceProvider implements ThrowingFunction<Context, GraphDataScience, ProcedureException> {
+public class GraphDataScienceProvider implements ThrowingFunction<Context, GraphDataScienceProcedures, ProcedureException> {
     private final Log log;
     private final CatalogFacadeProvider catalogFacadeProvider;
     private final AlgorithmFacadeFactoryProvider algorithmFacadeFactoryProvider;
@@ -50,7 +50,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
     }
 
     @Override
-    public GraphDataScience apply(Context context) throws ProcedureException {
+    public GraphDataScienceProcedures apply(Context context) throws ProcedureException {
         var catalogFacade = catalogFacadeProvider.createCatalogFacade(context);
 
         var algorithmFacadeFactory = algorithmFacadeFactoryProvider.createAlgorithmFacadeFactory(context);
@@ -63,7 +63,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
 
         var pipelinesProcedureFacade = pipelinesProcedureFacadeProvider.createPipelinesProcedureFacade(context);
 
-        return new GraphDataScienceBuilder(log)
+        return new GraphDataScienceProceduresBuilder(log)
             .with(catalogFacade)
             .with(centralityProcedureFacade)
             .with(communityProcedureFacade)

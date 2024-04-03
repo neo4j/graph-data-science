@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.paths.steiner;
 
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SteinerMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
@@ -37,7 +37,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class SteinerTreeMutateProc {
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.steinerTree.mutate", mode = READ)
     @Description(STEINER_DESCRIPTION)

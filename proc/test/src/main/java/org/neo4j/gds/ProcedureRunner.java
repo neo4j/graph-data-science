@@ -25,7 +25,8 @@ import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.metrics.MetricsFacade;
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.graphdb.Transaction;
 import org.neo4j.internal.kernel.api.procs.ProcedureCallContext;
@@ -47,7 +48,7 @@ public final class ProcedureRunner {
         Transaction tx,
         Username username,
         MetricsFacade metricsFacade,
-        GraphDataScience graphDataScience
+        GraphDataScienceProcedures graphDataScienceProcedures
     ) {
         P proc;
         try {
@@ -66,7 +67,7 @@ public final class ProcedureRunner {
         proc.username = username;
 
         proc.metricsFacade = metricsFacade;
-        proc.graphDataScience = graphDataScience;
+        proc.graphDataScienceProcedures = graphDataScienceProcedures;
 
         return proc;
     }
@@ -107,23 +108,7 @@ public final class ProcedureRunner {
              * so testing granular bits should be a doozy.
              * Happy to be proved wrong, so come talk to me if you get in trouble ;)
              */
-            new GraphDataScience(
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null
-            ) {
-                @Override
-                public String toString() {
-                    return "from Procedure Runner"; // handy for debugging
-                }
-            }
+            new GraphDataScienceProceduresBuilder(org.neo4j.gds.logging.Log.noOpLog()).build()
         );
         func.accept(proc);
         return proc;

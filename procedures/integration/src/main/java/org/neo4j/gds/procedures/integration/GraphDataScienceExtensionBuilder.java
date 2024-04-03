@@ -31,7 +31,7 @@ import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryGauge;
 import org.neo4j.gds.metrics.MetricsFacade;
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.services.UserLogServices;
 import org.neo4j.gds.settings.GdsSettings;
@@ -190,7 +190,7 @@ public final class GraphDataScienceExtensionBuilder {
             userLogServices
         );
 
-        componentRegistration.registerComponent("Graph Data Science", GraphDataScience.class, graphDataScienceProvider);
+        componentRegistration.registerComponent("Graph Data Science", GraphDataScienceProcedures.class, graphDataScienceProvider);
     }
 
     /**

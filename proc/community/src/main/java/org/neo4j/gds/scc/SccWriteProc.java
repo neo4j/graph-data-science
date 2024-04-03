@@ -20,7 +20,7 @@
 package org.neo4j.gds.scc;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.community.scc.AlphaSccWriteResult;
 import org.neo4j.gds.procedures.community.scc.SccWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -41,7 +41,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class SccWriteProc extends BaseProc {
 
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.scc.write", mode = WRITE)
     @Description(SCC_DESCRIPTION)

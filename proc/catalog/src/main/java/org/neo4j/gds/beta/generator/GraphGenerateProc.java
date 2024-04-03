@@ -20,7 +20,7 @@
 package org.neo4j.gds.beta.generator;
 
 import org.neo4j.gds.applications.graphstorecatalog.GraphGenerationStats;
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -36,7 +36,7 @@ public final class GraphGenerateProc {
     private static final String DESCRIPTION = "Computes a random graph, which will be stored in the graph catalog.";
 
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     @Internal
     @Deprecated(forRemoval = true)

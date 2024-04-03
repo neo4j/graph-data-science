@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.closeness;
 
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.centrality.CentralityStreamResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -36,7 +36,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class ClosenessCentralityStreamProc {
 
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.closeness.stream", mode = READ)
     @Description(CLOSENESS_DESCRIPTION)

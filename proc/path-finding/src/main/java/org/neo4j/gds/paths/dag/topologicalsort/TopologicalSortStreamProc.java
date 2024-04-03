@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.paths.dag.topologicalsort;
 
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.pathfinding.TopologicalSortStreamResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -34,7 +34,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class TopologicalSortStreamProc {
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.dag.topologicalSort.stream", mode = READ)
     @Description(TOPOLOGICAL_SORT_DESCRIPTION)

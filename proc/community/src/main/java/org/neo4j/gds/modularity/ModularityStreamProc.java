@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.modularity;
 
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.community.modularity.ModularityStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
@@ -38,7 +38,7 @@ public class ModularityStreamProc {
     static final String DESCRIPTION = "The Modularity procedure computes the modularity scores for a given set of communities/";
 
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.modularity.stream", mode = READ)
     @Description(DESCRIPTION)

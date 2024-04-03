@@ -22,7 +22,7 @@ package org.neo4j.gds.catalog;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.beta.filter.GraphFilterResult;
 import org.neo4j.gds.legacycypherprojection.GraphProjectCypherResult;
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.projection.GraphProjectNativeResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
@@ -40,12 +40,12 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphProjectProc {
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     public GraphProjectProc() {
     }
 
-    GraphProjectProc(GraphDataScience facade) {
+    GraphProjectProc(GraphDataScienceProcedures facade) {
         this.facade = facade;
     }
 

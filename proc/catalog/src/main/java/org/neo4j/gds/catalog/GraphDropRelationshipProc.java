@@ -20,7 +20,7 @@
 package org.neo4j.gds.catalog;
 
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -34,7 +34,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphDropRelationshipProc {
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     @SuppressWarnings("unused")
     @Procedure(name = "gds.graph.relationships.drop", mode = READ)

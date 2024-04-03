@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
@@ -36,7 +36,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class FastRPMutateProc {
 
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.fastRP.mutate", mode = READ)
     @Description(FastRPCompanion.DESCRIPTION)

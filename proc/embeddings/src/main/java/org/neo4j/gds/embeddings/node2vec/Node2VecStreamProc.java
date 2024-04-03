@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
@@ -37,7 +37,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class Node2VecStreamProc {
 
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
     
     @Procedure(value = "gds.node2vec.stream", mode = READ)
     @Description(Node2VecCompanion.DESCRIPTION)

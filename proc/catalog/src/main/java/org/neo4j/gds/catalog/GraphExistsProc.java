@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -33,7 +33,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class GraphExistsProc {
     @SuppressWarnings("WeakerAccess")
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     /**
      * This would be dumber (=better) if the bespoke conversion didn't live here. Think it over.

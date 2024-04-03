@@ -54,8 +54,8 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
-import org.neo4j.gds.procedures.GraphDataScience;
-import org.neo4j.gds.procedures.GraphDataScienceBuilder;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
@@ -167,7 +167,7 @@ class DeprecatedTieredHarmonicCentralityWriteProcTest extends BaseProcTest {
         });
     }
 
-    private GraphDataScience createFacade(
+    private GraphDataScienceProcedures createFacade(
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         TaskRegistryFactory taskRegistryFactory
     ) {
@@ -203,7 +203,7 @@ class DeprecatedTieredHarmonicCentralityWriteProcTest extends BaseProcTest {
             )
         );
 
-        return new GraphDataScienceBuilder(Log.noOpLog())
+        return new GraphDataScienceProceduresBuilder(Log.noOpLog())
             .with(new CentralityProcedureFacade(
                 new ConfigurationCreator(ConfigurationParser.EMPTY, null, new User(getUsername(), false)),
                 ProcedureReturnColumns.EMPTY,

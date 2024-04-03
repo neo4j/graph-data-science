@@ -20,7 +20,7 @@
 package org.neo4j.gds.similarity.filteredknn;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.similarity.knn.KnnStatsResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
@@ -39,7 +39,7 @@ import static org.neo4j.procedure.Mode.READ;
 public final class FilteredKnnStatsProc extends BaseProc {
 
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.knn.filtered.stats", mode = READ)
     @Description(PROCEDURE_DESCRIPTION)

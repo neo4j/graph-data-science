@@ -20,7 +20,7 @@
 package org.neo4j.gds.catalog;
 
 import org.neo4j.gds.applications.graphstorecatalog.NodePropertiesWriteResult;
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -35,7 +35,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 public class GraphWriteNodePropertiesProc {
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     @SuppressWarnings("unused")
     @Procedure(name = "gds.graph.nodeProperties.write", mode = WRITE)

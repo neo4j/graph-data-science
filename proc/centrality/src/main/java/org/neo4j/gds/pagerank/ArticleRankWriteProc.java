@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.centrality.pagerank.PageRankProcCompanion;
 import org.neo4j.gds.procedures.centrality.pagerank.PageRankWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -38,7 +38,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class ArticleRankWriteProc {
 
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.articleRank.write", mode = WRITE)
     @Description(PageRankProcCompanion.ARTICLE_RANK_DESCRIPTION)

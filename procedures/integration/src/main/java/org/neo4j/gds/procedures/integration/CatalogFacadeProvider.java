@@ -71,7 +71,7 @@ import java.util.function.Function;
  * <p>
  * We can resolve things like user and database id here, construct termination flags, and such.
  * <p>
- * We call it a provider because it is used as a sub-provider to the {@link org.neo4j.gds.procedures.GraphDataScience} provider.
+ * We call it a provider because it is used as a sub-provider to the {@link org.neo4j.gds.procedures.GraphDataScienceProcedures} provider.
  */
 public class CatalogFacadeProvider {
     // dull bits

@@ -23,7 +23,7 @@ package org.neo4j.gds.userlog;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.catalog.CatalogFacade;
 
 import java.util.stream.Stream;
@@ -35,7 +35,7 @@ import static org.mockito.Mockito.when;
 class UserLogProcTest {
     @Test
     void shouldLogUserWarnings() {
-        var facade = mock(GraphDataScience.class);
+        var facade = mock(GraphDataScienceProcedures.class);
         var userLogProc = new UserLogProc(facade);
 
         var expectedWarnings = Stream.of(

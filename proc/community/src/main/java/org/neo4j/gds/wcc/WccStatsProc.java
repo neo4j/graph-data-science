@@ -20,7 +20,7 @@
 package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.community.wcc.WccStatsResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
@@ -38,7 +38,7 @@ import static org.neo4j.procedure.Mode.READ;
 public class WccStatsProc extends BaseProc {
 
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.wcc.stats", mode = READ)
     @Description(WCC_DESCRIPTION)

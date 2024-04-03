@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.misc.scaleproperties.ScalePropertiesWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
@@ -38,7 +38,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class ScalePropertiesWriteProc {
 
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.scaleProperties.write", mode = WRITE)
     @Description(SCALE_PROPERTIES_DESCRIPTION)

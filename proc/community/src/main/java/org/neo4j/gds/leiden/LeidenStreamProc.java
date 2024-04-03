@@ -20,7 +20,7 @@
 package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.community.leiden.LeidenStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
@@ -40,7 +40,7 @@ public class LeidenStreamProc extends BaseProc {
         "Leiden is a community detection algorithm, which guarantees that communities are well connected";
 
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.leiden.stream", mode = READ)
     @Description(DESCRIPTION)

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.catalog;
 
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.applications.graphstorecatalog.TopologyResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -36,7 +36,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphStreamRelationshipsProc {
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.graph.relationships.stream", mode = READ)
     @Description(STREAM_RELATIONSHIPS_DESCRIPTION)

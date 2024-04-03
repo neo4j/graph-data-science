@@ -37,7 +37,7 @@ import org.neo4j.gds.procedures.similarity.SimilarityProcedureFacade;
  * nor defaulting to @{@link org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService#PASSTHROUGH},
  * because this is after all used in production code.
  */
-public class GraphDataScienceBuilder {
+public class GraphDataScienceProceduresBuilder {
     private final Log log;
     private CatalogFacade catalogFacade;
     private CentralityProcedureFacade centralityProcedureFacade;
@@ -49,36 +49,36 @@ public class GraphDataScienceBuilder {
     private SimilarityProcedureFacade similarityProcedureFacade;
     private DeprecatedProceduresMetricService deprecatedProceduresMetricService;
 
-    public GraphDataScienceBuilder(Log log) {
+    public GraphDataScienceProceduresBuilder(Log log) {
         this.log = log;
     }
 
-    public GraphDataScienceBuilder with(CatalogFacade catalogFacade) {
+    public GraphDataScienceProceduresBuilder with(CatalogFacade catalogFacade) {
         this.catalogFacade = catalogFacade;
         return this;
     }
 
-    public GraphDataScienceBuilder with(CentralityProcedureFacade centralityProcedureFacade) {
+    public GraphDataScienceProceduresBuilder with(CentralityProcedureFacade centralityProcedureFacade) {
         this.centralityProcedureFacade = centralityProcedureFacade;
         return this;
     }
 
-    public GraphDataScienceBuilder with(CommunityProcedureFacade communityProcedureFacade) {
+    public GraphDataScienceProceduresBuilder with(CommunityProcedureFacade communityProcedureFacade) {
         this.communityProcedureFacade = communityProcedureFacade;
         return this;
     }
 
-    public GraphDataScienceBuilder with(MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade) {
+    public GraphDataScienceProceduresBuilder with(MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade) {
         this.miscAlgorithmsProcedureFacade = miscAlgorithmsProcedureFacade;
         return this;
     }
 
-    public GraphDataScienceBuilder with(NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade) {
+    public GraphDataScienceProceduresBuilder with(NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade) {
         this.nodeEmbeddingsProcedureFacade = nodeEmbeddingsProcedureFacade;
         return this;
     }
 
-    public GraphDataScienceBuilder with(PathFindingProcedureFacade pathFindingProcedureFacade) {
+    public GraphDataScienceProceduresBuilder with(PathFindingProcedureFacade pathFindingProcedureFacade) {
         this.pathFindingProcedureFacade = pathFindingProcedureFacade;
         return this;
     }
@@ -87,25 +87,25 @@ public class GraphDataScienceBuilder {
      * @deprecated this stops working the moment I need pipelines to use algorithms. At that point: opinionated builder
      */
     @Deprecated
-    public GraphDataScienceBuilder with(PipelinesProcedureFacade pipelinesProcedureFacade) {
+    public GraphDataScienceProceduresBuilder with(PipelinesProcedureFacade pipelinesProcedureFacade) {
         this.pipelinesProcedureFacade = pipelinesProcedureFacade;
         return this;
     }
 
-    public GraphDataScienceBuilder with(SimilarityProcedureFacade similarityProcedureFacade) {
+    public GraphDataScienceProceduresBuilder with(SimilarityProcedureFacade similarityProcedureFacade) {
         this.similarityProcedureFacade = similarityProcedureFacade;
         return this;
     }
 
-    public GraphDataScienceBuilder with(DeprecatedProceduresMetricService deprecatedProceduresMetricService) {
+    public GraphDataScienceProceduresBuilder with(DeprecatedProceduresMetricService deprecatedProceduresMetricService) {
         this.deprecatedProceduresMetricService = deprecatedProceduresMetricService;
         return this;
     }
 
-    public GraphDataScience build() {
+    public GraphDataScienceProcedures build() {
         var algorithmsProcedureFacade = new AlgorithmsProcedureFacade(pathFindingProcedureFacade);
 
-        return new GraphDataScience(
+        return new GraphDataScienceProcedures(
             log,
             algorithmsProcedureFacade,
             catalogFacade,

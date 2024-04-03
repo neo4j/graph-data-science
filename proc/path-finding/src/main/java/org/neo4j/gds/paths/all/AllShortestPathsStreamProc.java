@@ -20,7 +20,7 @@
 package org.neo4j.gds.paths.all;
 
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -35,7 +35,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class AllShortestPathsStreamProc {
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.allShortestPaths.stream", mode = READ)
     @Description(ALL_PAIRS_SHORTEST_PATH_DESCRIPTION)

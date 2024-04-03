@@ -75,7 +75,7 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
-import org.neo4j.gds.procedures.GraphDataScienceBuilder;
+import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
@@ -372,7 +372,7 @@ class WccMutateProcTest extends BaseProcTest {
         );
 
         applyOnProcedure(procedure -> {
-            procedure.facade = new GraphDataScienceBuilder(Log.noOpLog())
+            procedure.facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
                 .with(new CommunityProcedureFacade(
                     new ConfigurationCreator(
                         ConfigurationParser.EMPTY,
@@ -505,7 +505,7 @@ class WccMutateProcTest extends BaseProcTest {
                 new MutateNodePropertyService(logMock)
             );
 
-            procedure.facade = new GraphDataScienceBuilder(Log.noOpLog())
+            procedure.facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
                 .with(new CommunityProcedureFacade(
                     new ConfigurationCreator(
                         ConfigurationParser.EMPTY,
@@ -585,7 +585,7 @@ class WccMutateProcTest extends BaseProcTest {
                 ),
                 new MutateNodePropertyService(null)
             );
-            proc.facade = new GraphDataScienceBuilder(Log.noOpLog())
+            proc.facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
                 .with(new CommunityProcedureFacade(
                     new ConfigurationCreator(
                         ConfigurationParser.EMPTY,
@@ -675,7 +675,7 @@ class WccMutateProcTest extends BaseProcTest {
         applyOnProcedure(procedure ->
             ProcedureMethodHelper.mutateMethods(procedure)
                 .forEach(mutateMethod -> {
-                    procedure.facade = new GraphDataScienceBuilder(Log.noOpLog())
+                    procedure.facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())
                         .with(new CommunityProcedureFacade(
                             new ConfigurationCreator(
                                 ConfigurationParser.EMPTY,

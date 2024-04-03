@@ -20,7 +20,7 @@
 package org.neo4j.gds.catalog;
 
 import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsage;
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Internal;
 import org.neo4j.procedure.Name;
@@ -32,7 +32,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphMemoryUsageProc {
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     @Internal
     @Procedure(name = "gds.internal.graph.sizeOf", mode = READ)

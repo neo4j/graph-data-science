@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.scc;
 
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.community.scc.SccStreamResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
@@ -40,7 +40,7 @@ public class SccStreamProc {
 
 
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.scc.stream", mode = READ)
     @Description(SCC_DESCRIPTION)

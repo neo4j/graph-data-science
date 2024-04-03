@@ -21,7 +21,7 @@ package org.neo4j.gds.catalog;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.applications.graphstorecatalog.WriteRelationshipResult;
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -36,7 +36,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 public class GraphWriteRelationshipProc {
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     @SuppressWarnings("unused")
     @Procedure(name = "gds.graph.relationship.write", mode = WRITE)

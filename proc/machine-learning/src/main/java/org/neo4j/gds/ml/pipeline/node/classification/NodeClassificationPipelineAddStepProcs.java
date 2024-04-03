@@ -24,7 +24,7 @@ import org.neo4j.gds.ml.pipeline.PipelineCatalog;
 import org.neo4j.gds.procedures.pipelines.NodePipelineInfoResult;
 import org.neo4j.gds.ml.pipeline.nodePipeline.NodeFeatureStep;
 import org.neo4j.gds.ml.pipeline.nodePipeline.classification.NodeClassificationTrainingPipeline;
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -38,12 +38,12 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class NodeClassificationPipelineAddStepProcs extends BaseProc {
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     public NodeClassificationPipelineAddStepProcs() {
     }
 
-    NodeClassificationPipelineAddStepProcs(GraphDataScience facade) {
+    NodeClassificationPipelineAddStepProcs(GraphDataScienceProcedures facade) {
         this.facade = facade;
     }
 

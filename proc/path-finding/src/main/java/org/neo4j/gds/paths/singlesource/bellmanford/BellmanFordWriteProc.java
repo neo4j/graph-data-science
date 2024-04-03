@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.paths.singlesource.bellmanford;
 
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
@@ -37,7 +37,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 
 public class BellmanFordWriteProc {
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.bellmanFord.write", mode = WRITE)
     @Description(BELLMAN_FORD_DESCRIPTION)

@@ -20,7 +20,7 @@
 package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.BaseProc;
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.embeddings.node2vec.Node2VecWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
@@ -38,7 +38,7 @@ import static org.neo4j.procedure.Mode.WRITE;
 public class Node2VecWriteProc {
 
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.node2vec.write", mode = WRITE)
     @Description(Node2VecCompanion.DESCRIPTION)

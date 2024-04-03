@@ -20,7 +20,7 @@
 package org.neo4j.gds.catalog;
 
 import org.neo4j.gds.applications.graphstorecatalog.RandomWalkSamplingResult;
-import org.neo4j.gds.procedures.GraphDataScience;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -38,7 +38,7 @@ import static org.neo4j.procedure.Mode.READ;
 
 public class GraphSampleProc {
     @Context
-    public GraphDataScience facade;
+    public GraphDataScienceProcedures facade;
 
     @SuppressWarnings("WeakerAccess")
     @Procedure(name = "gds.graph.sample.rwr", mode = READ)
