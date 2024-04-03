@@ -465,12 +465,7 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
     public long getHighestPossibleRelationshipCount(
         Read read, IdGeneratorFactory idGeneratorFactory
     ) {
-        return countByIdGenerator(
-            idGeneratorFactory,
-            RecordIdType.RELATIONSHIP,
-            BlockFormat.INSTANCE.relationshipType,
-            BlockFormat.INSTANCE.dynamicRelationshipType
-        );
+        return read.relationshipsGetCount();
     }
 
     private static final class BlockFormat {
@@ -478,8 +473,6 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
 
         private org.neo4j.internal.id.IdType nodeType = null;
         private org.neo4j.internal.id.IdType dynamicNodeType = null;
-        private org.neo4j.internal.id.IdType relationshipType = null;
-        private org.neo4j.internal.id.IdType dynamicRelationshipType = null;
 
         BlockFormat() {
             try {
@@ -490,8 +483,6 @@ public abstract class CommonNeo4jProxyImpl implements Neo4jProxyApi {
                     switch (type.name()) {
                         case "NODE" -> this.nodeType = (org.neo4j.internal.id.IdType) type;
                         case "DYNAMIC_NODE" -> this.dynamicNodeType = (org.neo4j.internal.id.IdType) type;
-                        case "RELATIONSHIP" -> this.relationshipType = (org.neo4j.internal.id.IdType) type;
-                        case "DYNAMIC_RELATIONSHIP" -> this.dynamicRelationshipType = (org.neo4j.internal.id.IdType) type;
                     }
                 }
             } catch (ClassNotFoundException | NullPointerException | ClassCastException ignored) {
