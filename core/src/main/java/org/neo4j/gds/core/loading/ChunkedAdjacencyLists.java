@@ -19,9 +19,10 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.neo4j.gds.collections.ArrayUtil;
 import org.neo4j.gds.collections.DrainingIterator;
-import org.neo4j.gds.collections.hsl.HugeSparseByteArrayList;
 import org.neo4j.gds.collections.hsa.HugeSparseCollections;
+import org.neo4j.gds.collections.hsl.HugeSparseByteArrayList;
 import org.neo4j.gds.collections.hsl.HugeSparseIntList;
 import org.neo4j.gds.collections.hsl.HugeSparseLongArrayList;
 import org.neo4j.gds.collections.hsl.HugeSparseLongList;
@@ -220,13 +221,29 @@ public final class ChunkedAdjacencyLists {
                 )
             );
         } else if (currentProperties.length <= pos + required) {
-//            int newLength = ArrayUtil.oversize(pos + required, Long.BYTES);
-            int newLength = BitUtil.nextHighestPowerOfTwo(pos + required);
+            var newLength = getNewLength(pos + required);
             currentProperties = Arrays.copyOf(currentProperties, newLength);
             this.properties[propertyIndex].set(index, currentProperties);
         }
 
         return currentProperties;
+    }
+
+    static int getNewLength(int minLength) {
+        int newLength = BitUtil.nextHighestPowerOfTwo(minLength);
+        if (newLength < 0) {
+            // If we overflow, we try to grow by ~1/8th and :fingers_crossed: it's enough.
+            newLength = ArrayUtil.oversize(minLength, Long.BYTES);
+        }
+        if (newLength < 0) {
+            throw new IllegalArgumentException(
+                formatWithLocale(
+                    "Encountered numeric overflow in compressed buffer. Required a minimum length of %d.",
+                    minLength
+                )
+            );
+        }
+        return newLength;
     }
 
     public long capacity() {
