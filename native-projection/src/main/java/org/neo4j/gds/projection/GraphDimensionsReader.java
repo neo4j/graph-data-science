@@ -113,7 +113,7 @@ final class GraphDimensionsReader extends StatementFunction<GraphDimensions> {
             typeTokenRelTypeMappings
         );
         long relCountUpperBound = relationshipCounts.values().stream().mapToLong(Long::longValue).sum();
-        long allRelationshipsCount = Neo4jProxy.getHighestPossibleRelationshipCount(idGeneratorFactory);
+        long allRelationshipsCount = Neo4jProxy.getHighestPossibleRelationshipCount(dataRead);
 
         return ImmutableGraphDimensions.builder()
             .nodeCount(finalNodeCount)

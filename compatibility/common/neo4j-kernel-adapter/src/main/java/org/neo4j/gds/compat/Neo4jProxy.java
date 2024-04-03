@@ -530,13 +530,8 @@ public final class Neo4jProxy {
         );
     }
 
-    public static long getHighestPossibleRelationshipCount(IdGeneratorFactory idGeneratorFactory) {
-        return countByIdGenerator(
-            idGeneratorFactory,
-            RecordIdType.RELATIONSHIP,
-            BlockFormat.INSTANCE.relationshipType,
-            BlockFormat.INSTANCE.dynamicRelationshipType
-        );
+    public static long getHighestPossibleRelationshipCount(Read read) {
+        return read.relationshipsGetCount();
     }
 
     private static final class BlockFormat {
@@ -544,8 +539,6 @@ public final class Neo4jProxy {
 
         private org.neo4j.internal.id.IdType nodeType = null;
         private org.neo4j.internal.id.IdType dynamicNodeType = null;
-        private org.neo4j.internal.id.IdType relationshipType = null;
-        private org.neo4j.internal.id.IdType dynamicRelationshipType = null;
 
         BlockFormat() {
             try {
@@ -556,9 +549,6 @@ public final class Neo4jProxy {
                     switch (type.name()) {
                         case "NODE" -> this.nodeType = (org.neo4j.internal.id.IdType) type;
                         case "DYNAMIC_NODE" -> this.dynamicNodeType = (org.neo4j.internal.id.IdType) type;
-                        case "RELATIONSHIP" -> this.relationshipType = (org.neo4j.internal.id.IdType) type;
-                        case "DYNAMIC_RELATIONSHIP" ->
-                            this.dynamicRelationshipType = (org.neo4j.internal.id.IdType) type;
                     }
                 }
             } catch (ClassNotFoundException | NullPointerException | ClassCastException ignored) {
