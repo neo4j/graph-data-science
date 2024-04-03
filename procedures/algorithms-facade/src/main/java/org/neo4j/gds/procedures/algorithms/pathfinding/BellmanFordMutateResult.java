@@ -17,19 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.paths.singlesource.bellmanford;
+package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.results.StandardMutateResult;
 
 import java.util.Map;
 
-public class BellmanFordMutateResult extends StandardMutateResult {
-
+public final class BellmanFordMutateResult extends StandardMutateResult {
     public final boolean containsNegativeCycle;
     public final long relationshipsWritten;
 
-    public BellmanFordMutateResult(
+    private BellmanFordMutateResult(
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
@@ -48,7 +47,7 @@ public class BellmanFordMutateResult extends StandardMutateResult {
     public static class Builder extends AbstractResultBuilder<BellmanFordMutateResult> {
         private boolean containsNegativeCycle;
 
-        Builder withContainsNegativeCycle(boolean containsNegativeCycle) {
+        public Builder withContainsNegativeCycle(boolean containsNegativeCycle) {
             this.containsNegativeCycle = containsNegativeCycle;
             return this;
         }

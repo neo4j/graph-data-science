@@ -60,16 +60,13 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         throw new MemoryEstimationNotImplementedException();
     }
 
-    public MemoryEstimateResult bellmanFord(
-        BellmanFordBaseConfig configuration,
-        Object graphNameOrConfiguration
-    ) {
+    public MemoryEstimateResult bellmanFord(BellmanFordBaseConfig configuration, Object graphNameOrConfiguration) {
         var memoryEstimation = bellmanFordEstimation(configuration);
 
         return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
     }
 
-    MemoryEstimation bellmanFordEstimation(BellmanFordBaseConfig configuration) {
+    public MemoryEstimation bellmanFordEstimation(BellmanFordBaseConfig configuration) {
         return new BellmanFordMemoryEstimateDefinition(configuration.trackNegativeCycles()).memoryEstimation();
     }
 
