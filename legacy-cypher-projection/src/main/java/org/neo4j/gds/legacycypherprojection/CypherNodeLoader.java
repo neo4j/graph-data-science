@@ -64,7 +64,6 @@ class CypherNodeLoader extends CypherRecordLoader<Nodes> {
 
         this.nodesBuilder = GraphFactory.initNodesBuilder()
             .nodeCount(nodeCount)
-            .maxOriginalId(NodesBuilder.UNKNOWN_MAX_ID)
             .hasLabelInformation(hasLabelInformation)
             .hasProperties(!propertyColumns.isEmpty())
             .propertyState(PropertyState.TRANSIENT)

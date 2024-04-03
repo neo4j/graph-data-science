@@ -79,7 +79,7 @@ public final class GraphFactory {
 
     @Builder.Factory
     static NodesBuilder nodesBuilder(
-        long maxOriginalId,
+        Optional<Long> maxOriginalId,
         Optional<Long> nodeCount,
         Optional<NodeSchema> nodeSchema,
         Optional<Boolean> hasLabelInformation,
@@ -95,20 +95,18 @@ public final class GraphFactory {
         int threadCount = concurrency.orElse(1);
 
         var idMapBehavior = IdMapBehaviorServiceProvider.idMapBehavior();
-        var maybeMaxOriginalId = maxOriginalId != NodesBuilder.UNKNOWN_MAX_ID
-            ? Optional.of(maxOriginalId)
-            : Optional.<Long>empty();
 
         var idMapType = idMapBuilderType.orElse(IdMap.NO_TYPE);
         var idMapBuilder = idMapBehavior.create(
             idMapType,
             threadCount,
-            maybeMaxOriginalId,
+            maxOriginalId,
             nodeCount
         );
 
+        long maxOriginalNodeId = maxOriginalId.orElse(NodesBuilder.UNKNOWN_MAX_ID);
         boolean deduplicate = deduplicateIds.orElse(true);
-        long maxIntermediateId = maxOriginalId;
+        long maxIntermediateId = maxOriginalNodeId;
 
         if (HighLimitIdMap.isHighLimitIdMap(idMapType)) {
             // If the requested id map is high limit, we need to make sure that
@@ -129,7 +127,7 @@ public final class GraphFactory {
 
         return nodeSchema.isPresent()
             ? fromSchema(
-                maxOriginalId,
+            maxOriginalNodeId,
                 maxIntermediateId,
                 idMapBuilder,
                 threadCount,
@@ -138,7 +136,7 @@ public final class GraphFactory {
                 deduplicate
             )
             : new NodesBuilder(
-                maxOriginalId,
+                maxOriginalNodeId,
                 maxIntermediateId,
                 threadCount,
                 NodesBuilderContext.lazy(threadCount),
