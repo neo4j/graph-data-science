@@ -21,6 +21,8 @@ package org.neo4j.gds.core.io.db;
 
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.compat.CompatExecutionMonitor;
+import org.neo4j.gds.compat.CompatMonitor;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -31,10 +33,12 @@ import org.neo4j.internal.batchimport.staging.StageExecution;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 
-public final class ProgressTrackerExecutionMonitor extends CoarseBoundedProgressExecutionMonitor {
+public final class ProgressTrackerExecutionMonitor
+    extends CoarseBoundedProgressExecutionMonitor
+    implements CompatExecutionMonitor {
 
+    private final long total;
     private final ProgressTracker progressTracker;
-
 
     public static Task progressTask(GraphStore graphStore) {
         return Tasks.leaf(
@@ -49,7 +53,16 @@ public final class ProgressTrackerExecutionMonitor extends CoarseBoundedProgress
         Configuration config
     ) {
         super(graphStore.nodeCount(), graphStore.relationshipCount(), config);
+        this.total = getTotal(graphStore);
         this.progressTracker = progressTracker;
+    }
+
+    private static long getTotal(GraphStore graphStore) {
+        return graphStore.nodeCount() +
+            // In block format:
+            // Each relationship is sorted and then applied
+            // Each relationship is written on both ends (except loops)
+            graphStore.relationshipCount() * 4;
     }
 
     @Override
@@ -80,5 +93,38 @@ public final class ProgressTrackerExecutionMonitor extends CoarseBoundedProgress
         super.done(successful, totalTimeMillis, additionalInformation);
         this.progressTracker.endSubTask();
         this.progressTracker.logInfo(additionalInformation);
+    }
+
+    @Override
+    public CompatMonitor toCompatMonitor() {
+        return new Monitor(this.total, progressTracker);
+    }
+
+    private static final class Monitor implements CompatMonitor {
+
+        private final long total;
+        private final ProgressTracker progressTracker;
+
+        private Monitor(long total, ProgressTracker progressTracker) {
+            this.total = total;
+            this.progressTracker = progressTracker;
+        }
+
+        @Override
+        public void started() {
+            this.progressTracker.beginSubTask();
+            this.progressTracker.setVolume(this.total);
+        }
+
+        @Override
+        public void percentageCompleted(int percentage) {
+            long progress = (long) (this.total * (percentage / 100.0));
+            this.progressTracker.logProgress(progress);
+        }
+
+        @Override
+        public void completed(boolean success) {
+            this.progressTracker.endSubTask();
+        }
     }
 }
