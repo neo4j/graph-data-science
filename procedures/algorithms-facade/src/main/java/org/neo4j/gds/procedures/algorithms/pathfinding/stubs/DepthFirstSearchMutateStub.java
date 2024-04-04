@@ -21,7 +21,6 @@ package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
 
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.paths.traverse.DfsMutateConfig;
 import org.neo4j.gds.procedures.algorithms.pathfinding.MutateStub;
@@ -33,15 +32,12 @@ import java.util.stream.Stream;
 
 public class DepthFirstSearchMutateStub implements MutateStub<DfsMutateConfig, PathFindingMutateResult> {
     private final GenericStub genericStub;
-    private final PathFindingAlgorithmsMutateModeBusinessFacade mutateFacade;
     private final ApplicationsFacade applicationsFacade;
 
     public DepthFirstSearchMutateStub(
         GenericStub genericStub,
-        PathFindingAlgorithmsMutateModeBusinessFacade mutateFacade,
         ApplicationsFacade applicationsFacade
     ) {
-        this.mutateFacade = mutateFacade;
         this.genericStub = genericStub;
         this.applicationsFacade = applicationsFacade;
     }
@@ -84,7 +80,7 @@ public class DepthFirstSearchMutateStub implements MutateStub<DfsMutateConfig, P
             graphName,
             configuration,
             DfsMutateConfig::of,
-            mutateFacade::depthFirstSearch,
+            applicationsFacade.pathFinding().mutate()::depthFirstSearch,
             resultBuilder
         );
     }

@@ -63,9 +63,6 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTemplate;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -289,25 +286,7 @@ class AlgorithmFacadeFactory {
     }
 
     PathFindingProcedureFacade createPathFindingProcedureFacade() {
-        var pathFindingAlgorithms = new PathFindingAlgorithms(
-            log,
-            taskRegistryFactory,
-            terminationFlag,
-            userLogRegistryFactory
-        );
-
-        var estimationModeFacade = new PathFindingAlgorithmsEstimationModeBusinessFacade(algorithmEstimationTemplate);
-
-        var mutateModeFacade = new PathFindingAlgorithmsMutateModeBusinessFacade(
-            estimationModeFacade,
-            pathFindingAlgorithms,
-            algorithmProcessingTemplate
-        );
-
-        /*
-         * this guy will subsume ^^ shortly
-         * then become a parameter
-         */
+        // eventually this moves up and is shared
         var applicationsFacade = ApplicationsFacade.create(
             log,
             nodePropertyExporterBuilder,
@@ -315,9 +294,9 @@ class AlgorithmFacadeFactory {
             relationshipStreamExporterBuilder,
             taskRegistryFactory,
             terminationFlag,
+            userLogRegistryFactory,
             algorithmProcessingTemplate,
-            pathFindingAlgorithms,
-            estimationModeFacade
+            algorithmEstimationTemplate
         );
 
         return PathFindingProcedureFacade.create(
@@ -329,7 +308,6 @@ class AlgorithmFacadeFactory {
             nodeLookup,
             returnColumns,
             user,
-            mutateModeFacade,
             applicationsFacade
         );
     }

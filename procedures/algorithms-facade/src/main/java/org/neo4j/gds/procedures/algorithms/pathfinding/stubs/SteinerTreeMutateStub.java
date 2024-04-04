@@ -21,7 +21,6 @@ package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
 
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.pathfinding.MutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SteinerMutateResult;
@@ -33,15 +32,12 @@ import java.util.stream.Stream;
 
 public class SteinerTreeMutateStub implements MutateStub<SteinerTreeMutateConfig, SteinerMutateResult> {
     private final GenericStub genericStub;
-    private final PathFindingAlgorithmsMutateModeBusinessFacade mutateFacade;
     private final ApplicationsFacade applicationsFacade;
 
     public SteinerTreeMutateStub(
         GenericStub genericStub,
-        PathFindingAlgorithmsMutateModeBusinessFacade mutateFacade,
         ApplicationsFacade applicationsFacade
     ) {
-        this.mutateFacade = mutateFacade;
         this.genericStub = genericStub;
         this.applicationsFacade = applicationsFacade;
     }
@@ -84,7 +80,7 @@ public class SteinerTreeMutateStub implements MutateStub<SteinerTreeMutateConfig
             graphName,
             configuration,
             SteinerTreeMutateConfig::of,
-            mutateFacade::steinerTree,
+            applicationsFacade.pathFinding().mutate()::steinerTree,
             resultBuilder
         );
     }

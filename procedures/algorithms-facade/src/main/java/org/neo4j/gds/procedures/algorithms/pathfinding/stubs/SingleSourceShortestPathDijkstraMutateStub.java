@@ -21,7 +21,6 @@ package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
 
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.paths.dijkstra.config.AllShortestPathsDijkstraMutateConfig;
 import org.neo4j.gds.procedures.algorithms.pathfinding.MutateStub;
@@ -34,15 +33,12 @@ import java.util.stream.Stream;
 
 public class SingleSourceShortestPathDijkstraMutateStub implements MutateStub<AllShortestPathsDijkstraMutateConfig, PathFindingMutateResult> {
     private final GenericStub genericStub;
-    private final PathFindingAlgorithmsMutateModeBusinessFacade mutateFacade;
     private final ApplicationsFacade applicationsFacade;
 
     public SingleSourceShortestPathDijkstraMutateStub(
         GenericStub genericStub,
-        PathFindingAlgorithmsMutateModeBusinessFacade mutateFacade,
         ApplicationsFacade applicationsFacade
     ) {
-        this.mutateFacade = mutateFacade;
         this.genericStub = genericStub;
         this.applicationsFacade = applicationsFacade;
     }
@@ -83,7 +79,7 @@ public class SingleSourceShortestPathDijkstraMutateStub implements MutateStub<Al
             graphName,
             configuration,
             AllShortestPathsDijkstraMutateConfig::of,
-            mutateFacade::singleSourceShortestPathDijkstra,
+            applicationsFacade.pathFinding().mutate()::singleSourceShortestPathDijkstra,
             new PathFindingResultBuilderForMutateMode<>()
         );
     }

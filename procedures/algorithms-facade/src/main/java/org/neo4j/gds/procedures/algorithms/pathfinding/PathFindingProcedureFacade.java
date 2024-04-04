@@ -28,7 +28,6 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsWriteModeBusinessFacade;
@@ -165,8 +164,6 @@ public final class PathFindingProcedureFacade {
         NodeLookup nodeLookup,
         ProcedureReturnColumns procedureReturnColumns,
         User user,
-        PathFindingAlgorithmsEstimationModeBusinessFacade pathFindingAlgorithmsEstimationModeBusinessFacade,
-        PathFindingAlgorithmsMutateModeBusinessFacade pathFindingAlgorithmsMutateModeBusinessFacade,
         ApplicationsFacade applicationsFacade
     ) {
         var genericStub = new GenericStub(
@@ -180,61 +177,51 @@ public final class PathFindingProcedureFacade {
 
         var aStarStub = new SinglePairShortestPathAStarMutateStub(
             genericStub,
-            pathFindingAlgorithmsMutateModeBusinessFacade,
             applicationsFacade
         );
 
         var bellmanFordMutateStub = new BellmanFordMutateStub(
             genericStub,
-            pathFindingAlgorithmsMutateModeBusinessFacade,
             applicationsFacade
         );
 
         var breadthFirstSearchMutateStub = new BreadthFirstSearchMutateStub(
             genericStub,
-            pathFindingAlgorithmsMutateModeBusinessFacade,
             applicationsFacade
         );
 
         var deltaSteppingMutateStub = new DeltaSteppingMutateStub(
             genericStub,
-            pathFindingAlgorithmsMutateModeBusinessFacade,
             applicationsFacade
         );
 
         var depthFirstSearchMutateStub = new DepthFirstSearchMutateStub(
             genericStub,
-            pathFindingAlgorithmsMutateModeBusinessFacade,
             applicationsFacade
         );
 
         var singlePairDijkstraStub = new SinglePairShortestPathDijkstraMutateStub(
             genericStub,
-            pathFindingAlgorithmsMutateModeBusinessFacade,
             applicationsFacade
         );
 
         var yensStub = new SinglePairShortestPathYensMutateStub(
             genericStub,
-            pathFindingAlgorithmsMutateModeBusinessFacade,
             applicationsFacade
         );
 
         var singleSourceDijkstraStub = new SingleSourceShortestPathDijkstraMutateStub(
             genericStub,
-            pathFindingAlgorithmsMutateModeBusinessFacade,
             applicationsFacade
         );
 
         var spanningTreeMutateStub = new SpanningTreeMutateStub(
             genericStub,
-            pathFindingAlgorithmsMutateModeBusinessFacade,
             applicationsFacade
         );
 
         var steinerTreeMutateStub = new SteinerTreeMutateStub(
             genericStub,
-            pathFindingAlgorithmsMutateModeBusinessFacade,
             applicationsFacade
         );
 
