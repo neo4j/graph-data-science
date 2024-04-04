@@ -306,12 +306,6 @@ class AlgorithmFacadeFactory {
             algorithmProcessingTemplate
         );
 
-        var statsModeFacade = new PathFindingAlgorithmsStatsModeBusinessFacade(
-            algorithmProcessingTemplate,
-            estimationModeFacade,
-            pathFindingAlgorithms
-        );
-
         var writeModeFacade = new PathFindingAlgorithmsWriteModeBusinessFacade(
             log,
             algorithmProcessingTemplate,
@@ -345,7 +339,6 @@ class AlgorithmFacadeFactory {
             user,
             estimationModeFacade,
             mutateModeFacade,
-            statsModeFacade,
             writeModeFacade,
             applicationsFacade
         );

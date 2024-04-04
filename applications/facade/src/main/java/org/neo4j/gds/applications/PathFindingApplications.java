@@ -22,16 +22,22 @@ package org.neo4j.gds.applications;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStreamModeBusinessFacade;
 
 /**
  * The facade over path finding applications
  */
 public final class PathFindingApplications {
-    private final PathFindingAlgorithmsStreamModeBusinessFacade pathFindingAlgorithmsStreamModeBusinessFacade;
+    private final PathFindingAlgorithmsStatsModeBusinessFacade statsModeFacade;
+    private final PathFindingAlgorithmsStreamModeBusinessFacade streamModeFacade;
 
-    private PathFindingApplications(PathFindingAlgorithmsStreamModeBusinessFacade pathFindingAlgorithmsStreamModeBusinessFacade) {
-        this.pathFindingAlgorithmsStreamModeBusinessFacade = pathFindingAlgorithmsStreamModeBusinessFacade;
+    private PathFindingApplications(
+        PathFindingAlgorithmsStatsModeBusinessFacade statsModeFacade,
+        PathFindingAlgorithmsStreamModeBusinessFacade streamModeFacade
+    ) {
+        this.statsModeFacade = statsModeFacade;
+        this.streamModeFacade = streamModeFacade;
     }
 
     /**
@@ -42,16 +48,26 @@ public final class PathFindingApplications {
         PathFindingAlgorithms pathFindingAlgorithms,
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade
     ) {
+        var statsModeFacade = new PathFindingAlgorithmsStatsModeBusinessFacade(
+            algorithmProcessingTemplate,
+            estimationFacade,
+            pathFindingAlgorithms
+        );
+
         var streamModeFacade = new PathFindingAlgorithmsStreamModeBusinessFacade(
             algorithmProcessingTemplate,
             estimationFacade,
             pathFindingAlgorithms
         );
 
-        return new PathFindingApplications(streamModeFacade);
+        return new PathFindingApplications(statsModeFacade, streamModeFacade);
     }
 
     public PathFindingAlgorithmsStreamModeBusinessFacade stream() {
-        return pathFindingAlgorithmsStreamModeBusinessFacade;
+        return streamModeFacade;
+    }
+
+    public PathFindingAlgorithmsStatsModeBusinessFacade stats() {
+        return statsModeFacade;
     }
 }

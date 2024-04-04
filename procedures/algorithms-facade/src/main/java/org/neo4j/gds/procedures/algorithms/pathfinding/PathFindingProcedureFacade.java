@@ -104,7 +104,6 @@ public final class PathFindingProcedureFacade {
 
     // delegate
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeFacade;
-    private final PathFindingAlgorithmsStatsModeBusinessFacade statsModeFacade;
     private final PathFindingAlgorithmsWriteModeBusinessFacade writeModeFacade;
     private final ApplicationsFacade applicationsFacade;
 
@@ -126,7 +125,6 @@ public final class PathFindingProcedureFacade {
         NodeLookup nodeLookup,
         ProcedureReturnColumns procedureReturnColumns,
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeFacade,
-        PathFindingAlgorithmsStatsModeBusinessFacade statsModeFacade,
         PathFindingAlgorithmsWriteModeBusinessFacade writeModeFacade,
         ApplicationsFacade applicationsFacade,
         BellmanFordMutateStub bellmanFordMutateStub,
@@ -146,7 +144,6 @@ public final class PathFindingProcedureFacade {
         this.procedureReturnColumns = procedureReturnColumns;
 
         this.estimationModeFacade = estimationModeFacade;
-        this.statsModeFacade = statsModeFacade;
         this.writeModeFacade = writeModeFacade;
         this.applicationsFacade = applicationsFacade;
 
@@ -176,7 +173,6 @@ public final class PathFindingProcedureFacade {
         User user,
         PathFindingAlgorithmsEstimationModeBusinessFacade pathFindingAlgorithmsEstimationModeBusinessFacade,
         PathFindingAlgorithmsMutateModeBusinessFacade pathFindingAlgorithmsMutateModeBusinessFacade,
-        PathFindingAlgorithmsStatsModeBusinessFacade pathFindingAlgorithmsStatsModeBusinessFacade,
         PathFindingAlgorithmsWriteModeBusinessFacade pathFindingAlgorithmsWriteModeBusinessFacade,
         ApplicationsFacade applicationsFacade
     ) {
@@ -255,7 +251,6 @@ public final class PathFindingProcedureFacade {
             nodeLookup,
             procedureReturnColumns,
             pathFindingAlgorithmsEstimationModeBusinessFacade,
-            pathFindingAlgorithmsStatsModeBusinessFacade,
             pathFindingAlgorithmsWriteModeBusinessFacade,
             applicationsFacade,
             bellmanFordMutateStub,
@@ -328,7 +323,7 @@ public final class PathFindingProcedureFacade {
             configuration,
             BellmanFordStatsConfig::of,
             resultBuilder,
-            statsModeFacade::bellmanFord
+            statsMode()::bellmanFord
         );
     }
 
@@ -393,7 +388,7 @@ public final class PathFindingProcedureFacade {
             configuration,
             BfsStatsConfig::of,
             resultBuilder,
-            statsModeFacade::breadthFirstSearch
+            statsMode()::breadthFirstSearch
         );
     }
 
@@ -453,7 +448,7 @@ public final class PathFindingProcedureFacade {
             configuration,
             AllShortestPathsDeltaStatsConfig::of,
             resultBuilder,
-            statsModeFacade::deltaStepping
+            statsMode()::deltaStepping
         );
     }
 
@@ -603,7 +598,7 @@ public final class PathFindingProcedureFacade {
             configuration,
             RandomWalkStatsConfig::of,
             resultBuilder,
-            statsModeFacade::randomWalk
+            statsMode()::randomWalk
         );
     }
 
@@ -917,7 +912,7 @@ public final class PathFindingProcedureFacade {
             configuration,
             SpanningTreeStatsConfig::of,
             resultBuilder,
-            statsModeFacade::spanningTree
+            statsMode()::spanningTree
         );
     }
 
@@ -1007,7 +1002,7 @@ public final class PathFindingProcedureFacade {
             configuration,
             SteinerTreeStatsConfig::of,
             resultBuilder,
-            statsModeFacade::steinerTree
+            statsMode()::steinerTree
         );
     }
 
@@ -1204,6 +1199,10 @@ public final class PathFindingProcedureFacade {
         var configuration = configurationCreator.createConfiguration(rawConfiguration, configurationSupplier);
 
         return algorithm.compute(graphName, configuration, resultBuilder);
+    }
+
+    private PathFindingAlgorithmsStatsModeBusinessFacade statsMode() {
+        return applicationsFacade.pathFinding().stats();
     }
 
     private PathFindingAlgorithmsStreamModeBusinessFacade streamMode() {
