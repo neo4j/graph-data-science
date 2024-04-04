@@ -60,7 +60,7 @@ public final class TaskStoreHolder {
      * Not using DatabaseId directly, because that would mead to some awful dependencies.
      * And we will eliminate this in due course.
      */
-    static TaskStore getTaskStore(String databaseName) {
+    public static TaskStore getTaskStore(String databaseName) {
         String normalizedDatabaseName = StringFormatting.toLowerCaseWithLocale(databaseName);
 
         return TASK_STORES.computeIfAbsent(normalizedDatabaseName, __ -> new PerDatabaseTaskStore());
