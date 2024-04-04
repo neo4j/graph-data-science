@@ -405,8 +405,6 @@ public final class Neo4jProxy {
     }
 
     public static BatchImporter instantiateBatchImporter(
-        String databaseName,
-        GraphDatabaseService databaseService,
         GdsDatabaseLayout directoryStructure,
         FileSystemAbstraction fileSystem,
         Configuration configuration,
@@ -416,9 +414,7 @@ public final class Neo4jProxy {
         JobScheduler jobScheduler,
         Collector badCollector
     ) {
-        var dbFormat = dbConfig.get(GraphDatabaseSettings.db_format);
-
-        if (dbFormat.equals("block")) {
+        if (dbConfig.get(GraphDatabaseSettings.db_format).equals("block")) {
             return instantiateBlockBatchImporter(
                 directoryStructure,
                 fileSystem,
@@ -431,20 +427,9 @@ public final class Neo4jProxy {
             );
         }
 
-        var recordFormat = Neo4jProxy.recordFormatSelector(
-            databaseName,
-            dbConfig,
-            fileSystem,
-            logService,
-            databaseService
-        );
-
-        dbConfig.set(GraphDatabaseSettings.db_format, recordFormat.name());
-
-        var databaseLayout = ((GdsDatabaseLayoutImpl) directoryStructure).databaseLayout();
         return BatchImporterFactory.withHighestPriority()
             .instantiate(
-                databaseLayout,
+                ((GdsDatabaseLayoutImpl) directoryStructure).databaseLayout(),
                 fileSystem,
                 PageCacheTracer.NULL,
                 configuration,

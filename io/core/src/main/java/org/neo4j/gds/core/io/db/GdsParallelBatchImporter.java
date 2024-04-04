@@ -224,8 +224,6 @@ public final class GdsParallelBatchImporter {
         JobScheduler jobScheduler
     ) {
         return Neo4jProxy.instantiateBatchImporter(
-            this.parameters.dbName(),
-            this.databaseService,
             databaseLayout,
             this.fileSystem,
             this.parameters.toBatchImporterConfig(),
