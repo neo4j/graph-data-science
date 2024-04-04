@@ -19,39 +19,125 @@
  */
 package org.neo4j.gds.applications;
 
+import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStreamModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsWriteModeBusinessFacade;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
+import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
+import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.termination.TerminationFlag;
 
 /**
  * The facade over path finding applications
  */
 public final class PathFindingApplications {
-    private final PathFindingAlgorithmsStreamModeBusinessFacade pathFindingAlgorithmsStreamModeBusinessFacade;
+    private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeFacade;
+    private final PathFindingAlgorithmsMutateModeBusinessFacade mutateModeFacade;
+    private final PathFindingAlgorithmsStatsModeBusinessFacade statsModeFacade;
+    private final PathFindingAlgorithmsStreamModeBusinessFacade streamModeFacade;
+    private final PathFindingAlgorithmsWriteModeBusinessFacade writeModeFacade;
 
-    private PathFindingApplications(PathFindingAlgorithmsStreamModeBusinessFacade pathFindingAlgorithmsStreamModeBusinessFacade) {
-        this.pathFindingAlgorithmsStreamModeBusinessFacade = pathFindingAlgorithmsStreamModeBusinessFacade;
+    private PathFindingApplications(
+        PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeFacade,
+        PathFindingAlgorithmsMutateModeBusinessFacade mutateModeFacade,
+        PathFindingAlgorithmsStatsModeBusinessFacade statsModeFacade,
+        PathFindingAlgorithmsStreamModeBusinessFacade streamModeFacade,
+        PathFindingAlgorithmsWriteModeBusinessFacade writeModeFacade
+    ) {
+        this.estimationModeFacade = estimationModeFacade;
+        this.mutateModeFacade = mutateModeFacade;
+        this.statsModeFacade = statsModeFacade;
+        this.streamModeFacade = streamModeFacade;
+        this.writeModeFacade = writeModeFacade;
     }
 
     /**
      * Here we hide dull and boring structure
      */
     public static PathFindingApplications create(
+        Log log,
+        NodePropertyExporterBuilder nodePropertyExporterBuilder,
+        RelationshipExporterBuilder relationshipExporterBuilder,
+        RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
+        TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag,
+        UserLogRegistryFactory userLogRegistryFactory,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
-        PathFindingAlgorithms pathFindingAlgorithms,
-        PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade
+        AlgorithmEstimationTemplate algorithmEstimationTemplate
     ) {
-        var streamModeFacade = new PathFindingAlgorithmsStreamModeBusinessFacade(
+        var pathFindingAlgorithms = new PathFindingAlgorithms(
+            log,
+            taskRegistryFactory,
+            terminationFlag,
+            userLogRegistryFactory
+        );
+
+        var estimationModeFacade = new PathFindingAlgorithmsEstimationModeBusinessFacade(algorithmEstimationTemplate);
+
+        var mutateModeFacade = new PathFindingAlgorithmsMutateModeBusinessFacade(
+            estimationModeFacade,
+            pathFindingAlgorithms,
+            algorithmProcessingTemplate
+        );
+
+        var statsModeFacade = new PathFindingAlgorithmsStatsModeBusinessFacade(
             algorithmProcessingTemplate,
-            estimationFacade,
+            estimationModeFacade,
             pathFindingAlgorithms
         );
 
-        return new PathFindingApplications(streamModeFacade);
+        var streamModeFacade = new PathFindingAlgorithmsStreamModeBusinessFacade(
+            algorithmProcessingTemplate,
+            estimationModeFacade,
+            pathFindingAlgorithms
+        );
+
+        var writeModeFacade = new PathFindingAlgorithmsWriteModeBusinessFacade(
+            log,
+            algorithmProcessingTemplate,
+            nodePropertyExporterBuilder,
+            relationshipExporterBuilder,
+            relationshipStreamExporterBuilder,
+            taskRegistryFactory,
+            terminationFlag,
+            estimationModeFacade,
+            pathFindingAlgorithms
+        );
+
+        return new PathFindingApplications(
+            estimationModeFacade,
+            mutateModeFacade,
+            statsModeFacade,
+            streamModeFacade,
+            writeModeFacade
+        );
+    }
+
+    public PathFindingAlgorithmsEstimationModeBusinessFacade estimate() {
+        return estimationModeFacade;
+    }
+
+    public PathFindingAlgorithmsMutateModeBusinessFacade mutate() {
+        return mutateModeFacade;
+    }
+
+    public PathFindingAlgorithmsStatsModeBusinessFacade stats() {
+        return statsModeFacade;
     }
 
     public PathFindingAlgorithmsStreamModeBusinessFacade stream() {
-        return pathFindingAlgorithmsStreamModeBusinessFacade;
+        return streamModeFacade;
+    }
+
+    public PathFindingAlgorithmsWriteModeBusinessFacade write() {
+        return writeModeFacade;
     }
 }

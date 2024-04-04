@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
 
+import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.pathfinding.MutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeMutateResult;
@@ -32,17 +32,14 @@ import java.util.stream.Stream;
 
 public class SpanningTreeMutateStub implements MutateStub<SpanningTreeMutateConfig, SpanningTreeMutateResult> {
     private final GenericStub genericStub;
-    private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final PathFindingAlgorithmsMutateModeBusinessFacade mutateFacade;
+    private final ApplicationsFacade applicationsFacade;
 
     public SpanningTreeMutateStub(
         GenericStub genericStub,
-        PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        PathFindingAlgorithmsMutateModeBusinessFacade mutateFacade
+        ApplicationsFacade applicationsFacade
     ) {
-        this.estimationFacade = estimationFacade;
-        this.mutateFacade = mutateFacade;
         this.genericStub = genericStub;
+        this.applicationsFacade = applicationsFacade;
     }
 
     @Override
@@ -61,7 +58,7 @@ public class SpanningTreeMutateStub implements MutateStub<SpanningTreeMutateConf
             username,
             configuration,
             SpanningTreeMutateConfig::of,
-            __ -> estimationFacade.spanningTreeEstimation()
+            __ -> estimationMode().spanningTreeEstimation()
         );
     }
 
@@ -71,7 +68,7 @@ public class SpanningTreeMutateStub implements MutateStub<SpanningTreeMutateConf
             graphName,
             configuration,
             SpanningTreeMutateConfig::of,
-            __ -> estimationFacade.spanningTreeEstimation()
+            __ -> estimationMode().spanningTreeEstimation()
         );
     }
 
@@ -83,8 +80,12 @@ public class SpanningTreeMutateStub implements MutateStub<SpanningTreeMutateConf
             graphName,
             configuration,
             SpanningTreeMutateConfig::of,
-            mutateFacade::spanningTree,
+            applicationsFacade.pathFinding().mutate()::spanningTree,
             resultBuilder
         );
+    }
+
+    private PathFindingAlgorithmsEstimationModeBusinessFacade estimationMode() {
+        return applicationsFacade.pathFinding().estimate();
     }
 }

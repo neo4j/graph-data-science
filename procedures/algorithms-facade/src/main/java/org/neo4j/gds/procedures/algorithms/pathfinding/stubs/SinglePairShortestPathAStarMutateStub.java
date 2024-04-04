@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
 
+import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.paths.astar.config.ShortestPathAStarMutateConfig;
 import org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraMutateConfig;
@@ -34,17 +34,14 @@ import java.util.stream.Stream;
 
 public class SinglePairShortestPathAStarMutateStub implements MutateStub<ShortestPathAStarMutateConfig, PathFindingMutateResult> {
     private final GenericStub genericStub;
-    private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
-    private final PathFindingAlgorithmsMutateModeBusinessFacade mutateFacade;
+    private final ApplicationsFacade applicationsFacade;
 
     public SinglePairShortestPathAStarMutateStub(
         GenericStub genericStub,
-        PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        PathFindingAlgorithmsMutateModeBusinessFacade mutateFacade
+        ApplicationsFacade applicationsFacade
     ) {
-        this.estimationFacade = estimationFacade;
-        this.mutateFacade = mutateFacade;
         this.genericStub = genericStub;
+        this.applicationsFacade = applicationsFacade;
     }
 
     @Override
@@ -63,7 +60,7 @@ public class SinglePairShortestPathAStarMutateStub implements MutateStub<Shortes
             username,
             configuration,
             ShortestPathAStarMutateConfig::of,
-            __ -> estimationFacade.singlePairShortestPathAStarEstimation()
+            __ -> estimationMode().singlePairShortestPathAStarEstimation()
         );
     }
 
@@ -73,7 +70,7 @@ public class SinglePairShortestPathAStarMutateStub implements MutateStub<Shortes
             graphName,
             configuration,
             ShortestPathAStarMutateConfig::of,
-            __ -> estimationFacade.singlePairShortestPathAStarEstimation()
+            __ -> estimationMode().singlePairShortestPathAStarEstimation()
         );
     }
 
@@ -83,8 +80,12 @@ public class SinglePairShortestPathAStarMutateStub implements MutateStub<Shortes
             graphName,
             configuration,
             ShortestPathAStarMutateConfig::of,
-            mutateFacade::singlePairShortestPathAStar,
+            applicationsFacade.pathFinding().mutate()::singlePairShortestPathAStar,
             new PathFindingResultBuilderForMutateMode<>()
         );
+    }
+
+    private PathFindingAlgorithmsEstimationModeBusinessFacade estimationMode() {
+        return applicationsFacade.pathFinding().estimate();
     }
 }

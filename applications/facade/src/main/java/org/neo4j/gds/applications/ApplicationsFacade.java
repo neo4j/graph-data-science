@@ -19,9 +19,15 @@
  */
 package org.neo4j.gds.applications;
 
+import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTemplate;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
+import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
+import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.termination.TerminationFlag;
 
 /**
  * This is the top level facade for GDS applications. If you are integrating GDS,
@@ -41,14 +47,26 @@ public final class ApplicationsFacade {
      * We can stuff all the boring structure stuff in here so nobody needs to worry about it.
      */
     public static ApplicationsFacade create(
+        Log log,
+        NodePropertyExporterBuilder nodePropertyExporterBuilder,
+        RelationshipExporterBuilder relationshipExporterBuilder,
+        RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
+        TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag,
+        UserLogRegistryFactory userLogRegistryFactory,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
-        PathFindingAlgorithms pathFindingAlgorithms,
-        PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade
+        AlgorithmEstimationTemplate algorithmEstimationTemplate
     ) {
         var pathFindingApplications = PathFindingApplications.create(
+            log,
+            nodePropertyExporterBuilder,
+            relationshipExporterBuilder,
+            relationshipStreamExporterBuilder,
+            taskRegistryFactory,
+            terminationFlag,
+            userLogRegistryFactory,
             algorithmProcessingTemplate,
-            pathFindingAlgorithms,
-            estimationFacade
+            algorithmEstimationTemplate
         );
 
         return new ApplicationsFacade(pathFindingApplications);
