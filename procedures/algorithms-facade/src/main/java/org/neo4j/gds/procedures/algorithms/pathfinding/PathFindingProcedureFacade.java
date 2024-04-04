@@ -103,7 +103,6 @@ public final class PathFindingProcedureFacade {
     private final ProcedureReturnColumns procedureReturnColumns;
 
     // delegate
-    private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeFacade;
     private final ApplicationsFacade applicationsFacade;
 
     // applications
@@ -123,7 +122,6 @@ public final class PathFindingProcedureFacade {
         ConfigurationCreator configurationCreator,
         NodeLookup nodeLookup,
         ProcedureReturnColumns procedureReturnColumns,
-        PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeFacade,
         ApplicationsFacade applicationsFacade,
         BellmanFordMutateStub bellmanFordMutateStub,
         BreadthFirstSearchMutateStub breadthFirstSearchMutateStub,
@@ -141,7 +139,6 @@ public final class PathFindingProcedureFacade {
         this.nodeLookup = nodeLookup;
         this.procedureReturnColumns = procedureReturnColumns;
 
-        this.estimationModeFacade = estimationModeFacade;
         this.applicationsFacade = applicationsFacade;
 
         this.bellmanFordMutateStub = bellmanFordMutateStub;
@@ -178,67 +175,67 @@ public final class PathFindingProcedureFacade {
             configurationCreator,
             configurationParser,
             user,
-            pathFindingAlgorithmsEstimationModeBusinessFacade
+            applicationsFacade
         );
 
         var aStarStub = new SinglePairShortestPathAStarMutateStub(
             genericStub,
-            pathFindingAlgorithmsEstimationModeBusinessFacade,
-            pathFindingAlgorithmsMutateModeBusinessFacade
+            pathFindingAlgorithmsMutateModeBusinessFacade,
+            applicationsFacade
         );
 
         var bellmanFordMutateStub = new BellmanFordMutateStub(
             genericStub,
-            pathFindingAlgorithmsEstimationModeBusinessFacade,
-            pathFindingAlgorithmsMutateModeBusinessFacade
+            pathFindingAlgorithmsMutateModeBusinessFacade,
+            applicationsFacade
         );
 
         var breadthFirstSearchMutateStub = new BreadthFirstSearchMutateStub(
             genericStub,
-            pathFindingAlgorithmsEstimationModeBusinessFacade,
-            pathFindingAlgorithmsMutateModeBusinessFacade
+            pathFindingAlgorithmsMutateModeBusinessFacade,
+            applicationsFacade
         );
 
         var deltaSteppingMutateStub = new DeltaSteppingMutateStub(
             genericStub,
-            pathFindingAlgorithmsEstimationModeBusinessFacade,
-            pathFindingAlgorithmsMutateModeBusinessFacade
+            pathFindingAlgorithmsMutateModeBusinessFacade,
+            applicationsFacade
         );
 
         var depthFirstSearchMutateStub = new DepthFirstSearchMutateStub(
             genericStub,
-            pathFindingAlgorithmsEstimationModeBusinessFacade,
-            pathFindingAlgorithmsMutateModeBusinessFacade
+            pathFindingAlgorithmsMutateModeBusinessFacade,
+            applicationsFacade
         );
 
         var singlePairDijkstraStub = new SinglePairShortestPathDijkstraMutateStub(
             genericStub,
-            pathFindingAlgorithmsEstimationModeBusinessFacade,
-            pathFindingAlgorithmsMutateModeBusinessFacade
+            pathFindingAlgorithmsMutateModeBusinessFacade,
+            applicationsFacade
         );
 
         var yensStub = new SinglePairShortestPathYensMutateStub(
             genericStub,
-            pathFindingAlgorithmsEstimationModeBusinessFacade,
-            pathFindingAlgorithmsMutateModeBusinessFacade
+            pathFindingAlgorithmsMutateModeBusinessFacade,
+            applicationsFacade
         );
 
         var singleSourceDijkstraStub = new SingleSourceShortestPathDijkstraMutateStub(
             genericStub,
-            pathFindingAlgorithmsEstimationModeBusinessFacade,
-            pathFindingAlgorithmsMutateModeBusinessFacade
+            pathFindingAlgorithmsMutateModeBusinessFacade,
+            applicationsFacade
         );
 
         var spanningTreeMutateStub = new SpanningTreeMutateStub(
             genericStub,
-            pathFindingAlgorithmsEstimationModeBusinessFacade,
-            pathFindingAlgorithmsMutateModeBusinessFacade
+            pathFindingAlgorithmsMutateModeBusinessFacade,
+            applicationsFacade
         );
 
         var steinerTreeMutateStub = new SteinerTreeMutateStub(
             genericStub,
-            pathFindingAlgorithmsEstimationModeBusinessFacade,
-            pathFindingAlgorithmsMutateModeBusinessFacade
+            pathFindingAlgorithmsMutateModeBusinessFacade,
+            applicationsFacade
         );
 
         return new PathFindingProcedureFacade(
@@ -246,7 +243,6 @@ public final class PathFindingProcedureFacade {
             configurationCreator,
             nodeLookup,
             procedureReturnColumns,
-            pathFindingAlgorithmsEstimationModeBusinessFacade,
             applicationsFacade,
             bellmanFordMutateStub,
             breadthFirstSearchMutateStub,
@@ -301,7 +297,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             BellmanFordStreamConfig::of,
-            configuration -> estimationModeFacade.bellmanFord(
+            configuration -> estimationMode().bellmanFord(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -329,7 +325,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             BellmanFordStatsConfig::of,
-            configuration -> estimationModeFacade.bellmanFord(
+            configuration -> estimationMode().bellmanFord(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -362,7 +358,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             BellmanFordWriteConfig::of,
-            configuration -> estimationModeFacade.bellmanFord(
+            configuration -> estimationMode().bellmanFord(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -394,7 +390,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             BfsStatsConfig::of,
-            configuration -> estimationModeFacade.breadthFirstSearch(
+            configuration -> estimationMode().breadthFirstSearch(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -422,7 +418,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             BfsStreamConfig::of,
-            configuration -> estimationModeFacade.breadthFirstSearch(
+            configuration -> estimationMode().breadthFirstSearch(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -454,7 +450,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             AllShortestPathsDeltaStatsConfig::of,
-            configuration -> estimationModeFacade.deltaStepping(
+            configuration -> estimationMode().deltaStepping(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -485,7 +481,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             AllShortestPathsDeltaStreamConfig::of,
-            configuration -> estimationModeFacade.deltaStepping(
+            configuration -> estimationMode().deltaStepping(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -515,7 +511,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             AllShortestPathsDeltaWriteConfig::of,
-            configuration -> estimationModeFacade.deltaStepping(
+            configuration -> estimationMode().deltaStepping(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -547,7 +543,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             DfsStreamConfig::of,
-            configuration -> estimationModeFacade.depthFirstSearch(
+            configuration -> estimationMode().depthFirstSearch(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -604,7 +600,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             RandomWalkStatsConfig::of,
-            configuration -> estimationModeFacade.randomWalk(
+            configuration -> estimationMode().randomWalk(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -635,7 +631,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             RandomWalkStreamConfig::of,
-            configuration -> estimationModeFacade.randomWalk(
+            configuration -> estimationMode().randomWalk(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -667,7 +663,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             ShortestPathAStarStreamConfig::of,
-            configuration -> estimationModeFacade.singlePairShortestPathAStar(
+            configuration -> estimationMode().singlePairShortestPathAStar(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -697,7 +693,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             ShortestPathAStarWriteConfig::of,
-            configuration -> estimationModeFacade.singlePairShortestPathAStar(
+            configuration -> estimationMode().singlePairShortestPathAStar(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -729,7 +725,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             ShortestPathDijkstraStreamConfig::of,
-            configuration -> estimationModeFacade.singlePairShortestPathDijkstra(
+            configuration -> estimationMode().singlePairShortestPathDijkstra(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -759,7 +755,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             ShortestPathDijkstraWriteConfig::of,
-            configuration -> estimationModeFacade.singlePairShortestPathDijkstra(
+            configuration -> estimationMode().singlePairShortestPathDijkstra(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -791,7 +787,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             ShortestPathYensStreamConfig::of,
-            configuration -> estimationModeFacade.singlePairShortestPathYens(
+            configuration -> estimationMode().singlePairShortestPathYens(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -821,7 +817,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             ShortestPathYensWriteConfig::of,
-            configuration -> estimationModeFacade.singlePairShortestPathYens(
+            configuration -> estimationMode().singlePairShortestPathYens(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -853,7 +849,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             AllShortestPathsDijkstraStreamConfig::of,
-            configuration -> estimationModeFacade.singleSourceShortestPathDijkstra(
+            configuration -> estimationMode().singleSourceShortestPathDijkstra(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -883,7 +879,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             AllShortestPathsDijkstraWriteConfig::of,
-            configuration -> estimationModeFacade.singleSourceShortestPathDijkstra(
+            configuration -> estimationMode().singleSourceShortestPathDijkstra(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -918,7 +914,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             SpanningTreeStatsConfig::of,
-            configuration -> estimationModeFacade.spanningTree(
+            configuration -> estimationMode().spanningTree(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -946,7 +942,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             SpanningTreeStreamConfig::of,
-            configuration -> estimationModeFacade.spanningTree(
+            configuration -> estimationMode().spanningTree(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -976,7 +972,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             SpanningTreeWriteConfig::of,
-            configuration -> estimationModeFacade.spanningTree(
+            configuration -> estimationMode().spanningTree(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -1008,7 +1004,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             SteinerTreeStatsConfig::of,
-            configuration -> estimationModeFacade.steinerTree(
+            configuration -> estimationMode().steinerTree(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -1036,7 +1032,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             SteinerTreeStreamConfig::of,
-            configuration -> estimationModeFacade.steinerTree(
+            configuration -> estimationMode().steinerTree(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -1066,7 +1062,7 @@ public final class PathFindingProcedureFacade {
         var result = runEstimation(
             algorithmConfiguration,
             SteinerTreeWriteConfig::of,
-            configuration -> estimationModeFacade.steinerTree(
+            configuration -> estimationMode().steinerTree(
                 configuration,
                 graphNameOrConfiguration
             )
@@ -1194,6 +1190,10 @@ public final class PathFindingProcedureFacade {
         var configuration = configurationCreator.createConfiguration(rawConfiguration, configurationSupplier);
 
         return algorithm.compute(graphName, configuration, resultBuilder);
+    }
+
+    private PathFindingAlgorithmsEstimationModeBusinessFacade estimationMode() {
+        return applicationsFacade.pathFinding().estimate();
     }
 
     private PathFindingAlgorithmsStatsModeBusinessFacade statsMode() {

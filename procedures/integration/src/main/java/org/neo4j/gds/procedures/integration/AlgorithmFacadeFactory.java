@@ -329,7 +329,6 @@ class AlgorithmFacadeFactory {
             nodeLookup,
             returnColumns,
             user,
-            estimationModeFacade,
             mutateModeFacade,
             applicationsFacade
         );

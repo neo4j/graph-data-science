@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
 
+import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -33,17 +34,17 @@ import java.util.stream.Stream;
 
 public class SingleSourceShortestPathDijkstraMutateStub implements MutateStub<AllShortestPathsDijkstraMutateConfig, PathFindingMutateResult> {
     private final GenericStub genericStub;
-    private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final PathFindingAlgorithmsMutateModeBusinessFacade mutateFacade;
+    private final ApplicationsFacade applicationsFacade;
 
     public SingleSourceShortestPathDijkstraMutateStub(
         GenericStub genericStub,
-        PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        PathFindingAlgorithmsMutateModeBusinessFacade mutateFacade
+        PathFindingAlgorithmsMutateModeBusinessFacade mutateFacade,
+        ApplicationsFacade applicationsFacade
     ) {
-        this.estimationFacade = estimationFacade;
         this.mutateFacade = mutateFacade;
         this.genericStub = genericStub;
+        this.applicationsFacade = applicationsFacade;
     }
 
     @Override
@@ -62,7 +63,7 @@ public class SingleSourceShortestPathDijkstraMutateStub implements MutateStub<Al
             username,
             configuration,
             AllShortestPathsDijkstraMutateConfig::of,
-            estimationFacade::singleSourceShortestPathDijkstraEstimation
+            estimationMode()::singleSourceShortestPathDijkstraEstimation
         );
     }
 
@@ -72,7 +73,7 @@ public class SingleSourceShortestPathDijkstraMutateStub implements MutateStub<Al
             graphName,
             configuration,
             AllShortestPathsDijkstraMutateConfig::of,
-            estimationFacade::singleSourceShortestPathDijkstraEstimation
+            estimationMode()::singleSourceShortestPathDijkstraEstimation
         );
     }
 
@@ -85,5 +86,9 @@ public class SingleSourceShortestPathDijkstraMutateStub implements MutateStub<Al
             mutateFacade::singleSourceShortestPathDijkstra,
             new PathFindingResultBuilderForMutateMode<>()
         );
+    }
+
+    private PathFindingAlgorithmsEstimationModeBusinessFacade estimationMode() {
+        return applicationsFacade.pathFinding().estimate();
     }
 }

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
 
+import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -32,17 +33,17 @@ import java.util.stream.Stream;
 
 public class DepthFirstSearchMutateStub implements MutateStub<DfsMutateConfig, PathFindingMutateResult> {
     private final GenericStub genericStub;
-    private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final PathFindingAlgorithmsMutateModeBusinessFacade mutateFacade;
+    private final ApplicationsFacade applicationsFacade;
 
     public DepthFirstSearchMutateStub(
         GenericStub genericStub,
-        PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
-        PathFindingAlgorithmsMutateModeBusinessFacade mutateFacade
+        PathFindingAlgorithmsMutateModeBusinessFacade mutateFacade,
+        ApplicationsFacade applicationsFacade
     ) {
-        this.estimationFacade = estimationFacade;
         this.mutateFacade = mutateFacade;
         this.genericStub = genericStub;
+        this.applicationsFacade = applicationsFacade;
     }
 
     @Override
@@ -61,7 +62,7 @@ public class DepthFirstSearchMutateStub implements MutateStub<DfsMutateConfig, P
             username,
             configuration,
             DfsMutateConfig::of,
-            __ -> estimationFacade.depthFirstSearchEstimation()
+            __ -> estimationMode().depthFirstSearchEstimation()
         );
     }
 
@@ -71,7 +72,7 @@ public class DepthFirstSearchMutateStub implements MutateStub<DfsMutateConfig, P
             graphName,
             configuration,
             DfsMutateConfig::of,
-            __ -> estimationFacade.depthFirstSearchEstimation()
+            __ -> estimationMode().depthFirstSearchEstimation()
         );
     }
 
@@ -86,5 +87,9 @@ public class DepthFirstSearchMutateStub implements MutateStub<DfsMutateConfig, P
             mutateFacade::depthFirstSearch,
             resultBuilder
         );
+    }
+
+    private PathFindingAlgorithmsEstimationModeBusinessFacade estimationMode() {
+        return applicationsFacade.pathFinding().estimate();
     }
 }

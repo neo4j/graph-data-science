@@ -36,15 +36,18 @@ import org.neo4j.gds.termination.TerminationFlag;
  * The facade over path finding applications
  */
 public final class PathFindingApplications {
+    private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeFacade;
     private final PathFindingAlgorithmsStatsModeBusinessFacade statsModeFacade;
     private final PathFindingAlgorithmsStreamModeBusinessFacade streamModeFacade;
     private final PathFindingAlgorithmsWriteModeBusinessFacade writeModeFacade;
 
     private PathFindingApplications(
+        PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeFacade,
         PathFindingAlgorithmsStatsModeBusinessFacade statsModeFacade,
         PathFindingAlgorithmsStreamModeBusinessFacade streamModeFacade,
         PathFindingAlgorithmsWriteModeBusinessFacade writeModeFacade
     ) {
+        this.estimationModeFacade = estimationModeFacade;
         this.statsModeFacade = statsModeFacade;
         this.streamModeFacade = streamModeFacade;
         this.writeModeFacade = writeModeFacade;
@@ -62,17 +65,17 @@ public final class PathFindingApplications {
         TerminationFlag terminationFlag,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
         PathFindingAlgorithms pathFindingAlgorithms,
-        PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade
+        PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeFacade
     ) {
         var statsModeFacade = new PathFindingAlgorithmsStatsModeBusinessFacade(
             algorithmProcessingTemplate,
-            estimationFacade,
+            estimationModeFacade,
             pathFindingAlgorithms
         );
 
         var streamModeFacade = new PathFindingAlgorithmsStreamModeBusinessFacade(
             algorithmProcessingTemplate,
-            estimationFacade,
+            estimationModeFacade,
             pathFindingAlgorithms
         );
 
@@ -84,11 +87,15 @@ public final class PathFindingApplications {
             relationshipStreamExporterBuilder,
             taskRegistryFactory,
             terminationFlag,
-            estimationFacade,
+            estimationModeFacade,
             pathFindingAlgorithms
         );
 
-        return new PathFindingApplications(statsModeFacade, streamModeFacade, writeModeFacade);
+        return new PathFindingApplications(estimationModeFacade, statsModeFacade, streamModeFacade, writeModeFacade);
+    }
+
+    public PathFindingAlgorithmsEstimationModeBusinessFacade estimate() {
+        return estimationModeFacade;
     }
 
     public PathFindingAlgorithmsStreamModeBusinessFacade stream() {
