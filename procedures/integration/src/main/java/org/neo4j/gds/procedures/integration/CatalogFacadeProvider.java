@@ -55,7 +55,7 @@ import org.neo4j.gds.procedures.ProcedureTransactionAccessor;
 import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.TerminationFlagAccessor;
 import org.neo4j.gds.procedures.TransactionContextAccessor;
-import org.neo4j.gds.procedures.catalog.CatalogFacade;
+import org.neo4j.gds.procedures.catalog.CatalogProcedureFacade;
 import org.neo4j.gds.services.DatabaseIdAccessor;
 import org.neo4j.gds.services.UserAccessor;
 import org.neo4j.gds.services.UserLogServices;
@@ -66,7 +66,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- * Here we keep everything related to constructing the {@link org.neo4j.gds.procedures.catalog.CatalogFacade}
+ * Here we keep everything related to constructing the {@link org.neo4j.gds.procedures.catalog.CatalogProcedureFacade}
  * from a {@link org.neo4j.kernel.api.procedure.Context}, at request time.
  * <p>
  * We can resolve things like user and database id here, construct termination flags, and such.
@@ -200,7 +200,7 @@ public class CatalogFacadeProvider {
      * We construct the catalog facade at request time. At this point things like user and database id are set in stone.
      * And we can readily construct things like termination flags.
      */
-    CatalogFacade createCatalogFacade(Context context) {
+    CatalogProcedureFacade createCatalogProcedureFacade(Context context) {
         // Neo4j's basic request scoped services
         var graphDatabaseService = context.graphDatabaseAPI();
         var kernelTransaction = kernelTransactionAccessor.getKernelTransaction(context);
@@ -270,7 +270,7 @@ public class CatalogFacadeProvider {
             businessFacade = businessFacadeDecorator.get().apply(businessFacade);
         }
 
-        return new CatalogFacade(
+        return new CatalogProcedureFacade(
             streamCloser,
             databaseId,
             graphDatabaseService,

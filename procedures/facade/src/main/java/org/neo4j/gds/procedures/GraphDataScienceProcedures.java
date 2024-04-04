@@ -22,7 +22,7 @@ package org.neo4j.gds.procedures;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
-import org.neo4j.gds.procedures.catalog.CatalogFacade;
+import org.neo4j.gds.procedures.catalog.CatalogProcedureFacade;
 import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.embeddings.NodeEmbeddingsProcedureFacade;
@@ -35,7 +35,7 @@ public class GraphDataScienceProcedures {
     private final Log log;
 
     private final AlgorithmsProcedureFacade algorithmsProcedureFacade;
-    private final CatalogFacade catalogFacade;
+    private final CatalogProcedureFacade catalogProcedureFacade;
     private final CentralityProcedureFacade centralityProcedureFacade;
     private final CommunityProcedureFacade communityProcedureFacade;
     private final MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade;
@@ -51,7 +51,7 @@ public class GraphDataScienceProcedures {
     GraphDataScienceProcedures(
         Log log,
         AlgorithmsProcedureFacade algorithmsProcedureFacade,
-        CatalogFacade catalogFacade,
+        CatalogProcedureFacade catalogProcedureFacade,
         CentralityProcedureFacade centralityProcedureFacade,
         CommunityProcedureFacade communityProcedureFacade,
         MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade,
@@ -62,7 +62,7 @@ public class GraphDataScienceProcedures {
     ) {
         this.log = log;
         this.algorithmsProcedureFacade = algorithmsProcedureFacade;
-        this.catalogFacade = catalogFacade;
+        this.catalogProcedureFacade = catalogProcedureFacade;
         this.centralityProcedureFacade = centralityProcedureFacade;
         this.communityProcedureFacade = communityProcedureFacade;
         this.miscAlgorithmsProcedureFacade = miscAlgorithmsProcedureFacade;
@@ -76,8 +76,8 @@ public class GraphDataScienceProcedures {
         return log;
     }
 
-    public CatalogFacade catalog() {
-        return catalogFacade;
+    public CatalogProcedureFacade catalog() {
+        return catalogProcedureFacade;
     }
 
     public CentralityProcedureFacade centrality() {

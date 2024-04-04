@@ -158,7 +158,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             algorithmEstimationTemplate
         );
 
-        var catalogFacade = catalogFacadeProvider.createCatalogFacade(context);
+        var catalogProcedureFacade = catalogFacadeProvider.createCatalogProcedureFacade(context);
 
         var algorithmFacadeFactory = algorithmFacadeFactoryProvider.createAlgorithmFacadeFactory(
             context,
@@ -183,7 +183,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         var pipelinesProcedureFacade = pipelinesProcedureFacadeProvider.createPipelinesProcedureFacade(context);
 
         return new GraphDataScienceProceduresBuilder(log)
-            .with(catalogFacade)
+            .with(catalogProcedureFacade)
             .with(centralityProcedureFacade)
             .with(communityProcedureFacade)
             .with(miscAlgorithmsProcedureFacade)

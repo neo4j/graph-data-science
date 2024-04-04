@@ -72,7 +72,7 @@ import java.util.stream.Stream;
  * <p>
  * This class gets constructed per request, and as such has fields for request scoped things like user and database id.
  */
-public class CatalogFacade {
+public class CatalogProcedureFacade {
     /**
      * This exists because procedures need default values sometimes.
      * For example, CALL gds.graph.list() would fail otherwise,
@@ -103,7 +103,7 @@ public class CatalogFacade {
     /**
      * @param streamCloser A special thing needed for property streaming
      */
-    public CatalogFacade(
+    public CatalogProcedureFacade(
         Consumer<AutoCloseable> streamCloser,
         DatabaseId databaseId,
         GraphDatabaseService graphDatabaseService,

@@ -53,7 +53,7 @@ import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.core.utils.warnings.UserLogStore;
-import org.neo4j.gds.procedures.catalog.CatalogFacade;
+import org.neo4j.gds.procedures.catalog.CatalogProcedureFacade;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
@@ -68,11 +68,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-class CatalogFacadeTest {
+class CatalogProcedureFacadeTest {
     @Test
     void shouldDetermineIfGraphExists() {
         var businessFacade = mock(CatalogBusinessFacade.class);
-        var catalogFacade = new CatalogFacade(
+        var catalogFacade = new CatalogProcedureFacade(
             null,
             DatabaseId.of("current database"),
             null,
@@ -113,7 +113,7 @@ class CatalogFacadeTest {
     void shouldQueryUserLog() {
         var userLogStore = mock(UserLogStore.class);
         var businessFacade = mock(CatalogBusinessFacade.class);
-        var catalogFacade = new CatalogFacade(
+        var catalogFacade = new CatalogProcedureFacade(
             null,
             DatabaseId.of("current database"),
             null,
@@ -147,7 +147,7 @@ class CatalogFacadeTest {
     void shouldListGraphsWithoutDegreeDistribution() {
         var procedureReturnColumns = mock(ProcedureReturnColumns.class);
         var businessFacade = mock(CatalogBusinessFacade.class);
-        var catalogFacade = new CatalogFacade(
+        var catalogFacade = new CatalogProcedureFacade(
             null,
             null,
             null,
@@ -183,7 +183,7 @@ class CatalogFacadeTest {
     void shouldListGraphsWithDegreeDistribution() {
         var procedureReturnColumns = mock(ProcedureReturnColumns.class);
         var businessFacade = mock(CatalogBusinessFacade.class);
-        var catalogFacade = new CatalogFacade(
+        var catalogFacade = new CatalogProcedureFacade(
             null,
             null,
             null,
@@ -231,7 +231,7 @@ class CatalogFacadeTest {
     void shouldListGraphsWithoutMemoryUsage() {
         var procedureReturnColumns = mock(ProcedureReturnColumns.class);
         var businessFacade = mock(CatalogBusinessFacade.class);
-        var catalogFacade = new CatalogFacade(
+        var catalogFacade = new CatalogProcedureFacade(
             null,
             null,
             null,
@@ -270,7 +270,7 @@ class CatalogFacadeTest {
     void shouldListGraphsWithMemoryUsage(String returnColumn) {
         var procedureReturnColumns = mock(ProcedureReturnColumns.class);
         var businessFacade = mock(CatalogBusinessFacade.class);
-        var catalogFacade = new CatalogFacade(
+        var catalogFacade = new CatalogProcedureFacade(
             null,
             null,
             null,

@@ -22,7 +22,7 @@ package org.neo4j.gds.procedures;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
-import org.neo4j.gds.procedures.catalog.CatalogFacade;
+import org.neo4j.gds.procedures.catalog.CatalogProcedureFacade;
 import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.embeddings.NodeEmbeddingsProcedureFacade;
@@ -39,7 +39,7 @@ import org.neo4j.gds.procedures.similarity.SimilarityProcedureFacade;
  */
 public class GraphDataScienceProceduresBuilder {
     private final Log log;
-    private CatalogFacade catalogFacade;
+    private CatalogProcedureFacade catalogProcedureFacade;
     private CentralityProcedureFacade centralityProcedureFacade;
     private CommunityProcedureFacade communityProcedureFacade;
     private MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade;
@@ -53,8 +53,8 @@ public class GraphDataScienceProceduresBuilder {
         this.log = log;
     }
 
-    public GraphDataScienceProceduresBuilder with(CatalogFacade catalogFacade) {
-        this.catalogFacade = catalogFacade;
+    public GraphDataScienceProceduresBuilder with(CatalogProcedureFacade catalogProcedureFacade) {
+        this.catalogProcedureFacade = catalogProcedureFacade;
         return this;
     }
 
@@ -108,7 +108,7 @@ public class GraphDataScienceProceduresBuilder {
         return new GraphDataScienceProcedures(
             log,
             algorithmsProcedureFacade,
-            catalogFacade,
+            catalogProcedureFacade,
             centralityProcedureFacade,
             communityProcedureFacade,
             miscAlgorithmsProcedureFacade,
