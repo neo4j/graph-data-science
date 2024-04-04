@@ -104,7 +104,6 @@ public final class PathFindingProcedureFacade {
 
     // delegate
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeFacade;
-    private final PathFindingAlgorithmsWriteModeBusinessFacade writeModeFacade;
     private final ApplicationsFacade applicationsFacade;
 
     // applications
@@ -125,7 +124,6 @@ public final class PathFindingProcedureFacade {
         NodeLookup nodeLookup,
         ProcedureReturnColumns procedureReturnColumns,
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeFacade,
-        PathFindingAlgorithmsWriteModeBusinessFacade writeModeFacade,
         ApplicationsFacade applicationsFacade,
         BellmanFordMutateStub bellmanFordMutateStub,
         BreadthFirstSearchMutateStub breadthFirstSearchMutateStub,
@@ -144,7 +142,6 @@ public final class PathFindingProcedureFacade {
         this.procedureReturnColumns = procedureReturnColumns;
 
         this.estimationModeFacade = estimationModeFacade;
-        this.writeModeFacade = writeModeFacade;
         this.applicationsFacade = applicationsFacade;
 
         this.bellmanFordMutateStub = bellmanFordMutateStub;
@@ -173,7 +170,6 @@ public final class PathFindingProcedureFacade {
         User user,
         PathFindingAlgorithmsEstimationModeBusinessFacade pathFindingAlgorithmsEstimationModeBusinessFacade,
         PathFindingAlgorithmsMutateModeBusinessFacade pathFindingAlgorithmsMutateModeBusinessFacade,
-        PathFindingAlgorithmsWriteModeBusinessFacade pathFindingAlgorithmsWriteModeBusinessFacade,
         ApplicationsFacade applicationsFacade
     ) {
         var genericStub = new GenericStub(
@@ -251,7 +247,6 @@ public final class PathFindingProcedureFacade {
             nodeLookup,
             procedureReturnColumns,
             pathFindingAlgorithmsEstimationModeBusinessFacade,
-            pathFindingAlgorithmsWriteModeBusinessFacade,
             applicationsFacade,
             bellmanFordMutateStub,
             breadthFirstSearchMutateStub,
@@ -354,7 +349,7 @@ public final class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 BellmanFordWriteConfig::of,
-                writeModeFacade::bellmanFord,
+                writeMode()::bellmanFord,
                 resultBuilder
             )
         );
@@ -508,7 +503,7 @@ public final class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 AllShortestPathsDeltaWriteConfig::of,
-                writeModeFacade::deltaStepping
+                writeMode()::deltaStepping
             )
         );
     }
@@ -569,7 +564,7 @@ public final class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 KSpanningTreeWriteConfig::of,
-                writeModeFacade::kSpanningTree,
+                writeMode()::kSpanningTree,
                 resultBuilder
             )
         );
@@ -690,7 +685,7 @@ public final class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 ShortestPathAStarWriteConfig::of,
-                writeModeFacade::singlePairShortestPathAStar
+                writeMode()::singlePairShortestPathAStar
             )
         );
     }
@@ -752,7 +747,7 @@ public final class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 ShortestPathDijkstraWriteConfig::of,
-                writeModeFacade::singlePairShortestPathDijkstra
+                writeMode()::singlePairShortestPathDijkstra
             )
         );
     }
@@ -814,7 +809,7 @@ public final class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 ShortestPathYensWriteConfig::of,
-                writeModeFacade::singlePairShortestPathYens
+                writeMode()::singlePairShortestPathYens
             )
         );
     }
@@ -876,7 +871,7 @@ public final class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 AllShortestPathsDijkstraWriteConfig::of,
-                writeModeFacade::singleSourceShortestPathDijkstra
+                writeMode()::singleSourceShortestPathDijkstra
             )
         );
     }
@@ -968,7 +963,7 @@ public final class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 SpanningTreeWriteConfig::of,
-                writeModeFacade::spanningTree,
+                writeMode()::spanningTree,
                 resultBuilder
             )
         );
@@ -1058,7 +1053,7 @@ public final class PathFindingProcedureFacade {
                 graphName,
                 configuration,
                 SteinerTreeWriteConfig::of,
-                writeModeFacade::steinerTree,
+                writeMode()::steinerTree,
                 resultBuilder
             )
         );
@@ -1207,5 +1202,9 @@ public final class PathFindingProcedureFacade {
 
     private PathFindingAlgorithmsStreamModeBusinessFacade streamMode() {
         return applicationsFacade.pathFinding().stream();
+    }
+
+    private PathFindingAlgorithmsWriteModeBusinessFacade writeMode() {
+        return applicationsFacade.pathFinding().write();
     }
 }

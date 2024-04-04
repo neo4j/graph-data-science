@@ -22,6 +22,12 @@ package org.neo4j.gds.applications;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
+import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
+import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.termination.TerminationFlag;
 
 /**
  * This is the top level facade for GDS applications. If you are integrating GDS,
@@ -41,11 +47,23 @@ public final class ApplicationsFacade {
      * We can stuff all the boring structure stuff in here so nobody needs to worry about it.
      */
     public static ApplicationsFacade create(
+        Log log,
+        NodePropertyExporterBuilder nodePropertyExporterBuilder,
+        RelationshipExporterBuilder relationshipExporterBuilder,
+        RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
+        TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
         PathFindingAlgorithms pathFindingAlgorithms,
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade
     ) {
         var pathFindingApplications = PathFindingApplications.create(
+            log,
+            nodePropertyExporterBuilder,
+            relationshipExporterBuilder,
+            relationshipStreamExporterBuilder,
+            taskRegistryFactory,
+            terminationFlag,
             algorithmProcessingTemplate,
             pathFindingAlgorithms,
             estimationFacade

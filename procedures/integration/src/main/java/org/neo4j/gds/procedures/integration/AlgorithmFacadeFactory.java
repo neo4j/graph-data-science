@@ -66,8 +66,6 @@ import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTemp
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStatsModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -306,23 +304,17 @@ class AlgorithmFacadeFactory {
             algorithmProcessingTemplate
         );
 
-        var writeModeFacade = new PathFindingAlgorithmsWriteModeBusinessFacade(
-            log,
-            algorithmProcessingTemplate,
-            nodePropertyExporterBuilder,
-            relationshipExporterBuilder,
-            relationshipStreamExporterBuilder,
-            taskRegistryFactory,
-            terminationFlag,
-            estimationModeFacade,
-            pathFindingAlgorithms
-        );
-
         /*
          * this guy will subsume ^^ shortly
          * then become a parameter
          */
         var applicationsFacade = ApplicationsFacade.create(
+            log,
+            nodePropertyExporterBuilder,
+            relationshipExporterBuilder,
+            relationshipStreamExporterBuilder,
+            taskRegistryFactory,
+            terminationFlag,
             algorithmProcessingTemplate,
             pathFindingAlgorithms,
             estimationModeFacade
@@ -339,7 +331,6 @@ class AlgorithmFacadeFactory {
             user,
             estimationModeFacade,
             mutateModeFacade,
-            writeModeFacade,
             applicationsFacade
         );
     }

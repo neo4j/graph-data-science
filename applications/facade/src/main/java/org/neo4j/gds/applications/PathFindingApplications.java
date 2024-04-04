@@ -24,6 +24,13 @@ import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStreamModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsWriteModeBusinessFacade;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
+import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
+import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.termination.TerminationFlag;
 
 /**
  * The facade over path finding applications
@@ -31,19 +38,28 @@ import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsSt
 public final class PathFindingApplications {
     private final PathFindingAlgorithmsStatsModeBusinessFacade statsModeFacade;
     private final PathFindingAlgorithmsStreamModeBusinessFacade streamModeFacade;
+    private final PathFindingAlgorithmsWriteModeBusinessFacade writeModeFacade;
 
     private PathFindingApplications(
         PathFindingAlgorithmsStatsModeBusinessFacade statsModeFacade,
-        PathFindingAlgorithmsStreamModeBusinessFacade streamModeFacade
+        PathFindingAlgorithmsStreamModeBusinessFacade streamModeFacade,
+        PathFindingAlgorithmsWriteModeBusinessFacade writeModeFacade
     ) {
         this.statsModeFacade = statsModeFacade;
         this.streamModeFacade = streamModeFacade;
+        this.writeModeFacade = writeModeFacade;
     }
 
     /**
      * Here we hide dull and boring structure
      */
     public static PathFindingApplications create(
+        Log log,
+        NodePropertyExporterBuilder nodePropertyExporterBuilder,
+        RelationshipExporterBuilder relationshipExporterBuilder,
+        RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
+        TaskRegistryFactory taskRegistryFactory,
+        TerminationFlag terminationFlag,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
         PathFindingAlgorithms pathFindingAlgorithms,
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade
@@ -60,7 +76,19 @@ public final class PathFindingApplications {
             pathFindingAlgorithms
         );
 
-        return new PathFindingApplications(statsModeFacade, streamModeFacade);
+        var writeModeFacade = new PathFindingAlgorithmsWriteModeBusinessFacade(
+            log,
+            algorithmProcessingTemplate,
+            nodePropertyExporterBuilder,
+            relationshipExporterBuilder,
+            relationshipStreamExporterBuilder,
+            taskRegistryFactory,
+            terminationFlag,
+            estimationFacade,
+            pathFindingAlgorithms
+        );
+
+        return new PathFindingApplications(statsModeFacade, streamModeFacade, writeModeFacade);
     }
 
     public PathFindingAlgorithmsStreamModeBusinessFacade stream() {
@@ -69,5 +97,9 @@ public final class PathFindingApplications {
 
     public PathFindingAlgorithmsStatsModeBusinessFacade stats() {
         return statsModeFacade;
+    }
+
+    public PathFindingAlgorithmsWriteModeBusinessFacade write() {
+        return writeModeFacade;
     }
 }
