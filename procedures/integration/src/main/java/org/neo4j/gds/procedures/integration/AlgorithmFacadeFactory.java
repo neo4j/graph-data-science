@@ -61,16 +61,8 @@ import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.ApplicationsFacade;
-import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmEstimationTemplate;
-import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTemplate;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.core.write.RelationshipExporterBuilder;
-import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
-import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.modelcatalogservices.ModelCatalogService;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
@@ -80,11 +72,9 @@ import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.embeddings.NodeEmbeddingsProcedureFacade;
 import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.similarity.SimilarityProcedureFacade;
-import org.neo4j.gds.termination.TerminationFlag;
 
 class AlgorithmFacadeFactory {
     // Global scoped dependencies
-    private final Log log;
     private final DefaultsConfiguration defaultsConfiguration;
     private final LimitsConfiguration limitsConfiguration;
 
@@ -100,19 +90,10 @@ class AlgorithmFacadeFactory {
     private final WriteRelationshipService writeRelationshipService;
     private final AlgorithmEstimator algorithmEstimator;
     private final AlgorithmRunner algorithmRunner;
-    private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
-    private final AlgorithmEstimationTemplate algorithmEstimationTemplate;
-    private final NodePropertyExporterBuilder nodePropertyExporterBuilder;
-    private final RelationshipExporterBuilder relationshipExporterBuilder;
-    private final RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
-    private final TaskRegistryFactory taskRegistryFactory;
-    private final TerminationFlag terminationFlag;
     private final User user;
-    private final UserLogRegistryFactory userLogRegistryFactory;
     private final ModelCatalogService modelCatalogService;
 
     AlgorithmFacadeFactory(
-        Log log,
         DefaultsConfiguration defaultsConfiguration,
         LimitsConfiguration limitsConfiguration,
         CloseableResourceRegistry closeableResourceRegistry,
@@ -126,18 +107,9 @@ class AlgorithmFacadeFactory {
         WriteRelationshipService writeRelationshipService,
         AlgorithmRunner algorithmRunner,
         AlgorithmEstimator algorithmEstimator,
-        AlgorithmProcessingTemplate algorithmProcessingTemplate,
-        AlgorithmEstimationTemplate algorithmEstimationTemplate,
-        NodePropertyExporterBuilder nodePropertyExporterBuilder,
-        RelationshipExporterBuilder relationshipExporterBuilder,
-        RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
         User user,
-        UserLogRegistryFactory userLogRegistryFactory,
         ModelCatalogService modelCatalogService
     ) {
-        this.log = log;
         this.defaultsConfiguration = defaultsConfiguration;
         this.limitsConfiguration = limitsConfiguration;
 
@@ -154,15 +126,6 @@ class AlgorithmFacadeFactory {
         this.algorithmRunner = algorithmRunner;
         this.algorithmEstimator = algorithmEstimator;
         this.modelCatalogService = modelCatalogService;
-
-        this.algorithmProcessingTemplate = algorithmProcessingTemplate;
-        this.algorithmEstimationTemplate = algorithmEstimationTemplate;
-        this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
-        this.relationshipExporterBuilder = relationshipExporterBuilder;
-        this.relationshipStreamExporterBuilder = relationshipStreamExporterBuilder;
-        this.taskRegistryFactory = taskRegistryFactory;
-        this.terminationFlag = terminationFlag;
-        this.userLogRegistryFactory = userLogRegistryFactory;
     }
 
     CentralityProcedureFacade createCentralityProcedureFacade() {
@@ -285,20 +248,7 @@ class AlgorithmFacadeFactory {
         );
     }
 
-    PathFindingProcedureFacade createPathFindingProcedureFacade() {
-        // eventually this moves up and is shared
-        var applicationsFacade = ApplicationsFacade.create(
-            log,
-            nodePropertyExporterBuilder,
-            relationshipExporterBuilder,
-            relationshipStreamExporterBuilder,
-            taskRegistryFactory,
-            terminationFlag,
-            userLogRegistryFactory,
-            algorithmProcessingTemplate,
-            algorithmEstimationTemplate
-        );
-
+    PathFindingProcedureFacade createPathFindingProcedureFacade(ApplicationsFacade applicationsFacade) {
         return PathFindingProcedureFacade.create(
             defaultsConfiguration,
             limitsConfiguration,

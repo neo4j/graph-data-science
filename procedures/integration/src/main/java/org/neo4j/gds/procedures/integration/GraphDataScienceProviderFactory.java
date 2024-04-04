@@ -94,16 +94,22 @@ final class GraphDataScienceProviderFactory {
             defaultsConfiguration,
             graphStoreCatalogService,
             limitsConfiguration,
-            taskRegistryFactoryService,
-            useMaxMemoryEstimation,
-            userLogServices
+            useMaxMemoryEstimation
         );
 
         return new GraphDataScienceProvider(
             log,
             catalogFacadeProvider,
             algorithmFacadeService,
-            metricsFacade.deprecatedProcedures()
+            metricsFacade.deprecatedProcedures(),
+            exporterBuildersProviderService,
+            taskRegistryFactoryService,
+            userLogServices,
+            graphStoreCatalogService,
+            algorithmProcessingTemplateDecorator,
+            memoryGauge,
+            useMaxMemoryEstimation,
+            metricsFacade.algorithmMetrics()
         );
     }
 
@@ -138,9 +144,7 @@ final class GraphDataScienceProviderFactory {
         DefaultsConfiguration defaultsConfiguration,
         GraphStoreCatalogService graphStoreCatalogService,
         LimitsConfiguration limitsConfiguration,
-        TaskRegistryFactoryService taskRegistryFactoryService,
-        boolean useMaxMemoryEstimation,
-        UserLogServices userLogServices
+        boolean useMaxMemoryEstimation
     ) {
         // Defaults and limits is a big shared thing (or, will be)
         var configurationParser = new ConfigurationParser(defaultsConfiguration, limitsConfiguration);
@@ -152,14 +156,9 @@ final class GraphDataScienceProviderFactory {
             defaultsConfiguration,
             graphStoreCatalogService,
             limitsConfiguration,
-            memoryGauge,
             useMaxMemoryEstimation,
             metricsFacade.algorithmMetrics(),
-            exporterBuildersProviderService,
-            modelCatalogServiceProvider,
-            taskRegistryFactoryService,
-            userLogServices,
-            algorithmProcessingTemplateDecorator
+            modelCatalogServiceProvider
         );
     }
 }
