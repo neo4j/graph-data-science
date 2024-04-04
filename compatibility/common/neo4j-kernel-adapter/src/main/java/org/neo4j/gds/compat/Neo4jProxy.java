@@ -44,7 +44,6 @@ import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.batchimport.input.IdType;
 import org.neo4j.internal.batchimport.input.InputEntityVisitor;
 import org.neo4j.internal.batchimport.input.ReadableGroups;
-import org.neo4j.internal.batchimport.staging.ExecutionMonitor;
 import org.neo4j.internal.helpers.HostnamePort;
 import org.neo4j.internal.id.IdGenerator;
 import org.neo4j.internal.id.IdGeneratorFactory;
@@ -406,38 +405,70 @@ public final class Neo4jProxy {
     }
 
     public static BatchImporter instantiateBatchImporter(
-        BatchImporterFactory factory,
         GdsDatabaseLayout directoryStructure,
         FileSystemAbstraction fileSystem,
-        PageCacheTracer pageCacheTracer,
         Configuration configuration,
         LogService logService,
-        ExecutionMonitor executionMonitor,
-        AdditionalInitialIds additionalInitialIds,
+        CompatExecutionMonitor executionMonitor,
         Config dbConfig,
-        RecordFormats recordFormats,
         JobScheduler jobScheduler,
         Collector badCollector
     ) {
-        dbConfig.set(GraphDatabaseSettings.db_format, recordFormats.name());
-        var databaseLayout = ((GdsDatabaseLayoutImpl) directoryStructure).databaseLayout();
-        return factory.instantiate(
-            databaseLayout,
+        if (dbConfig.get(GraphDatabaseSettings.db_format).equals("block")) {
+            return instantiateBlockBatchImporter(
+                directoryStructure,
+                fileSystem,
+                configuration,
+                executionMonitor.toCompatMonitor(),
+                logService,
+                dbConfig,
+                jobScheduler,
+                badCollector
+            );
+        }
+
+        return BatchImporterFactory.withHighestPriority()
+            .instantiate(
+                ((GdsDatabaseLayoutImpl) directoryStructure).databaseLayout(),
+                fileSystem,
+                PageCacheTracer.NULL,
+                configuration,
+                logService,
+                executionMonitor,
+                AdditionalInitialIds.EMPTY,
+                new EmptyLogTailMetadata(dbConfig),
+                dbConfig,
+                Monitor.NO_MONITOR,
+                jobScheduler,
+                badCollector,
+                TransactionLogInitializer.getLogFilesInitializer(),
+                new IndexImporterFactoryImpl(),
+                EmptyMemoryTracker.INSTANCE,
+                cursorContextFactory(Optional.empty())
+            );
+    }
+
+    private static BatchImporter instantiateBlockBatchImporter(
+        GdsDatabaseLayout directoryStructure,
+        FileSystemAbstraction fileSystem,
+        Configuration configuration,
+        CompatMonitor compatMonitor,
+        LogService logService,
+        Config dbConfig,
+        JobScheduler jobScheduler,
+        Collector badCollector
+    ) {
+        return IMPL.instantiateBlockBatchImporter(
+            ((GdsDatabaseLayoutImpl) directoryStructure).databaseLayout(),
             fileSystem,
-            pageCacheTracer,
+            PageCacheTracer.NULL,
             configuration,
+            compatMonitor,
             logService,
-            executionMonitor,
-            additionalInitialIds,
-            new EmptyLogTailMetadata(dbConfig),
+            AdditionalInitialIds.EMPTY,
             dbConfig,
-            Monitor.NO_MONITOR,
             jobScheduler,
-            badCollector,
-            TransactionLogInitializer.getLogFilesInitializer(),
-            new IndexImporterFactoryImpl(),
-            EmptyMemoryTracker.INSTANCE,
-            cursorContextFactory(Optional.empty())
+            badCollector
         );
     }
 

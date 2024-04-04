@@ -20,10 +20,19 @@
 package org.neo4j.gds.compat;
 
 import org.neo4j.common.DependencyResolver;
+import org.neo4j.configuration.Config;
+import org.neo4j.internal.batchimport.AdditionalInitialIds;
+import org.neo4j.internal.batchimport.BatchImporter;
+import org.neo4j.internal.batchimport.Configuration;
+import org.neo4j.internal.batchimport.input.Collector;
 import org.neo4j.internal.kernel.api.NodeCursor;
 import org.neo4j.internal.kernel.api.Read;
+import org.neo4j.io.fs.FileSystemAbstraction;
+import org.neo4j.io.layout.DatabaseLayout;
 import org.neo4j.io.pagecache.context.CursorContextFactory;
 import org.neo4j.io.pagecache.tracing.PageCacheTracer;
+import org.neo4j.logging.internal.LogService;
+import org.neo4j.scheduler.JobScheduler;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -49,10 +58,10 @@ public interface Neo4jProxyApi {
     @CompatSince(Neo4jVersion.V_5_15)
     String metricsManagerClass();
 
-    @CompatSince(value = Neo4jVersion.V_Dev, dev = "5.17")
+    @CompatSince(Neo4jVersion.V_5_17)
     long estimateNodeCount(Read read, int label);
 
-    @CompatSince(value = Neo4jVersion.V_Dev, dev = "5.17")
+    @CompatSince(Neo4jVersion.V_5_17)
     long estimateRelationshipCount(Read read, int sourceLabel, int targetLabel, int type);
 
     @CompatSince(Neo4jVersion.V_5_11)
@@ -60,4 +69,20 @@ public interface Neo4jProxyApi {
         org.neo4j.kernel.api.KernelTransaction transaction,
         AutoCloseable autoCloseable
     );
+
+    @CompatSince(Neo4jVersion.V_5_18)
+    default BatchImporter instantiateBlockBatchImporter(
+        DatabaseLayout directoryStructure,
+        FileSystemAbstraction fileSystem,
+        PageCacheTracer pageCacheTracer,
+        Configuration configuration,
+        CompatMonitor compatMonitor,
+        LogService logService,
+        AdditionalInitialIds additionalInitialIds,
+        Config dbConfig,
+        JobScheduler jobScheduler,
+        Collector badCollector
+    ) {
+        throw new UnsupportedOperationException("GDS does not support block store format batch importer on this Neo4j version. Requires >= Neo4j 5.18.");
+    }
 }
