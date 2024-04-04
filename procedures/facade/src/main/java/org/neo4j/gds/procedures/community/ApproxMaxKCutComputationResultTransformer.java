@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.procedures.community;
 
-import org.neo4j.gds.algorithms.community.specificfields.ApproxMaxKCutSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.algorithms.community.CommunityResultCompanion;
+import org.neo4j.gds.algorithms.community.CommunityCompanion;
+import org.neo4j.gds.algorithms.community.specificfields.ApproxMaxKCutSpecificFields;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.approxmaxkcut.ApproxMaxKCutResult;
@@ -44,7 +44,7 @@ final class ApproxMaxKCutComputationResultTransformer {
         return computationResult.result().map(approxMaxKCutResult -> {
 
             var graph = computationResult.graph();
-            var nodeProperties = CommunityResultCompanion.nodePropertyValues(
+            var nodeProperties = CommunityCompanion.nodePropertyValues(
                 false,
                 NodePropertyValuesAdapter.adapt(approxMaxKCutResult.candidateSolution()),
                 config.minCommunitySize(),

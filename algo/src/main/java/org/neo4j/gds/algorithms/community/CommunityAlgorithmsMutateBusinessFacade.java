@@ -60,7 +60,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static org.neo4j.gds.algorithms.community.CommunityResultCompanion.createIntermediateCommunitiesNodePropertyValues;
+import static org.neo4j.gds.algorithms.community.CommunityCompanion.createIntermediateCommunitiesNodePropertyValues;
 import static org.neo4j.gds.algorithms.runner.AlgorithmRunner.runWithTiming;
 
 public class CommunityAlgorithmsMutateBusinessFacade {
@@ -90,7 +90,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         return mutateNodeProperty(
             algorithmResult,
             configuration,
-            (result, config) -> CommunityResultCompanion.nodePropertyValues(
+            (result, config) -> CommunityCompanion.nodePropertyValues(
                 config.isIncremental(),
                 config.mutateProperty(),
                 config.seedProperty(),
@@ -147,7 +147,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         NodePropertyValuesMapper<LouvainResult, LouvainMutateConfig> mapper = ((result, config) -> {
             return config.includeIntermediateCommunities()
                 ? createIntermediateCommunitiesNodePropertyValues(result::getIntermediateCommunities, result.size())
-                : CommunityResultCompanion.nodePropertyValues(
+                : CommunityCompanion.nodePropertyValues(
                     config.isIncremental(),
                     config.mutateProperty(),
                     config.seedProperty(),
@@ -194,7 +194,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
                 result::getIntermediateCommunities,
                 result.communities().size()
             )
-                : CommunityResultCompanion.nodePropertyValues(
+                : CommunityCompanion.nodePropertyValues(
                     config.isIncremental(),
                     config.mutateProperty(),
                     config.seedProperty(),
@@ -240,7 +240,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
         return mutateNodeProperty(
             algorithmResult,
             configuration,
-            (result, config) -> CommunityResultCompanion.nodePropertyValues(
+            (result, config) -> CommunityCompanion.nodePropertyValues(
                 config.consecutiveIds(),
                 NodePropertyValuesAdapter.adapt(result)
             ),
@@ -273,7 +273,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             algorithmResult,
             configuration,
             ((result1, config) -> {
-                return CommunityResultCompanion.nodePropertyValues(
+                return CommunityCompanion.nodePropertyValues(
                     config.isIncremental(),
                     config.mutateProperty(),
                     config.seedProperty(),
@@ -484,7 +484,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             algorithmResult,
             configuration,
             ((result, configuration1) -> {
-                return CommunityResultCompanion.nodePropertyValues(
+                return CommunityCompanion.nodePropertyValues(
                     false,
                     NodePropertyValuesAdapter.adapt(result.candidateSolution())
                 );
@@ -513,7 +513,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
             algorithmResult,
             configuration,
             ((modularityOptimizationResult, config) -> {
-                return CommunityResultCompanion.nodePropertyValues(
+                return CommunityCompanion.nodePropertyValues(
                     config.isIncremental(),
                     config.mutateProperty(),
                     config.seedProperty(),

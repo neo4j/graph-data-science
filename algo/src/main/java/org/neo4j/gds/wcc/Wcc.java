@@ -20,6 +20,7 @@
 package org.neo4j.gds.wcc;
 
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
@@ -94,7 +95,7 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
         long nodeCount = graph.nodeCount();
         var disjointSetStruct = parameters.seedProperty()
             .map(seedProperty -> {
-                var initialComponents = graph.nodeProperties(seedProperty);
+                var initialComponents = CommunityCompanion.extractSeedingNodePropertyValues(graph, seedProperty);
                 return new HugeAtomicDisjointSetStruct(nodeCount, initialComponents, parameters.concurrency());
             })
             .orElseGet(() -> new HugeAtomicDisjointSetStruct(nodeCount, parameters.concurrency()));
