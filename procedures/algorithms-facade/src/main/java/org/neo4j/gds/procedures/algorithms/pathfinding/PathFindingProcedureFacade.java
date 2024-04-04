@@ -26,6 +26,7 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStatsModeBusinessFacade;
@@ -104,8 +105,8 @@ public final class PathFindingProcedureFacade {
     // delegate
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeFacade;
     private final PathFindingAlgorithmsStatsModeBusinessFacade statsModeFacade;
-    private final PathFindingAlgorithmsStreamModeBusinessFacade streamModeFacade;
     private final PathFindingAlgorithmsWriteModeBusinessFacade writeModeFacade;
+    private final ApplicationsFacade applicationsFacade;
 
     // applications
     private final BellmanFordMutateStub bellmanFordMutateStub;
@@ -126,8 +127,8 @@ public final class PathFindingProcedureFacade {
         ProcedureReturnColumns procedureReturnColumns,
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationModeFacade,
         PathFindingAlgorithmsStatsModeBusinessFacade statsModeFacade,
-        PathFindingAlgorithmsStreamModeBusinessFacade streamModeFacade,
         PathFindingAlgorithmsWriteModeBusinessFacade writeModeFacade,
+        ApplicationsFacade applicationsFacade,
         BellmanFordMutateStub bellmanFordMutateStub,
         BreadthFirstSearchMutateStub breadthFirstSearchMutateStub,
         DeltaSteppingMutateStub deltaSteppingMutateStub,
@@ -146,8 +147,8 @@ public final class PathFindingProcedureFacade {
 
         this.estimationModeFacade = estimationModeFacade;
         this.statsModeFacade = statsModeFacade;
-        this.streamModeFacade = streamModeFacade;
         this.writeModeFacade = writeModeFacade;
+        this.applicationsFacade = applicationsFacade;
 
         this.bellmanFordMutateStub = bellmanFordMutateStub;
         this.breadthFirstSearchMutateStub = breadthFirstSearchMutateStub;
@@ -176,8 +177,8 @@ public final class PathFindingProcedureFacade {
         PathFindingAlgorithmsEstimationModeBusinessFacade pathFindingAlgorithmsEstimationModeBusinessFacade,
         PathFindingAlgorithmsMutateModeBusinessFacade pathFindingAlgorithmsMutateModeBusinessFacade,
         PathFindingAlgorithmsStatsModeBusinessFacade pathFindingAlgorithmsStatsModeBusinessFacade,
-        PathFindingAlgorithmsStreamModeBusinessFacade pathFindingAlgorithmsStreamModeBusinessFacade,
-        PathFindingAlgorithmsWriteModeBusinessFacade pathFindingAlgorithmsWriteModeBusinessFacade
+        PathFindingAlgorithmsWriteModeBusinessFacade pathFindingAlgorithmsWriteModeBusinessFacade,
+        ApplicationsFacade applicationsFacade
     ) {
         var genericStub = new GenericStub(
             defaultsConfiguration,
@@ -255,8 +256,8 @@ public final class PathFindingProcedureFacade {
             procedureReturnColumns,
             pathFindingAlgorithmsEstimationModeBusinessFacade,
             pathFindingAlgorithmsStatsModeBusinessFacade,
-            pathFindingAlgorithmsStreamModeBusinessFacade,
             pathFindingAlgorithmsWriteModeBusinessFacade,
+            applicationsFacade,
             bellmanFordMutateStub,
             breadthFirstSearchMutateStub,
             deltaSteppingMutateStub,
@@ -282,7 +283,7 @@ public final class PathFindingProcedureFacade {
             configuration,
             AllShortestPathsConfig::of,
             resultBuilder,
-            streamModeFacade::allShortestPaths
+            streamMode()::allShortestPaths
         );
     }
 
@@ -299,7 +300,7 @@ public final class PathFindingProcedureFacade {
             configuration,
             BellmanFordStreamConfig::of,
             resultBuilder,
-            streamModeFacade::bellmanFord
+            streamMode()::bellmanFord
         );
     }
 
@@ -420,7 +421,7 @@ public final class PathFindingProcedureFacade {
             configuration,
             BfsStreamConfig::of,
             resultBuilder,
-            streamModeFacade::breadthFirstSearch
+            streamMode()::breadthFirstSearch
         );
     }
 
@@ -483,7 +484,7 @@ public final class PathFindingProcedureFacade {
             configuration,
             AllShortestPathsDeltaStreamConfig::of,
             resultBuilder,
-            streamModeFacade::deltaStepping
+            streamMode()::deltaStepping
         );
     }
 
@@ -545,7 +546,7 @@ public final class PathFindingProcedureFacade {
             configuration,
             DfsStreamConfig::of,
             resultBuilder,
-            streamModeFacade::depthFirstSearch
+            streamMode()::depthFirstSearch
         );
     }
 
@@ -590,7 +591,7 @@ public final class PathFindingProcedureFacade {
             configuration,
             DagLongestPathStreamConfig::of,
             resultBuilder,
-            streamModeFacade::longestPath
+            streamMode()::longestPath
         );
     }
 
@@ -633,7 +634,7 @@ public final class PathFindingProcedureFacade {
             configuration,
             RandomWalkStreamConfig::of,
             resultBuilder,
-            streamModeFacade::randomWalk
+            streamMode()::randomWalk
         );
     }
 
@@ -665,7 +666,7 @@ public final class PathFindingProcedureFacade {
             graphName,
             configuration,
             ShortestPathAStarStreamConfig::of,
-            streamModeFacade::singlePairShortestPathAStar
+            streamMode()::singlePairShortestPathAStar
         );
     }
 
@@ -727,7 +728,7 @@ public final class PathFindingProcedureFacade {
             graphName,
             configuration,
             ShortestPathDijkstraStreamConfig::of,
-            streamModeFacade::singlePairShortestPathDijkstra
+            streamMode()::singlePairShortestPathDijkstra
         );
     }
 
@@ -789,7 +790,7 @@ public final class PathFindingProcedureFacade {
             graphName,
             configuration,
             ShortestPathYensStreamConfig::of,
-            streamModeFacade::singlePairShortestPathYens
+            streamMode()::singlePairShortestPathYens
         );
     }
 
@@ -851,7 +852,7 @@ public final class PathFindingProcedureFacade {
             graphName,
             configuration,
             AllShortestPathsDijkstraStreamConfig::of,
-            streamModeFacade::singleSourceShortestPathDijkstra
+            streamMode()::singleSourceShortestPathDijkstra
         );
     }
 
@@ -944,7 +945,7 @@ public final class PathFindingProcedureFacade {
             configuration,
             SpanningTreeStreamConfig::of,
             resultBuilder,
-            streamModeFacade::spanningTree
+            streamMode()::spanningTree
         );
     }
 
@@ -1034,7 +1035,7 @@ public final class PathFindingProcedureFacade {
             configuration,
             SteinerTreeStreamConfig::of,
             resultBuilder,
-            streamModeFacade::steinerTree
+            streamMode()::steinerTree
         );
     }
 
@@ -1095,7 +1096,7 @@ public final class PathFindingProcedureFacade {
             configuration,
             TopologicalSortStreamConfig::of,
             resultBuilder,
-            streamModeFacade::topologicalSort
+            streamMode()::topologicalSort
         );
     }
 
@@ -1203,5 +1204,9 @@ public final class PathFindingProcedureFacade {
         var configuration = configurationCreator.createConfiguration(rawConfiguration, configurationSupplier);
 
         return algorithm.compute(graphName, configuration, resultBuilder);
+    }
+
+    private PathFindingAlgorithmsStreamModeBusinessFacade streamMode() {
+        return applicationsFacade.pathFinding().stream();
     }
 }

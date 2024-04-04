@@ -45,26 +45,25 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
  * But we do not like inheritance, so the hooks are injected
  */
 public class AlgorithmEstimationTemplate {
+    private final FictitiousGraphStoreEstimationService fictitiousGraphStoreEstimationService = new FictitiousGraphStoreEstimationService();
+
     // global scoped dependencies
     private final GraphStoreCatalogService graphStoreCatalogService;
 
     // request scoped parameters and services
     private final DatabaseGraphStoreEstimationService databaseGraphStoreEstimationService;
     private final DatabaseId databaseId;
-    private final FictitiousGraphStoreEstimationService fictitiousGraphStoreEstimationService;
     private final User user;
 
     public AlgorithmEstimationTemplate(
         GraphStoreCatalogService graphStoreCatalogService,
         DatabaseId databaseId,
         DatabaseGraphStoreEstimationService databaseGraphStoreEstimationService,
-        FictitiousGraphStoreEstimationService fictitiousGraphStoreEstimationService,
         User user
     ) {
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.databaseGraphStoreEstimationService = databaseGraphStoreEstimationService;
         this.databaseId = databaseId;
-        this.fictitiousGraphStoreEstimationService = fictitiousGraphStoreEstimationService;
         this.user = user;
     }
 

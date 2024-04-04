@@ -16,6 +16,7 @@ dependencies {
     compileOnly group: 'org.immutables', name: 'value', version: ver.'immutables'
 
     implementation project(':algorithms-procedure-facade')
+    implementation project(':applications-facade')
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-write')

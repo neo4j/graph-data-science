@@ -1,0 +1,14 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Application Facade'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    implementation project(":core")
+    implementation project(":logging")
+    implementation project(":memory-estimation")
+    implementation project(":path-finding-algorithms")
+    implementation project(":progress-tracking")
+    implementation project(":termination")
+}

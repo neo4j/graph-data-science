@@ -214,7 +214,6 @@ class AlgorithmFacadeFactoryProvider {
             graphStoreCatalogService,
             databaseId,
             databaseGraphStoreEstimationService,
-            fictitiousGraphStoreEstimationService,
             user
         );
 

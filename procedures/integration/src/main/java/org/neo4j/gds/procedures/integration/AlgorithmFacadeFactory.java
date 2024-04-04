@@ -60,13 +60,13 @@ import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStatsModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
@@ -312,10 +312,6 @@ class AlgorithmFacadeFactory {
             pathFindingAlgorithms
         );
 
-        var streamModeFacade = new PathFindingAlgorithmsStreamModeBusinessFacade(
-            algorithmProcessingTemplate, estimationModeFacade, pathFindingAlgorithms
-        );
-
         var writeModeFacade = new PathFindingAlgorithmsWriteModeBusinessFacade(
             log,
             algorithmProcessingTemplate,
@@ -326,6 +322,16 @@ class AlgorithmFacadeFactory {
             terminationFlag,
             estimationModeFacade,
             pathFindingAlgorithms
+        );
+
+        /*
+         * this guy will subsume ^^ shortly
+         * then become a parameter
+         */
+        var applicationsFacade = ApplicationsFacade.create(
+            algorithmProcessingTemplate,
+            pathFindingAlgorithms,
+            estimationModeFacade
         );
 
         return PathFindingProcedureFacade.create(
@@ -340,8 +346,8 @@ class AlgorithmFacadeFactory {
             estimationModeFacade,
             mutateModeFacade,
             statsModeFacade,
-            streamModeFacade,
-            writeModeFacade
+            writeModeFacade,
+            applicationsFacade
         );
     }
 
@@ -364,7 +370,6 @@ class AlgorithmFacadeFactory {
             nodeEmbeddingsAlgorithmsFacade,
             modelCatalogService
         );
-
 
         var writeBusinessFacade = new NodeEmbeddingsAlgorithmsWriteBusinessFacade(
             nodeEmbeddingsAlgorithmsFacade,
