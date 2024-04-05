@@ -20,6 +20,7 @@
 package org.neo4j.gds.labelpropagation;
 
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
@@ -72,7 +73,7 @@ public class LabelPropagation extends Algorithm<LabelPropagationResult> {
         NodePropertyValues seedProperty;
         String seedPropertyKey = parameters.seedProperty();
         if (seedPropertyKey != null && graph.availableNodeProperties().contains(seedPropertyKey)) {
-            seedProperty = graph.nodeProperties(seedPropertyKey);
+            seedProperty = CommunityCompanion.extractSeedingNodePropertyValues(graph, seedPropertyKey);
         } else {
             seedProperty = new LongNullPropertyMap(DefaultValue.LONG_DEFAULT_FALLBACK);
         }

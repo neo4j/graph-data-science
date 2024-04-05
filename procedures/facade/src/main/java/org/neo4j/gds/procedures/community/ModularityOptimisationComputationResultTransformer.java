@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.procedures.community;
 
-import org.neo4j.gds.algorithms.community.specificfields.ModularityOptimizationSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.algorithms.community.CommunityResultCompanion;
+import org.neo4j.gds.algorithms.community.CommunityCompanion;
+import org.neo4j.gds.algorithms.community.specificfields.ModularityOptimizationSpecificFields;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationMutateConfig;
 import org.neo4j.gds.modularityoptimization.ModularityOptimizationResult;
@@ -49,7 +49,7 @@ final class ModularityOptimisationComputationResultTransformer {
         return computationResult.result()
             .map(result -> {
                 var graph = computationResult.graph();
-                var nodePropertyValues = CommunityResultCompanion.nodePropertyValues(
+                var nodePropertyValues = CommunityCompanion.nodePropertyValues(
                     config.consecutiveIds(),
                     result.asNodeProperties(),
                     config.minCommunitySize(),

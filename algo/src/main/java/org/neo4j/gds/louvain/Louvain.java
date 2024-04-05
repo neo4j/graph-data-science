@@ -21,6 +21,7 @@ package org.neo4j.gds.louvain;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipIterator;
@@ -79,7 +80,9 @@ public final class Louvain extends Algorithm<LouvainResult> {
         this.rootGraph = graph;
         this.maxIterations = maxIterations;
         this.concurrency = concurrency;
-        this.seedingValues = Optional.ofNullable(seedProperty).map(graph::nodeProperties).orElse(null);
+        this.seedingValues = Optional.ofNullable(seedProperty)
+            .map(seedParameter -> CommunityCompanion.extractSeedingNodePropertyValues(graph, seedParameter))
+            .orElse(null);
         this.executorService = executorService;
         this.dendrogramManager = new LouvainDendrogramManager(
             graph.nodeCount(),

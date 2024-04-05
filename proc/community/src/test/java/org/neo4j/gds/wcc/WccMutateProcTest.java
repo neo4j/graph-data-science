@@ -77,8 +77,8 @@ import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
+import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -96,6 +96,7 @@ import java.util.stream.Stream;
 
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.InstanceOfAssertFactories.LONG;
 import static org.assertj.core.api.InstanceOfAssertFactories.MAP;
@@ -727,6 +728,44 @@ class WccMutateProcTest extends BaseProcTest {
             )
             .relationshipProjections(rels)
             .build();
+    }
+
+    @Test
+    void testMutateTwiceWithComputedSeed() {
+        var projectQuery = GdsCypher.call(DEFAULT_GRAPH_NAME)
+            .graphProject()
+            .loadEverything(Orientation.NATURAL)
+            .yields();
+        runQuery(projectQuery);
+        String query = GdsCypher
+            .call(DEFAULT_GRAPH_NAME)
+            .algo("wcc")
+            .mutateMode()
+            .addParameter("mutateProperty", MUTATE_PROPERTY)
+            .yields("componentCount");
+
+        runQueryWithRowConsumer(query, row -> {
+            assertThat(row.getNumber("componentCount"))
+                .asInstanceOf(LONG)
+                .isEqualTo(3L);
+        });
+
+        String secondQuery = GdsCypher
+            .call(DEFAULT_GRAPH_NAME)
+            .algo("wcc")
+            .mutateMode()
+            .addParameter("seedProperty", MUTATE_PROPERTY)
+            .addParameter("mutateProperty", "foo")
+            .yields("componentCount");
+
+        assertThatNoException().isThrownBy(() -> {
+                runQueryWithRowConsumer(secondQuery, row -> {
+                    assertThat(row.getNumber("componentCount"))
+                        .asInstanceOf(LONG)
+                        .isEqualTo(3L);
+                });
+            }
+        );
     }
 
     @NotNull

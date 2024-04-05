@@ -20,6 +20,7 @@
 package org.neo4j.gds.modularityoptimization;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
+import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -57,8 +58,14 @@ public class ModularityOptimizationFactory<CONFIG extends ModularityOptimization
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-        var seedProperty = configuration.seedProperty() != null ? graph.nodeProperties(configuration.seedProperty()) : null;
-        return build(graph, configuration.toParameters(), seedProperty, progressTracker);
+        String seedProperty = configuration.seedProperty();
+        var seedPropertyValues = seedProperty != null ?
+            CommunityCompanion.extractSeedingNodePropertyValues(
+                graph,
+                seedProperty
+            ) : null;
+        
+        return build(graph, configuration.toParameters(), seedPropertyValues, progressTracker);
     }
 
     public ModularityOptimization build(

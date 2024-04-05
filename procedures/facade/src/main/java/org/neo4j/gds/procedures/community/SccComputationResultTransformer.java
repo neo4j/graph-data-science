@@ -19,13 +19,13 @@
  */
 package org.neo4j.gds.procedures.community;
 
-import org.neo4j.gds.algorithms.community.specificfields.AlphaSccSpecificFields;
 import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
-import org.neo4j.gds.algorithms.community.specificfields.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.algorithms.community.CommunityResultCompanion;
+import org.neo4j.gds.algorithms.community.CommunityCompanion;
+import org.neo4j.gds.algorithms.community.specificfields.AlphaSccSpecificFields;
+import org.neo4j.gds.algorithms.community.specificfields.StandardCommunityStatisticsSpecificFields;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -52,7 +52,7 @@ final class SccComputationResultTransformer {
     ) {
         return computationResult.result().map(sccResult -> {
             var graph = computationResult.graph();
-            var nodePropertyValues = CommunityResultCompanion.nodePropertyValues(
+            var nodePropertyValues = CommunityCompanion.nodePropertyValues(
                 configuration.consecutiveIds(),
                 NodePropertyValuesAdapter.adapt(sccResult),
                 Optional.empty(),

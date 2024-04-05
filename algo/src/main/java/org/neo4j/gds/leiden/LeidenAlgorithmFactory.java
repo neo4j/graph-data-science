@@ -20,6 +20,7 @@
 package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
+import org.neo4j.gds.algorithms.community.CommunityCompanion;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.IterativeTask;
@@ -38,7 +39,7 @@ public class LeidenAlgorithmFactory<CONFIG extends LeidenBaseConfig> extends Gra
                 "The Leiden algorithm works only with undirected graphs. Please orient the edges properly");
         }
         var seedValues = Optional.ofNullable(parameters.seedProperty())
-            .map(graph::nodeProperties)
+            .map(seedParameter -> CommunityCompanion.extractSeedingNodePropertyValues(graph, seedParameter))
             .orElse(null);
 
         return new Leiden(

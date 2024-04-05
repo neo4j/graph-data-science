@@ -63,8 +63,8 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.algorithms.community.CommunityResultCompanion.arrayMatrixToListMatrix;
-import static org.neo4j.gds.algorithms.community.CommunityResultCompanion.createIntermediateCommunitiesNodePropertyValues;
+import static org.neo4j.gds.algorithms.community.CommunityCompanion.arrayMatrixToListMatrix;
+import static org.neo4j.gds.algorithms.community.CommunityCompanion.createIntermediateCommunitiesNodePropertyValues;
 import static org.neo4j.gds.algorithms.runner.AlgorithmRunner.runWithTiming;
 
 public class CommunityAlgorithmsWriteBusinessFacade {
@@ -94,7 +94,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
         return writeToDatabase(
             algorithmResult,
             configuration,
-            (result, config) -> CommunityResultCompanion.nodePropertyValues(
+            (result, config) -> CommunityCompanion.nodePropertyValues(
                 config.isIncremental(),
                 config.seedProperty(),
                 config.writeProperty(),
@@ -163,7 +163,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
         return writeToDatabase(
             algorithmResult,
             configuration,
-            (result, config) -> CommunityResultCompanion.nodePropertyValues(
+            (result, config) -> CommunityCompanion.nodePropertyValues(
                 config.consecutiveIds(),
                 NodePropertyValuesAdapter.adapt(result),
                 Optional.empty(),
@@ -234,7 +234,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
 
         NodePropertyValuesMapper<LouvainResult, LouvainWriteConfig> mapper = ((result, config) -> config.includeIntermediateCommunities()
             ? createIntermediateCommunitiesNodePropertyValues(result::getIntermediateCommunities, result.size())
-            : CommunityResultCompanion.nodePropertyValues(
+            : CommunityCompanion.nodePropertyValues(
                 config.isIncremental(),
                 config.writeProperty(),
                 config.seedProperty(),
@@ -282,7 +282,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
         return writeToDatabase(
             algorithmResult,
             configuration,
-            ((result, config) -> CommunityResultCompanion.nodePropertyValues(
+            ((result, config) -> CommunityCompanion.nodePropertyValues(
                 config.isIncremental(),
                 config.writeProperty(),
                 config.seedProperty(),
@@ -326,7 +326,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             result::getIntermediateCommunities,
             result.communities().size()
         )
-            : CommunityResultCompanion.nodePropertyValues(
+            : CommunityCompanion.nodePropertyValues(
                 config.isIncremental(),
                 config.writeProperty(),
                 config.seedProperty(),
@@ -415,7 +415,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
         return writeToDatabase(
             algorithmResult,
             config,
-            (result, configuration) -> CommunityResultCompanion.nodePropertyValues(
+            (result, configuration) -> CommunityCompanion.nodePropertyValues(
                 false,
                 NodePropertyValuesAdapter.adapt(result.colors()),
                 configuration.minCommunitySize(),
@@ -457,7 +457,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
         return writeToDatabase(
             algorithmResult,
             configuration,
-            (result, config) -> CommunityResultCompanion.nodePropertyValues(
+            (result, config) -> CommunityCompanion.nodePropertyValues(
                 config.isIncremental(),
                 config.writeProperty(),
                 config.seedProperty(),

@@ -20,6 +20,8 @@
 package org.neo4j.gds.algorithms.community;
 
 import org.eclipse.collections.api.block.function.primitive.LongToObjectFunction;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
@@ -35,9 +37,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public final class CommunityResultCompanion {
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-    private CommunityResultCompanion() {}
+public final class CommunityCompanion {
+
+    private CommunityCompanion() {}
 
     public static NodePropertyValues nodePropertyValues(
         boolean consecutiveIds,
@@ -214,4 +218,22 @@ public final class CommunityResultCompanion {
             return communitySizes.get(communityId) >= minCommunitySize;
         }
     }
+
+    public static NodePropertyValues extractSeedingNodePropertyValues(Graph graph, String seedingProperty) {
+
+        var nodePropertyValues = graph.nodeProperties(seedingProperty);
+        if (nodePropertyValues == null)
+            return null;
+
+        if (nodePropertyValues.valueType() != ValueType.LONG) {
+            throw new IllegalArgumentException(
+                formatWithLocale(
+                    " Provided seeding property `%s`  does not comprise exclusively of long values",
+                    seedingProperty
+                ));
+        }
+        
+        return nodePropertyValues;
+    }
+
 }
