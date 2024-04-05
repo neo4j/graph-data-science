@@ -20,8 +20,7 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.function.ThrowingFunction;
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.User;
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTemplate;
@@ -117,6 +116,12 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         var terminationFlag = terminationFlagAccessor.createTerminationFlag(kernelTransaction);
         var user = userAccessor.getUser(context.securityContext());
 
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(databaseId)
+            .with(terminationFlag)
+            .with(user)
+            .build();
+
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
 
@@ -142,15 +147,11 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         // this eventually goes below the fold, inside the application layer
         var algorithmEstimationTemplate = new AlgorithmEstimationTemplate(
             graphStoreCatalogService,
-            databaseId,
             databaseGraphStoreEstimationService,
-            user
+            requestScopedDependencies
         );
 
-        var algorithmProcessingTemplate = buildAlgorithmProcessingTemplate(
-            databaseId,
-            user
-        );
+        var algorithmProcessingTemplate = buildAlgorithmProcessingTemplate(requestScopedDependencies);
 
         var applicationsFacade = ApplicationsFacade.create(
             log,
@@ -162,8 +163,8 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             nodePropertyExporterBuilder,
             relationshipExporterBuilder,
             relationshipStreamExporterBuilder,
+            requestScopedDependencies,
             taskRegistryFactory,
-            terminationFlag,
             userLogRegistryFactory
         );
 
@@ -173,11 +174,9 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             context,
             nodePropertyExporterBuilder,
             relationshipExporterBuilder,
+            requestScopedDependencies,
             taskRegistryFactory,
             userLogRegistryFactory,
-            terminationFlag,
-            databaseId,
-            user,
             kernelTransaction,
             graphDatabaseService,
             databaseGraphStoreEstimationService
@@ -204,10 +203,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             .build();
     }
 
-    private AlgorithmProcessingTemplate buildAlgorithmProcessingTemplate(
-        DatabaseId databaseId,
-        User user
-    ) {
+    private AlgorithmProcessingTemplate buildAlgorithmProcessingTemplate(RequestScopedDependencies requestScopedDependencies) {
         var memoryGuard = new DefaultMemoryGuard(log, useMaxMemoryEstimation, memoryGauge);
 
         var algorithmProcessingTemplate = new DefaultAlgorithmProcessingTemplate(
@@ -215,8 +211,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             algorithmMetricsService,
             graphStoreCatalogService,
             memoryGuard,
-            databaseId,
-            user
+            requestScopedDependencies
         );
 
         if (algorithmProcessingTemplateDecorator.isEmpty()) return algorithmProcessingTemplate;

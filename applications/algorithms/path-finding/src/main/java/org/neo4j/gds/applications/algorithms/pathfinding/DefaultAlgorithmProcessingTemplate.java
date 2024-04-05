@@ -20,11 +20,10 @@
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -42,25 +41,22 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
     private final AlgorithmMetricsService algorithmMetricsService;
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final MemoryGuard memoryGuard;
+    private final RequestScopedDependencies requestScopedDependencies;
 
     // request scoped parameters
-    private final DatabaseId databaseId;
-    private final User user;
 
     public DefaultAlgorithmProcessingTemplate(
         Log log,
         AlgorithmMetricsService algorithmMetricsService,
         GraphStoreCatalogService graphStoreCatalogService,
         MemoryGuard memoryGuard,
-        DatabaseId databaseId,
-        User user
+        RequestScopedDependencies requestScopedDependencies
     ) {
         this.log = log;
         this.algorithmMetricsService = algorithmMetricsService;
         this.graphStoreCatalogService = graphStoreCatalogService;
-        this.databaseId = databaseId;
-        this.user = user;
         this.memoryGuard = memoryGuard;
+        this.requestScopedDependencies = requestScopedDependencies;
     }
 
     @Override
@@ -148,8 +144,8 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
                 graphName,
                 configuration,
                 relationshipProperty,
-                user,
-                databaseId
+                requestScopedDependencies.getUser(),
+                requestScopedDependencies.getDatabaseId()
             );
 
             // ValidationConfiguration post-load stuff would go here

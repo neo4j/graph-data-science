@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications;
 
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
@@ -33,7 +34,6 @@ import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.termination.TerminationFlag;
 
 /**
  * The facade over path finding applications
@@ -67,16 +67,16 @@ public final class PathFindingApplications {
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         RelationshipExporterBuilder relationshipExporterBuilder,
         RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
+        RequestScopedDependencies requestScopedDependencies,
         TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
         UserLogRegistryFactory userLogRegistryFactory,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
         AlgorithmEstimationTemplate algorithmEstimationTemplate
     ) {
         var pathFindingAlgorithms = new PathFindingAlgorithms(
             log,
+            requestScopedDependencies,
             taskRegistryFactory,
-            terminationFlag,
             userLogRegistryFactory
         );
 
@@ -106,8 +106,8 @@ public final class PathFindingApplications {
             nodePropertyExporterBuilder,
             relationshipExporterBuilder,
             relationshipStreamExporterBuilder,
+            requestScopedDependencies,
             taskRegistryFactory,
-            terminationFlag,
             estimationModeFacade,
             pathFindingAlgorithms
         );

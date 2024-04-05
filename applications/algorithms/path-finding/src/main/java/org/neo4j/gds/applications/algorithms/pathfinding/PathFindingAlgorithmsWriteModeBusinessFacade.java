@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
@@ -43,7 +44,6 @@ import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeWriteConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -68,8 +68,8 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     private final NodePropertyExporterBuilder nodePropertyExporterBuilder;
     private final RelationshipExporterBuilder relationshipExporterBuilder;
     private final RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
+    private final RequestScopedDependencies requestScopedDependencies;
     private final TaskRegistryFactory taskRegistryFactory;
-    private final TerminationFlag terminationFlag;
 
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final PathFindingAlgorithms pathFindingAlgorithms;
@@ -80,8 +80,8 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         RelationshipExporterBuilder relationshipExporterBuilder,
         RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
+        RequestScopedDependencies requestScopedDependencies,
         TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         PathFindingAlgorithms pathFindingAlgorithms
     ) {
@@ -90,8 +90,8 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
         this.relationshipExporterBuilder = relationshipExporterBuilder;
         this.relationshipStreamExporterBuilder = relationshipStreamExporterBuilder;
+        this.requestScopedDependencies = requestScopedDependencies;
         this.taskRegistryFactory = taskRegistryFactory;
-        this.terminationFlag = terminationFlag;
         this.estimationFacade = estimationFacade;
         this.pathFindingAlgorithms = pathFindingAlgorithms;
     }
@@ -105,7 +105,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             log,
             relationshipStreamExporterBuilder,
             taskRegistryFactory,
-            terminationFlag,
+            requestScopedDependencies.getTerminationFlag(),
             configuration
         );
 
@@ -144,7 +144,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             log,
             nodePropertyExporterBuilder,
             taskRegistryFactory,
-            terminationFlag,
+            requestScopedDependencies.getTerminationFlag(),
             configuration
         );
 
@@ -227,7 +227,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         var writeStep = new SpanningTreeWriteStep(
             log,
             relationshipExporterBuilder,
-            terminationFlag,
+            requestScopedDependencies.getTerminationFlag(),
             taskRegistryFactory,
             configuration
         );
@@ -248,7 +248,11 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         SteinerTreeWriteConfig configuration,
         ResultBuilder<SteinerTreeWriteConfig, SteinerTreeResult, RESULT> resultBuilder
     ) {
-        var writeStep = new SteinerTreeWriteStep(relationshipExporterBuilder, terminationFlag, configuration);
+        var writeStep = new SteinerTreeWriteStep(
+            relationshipExporterBuilder,
+            requestScopedDependencies.getTerminationFlag(),
+            configuration
+        );
 
         return runAlgorithmAndWrite(
             graphName,
@@ -276,7 +280,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             log,
             relationshipStreamExporterBuilder,
             taskRegistryFactory,
-            terminationFlag,
+            requestScopedDependencies.getTerminationFlag(),
             configuration
         );
 

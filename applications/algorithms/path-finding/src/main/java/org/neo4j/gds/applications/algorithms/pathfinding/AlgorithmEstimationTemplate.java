@@ -19,10 +19,9 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.algorithms.estimation.GraphDimensionsComputer;
-import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
@@ -52,19 +51,16 @@ public class AlgorithmEstimationTemplate {
 
     // request scoped parameters and services
     private final DatabaseGraphStoreEstimationService databaseGraphStoreEstimationService;
-    private final DatabaseId databaseId;
-    private final User user;
+    private final RequestScopedDependencies requestScopedDependencies;
 
     public AlgorithmEstimationTemplate(
         GraphStoreCatalogService graphStoreCatalogService,
-        DatabaseId databaseId,
         DatabaseGraphStoreEstimationService databaseGraphStoreEstimationService,
-        User user
+        RequestScopedDependencies requestScopedDependencies
     ) {
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.databaseGraphStoreEstimationService = databaseGraphStoreEstimationService;
-        this.databaseId = databaseId;
-        this.user = user;
+        this.requestScopedDependencies = requestScopedDependencies;
     }
 
     <CONFIGURATION extends AlgoBaseConfig> MemoryEstimateResult estimate(
@@ -75,7 +71,7 @@ public class AlgorithmEstimationTemplate {
         var estimationBuilder = MemoryEstimations.builder("Memory Estimation");
 
         if (graphNameOrConfiguration instanceof Map) {
-            var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(user.getUsername());
+            var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(requestScopedDependencies.getUser().getUsername());
             var projectionConfiguration = memoryEstimationGraphConfigParser.parse(graphNameOrConfiguration);
 
             var graphMemoryEstimation = estimate(projectionConfiguration);
@@ -117,8 +113,8 @@ public class AlgorithmEstimationTemplate {
         var graphStore = graphStoreCatalogService.getGraphStore(
             graphName,
             configuration,
-            user,
-            databaseId
+            requestScopedDependencies.getUser(),
+            requestScopedDependencies.getDatabaseId()
         );
 
         return GraphDimensionsComputer.of(graphStore, configuration);

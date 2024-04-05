@@ -30,8 +30,6 @@ import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -46,7 +44,6 @@ import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.modelcatalogservices.ModelCatalogServiceProvider;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.Context;
@@ -93,11 +90,9 @@ class AlgorithmFacadeFactoryProvider {
         Context context,
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         RelationshipExporterBuilder relationshipExporterBuilder,
+        RequestScopedDependencies requestScopedDependencies,
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory,
-        TerminationFlag terminationFlag,
-        DatabaseId databaseId,
-        User user,
         KernelTransaction kernelTransaction,
         GraphDatabaseService graphDatabaseService,
         DatabaseGraphStoreEstimationService databaseGraphStoreEstimationService
@@ -117,26 +112,24 @@ class AlgorithmFacadeFactoryProvider {
         var returnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
 
         // Second layer
-        var configurationCreator = new ConfigurationCreator(configurationParser, algorithmMetaDataSetter, user);
-
-        var requestScopedDependencies = RequestScopedDependencies.builder()
-            .with(databaseId)
-            .with(user)
-            .with(terminationFlag)
-            .build();
+        var configurationCreator = new ConfigurationCreator(
+            configurationParser,
+            algorithmMetaDataSetter,
+            requestScopedDependencies.getUser()
+        );
 
         // Third layer
         var writeNodePropertyService = new WriteNodePropertyService(
             log,
             nodePropertyExporterBuilder,
             taskRegistryFactory,
-            terminationFlag
+            requestScopedDependencies.getTerminationFlag()
         );
         var writeRelationshipService = new WriteRelationshipService(
             log,
             relationshipExporterBuilder,
             taskRegistryFactory,
-            terminationFlag
+            requestScopedDependencies.getTerminationFlag()
         );
 
         // Fourth layer
@@ -144,8 +137,7 @@ class AlgorithmFacadeFactoryProvider {
             graphStoreCatalogService,
             fictitiousGraphStoreEstimationService,
             databaseGraphStoreEstimationService,
-            databaseId,
-            user
+            requestScopedDependencies
         );
         var algorithmRunner = new AlgorithmRunner(
             log,
@@ -172,7 +164,7 @@ class AlgorithmFacadeFactoryProvider {
             writeRelationshipService,
             algorithmRunner,
             algorithmEstimator,
-            user,
+            requestScopedDependencies.getUser(),
             modelCatalogServiceProvider.createService(graphDatabaseService, log)
         );
     }

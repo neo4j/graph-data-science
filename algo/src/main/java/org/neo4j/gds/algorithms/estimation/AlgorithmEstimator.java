@@ -21,9 +21,8 @@ package org.neo4j.gds.algorithms.estimation;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.MemoryEstimateDefinition;
-import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -44,21 +43,18 @@ public class AlgorithmEstimator {
 
     private final FictitiousGraphStoreEstimationService fictitiousGraphStoreEstimationService;
     private final DatabaseGraphStoreEstimationService databaseGraphStoreEstimationService;
-    private final DatabaseId databaseId;
-    private final User user;
+    private final RequestScopedDependencies requestScopedDependencies;
 
     public AlgorithmEstimator(
         GraphStoreCatalogService graphStoreCatalogService,
         FictitiousGraphStoreEstimationService fictitiousGraphStoreEstimationService,
         DatabaseGraphStoreEstimationService databaseGraphStoreEstimationService,
-        DatabaseId databaseId,
-        User user
+        RequestScopedDependencies requestScopedDependencies
     ) {
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.fictitiousGraphStoreEstimationService = fictitiousGraphStoreEstimationService;
         this.databaseGraphStoreEstimationService = databaseGraphStoreEstimationService;
-        this.databaseId = databaseId;
-        this.user = user;
+        this.requestScopedDependencies = requestScopedDependencies;
     }
 
     public <G, A extends Algorithm<?>, C extends AlgoBaseConfig> MemoryEstimateResult estimate(
@@ -71,7 +67,7 @@ public class AlgorithmEstimator {
 
         var estimationBuilder = MemoryEstimations.builder("Memory Estimation");
         if (graphNameOrConfiguration instanceof Map) {
-            var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(user.getUsername());
+            var memoryEstimationGraphConfigParser = new MemoryEstimationGraphConfigParser(requestScopedDependencies.getUser().getUsername());
             var graphProjectConfig = memoryEstimationGraphConfigParser.parse(graphNameOrConfiguration);
 
             var graphMemoryEstimation = graphProjectConfig.isFictitiousLoading()
@@ -86,8 +82,8 @@ public class AlgorithmEstimator {
                     (String) graphNameOrConfiguration),
                 config,
                 maybeRelationshipProperty,
-                user,
-                databaseId
+                requestScopedDependencies.getUser(),
+                requestScopedDependencies.getDatabaseId()
             ).getRight();
             dimensions = GraphDimensionsComputer.of(graphStore, config);
         } else {

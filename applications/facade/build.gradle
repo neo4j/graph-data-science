@@ -5,6 +5,7 @@ description = 'Neo4j Graph Data Science :: Application Facade'
 group = 'org.neo4j.gds'
 
 dependencies {
+    implementation project(":algo")
     implementation project(":core")
     implementation project(":core-write")
     implementation project(":graph-store-catalog-applications")

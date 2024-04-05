@@ -99,6 +99,10 @@ public class GraphStoreCatalogService {
         return Pair.of(graph, graphStore);
     }
 
+    /**
+     * @deprecated Push RequestScopedDependencies down and use it instead of database id + user parameters
+     */
+    @Deprecated
     public GraphStore getGraphStore(GraphName graphName, AlgoBaseConfig config, User user, DatabaseId databaseId) {
         var catalogRequest = CatalogRequest.of(user, databaseId, config.usernameOverride());
         var graphStoreWithConfig = get(catalogRequest, graphName);

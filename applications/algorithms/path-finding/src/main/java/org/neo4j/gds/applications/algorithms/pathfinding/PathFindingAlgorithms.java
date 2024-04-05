@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.allshortestpaths.MSBFSASPAlgorithm;
@@ -66,7 +67,6 @@ import org.neo4j.gds.spanningtree.SpanningTreeBaseConfig;
 import org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm;
 import org.neo4j.gds.steiner.SteinerTreeBaseConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.traversal.RandomWalk;
 import org.neo4j.gds.traversal.RandomWalkBaseConfig;
 
@@ -102,19 +102,19 @@ public class PathFindingAlgorithms {
     private final Log log;
 
     // request scoped parameters
+    private final RequestScopedDependencies requestScopedDependencies;
     private final TaskRegistryFactory taskRegistryFactory;
-    private final TerminationFlag terminationFlag;
     private final UserLogRegistryFactory userLogRegistryFactory;
 
     public PathFindingAlgorithms(
         Log log,
+        RequestScopedDependencies requestScopedDependencies,
         TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
         UserLogRegistryFactory userLogRegistryFactory
     ) {
         this.log = log;
+        this.requestScopedDependencies = requestScopedDependencies;
         this.taskRegistryFactory = taskRegistryFactory;
-        this.terminationFlag = terminationFlag;
         this.userLogRegistryFactory = userLogRegistryFactory;
     }
 
@@ -251,7 +251,12 @@ public class PathFindingAlgorithms {
             Tasks.leaf(A_STAR, graph.relationshipCount())
         );
 
-        var algorithm = AStar.sourceTarget(graph, configuration, progressTracker, terminationFlag);
+        var algorithm = AStar.sourceTarget(
+            graph,
+            configuration,
+            progressTracker,
+            requestScopedDependencies.getTerminationFlag()
+        );
 
         return algorithm.compute();
     }
@@ -275,7 +280,7 @@ public class PathFindingAlgorithms {
             false,
             Optional.empty(),
             progressTracker,
-            terminationFlag
+            requestScopedDependencies.getTerminationFlag()
         );
 
         return dijkstra.compute();
@@ -291,7 +296,12 @@ public class PathFindingAlgorithms {
             yensTask
         );
 
-        var yens = Yens.sourceTarget(graph, configuration, progressTracker, terminationFlag);
+        var yens = Yens.sourceTarget(
+            graph,
+            configuration,
+            progressTracker,
+            requestScopedDependencies.getTerminationFlag()
+        );
 
         return yens.compute();
     }
@@ -308,7 +318,7 @@ public class PathFindingAlgorithms {
             false,
             Optional.empty(),
             progressTracker,
-            terminationFlag
+            requestScopedDependencies.getTerminationFlag()
         );
 
         return dijkstra.compute();

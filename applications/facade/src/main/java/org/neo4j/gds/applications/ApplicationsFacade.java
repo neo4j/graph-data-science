@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications;
 
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
@@ -31,7 +32,6 @@ import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -65,8 +65,8 @@ public final class ApplicationsFacade {
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         RelationshipExporterBuilder relationshipExporterBuilder,
         RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
+        RequestScopedDependencies requestScopedDependencies,
         TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
         UserLogRegistryFactory userLogRegistryFactory
     ) {
         var catalogBusinessFacade = createCatalogBusinessFacade(
@@ -81,8 +81,8 @@ public final class ApplicationsFacade {
             nodePropertyExporterBuilder,
             relationshipExporterBuilder,
             relationshipStreamExporterBuilder,
+            requestScopedDependencies,
             taskRegistryFactory,
-            terminationFlag,
             userLogRegistryFactory,
             algorithmProcessingTemplate,
             algorithmEstimationTemplate

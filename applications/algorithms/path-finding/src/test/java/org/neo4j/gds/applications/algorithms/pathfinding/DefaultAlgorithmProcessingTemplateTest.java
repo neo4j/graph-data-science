@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
@@ -58,8 +59,7 @@ class DefaultAlgorithmProcessingTemplateTest {
             algorithmMetricsService,
             graphStoreCatalogService,
             MemoryGuard.DISABLED,
-            databaseId,
-            user
+            RequestScopedDependencies.builder().with(databaseId).with(user).build()
         );
 
         var graphName = GraphName.parse("some graph");
@@ -135,8 +135,7 @@ class DefaultAlgorithmProcessingTemplateTest {
             algorithmMetricsService,
             graphStoreCatalogService,
             MemoryGuard.DISABLED,
-            databaseId,
-            user
+            RequestScopedDependencies.builder().with(databaseId).with(user).build()
         );
 
         var graphName = GraphName.parse("some graph");
@@ -211,7 +210,6 @@ class DefaultAlgorithmProcessingTemplateTest {
             null,
             null,
             MemoryGuard.DISABLED,
-            null,
             null
         ) {
             @Override
