@@ -53,7 +53,6 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.graphsampling.RandomWalkSamplerType.CNARW;
 import static org.neo4j.gds.graphsampling.RandomWalkSamplerType.RWR;
 
-
 /**
  * This layer is shared between Neo4j and other integrations. It is entry-point agnostic.
  * "Business facade" to distinguish it from "procedure facade" and similar.
@@ -74,13 +73,16 @@ import static org.neo4j.gds.graphsampling.RandomWalkSamplerType.RWR;
  * or behind other facades (oh gosh turtles, turtles everywhere :scream:).
  */
 public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
+    private final CatalogConfigurationService catalogConfigurationService = new CatalogConfigurationService();
+    private final GraphStoreValidationService graphStoreValidationService = new GraphStoreValidationService();
+
+    // global dependencies
     private final Log log;
+    private final GraphStoreCatalogService graphStoreCatalogService;
+    private final ProjectionMetricsService projectionMetricsService;
 
     // services
-    private final CatalogConfigurationService catalogConfigurationService;
     private final GraphNameValidationService graphNameValidationService;
-    private final GraphStoreCatalogService graphStoreCatalogService;
-    private final GraphStoreValidationService graphStoreValidationService;
 
     // applications
     private final DropGraphApplication dropGraphApplication;
@@ -102,14 +104,12 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
     private final GraphSamplingApplication graphSamplingApplication;
     private final EstimateCommonNeighbourAwareRandomWalkApplication estimateCommonNeighbourAwareRandomWalkApplication;
     private final GenerateGraphApplication generateGraphApplication;
-    private final ProjectionMetricsService projectionMetricsService;
 
-    public DefaultCatalogBusinessFacade(
+    DefaultCatalogBusinessFacade(
         Log log,
-        CatalogConfigurationService catalogConfigurationService,
-        GraphNameValidationService graphNameValidationService,
         GraphStoreCatalogService graphStoreCatalogService,
-        GraphStoreValidationService graphStoreValidationService,
+        ProjectionMetricsService projectionMetricsService,
+        GraphNameValidationService graphNameValidationService,
         CypherProjectApplication cypherProjectApplication,
         DropGraphApplication dropGraphApplication,
         DropNodePropertiesApplication dropNodePropertiesApplication,
@@ -125,18 +125,16 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         StreamRelationshipPropertiesApplication streamRelationshipPropertiesApplication,
         StreamRelationshipsApplication streamRelationshipsApplication,
         SubGraphProjectApplication subGraphProjectApplication,
+        WriteNodeLabelApplication writeNodeLabelApplication,
         WriteNodePropertiesApplication writeNodePropertiesApplication,
         WriteRelationshipPropertiesApplication writeRelationshipPropertiesApplication,
-        WriteNodeLabelApplication writeNodeLabelApplication,
-        WriteRelationshipsApplication writeRelationshipsApplication,
-        ProjectionMetricsService projectionMetricsService
+        WriteRelationshipsApplication writeRelationshipsApplication
     ) {
         this.log = log;
-
-        this.catalogConfigurationService = catalogConfigurationService;
-        this.graphNameValidationService = graphNameValidationService;
         this.graphStoreCatalogService = graphStoreCatalogService;
-        this.graphStoreValidationService = graphStoreValidationService;
+        this.projectionMetricsService = projectionMetricsService;
+
+        this.graphNameValidationService = graphNameValidationService;
 
         this.dropGraphApplication = dropGraphApplication;
         this.listGraphApplication = listGraphApplication;
@@ -157,7 +155,75 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         this.graphSamplingApplication = graphSamplingApplication;
         this.estimateCommonNeighbourAwareRandomWalkApplication = estimateCommonNeighbourAwareRandomWalkApplication;
         this.generateGraphApplication = generateGraphApplication;
-        this.projectionMetricsService = projectionMetricsService;
+    }
+
+    public static CatalogBusinessFacade create(
+        Log log,
+        GraphStoreCatalogService graphStoreCatalogService,
+        ProjectionMetricsService projectionMetricsService
+    ) {
+        var graphNameValidationService = new GraphNameValidationService();
+
+        var cypherProjectApplication = new CypherProjectApplication(
+            new GenericProjectApplication<>(
+                log,
+                graphStoreCatalogService,
+                GraphProjectCypherResult.Builder::new
+            )
+        );
+        var dropGraphApplication = new DropGraphApplication(graphStoreCatalogService);
+        var dropNodePropertiesApplication = new DropNodePropertiesApplication(log);
+        var dropRelationshipsApplication = new DropRelationshipsApplication(log);
+        var estimateCommonNeighbourAwareRandomWalkApplication = new EstimateCommonNeighbourAwareRandomWalkApplication();
+        var generateGraphApplication = new GenerateGraphApplication(log, graphStoreCatalogService);
+        var graphMemoryUsageApplication = new GraphMemoryUsageApplication(graphStoreCatalogService);
+        var graphSamplingApplication = new GraphSamplingApplication(log, graphStoreCatalogService);
+        var listGraphApplication = ListGraphApplication.create(graphStoreCatalogService);
+        var nativeProjectApplication = new NativeProjectApplication(
+            new GenericProjectApplication<>(
+                log,
+                graphStoreCatalogService,
+                GraphProjectNativeResult.Builder::new
+            )
+        );
+        var nodeLabelMutatorApplication = new NodeLabelMutatorApplication();
+        var streamNodePropertiesApplication = new StreamNodePropertiesApplication(log);
+        var streamRelationshipPropertiesApplication = new StreamRelationshipPropertiesApplication(log);
+        var streamRelationshipsApplication = new StreamRelationshipsApplication();
+        var subGraphProjectApplication = new SubGraphProjectApplication(
+            log,
+            graphStoreCatalogService
+        );
+        var writeNodeLabelApplication = new WriteNodeLabelApplication(log);
+        var writeNodePropertiesApplication = new WriteNodePropertiesApplication(log);
+        var writeRelationshipPropertiesApplication = new WriteRelationshipPropertiesApplication(log);
+        var writeRelationshipsApplication = new WriteRelationshipsApplication(log);
+
+        return new DefaultCatalogBusinessFacade(
+            log,
+            graphStoreCatalogService,
+            projectionMetricsService,
+            graphNameValidationService,
+            cypherProjectApplication,
+            dropGraphApplication,
+            dropNodePropertiesApplication,
+            dropRelationshipsApplication,
+            estimateCommonNeighbourAwareRandomWalkApplication,
+            generateGraphApplication,
+            graphMemoryUsageApplication,
+            graphSamplingApplication,
+            listGraphApplication,
+            nativeProjectApplication,
+            nodeLabelMutatorApplication,
+            streamNodePropertiesApplication,
+            streamRelationshipPropertiesApplication,
+            streamRelationshipsApplication,
+            subGraphProjectApplication,
+            writeNodeLabelApplication,
+            writeNodePropertiesApplication,
+            writeRelationshipPropertiesApplication,
+            writeRelationshipsApplication
+        );
     }
 
     @Override
@@ -229,7 +295,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         );
 
         var projectMetric = projectionMetricsService.createNative();
-        try(projectMetric) {
+        try (projectMetric) {
             projectMetric.start();
             return nativeProjectApplication.project(
                 databaseId,
@@ -302,7 +368,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         );
 
         var projectMetric = projectionMetricsService.createCypher();
-        try(projectMetric) {
+        try (projectMetric) {
             projectMetric.start();
             return cypherProjectApplication.project(
                 databaseId,
@@ -382,7 +448,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         );
 
         var subGraphMetric = projectionMetricsService.createSubGraph();
-        try(subGraphMetric) {
+        try (subGraphMetric) {
             subGraphMetric.start();
             return subGraphProjectApplication.project(
                 taskRegistryFactory,

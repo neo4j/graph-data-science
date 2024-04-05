@@ -22,6 +22,7 @@ package org.neo4j.gds.executor;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.applications.graphstorecatalog.MemoryUsageValidator;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;

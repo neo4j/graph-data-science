@@ -7,8 +7,10 @@ group = 'org.neo4j.gds'
 dependencies {
     implementation project(":core")
     implementation project(":core-write")
+    implementation project(":graph-store-catalog-applications")
     implementation project(":logging")
     implementation project(":memory-estimation")
+    implementation project(":metrics-api")
     implementation project(":path-finding-algorithms")
     implementation project(":progress-tracking")
     implementation project(":termination")

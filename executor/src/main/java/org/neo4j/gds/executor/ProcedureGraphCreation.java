@@ -25,6 +25,8 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.applications.graphstorecatalog.GraphStoreLoader;
+import org.neo4j.gds.applications.graphstorecatalog.MemoryUsageValidator;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;

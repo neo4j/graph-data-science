@@ -21,13 +21,20 @@ package org.neo4j.gds.applications;
 
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
+import org.neo4j.gds.applications.graphstorecatalog.DefaultCatalogBusinessFacade;
+import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.termination.TerminationFlag;
+
+import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * This is the top level facade for GDS applications. If you are integrating GDS,
@@ -37,9 +44,11 @@ import org.neo4j.gds.termination.TerminationFlag;
  * and we apply a breakdown into sub-facades to keep things smaller and more manageable.
  */
 public final class ApplicationsFacade {
+    private final CatalogBusinessFacade catalogBusinessFacade;
     private final PathFindingApplications pathFindingApplications;
 
-    private ApplicationsFacade(PathFindingApplications pathFindingApplications) {
+    ApplicationsFacade(CatalogBusinessFacade catalogBusinessFacade, PathFindingApplications pathFindingApplications) {
+        this.catalogBusinessFacade = catalogBusinessFacade;
         this.pathFindingApplications = pathFindingApplications;
     }
 
@@ -48,15 +57,25 @@ public final class ApplicationsFacade {
      */
     public static ApplicationsFacade create(
         Log log,
+        Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> catalogBusinessFacadeDecorator,
+        GraphStoreCatalogService graphStoreCatalogService,
+        ProjectionMetricsService projectionMetricsService,
+        AlgorithmEstimationTemplate algorithmEstimationTemplate,
+        AlgorithmProcessingTemplate algorithmProcessingTemplate,
         NodePropertyExporterBuilder nodePropertyExporterBuilder,
         RelationshipExporterBuilder relationshipExporterBuilder,
         RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
-        UserLogRegistryFactory userLogRegistryFactory,
-        AlgorithmProcessingTemplate algorithmProcessingTemplate,
-        AlgorithmEstimationTemplate algorithmEstimationTemplate
+        UserLogRegistryFactory userLogRegistryFactory
     ) {
+        var catalogBusinessFacade = createCatalogBusinessFacade(
+            log,
+            catalogBusinessFacadeDecorator,
+            graphStoreCatalogService,
+            projectionMetricsService
+        );
+
         var pathFindingApplications = PathFindingApplications.create(
             log,
             nodePropertyExporterBuilder,
@@ -69,7 +88,31 @@ public final class ApplicationsFacade {
             algorithmEstimationTemplate
         );
 
-        return new ApplicationsFacade(pathFindingApplications);
+        return new ApplicationsFacadeBuilder()
+            .with(catalogBusinessFacade)
+            .with(pathFindingApplications)
+            .build();
+    }
+
+    private static CatalogBusinessFacade createCatalogBusinessFacade(
+        Log log,
+        Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> catalogBusinessFacadeDecorator,
+        GraphStoreCatalogService graphStoreCatalogService,
+        ProjectionMetricsService projectionMetricsService
+    ) {
+        var catalogBusinessFacade = DefaultCatalogBusinessFacade.create(
+            log,
+            graphStoreCatalogService,
+            projectionMetricsService
+        );
+
+        if (catalogBusinessFacadeDecorator.isEmpty()) return catalogBusinessFacade;
+
+        return catalogBusinessFacadeDecorator.get().apply(catalogBusinessFacade);
+    }
+
+    public CatalogBusinessFacade catalog() {
+        return catalogBusinessFacade;
     }
 
     public PathFindingApplications pathFinding() {

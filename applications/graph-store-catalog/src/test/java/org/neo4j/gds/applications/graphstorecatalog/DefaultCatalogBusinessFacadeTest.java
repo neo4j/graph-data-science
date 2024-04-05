@@ -39,11 +39,9 @@ class DefaultCatalogBusinessFacadeTest {
         var service = mock(GraphStoreCatalogService.class);
         var facade = new DefaultCatalogBusinessFacade(
             null,
-            null,
-            new GraphNameValidationService(),
             service,
             null,
-            null,
+            new GraphNameValidationService(),
             null,
             null,
             null,
@@ -80,11 +78,9 @@ class DefaultCatalogBusinessFacadeTest {
         var service = mock(GraphStoreCatalogService.class);
         var facade = new DefaultCatalogBusinessFacade(
             null,
-            null,
-            mock(GraphNameValidationService.class),
             service,
             null,
-            null,
+            new GraphNameValidationService(),
             null,
             null,
             null,
@@ -125,11 +121,9 @@ class DefaultCatalogBusinessFacadeTest {
         var service = mock(GraphStoreCatalogService.class);
         var facade = new DefaultCatalogBusinessFacade(
             null,
-            null,
-            new GraphNameValidationService(),
             service,
             null,
-            null,
+            new GraphNameValidationService(),
             null,
             null,
             null,
@@ -162,10 +156,8 @@ class DefaultCatalogBusinessFacadeTest {
         var facade = new DefaultCatalogBusinessFacade(
             null,
             null,
+            null,
             validationService,
-            null,
-            null,
-            null,
             null,
             null,
             null,
@@ -232,11 +224,9 @@ class DefaultCatalogBusinessFacadeTest {
     void shouldHandleNullsInNativeProjectParameters() {
         var facade = new DefaultCatalogBusinessFacade(
             null,
-            new CatalogConfigurationService(),
-            new GraphNameValidationService(),
             mock(GraphStoreCatalogService.class),
             null,
-            null,
+            new GraphNameValidationService(),
             null,
             null,
             null,
@@ -328,11 +318,9 @@ class DefaultCatalogBusinessFacadeTest {
     void shouldHandleNullsInCypherProjectParameters() {
         var facade = new DefaultCatalogBusinessFacade(
             null,
-            new CatalogConfigurationService(),
-            new GraphNameValidationService(),
             mock(GraphStoreCatalogService.class),
             null,
-            null,
+            new GraphNameValidationService(),
             null,
             null,
             null,
@@ -422,11 +410,9 @@ class DefaultCatalogBusinessFacadeTest {
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
         var facade = new DefaultCatalogBusinessFacade(
             null,
-            null,
-            new GraphNameValidationService(),
             graphStoreCatalogService,
             null,
-            null,
+            new GraphNameValidationService(),
             null,
             null,
             null,
@@ -504,11 +490,9 @@ class DefaultCatalogBusinessFacadeTest {
         var graphStoreCatalogService = mock(GraphStoreCatalogService.class);
         var facade = new DefaultCatalogBusinessFacade(
             null,
-            null,
-            new GraphNameValidationService(),
             graphStoreCatalogService,
             null,
-            null,
+            new GraphNameValidationService(),
             null,
             null,
             null,

@@ -20,6 +20,8 @@
 package org.neo4j.gds.executor;
 
 import org.neo4j.gds.Algorithm;
+import org.neo4j.gds.applications.graphstorecatalog.GraphStoreFromCatalogLoader;
+import org.neo4j.gds.applications.graphstorecatalog.MemoryUsageValidator;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;

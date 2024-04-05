@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.catalog;
+package org.neo4j.gds.procedures.catalog;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
@@ -44,6 +44,7 @@ import org.neo4j.gds.api.properties.graph.GraphPropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.applications.ApplicationsFacadeBuilder;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.Capabilities;
@@ -53,7 +54,6 @@ import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.utils.progress.tasks.LeafTask;
 import org.neo4j.gds.core.utils.warnings.UserLogEntry;
 import org.neo4j.gds.core.utils.warnings.UserLogStore;
-import org.neo4j.gds.procedures.catalog.CatalogProcedureFacade;
 
 import java.time.ZonedDateTime;
 import java.util.Collection;
@@ -88,7 +88,7 @@ class CatalogProcedureFacadeTest {
             new User("current user", false),
             null,
             null,
-            businessFacade
+            new ApplicationsFacadeBuilder().with(businessFacade).build()
         );
 
         catalogFacade.graphExists("some graph");
@@ -129,7 +129,7 @@ class CatalogProcedureFacadeTest {
             new User("current user", false),
             null,
             userLogStore,
-            businessFacade
+            new ApplicationsFacadeBuilder().with(businessFacade).build()
         );
 
         var expectedWarnings = Stream.of(
@@ -163,7 +163,7 @@ class CatalogProcedureFacadeTest {
             new User("Bob", false),
             null,
             null,
-            businessFacade
+            new ApplicationsFacadeBuilder().with(businessFacade).build()
         );
 
         // the return columns mock returns false by default (all simple types get defaults btw) - should I code that explicitly?
@@ -199,7 +199,7 @@ class CatalogProcedureFacadeTest {
             new User("Bob", false),
             null,
             null,
-            businessFacade
+            new ApplicationsFacadeBuilder().with(businessFacade).build()
         );
 
         when(procedureReturnColumns.contains("degreeDistribution")).thenReturn(true);
@@ -247,7 +247,7 @@ class CatalogProcedureFacadeTest {
             new User("Bob", false),
             null,
             null,
-            businessFacade
+            new ApplicationsFacadeBuilder().with(businessFacade).build()
         );
 
         // the return columns mock returns false by default (all simple types get defaults btw) - should I code that explicitly?
@@ -286,7 +286,7 @@ class CatalogProcedureFacadeTest {
             new User("Bob", false),
             null,
             null,
-            businessFacade
+            new ApplicationsFacadeBuilder().with(businessFacade).build()
         );
 
         when(procedureReturnColumns.contains(returnColumn)).thenReturn(true);

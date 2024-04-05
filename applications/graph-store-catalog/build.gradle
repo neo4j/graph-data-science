@@ -13,13 +13,12 @@ dependencies {
     compileOnly group: 'org.immutables', name: 'value-annotations', version: ver.'immutables'
     compileOnly group: 'org.jetbrains', name: 'annotations', version: ver.'jetbrains-annotations'
 
-    // DependencyResolver, which we should get rid of
-    compileOnly(group: 'org.neo4j', name: 'neo4j-common', version: ver.'neo4j') { transitive = false }
-    // that one Neo4j thing we haven't abstracted yet: GraphDatabaseService
-    compileOnly(group: 'org.neo4j', name: 'neo4j-graphdb-api', version: ver.'neo4j') { transitive = false }
-    // argh and one more for the time being
-    compileOnly(group: 'org.neo4j', name: 'neo4j-logging', version: ver.'neo4j') { transitive = false }
-    compileOnly(group: 'org.neo4j', name: 'neo4j-values', version: ver.'neo4j') { transitive = false }
+    // we should get rid of Neo4j dependencies from this, the application layer
+    neodeps().each {
+        compileOnly(group: 'org.neo4j', name: it, version: ver.'neo4j') {
+            transitive = false
+        }
+    }
 
     // graph store filter errors
     implementation group: 'org.opencypher', name: 'cypher-javacc-parser-9.0', version: ver.'opencypher-front-end', transitive: false
@@ -28,11 +27,11 @@ dependencies {
 
     // the necessary GDS things for the extension to construct the application
     implementation project(':algo')
+    implementation project(':algo-common')
     implementation project(':annotations')
     implementation project(':config-api')
     implementation project(':core')
     implementation project(':core-write')
-    implementation project(':executor')
     implementation project(':graph-projection-api')
     implementation project(':graph-sampling')
     implementation project(':graph-schema-api')
@@ -42,6 +41,7 @@ dependencies {
     implementation project(':metrics-api')
     implementation project(':native-projection')
     implementation project(':neo4j-api')
+    implementation project(':neo4j-settings')
     implementation project(':progress-tracking')
     implementation project(':string-formatting')
     implementation project(':subgraph-filtering')

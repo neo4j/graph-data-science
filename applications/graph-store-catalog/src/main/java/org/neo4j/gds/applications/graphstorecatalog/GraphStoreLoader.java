@@ -17,12 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.executor;
+package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.core.GraphDimensions;
 
-public interface GraphStoreCreator extends GraphStoreLoader {
-    MemoryEstimation estimateMemoryUsageDuringLoading();
+public interface GraphStoreLoader {
+    GraphProjectConfig graphProjectConfig();
 
-    MemoryEstimation estimateMemoryUsageAfterLoading();
+    GraphStore graphStore();
+    GraphDimensions graphDimensions();
 }

@@ -18,6 +18,7 @@ dependencies {
     implementation project(':core')
     implementation project(':core-write')
     implementation project(':edition-api')
+    implementation project(':graph-store-catalog-applications')
     implementation project(':native-projection')
     implementation project(':memory-estimation')
     implementation project(':memory-usage')

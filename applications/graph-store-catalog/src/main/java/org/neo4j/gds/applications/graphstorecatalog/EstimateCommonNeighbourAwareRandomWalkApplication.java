@@ -22,12 +22,11 @@ package org.neo4j.gds.applications.graphstorecatalog;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
-import org.neo4j.gds.executor.GraphStoreFromCatalogLoader;
 import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfig;
 import org.neo4j.gds.graphsampling.samplers.rw.cnarw.CommonNeighbourAwareRandomWalk;
 import org.neo4j.gds.results.MemoryEstimateResult;
 
-public class EstimateCommonNeighbourAwareRandomWalkApplication {
+class EstimateCommonNeighbourAwareRandomWalkApplication {
     MemoryEstimateResult estimate(
         User user,
         DatabaseId databaseId,

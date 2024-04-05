@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.executor;
+package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.common.DependencyResolver;
 import org.neo4j.configuration.Config;
@@ -82,7 +82,7 @@ public class MemoryUsageValidator {
         return memoryTreeWithDimensions.memoryTree.memoryUsage();
     }
 
-    static void validateMemoryUsage(
+    public static void validateMemoryUsage(
         MemoryTreeWithDimensions memoryTreeWithDimensions,
         long availableBytes,
         boolean useMaxMemoryEstimation,

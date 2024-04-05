@@ -50,12 +50,11 @@ final class GraphDataScienceProviderFactory {
 
     private final Log log;
 
-    private final CatalogFacadeProviderFactory catalogFacadeProviderFactory;
-
     // Graph catalog state initialised here, currently just a front for a big shared singleton
     private final GraphStoreCatalogService graphStoreCatalogService = new GraphStoreCatalogService();
 
     private final Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator;
+    private final Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> catalogBusinessFacadeDecorator;
     private final ExporterBuildersProviderService exporterBuildersProviderService;
     private final MemoryGauge memoryGauge;
     private final MetricsFacade metricsFacade;
@@ -63,16 +62,16 @@ final class GraphDataScienceProviderFactory {
 
     private GraphDataScienceProviderFactory(
         Log log,
-        CatalogFacadeProviderFactory catalogFacadeProviderFactory,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
+        Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> catalogBusinessFacadeDecorator,
         ExporterBuildersProviderService exporterBuildersProviderService,
         MemoryGauge memoryGauge,
         MetricsFacade metricsFacade,
         ModelCatalog modelCatalog
     ) {
         this.log = log;
-        this.catalogFacadeProviderFactory = catalogFacadeProviderFactory;
         this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
+        this.catalogBusinessFacadeDecorator = catalogBusinessFacadeDecorator;
         this.exporterBuildersProviderService = exporterBuildersProviderService;
         this.memoryGauge = memoryGauge;
         this.metricsFacade = metricsFacade;
@@ -84,8 +83,9 @@ final class GraphDataScienceProviderFactory {
         boolean useMaxMemoryEstimation,
         UserLogServices userLogServices
     ) {
-        var catalogFacadeProvider = catalogFacadeProviderFactory.createCatalogFacadeProvider(
-            graphStoreCatalogService,
+        var catalogFacadeProvider = new CatalogFacadeProvider(
+            log,
+            exporterBuildersProviderService,
             taskRegistryFactoryService,
             userLogServices
         );
@@ -99,40 +99,35 @@ final class GraphDataScienceProviderFactory {
 
         return new GraphDataScienceProvider(
             log,
-            catalogFacadeProvider,
             algorithmFacadeService,
+            metricsFacade.algorithmMetrics(),
+            algorithmProcessingTemplateDecorator,
+            catalogBusinessFacadeDecorator,
+            catalogFacadeProvider,
             metricsFacade.deprecatedProcedures(),
             exporterBuildersProviderService,
-            taskRegistryFactoryService,
-            userLogServices,
             graphStoreCatalogService,
-            algorithmProcessingTemplateDecorator,
             memoryGauge,
+            metricsFacade.projectionMetrics(),
+            taskRegistryFactoryService,
             useMaxMemoryEstimation,
-            metricsFacade.algorithmMetrics()
+            userLogServices
         );
     }
 
     static GraphDataScienceProviderFactory create(
         Log log,
         Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
-        Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> catalogFacadeDecorator,
+        Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> catalogBusinessFacadeDecorator,
         ExporterBuildersProviderService exporterBuildersProviderService,
         MemoryGauge memoryGauge,
         MetricsFacade metricsFacade,
         ModelCatalog modelCatalog
     ) {
-        var catalogFacadeProviderFactory = new CatalogFacadeProviderFactory(
-            log,
-            catalogFacadeDecorator,
-            exporterBuildersProviderService,
-            metricsFacade.projectionMetrics()
-        );
-
         return new GraphDataScienceProviderFactory(
             log,
-            catalogFacadeProviderFactory,
             algorithmProcessingTemplateDecorator,
+            catalogBusinessFacadeDecorator,
             exporterBuildersProviderService,
             memoryGauge,
             metricsFacade,

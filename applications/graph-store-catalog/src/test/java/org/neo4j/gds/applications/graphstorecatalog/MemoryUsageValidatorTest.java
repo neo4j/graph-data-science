@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.executor;
+package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseTest;
@@ -113,7 +113,7 @@ class MemoryUsageValidatorTest extends BaseTest {
         private final String description;
         private final MemoryRange range;
 
-        public TestTree(final String description, final MemoryRange range) {
+        TestTree(final String description, final MemoryRange range) {
             this.description = description;
             this.range = range;
         }

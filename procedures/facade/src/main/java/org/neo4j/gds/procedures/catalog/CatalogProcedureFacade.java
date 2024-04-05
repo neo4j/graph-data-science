@@ -22,6 +22,7 @@ package org.neo4j.gds.procedures.catalog;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.GraphGenerationStats;
 import org.neo4j.gds.applications.graphstorecatalog.GraphMemoryUsage;
@@ -98,7 +99,7 @@ public class CatalogProcedureFacade {
     private final UserLogStore userLogStore;
 
     // business facade
-    private final CatalogBusinessFacade businessFacade;
+    private final ApplicationsFacade applicationsFacade;
 
     /**
      * @param streamCloser A special thing needed for property streaming
@@ -119,7 +120,7 @@ public class CatalogProcedureFacade {
         User user,
         UserLogRegistryFactory userLogRegistryFactory,
         UserLogStore userLogStore,
-        CatalogBusinessFacade businessFacade
+        ApplicationsFacade applicationsFacade
     ) {
         this.streamCloser = streamCloser;
         this.databaseId = databaseId;
@@ -137,7 +138,7 @@ public class CatalogProcedureFacade {
         this.userLogRegistryFactory = userLogRegistryFactory;
         this.userLogStore = userLogStore;
 
-        this.businessFacade = businessFacade;
+        this.applicationsFacade = applicationsFacade;
     }
 
     /**
@@ -159,7 +160,7 @@ public class CatalogProcedureFacade {
     }
 
     public boolean graphExists(String graphName) {
-        return businessFacade.graphExists(user, databaseId, graphName);
+        return catalog().graphExists(user, databaseId, graphName);
     }
 
     /**
@@ -181,7 +182,7 @@ public class CatalogProcedureFacade {
         String databaseName,
         String username
     ) throws IllegalArgumentException {
-        var results = businessFacade.dropGraph(
+        var results = catalog().dropGraph(
             graphNameOrListOfGraphNames,
             failIfMissing,
             databaseName,
@@ -202,7 +203,7 @@ public class CatalogProcedureFacade {
 
         var displayDegreeDistribution = procedureReturnColumns.contains("degreeDistribution");
 
-        var results = businessFacade.listGraphs(user, graphName, displayDegreeDistribution, terminationFlag);
+        var results = catalog().listGraphs(user, graphName, displayDegreeDistribution, terminationFlag);
 
         // we convert here from domain type to Neo4j display type
         var computeGraphSize = procedureReturnColumns.contains("memoryUsage")
@@ -221,7 +222,7 @@ public class CatalogProcedureFacade {
         Object relationshipProjection,
         Map<String, Object> configuration
     ) {
-        var result = businessFacade.nativeProject(
+        var result = catalog().nativeProject(
             user,
             databaseId,
             graphDatabaseService,
@@ -245,7 +246,7 @@ public class CatalogProcedureFacade {
         Object relationshipProjection,
         Map<String, Object> configuration
     ) {
-        var result = businessFacade.estimateNativeProject(
+        var result = catalog().estimateNativeProject(
             databaseId,
             graphProjectMemoryUsageService,
             taskRegistryFactory,
@@ -266,7 +267,7 @@ public class CatalogProcedureFacade {
         String relationshipQuery,
         Map<String, Object> configuration
     ) {
-        var result = businessFacade.cypherProject(
+        var result = catalog().cypherProject(
             user,
             databaseId,
             graphDatabaseService,
@@ -289,7 +290,7 @@ public class CatalogProcedureFacade {
         String relationshipQuery,
         Map<String, Object> configuration
     ) {
-        var result = businessFacade.estimateCypherProject(
+        var result = catalog().estimateCypherProject(
             databaseId,
             graphProjectMemoryUsageService,
             taskRegistryFactory,
@@ -311,7 +312,7 @@ public class CatalogProcedureFacade {
         String relationshipFilter,
         Map<String, Object> configuration
     ) {
-        var result = businessFacade.subGraphProject(
+        var result = catalog().subGraphProject(
             user,
             databaseId,
             taskRegistryFactory,
@@ -327,7 +328,7 @@ public class CatalogProcedureFacade {
     }
 
     public Stream<GraphMemoryUsage> sizeOf(String graphName) {
-        var result = businessFacade.sizeOf(user, databaseId, graphName);
+        var result = catalog().sizeOf(user, databaseId, graphName);
 
         return Stream.of(result);
     }
@@ -337,7 +338,7 @@ public class CatalogProcedureFacade {
         Object nodeProperties,
         Map<String, Object> configuration
     ) {
-        var result = businessFacade.dropNodeProperties(
+        var result = catalog().dropNodeProperties(
             user,
             databaseId,
             taskRegistryFactory,
@@ -354,7 +355,7 @@ public class CatalogProcedureFacade {
         String graphName,
         String relationshipType
     ) {
-        var result = businessFacade.dropRelationships(
+        var result = catalog().dropRelationships(
             user,
             databaseId,
             taskRegistryFactory,
@@ -371,7 +372,7 @@ public class CatalogProcedureFacade {
         String graphProperty,
         Map<String, Object> configuration
     ) {
-        var numberOfPropertiesRemoved = businessFacade.dropGraphProperty(
+        var numberOfPropertiesRemoved = catalog().dropGraphProperty(
             user,
             databaseId,
             graphName,
@@ -393,7 +394,7 @@ public class CatalogProcedureFacade {
         String nodeLabel,
         Map<String, Object> configuration
     ) {
-        var result = businessFacade.mutateNodeLabel(user, databaseId, graphName, nodeLabel, configuration);
+        var result = catalog().mutateNodeLabel(user, databaseId, graphName, nodeLabel, configuration);
 
         return Stream.of(result);
     }
@@ -403,7 +404,7 @@ public class CatalogProcedureFacade {
         String graphProperty,
         Map<String, Object> configuration
     ) {
-        var result = businessFacade.streamGraphProperty(
+        var result = catalog().streamGraphProperty(
             user,
             databaseId,
             graphName,
@@ -458,7 +459,7 @@ public class CatalogProcedureFacade {
     ) {
         var usesPropertyNameColumn = procedureReturnColumns.contains("nodeProperty");
 
-        var resultStream = businessFacade.streamNodeProperties(
+        var resultStream = catalog().streamNodeProperties(
             user,
             databaseId,
             taskRegistryFactory,
@@ -516,7 +517,7 @@ public class CatalogProcedureFacade {
         List<String> relationshipTypes,
         Map<String, Object> configuration
     ) {
-        return businessFacade.streamRelationships(user, databaseId, graphName, relationshipTypes, configuration);
+        return catalog().streamRelationships(user, databaseId, graphName, relationshipTypes, configuration);
     }
 
     public Stream<NodePropertiesWriteResult> writeNodeProperties(
@@ -525,7 +526,7 @@ public class CatalogProcedureFacade {
         Object nodeLabels,
         Map<String, Object> configuration
     ) {
-        var result = businessFacade.writeNodeProperties(
+        var result = catalog().writeNodeProperties(
             user,
             databaseId,
             nodePropertyExporterBuilder,
@@ -547,7 +548,7 @@ public class CatalogProcedureFacade {
         List<String> relationshipProperties,
         Map<String, Object> configuration
     ) {
-        var result = businessFacade.writeRelationshipProperties(
+        var result = catalog().writeRelationshipProperties(
             user,
             databaseId,
             relationshipPropertiesExporterBuilder,
@@ -566,7 +567,7 @@ public class CatalogProcedureFacade {
         String nodeLabel,
         Map<String, Object> configuration
     ) {
-        var result = businessFacade.writeNodeLabel(
+        var result = catalog().writeNodeLabel(
             user,
             databaseId,
             nodeLabelExporterBuilder,
@@ -585,7 +586,7 @@ public class CatalogProcedureFacade {
         String relationshipProperty,
         Map<String, Object> configuration
     ) {
-        var result = businessFacade.writeRelationships(
+        var result = catalog().writeRelationships(
             user,
             databaseId,
             relationshipExporterBuilder,
@@ -606,7 +607,7 @@ public class CatalogProcedureFacade {
         String originGraphName,
         Map<String, Object> configuration
     ) {
-        var result = businessFacade.sampleRandomWalkWithRestarts(
+        var result = catalog().sampleRandomWalkWithRestarts(
             user,
             databaseId,
             taskRegistryFactory,
@@ -624,7 +625,7 @@ public class CatalogProcedureFacade {
         String originGraphName,
         Map<String, Object> configuration
     ) {
-        var result = businessFacade.sampleCommonNeighbourAwareRandomWalk(
+        var result = catalog().sampleCommonNeighbourAwareRandomWalk(
             user,
             databaseId,
             taskRegistryFactory,
@@ -641,7 +642,7 @@ public class CatalogProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        var result = businessFacade.estimateCommonNeighbourAwareRandomWalk(
+        var result = catalog().estimateCommonNeighbourAwareRandomWalk(
             user,
             databaseId,
             graphName,
@@ -657,7 +658,7 @@ public class CatalogProcedureFacade {
         long averageDegree,
         Map<String, Object> configuration
     ) {
-        var result = businessFacade.generateGraph(user, databaseId, graphName, nodeCount, averageDegree, configuration);
+        var result = catalog().generateGraph(user, databaseId, graphName, nodeCount, averageDegree, configuration);
 
         return Stream.of(result);
     }
@@ -671,7 +672,7 @@ public class CatalogProcedureFacade {
     ) {
         var usesPropertyNameColumn = procedureReturnColumns.contains("relationshipProperty");
 
-        var resultStream = businessFacade.streamRelationshipProperties(
+        var resultStream = catalog().streamRelationshipProperties(
             user,
             databaseId,
             taskRegistryFactory,
@@ -696,5 +697,9 @@ public class CatalogProcedureFacade {
         if (NO_VALUE_PLACEHOLDER.equals(graphName)) return null;
 
         return graphName;
+    }
+
+    private CatalogBusinessFacade catalog() {
+        return applicationsFacade.catalog();
     }
 }

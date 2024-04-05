@@ -25,6 +25,7 @@ dependencies {
     implementation project(':edition-api')
     implementation project(':executor')
     implementation project(':graph-schema-api')
+    implementation project(':graph-store-catalog-applications')
     implementation project(':licensing')
     implementation project(':memory-usage')
     implementation project(':ml-algo')

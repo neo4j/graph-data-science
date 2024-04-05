@@ -27,18 +27,15 @@ import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmEstimationTemp
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.pathfinding.DefaultAlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.pathfinding.DefaultMemoryGuard;
+import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.write.ExporterContext;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.core.write.RelationshipExporterBuilder;
-import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.mem.MemoryGauge;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
+import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
 import org.neo4j.gds.procedures.KernelTransactionAccessor;
@@ -47,7 +44,6 @@ import org.neo4j.gds.procedures.TerminationFlagAccessor;
 import org.neo4j.gds.services.DatabaseIdAccessor;
 import org.neo4j.gds.services.UserAccessor;
 import org.neo4j.gds.services.UserLogServices;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
@@ -60,46 +56,55 @@ import java.util.function.Function;
 public class GraphDataScienceProvider implements ThrowingFunction<Context, GraphDataScienceProcedures, ProcedureException> {
     private final DatabaseIdAccessor databaseIdAccessor = new DatabaseIdAccessor();
     private final KernelTransactionAccessor kernelTransactionAccessor = new KernelTransactionAccessor();
+    private final PipelinesProcedureFacadeProvider pipelinesProcedureFacadeProvider = new PipelinesProcedureFacadeProvider();
     private final TerminationFlagAccessor terminationFlagAccessor = new TerminationFlagAccessor();
     private final UserAccessor userAccessor = new UserAccessor();
 
     private final Log log;
-    private final CatalogFacadeProvider catalogFacadeProvider;
     private final AlgorithmFacadeFactoryProvider algorithmFacadeFactoryProvider;
-    private final DeprecatedProceduresMetricService deprecatedProceduresMetricService;
-    private final PipelinesProcedureFacadeProvider pipelinesProcedureFacadeProvider = new PipelinesProcedureFacadeProvider();
-    private final ExporterBuildersProviderService exporterBuildersProviderService;
-    private final TaskRegistryFactoryService taskRegistryFactoryService;
-    private final UserLogServices userLogServices;
-    private final GraphStoreCatalogService graphStoreCatalogService;
-    private final Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator;
-    private final MemoryGauge memoryGauge;
-    private final boolean useMaxMemoryEstimation;
     private final AlgorithmMetricsService algorithmMetricsService;
+    private final Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator;
+    private final Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> catalogBusinessFacadeDecorator;
+    private final CatalogFacadeProvider catalogFacadeProvider;
+    private final DeprecatedProceduresMetricService deprecatedProceduresMetricService;
+    private final ExporterBuildersProviderService exporterBuildersProviderService;
+    private final GraphStoreCatalogService graphStoreCatalogService;
+    private final MemoryGauge memoryGauge;
+    private final ProjectionMetricsService projectionMetricsService;
+    private final TaskRegistryFactoryService taskRegistryFactoryService;
+    private final boolean useMaxMemoryEstimation;
+    private final UserLogServices userLogServices;
 
     GraphDataScienceProvider(
         Log log,
-        CatalogFacadeProvider catalogFacadeProvider,
         AlgorithmFacadeFactoryProvider algorithmFacadeFactoryProvider,
+        AlgorithmMetricsService algorithmMetricsService,
+        Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
+        Optional<Function<CatalogBusinessFacade, CatalogBusinessFacade>> catalogBusinessFacadeDecorator,
+        CatalogFacadeProvider catalogFacadeProvider,
         DeprecatedProceduresMetricService deprecatedProceduresMetricService,
         ExporterBuildersProviderService exporterBuildersProviderService,
+        GraphStoreCatalogService graphStoreCatalogService,
+        MemoryGauge memoryGauge,
+        ProjectionMetricsService projectionMetricsService,
         TaskRegistryFactoryService taskRegistryFactoryService,
-        UserLogServices userLogServices, GraphStoreCatalogService graphStoreCatalogService,
-        Optional<Function<AlgorithmProcessingTemplate, AlgorithmProcessingTemplate>> algorithmProcessingTemplateDecorator,
-        MemoryGauge memoryGauge, boolean useMaxMemoryEstimation, AlgorithmMetricsService algorithmMetricsService
+        boolean useMaxMemoryEstimation,
+        UserLogServices userLogServices
     ) {
         this.log = log;
-        this.catalogFacadeProvider = catalogFacadeProvider;
         this.algorithmFacadeFactoryProvider = algorithmFacadeFactoryProvider;
+        this.algorithmMetricsService = algorithmMetricsService;
+        this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
+        this.catalogBusinessFacadeDecorator = catalogBusinessFacadeDecorator;
+        this.catalogFacadeProvider = catalogFacadeProvider;
         this.deprecatedProceduresMetricService = deprecatedProceduresMetricService;
         this.exporterBuildersProviderService = exporterBuildersProviderService;
-        this.taskRegistryFactoryService = taskRegistryFactoryService;
-        this.userLogServices = userLogServices;
         this.graphStoreCatalogService = graphStoreCatalogService;
-        this.algorithmProcessingTemplateDecorator = algorithmProcessingTemplateDecorator;
         this.memoryGauge = memoryGauge;
+        this.projectionMetricsService = projectionMetricsService;
+        this.taskRegistryFactoryService = taskRegistryFactoryService;
         this.useMaxMemoryEstimation = useMaxMemoryEstimation;
-        this.algorithmMetricsService = algorithmMetricsService;
+        this.userLogServices = userLogServices;
     }
 
     @Override
@@ -147,18 +152,22 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             user
         );
 
-        var applicationsFacade = buildApplicationLayer(
+        var applicationsFacade = ApplicationsFacade.create(
+            log,
+            catalogBusinessFacadeDecorator,
+            graphStoreCatalogService,
+            projectionMetricsService,
+            algorithmEstimationTemplate,
+            algorithmProcessingTemplate,
             nodePropertyExporterBuilder,
             relationshipExporterBuilder,
             relationshipStreamExporterBuilder,
             taskRegistryFactory,
             terminationFlag,
-            userLogRegistryFactory,
-            algorithmProcessingTemplate,
-            algorithmEstimationTemplate
+            userLogRegistryFactory
         );
 
-        var catalogProcedureFacade = catalogFacadeProvider.createCatalogProcedureFacade(context);
+        var catalogProcedureFacade = catalogFacadeProvider.createCatalogProcedureFacade(applicationsFacade, context);
 
         var algorithmFacadeFactory = algorithmFacadeFactoryProvider.createAlgorithmFacadeFactory(
             context,
@@ -213,28 +222,5 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         if (algorithmProcessingTemplateDecorator.isEmpty()) return algorithmProcessingTemplate;
 
         return algorithmProcessingTemplateDecorator.get().apply(algorithmProcessingTemplate);
-    }
-
-    private ApplicationsFacade buildApplicationLayer(
-        NodePropertyExporterBuilder nodePropertyExporterBuilder,
-        RelationshipExporterBuilder relationshipExporterBuilder,
-        RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
-        UserLogRegistryFactory userLogRegistryFactory,
-        AlgorithmProcessingTemplate algorithmProcessingTemplate,
-        AlgorithmEstimationTemplate algorithmEstimationTemplate
-    ) {
-        return ApplicationsFacade.create(
-            log,
-            nodePropertyExporterBuilder,
-            relationshipExporterBuilder,
-            relationshipStreamExporterBuilder,
-            taskRegistryFactory,
-            terminationFlag,
-            userLogRegistryFactory,
-            algorithmProcessingTemplate,
-            algorithmEstimationTemplate
-        );
     }
 }
