@@ -36,6 +36,7 @@ public enum Neo4jVersion {
     V_5_16,
     V_5_17,
     V_5_18,
+    V_5_19,
     V_RC;
 
     private static final int MINOR_DEV_VERSION = 19;
@@ -79,6 +80,8 @@ public enum Neo4jVersion {
                     return Neo4jVersion.V_5_17;
                 case 18:
                     return Neo4jVersion.V_5_18;
+                case 19:
+                    return Neo4jVersion.V_5_19;
                 default:
                     if (minorVersion >= MINOR_DEV_VERSION) {
                         return Neo4jVersion.V_RC;
@@ -153,6 +156,8 @@ public enum Neo4jVersion {
                 return "5.17";
             case V_5_18:
                 return "5.18";
+            case V_5_19:
+                return "5.19";
             case V_RC:
                 return "dev";
             default:
