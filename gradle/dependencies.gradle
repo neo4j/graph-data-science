@@ -74,7 +74,7 @@ ext {
         'eclipse-collections'  : '11.1.0',
         'ejml'                 : '0.43.1',
         'fastcsv'              : '2.2.2',
-        'gdl'                  : '0.3.8',
+        'gdl'                  : '0.3.9',
         'hamcrest'             : '2.2',
         'HdrHistogram'         : '2.1.12',
         'hppc'                 : '0.7.3',
