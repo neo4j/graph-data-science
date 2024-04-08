@@ -28,8 +28,6 @@ import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMu
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsWriteModeBusinessFacade;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
@@ -68,17 +66,10 @@ public final class PathFindingApplications {
         RelationshipExporterBuilder relationshipExporterBuilder,
         RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
         RequestScopedDependencies requestScopedDependencies,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
         AlgorithmEstimationTemplate algorithmEstimationTemplate
     ) {
-        var pathFindingAlgorithms = new PathFindingAlgorithms(
-            log,
-            requestScopedDependencies,
-            taskRegistryFactory,
-            userLogRegistryFactory
-        );
+        var pathFindingAlgorithms = new PathFindingAlgorithms(log, requestScopedDependencies);
 
         var estimationModeFacade = new PathFindingAlgorithmsEstimationModeBusinessFacade(algorithmEstimationTemplate);
 
@@ -107,7 +98,6 @@ public final class PathFindingApplications {
             relationshipExporterBuilder,
             relationshipStreamExporterBuilder,
             requestScopedDependencies,
-            taskRegistryFactory,
             estimationModeFacade,
             pathFindingAlgorithms
         );

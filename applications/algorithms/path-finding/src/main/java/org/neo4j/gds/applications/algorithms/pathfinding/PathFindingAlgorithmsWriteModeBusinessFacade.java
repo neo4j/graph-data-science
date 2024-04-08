@@ -25,7 +25,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
@@ -69,7 +68,6 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     private final RelationshipExporterBuilder relationshipExporterBuilder;
     private final RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
     private final RequestScopedDependencies requestScopedDependencies;
-    private final TaskRegistryFactory taskRegistryFactory;
 
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
     private final PathFindingAlgorithms pathFindingAlgorithms;
@@ -81,7 +79,6 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         RelationshipExporterBuilder relationshipExporterBuilder,
         RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
         RequestScopedDependencies requestScopedDependencies,
-        TaskRegistryFactory taskRegistryFactory,
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         PathFindingAlgorithms pathFindingAlgorithms
     ) {
@@ -91,7 +88,6 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         this.relationshipExporterBuilder = relationshipExporterBuilder;
         this.relationshipStreamExporterBuilder = relationshipStreamExporterBuilder;
         this.requestScopedDependencies = requestScopedDependencies;
-        this.taskRegistryFactory = taskRegistryFactory;
         this.estimationFacade = estimationFacade;
         this.pathFindingAlgorithms = pathFindingAlgorithms;
     }
@@ -104,7 +100,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         var writeStep = new BellmanFordWriteStep(
             log,
             relationshipStreamExporterBuilder,
-            taskRegistryFactory,
+            requestScopedDependencies.getTaskRegistryFactory(),
             requestScopedDependencies.getTerminationFlag(),
             configuration
         );
@@ -143,7 +139,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         var writeStep = new KSpanningTreeWriteStep(
             log,
             nodePropertyExporterBuilder,
-            taskRegistryFactory,
+            requestScopedDependencies.getTaskRegistryFactory(),
             requestScopedDependencies.getTerminationFlag(),
             configuration
         );
@@ -228,7 +224,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             log,
             relationshipExporterBuilder,
             requestScopedDependencies.getTerminationFlag(),
-            taskRegistryFactory,
+            requestScopedDependencies.getTaskRegistryFactory(),
             configuration
         );
 
@@ -279,7 +275,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         var writeStep = new ShortestPathWriteStep<>(
             log,
             relationshipStreamExporterBuilder,
-            taskRegistryFactory,
+            requestScopedDependencies.getTaskRegistryFactory(),
             requestScopedDependencies.getTerminationFlag(),
             configuration
         );

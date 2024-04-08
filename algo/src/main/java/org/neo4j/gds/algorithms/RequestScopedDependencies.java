@@ -21,6 +21,8 @@ package org.neo4j.gds.algorithms;
 
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
+import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.termination.TerminationFlag;
 
 /**
@@ -29,8 +31,10 @@ import org.neo4j.gds.termination.TerminationFlag;
  */
 public final class RequestScopedDependencies {
     private final DatabaseId databaseId;
+    private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationFlag terminationFlag;
     private final User user;
+    private final UserLogRegistryFactory userLogRegistryFactory;
 
     /**
      * Over-doing it with a private constructor?
@@ -39,12 +43,16 @@ public final class RequestScopedDependencies {
      */
     private RequestScopedDependencies(
         DatabaseId databaseId,
+        TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
-        User user
+        User user,
+        UserLogRegistryFactory userLogRegistryFactory
     ) {
         this.databaseId = databaseId;
+        this.taskRegistryFactory = taskRegistryFactory;
         this.terminationFlag = terminationFlag;
         this.user = user;
+        this.userLogRegistryFactory = userLogRegistryFactory;
     }
 
     public static RequestScopedDependenciesBuilder builder() {
@@ -55,6 +63,10 @@ public final class RequestScopedDependencies {
         return databaseId;
     }
 
+    public TaskRegistryFactory getTaskRegistryFactory() {
+        return taskRegistryFactory;
+    }
+
     public TerminationFlag getTerminationFlag() {
         return terminationFlag;
     }
@@ -63,13 +75,24 @@ public final class RequestScopedDependencies {
         return user;
     }
 
+    public UserLogRegistryFactory getUserLogRegistryFactory() {
+        return userLogRegistryFactory;
+    }
+
     public static class RequestScopedDependenciesBuilder {
         private DatabaseId databaseId = DatabaseId.DEFAULT;
-        private User user = User.DEFAULT;
         private TerminationFlag terminationFlag = TerminationFlag.DEFAULT;
+        private TaskRegistryFactory taskRegistryFactory;
+        private User user = User.DEFAULT;
+        private UserLogRegistryFactory userLogRegistryFactory;
 
         public RequestScopedDependenciesBuilder with(DatabaseId databaseId) {
             this.databaseId = databaseId;
+            return this;
+        }
+
+        public RequestScopedDependenciesBuilder with(TaskRegistryFactory taskRegistryFactory) {
+            this.taskRegistryFactory = taskRegistryFactory;
             return this;
         }
 
@@ -83,8 +106,19 @@ public final class RequestScopedDependencies {
             return this;
         }
 
+        public RequestScopedDependenciesBuilder with(UserLogRegistryFactory userLogRegistryFactory) {
+            this.userLogRegistryFactory = userLogRegistryFactory;
+            return this;
+        }
+
         public RequestScopedDependencies build() {
-            return new RequestScopedDependencies(databaseId, terminationFlag, user);
+            return new RequestScopedDependencies(
+                databaseId,
+                taskRegistryFactory,
+                terminationFlag,
+                user,
+                userLogRegistryFactory
+            );
         }
     }
 }

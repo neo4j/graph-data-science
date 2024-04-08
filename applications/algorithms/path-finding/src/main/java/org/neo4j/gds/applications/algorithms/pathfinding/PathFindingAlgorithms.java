@@ -31,13 +31,11 @@ import org.neo4j.gds.applications.algorithms.pathfinding.traverse.DepthFirstSear
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskTreeProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.dag.longestPath.DagLongestPath;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSort;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortBaseConfig;
@@ -103,19 +101,13 @@ public class PathFindingAlgorithms {
 
     // request scoped parameters
     private final RequestScopedDependencies requestScopedDependencies;
-    private final TaskRegistryFactory taskRegistryFactory;
-    private final UserLogRegistryFactory userLogRegistryFactory;
 
     public PathFindingAlgorithms(
         Log log,
-        RequestScopedDependencies requestScopedDependencies,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory
+        RequestScopedDependencies requestScopedDependencies
     ) {
         this.log = log;
         this.requestScopedDependencies = requestScopedDependencies;
-        this.taskRegistryFactory = taskRegistryFactory;
-        this.userLogRegistryFactory = userLogRegistryFactory;
     }
 
     Stream<AllShortestPathsStreamResult> allShortestPaths(Graph graph, AllShortestPathsConfig configuration) {
@@ -414,8 +406,8 @@ public class PathFindingAlgorithms {
                 (org.neo4j.logging.Log) log.getNeo4jLog(),
                 configuration.concurrency(),
                 configuration.jobId(),
-                taskRegistryFactory,
-                userLogRegistryFactory
+                requestScopedDependencies.getTaskRegistryFactory(),
+                requestScopedDependencies.getUserLogRegistryFactory()
             );
         }
 
@@ -424,8 +416,8 @@ public class PathFindingAlgorithms {
             (org.neo4j.logging.Log) log.getNeo4jLog(),
             configuration.concurrency(),
             configuration.jobId(),
-            taskRegistryFactory,
-            userLogRegistryFactory
+            requestScopedDependencies.getTaskRegistryFactory(),
+            requestScopedDependencies.getUserLogRegistryFactory()
         );
     }
 }

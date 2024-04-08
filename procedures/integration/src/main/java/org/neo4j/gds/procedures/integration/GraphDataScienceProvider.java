@@ -116,14 +116,16 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         var terminationFlag = terminationFlagAccessor.createTerminationFlag(kernelTransaction);
         var user = userAccessor.getUser(context.securityContext());
 
-        var requestScopedDependencies = RequestScopedDependencies.builder()
-            .with(databaseId)
-            .with(terminationFlag)
-            .with(user)
-            .build();
-
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
+
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(databaseId)
+            .with(taskRegistryFactory)
+            .with(terminationFlag)
+            .with(userLogRegistryFactory)
+            .with(user)
+            .build();
 
         var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(graphDatabaseService);
         var exporterContext = new ExporterContext.ProcedureContextWrapper(context);
@@ -163,9 +165,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             nodePropertyExporterBuilder,
             relationshipExporterBuilder,
             relationshipStreamExporterBuilder,
-            requestScopedDependencies,
-            taskRegistryFactory,
-            userLogRegistryFactory
+            requestScopedDependencies
         );
 
         var catalogProcedureFacade = catalogFacadeProvider.createCatalogProcedureFacade(applicationsFacade, context);
@@ -175,8 +175,6 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             nodePropertyExporterBuilder,
             relationshipExporterBuilder,
             requestScopedDependencies,
-            taskRegistryFactory,
-            userLogRegistryFactory,
             kernelTransaction,
             graphDatabaseService,
             databaseGraphStoreEstimationService
