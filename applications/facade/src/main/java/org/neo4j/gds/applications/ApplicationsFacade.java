@@ -25,9 +25,6 @@ import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmProcessingTemp
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.DefaultCatalogBusinessFacade;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.core.write.RelationshipExporterBuilder;
-import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 
@@ -60,9 +57,6 @@ public final class ApplicationsFacade {
         ProjectionMetricsService projectionMetricsService,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
-        NodePropertyExporterBuilder nodePropertyExporterBuilder,
-        RelationshipExporterBuilder relationshipExporterBuilder,
-        RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
         RequestScopedDependencies requestScopedDependencies
     ) {
         var catalogBusinessFacade = createCatalogBusinessFacade(
@@ -74,9 +68,6 @@ public final class ApplicationsFacade {
 
         var pathFindingApplications = PathFindingApplications.create(
             log,
-            nodePropertyExporterBuilder,
-            relationshipExporterBuilder,
-            relationshipStreamExporterBuilder,
             requestScopedDependencies,
             algorithmProcessingTemplate,
             algorithmEstimationTemplate

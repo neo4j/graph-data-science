@@ -119,19 +119,22 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         var taskRegistryFactory = taskRegistryFactoryService.getTaskRegistryFactory(databaseId, user);
         var userLogRegistryFactory = userLogServices.getUserLogRegistryFactory(databaseId, user);
 
-        var requestScopedDependencies = RequestScopedDependencies.builder()
-            .with(databaseId)
-            .with(taskRegistryFactory)
-            .with(terminationFlag)
-            .with(userLogRegistryFactory)
-            .with(user)
-            .build();
-
         var exportBuildersProvider = exporterBuildersProviderService.identifyExportBuildersProvider(graphDatabaseService);
         var exporterContext = new ExporterContext.ProcedureContextWrapper(context);
         var nodePropertyExporterBuilder = exportBuildersProvider.nodePropertyExporterBuilder(exporterContext);
         var relationshipExporterBuilder = exportBuildersProvider.relationshipExporterBuilder(exporterContext);
         var relationshipStreamExporterBuilder = exportBuildersProvider.relationshipStreamExporterBuilder(exporterContext);
+
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(databaseId)
+            .with(nodePropertyExporterBuilder)
+            .with(relationshipExporterBuilder)
+            .with(relationshipStreamExporterBuilder)
+            .with(taskRegistryFactory)
+            .with(terminationFlag)
+            .with(userLogRegistryFactory)
+            .with(user)
+            .build();
 
         var graphLoaderContext = GraphLoaderContextProvider.buildGraphLoaderContext(
             context,
@@ -162,9 +165,6 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             projectionMetricsService,
             algorithmEstimationTemplate,
             algorithmProcessingTemplate,
-            nodePropertyExporterBuilder,
-            relationshipExporterBuilder,
-            relationshipStreamExporterBuilder,
             requestScopedDependencies
         );
 
@@ -172,8 +172,6 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
 
         var algorithmFacadeFactory = algorithmFacadeFactoryProvider.createAlgorithmFacadeFactory(
             context,
-            nodePropertyExporterBuilder,
-            relationshipExporterBuilder,
             requestScopedDependencies,
             kernelTransaction,
             graphDatabaseService,

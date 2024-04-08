@@ -33,8 +33,6 @@ import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
@@ -86,8 +84,6 @@ class AlgorithmFacadeFactoryProvider {
 
     AlgorithmFacadeFactory createAlgorithmFacadeFactory(
         Context context,
-        NodePropertyExporterBuilder nodePropertyExporterBuilder,
-        RelationshipExporterBuilder relationshipExporterBuilder,
         RequestScopedDependencies requestScopedDependencies,
         KernelTransaction kernelTransaction,
         GraphDatabaseService graphDatabaseService,
@@ -117,13 +113,13 @@ class AlgorithmFacadeFactoryProvider {
         // Third layer
         var writeNodePropertyService = new WriteNodePropertyService(
             log,
-            nodePropertyExporterBuilder,
+            requestScopedDependencies.getNodePropertyExporterBuilder(),
             requestScopedDependencies.getTaskRegistryFactory(),
             requestScopedDependencies.getTerminationFlag()
         );
         var writeRelationshipService = new WriteRelationshipService(
             log,
-            relationshipExporterBuilder,
+            requestScopedDependencies.getRelationshipExporterBuilder(),
             requestScopedDependencies.getTaskRegistryFactory(),
             requestScopedDependencies.getTerminationFlag()
         );

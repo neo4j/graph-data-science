@@ -25,9 +25,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.core.write.RelationshipExporterBuilder;
-import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.paths.WritePathOptionsConfig;
@@ -64,9 +61,6 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     private final Log log;
 
     private final AlgorithmProcessingTemplate algorithmProcessingTemplate;
-    private final NodePropertyExporterBuilder nodePropertyExporterBuilder;
-    private final RelationshipExporterBuilder relationshipExporterBuilder;
-    private final RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
     private final RequestScopedDependencies requestScopedDependencies;
 
     private final PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade;
@@ -75,18 +69,12 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     public PathFindingAlgorithmsWriteModeBusinessFacade(
         Log log,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
-        NodePropertyExporterBuilder nodePropertyExporterBuilder,
-        RelationshipExporterBuilder relationshipExporterBuilder,
-        RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
         RequestScopedDependencies requestScopedDependencies,
         PathFindingAlgorithmsEstimationModeBusinessFacade estimationFacade,
         PathFindingAlgorithms pathFindingAlgorithms
     ) {
         this.log = log;
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
-        this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
-        this.relationshipExporterBuilder = relationshipExporterBuilder;
-        this.relationshipStreamExporterBuilder = relationshipStreamExporterBuilder;
         this.requestScopedDependencies = requestScopedDependencies;
         this.estimationFacade = estimationFacade;
         this.pathFindingAlgorithms = pathFindingAlgorithms;
@@ -99,7 +87,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new BellmanFordWriteStep(
             log,
-            relationshipStreamExporterBuilder,
+            requestScopedDependencies.getRelationshipStreamExporterBuilder(),
             requestScopedDependencies.getTaskRegistryFactory(),
             requestScopedDependencies.getTerminationFlag(),
             configuration
@@ -138,7 +126,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new KSpanningTreeWriteStep(
             log,
-            nodePropertyExporterBuilder,
+            requestScopedDependencies.getNodePropertyExporterBuilder(),
             requestScopedDependencies.getTaskRegistryFactory(),
             requestScopedDependencies.getTerminationFlag(),
             configuration
@@ -222,7 +210,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new SpanningTreeWriteStep(
             log,
-            relationshipExporterBuilder,
+            requestScopedDependencies.getRelationshipExporterBuilder(),
             requestScopedDependencies.getTerminationFlag(),
             requestScopedDependencies.getTaskRegistryFactory(),
             configuration
@@ -245,7 +233,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         ResultBuilder<SteinerTreeWriteConfig, SteinerTreeResult, RESULT> resultBuilder
     ) {
         var writeStep = new SteinerTreeWriteStep(
-            relationshipExporterBuilder,
+            requestScopedDependencies.getRelationshipExporterBuilder(),
             requestScopedDependencies.getTerminationFlag(),
             configuration
         );
@@ -274,7 +262,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new ShortestPathWriteStep<>(
             log,
-            relationshipStreamExporterBuilder,
+            requestScopedDependencies.getRelationshipStreamExporterBuilder(),
             requestScopedDependencies.getTaskRegistryFactory(),
             requestScopedDependencies.getTerminationFlag(),
             configuration

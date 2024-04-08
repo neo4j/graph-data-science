@@ -23,6 +23,9 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
+import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
+import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.termination.TerminationFlag;
 
 /**
@@ -31,6 +34,9 @@ import org.neo4j.gds.termination.TerminationFlag;
  */
 public final class RequestScopedDependencies {
     private final DatabaseId databaseId;
+    private final NodePropertyExporterBuilder nodePropertyExporterBuilder;
+    private final RelationshipExporterBuilder relationshipExporterBuilder;
+    private final RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
     private final TaskRegistryFactory taskRegistryFactory;
     private final TerminationFlag terminationFlag;
     private final User user;
@@ -43,12 +49,18 @@ public final class RequestScopedDependencies {
      */
     private RequestScopedDependencies(
         DatabaseId databaseId,
+        NodePropertyExporterBuilder nodePropertyExporterBuilder,
+        RelationshipExporterBuilder relationshipExporterBuilder,
+        RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
         TaskRegistryFactory taskRegistryFactory,
         TerminationFlag terminationFlag,
         User user,
         UserLogRegistryFactory userLogRegistryFactory
     ) {
         this.databaseId = databaseId;
+        this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
+        this.relationshipExporterBuilder = relationshipExporterBuilder;
+        this.relationshipStreamExporterBuilder = relationshipStreamExporterBuilder;
         this.taskRegistryFactory = taskRegistryFactory;
         this.terminationFlag = terminationFlag;
         this.user = user;
@@ -61,6 +73,18 @@ public final class RequestScopedDependencies {
 
     public DatabaseId getDatabaseId() {
         return databaseId;
+    }
+
+    public NodePropertyExporterBuilder getNodePropertyExporterBuilder() {
+        return nodePropertyExporterBuilder;
+    }
+
+    public RelationshipExporterBuilder getRelationshipExporterBuilder() {
+        return relationshipExporterBuilder;
+    }
+
+    public RelationshipStreamExporterBuilder getRelationshipStreamExporterBuilder() {
+        return relationshipStreamExporterBuilder;
     }
 
     public TaskRegistryFactory getTaskRegistryFactory() {
@@ -81,6 +105,9 @@ public final class RequestScopedDependencies {
 
     public static class RequestScopedDependenciesBuilder {
         private DatabaseId databaseId = DatabaseId.DEFAULT;
+        private NodePropertyExporterBuilder nodePropertyExporterBuilder;
+        private RelationshipExporterBuilder relationshipExporterBuilder;
+        private RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
         private TerminationFlag terminationFlag = TerminationFlag.DEFAULT;
         private TaskRegistryFactory taskRegistryFactory;
         private User user = User.DEFAULT;
@@ -88,6 +115,21 @@ public final class RequestScopedDependencies {
 
         public RequestScopedDependenciesBuilder with(DatabaseId databaseId) {
             this.databaseId = databaseId;
+            return this;
+        }
+
+        public RequestScopedDependenciesBuilder with(NodePropertyExporterBuilder nodePropertyExporterBuilder) {
+            this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
+            return this;
+        }
+
+        public RequestScopedDependenciesBuilder with(RelationshipExporterBuilder relationshipExporterBuilder) {
+            this.relationshipExporterBuilder = relationshipExporterBuilder;
+            return this;
+        }
+
+        public RequestScopedDependenciesBuilder with(RelationshipStreamExporterBuilder relationshipStreamExporterBuilder) {
+            this.relationshipStreamExporterBuilder = relationshipStreamExporterBuilder;
             return this;
         }
 
@@ -114,6 +156,9 @@ public final class RequestScopedDependencies {
         public RequestScopedDependencies build() {
             return new RequestScopedDependencies(
                 databaseId,
+                nodePropertyExporterBuilder,
+                relationshipExporterBuilder,
+                relationshipStreamExporterBuilder,
                 taskRegistryFactory,
                 terminationFlag,
                 user,

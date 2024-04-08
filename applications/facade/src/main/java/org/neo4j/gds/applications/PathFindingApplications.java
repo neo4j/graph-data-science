@@ -28,9 +28,6 @@ import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsMu
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsWriteModeBusinessFacade;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
-import org.neo4j.gds.core.write.RelationshipExporterBuilder;
-import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.logging.Log;
 
 /**
@@ -62,9 +59,6 @@ public final class PathFindingApplications {
      */
     public static PathFindingApplications create(
         Log log,
-        NodePropertyExporterBuilder nodePropertyExporterBuilder,
-        RelationshipExporterBuilder relationshipExporterBuilder,
-        RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
         RequestScopedDependencies requestScopedDependencies,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
         AlgorithmEstimationTemplate algorithmEstimationTemplate
@@ -94,9 +88,6 @@ public final class PathFindingApplications {
         var writeModeFacade = new PathFindingAlgorithmsWriteModeBusinessFacade(
             log,
             algorithmProcessingTemplate,
-            nodePropertyExporterBuilder,
-            relationshipExporterBuilder,
-            relationshipStreamExporterBuilder,
             requestScopedDependencies,
             estimationModeFacade,
             pathFindingAlgorithms
