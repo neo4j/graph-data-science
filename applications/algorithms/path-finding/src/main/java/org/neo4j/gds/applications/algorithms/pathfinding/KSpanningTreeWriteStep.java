@@ -19,37 +19,30 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.NodePropertyExporter;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.spanningtree.SpanningTree;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.K_SPANNING_TREE;
 
 class KSpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree> {
     private final Log log;
-    private final NodePropertyExporterBuilder nodePropertyExporterBuilder;
-    private final TaskRegistryFactory taskRegistryFactory;
-    private final TerminationFlag terminationFlag;
+    private final RequestScopedDependencies requestScopedDependencies;
     private final KSpanningTreeWriteConfig configuration;
 
     KSpanningTreeWriteStep(
         Log log,
-        NodePropertyExporterBuilder nodePropertyExporterBuilder, TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
+        RequestScopedDependencies requestScopedDependencies,
         KSpanningTreeWriteConfig configuration
     ) {
         this.log = log;
-        this.nodePropertyExporterBuilder = nodePropertyExporterBuilder;
-        this.taskRegistryFactory = taskRegistryFactory;
-        this.terminationFlag = terminationFlag;
+        this.requestScopedDependencies = requestScopedDependencies;
         this.configuration = configuration;
     }
 
@@ -67,12 +60,12 @@ class KSpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree> {
             NodePropertyExporter.baseTask(K_SPANNING_TREE, graph.nodeCount()),
             (org.neo4j.logging.Log) log.getNeo4jLog(),
             configuration.writeConcurrency(),
-            taskRegistryFactory
+            requestScopedDependencies.getTaskRegistryFactory()
         );
 
-        var nodePropertyExporter = nodePropertyExporterBuilder
+        var nodePropertyExporter = requestScopedDependencies.getNodePropertyExporterBuilder()
             .withIdMap(graph)
-            .withTerminationFlag(terminationFlag)
+            .withTerminationFlag(requestScopedDependencies.getTerminationFlag())
             .withProgressTracker(progressTracker)
             .withArrowConnectionInfo(
                 configuration.arrowConnectionInfo(),

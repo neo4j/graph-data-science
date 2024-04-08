@@ -49,8 +49,6 @@ class AlgorithmRunnerTest {
             null,
             algorithmMetricsServiceMock,
             null,
-            null,
-            null,
             null
         );
 
@@ -84,8 +82,6 @@ class AlgorithmRunnerTest {
             logMock,
             null,
             algorithmMetricsServiceMock,
-            null,
-            null,
             null,
             null
         );

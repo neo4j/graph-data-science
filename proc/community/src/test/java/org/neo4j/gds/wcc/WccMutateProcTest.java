@@ -362,11 +362,11 @@ class WccMutateProcTest extends BaseProcTest {
                     memoryUsageValidator,
                     RequestScopedDependencies.builder()
                         .with(DatabaseId.of(db.databaseName()))
+                        .with(TaskRegistryFactory.empty())
                         .with(TerminationFlag.RUNNING_TRUE)
                         .with(new User(getUsername(), false))
-                        .build(),
-                    TaskRegistryFactory.empty(),
-                    EmptyUserLogRegistryFactory.INSTANCE
+                        .with(EmptyUserLogRegistryFactory.INSTANCE)
+                        .build()
                 )
             ),
             new MutateNodePropertyService(logMock)
@@ -496,11 +496,11 @@ class WccMutateProcTest extends BaseProcTest {
                         memoryUsageValidator,
                         RequestScopedDependencies.builder()
                             .with(DatabaseId.of(db.databaseName()))
+                            .with(TaskRegistryFactory.empty())
                             .with(TerminationFlag.RUNNING_TRUE)
                             .with(new User(getUsername(), false))
-                            .build(),
-                        TaskRegistryFactory.empty(),
-                        EmptyUserLogRegistryFactory.INSTANCE
+                            .with(EmptyUserLogRegistryFactory.INSTANCE)
+                            .build()
                     )
                 ),
                 new MutateNodePropertyService(logMock)
@@ -578,10 +578,10 @@ class WccMutateProcTest extends BaseProcTest {
                         memoryUsageValidator,
                         RequestScopedDependencies.builder()
                             .with(DatabaseId.of(db.databaseName()))
+                            .with(TaskRegistryFactory.empty())
                             .with(new User(getUsername(), false))
-                            .build(),
-                        TaskRegistryFactory.empty(),
-                        EmptyUserLogRegistryFactory.INSTANCE
+                            .with(EmptyUserLogRegistryFactory.INSTANCE)
+                            .build()
                     )
                 ),
                 new MutateNodePropertyService(null)
@@ -663,11 +663,11 @@ class WccMutateProcTest extends BaseProcTest {
                     memoryUsageValidator,
                     RequestScopedDependencies.builder()
                         .with(DatabaseId.of(db.databaseName()))
+                        .with(TaskRegistryFactory.empty())
                         .with(TerminationFlag.RUNNING_TRUE)
                         .with(new User(getUsername(), false))
-                        .build(),
-                    TaskRegistryFactory.empty(),
-                    EmptyUserLogRegistryFactory.INSTANCE
+                        .with(EmptyUserLogRegistryFactory.INSTANCE)
+                        .build()
                 )
             ),
             new MutateNodePropertyService(logMock)

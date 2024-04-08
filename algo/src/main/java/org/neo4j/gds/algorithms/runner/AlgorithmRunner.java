@@ -32,8 +32,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 
@@ -46,8 +44,6 @@ public final class AlgorithmRunner {
     private final Log log;
     private final GraphStoreCatalogService graphStoreCatalogService;
     private final AlgorithmMemoryValidationService memoryUsageValidator;
-    private final TaskRegistryFactory taskRegistryFactory;
-    private final UserLogRegistryFactory userLogRegistryFactory;
     private final AlgorithmMetricsService algorithmMetricsService;
     private final RequestScopedDependencies requestScopedDependencies;
 
@@ -56,15 +52,11 @@ public final class AlgorithmRunner {
         GraphStoreCatalogService graphStoreCatalogService,
         AlgorithmMetricsService algorithmMetricsService,
         AlgorithmMemoryValidationService memoryUsageValidator,
-        RequestScopedDependencies requestScopedDependencies,
-        TaskRegistryFactory taskRegistryFactory,
-        UserLogRegistryFactory userLogRegistryFactory
+        RequestScopedDependencies requestScopedDependencies
     ) {
         this.log = log;
         this.graphStoreCatalogService = graphStoreCatalogService;
         this.memoryUsageValidator = memoryUsageValidator;
-        this.taskRegistryFactory = taskRegistryFactory;
-        this.userLogRegistryFactory = userLogRegistryFactory;
         this.algorithmMetricsService = algorithmMetricsService;
         this.requestScopedDependencies = requestScopedDependencies;
     }
@@ -125,8 +117,8 @@ public final class AlgorithmRunner {
             graph,
             config,
             (org.neo4j.logging.Log) log.getNeo4jLog(),
-            taskRegistryFactory,
-            userLogRegistryFactory
+            requestScopedDependencies.getTaskRegistryFactory(),
+            requestScopedDependencies.getUserLogRegistryFactory()
         );
 
         // this really belongs in the factory build thing
@@ -140,7 +132,7 @@ public final class AlgorithmRunner {
 
     <R> R runAlgorithm(Algorithm<R> algorithm, String algorithmName) {
         var algorithmMetric = algorithmMetricsService.create(algorithmName);
-        try(algorithmMetric) {
+        try (algorithmMetric) {
             algorithmMetric.start();
             return algorithm.compute();
         } catch (Exception e) {

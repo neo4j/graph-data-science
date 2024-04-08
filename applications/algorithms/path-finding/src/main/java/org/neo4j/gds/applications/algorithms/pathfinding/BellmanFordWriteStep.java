@@ -19,21 +19,19 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ImmutableExportedRelationship;
 import org.neo4j.gds.api.nodeproperties.ValueType;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
-import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.bellmanford.BellmanFordWriteConfig;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -45,22 +43,16 @@ import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfi
 
 class BellmanFordWriteStep implements MutateOrWriteStep<BellmanFordResult> {
     private final Log log;
-    private final RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
-    private final TaskRegistryFactory taskRegistryFactory;
-    private final TerminationFlag terminationFlag;
+    private final RequestScopedDependencies requestScopedDependencies;
     private final BellmanFordWriteConfig configuration;
 
     BellmanFordWriteStep(
         Log log,
-        RelationshipStreamExporterBuilder relationshipStreamExporterBuilder,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
+        RequestScopedDependencies requestScopedDependencies,
         BellmanFordWriteConfig configuration
     ) {
         this.log = log;
-        this.relationshipStreamExporterBuilder = relationshipStreamExporterBuilder;
-        this.taskRegistryFactory = taskRegistryFactory;
-        this.terminationFlag = terminationFlag;
+        this.requestScopedDependencies = requestScopedDependencies;
         this.configuration = configuration;
     }
 
@@ -93,13 +85,13 @@ class BellmanFordWriteStep implements MutateOrWriteStep<BellmanFordResult> {
             RelationshipStreamExporter.baseTask("Write shortest Paths"),
             (org.neo4j.logging.Log) log.getNeo4jLog(),
             1,
-            taskRegistryFactory
+            requestScopedDependencies.getTaskRegistryFactory()
         );
 
-        var exporter = relationshipStreamExporterBuilder
+        var exporter = requestScopedDependencies.getRelationshipStreamExporterBuilder()
             .withIdMappingOperator(graph::toOriginalNodeId)
             .withRelationships(relationshipStream)
-            .withTerminationFlag(terminationFlag)
+            .withTerminationFlag(requestScopedDependencies.getTerminationFlag())
             .withProgressTracker(progressTracker)
             .withArrowConnectionInfo(
                 configuration.arrowConnectionInfo(),

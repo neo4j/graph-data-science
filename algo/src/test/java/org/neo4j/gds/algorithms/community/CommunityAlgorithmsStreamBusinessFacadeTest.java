@@ -39,6 +39,7 @@ import org.neo4j.gds.extension.TestGraph;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.wcc.WccBaseConfig;
 import org.neo4j.gds.wcc.WccParameters;
 
@@ -107,9 +108,11 @@ class CommunityAlgorithmsStreamBusinessFacadeTest {
                         graphStoreCatalogServiceMock,
                         new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
                         mock(AlgorithmMemoryValidationService.class),
-                        RequestScopedDependencies.builder().build(),
-                        TaskRegistryFactory.empty(),
-                        EmptyUserLogRegistryFactory.INSTANCE
+                        RequestScopedDependencies.builder()
+                            .with(TaskRegistryFactory.empty())
+                            .with(TerminationFlag.DEFAULT)
+                            .with(EmptyUserLogRegistryFactory.INSTANCE)
+                            .build()
                     )
                 )
             );
@@ -146,9 +149,10 @@ class CommunityAlgorithmsStreamBusinessFacadeTest {
                         graphStoreCatalogServiceMock,
                         new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
                         null,
-                        RequestScopedDependencies.builder().build(),
-                        mock(TaskRegistryFactory.class),
-                        mock(UserLogRegistryFactory.class)
+                        RequestScopedDependencies.builder()
+                            .with(mock(TaskRegistryFactory.class))
+                            .with(mock(UserLogRegistryFactory.class))
+                            .build()
                     )
                 )
             );

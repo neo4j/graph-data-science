@@ -59,7 +59,6 @@ import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.logging.Log;
@@ -481,24 +480,25 @@ class WccWriteProcTest extends BaseProcTest {
                 methods.forEach(method -> {
 
                     var taskRegistry = EmptyTaskRegistryFactory.INSTANCE;
+                    var requestScopedDependencies = RequestScopedDependencies.builder()
+                        .with(DatabaseId.of(db.databaseName()))
+                        .with(wccWriteProc.executionContext().nodePropertyExporterBuilder())
+                        .with(taskRegistry)
+                        .with(TerminationFlag.RUNNING_TRUE)
+                        .with(new User(getUsername(), false))
+                        .with(EmptyUserLogRegistryFactory.INSTANCE)
+                        .build();
                     var algorithmsBusinessFacade = new CommunityAlgorithmsWriteBusinessFacade(
                         new WriteNodePropertyService(
                             logMock,
-                            wccWriteProc.executionContext().nodePropertyExporterBuilder(),
-                            taskRegistry,
-                            TerminationFlag.RUNNING_TRUE
+                            requestScopedDependencies
                         ), new CommunityAlgorithmsFacade(
                             new AlgorithmRunner(
                                 logMock,
                                 graphStoreCatalogService,
                                 new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
                                 memoryUsageValidator,
-                                RequestScopedDependencies.builder()
-                                    .with(DatabaseId.of(db.databaseName()))
-                                    .with(new User(getUsername(), false))
-                                    .build(),
-                                TaskRegistryFactory.empty(),
-                                EmptyUserLogRegistryFactory.INSTANCE
+                                requestScopedDependencies
                             )
                         )
                     );

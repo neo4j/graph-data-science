@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -26,15 +27,12 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ImmutableExportedRelationship;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.config.WriteRelationshipConfig;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
-import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.WritePathOptionsConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 
@@ -47,26 +45,19 @@ import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfi
 /**
  * This is relationship writes as needed by path finding algorithms (for now).
  */
-class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & WritePathOptionsConfig> implements MutateOrWriteStep<PathFindingResult> {
+class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & WritePathOptionsConfig> implements
+    MutateOrWriteStep<PathFindingResult> {
     private final Log log;
-
-    private final RelationshipStreamExporterBuilder exporterBuilder;
-    private final TaskRegistryFactory taskRegistryFactory;
-    private final TerminationFlag terminationFlag;
-
+    private final RequestScopedDependencies requestScopedDependencies;
     private final CONFIGURATION configuration;
 
     ShortestPathWriteStep(
         Log log,
-        RelationshipStreamExporterBuilder exporterBuilder,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag,
+        RequestScopedDependencies requestScopedDependencies,
         CONFIGURATION configuration
     ) {
         this.log = log;
-        this.exporterBuilder = exporterBuilder;
-        this.taskRegistryFactory = taskRegistryFactory;
-        this.terminationFlag = terminationFlag;
+        this.requestScopedDependencies = requestScopedDependencies;
         this.configuration = configuration;
     }
 
@@ -105,11 +96,11 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
                 RelationshipStreamExporter.baseTask("Write shortest Paths"),
                 (org.neo4j.logging.Log) log.getNeo4jLog(),
                 1,
-                taskRegistryFactory
+                requestScopedDependencies.getTaskRegistryFactory()
             );
 
             // configure the exporter
-            var relationshipStreamExporter = exporterBuilder
+            var relationshipStreamExporter = requestScopedDependencies.getRelationshipStreamExporterBuilder()
                 .withConcurrency(configuration.writeConcurrency())
                 .withArrowConnectionInfo(
                     configuration.arrowConnectionInfo(),
@@ -119,7 +110,7 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
                 .withIdMappingOperator(graph::toOriginalNodeId)
                 .withProgressTracker(progressTracker)
                 .withRelationships(relationshipStream)
-                .withTerminationFlag(terminationFlag)
+                .withTerminationFlag(requestScopedDependencies.getTerminationFlag())
                 .build();
 
             var writeRelationshipType = configuration.writeRelationshipType();

@@ -111,18 +111,8 @@ class AlgorithmFacadeFactoryProvider {
         );
 
         // Third layer
-        var writeNodePropertyService = new WriteNodePropertyService(
-            log,
-            requestScopedDependencies.getNodePropertyExporterBuilder(),
-            requestScopedDependencies.getTaskRegistryFactory(),
-            requestScopedDependencies.getTerminationFlag()
-        );
-        var writeRelationshipService = new WriteRelationshipService(
-            log,
-            requestScopedDependencies.getRelationshipExporterBuilder(),
-            requestScopedDependencies.getTaskRegistryFactory(),
-            requestScopedDependencies.getTerminationFlag()
-        );
+        var writeNodePropertyService = new WriteNodePropertyService(log, requestScopedDependencies);
+        var writeRelationshipService = new WriteRelationshipService(log, requestScopedDependencies);
 
         // Fourth layer
         var algorithmEstimator = new AlgorithmEstimator(
@@ -136,9 +126,7 @@ class AlgorithmFacadeFactoryProvider {
             graphStoreCatalogService,
             algorithmMetricsService,
             algorithmMemoryValidationService,
-            requestScopedDependencies,
-            requestScopedDependencies.getTaskRegistryFactory(),
-            requestScopedDependencies.getUserLogRegistryFactory()
+            requestScopedDependencies
         );
 
         // procedure facade
