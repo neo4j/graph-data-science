@@ -5,7 +5,7 @@
 
 You can create a GDS graph from any of the following data sources:
 
-* A Neo4j database, using a xref:management-ops/graph-creation/graph-project.adoc[native projection] (for ease of use) or a xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[Cypher projection] (for higher flexibility)
+* A Neo4j database, using a xref:management-ops/graph-creation/graph-project-cypher-projection.adoc[Cypher projection], or xref:management-ops/graph-creation/graph-project.adoc[native projection] (for ease of use, but reduced flexibility)
 * An external source, via an xref:management-ops/graph-export/graph-catalog-apache-arrow-ops.adoc[Apache Arrow connection]
 * An existing named graph, using xref:management-ops/graph-creation/graph-filter.adoc[filtering] or xref:management-ops/graph-creation/sampling/rwr.adoc[sampling]
 * xref:management-ops/graph-creation/graph-generation.adoc[Random data] (for testing purposes)

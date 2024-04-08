@@ -34,6 +34,11 @@ If a node occurs multiple times, the node properties and labels of the first occ
 This is important when a node can be a source node as well as a target node and their configuration differs.
 Relevant configuration options are `sourceNodeProperties`, `targetNodeProperties`, `sourceNodeLabels` and `targetNodeLabels`.
 
+=== Parallel Cypher Runtime
+
+Cypher projection is compatible with the https://neo4j.com/docs/cypher-manual/5/planning-and-tuning/runtimes/reference/[parallel runtime], which can be used to speed up the execution of the projection.
+The achieved speedup depends on how well the query can be parallelized.
+Note that the parallel runtime is only available on Neo4j Enterprise Edition and since version 5.13.
 
 [[graph-project-cypher-projection-syntax]]
 == Syntax
@@ -115,7 +120,6 @@ RETURN gds.graph.project(
 
 NOTE: To get information about a stored graph, such as its schema, one can use xref:management-ops/graph-list.adoc[gds.graph.list].
 
-
 [[graph-project-cypher-projection-examples]]
 == Examples
 
@@ -194,6 +198,29 @@ RETURN
 |===
 --
 
+=== Using the parallel runtime
+
+Cypher projection is compatible with the https://neo4j.com/docs/cypher-manual/5/planning-and-tuning/runtimes/reference/[parallel runtime].
+
+[role=query-example]
+--
+.Project using the parallel runtime:
+[source,cypher,role=noplay]
+----
+CYPHER runtime=parallel
+MATCH (source:Person)-[r:KNOWS]->(target:Person)
+WITH gds.graph.project('persons', source, target) AS g
+RETURN
+  g.graphName AS graph, g.nodeCount AS nodes, g.relationshipCount AS rels
+----
+
+.Results
+[opts="header",cols="1,1,1m"]
+|===
+| graph     | nodes | rels
+| "persons" | 3     | 2
+|===
+--
 
 [[graph-project-cypher-projection-arbitrary-source-and-target-id-values]]
 === Arbitrary source and target ID values
