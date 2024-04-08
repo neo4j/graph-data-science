@@ -39,6 +39,7 @@ import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfigImpl;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -122,9 +123,11 @@ class NodeSimilarityAlgorithmsFacadeTest {
                 graphStoreCatalogServiceMock,
                 new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
                 mock(AlgorithmMemoryValidationService.class),
-                RequestScopedDependencies.builder().build(),
-                TaskRegistryFactory.empty(),
-                EmptyUserLogRegistryFactory.INSTANCE
+                RequestScopedDependencies.builder()
+                    .with(TaskRegistryFactory.empty())
+                    .with(TerminationFlag.DEFAULT)
+                    .with(EmptyUserLogRegistryFactory.INSTANCE)
+                    .build()
             )
         );
         var nodeSimilarity = similarityAlgorithmsFacade.nodeSimilarity(

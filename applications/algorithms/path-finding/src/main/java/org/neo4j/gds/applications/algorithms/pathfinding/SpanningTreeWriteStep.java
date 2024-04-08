@@ -19,39 +19,32 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.NodePropertyExporter;
-import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.spanningtree.SpanningGraph;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeWriteConfig;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.SPANNING_TREE;
 
 class SpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree> {
     private final Log log;
-    private final RelationshipExporterBuilder relationshipExporterBuilder;
+    private final RequestScopedDependencies requestScopedDependencies;
     private final SpanningTreeWriteConfig configuration;
-    private final TaskRegistryFactory taskRegistryFactory;
-    private final TerminationFlag terminationFlag;
 
     SpanningTreeWriteStep(
         Log log,
-        RelationshipExporterBuilder relationshipExporterBuilder,
-        TerminationFlag terminationFlag,
-        TaskRegistryFactory taskRegistryFactory, SpanningTreeWriteConfig configuration
+        RequestScopedDependencies requestScopedDependencies,
+        SpanningTreeWriteConfig configuration
     ) {
         this.log = log;
-        this.relationshipExporterBuilder = relationshipExporterBuilder;
-        this.terminationFlag = terminationFlag;
+        this.requestScopedDependencies = requestScopedDependencies;
         this.configuration = configuration;
-        this.taskRegistryFactory = taskRegistryFactory;
     }
 
     @Override
@@ -67,13 +60,13 @@ class SpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree> {
             NodePropertyExporter.baseTask(SPANNING_TREE, graph.nodeCount()),
             (org.neo4j.logging.Log) log.getNeo4jLog(),
             configuration.writeConcurrency(),
-            taskRegistryFactory
+            requestScopedDependencies.getTaskRegistryFactory()
         );
 
-        var relationshipExporter = relationshipExporterBuilder
+        var relationshipExporter = requestScopedDependencies.getRelationshipExporterBuilder()
             .withGraph(spanningGraph)
             .withIdMappingOperator(spanningGraph::toOriginalNodeId)
-            .withTerminationFlag(terminationFlag)
+            .withTerminationFlag(requestScopedDependencies.getTerminationFlag())
             .withProgressTracker(progressTracker)
             .withArrowConnectionInfo(
                 configuration.arrowConnectionInfo(),

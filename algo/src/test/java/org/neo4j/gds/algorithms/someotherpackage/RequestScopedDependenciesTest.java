@@ -29,15 +29,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class RequestScopedDependenciesTest {
     @Test
-    void shouldBeSafeAndConvenient() {
-        var rsd = RequestScopedDependencies.builder().build();
-
-        assertThat(rsd.getDatabaseId()).isEqualTo(DatabaseId.DEFAULT);
-        assertThat(rsd.getUser()).isEqualTo(User.DEFAULT);
-        assertThat(rsd.getTerminationFlag()).isEqualTo(TerminationFlag.DEFAULT);
-    }
-
-    @Test
     void shouldBuildBespokeProducts() {
         var rsd = RequestScopedDependencies.builder()
             .with(DatabaseId.of("IMDB"))

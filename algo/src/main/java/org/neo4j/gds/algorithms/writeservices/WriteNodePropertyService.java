@@ -19,35 +19,23 @@
  */
 package org.neo4j.gds.algorithms.writeservices;
 
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.config.ArrowConnectionInfo;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 
 public class WriteNodePropertyService {
-
     private final Log log;
-    private  final NodePropertyExporterBuilder nodePropertyExporterBuilder;
-    private final TaskRegistryFactory taskRegistryFactory;
-    private final TerminationFlag terminationFlag;
+    private final RequestScopedDependencies requestScopedDependencies;
 
-    public WriteNodePropertyService(
-        Log log,
-        NodePropertyExporterBuilder nodePropertyExporterBuilder,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag
-    ) {
-        this.nodePropertyExporterBuilder=nodePropertyExporterBuilder;
+    public WriteNodePropertyService(Log log, RequestScopedDependencies requestScopedDependencies) {
         this.log = log;
-        this.taskRegistryFactory = taskRegistryFactory;
-        this.terminationFlag = terminationFlag;
+        this.requestScopedDependencies = requestScopedDependencies;
     }
 
     public WriteNodePropertyResult write(
@@ -61,8 +49,8 @@ public class WriteNodePropertyService {
         Optional<ResultStore> resultStore
     ) {
         return Neo4jDatabaseNodePropertyWriter.writeNodeProperty(
-            nodePropertyExporterBuilder,
-            taskRegistryFactory,
+            requestScopedDependencies.getNodePropertyExporterBuilder(),
+            requestScopedDependencies.getTaskRegistryFactory(),
             graph,
             graphStore,
             nodePropertyValues,
@@ -71,7 +59,7 @@ public class WriteNodePropertyService {
             procedureName,
             arrowConnectionInfo,
             resultStore,
-            terminationFlag,
+            requestScopedDependencies.getTerminationFlag(),
             log
         );
     }

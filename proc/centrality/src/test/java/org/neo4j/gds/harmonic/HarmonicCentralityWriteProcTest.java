@@ -183,6 +183,14 @@ class HarmonicCentralityWriteProcTest extends BaseProcTest {
             false
         );
 
+        var requestScopedDependencies = RequestScopedDependencies.builder()
+            .with(DatabaseId.of(db.databaseName()))
+            .with(nodePropertyExporterBuilder)
+            .with(taskRegistryFactory)
+            .with(TerminationFlag.RUNNING_TRUE)
+            .with(new User(getUsername(), false))
+            .with(EmptyUserLogRegistryFactory.INSTANCE)
+            .build();
         var writeBusinessFacade = new CentralityAlgorithmsWriteBusinessFacade(
             new CentralityAlgorithmsFacade(
                 new AlgorithmRunner(
@@ -190,19 +198,12 @@ class HarmonicCentralityWriteProcTest extends BaseProcTest {
                     graphStoreCatalogService,
                     new AlgorithmMetricsService(new PassthroughExecutionMetricRegistrar()),
                     memoryUsageValidator,
-                    RequestScopedDependencies.builder()
-                        .with(DatabaseId.of(db.databaseName()))
-                        .with(new User(getUsername(), false))
-                        .build(),
-                    taskRegistryFactory,
-                    EmptyUserLogRegistryFactory.INSTANCE
+                    requestScopedDependencies
                 )
             ),
             new WriteNodePropertyService(
                 logMock,
-                nodePropertyExporterBuilder,
-                taskRegistryFactory,
-                TerminationFlag.RUNNING_TRUE
+                requestScopedDependencies
             )
         );
 

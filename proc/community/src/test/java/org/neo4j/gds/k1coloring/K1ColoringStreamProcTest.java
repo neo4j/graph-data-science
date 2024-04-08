@@ -211,11 +211,11 @@ class K1ColoringStreamProcTest extends BaseProcTest {
                         memoryUsageValidator,
                         RequestScopedDependencies.builder()
                             .with(DatabaseId.of(db.databaseName()))
+                            .with(taskRegistryFactory)
                             .with(TerminationFlag.RUNNING_TRUE)
                             .with(new User(getUsername(), false))
-                            .build(),
-                        taskRegistryFactory,
-                        EmptyUserLogRegistryFactory.INSTANCE
+                            .with(EmptyUserLogRegistryFactory.INSTANCE)
+                            .build()
                     )
                 ));
             proc.facade = new GraphDataScienceProceduresBuilder(Log.noOpLog())

@@ -19,35 +19,24 @@
  */
 package org.neo4j.gds.algorithms.similarity;
 
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.ArrowConnectionInfo;
-import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
-import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Optional;
 
 public class WriteRelationshipService {
     private final Log log;
-    private final RelationshipExporterBuilder relationshipExporterBuilder;
-    private final TaskRegistryFactory taskRegistryFactory;
-    private final TerminationFlag terminationFlag;
+    private final RequestScopedDependencies requestScopedDependencies;
 
-    public WriteRelationshipService(
-        Log log,
-        RelationshipExporterBuilder relationshipExporterBuilder,
-        TaskRegistryFactory taskRegistryFactory,
-        TerminationFlag terminationFlag
-    ) {
+    public WriteRelationshipService(Log log, RequestScopedDependencies requestScopedDependencies) {
         this.log = log;
-        this.relationshipExporterBuilder = relationshipExporterBuilder;
-        this.taskRegistryFactory = taskRegistryFactory;
-        this.terminationFlag = terminationFlag;
+        this.requestScopedDependencies = requestScopedDependencies;
     }
 
     public WriteRelationshipResult write(
@@ -65,14 +54,14 @@ public class WriteRelationshipService {
         return Neo4jDatabaseRelationshipWriter.writeRelationship(
             writeRelationshipType,
             writeProperty,
-            taskRegistryFactory,
-            relationshipExporterBuilder,
+            requestScopedDependencies.getTaskRegistryFactory(),
+            requestScopedDependencies.getRelationshipExporterBuilder(),
             graph,
             graphStore,
             rootIdMap,
             log,
             taskName,
-            terminationFlag,
+            requestScopedDependencies.getTerminationFlag(),
             concurrency,
             arrowConnectionInfo,
             resultStore,

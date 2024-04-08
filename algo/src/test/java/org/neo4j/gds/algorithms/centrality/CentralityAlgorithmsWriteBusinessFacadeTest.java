@@ -22,6 +22,7 @@ package org.neo4j.gds.algorithms.centrality;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyResult;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
@@ -298,7 +299,7 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
         private final long writeMilliseconds;
 
         WriteNodePropertyServiceStub(long nodePropertiesWritten, long writeMilliseconds) {
-            super(null, null, null, null);
+            super(null, RequestScopedDependencies.builder().build());
             this.nodePropertiesWritten = nodePropertiesWritten;
             this.writeMilliseconds = writeMilliseconds;
         }

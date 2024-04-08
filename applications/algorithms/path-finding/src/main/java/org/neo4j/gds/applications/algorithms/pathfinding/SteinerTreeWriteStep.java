@@ -19,30 +19,25 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
+import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.spanningtree.SpanningGraph;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
-import org.neo4j.gds.termination.TerminationFlag;
 
 class SteinerTreeWriteStep implements MutateOrWriteStep<SteinerTreeResult> {
-    private final RelationshipExporterBuilder exporterBuilder;
-    private final TerminationFlag terminationFlag;
-
+    private final RequestScopedDependencies requestScopedDependencies;
     private final SteinerTreeWriteConfig configuration;
 
     SteinerTreeWriteStep(
-        RelationshipExporterBuilder exporterBuilder,
-        TerminationFlag terminationFlag,
+        RequestScopedDependencies requestScopedDependencies,
         SteinerTreeWriteConfig configuration
     ) {
-        this.exporterBuilder = exporterBuilder;
-        this.terminationFlag = terminationFlag;
+        this.requestScopedDependencies = requestScopedDependencies;
         this.configuration = configuration;
     }
 
@@ -65,10 +60,10 @@ class SteinerTreeWriteStep implements MutateOrWriteStep<SteinerTreeResult> {
         );
         var spanningGraph = new SpanningGraph(graph, spanningTree);
 
-        var relationshipExporter = exporterBuilder
+        var relationshipExporter = requestScopedDependencies.getRelationshipExporterBuilder()
             .withGraph(spanningGraph)
             .withIdMappingOperator(spanningGraph::toOriginalNodeId)
-            .withTerminationFlag(terminationFlag)
+            .withTerminationFlag(requestScopedDependencies.getTerminationFlag())
             .withProgressTracker(ProgressTracker.NULL_TRACKER)
             .withArrowConnectionInfo(
                 configuration.arrowConnectionInfo(),

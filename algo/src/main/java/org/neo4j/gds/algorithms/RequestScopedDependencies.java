@@ -29,8 +29,8 @@ import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 import org.neo4j.gds.termination.TerminationFlag;
 
 /**
- * This is a handy class for transporting similar dependencies through layers.
- * And especially useful when that list grows or shrinks - less sites to edit innit
+ * This is a handy class for transporting similarly scoped dependencies through layers.
+ * And especially useful when that list grows or shrinks - less sites to edit innit.
  */
 public final class RequestScopedDependencies {
     private final DatabaseId databaseId;
@@ -103,14 +103,19 @@ public final class RequestScopedDependencies {
         return userLogRegistryFactory;
     }
 
+    /**
+     * A handy builder where you can include as many or as few components as you are interested in.
+     * We deliberately do not have defaults,
+     * because trying to reconcile convenience across all usages is an error-prone form of coupling.
+     */
     public static class RequestScopedDependenciesBuilder {
-        private DatabaseId databaseId = DatabaseId.DEFAULT;
+        private DatabaseId databaseId;
         private NodePropertyExporterBuilder nodePropertyExporterBuilder;
         private RelationshipExporterBuilder relationshipExporterBuilder;
         private RelationshipStreamExporterBuilder relationshipStreamExporterBuilder;
-        private TerminationFlag terminationFlag = TerminationFlag.DEFAULT;
+        private TerminationFlag terminationFlag;
         private TaskRegistryFactory taskRegistryFactory;
-        private User user = User.DEFAULT;
+        private User user;
         private UserLogRegistryFactory userLogRegistryFactory;
 
         public RequestScopedDependenciesBuilder with(DatabaseId databaseId) {

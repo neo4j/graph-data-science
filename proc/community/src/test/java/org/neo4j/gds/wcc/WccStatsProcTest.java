@@ -288,10 +288,10 @@ class WccStatsProcTest extends BaseProcTest {
                     memoryUsageValidator,
                     RequestScopedDependencies.builder()
                         .with(DatabaseId.of(db.databaseName()))
+                        .with(TaskRegistryFactory.empty())
                         .with(new User(getUsername(), false))
-                        .build(),
-                    TaskRegistryFactory.empty(),
-                    EmptyUserLogRegistryFactory.INSTANCE
+                        .with(EmptyUserLogRegistryFactory.INSTANCE)
+                        .build()
                 )
             )
         );

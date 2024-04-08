@@ -87,9 +87,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new BellmanFordWriteStep(
             log,
-            requestScopedDependencies.getRelationshipStreamExporterBuilder(),
-            requestScopedDependencies.getTaskRegistryFactory(),
-            requestScopedDependencies.getTerminationFlag(),
+            requestScopedDependencies,
             configuration
         );
 
@@ -126,9 +124,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new KSpanningTreeWriteStep(
             log,
-            requestScopedDependencies.getNodePropertyExporterBuilder(),
-            requestScopedDependencies.getTaskRegistryFactory(),
-            requestScopedDependencies.getTerminationFlag(),
+            requestScopedDependencies,
             configuration
         );
 
@@ -210,9 +206,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new SpanningTreeWriteStep(
             log,
-            requestScopedDependencies.getRelationshipExporterBuilder(),
-            requestScopedDependencies.getTerminationFlag(),
-            requestScopedDependencies.getTaskRegistryFactory(),
+            requestScopedDependencies,
             configuration
         );
 
@@ -232,11 +226,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         SteinerTreeWriteConfig configuration,
         ResultBuilder<SteinerTreeWriteConfig, SteinerTreeResult, RESULT> resultBuilder
     ) {
-        var writeStep = new SteinerTreeWriteStep(
-            requestScopedDependencies.getRelationshipExporterBuilder(),
-            requestScopedDependencies.getTerminationFlag(),
-            configuration
-        );
+        var writeStep = new SteinerTreeWriteStep(requestScopedDependencies, configuration);
 
         return runAlgorithmAndWrite(
             graphName,
@@ -262,9 +252,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     ) {
         var writeStep = new ShortestPathWriteStep<>(
             log,
-            requestScopedDependencies.getRelationshipStreamExporterBuilder(),
-            requestScopedDependencies.getTaskRegistryFactory(),
-            requestScopedDependencies.getTerminationFlag(),
+            requestScopedDependencies,
             configuration
         );
 
