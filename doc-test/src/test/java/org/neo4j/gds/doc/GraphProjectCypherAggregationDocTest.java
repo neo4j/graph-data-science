@@ -21,12 +21,16 @@ package org.neo4j.gds.doc;
 
 import org.neo4j.gds.catalog.GraphStreamRelationshipPropertiesProc;
 import org.neo4j.gds.compat.CompatUserAggregationFunction;
+import org.neo4j.gds.compat.Neo4jVersion;
 import org.neo4j.gds.functions.AsNodeFunc;
 import org.neo4j.gds.functions.NodePropertyFunc;
+import org.neo4j.gds.junit.annotation.DisableForNeo4jVersion;
 import org.neo4j.gds.projection.CypherAggregation;
 
 import java.util.List;
 
+@DisableForNeo4jVersion(Neo4jVersion.V_5_11)
+@DisableForNeo4jVersion(Neo4jVersion.V_5_12)
 class GraphProjectCypherAggregationDocTest extends SingleFileDocTestBase {
     @Override
     protected List<Class<?>> functions() {
