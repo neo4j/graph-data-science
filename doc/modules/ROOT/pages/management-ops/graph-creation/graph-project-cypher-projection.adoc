@@ -218,7 +218,7 @@ RETURN
 [opts="header",cols="1,1,1m"]
 |===
 | graph     | nodes | rels
-| "persons" | 5     | 2
+| "persons" | 3     | 2
 |===
 --
 
