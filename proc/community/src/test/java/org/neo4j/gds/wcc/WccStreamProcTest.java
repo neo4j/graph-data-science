@@ -27,7 +27,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.BaseProcTest;
-import org.neo4j.gds.CommunityHelper;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -41,6 +40,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -121,7 +121,14 @@ class WccStreamProcTest extends BaseProcTest {
             communities.put(nodeId, setId);
         });
 
-        CommunityHelper.assertCommunities(communities, EXPECTED_COMMUNITIES);
+        assertThat(communities.values().stream().distinct()).hasSize(3);
+
+        for (var community : EXPECTED_COMMUNITIES) {
+            for (int j = 0; j < community.length - 1; ++j) {
+                assertThat(communities.get(community[j])).isEqualTo(communities.get(community[j + 1]));
+            }
+        }
+
     }
 
     @Test
@@ -210,7 +217,21 @@ class WccStreamProcTest extends BaseProcTest {
             );
         });
 
-        assertThat(actualComponents).isEqualTo(expectedCommunities);
+        String[] keySet = expectedCommunities.keySet().toArray(new String[0]);
+        assertThat(actualComponents.keySet()).containsExactlyInAnyOrder(keySet);
+
+        BiFunction<String, String, Boolean> actualCompare = (a, b) ->
+            actualComponents.get(a).equals(actualComponents.get(b));
+        BiFunction<String, String, Boolean> expectedCompare = (a, b) ->
+            expectedCommunities.get(a).equals(expectedCommunities.get(b));
+
+        for (int j = 0; j < keySet.length; ++j) {
+            for (int z = j + 1; z < keySet.length; ++z) {
+                assertThat(actualCompare.apply(keySet[j], keySet[z]))
+                    .isEqualTo(expectedCompare.apply(keySet[j], keySet[z]));
+            }
+        }
+
     }
 
     @Test
