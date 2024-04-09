@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.io.db;
 
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.io.GraphStoreExporter;
 import org.neo4j.gds.core.io.GraphStoreInput;
@@ -51,23 +52,39 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter {
         Log log,
         ProgressTracker progressTracker
     ) {
+        var executionMonitor = new ProgressTrackerExecutionMonitor(
+            graphStore,
+            progressTracker,
+            parameters.toBatchImporterConfig()
+        );
+
+        var pbiConfig = GdsParallelBatchImporter.Config.builder()
+            .databaseName(parameters.dbName())
+            .batchSize(parameters.batchSize())
+            .enableDebugLog(parameters.enableDebugLog())
+            .defaultRelationshipType(RelationshipType.of(parameters.defaultRelationshipType()))
+            .writeConcurrency(parameters.writeConcurrency())
+            .databaseFormat(parameters.recordFormat())
+            .force(parameters.force())
+            .highIO(parameters.highIO())
+            .useBadCollector(parameters.withUseBadCollector())
+            .build();
+
+        var parallelBatchImporter = GdsParallelBatchImporter.fromDb(databaseService, pbiConfig, log, executionMonitor);
+
         return new GraphStoreToDatabaseExporter(
             graphStore,
-            databaseService,
+            parallelBatchImporter,
             parameters,
-            neoNodeProperties,
-            log,
-            progressTracker
+            neoNodeProperties
         );
     }
 
     private GraphStoreToDatabaseExporter(
         GraphStore graphStore,
-        GraphDatabaseService databaseService,
+        GdsParallelBatchImporter parallelBatchImporter,
         GraphStoreToDatabaseExporterParameters parameters,
-        Optional<NeoNodeProperties> neoNodeProperties,
-        Log log,
-        ProgressTracker progressTracker
+        Optional<NeoNodeProperties> neoNodeProperties
     ) {
         super(
             graphStore,
@@ -77,12 +94,7 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter {
             parameters.writeConcurrency(),
             parameters.batchSize()
         );
-        var executionMonitor = new ProgressTrackerExecutionMonitor(
-            graphStore,
-            progressTracker,
-            parameters.toBatchImporterConfig()
-        );
-        this.parallelBatchImporter = GdsParallelBatchImporter.fromDb(databaseService, parameters, log, executionMonitor);
+        this.parallelBatchImporter = parallelBatchImporter;
     }
 
     @Override

@@ -96,6 +96,10 @@ public final class GraphStoreToDatabaseExporterParameters {
         return force;
     }
 
+    boolean highIO() {
+        return highIO;
+    }
+
     boolean enableDebugLog() {
         return enableDebugLog;
     }
