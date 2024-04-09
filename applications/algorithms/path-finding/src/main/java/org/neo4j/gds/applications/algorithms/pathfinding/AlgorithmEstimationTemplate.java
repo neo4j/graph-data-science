@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
-import org.neo4j.gds.algorithms.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.algorithms.estimation.GraphDimensionsComputer;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.config.AlgoBaseConfig;

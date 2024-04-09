@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms;
+package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
@@ -30,7 +30,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 
 /**
  * This is a handy class for transporting similarly scoped dependencies through layers.
- * And especially useful when that list grows or shrinks - less sites to edit innit.
+ * And especially useful when that list grows or shrinks - fewer sites to edit innit.
  */
 public final class RequestScopedDependencies {
     private final DatabaseId databaseId;

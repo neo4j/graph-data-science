@@ -21,7 +21,7 @@ package org.neo4j.gds.algorithms.estimation;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.MemoryEstimateDefinition;
-import org.neo4j.gds.algorithms.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.GraphDimensions;

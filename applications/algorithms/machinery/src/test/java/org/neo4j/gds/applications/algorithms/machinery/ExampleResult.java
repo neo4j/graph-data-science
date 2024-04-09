@@ -17,26 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.pathfinding;
+package org.neo4j.gds.applications.algorithms.machinery;
 
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.config.RelationshipWeightConfig;
+class ExampleResult {
+    String foo;
 
-import java.util.Optional;
+    int bar;
 
-class ExampleConfiguration implements AlgoBaseConfig, RelationshipWeightConfig {
-    @Override
-    public Optional<String> usernameOverride() {
-        throw new UnsupportedOperationException("TODO");
-    }
-
-    @Override
-    public Optional<String> relationshipWeightProperty() {
-        return Optional.empty();
-    }
-
-    @Override
-    public int concurrency() {
-        return 7;
-    }
+    boolean baz;
 }

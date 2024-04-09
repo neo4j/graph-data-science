@@ -92,6 +92,9 @@ project(':path-finding-algorithms').projectDir = file('applications/algorithms/p
 include('applications-facade')
 project(':applications-facade').projectDir = file('applications/facade')
 
+include('algorithms-machinery')
+project(':algorithms-machinery').projectDir = file('applications/algorithms/machinery')
+
 include 'procedure-collector'
 project(':procedure-collector').projectDir = file('procedure-collector')
 

@@ -10,6 +10,7 @@ dependencies {
     compileOnly(group: 'org.neo4j', name: 'neo4j-values', version: ver.'neo4j') { transitive = false }
 
     implementation project(':algo')
+    implementation project(':algorithms-machinery')
     implementation project(':algo-common')
     implementation project(':config-api')
     implementation project(':core')

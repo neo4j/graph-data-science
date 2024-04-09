@@ -17,19 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.pathfinding;
+package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
 
-public interface MutateOrWriteStep<RESULT_FROM_ALGORITHM> {
-    /**
-     * Timings belong on the outside.
-     */
-    void execute(
-        Graph graph,
-        GraphStore graphStore,
-        RESULT_FROM_ALGORITHM result,
-        SideEffectProcessingCountsBuilder countsBuilder
-    );
+public interface AlgorithmComputation<RESULT> {
+    RESULT compute(Graph graph);
 }

@@ -17,10 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.pathfinding;
+package org.neo4j.gds.applications.algorithms.machinery;
 
-import org.neo4j.gds.api.Graph;
+/**
+ * This is finalised timings for one algorithm processing. Going for a good old struct here
+ */
+public class AlgorithmProcessingTimings {
+    public final long preProcessingMillis;
+    public final long computeMillis;
+    public final long postProcessingMillis;
 
-public interface AlgorithmComputation<RESULT> {
-    RESULT compute(Graph graph);
+    AlgorithmProcessingTimings(long preProcessingMillis, long computeMillis, long postProcessingMillis) {
+        this.preProcessingMillis = preProcessingMillis;
+        this.computeMillis = computeMillis;
+        this.postProcessingMillis = postProcessingMillis;
+    }
 }

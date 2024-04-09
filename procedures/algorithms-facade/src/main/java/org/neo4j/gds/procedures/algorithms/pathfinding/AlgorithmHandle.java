@@ -20,7 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.applications.algorithms.pathfinding.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 
 public interface AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> {
     RESULT_TO_CALLER compute(

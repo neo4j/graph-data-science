@@ -17,11 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.pathfinding;
+package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.algorithms.RequestScopedDependencies;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
@@ -31,7 +30,6 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.metrics.ExecutionMetric;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
-import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
 import java.util.Map;
 import java.util.Optional;
@@ -78,17 +76,17 @@ class DefaultAlgorithmProcessingTemplateTest {
         when(algorithmMetricsService.create("Duckstra")).thenReturn(mock(ExecutionMetric.class));
 
         //noinspection unchecked
-        AlgorithmComputation<PathFindingResult> computation = mock(AlgorithmComputation.class);
-        var pathFindingResult = mock(PathFindingResult.class);
+        AlgorithmComputation<ExampleResult> computation = mock(AlgorithmComputation.class);
+        var pathFindingResult = mock(ExampleResult.class);
         when(computation.compute(graph)).thenReturn(pathFindingResult);
 
-        var resultBuilder = new ResultBuilder<ExampleConfiguration, PathFindingResult, Stream<String>>() {
+        var resultBuilder = new ResultBuilder<ExampleConfiguration, ExampleResult, Stream<String>>() {
             @Override
             public Stream<String> build(
                 Graph graph,
                 GraphStore graphStore,
                 ExampleConfiguration configuration,
-                Optional<PathFindingResult> pathFindingResult,
+                Optional<ExampleResult> pathFindingResult,
                 AlgorithmProcessingTimings timings,
                 SideEffectProcessingCounts counts
             ) {
@@ -150,14 +148,14 @@ class DefaultAlgorithmProcessingTemplateTest {
             databaseId
         )).thenReturn(Pair.of(graph, graphStore));
 
-        var pathFindingResult = mock(PathFindingResult.class);
-        var resultBuilder = new ResultBuilder<ExampleConfiguration, PathFindingResult, String>() {
+        var pathFindingResult = mock(ExampleResult.class);
+        var resultBuilder = new ResultBuilder<ExampleConfiguration, ExampleResult, String>() {
             @Override
             public String build(
                 Graph actualGraph,
                 GraphStore actualGraphStore,
                 ExampleConfiguration configuration,
-                Optional<PathFindingResult> actualResult,
+                Optional<ExampleResult> actualResult,
                 AlgorithmProcessingTimings timings,
                 SideEffectProcessingCounts counts
             ) {
@@ -175,15 +173,15 @@ class DefaultAlgorithmProcessingTemplateTest {
         when(algorithmMetricsService.create("m || w")).thenReturn(mock(ExecutionMetric.class));
 
         //noinspection unchecked
-        AlgorithmComputation<PathFindingResult> computation = mock(AlgorithmComputation.class);
+        AlgorithmComputation<ExampleResult> computation = mock(AlgorithmComputation.class);
         when(computation.compute(graph)).thenReturn(pathFindingResult);
 
-        var mutateOrWriteStep = new MutateOrWriteStep<PathFindingResult>() {
+        var mutateOrWriteStep = new MutateOrWriteStep<ExampleResult>() {
             @Override
             public void execute(
                 Graph graph,
                 GraphStore graphStore,
-                PathFindingResult resultFromAlgorithm,
+                ExampleResult resultFromAlgorithm,
                 SideEffectProcessingCountsBuilder countsBuilder
             ) {
                 countsBuilder.withRelationshipsWritten(42);

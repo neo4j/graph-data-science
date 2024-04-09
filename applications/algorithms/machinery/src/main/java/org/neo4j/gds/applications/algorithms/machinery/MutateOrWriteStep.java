@@ -17,22 +17,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.pathfinding;
+package org.neo4j.gds.applications.algorithms.machinery;
 
-/**
- * When doing mutate or write, we count e.g. the number of relationships written,
- * and we want to report that up the call chain. This is the facility for it.
- */
-public class SideEffectProcessingCountsBuilder {
-    private static final int NOT_AVAILABLE = -1;
+import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.GraphStore;
 
-    private long relationshipsWritten = NOT_AVAILABLE;
-
-    void withRelationshipsWritten(long relationshipsWritten) {
-        this.relationshipsWritten = relationshipsWritten;
-    }
-
-    SideEffectProcessingCounts build() {
-        return new SideEffectProcessingCounts(relationshipsWritten);
-    }
+public interface MutateOrWriteStep<RESULT_FROM_ALGORITHM> {
+    /**
+     * Timings belong on the outside.
+     */
+    void execute(
+        Graph graph,
+        GraphStore graphStore,
+        RESULT_FROM_ALGORITHM result,
+        SideEffectProcessingCountsBuilder countsBuilder
+    );
 }

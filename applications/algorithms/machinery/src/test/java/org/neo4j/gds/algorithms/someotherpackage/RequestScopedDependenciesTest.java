@@ -20,7 +20,7 @@
 package org.neo4j.gds.algorithms.someotherpackage;
 
 import org.junit.jupiter.api.Test;
-import org.neo4j.gds.algorithms.RequestScopedDependencies;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.termination.TerminationFlag;
