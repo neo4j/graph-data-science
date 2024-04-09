@@ -97,6 +97,7 @@ public class GraphStoreExportProc extends BaseProc {
                     exportConfig.writeConcurrency(),
                     exportConfig.batchSize(),
                     RelationshipType.of(exportConfig.defaultRelationshipType()),
+                    exportConfig.databaseFormat(),
                     exportConfig.enableDebugLog()
                 );
 

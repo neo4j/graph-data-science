@@ -38,6 +38,10 @@ public interface GraphStoreToDatabaseExporterConfig extends GraphStoreExporterBa
         return false;
     }
 
+    default String databaseFormat() {
+        return Neo4jProxy.defaultDatabaseFormatSetting();
+    }
+
     @Configuration.Check
     default void validate() {
         Neo4jProxy.validateExternalDatabaseName(dbName());
