@@ -93,7 +93,7 @@ public class GraphStoreExportProc extends BaseProc {
                 );
 
                 var parameters = new GraphStoreToDatabaseExporterParameters(
-                    exportConfig.dbName(),
+                    exportConfig.databaseName(),
                     exportConfig.writeConcurrency(),
                     exportConfig.batchSize(),
                     RelationshipType.of(exportConfig.defaultRelationshipType()),
@@ -117,7 +117,7 @@ public class GraphStoreExportProc extends BaseProc {
 
                     return new DatabaseExportResult(
                         graphName,
-                        exportConfig.dbName(),
+                        exportConfig.databaseName(),
                         graphStore.nodeCount(),
                         graphStore.relationshipCount(),
                         graphStore.relationshipTypes().size(),

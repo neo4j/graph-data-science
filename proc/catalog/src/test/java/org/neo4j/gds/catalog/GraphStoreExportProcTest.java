@@ -115,7 +115,7 @@ class GraphStoreExportProcTest extends BaseProcTest {
     void exportGraphWithCommunityDatabaseFormats(String databaseFormat) {
         projectGraph();
 
-        var exportQuery = "CALL gds.graph.export('test-graph', {dbName: 'test-db', databaseFormat: $databaseFormat})";
+        var exportQuery = "CALL gds.graph.export('test-graph', {dbName: 'test-db', dbFormat: $databaseFormat})";
 
         runQueryWithRowConsumer(
             exportQuery,
