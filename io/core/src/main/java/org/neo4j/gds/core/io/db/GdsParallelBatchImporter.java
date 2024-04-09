@@ -207,7 +207,7 @@ public final class GdsParallelBatchImporter {
     }
 
     private Collector getCollector() {
-        return parameters.useBadCollector()
+        return parameters.withUseBadCollector()
             ? Collectors.badCollector(new LoggingOutputStream(log), 0)
             : Collector.EMPTY;
     }

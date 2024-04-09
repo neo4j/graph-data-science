@@ -25,8 +25,6 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.internal.batchimport.Configuration;
 import org.neo4j.internal.batchimport.IndexConfig;
 
-import java.util.Optional;
-
 @Parameters
 public final class GraphStoreToDatabaseExporterParameters {
     private final String dbName;
@@ -35,11 +33,10 @@ public final class GraphStoreToDatabaseExporterParameters {
     private final String defaultRelationshipType;
     private final boolean enableDebugLog;
 
-    private String recordFormat;
+    private String databaseFormat;
     private boolean useBadCollector;
     private boolean highIO;
     private boolean force;
-    private Optional<Long> pageCacheMemory;
 
     public static GraphStoreToDatabaseExporterParameters create(
         String dbName,
@@ -67,7 +64,7 @@ public final class GraphStoreToDatabaseExporterParameters {
         int batchSize,
         String defaultRelationshipType,
         boolean enableDebugLog,
-        String recordFormat,
+        String databaseFormat,
         boolean useBadCollector
     ) {
         this.dbName = dbName;
@@ -76,12 +73,11 @@ public final class GraphStoreToDatabaseExporterParameters {
         this.defaultRelationshipType = defaultRelationshipType;
         this.enableDebugLog = enableDebugLog;
 
-        this.recordFormat = recordFormat;
+        this.databaseFormat = databaseFormat;
         this.useBadCollector = useBadCollector;
 
         this.highIO = false;
         this.force = false;
-        this.pageCacheMemory = Optional.empty();
     }
 
     String dbName() {
@@ -89,10 +85,10 @@ public final class GraphStoreToDatabaseExporterParameters {
     }
 
     String recordFormat() {
-        return recordFormat;
+        return databaseFormat;
     }
 
-    boolean useBadCollector() {
+    boolean withUseBadCollector() {
         return useBadCollector;
     }
 
@@ -116,11 +112,6 @@ public final class GraphStoreToDatabaseExporterParameters {
         return defaultRelationshipType;
     }
 
-    public GraphStoreToDatabaseExporterParameters withPageCacheMemory(long pageCacheMemory) {
-        this.pageCacheMemory = Optional.of(pageCacheMemory);
-        return this;
-    }
-
     public GraphStoreToDatabaseExporterParameters withForce(boolean force) {
         this.force = force;
         return this;
@@ -131,13 +122,13 @@ public final class GraphStoreToDatabaseExporterParameters {
         return this;
     }
 
-    public GraphStoreToDatabaseExporterParameters andAlsoWithUseBadCollector(boolean useBadCollector) {
+    public GraphStoreToDatabaseExporterParameters withUseBadCollector(boolean useBadCollector) {
         this.useBadCollector = useBadCollector;
         return this;
     }
 
-    public GraphStoreToDatabaseExporterParameters andAlsoWithRecordFormat(String recordFormat) {
-        this.recordFormat = recordFormat;
+    public GraphStoreToDatabaseExporterParameters withDatabaseFormat(String databaseFormat) {
+        this.databaseFormat = databaseFormat;
         return this;
     }
 

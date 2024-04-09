@@ -36,7 +36,6 @@ class GraphStoreToDatabaseExporterParametersTest {
                 false,
                 RelationshipType.ALL_RELATIONSHIPS.name
             )
-            .withPageCacheMemory(100_000L)
             .withHighIO(true);
         var pbiConfig = parameters.toBatchImporterConfig();
 
