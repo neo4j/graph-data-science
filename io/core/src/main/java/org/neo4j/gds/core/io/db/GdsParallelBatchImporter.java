@@ -59,7 +59,6 @@ public final class GdsParallelBatchImporter {
     private final LogService logService;
     private final Config databaseConfig;
     private final DatabaseManagementService dbms;
-    private final GraphDatabaseService databaseService;
 
     static GdsParallelBatchImporter fromDb(
         GraphDatabaseService databaseService,
@@ -76,7 +75,6 @@ public final class GdsParallelBatchImporter {
             log,
             executionMonitor,
             dbms,
-            databaseService,
             fs,
             logService,
             databaseConfig
@@ -98,7 +96,6 @@ public final class GdsParallelBatchImporter {
             log,
             executionMonitor,
             dbms,
-            databaseService,
             fs,
             logService,
             databaseConfig
@@ -110,7 +107,6 @@ public final class GdsParallelBatchImporter {
         Log log,
         CompatExecutionMonitor executionMonitor,
         DatabaseManagementService dbms,
-        GraphDatabaseService databaseService,
         FileSystemAbstraction fileSystem,
         LogService logService,
         Config databaseConfig
@@ -119,7 +115,6 @@ public final class GdsParallelBatchImporter {
         this.log = log;
         this.executionMonitor = executionMonitor;
         this.dbms = dbms;
-        this.databaseService = databaseService;
         this.fileSystem = fileSystem;
         this.logService = logService;
 
