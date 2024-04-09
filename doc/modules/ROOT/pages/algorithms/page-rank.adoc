@@ -531,8 +531,6 @@ ORDER BY score DESC, name ASC
 --
 
 In this example we are using `tolerance: 0.1`, so the results are a bit different compared to the ones from xref:algorithms/page-rank.adoc#algorithms-page-rank-examples-stream[stream example] which is using the default value of `tolerance`.
-Note that the nodes 'About', 'Link' and 'Product' now have the same score, while with the default value of `tolerance` the node 'Product' has higher score than the other two.
-
 
 [[algorithms-page-rank-examples-damping]]
 === Damping Factor
