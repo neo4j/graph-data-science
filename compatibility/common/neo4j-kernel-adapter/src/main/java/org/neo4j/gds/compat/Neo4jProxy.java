@@ -651,7 +651,7 @@ public final class Neo4jProxy {
         );
     }
 
-    public static String defaultRecordFormatSetting() {
+    public static String defaultDatabaseFormatSetting() {
         return GraphDatabaseSettings.db_format.defaultValue();
     }
 

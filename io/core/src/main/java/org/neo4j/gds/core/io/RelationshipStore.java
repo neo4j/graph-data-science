@@ -74,7 +74,7 @@ public final class RelationshipStore {
         );
     }
 
-    static RelationshipStore of(GraphStore graphStore, String defaultRelationshipType) {
+    static RelationshipStore of(GraphStore graphStore, RelationshipType defaultRelationshipType) {
         Map<RelationshipType, CompositeRelationshipIterator> relationshipIterators = new HashMap<>();
         var propertyCount = new MutableLong(0);
 
@@ -85,7 +85,7 @@ public final class RelationshipStore {
             propertyCount.add(outputProperties.size() * graphStore.relationshipCount(relationshipType));
 
             var outputRelationshipType = relationshipType.equals(RelationshipType.ALL_RELATIONSHIPS)
-                ? RelationshipType.of(defaultRelationshipType)
+                ? defaultRelationshipType
                 : relationshipType;
 
             relationshipIterators.put(

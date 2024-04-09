@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.io.file;
 
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Parameters;
 
 @Parameters
@@ -28,7 +29,7 @@ public final class GraphStoreToFileExporterParameters {
         String username,
         boolean includeMetaData,
         boolean useLabelMapping,
-        String defaultRelationshipType,
+        RelationshipType defaultRelationshipType,
         int concurrency,
         int batchSize
     ) {
@@ -48,7 +49,7 @@ public final class GraphStoreToFileExporterParameters {
     private final boolean includeMetaData;
     private final boolean useLabelMapping;
 
-    private final String defaultRelationshipType;
+    private final RelationshipType defaultRelationshipType;
     private final int concurrency;
     private final int batchSize;
 
@@ -57,7 +58,7 @@ public final class GraphStoreToFileExporterParameters {
         String username,
         boolean includeMetaData,
         boolean useLabelMapping,
-        String defaultRelationshipType,
+        RelationshipType defaultRelationshipType,
         int concurrency,
         int batchSize
     ) {
@@ -86,7 +87,7 @@ public final class GraphStoreToFileExporterParameters {
         return useLabelMapping;
     }
 
-    public String defaultRelationshipType() {
+    public RelationshipType defaultRelationshipType() {
         return defaultRelationshipType;
     }
 

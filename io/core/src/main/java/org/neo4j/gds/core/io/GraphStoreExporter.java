@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.io;
 
 import org.neo4j.common.Validator;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
@@ -37,7 +38,7 @@ public abstract class GraphStoreExporter {
     private final GraphStore graphStore;
     private final Map<String, LongFunction<Object>> neoNodeProperties;
     private final Optional<NodeLabelMapping> nodeLabelMapping;
-    private final String defaultRelationshipType;
+    private final RelationshipType defaultRelationshipType;
     protected final int concurrency;
     private final int batchSize;
 
@@ -86,7 +87,7 @@ public abstract class GraphStoreExporter {
         GraphStore graphStore,
         Optional<NeoNodeProperties> neoNodeProperties,
         Optional<NodeLabelMapping> nodeLabelMapping,
-        String defaultRelationshipType,
+        RelationshipType defaultRelationshipType,
         int concurrency,
         int batchSize
 

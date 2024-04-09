@@ -52,23 +52,23 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter {
         Log log,
         ProgressTracker progressTracker
     ) {
+        var pbiConfig = GdsParallelBatchImporter.Config.builder()
+            .databaseName(parameters.databaseName())
+            .batchSize(parameters.batchSize())
+            .enableDebugLog(parameters.enableDebugLog())
+            .defaultRelationshipType(parameters.defaultRelationshipType())
+            .writeConcurrency(parameters.writeConcurrency())
+            .databaseFormat(parameters.databaseFormat())
+            .force(false)
+            .highIO(false)
+            .useBadCollector(false)
+            .build();
+
         var executionMonitor = new ProgressTrackerExecutionMonitor(
             graphStore,
             progressTracker,
-            parameters.toBatchImporterConfig()
+            GdsParallelBatchImporter.Config.toBatchImporterConfig(pbiConfig)
         );
-
-        var pbiConfig = GdsParallelBatchImporter.Config.builder()
-            .databaseName(parameters.dbName())
-            .batchSize(parameters.batchSize())
-            .enableDebugLog(parameters.enableDebugLog())
-            .defaultRelationshipType(RelationshipType.of(parameters.defaultRelationshipType()))
-            .writeConcurrency(parameters.writeConcurrency())
-            .databaseFormat(parameters.recordFormat())
-            .force(parameters.force())
-            .highIO(parameters.highIO())
-            .useBadCollector(parameters.withUseBadCollector())
-            .build();
 
         var parallelBatchImporter = GdsParallelBatchImporter.fromDb(databaseService, pbiConfig, log, executionMonitor);
 

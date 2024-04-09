@@ -23,6 +23,7 @@ import org.neo4j.configuration.Config;
 import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.PropertyMappings;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
@@ -91,13 +92,14 @@ public class GraphStoreExportProc extends BaseProc {
                     executionContext().userLogRegistryFactory()
                 );
 
-                var parameters = GraphStoreToDatabaseExporterParameters.create(
+                var parameters = new GraphStoreToDatabaseExporterParameters(
                     exportConfig.dbName(),
                     exportConfig.writeConcurrency(),
                     exportConfig.batchSize(),
-                    exportConfig.enableDebugLog(),
-                    exportConfig.defaultRelationshipType()
+                    RelationshipType.of(exportConfig.defaultRelationshipType()),
+                    exportConfig.enableDebugLog()
                 );
+
                 var exporter = GraphStoreToDatabaseExporter.of(
                     graphStore,
                     databaseService,
@@ -174,7 +176,7 @@ public class GraphStoreExportProc extends BaseProc {
             exportConfig.username(),
             exportConfig.includeMetaData(),
             exportConfig.useLabelMapping(),
-            exportConfig.defaultRelationshipType(),
+            RelationshipType.of(exportConfig.defaultRelationshipType()),
             exportConfig.writeConcurrency(),
             exportConfig.batchSize()
         );

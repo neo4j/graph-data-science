@@ -289,7 +289,7 @@ class CsvToGraphStoreImporterIntegrationTest {
             "",
             true,
             useLabelMapping,
-            RelationshipType.ALL_RELATIONSHIPS.name,
+            RelationshipType.ALL_RELATIONSHIPS,
             concurrency,
             10_000
         );

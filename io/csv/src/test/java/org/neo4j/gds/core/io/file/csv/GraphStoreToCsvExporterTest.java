@@ -141,7 +141,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             "",
             true,
             false,
-            RelationshipType.ALL_RELATIONSHIPS.name,
+            RelationshipType.ALL_RELATIONSHIPS,
             1,
             10_000
         );
@@ -242,7 +242,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             "",
             false,
             false,
-            RelationshipType.ALL_RELATIONSHIPS.name,
+            RelationshipType.ALL_RELATIONSHIPS,
             1,
             10_000
         );
@@ -298,7 +298,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             "",
             true,
             false,
-            RelationshipType.ALL_RELATIONSHIPS.name,
+            RelationshipType.ALL_RELATIONSHIPS,
             2,
             10_000
         );
@@ -377,7 +377,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             "",
             false,
             false,
-            RelationshipType.ALL_RELATIONSHIPS.name,
+            RelationshipType.ALL_RELATIONSHIPS,
             4,
             10_000
         );
@@ -453,7 +453,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             "",
             true,
             false,
-            RelationshipType.ALL_RELATIONSHIPS.name,
+            RelationshipType.ALL_RELATIONSHIPS,
             1,
             10_000
         );
@@ -652,7 +652,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             "UserA",
             true,
             false,
-            RelationshipType.ALL_RELATIONSHIPS.name,
+            RelationshipType.ALL_RELATIONSHIPS,
             1,
             10_000
         );
@@ -682,7 +682,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             "",
             true,
             false,
-            RelationshipType.ALL_RELATIONSHIPS.name,
+            RelationshipType.ALL_RELATIONSHIPS,
             1,
             10_000
         );
@@ -736,7 +736,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             "",
             false,
             false,
-            RelationshipType.ALL_RELATIONSHIPS.name,
+            RelationshipType.ALL_RELATIONSHIPS,
             1,
             10_000
         );
@@ -785,7 +785,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             "",
             true,
             false,
-            RelationshipType.ALL_RELATIONSHIPS.name,
+            RelationshipType.ALL_RELATIONSHIPS,
             1,
             10_000
         );
