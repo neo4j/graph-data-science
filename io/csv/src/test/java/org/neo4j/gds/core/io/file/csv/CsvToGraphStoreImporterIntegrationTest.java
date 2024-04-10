@@ -284,7 +284,7 @@ class CsvToGraphStoreImporterIntegrationTest {
     }
 
     private GraphStoreToFileExporterParameters exportParameters(int concurrency, boolean useLabelMapping) {
-        return GraphStoreToFileExporterParameters.create(
+        return new GraphStoreToFileExporterParameters(
             "my-export",
             "",
             true,

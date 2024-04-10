@@ -97,7 +97,7 @@ class HashGNNTest {
     @Test
     void binaryLowNeighborInfluence() {
         int embeddingDensity = 4;
-        var parameters = HashGNNParameters.create(
+        var parameters = new HashGNNParameters(
             4,
             10,
             embeddingDensity,
@@ -118,7 +118,7 @@ class HashGNNTest {
 
     @Test
     void binaryHighEmbeddingDensityHighNeighborInfluence() {
-        var parameters = HashGNNParameters.create(
+        var parameters = new HashGNNParameters(
             4,
             10,
             200,
@@ -151,7 +151,7 @@ class HashGNNTest {
     @ParameterizedTest
     @MethodSource("determinismParams")
     void shouldBeDeterministic(int concurrency, boolean binarize, boolean dimReduce) {
-        var parameters = HashGNNParameters.create(
+        var parameters = new HashGNNParameters(
             concurrency,
             1,
             2,
@@ -180,7 +180,7 @@ class HashGNNTest {
         // not all random seeds will give b a unique feature
         // this intends to test that if b has a unique feature before the first iteration, then it also has it after the first iteration
         // however we simulate what is before the first iteration by running with neighborInfluence 0
-        Function<Double, HashGNNParameters> parametersMaker = (neighborInfluence) -> HashGNNParameters.create(
+        Function<Double, HashGNNParameters> parametersMaker = (neighborInfluence) -> new HashGNNParameters(
             4,
             1,
             embeddingDensity,
@@ -224,7 +224,7 @@ class HashGNNTest {
         int embeddingDensity = 100;
         int binarizationDimension = 8;
 
-        Function<Double, HashGNNParameters> parametersMaker = (neighborInfluence) ->  HashGNNParameters.create(
+        Function<Double, HashGNNParameters> parametersMaker = (neighborInfluence) ->  new HashGNNParameters(
             4,
             1,
             embeddingDensity,

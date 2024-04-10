@@ -35,8 +35,6 @@ import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
 
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
 import static org.neo4j.gds.assertj.Extractors.replaceTimings;
@@ -101,12 +99,12 @@ class CELFOnConnectedGraphTest {
         IdFunction idFunction = variable -> graph.toMappedNodeId(variable);
 
 
-        var parameters = CELFParameters.create(
+        var parameters = new CELFParameters(
             5,
             0.2,
             3,
             2,
-            Optional.of(0l),
+            0L,
             10
         );
 

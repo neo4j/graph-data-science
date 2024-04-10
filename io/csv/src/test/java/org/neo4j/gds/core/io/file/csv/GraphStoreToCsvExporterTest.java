@@ -136,7 +136,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void exportTopology() {
-        var parameters = GraphStoreToFileExporterParameters.create(
+        var parameters = new GraphStoreToFileExporterParameters(
             tempDir.toString(),
             "",
             true,
@@ -237,7 +237,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void shouldExportGraphProperties() {
-        var parameters = GraphStoreToFileExporterParameters.create(
+        var parameters = new GraphStoreToFileExporterParameters(
             tempDir.toString(),
             "",
             false,
@@ -293,7 +293,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void exportMultithreaded() {
-        var parameters = GraphStoreToFileExporterParameters.create(
+        var parameters = new GraphStoreToFileExporterParameters(
             tempDir.toString(),
             "",
             true,
@@ -372,7 +372,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void exportGraphPropertiesMultithreaded() throws IOException {
-        var parameters = GraphStoreToFileExporterParameters.create(
+        var parameters = new GraphStoreToFileExporterParameters(
             tempDir.toString(),
             "",
             false,
@@ -448,7 +448,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void exportSchemaAndDatabaseId() {
-        var parameters = GraphStoreToFileExporterParameters.create(
+        var parameters = new GraphStoreToFileExporterParameters(
             tempDir.toString(),
             "",
             true,
@@ -647,7 +647,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void exportUsername() {
-        var parameters = GraphStoreToFileExporterParameters.create(
+        var parameters = new GraphStoreToFileExporterParameters(
             tempDir.toString(),
             "UserA",
             true,
@@ -677,7 +677,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void exportSchemaWithoutProperties() {
-        var parameters = GraphStoreToFileExporterParameters.create(
+        var parameters = new GraphStoreToFileExporterParameters(
             tempDir.toString(),
             "",
             true,
@@ -731,7 +731,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             .build()
             .build();
 
-        var parameters = GraphStoreToFileExporterParameters.create(
+        var parameters = new GraphStoreToFileExporterParameters(
             tempDir.toString(),
             "",
             false,
@@ -780,7 +780,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
     @Test
     void shouldExportGraphCapabilities() {
-        var parameters = GraphStoreToFileExporterParameters.create(
+        var parameters = new GraphStoreToFileExporterParameters(
             tempDir.toString(),
             "",
             true,

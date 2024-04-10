@@ -172,7 +172,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     }
 
     private void computeColoring() {
-        var parameters = K1ColoringParameters.create(concurrency, K1COLORING_MAX_ITERATIONS, minBatchSize);
+        var parameters = new K1ColoringParameters(concurrency, K1COLORING_MAX_ITERATIONS, minBatchSize);
         K1Coloring coloring = new K1ColoringAlgorithmFactory<>().build(graph, parameters, progressTracker);
         coloring.setTerminationFlag(terminationFlag);
 

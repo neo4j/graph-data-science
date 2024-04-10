@@ -67,7 +67,7 @@ public interface LeidenBaseConfig extends
 
     @Configuration.Ignore
     default LeidenParameters toParameters() {
-        return LeidenParameters.create(concurrency(), tolerance(), seedProperty(), maxLevels(), gamma(), theta(), includeIntermediateCommunities(), randomSeed());
+        return new LeidenParameters(concurrency(), tolerance(), seedProperty(), maxLevels(), gamma(), theta(), includeIntermediateCommunities(), randomSeed());
     }
 
     @Configuration.Ignore

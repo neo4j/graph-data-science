@@ -40,7 +40,7 @@ public final class Node2VecMemoryEstimateDefinition implements MemoryEstimateDef
     public MemoryEstimation memoryEstimation() {
         int walksPerNode = parameters.walkParameters().walksPerNode;
         int walkLength = parameters.walkParameters().walkLength;
-        int embeddingDimension = parameters.trainParameters().embeddingDimension;
+        int embeddingDimension = parameters.trainParameters().embeddingDimension();
         return MemoryEstimations.builder(Node2Vec.class)
             .perNode("random walks", (nodeCount) -> {
                 var numberOfRandomWalks = nodeCount * walksPerNode;

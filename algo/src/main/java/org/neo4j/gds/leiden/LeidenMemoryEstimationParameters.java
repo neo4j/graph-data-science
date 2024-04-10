@@ -20,32 +20,12 @@
 package org.neo4j.gds.leiden;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.annotation.Parameters;
 
-public final class LeidenMemoryEstimationParameters {
-
-    private final String seedProperty;
-    private final boolean includeIntermediateCommunities;
-    private final int maxLevels;
-
-    public LeidenMemoryEstimationParameters(
-        @Nullable String seedProperty,
-        boolean includeIntermediateCommunities,
-        int maxLevels
-    ) {
-        this.seedProperty = seedProperty;
-        this.maxLevels = maxLevels;
-        this.includeIntermediateCommunities = includeIntermediateCommunities;
-    }
-
-    @Nullable String seedProperty() {
-        return seedProperty;
-    }
-
-    boolean includeIntermediateCommunities() {
-        return includeIntermediateCommunities;
-    }
-
-    int maxLevels() {
-        return maxLevels;
-    }
+@Parameters
+public record LeidenMemoryEstimationParameters(
+    @Nullable String seedProperty,
+    boolean includeIntermediateCommunities,
+    int maxLevels
+) {
 }

@@ -23,47 +23,10 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.annotation.Parameters;
 
 @Parameters
-public final class DegreeCentralityParameters {
-    static DegreeCentralityParameters create(
-        int concurrency,
-        Orientation orientation,
-        boolean hasRelationshipWeightProperty,
-        int minBatchSize
-    ) {
-        return new DegreeCentralityParameters(concurrency, orientation, hasRelationshipWeightProperty, minBatchSize);
-    }
-
-    private final int concurrency;
-    private final Orientation orientation;
-    private final boolean hasRelationshipWeightProperty;
-    private final int minBatchSize;
-
-    private DegreeCentralityParameters(
-        int concurrency,
-        Orientation orientation,
-        boolean hasRelationshipWeightProperty,
-        int minBatchSize
-    ) {
-
-        this.concurrency = concurrency;
-        this.orientation = orientation;
-        this.hasRelationshipWeightProperty = hasRelationshipWeightProperty;
-        this.minBatchSize = minBatchSize;
-    }
-
-    int concurrency() {
-        return concurrency;
-    }
-
-    Orientation orientation() {
-        return orientation;
-    }
-
-    boolean hasRelationshipWeightProperty() {
-        return hasRelationshipWeightProperty;
-    }
-
-    int minBatchSize() {
-        return minBatchSize;
-    }
+public record DegreeCentralityParameters(
+    int concurrency,
+    Orientation orientation,
+    boolean hasRelationshipWeightProperty,
+    int minBatchSize
+) {
 }

@@ -143,7 +143,7 @@ final class ConductanceTest {
 
     @Test
     void logProgress() {
-        var parameters = ConductanceParameters.create(1, 10_000, false, "community");
+        var parameters = new ConductanceParameters(1, 10_000, false, "community");
         var factory = new ConductanceAlgorithmFactory<>();
         var progressTask = factory.progressTask(naturalGraph.nodeCount());
         var log = Neo4jProxy.testLog();

@@ -24,25 +24,5 @@ import org.neo4j.gds.annotation.Parameters;
 import java.util.function.DoubleUnaryOperator;
 
 @Parameters
-public class SpanningTreeParameters {
-    static SpanningTreeParameters create(DoubleUnaryOperator objective, long sourceNode) {
-        return new SpanningTreeParameters(objective, sourceNode);
-    }
-
-    private final DoubleUnaryOperator objective;
-
-    private final long sourceNode;
-
-    protected SpanningTreeParameters(DoubleUnaryOperator objective, long sourceNode) {
-        this.objective = objective;
-        this.sourceNode = sourceNode;
-    }
-
-    public long sourceNode() {
-        return sourceNode;
-    }
-
-    public DoubleUnaryOperator objective() {
-        return objective;
-    }
+public record SpanningTreeParameters(DoubleUnaryOperator objective, long sourceNode) {
 }

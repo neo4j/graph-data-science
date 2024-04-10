@@ -23,69 +23,12 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Parameters;
 
 @Parameters
-public final class LouvainParameters {
-    public static LouvainParameters create(
-        int concurrency,
-        int maxIterations,
-        double tolerance,
-        int maxLevels,
-        boolean includeIntermediateCommunities,
-        @Nullable String seedProperty
-    ) {
-        return new LouvainParameters(
-            concurrency,
-            maxIterations,
-            tolerance,
-            maxLevels,
-            includeIntermediateCommunities,
-            seedProperty
-        );
-    }
-
-    private final int concurrency;
-    private final int maxIterations;
-    private final double tolerance;
-    private final int maxLevels;
-    private final boolean includeIntermediateCommunities;
-    private final String seedProperty;
-
-    private LouvainParameters(
-        int concurrency,
-        int maxIterations,
-        double tolerance,
-        int maxLevels,
-        boolean includeIntermediateCommunities,
-        @Nullable String seedProperty
-    ) {
-        this.concurrency = concurrency;
-        this.maxIterations = maxIterations;
-        this.tolerance = tolerance;
-        this.maxLevels = maxLevels;
-        this.includeIntermediateCommunities = includeIntermediateCommunities;
-        this.seedProperty = seedProperty;
-    }
-
-    int concurrency() {
-        return concurrency;
-    }
-
-    int maxIterations() {
-        return maxIterations;
-    }
-
-    double tolerance() {
-        return tolerance;
-    }
-
-    int maxLevels() {
-        return maxLevels;
-    }
-
-    boolean includeIntermediateCommunities() {
-        return includeIntermediateCommunities;
-    }
-
-    String seedProperty() {
-        return seedProperty;
-    }
+public record LouvainParameters(
+    int concurrency,
+    int maxIterations,
+    double tolerance,
+    int maxLevels,
+    boolean includeIntermediateCommunities,
+    @Nullable String seedProperty
+) {
 }

@@ -40,7 +40,7 @@ class NodeSimilarityTerminationTest {
 
         assertTerminates((terminationFlag) ->
             {
-                var parameters = NodeSimilarityParameters.create(
+                var parameters = new NodeSimilarityParameters(
                     new JaccardSimilarityComputer(1E-42),
                     1,
                     Integer.MAX_VALUE,

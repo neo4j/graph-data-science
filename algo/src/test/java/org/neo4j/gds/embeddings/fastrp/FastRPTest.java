@@ -125,7 +125,7 @@ class FastRPTest {
         var concurrency = 4;
         var minBatchSize = 10_000;
 
-        var parameters = FastRPParameters.create(
+        var parameters = new FastRPParameters(
             List.of("f1", "f2", "f3"),
             List.of(1.0D),
             DEFAULT_EMBEDDING_DIMENSION,
@@ -168,7 +168,7 @@ class FastRPTest {
         var concurrency = 4;
         var minBatchSize = 10_000;
 
-        var parameters = FastRPParameters.create(
+        var parameters = new FastRPParameters(
             List.of("f1", "f2", "f3"),
             List.of(1.0D),
             DEFAULT_EMBEDDING_DIMENSION,
@@ -209,7 +209,7 @@ class FastRPTest {
         var embeddingDimension = 6;
         var concurrency = 4;
         var minBatchSize = 10_000;
-        var parameters = FastRPParameters.create(
+        var parameters = new FastRPParameters(
             List.of("f1", "f2", "f3"),
             List.of(0.0D),
             embeddingDimension,
@@ -286,7 +286,7 @@ class FastRPTest {
         var concurrency = 4;
         var minBatchSize = 10_000;
 
-        var parameters = FastRPParameters.create(
+        var parameters = new FastRPParameters(
             List.of("f1", "f2", "f3"),
             List.of(1.0D),
             DEFAULT_EMBEDDING_DIMENSION,
@@ -351,7 +351,7 @@ class FastRPTest {
         );
         var minBatchSize = 1;
 
-        var parameters = FastRPParameters.create(
+        var parameters = new FastRPParameters(
             List.of("f1", "f2", "f3"),
             List.of(1.0D),
             DEFAULT_EMBEDDING_DIMENSION,
@@ -403,7 +403,7 @@ class FastRPTest {
         var concurrency = 4;
         var minBatchSize = 10_000;
 
-        var parameters = FastRPParameters.create(
+        var parameters = new FastRPParameters(
             List.of("f1", "f2", "f3"),
             List.of(1.0D),
             DEFAULT_EMBEDDING_DIMENSION,
@@ -450,7 +450,7 @@ class FastRPTest {
         var concurrency = 4;
         var minBatchSize = 10_000;
 
-        var parameters = FastRPParameters.create(
+        var parameters = new FastRPParameters(
             List.of(),
             List.of(1.0D),
             512,
@@ -507,7 +507,7 @@ class FastRPTest {
     void shouldYieldEmptyEmbeddingForIsolatedNodes() {
         var concurrency = 4;
         var minBatchSize = 10_000;
-        var parameters = FastRPParameters.create(
+        var parameters = new FastRPParameters(
             List.of("f1", "f2", "f3"),
             List.of(1.0D),
             DEFAULT_EMBEDDING_DIMENSION,
@@ -543,7 +543,7 @@ class FastRPTest {
         var concurrency = 4;
         var minBatchSize = 10_000;
 
-        var parameters = FastRPParameters.create(
+        var parameters = new FastRPParameters(
             List.of("f1", "f2", "f3"),
             List.of(0.0D),
             DEFAULT_EMBEDDING_DIMENSION,
@@ -614,7 +614,7 @@ class FastRPTest {
             Graph graph = graphStore.getGraph(NodeLabel.of("N"), RelationshipType.of("REL"), Optional.empty());
             var concurrency = 4;
             var minBatchSize = 10_000;
-            var parameters = FastRPParameters.create(
+            var parameters = new FastRPParameters(
                 List.of("prop"),
                 List.of(1.0D, 1.0D, 1.0D, 1.0D),
                 64,
@@ -652,7 +652,7 @@ class FastRPTest {
             var concurrency = 4;
             var minBatchSize = 10_000;
 
-            var parameters = FastRPParameters.create(
+            var parameters = new FastRPParameters(
                 List.of(),
                 List.of(1.0D),
                 DEFAULT_EMBEDDING_DIMENSION,
@@ -750,7 +750,7 @@ class FastRPTest {
 
         var concurrency = 1;
         var minBatchSize = 10_000;
-        var parameters = FastRPParameters.create(
+        var parameters = new FastRPParameters(
             List.of(),
             List.of(1.0D),
             embeddingDimension,
@@ -793,7 +793,7 @@ class FastRPTest {
     private HugeObjectArray<float[]> embeddings(Graph graph, List<String> properties) {
         var concurrency = 4;
         var minBatchSize = 10_000;
-        var parameters = FastRPParameters.create(
+        var parameters = new FastRPParameters(
             List.of("f1", "f2", "f3"),
             List.of(1.0D),
             DEFAULT_EMBEDDING_DIMENSION,

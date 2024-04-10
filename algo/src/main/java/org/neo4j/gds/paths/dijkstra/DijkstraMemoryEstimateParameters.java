@@ -19,20 +19,8 @@
  */
 package org.neo4j.gds.paths.dijkstra;
 
-public class DijkstraMemoryEstimateParameters {
-    private final boolean trackRelationships;
-    private final boolean manyTargets;
+import org.neo4j.gds.annotation.Parameters;
 
-    public DijkstraMemoryEstimateParameters(boolean trackRelationships, boolean manyTargets) {
-        this.trackRelationships = trackRelationships;
-        this.manyTargets = manyTargets;
-    }
-
-    boolean trackRelationships() {
-        return trackRelationships;
-    }
-
-    boolean manyTargets() {
-        return manyTargets;
-    }
+@Parameters
+public record DijkstraMemoryEstimateParameters(boolean trackRelationships, boolean manyTargets) {
 }

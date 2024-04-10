@@ -31,8 +31,6 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 
-import java.util.Optional;
-
 
 @GdlExtension
 class CELFOnTreeGraphTest {
@@ -132,12 +130,12 @@ class CELFOnTreeGraphTest {
         IdFunction mappedId = variable -> graph.toMappedNodeId(idFunction.of(variable));
 
 
-        var parameters = CELFParameters.create(
+        var parameters = new CELFParameters(
             5,
             0.51,
             3,
             1,
-            Optional.of(10l),
+            10L,
             10
         );
 

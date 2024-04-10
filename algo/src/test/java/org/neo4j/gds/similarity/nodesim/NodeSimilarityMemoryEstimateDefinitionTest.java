@@ -39,7 +39,7 @@ class NodeSimilarityMemoryEstimateDefinitionTest {
             .relCountUpperBound(5_000_000)
             .build();
 
-        var estimateParams = NodeSimilarityEstimateParameters.create(topK, 0, false, false, true);
+        var estimateParams = new NodeSimilarityEstimateParameters(topK, 0, false, false, true);
         var actual = new NodeSimilarityMemoryEstimateDefinition(estimateParams).memoryEstimation()
             .estimate(dimensions, 1).memoryUsage();
 
@@ -80,7 +80,7 @@ class NodeSimilarityMemoryEstimateDefinitionTest {
             .relCountUpperBound(5_000_000)
             .build();
 
-        var estimateParams = NodeSimilarityEstimateParameters.create(topK, 100, false, false, true);
+        var estimateParams = new NodeSimilarityEstimateParameters(topK, 100, false, false, true);
         var actual = new NodeSimilarityMemoryEstimateDefinition(estimateParams).memoryEstimation()
             .estimate(dimensions, 1).memoryUsage();
 
@@ -124,7 +124,7 @@ class NodeSimilarityMemoryEstimateDefinitionTest {
             .relCountUpperBound(20_000)
             .build();
 
-        var estimateParams = NodeSimilarityEstimateParameters.create(
+        var estimateParams = new NodeSimilarityEstimateParameters(
             Integer.MAX_VALUE,
             Integer.MAX_VALUE,
             false, false, true
@@ -149,8 +149,7 @@ class NodeSimilarityMemoryEstimateDefinitionTest {
             .build();
 
 
-        var estimateParams = NodeSimilarityEstimateParameters
-            .create(10, 0, true, !componentPropertySet, true);
+        var estimateParams = new NodeSimilarityEstimateParameters(10, 0, true, !componentPropertySet, true);
         var actual = new NodeSimilarityMemoryEstimateDefinition(estimateParams).memoryEstimation()
             .estimate(dimensions, 1).memoryUsage();
 

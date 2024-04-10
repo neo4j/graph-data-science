@@ -23,79 +23,13 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Parameters;
 
 @Parameters
-public final class GraphStoreToFileExporterParameters {
-    public static GraphStoreToFileExporterParameters create(
-        String exportName,
-        String username,
-        boolean includeMetaData,
-        boolean useLabelMapping,
-        RelationshipType defaultRelationshipType,
-        int concurrency,
-        int batchSize
-    ) {
-        return new GraphStoreToFileExporterParameters(
-            exportName,
-            username,
-            includeMetaData,
-            useLabelMapping,
-            defaultRelationshipType,
-            concurrency,
-            batchSize
-        );
-    }
-
-    private final String exportName;
-    private final String username;
-    private final boolean includeMetaData;
-    private final boolean useLabelMapping;
-
-    private final RelationshipType defaultRelationshipType;
-    private final int concurrency;
-    private final int batchSize;
-
-    private GraphStoreToFileExporterParameters(
-        String exportName,
-        String username,
-        boolean includeMetaData,
-        boolean useLabelMapping,
-        RelationshipType defaultRelationshipType,
-        int concurrency,
-        int batchSize
-    ) {
-        this.exportName = exportName;
-        this.username = username;
-        this.includeMetaData = includeMetaData;
-        this.useLabelMapping = useLabelMapping;
-        this.defaultRelationshipType = defaultRelationshipType;
-        this.concurrency = concurrency;
-        this.batchSize = batchSize;
-    }
-
-    public String exportName() {
-        return exportName;
-    }
-
-    String username() {
-        return username;
-    }
-
-    boolean includeMetaData() {
-        return includeMetaData;
-    }
-
-    public boolean useLabelMapping() {
-        return useLabelMapping;
-    }
-
-    public RelationshipType defaultRelationshipType() {
-        return defaultRelationshipType;
-    }
-
-    public int concurrency() {
-        return concurrency;
-    }
-
-    int batchSize() {
-        return batchSize;
-    }
+public record GraphStoreToFileExporterParameters(
+    String exportName,
+    String username,
+    boolean includeMetaData,
+    boolean useLabelMapping,
+    RelationshipType defaultRelationshipType,
+    int concurrency,
+    int batchSize
+) {
 }

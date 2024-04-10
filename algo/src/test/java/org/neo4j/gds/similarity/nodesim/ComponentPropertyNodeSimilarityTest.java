@@ -134,7 +134,7 @@ public class ComponentPropertyNodeSimilarityTest {
     void shouldOptimizeForDistinctComponentsProperty(Orientation orientation, int concurrency) {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
-        var parameters = NodeSimilarityParameters.create(
+        var parameters = new NodeSimilarityParameters(
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,

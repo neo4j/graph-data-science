@@ -172,7 +172,7 @@ public class GraphStoreExportProc extends BaseProc {
 
         var neo4jConfig = GraphDatabaseApiProxy.resolveDependency(databaseService, Config.class);
 
-        var exportParameters = GraphStoreToFileExporterParameters.create(
+        var exportParameters = new GraphStoreToFileExporterParameters(
             exportConfig.exportName(),
             exportConfig.username(),
             exportConfig.includeMetaData(),

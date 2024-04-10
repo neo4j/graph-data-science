@@ -181,7 +181,7 @@ public class PathFindingAlgorithms {
                 "The K-Spanning Tree algorithm works only with undirected graphs. Please orient the edges properly");
         }
 
-        var parameters = configuration.toParameters();
+        var parameters = configuration.toKSpanningTreeParameters();
 
         var progressTracker = createProgressTracker(configuration, Tasks.task(
             K_SPANNING_TREE,

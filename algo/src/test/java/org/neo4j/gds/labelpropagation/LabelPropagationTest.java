@@ -56,7 +56,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @ExtendWith(SoftAssertionsExtension.class)
 class LabelPropagationTest {
 
-    private static final LabelPropagationParameters DEFAULT_PARAMETERS = LabelPropagationParameters.create(
+    private static final LabelPropagationParameters DEFAULT_PARAMETERS = new LabelPropagationParameters(
         4,
         10,
         null,
@@ -94,7 +94,7 @@ class LabelPropagationTest {
     void shouldUseOriginalNodeIdWhenSeedPropertyIsMissing() {
         LabelPropagation lp = new LabelPropagation(
             graph,
-            LabelPropagationParameters.create(4, 1, null, null),
+            new LabelPropagationParameters(4, 1, null, null),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -116,7 +116,7 @@ class LabelPropagationTest {
     void shouldUseSeedProperty() {
         LabelPropagation lp = new LabelPropagation(
             graph,
-            LabelPropagationParameters.create(4, 1, null, "seedId"),
+            new LabelPropagationParameters(4, 1, null, "seedId"),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );

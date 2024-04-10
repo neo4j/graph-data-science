@@ -25,106 +25,16 @@ import java.util.List;
 import java.util.Optional;
 
 @Parameters
-public final class HashGNNParameters {
-
-    public static HashGNNParameters create(
-        int concurrency,
-        int iterations,
-        int embeddingDensity,
-        double neighborInfluence,
-        List<String> featureProperties,
-        boolean heterogeneous,
-        Optional<Integer> outputDimension,
-        Optional<BinarizeFeaturesConfig> binarizeFeatures,
-        Optional<GenerateFeaturesConfig> generateFeatures,
-        Optional<Long> randomSeed
-    ) {
-        return new HashGNNParameters(
-            concurrency,
-            iterations,
-            embeddingDensity,
-            neighborInfluence,
-            featureProperties,
-            heterogeneous,
-            outputDimension,
-            binarizeFeatures,
-            generateFeatures,
-            randomSeed
-        );
-    }
-
-    private final int concurrency;
-    private final int iterations;
-    private final int embeddingDensity;
-    private final double neighborInfluence;
-    private final List<String> featureProperties;
-    private final boolean heterogeneous;
-    private final Optional<Integer> outputDimension;
-    private final Optional<BinarizeFeaturesConfig> binarizeFeatures;
-    private final Optional<GenerateFeaturesConfig> generateFeatures;
-    private final Optional<Long> randomSeed;
-
-    private HashGNNParameters(
-        int concurrency,
-        int iterations,
-        int embeddingDensity,
-        double neighborInfluence,
-        List<String> featureProperties,
-        boolean heterogeneous,
-        Optional<Integer> outputDimension,
-        Optional<BinarizeFeaturesConfig> binarizeFeatures,
-        Optional<GenerateFeaturesConfig> generateFeatures,
-        Optional<Long> randomSeed
-    ) {
-        this.concurrency = concurrency;
-        this.iterations = iterations;
-        this.embeddingDensity = embeddingDensity;
-        this.neighborInfluence = neighborInfluence;
-        this.featureProperties = featureProperties;
-        this.heterogeneous = heterogeneous;
-        this.outputDimension = outputDimension;
-        this.binarizeFeatures = binarizeFeatures;
-        this.generateFeatures = generateFeatures;
-        this.randomSeed = randomSeed;
-    }
-
-    int concurrency() {
-        return concurrency;
-    }
-
-    int iterations() {
-        return iterations;
-    }
-
-    int embeddingDensity() {
-        return embeddingDensity;
-    }
-
-    double neighborInfluence() {
-        return neighborInfluence;
-    }
-
-    List<String> featureProperties() {
-        return featureProperties;
-    }
-
-    boolean heterogeneous() {
-        return heterogeneous;
-    }
-
-    Optional<Integer> outputDimension() {
-        return outputDimension;
-    }
-
-    Optional<BinarizeFeaturesConfig> binarizeFeatures() {
-        return binarizeFeatures;
-    }
-
-    Optional<GenerateFeaturesConfig> generateFeatures() {
-        return generateFeatures;
-    }
-
-    Optional<Long> randomSeed() {
-        return randomSeed;
-    }
+public record HashGNNParameters(
+    int concurrency,
+    int iterations,
+    int embeddingDensity,
+    double neighborInfluence,
+    List<String> featureProperties,
+    boolean heterogeneous,
+    Optional<Integer> outputDimension,
+    Optional<BinarizeFeaturesConfig> binarizeFeatures,
+    Optional<GenerateFeaturesConfig> generateFeatures,
+    Optional<Long> randomSeed
+) {
 }

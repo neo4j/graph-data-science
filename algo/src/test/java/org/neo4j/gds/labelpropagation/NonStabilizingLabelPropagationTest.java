@@ -61,7 +61,7 @@ class NonStabilizingLabelPropagationTest {
     void testLabelPropagationDoesStabilize() {
         LabelPropagation labelPropagation = new LabelPropagation(
             graph,
-            LabelPropagationParameters.create(4, 10, null, null),
+            new LabelPropagationParameters(4, 10, null, null),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );

@@ -22,23 +22,5 @@ package org.neo4j.gds.approxmaxkcut;
 import org.neo4j.gds.annotation.Parameters;
 
 @Parameters
-public final class ApproxMaxKCutMemoryEstimationParameters {
-    private final byte k;
-    private final int vnsMaxNeighborhoodOrder;
-
-    public ApproxMaxKCutMemoryEstimationParameters(
-        byte k,
-        int vnsMaxNeighborhoodOrder
-    ) {
-        this.k = k;
-        this.vnsMaxNeighborhoodOrder = vnsMaxNeighborhoodOrder;
-    }
-
-    byte k() {
-        return this.k;
-    }
-
-    int vnsMaxNeighborhoodOrder() {
-        return this.vnsMaxNeighborhoodOrder;
-    }
+public record ApproxMaxKCutMemoryEstimationParameters(int k, int vnsMaxNeighborhoodOrder) {
 }

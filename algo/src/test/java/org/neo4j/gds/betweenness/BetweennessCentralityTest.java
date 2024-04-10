@@ -170,7 +170,7 @@ class BetweennessCentralityTest {
 
     @Test
     void testShouldLogProgress() {
-        var parameters = BetweennessCentralityParameters.create(4, Optional.of(2L), Optional.empty(), false);
+        var parameters = new BetweennessCentralityParameters(4, Optional.of(2L), Optional.empty(), false);
         var factory = new BetweennessCentralityFactory<>();
         var log = Neo4jProxy.testLog();
         var testGraph = fromGdl(DIAMOND, "diamond");
@@ -195,7 +195,7 @@ class BetweennessCentralityTest {
 
     @Test
     void testShouldLogProgressNoSampling() {
-        var parameters = BetweennessCentralityParameters.create(4, Optional.empty(), Optional.empty(), false);
+        var parameters = new BetweennessCentralityParameters(4, Optional.empty(), Optional.empty(), false);
         var factory = new BetweennessCentralityFactory<>();
         var log = Neo4jProxy.testLog();
         var testGraph = fromGdl(DIAMOND, "diamond");

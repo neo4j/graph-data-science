@@ -22,41 +22,10 @@ package org.neo4j.gds.conductance;
 import org.neo4j.gds.annotation.Parameters;
 
 @Parameters
-public final class ConductanceParameters {
-    public static ConductanceParameters create(int concurrency, int minBatchSize, boolean hasRelationshipProperty, String communityProperty) {
-        return new ConductanceParameters(concurrency, minBatchSize, hasRelationshipProperty, communityProperty);
-    }
-
-    private final int concurrency;
-    private final int minBatchSize;
-    private final boolean hasRelationshipWeightProperty;
-    private final String communityProperty;
-
-    private ConductanceParameters(
-        int concurrency,
-        int minBatchSize,
-        boolean hasRelationshipWeightProperty,
-        String communityProperty
-    ) {
-        this.concurrency = concurrency;
-        this.minBatchSize = minBatchSize;
-        this.hasRelationshipWeightProperty = hasRelationshipWeightProperty;
-        this.communityProperty = communityProperty;
-    }
-
-    int concurrency() {
-        return concurrency;
-    }
-
-    int minBatchSize() {
-        return minBatchSize;
-    }
-
-    boolean hasRelationshipWeightProperty() {
-        return hasRelationshipWeightProperty;
-    }
-
-    String communityProperty() {
-        return communityProperty;
-    }
+public record ConductanceParameters(
+    int concurrency,
+    int minBatchSize,
+    boolean hasRelationshipWeightProperty,
+    String communityProperty
+) {
 }

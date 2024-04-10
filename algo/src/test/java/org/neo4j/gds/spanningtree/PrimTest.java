@@ -146,7 +146,7 @@ class PrimTest {
 
     @Test
     void shouldLogProgress() {
-        var parameters = SpanningTreeParameters.create(Prim.MIN_OPERATOR, graph.toOriginalNodeId("a"));
+        var parameters = new SpanningTreeParameters(Prim.MIN_OPERATOR, graph.toOriginalNodeId("a"));
         var factory = new SpanningTreeAlgorithmFactory<>();
         var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(

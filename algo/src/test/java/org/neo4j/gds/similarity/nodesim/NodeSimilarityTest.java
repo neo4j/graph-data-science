@@ -272,7 +272,7 @@ final class NodeSimilarityTest {
     void shouldComputeWeightedForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
-        var parameters = NodeSimilarityParameters.create(
+        var parameters = new NodeSimilarityParameters(
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -305,7 +305,7 @@ final class NodeSimilarityTest {
     void shouldComputeForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
-        var parameters = NodeSimilarityParameters.create(
+        var parameters = new NodeSimilarityParameters(
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -338,7 +338,7 @@ final class NodeSimilarityTest {
     void shouldComputeTopNForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
-        var parameters = NodeSimilarityParameters.create(
+        var parameters = new NodeSimilarityParameters(
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -372,7 +372,7 @@ final class NodeSimilarityTest {
     void shouldComputeNegativeTopNForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
-        var parameters = NodeSimilarityParameters.create(
+        var parameters = new NodeSimilarityParameters(
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -409,7 +409,7 @@ final class NodeSimilarityTest {
     void shouldComputeTopKForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
-        var parameters = NodeSimilarityParameters.create(
+        var parameters = new NodeSimilarityParameters(
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -443,7 +443,7 @@ final class NodeSimilarityTest {
     void shouldComputeNegativeTopKForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
-        var parameters = NodeSimilarityParameters.create(
+        var parameters = new NodeSimilarityParameters(
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -486,7 +486,7 @@ final class NodeSimilarityTest {
     void shouldComputeWithSimilarityCutoffForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
-        var parameters = NodeSimilarityParameters.create(
+        var parameters = new NodeSimilarityParameters(
             new JaccardSimilarityComputer(0.1),
             1,
             Integer.MAX_VALUE,
@@ -523,7 +523,7 @@ final class NodeSimilarityTest {
     void shouldComputeWithDegreeCutoffForSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
-        var parameters = NodeSimilarityParameters.create(
+        var parameters = new NodeSimilarityParameters(
             new JaccardSimilarityComputer(0.0),
             2,
             Integer.MAX_VALUE,
@@ -558,7 +558,7 @@ final class NodeSimilarityTest {
     @ParameterizedTest(name = "concurrency = {0}")
     @MethodSource("concurrencies")
     void shouldComputeForUndirectedGraphs(int concurrency) {
-        var parameters = NodeSimilarityParameters.create(
+        var parameters = new NodeSimilarityParameters(
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -584,7 +584,7 @@ final class NodeSimilarityTest {
 
     @Test
     void shouldComputeForUnionGraphs() {
-        var parameters = NodeSimilarityParameters.create(
+        var parameters = new NodeSimilarityParameters(
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -623,7 +623,7 @@ final class NodeSimilarityTest {
     void shouldComputeSimilarityGraphInAllSupportedDirections(Orientation orientation, int concurrency) {
         Graph graph = orientation == NATURAL ? naturalGraph : reverseGraph;
 
-        var parameters = NodeSimilarityParameters.create(
+        var parameters = new NodeSimilarityParameters(
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -683,7 +683,7 @@ final class NodeSimilarityTest {
     void shouldComputeToGraphWithUnusedNodesInInputGraph(Orientation orientation, int concurrency) {
         Graph graph = fromGdl(DB_CYPHER + ", (:Unused)".repeat(1024), orientation);
 
-        var parameters = NodeSimilarityParameters.create(
+        var parameters = new NodeSimilarityParameters(
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -734,7 +734,7 @@ final class NodeSimilarityTest {
 
         Graph graph = fromGdl(gdl, orientation);
 
-        var parameters = NodeSimilarityParameters.create(
+        var parameters = new NodeSimilarityParameters(
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -775,7 +775,7 @@ final class NodeSimilarityTest {
 
         Graph graph = fromGdl(gdl, orientation);
 
-        var parameters = NodeSimilarityParameters.create(
+        var parameters = new NodeSimilarityParameters(
             new JaccardSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -818,7 +818,7 @@ final class NodeSimilarityTest {
             concurrency,
             EmptyTaskRegistryFactory.INSTANCE
         );
-        var parameters = NodeSimilarityParameters.create(
+        var parameters = new NodeSimilarityParameters(
             new JaccardSimilarityComputer(1E-42),
             1,
             Integer.MAX_VALUE,
@@ -891,7 +891,7 @@ final class NodeSimilarityTest {
             concurrency,
             EmptyTaskRegistryFactory.INSTANCE
         );
-        var parameters = NodeSimilarityParameters.create(
+        var parameters = new NodeSimilarityParameters(
             new JaccardSimilarityComputer(1E-42),
             1,
             Integer.MAX_VALUE,
@@ -930,7 +930,7 @@ final class NodeSimilarityTest {
     @Test
     void shouldLogProgressForWccOptimization() {
         var graph = naturalGraph;
-        var parameters = NodeSimilarityParameters.create(
+        var parameters = new NodeSimilarityParameters(
             new JaccardSimilarityComputer(1E-42),
             1,
             Integer.MAX_VALUE,
@@ -992,7 +992,7 @@ final class NodeSimilarityTest {
 
         Graph graph = fromGdl(gdl);
 
-        var parameters1 = NodeSimilarityParameters.create(
+        var parameters1 = new NodeSimilarityParameters(
             new OverlapSimilarityComputer(0.0),
             1,
             Integer.MAX_VALUE,
@@ -1019,7 +1019,7 @@ final class NodeSimilarityTest {
 
         assertThat(result).contains("0,1 0.500000");
 
-        var parameters2 = NodeSimilarityParameters.create(
+        var parameters2 = new NodeSimilarityParameters(
             new OverlapSimilarityComputer(1E-42),
             1,
             Integer.MAX_VALUE,
@@ -1073,7 +1073,7 @@ final class NodeSimilarityTest {
     @ParameterizedTest
     @MethodSource("degreeCutoffInput")
     void shouldWorkForAllDegreeBoundsCombinations(int lowBound, int upperBound, String... expectedOutput) {
-        var parameters = NodeSimilarityParameters.create(
+        var parameters = new NodeSimilarityParameters(
             new JaccardSimilarityComputer(0.0),
             lowBound,
             upperBound,

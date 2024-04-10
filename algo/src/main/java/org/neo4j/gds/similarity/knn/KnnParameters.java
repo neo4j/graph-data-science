@@ -25,7 +25,17 @@ import java.util.List;
 import java.util.Optional;
 
 @Parameters
-public final class KnnParameters {
+public record KnnParameters(
+    int concurrency,
+    int maxIterations,
+    double similarityCutoff,
+    K kHolder,
+    double perturbationRate,
+    int randomJoins,
+    int minBatchSize,
+    KnnSampler.SamplerType samplerType,
+    Optional<Long> randomSeed,
+    List<KnnNodePropertySpec> nodePropertySpecs) {
 
     static KnnParameters create(
         long nodeCount,
@@ -47,18 +57,21 @@ public final class KnnParameters {
         if (maxIterations < 1) throw new IllegalArgumentException("maxIterations");
         // similarityCutoff -- value range [0.0;1.0]
         if (Double.compare(similarityCutoff, 0.0) < 0 || Double.compare(similarityCutoff, 1.0) > 0)
-            throw new IllegalArgumentException("similarityCutoff must be more than or equal to 0.0 and less than or equal to 1.0");
+            throw new IllegalArgumentException(
+                "similarityCutoff must be more than or equal to 0.0 and less than or equal to 1.0");
         // sampleRate -- value range (0.0;1.0]
         if (Double.compare(sampleRate, 0.0) < 1 || Double.compare(sampleRate, 1.0) > 0)
             throw new IllegalArgumentException("sampleRate must be more than 0.0 and less than or equal to 1.0");
         // deltaThreshold -- value range [0.0;1.0]
         if (Double.compare(deltaThreshold, 0.0) < 0 || Double.compare(deltaThreshold, 1.0) > 0)
-            throw new IllegalArgumentException("deltaThreshold must be more than or equal to 0.0 and less than or equal to 1.0");
+            throw new IllegalArgumentException(
+                "deltaThreshold must be more than or equal to 0.0 and less than or equal to 1.0");
         // rawK -- user provided k value must be at least 1
         if (rawK < 1) throw new IllegalArgumentException("K k must be 1 or more");
         // perturbationRate -- value range [0.0;1.0]
         if (Double.compare(perturbationRate, 0.0) < 0 || Double.compare(perturbationRate, 1.0) > 0)
-            throw new IllegalArgumentException("perturbationRate must be more than or equal to 0.0 and less than or equal to 1.0");
+            throw new IllegalArgumentException(
+                "perturbationRate must be more than or equal to 0.0 and less than or equal to 1.0");
         // randomJoins -- 0 or more
         if (randomJoins < 0) throw new IllegalArgumentException("randomJoins must be 0 or more");
 
@@ -74,80 +87,5 @@ public final class KnnParameters {
             randomSeed,
             nodePropertySpecs
         );
-    }
-
-    private final int concurrency;
-    private final int maxIterations;
-    private final double similarityCutoff;
-    private final K kHolder;
-    private final double perturbationRate;
-    private final int randomJoins;
-    private final int minBatchSize;
-    private final KnnSampler.SamplerType samplerType;
-    private final Optional<Long> randomSeed;
-    private final List<KnnNodePropertySpec> nodePropertySpecs;
-
-    private KnnParameters(
-        int concurrency,
-        int maxIterations,
-        double similarityCutoff,
-        K kHolder,
-        double perturbationRate,
-        int randomJoins,
-        int minBatchSize,
-        KnnSampler.SamplerType samplerType,
-        Optional<Long> randomSeed,
-        List<KnnNodePropertySpec> nodePropertySpecs
-    ) {
-        this.concurrency = concurrency;
-        this.maxIterations = maxIterations;
-        this.similarityCutoff = similarityCutoff;
-        this.kHolder = kHolder;
-        this.perturbationRate = perturbationRate;
-        this.randomJoins = randomJoins;
-        this.minBatchSize = minBatchSize;
-        this.samplerType = samplerType;
-        this.randomSeed = randomSeed;
-        this.nodePropertySpecs = nodePropertySpecs;
-    }
-
-    public int concurrency() {
-        return concurrency;
-    }
-
-    public int maxIterations() {
-        return maxIterations;
-    }
-
-    double similarityCutoff() {
-        return similarityCutoff;
-    }
-
-    public K kHolder() {
-        return kHolder;
-    }
-
-    public double perturbationRate() {
-        return perturbationRate;
-    }
-
-    int randomJoins() {
-        return randomJoins;
-    }
-
-    int minBatchSize() {
-        return minBatchSize;
-    }
-
-    public KnnSampler.SamplerType samplerType() {
-        return samplerType;
-    }
-
-    public Optional<Long> randomSeed() {
-        return randomSeed;
-    }
-
-    List<KnnNodePropertySpec> nodePropertySpecs() {
-        return nodePropertySpecs;
     }
 }

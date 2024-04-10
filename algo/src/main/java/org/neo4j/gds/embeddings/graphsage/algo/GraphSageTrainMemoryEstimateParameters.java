@@ -19,56 +19,18 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
+import org.neo4j.gds.annotation.Parameters;
 import org.neo4j.gds.embeddings.graphsage.LayerConfig;
 
 import java.util.List;
 
-public class GraphSageTrainMemoryEstimateParameters {
-
-    private final List<LayerConfig> layerConfigs;
-    private final boolean isMultiLabel;
-    private final int numberOfFeatureProperties;
-    private final int estimationFeatureDimension;
-    private final int batchSize;
-    private final int embeddingDimension;
-
-    GraphSageTrainMemoryEstimateParameters(
-        List<LayerConfig> layerConfigs,
-        boolean isMultiLabel,
-        int numberOfFeatureProperties,
-        int estimationFeatureDimension,
-        int batchSize,
-        int embeddingDimension
-    ) {
-        this.layerConfigs = layerConfigs;
-        this.isMultiLabel = isMultiLabel;
-        this.numberOfFeatureProperties = numberOfFeatureProperties;
-        this.estimationFeatureDimension = estimationFeatureDimension;
-        this.batchSize = batchSize;
-        this.embeddingDimension = embeddingDimension;
-    }
-
-    public List<LayerConfig> layerConfigs() {
-        return layerConfigs;
-    }
-
-    public boolean isMultiLabel() {
-        return isMultiLabel;
-    }
-
-    int numberOfFeatureProperties() {
-        return numberOfFeatureProperties;
-    }
-
-    public int estimationFeatureDimension() {
-        return estimationFeatureDimension;
-    }
-
-    int batchSize() {
-        return batchSize;
-    }
-
-    public int embeddingDimension() {
-        return embeddingDimension;
-    }
+@Parameters
+public record GraphSageTrainMemoryEstimateParameters(
+    List<LayerConfig> layerConfigs,
+    boolean isMultiLabel,
+    int numberOfFeatureProperties,
+    int estimationFeatureDimension,
+    int batchSize,
+    int embeddingDimension
+) {
 }

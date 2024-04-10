@@ -85,7 +85,7 @@ public interface FastRPBaseConfig extends AlgoBaseConfig, EmbeddingDimensionConf
 
     @Configuration.Ignore
     default FastRPParameters toParameters() {
-        return FastRPParameters.create(
+        return new FastRPParameters(
             featureProperties(),
             iterationWeights(),
             embeddingDimension(),

@@ -100,7 +100,7 @@ class HashGNNMemoryEstimateDefinitionTest {
         var graphDims = GraphDimensions.of((long) 1e6);
         var concurrency = 4;
 
-        var bigParameters = HashGNNParameters.create(
+        var bigParameters = new HashGNNParameters(
             concurrency,
             3,
             100,
@@ -117,7 +117,7 @@ class HashGNNMemoryEstimateDefinitionTest {
             .estimate(graphDims, concurrency)
             .memoryUsage();
 
-        var smallParameters = HashGNNParameters.create(
+        var smallParameters = new HashGNNParameters(
             concurrency,
             3,
             100,
