@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.io.db;
 
-import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.io.GraphStoreExporter;
 import org.neo4j.gds.core.io.GraphStoreInput;
