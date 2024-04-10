@@ -22,6 +22,7 @@ package org.neo4j.gds.approxmaxkcut;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeByteArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -40,7 +41,7 @@ import java.util.stream.IntStream;
 
 class PlaceNodesRandomly {
 
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final SplittableRandom random;
     private final Graph graph;
     private final List<Long> rangePartitionActualBatchSizes;
@@ -51,7 +52,7 @@ class PlaceNodesRandomly {
     private final int minBatchSize;
 
     PlaceNodesRandomly(
-        int concurrency,
+        Concurrency concurrency,
         byte k,
         List<Long> minCommunitySizes,
         int minBatchSize,
@@ -60,7 +61,6 @@ class PlaceNodesRandomly {
         ExecutorService executor,
         ProgressTracker progressTracker
     ) {
-//        this.config = config;
         this.concurrency = concurrency;
         this.k = k;
         this.minCommunitySizes = minCommunitySizes;
@@ -71,7 +71,7 @@ class PlaceNodesRandomly {
         this.progressTracker = progressTracker;
 
         this.rangePartitionActualBatchSizes = PartitionUtils.rangePartitionActualBatchSizes(
-            concurrency,
+            concurrency.value(),
             graph.nodeCount(),
             Optional.of(minBatchSize)
         );
@@ -87,7 +87,7 @@ class PlaceNodesRandomly {
 
         var partitionIndex = new AtomicInteger(0);
         var tasks = PartitionUtils.rangePartition(
-            concurrency,
+            concurrency.value(),
             graph.nodeCount(),
             partition -> new AssignNodes(
                 this.random.split(),
@@ -101,7 +101,7 @@ class PlaceNodesRandomly {
         );
         progressTracker.beginSubTask();
         RunWithConcurrency.builder()
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .tasks(tasks)
             .executor(executor)
             .run();
@@ -121,7 +121,7 @@ class PlaceNodesRandomly {
         var currPartitionCounts = new long[batchSizes.size()];
         var remainingMinCommunitySizeCounts = new ArrayList<>(minCommunitySizes);
 
-        var minCommunitiesPerPartition = new long[concurrency][];
+        var minCommunitiesPerPartition = new long[concurrency.value()][];
         Arrays.setAll(minCommunitiesPerPartition, i -> new long[k]);
 
         var activePartitions = IntStream

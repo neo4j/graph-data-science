@@ -25,6 +25,7 @@ import org.neo4j.gds.collections.ha.HugeByteArray;
 import org.neo4j.gds.collections.haa.HugeAtomicByteArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.concurrency.AtomicDouble;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.ParallelBytePageCreator;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
@@ -53,13 +54,13 @@ public class LocalSearch {
     private final List<Partition> degreePartition;
     private final ProgressTracker progressTracker;
     private final byte k;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final List<Long> minCommunitySizes;
 
     public LocalSearch(
         Graph graph,
         ApproxMaxKCut.Comparator comparator,
-        int concurrency,
+        Concurrency concurrency,
         byte k,
         List<Long> minCommunitySizes,
         int minBatchSize,
@@ -77,7 +78,7 @@ public class LocalSearch {
 
         this.degreePartition = PartitionUtils.degreePartition(
             graph,
-            concurrency,
+            concurrency.value(),
             partition -> partition,
             Optional.of(minBatchSize)
         );
@@ -87,11 +88,11 @@ public class LocalSearch {
         //  double array.
         this.nodeToCommunityWeights = HugeAtomicDoubleArray.of(
             graph.nodeCount() * k,
-            ParallelDoublePageCreator.passThrough(concurrency)
+            ParallelDoublePageCreator.passThrough(concurrency.value())
         );
 
         // Used to keep track of whether we can swap a node into another community or not.
-        this.swapStatus = HugeAtomicByteArray.of(graph.nodeCount(), new ParallelBytePageCreator(concurrency));
+        this.swapStatus = HugeAtomicByteArray.of(graph.nodeCount(), new ParallelBytePageCreator(concurrency.value()));
 
         this.weightTransformer = hasRelationshipWeightProperty ? weight -> weight : unused -> 1.0D;
     }
@@ -135,7 +136,7 @@ public class LocalSearch {
                 ).collect(Collectors.toList());
             progressTracker.beginSubTask();
             RunWithConcurrency.builder()
-                .concurrency(concurrency)
+                .concurrency(concurrency.value())
                 .tasks(nodeToCommunityWeightTasks)
                 .executor(executor)
                 .run();
@@ -161,7 +162,7 @@ public class LocalSearch {
                 ).collect(Collectors.toList());
             progressTracker.beginSubTask();
             RunWithConcurrency.builder()
-                .concurrency(concurrency)
+                .concurrency(concurrency.value())
                 .tasks(swapTasks)
                 .executor(executor)
                 .run();
@@ -184,7 +185,7 @@ public class LocalSearch {
             ).collect(Collectors.toList());
         progressTracker.beginSubTask();
         RunWithConcurrency.builder()
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .tasks(costTasks)
             .executor(executor)
             .run();
