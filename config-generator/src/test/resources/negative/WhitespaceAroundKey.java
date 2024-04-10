@@ -17,13 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package positive;
+package negative;
 
 import org.neo4j.gds.annotation.Configuration;
 
-@Configuration("KeyRenamesConfig")
-public interface KeyRenames {
+@Configuration("WhitespaceAroundKeyConfig")
+public interface WhitespaceAroundKey {
 
-    @Configuration.Key("key could also be an invalid identifier")
-    int lookupUnderAnotherKey();
+    @Configuration.Key("     whitespace around key is not allowed    ")
+    int whitespaceAroundKeyisNotAllowed();
 }

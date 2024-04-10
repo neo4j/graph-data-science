@@ -69,7 +69,7 @@ record Spec(TypeElement root, TypeMirror rootType, List<Member> members) {
                 throw new InvalidMemberException("The key must not be empty");
             }
             if (!trimmedKey.equals(resolvedKey)) {
-                throw new InvalidMemberException("The key must not contain whitespace");
+                throw new InvalidMemberException("The key must not be surrounded by whitespace");
             }
             if (collectsKeys && (validates || normalizes)) {
                 throw new InvalidMemberException(String.format(
