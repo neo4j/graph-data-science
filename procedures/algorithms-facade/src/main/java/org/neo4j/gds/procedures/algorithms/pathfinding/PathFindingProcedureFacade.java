@@ -71,9 +71,9 @@ import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SingleSourceShortes
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SpanningTreeMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SteinerTreeMutateStub;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.results.StandardModeResult;
-import org.neo4j.gds.results.StandardStatsResult;
-import org.neo4j.gds.results.StandardWriteRelationshipsResult;
+import org.neo4j.gds.procedures.algorithms.results.StandardModeResult;
+import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
+import org.neo4j.gds.procedures.algorithms.results.StandardWriteRelationshipsResult;
 import org.neo4j.gds.spanningtree.SpanningTreeStatsConfig;
 import org.neo4j.gds.spanningtree.SpanningTreeStreamConfig;
 import org.neo4j.gds.spanningtree.SpanningTreeWriteConfig;

@@ -17,11 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.executor;
+package org.neo4j.gds.procedures.algorithms.configuration;
 
-import java.util.Map;
+import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.CypherMapWrapper;
 
-@FunctionalInterface
-public interface ProcConfigParser<CONFIG> {
-    CONFIG processInput(Map<String, Object> configuration);
+public interface NewConfigFunction<CONFIG extends AlgoBaseConfig> {
+    CONFIG apply(
+        String username,
+        CypherMapWrapper config
+    );
 }

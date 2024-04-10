@@ -27,6 +27,9 @@ import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.executor.validation.Validator;
+import org.neo4j.gds.procedures.algorithms.configuration.AlgoConfigParser;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.configuration.ProcConfigParser;
 
 public class ProcedureExecutorSpec<
     ALGO extends Algorithm<ALGO_RESULT>,

@@ -17,14 +17,20 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.executor;
+package org.neo4j.gds.procedures.algorithms.results;
 
-import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.core.CypherMapWrapper;
+import java.util.Map;
 
-public interface NewConfigFunction<CONFIG extends AlgoBaseConfig> {
-    CONFIG apply(
-        String username,
-        CypherMapWrapper config
-    );
+public class StandardStatsResult extends StandardModeResult {
+    public final long postProcessingMillis;
+
+    public StandardStatsResult(
+        long preProcessingMillis,
+        long computeMillis,
+        long postProcessingMillis,
+        Map<String, Object> configuration
+    ) {
+        super(preProcessingMillis, computeMillis, configuration);
+        this.postProcessingMillis = postProcessingMillis;
+    }
 }

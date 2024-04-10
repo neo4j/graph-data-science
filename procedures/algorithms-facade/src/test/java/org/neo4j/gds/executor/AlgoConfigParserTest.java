@@ -24,6 +24,8 @@ import org.neo4j.gds.configuration.Default;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitFactory;
 import org.neo4j.gds.configuration.LimitsConfiguration;
+import org.neo4j.gds.procedures.algorithms.configuration.AlgoConfigParser;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 
 import java.util.Collections;
 import java.util.Map;

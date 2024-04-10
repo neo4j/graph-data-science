@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.executor;
 
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.test.TestAlgorithm;
 import org.neo4j.gds.test.TestAlgorithmFactory;
 import org.neo4j.gds.test.TestAlgorithmResult;

@@ -23,6 +23,8 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
 import org.neo4j.gds.executor.validation.Validator;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.configuration.ProcConfigParser;
 
 public interface ExecutorSpec<
     ALGO extends Algorithm<ALGO_RESULT>,

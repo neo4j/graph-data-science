@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.pipeline.node;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.results.StandardMutateResult;
+import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
 
 import java.util.Map;
 

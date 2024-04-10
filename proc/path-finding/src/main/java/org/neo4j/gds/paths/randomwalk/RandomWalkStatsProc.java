@@ -21,7 +21,7 @@ package org.neo4j.gds.paths.randomwalk;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.results.MemoryEstimateResult;
-import org.neo4j.gds.results.StandardModeResult;
+import org.neo4j.gds.procedures.algorithms.results.StandardModeResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;

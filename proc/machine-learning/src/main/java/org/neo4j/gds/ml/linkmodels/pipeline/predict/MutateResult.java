@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.core.ProcedureConstants;
 import org.neo4j.gds.result.AbstractResultBuilder;
 import org.neo4j.gds.result.HistogramUtils;
-import org.neo4j.gds.results.StandardMutateResult;
+import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
 
 import java.util.Map;
 

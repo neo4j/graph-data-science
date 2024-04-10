@@ -20,7 +20,7 @@
 package org.neo4j.gds.procedures.misc.scaleproperties;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
-import org.neo4j.gds.results.StandardWriteResult;
+import org.neo4j.gds.procedures.algorithms.results.StandardWriteResult;
 
 import java.util.List;
 import java.util.Map;
