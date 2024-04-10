@@ -26,8 +26,8 @@ import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.io.file.GraphInfo;
-import org.neo4j.gds.core.io.file.ImmutableGraphInfo;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
@@ -67,13 +67,13 @@ public interface MetaDataStore {
             );
         }
 
-        GraphInfo graphInfo = ImmutableGraphInfo.of(
+        GraphInfo graphInfo = new GraphInfo(
             graphStore.databaseInfo(),
             idMapTypeId,
             graphStore.nodeCount(),
             graphStore.nodes().highestOriginalId(),
             relTypeCounts,
-            graphStore.inverseIndexedRelationshipTypes()
+            List.copyOf(graphStore.inverseIndexedRelationshipTypes())
         );
         var schema = graphStore.schema();
         return ImmutableMetaDataStore.of(
