@@ -39,21 +39,6 @@ import static org.neo4j.gds.utils.StringFormatting.toUpperCaseWithLocale;
 public final class FeatureToggleProc {
 
     @Internal
-    @Procedure("gds.features.importer.skipOrphanNodes")
-    @Description("Toggle whether orphan nodes should be skipped during import.")
-    public void skipOrphanNodes(@Name(value = "skipOrphanNodes") boolean skipOrphanNodes) {
-        GdsFeatureToggles.SKIP_ORPHANS.toggle(skipOrphanNodes);
-    }
-
-    @Internal
-    @Procedure("gds.features.importer.skipOrphanNodes.reset")
-    @Description("Set the behavior of whether to skip orphan nodes to the default. That value is returned.")
-    public Stream<FeatureState> resetSkipOrphanNodes() {
-        GdsFeatureToggles.SKIP_ORPHANS.reset();
-        return Stream.of(new FeatureState(GdsFeatureToggles.SKIP_ORPHANS.isEnabled()));
-    }
-
-    @Internal
     @Procedure("gds.features.pagesPerThread")
     @Description("Toggle how many pages per thread are being used by the loader.")
     public void pagesPerThread(@Name(value = "pagesPerThread") long pagesPerThread) {

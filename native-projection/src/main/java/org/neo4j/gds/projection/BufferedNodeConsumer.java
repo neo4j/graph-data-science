@@ -31,16 +31,12 @@ import org.neo4j.token.api.TokenConstants;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.utils.GdsFeatureToggles.SKIP_ORPHANS;
-import static org.neo4j.internal.kernel.api.Read.NO_ID;
-
 public final class BufferedNodeConsumer implements StoreScanner.RecordConsumer<NodeReference> {
 
     private final NodesBatchBuffer<PropertyReference> buffer;
 
     private final long highestPossibleNodeCount;
     private final LongSet nodeLabelIds;
-    private final boolean skipOrphans;
     private final boolean readProperty;
 
     @Builder.Factory
@@ -78,7 +74,6 @@ public final class BufferedNodeConsumer implements StoreScanner.RecordConsumer<N
         this.buffer = buffer;
         this.highestPossibleNodeCount = highestPossibleNodeCount;
         this.nodeLabelIds = nodeLabelIds;
-        this.skipOrphans = SKIP_ORPHANS.isEnabled();
         this.readProperty = readProperty;
     }
 
@@ -90,10 +85,6 @@ public final class BufferedNodeConsumer implements StoreScanner.RecordConsumer<N
     public boolean offer(NodeReference record) {
         if (this.buffer.isFull()) {
             return false;
-        }
-
-        if (this.skipOrphans && record.relationshipReference() == NO_ID) {
-            return true;
         }
 
         if (record.nodeId() >= this.highestPossibleNodeCount) {

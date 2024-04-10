@@ -40,8 +40,8 @@ import org.neo4j.gds.TestGraphLoaderFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.extension.TestGraph;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Map;
@@ -57,7 +57,6 @@ import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.assertTransactionTermination;
 import static org.neo4j.gds.TestSupport.fromGdl;
 import static org.neo4j.gds.assertj.Extractors.removingThreadId;
-import static org.neo4j.gds.utils.GdsFeatureToggles.SKIP_ORPHANS;
 
 class GraphLoaderTest extends BaseTest {
 
@@ -316,20 +315,6 @@ class GraphLoaderTest extends BaseTest {
             .graph();
         TestGraph expected = fromGdl("(:X),(:Y),(:X),(:Y)-[:Q]->(:Z)");
         assertGraphEquals(expected, graph);
-    }
-
-    @Test
-    void testSkipOrphanNodes() {
-        SKIP_ORPHANS.enableAndRun(() -> {
-            runQuery("CREATE (:X),(:Y),(:X),(:Y)-[:Q]->(:Z)");
-            Graph graph = TestGraphLoaderFactory
-                .graphLoader(db, NATIVE)
-                .withLabels("X", "Y", "Z")
-                .withRelationshipTypes("Q")
-                .graph();
-            TestGraph expected = fromGdl("(:Y)-[:Q]->(:Z)");
-            assertGraphEquals(expected, graph);
-        });
     }
 
     @Test

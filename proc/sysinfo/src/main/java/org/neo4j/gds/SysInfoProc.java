@@ -159,7 +159,6 @@ public class SysInfoProc {
 
     private static void features(Stream.Builder<DebugValue> builder) {
         builder
-            .add(value("featureSkipOrphanNodes", GdsFeatureToggles.SKIP_ORPHANS.isEnabled()))
             .add(value("featureBitIdMap", GdsFeatureToggles.USE_BIT_ID_MAP.isEnabled()))
             .add(value(
                 "featureUncompressedAdjacencyList",

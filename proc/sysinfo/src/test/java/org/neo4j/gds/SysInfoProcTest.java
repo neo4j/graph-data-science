@@ -228,7 +228,7 @@ class SysInfoProcTest extends BaseProcTest {
         };
 
         assertThat(result)
-            .hasSizeGreaterThanOrEqualTo(44)
+            .hasSizeGreaterThanOrEqualTo(43)
             .containsEntry("gdsVersion", buildInfoProperties.gdsVersion())
             .containsEntry("minimumRequiredJavaVersion", buildInfoProperties.minimumRequiredJavaVersion())
             .containsEntry("buildDate", buildInfoProperties.buildDate())
@@ -273,7 +273,6 @@ class SysInfoProcTest extends BaseProcTest {
             .containsEntry(Neo4jSettings.pageCacheMemory().name(), Neo4jSettings.pageCacheMemoryValue("42M"))
             .containsEntry(Neo4jSettings.transactionStateAllocation().name(), "ON_HEAP")
             .containsEntry(Neo4jSettings.transactionStateMaxOffHeapMemory().name(), 1337L)
-            .containsEntry("featureSkipOrphanNodes", GdsFeatureToggles.SKIP_ORPHANS.isEnabled())
             .containsEntry("featureBitIdMap", GdsFeatureToggles.USE_BIT_ID_MAP.isEnabled())
             .containsEntry("featureUncompressedAdjacencyList", GdsFeatureToggles.USE_UNCOMPRESSED_ADJACENCY_LIST.isEnabled())
             .containsEntry("featurePackedAdjacencyList", GdsFeatureToggles.USE_PACKED_ADJACENCY_LIST.isEnabled())
