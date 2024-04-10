@@ -91,6 +91,7 @@ ext {
         'opencypher-front-end' : '9.0.20210312',
         'picocli'              : '4.7.5',
         'qala-datagen'         : '2.5.1',
+        'record-builder'       : '41',
         'sb-contrib'           : '7.6.3',
         'scala'                : scalas[neo4j_minor],
         'protobuf'             : '3.25.3',
