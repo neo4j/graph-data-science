@@ -23,14 +23,14 @@ algorithm = "article-rank"
 conf_filename = pathlib.Path("csv") / f"{algorithm}.csv"
 adoc_filename = pathlib.Path("..") / "modules" / "ROOT" / "partials" / "algorithms" / algorithm / "specific-configuration.adoc"
 
-with open(conf_filename) as conf, open(adoc_filename, "w") as adoc:
-    csvreader = csv.DictReader(conf)
-    adoc.write("// DO NOT EDIT: File generated automatically\n")
+with open(conf_filename) as conf_file, open(adoc_filename, "w") as adoc_file:
+    csvreader = csv.DictReader(conf_file)
+    adoc_file.write("// DO NOT EDIT: File generated automatically\n")
       
     for row in csvreader:
-        name, type_, default, optional, description = row['name'], row['type'], row['default'], row['optional'], row['description']
+        name, type_, default, optional, description = row["name"], row["type"], row["default"], row["optional"], row["description"]
         if name in LINKS:
             name = BASE_LINK + LINKS[name] + f"[{name}]"
         
         line = f"| {name} | {type_} | {default} | {optional} | {description}"
-        adoc.write(line + "\n")
+        adoc_file.write(line + "\n")
