@@ -21,7 +21,7 @@ package org.neo4j.gds.procedures.community.scc;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
-import org.neo4j.gds.results.StandardWriteResult;
+import org.neo4j.gds.procedures.algorithms.results.StandardWriteResult;
 
 import java.util.Map;
 
@@ -79,4 +79,3 @@ public class SccWriteResult extends StandardWriteResult {
 
     }
 }
-

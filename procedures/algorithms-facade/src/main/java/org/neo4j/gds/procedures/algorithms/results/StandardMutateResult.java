@@ -17,12 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.results;
+package org.neo4j.gds.procedures.algorithms.results;
 
 import java.util.Map;
 
 public class StandardMutateResult extends StandardStatsResult {
-
     public final long mutateMillis;
 
     public StandardMutateResult(

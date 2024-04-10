@@ -17,14 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.results;
+package org.neo4j.gds.procedures.algorithms.results;
 
 import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.Map;
 
 public final class StandardWriteRelationshipsResult extends StandardWriteResult {
-
     public final long relationshipsWritten;
 
     public StandardWriteRelationshipsResult(
@@ -40,7 +39,6 @@ public final class StandardWriteRelationshipsResult extends StandardWriteResult 
     }
 
     public static class Builder extends AbstractResultBuilder<StandardWriteRelationshipsResult> {
-
         @Override
         public StandardWriteRelationshipsResult build() {
             return new StandardWriteRelationshipsResult(

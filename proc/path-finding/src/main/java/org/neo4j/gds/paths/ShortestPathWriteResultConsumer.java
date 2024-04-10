@@ -33,7 +33,7 @@ import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
-import org.neo4j.gds.results.StandardWriteRelationshipsResult;
+import org.neo4j.gds.procedures.algorithms.results.StandardWriteRelationshipsResult;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 

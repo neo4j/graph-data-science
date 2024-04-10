@@ -21,7 +21,7 @@ package org.neo4j.gds.procedures.community.scc;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
-import org.neo4j.gds.results.StandardMutateResult;
+import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
 
 import java.util.Map;
 

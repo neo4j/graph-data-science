@@ -95,7 +95,7 @@ class SpecificationGeneratorTest {
         var specificationGenerator = new SpecificationGenerator(typeNames, "doesn't matter", Optional.empty());
         assertThat(specificationGenerator.newConfigFunctionMethod().toString()).isEqualTo("" +
             "@java.lang.Override" + NL +
-            "public org.neo4j.gds.executor.NewConfigFunction<org.neo4j.gds.beta.pregel.PregelProcedureConfig> newConfigFunction(" + NL +
+            "public org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction<org.neo4j.gds.beta.pregel.PregelProcedureConfig> newConfigFunction(" + NL +
             "    ) {" + NL +
             "  return (__, userInput) -> org.neo4j.gds.beta.pregel.PregelProcedureConfig.of(userInput);" + NL +
             "}" + NL

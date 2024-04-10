@@ -24,7 +24,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffectProcessingCounts;
-import org.neo4j.gds.results.StandardModeResult;
+import org.neo4j.gds.procedures.algorithms.results.StandardModeResult;
 import org.neo4j.gds.traversal.RandomWalkStatsConfig;
 
 import java.util.Optional;

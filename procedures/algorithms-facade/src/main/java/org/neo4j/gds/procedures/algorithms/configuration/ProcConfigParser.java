@@ -17,22 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.results;
+package org.neo4j.gds.procedures.algorithms.configuration;
 
 import java.util.Map;
 
-public class StandardWriteResult extends StandardStatsResult {
-
-    public final long writeMillis;
-
-    public StandardWriteResult(
-        long preProcessingMillis,
-        long computeMillis,
-        long postProcessingMillis,
-        long writeMillis,
-        Map<String, Object> configuration
-    ) {
-        super(preProcessingMillis, computeMillis, postProcessingMillis, configuration);
-        this.writeMillis = writeMillis;
-    }
+@FunctionalInterface
+public interface ProcConfigParser<CONFIG> {
+    CONFIG processInput(Map<String, Object> configuration);
 }

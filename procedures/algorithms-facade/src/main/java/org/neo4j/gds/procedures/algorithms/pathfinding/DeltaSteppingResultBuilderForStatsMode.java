@@ -26,7 +26,7 @@ import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.machinery.SideEffectProcessingCounts;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStatsConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
-import org.neo4j.gds.results.StandardStatsResult;
+import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
 import java.util.Optional;
 import java.util.stream.Stream;
