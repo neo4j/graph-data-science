@@ -20,7 +20,6 @@
 package org.neo4j.gds.result;
 
 import org.HdrHistogram.DoubleHistogram;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.ProcedureConstants;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -109,7 +108,7 @@ public final class CentralityStatistics {
             }
         }
 
-        return ImmutableCentralityStats.of(maybeHistogram, computeMilliseconds.get());
+        return new CentralityStats(maybeHistogram, computeMilliseconds.get());
     }
 
     public static Map<String, Object> centralitySummary(Optional<DoubleHistogram> histogram) {
@@ -118,13 +117,7 @@ public final class CentralityStatistics {
             .orElseGet(Collections::emptyMap);
     }
 
-    @ValueClass
-    @SuppressWarnings("immutables:incompat")
-    public interface CentralityStats {
-
-        Optional<DoubleHistogram> histogram();
-
-        long computeMilliseconds();
+    public record CentralityStats(Optional<DoubleHistogram> histogram, long computeMilliseconds) {
     }
 
 
