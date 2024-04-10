@@ -100,6 +100,15 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
                 requestScopedDependencies.getTaskRegistryFactory()
             );
 
+            var resultStore = configuration.resolveResultStore(graphStore.resultStore());
+            // When we are writing to the result store, the path finding result stream is not consumed
+            // inside the current transaction. This causes the stream to immediately return an empty stream
+            // as the termination flag, which is bound to the current transaction is set to true. We therefore
+            // need to collect the stream and trigger an eager computation.
+            var maybeCollectedStream = resultStore
+                .map(__ -> relationshipStream.toList().stream())
+                .orElse(relationshipStream);
+
             // configure the exporter
             var relationshipStreamExporter = requestScopedDependencies.getRelationshipStreamExporterBuilder()
                 .withConcurrency(configuration.writeConcurrency())
@@ -107,10 +116,10 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
                     configuration.arrowConnectionInfo(),
                     graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                 )
-                .withResultStore(configuration.resolveResultStore(graphStore.resultStore()))
+                .withResultStore(resultStore)
                 .withIdMappingOperator(graph::toOriginalNodeId)
                 .withProgressTracker(progressTracker)
-                .withRelationships(relationshipStream)
+                .withRelationships(maybeCollectedStream)
                 .withTerminationFlag(requestScopedDependencies.getTerminationFlag())
                 .build();
 
