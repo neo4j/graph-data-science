@@ -97,7 +97,7 @@ class CommunityAlgorithmsStreamBusinessFacadeTest {
 
             var config = mock(WccBaseConfig.class);
             when(config.concurrency()).thenReturn(4);
-            when(config.toParameters()).thenReturn(WccParameters.create(0D, null, 4));
+            when(config.toParameters()).thenReturn(new WccParameters(0D, 4));
             var logMock = mock(Log.class);
             when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
 

@@ -25,15 +25,12 @@ import org.neo4j.gds.config.ConsecutiveIdsConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.config.SeedConfig;
 
+import java.util.Optional;
+
 public interface WccBaseConfig extends AlgoBaseConfig, SeedConfig, ConsecutiveIdsConfig, RelationshipWeightConfig {
 
     default double threshold() {
         return 0D;
-    }
-
-    @Configuration.Ignore
-    default boolean hasThreshold() {
-        return !Double.isNaN(threshold()) && threshold() > 0;
     }
 
     @Configuration.Check
@@ -45,6 +42,6 @@ public interface WccBaseConfig extends AlgoBaseConfig, SeedConfig, ConsecutiveId
 
     @Configuration.Ignore
     default WccParameters toParameters() {
-        return WccParameters.create(threshold(), seedProperty(), concurrency());
+        return new WccParameters(threshold(), Optional.ofNullable(seedProperty()), concurrency());
     }
 }

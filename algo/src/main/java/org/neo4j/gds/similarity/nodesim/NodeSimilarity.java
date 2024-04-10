@@ -231,7 +231,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
         // run WCC to determine components
         progressTracker.beginSubTask();
-        var wccParameters = WccParameters.create(0D, null, concurrency);
+        var wccParameters = new WccParameters(0D, concurrency);
         Wcc wcc = new WccAlgorithmFactory<>().build(graph, wccParameters, ProgressTracker.NULL_TRACKER);
         DisjointSetStruct disjointSets = wcc.compute();
         progressTracker.endSubTask();

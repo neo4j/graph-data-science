@@ -83,23 +83,17 @@ public interface Node2VecBaseConfig extends AlgoBaseConfig, EmbeddingDimensionCo
 
     @Configuration.Ignore
     default Node2VecParameters node2VecParameters() {
-        return new Node2VecParameters(walkParameters(), trainParameters());
-    }
-    @Configuration.Ignore
-    default WalkParameters walkParameters() {
-        return new WalkParameters(
-            walksPerNode(),
-            walkLength(),
-            returnFactor(),
-            inOutFactor(),
+        var walkParameters = walkParameters();
+
+        var samplingWalkParameters = new SamplingWalkParameters(
+            walkParameters.walksPerNode(),
+            walkParameters.walkLength(),
+            walkParameters.returnFactor(),
+            walkParameters.inOutFactor(),
             positiveSamplingFactor(),
             negativeSamplingExponent()
         );
-    }
-
-    @Configuration.Ignore
-    default TrainParameters trainParameters() {
-        return new TrainParameters(
+        var trainParameters = new TrainParameters(
             initialLearningRate(),
             minLearningRate(),
             iterations(),
@@ -108,5 +102,7 @@ public interface Node2VecBaseConfig extends AlgoBaseConfig, EmbeddingDimensionCo
             embeddingDimension(),
             embeddingInitializer()
         );
+
+        return new Node2VecParameters(samplingWalkParameters, trainParameters);
     }
 }

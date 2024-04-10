@@ -24,54 +24,11 @@ import org.neo4j.gds.annotation.Parameters;
 import java.util.List;
 
 @Parameters
-public final class SteinerTreeParameters {
-    static SteinerTreeParameters create(int concurrency, long sourceNode, List<Long> targetNodes, double delta, boolean applyRerouting) {
-        return new SteinerTreeParameters(
-            concurrency,
-            sourceNode,
-            targetNodes,
-            delta,
-            applyRerouting
-        );
-    }
-
-    private final int concurrency;
-    private final long sourceNode;
-    private final List<Long> targetNodes;
-    private final double delta;
-    private final boolean applyRerouting;
-
-    private SteinerTreeParameters(
-        int concurrency,
-        long sourceNode,
-        List<Long> targetNodes,
-        double delta,
-        boolean applyRerouting
-    ) {
-        this.concurrency = concurrency;
-        this.sourceNode = sourceNode;
-        this.targetNodes = targetNodes;
-        this.delta = delta;
-        this.applyRerouting = applyRerouting;
-    }
-
-    public int concurrency() {
-        return concurrency;
-    }
-
-    public long sourceNode() {
-        return sourceNode;
-    }
-
-    public List<Long> targetNodes() {
-        return targetNodes;
-    }
-
-    public double delta() {
-        return delta;
-    }
-
-    public boolean applyRerouting() {
-        return applyRerouting;
-    }
+public record SteinerTreeParameters(
+    int concurrency,
+    long sourceNode,
+    List<Long> targetNodes,
+    double delta,
+    boolean applyRerouting
+) {
 }

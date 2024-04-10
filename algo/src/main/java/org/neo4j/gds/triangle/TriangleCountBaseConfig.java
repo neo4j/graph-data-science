@@ -67,6 +67,6 @@ public interface TriangleCountBaseConfig extends AlgoBaseConfig {
 
     @Configuration.Ignore
     default TriangleCountParameters toParameters() {
-        return TriangleCountParameters.create(concurrency(), maxDegree());
+        return new TriangleCountParameters(concurrency(), maxDegree());
     }
 }

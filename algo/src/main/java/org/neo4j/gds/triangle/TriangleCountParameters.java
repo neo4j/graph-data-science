@@ -22,24 +22,5 @@ package org.neo4j.gds.triangle;
 import org.neo4j.gds.annotation.Parameters;
 
 @Parameters
-public final class TriangleCountParameters {
-
-    public static TriangleCountParameters create(int concurrency, long maxDegree) {
-        return new TriangleCountParameters(concurrency, maxDegree);
-    }
-    private final int concurrency;
-    private final long maxDegree;
-
-    private TriangleCountParameters(int concurrency, long maxDegree) {
-        this.concurrency = concurrency;
-        this.maxDegree = maxDegree;
-    }
-
-    public int concurrency() {
-        return concurrency;
-    }
-
-    public long maxDegree() {
-        return maxDegree;
-    }
+public record TriangleCountParameters(int concurrency, long maxDegree) {
 }
