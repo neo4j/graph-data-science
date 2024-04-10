@@ -20,6 +20,7 @@
 package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,7 +32,7 @@ public record KmeansParameters(
     double deltaThreshold,
     int numberOfRestarts,
     boolean computeSilhouette,
-    int concurrency,
+    Concurrency concurrency,
     String nodeProperty,
     KmeansSampler.SamplerType samplerType,
     List<List<Double>> seedCentroids,

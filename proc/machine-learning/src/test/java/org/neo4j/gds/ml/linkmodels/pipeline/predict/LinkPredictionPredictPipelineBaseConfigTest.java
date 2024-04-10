@@ -24,6 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.similarity.knn.KnnSampler;
 
@@ -142,7 +143,7 @@ class LinkPredictionPredictPipelineBaseConfigTest {
         assertThat(approximateConfig.kHolder().sampledValue).isEqualTo(4);
         assertThat(approximateConfig.kHolder().value).isEqualTo(10);
         assertThat(approximateConfig.samplerType()).isEqualTo(KnnSampler.SamplerType.RANDOMWALK);
-        assertThat(approximateConfig.concurrency()).isEqualTo(1);
+        assertThat(approximateConfig.concurrency()).isEqualTo(new Concurrency(1));
         assertThat(approximateConfig.perturbationRate()).isEqualTo(0.0);
         assertThat(approximateConfig.randomSeed()).isEqualTo(Optional.of(42L));
     }

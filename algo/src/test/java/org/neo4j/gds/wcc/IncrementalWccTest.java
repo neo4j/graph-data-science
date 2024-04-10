@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.ConcurrencyConfig;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -74,7 +75,7 @@ class IncrementalWccTest {
     void shouldComputeComponentsFromSeedProperty() {
         Graph graph = createGraph();
 
-        var parameters = new WccParameters( 0D, Optional.of(SEED_PROPERTY), ConcurrencyConfig.DEFAULT_CONCURRENCY);
+        var parameters = new WccParameters( 0D, Optional.of(SEED_PROPERTY), new Concurrency(ConcurrencyConfig.DEFAULT_CONCURRENCY));
 
         // We expect that UF connects pairs of communities
         DisjointSetStruct result = run(graph, parameters);
@@ -108,7 +109,7 @@ class IncrementalWccTest {
         );
 
         // When
-        var parameters = new WccParameters(0D, Optional.of("seed"), ConcurrencyConfig.DEFAULT_CONCURRENCY);
+        var parameters = new WccParameters(0D, Optional.of("seed"), new Concurrency(ConcurrencyConfig.DEFAULT_CONCURRENCY));
 
         DisjointSetStruct result = run(graph, parameters);
 

@@ -112,7 +112,7 @@ public class LabelPropagation extends Algorithm<LabelPropagationResult> {
         while (ranIterations < parameters.maxIterations()) {
             progressTracker.beginSubTask();
             RunWithConcurrency.builder()
-                .concurrency(parameters.concurrency())
+                .concurrency(parameters.concurrency().value())
                 .tasks(stepRunners)
                 .waitTime(1L, MICROSECONDS)
                 .terminationFlag(terminationFlag)
@@ -160,7 +160,7 @@ public class LabelPropagation extends Algorithm<LabelPropagationResult> {
         }
         progressTracker.beginSubTask();
         RunWithConcurrency.builder()
-            .concurrency(parameters.concurrency())
+            .concurrency(parameters.concurrency().value())
             .tasks(tasks)
             .waitTime(1, MICROSECONDS)
             .terminationFlag(terminationFlag)

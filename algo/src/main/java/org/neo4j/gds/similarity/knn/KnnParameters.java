@@ -20,13 +20,14 @@
 package org.neo4j.gds.similarity.knn;
 
 import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.List;
 import java.util.Optional;
 
 @Parameters
 public record KnnParameters(
-    int concurrency,
+    Concurrency concurrency,
     int maxIterations,
     double similarityCutoff,
     K kHolder,
@@ -39,7 +40,7 @@ public record KnnParameters(
 
     static KnnParameters create(
         long nodeCount,
-        int concurrency,
+        Concurrency concurrency,
         int maxIterations,
         double similarityCutoff,
         double deltaThreshold,

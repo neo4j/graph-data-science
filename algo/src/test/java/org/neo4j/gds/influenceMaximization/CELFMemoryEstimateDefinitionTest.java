@@ -21,6 +21,7 @@ package org.neo4j.gds.influenceMaximization;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -42,7 +43,7 @@ class CELFMemoryEstimateDefinitionTest {
     void memoryEstimation(int seedSetSize, int concurrency, long expectedMemory) {
         var parameters = mock(CELFParameters.class);
         when(parameters.seedSetSize()).thenReturn(seedSetSize);
-        when(parameters.concurrency()).thenReturn(concurrency);
+        when(parameters.concurrency()).thenReturn(new Concurrency(concurrency));
 
         var memoryEstimation = new CELFMemoryEstimateDefinition(parameters).memoryEstimation();
 

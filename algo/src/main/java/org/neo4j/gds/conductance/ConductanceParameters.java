@@ -20,10 +20,11 @@
 package org.neo4j.gds.conductance;
 
 import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 @Parameters
 public record ConductanceParameters(
-    int concurrency,
+    Concurrency concurrency,
     int minBatchSize,
     boolean hasRelationshipWeightProperty,
     String communityProperty

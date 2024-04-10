@@ -37,6 +37,7 @@ public class CELF extends Algorithm<CELFResult> {
     private final int seedSetCount;
     private final Graph graph;
     private final CELFParameters parameters;
+    private final int concurrency;
     private final LongDoubleScatterMap seedSetNodes;
     private final HugeLongPriorityQueue spreads;
     private final ExecutorService executorService;
@@ -59,6 +60,7 @@ public class CELF extends Algorithm<CELFResult> {
 
         this.graph = graph;
         this.parameters = parameters;
+        this.concurrency = parameters.concurrency().value();
         this.seedSetCount = (parameters.seedSetSize() <= graph.nodeCount())
             ? parameters.seedSetSize()
             : (int) graph.nodeCount(); // k <= nodeCount
@@ -92,7 +94,7 @@ public class CELF extends Algorithm<CELFResult> {
         HugeDoubleArray singleSpreadArray = HugeDoubleArray.newArray(graph.nodeCount());
         progressTracker.beginSubTask(graph.nodeCount());
         var tasks = PartitionUtils.rangePartition(
-            parameters.concurrency(),
+            this.concurrency,
             graph.nodeCount(),
             partition -> new ICInitTask(
                 partition,
@@ -103,11 +105,11 @@ public class CELF extends Algorithm<CELFResult> {
                 parameters.randomSeed(),
                 progressTracker
             ),
-            Optional.of(Math.toIntExact(graph.nodeCount()) / parameters.concurrency())
+            Optional.of(Math.toIntExact(graph.nodeCount()) / this.concurrency)
         );
 
         RunWithConcurrency.builder()
-            .concurrency(parameters.concurrency())
+            .concurrency(this.concurrency)
             .tasks(tasks)
             .executor(executorService)
             .run();
@@ -132,7 +134,7 @@ public class CELF extends Algorithm<CELFResult> {
             parameters.monteCarloSimulations(),
             firstSeedNode,
             seedSetCount,
-            parameters.concurrency(),
+            this.concurrency,
             executorService,
             parameters.randomSeed(),
             parameters.batchSize()

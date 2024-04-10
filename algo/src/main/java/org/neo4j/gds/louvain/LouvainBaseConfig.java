@@ -65,7 +65,7 @@ public interface LouvainBaseConfig extends
     @Configuration.Ignore
     default LouvainParameters toParameters() {
         return new LouvainParameters(
-            concurrency(),
+            typedConcurrency(),
             maxIterations(),
             tolerance(),
             maxLevels(),

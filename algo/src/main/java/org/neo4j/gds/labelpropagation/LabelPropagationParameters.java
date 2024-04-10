@@ -21,10 +21,11 @@ package org.neo4j.gds.labelpropagation;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 @Parameters
 public record LabelPropagationParameters(
-    int concurrency,
+    Concurrency concurrency,
     int maxIterations,
     @Nullable String nodeWeightProperty,
     @Nullable String seedProperty

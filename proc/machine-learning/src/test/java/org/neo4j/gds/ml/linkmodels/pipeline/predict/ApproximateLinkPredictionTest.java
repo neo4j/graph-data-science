@@ -28,6 +28,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -103,7 +104,7 @@ class ApproximateLinkPredictionTest {
             LPNodeFilter.of(graphN, graphN),
             LPNodeFilter.of(graphN, graphN),
             KnnParametersSansNodeCount.create(
-                1,
+                new Concurrency(1),
                 4,
                 0.0,
                 0.0,
@@ -182,7 +183,7 @@ class ApproximateLinkPredictionTest {
                 LPNodeFilter.of(graphN, graphN),
                 LPNodeFilter.of(graphN, graphN),
                 KnnParametersSansNodeCount.create(
-                    1,
+                    new Concurrency(1),
                     10,
                     0.0,
                     0.0,
@@ -233,7 +234,7 @@ class ApproximateLinkPredictionTest {
             LPNodeFilter.of(graphN, graphN),
             LPNodeFilter.of(graphN, graphN),
             KnnParametersSansNodeCount.create(
-                1,
+                new Concurrency(1),
                 10,
                 0.0,
                 0.0,
@@ -289,7 +290,7 @@ class ApproximateLinkPredictionTest {
             sourceNodeLabelFilter,
             targetNodeLabelFilter,
             KnnParametersSansNodeCount.create(
-                1,
+                new Concurrency(1),
                 10,
                 0.0,
                 0.0,

@@ -30,6 +30,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
@@ -172,7 +173,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     }
 
     private void computeColoring() {
-        var parameters = new K1ColoringParameters(concurrency, K1COLORING_MAX_ITERATIONS, minBatchSize);
+        var parameters = new K1ColoringParameters(new Concurrency(concurrency), K1COLORING_MAX_ITERATIONS, minBatchSize);
         K1Coloring coloring = new K1ColoringAlgorithmFactory<>().build(graph, parameters, progressTracker);
         coloring.setTerminationFlag(terminationFlag);
 

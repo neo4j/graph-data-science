@@ -20,12 +20,13 @@
 package org.neo4j.gds.steiner;
 
 import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.List;
 
 @Parameters
 public record SteinerTreeParameters(
-    int concurrency,
+    Concurrency concurrency,
     long sourceNode,
     List<Long> targetNodes,
     double delta,

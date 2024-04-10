@@ -23,6 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.CommunityHelper;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -102,7 +103,7 @@ class WccThresholdTest {
     }
 
     private void assertResults(double threshold, TestGraph graph, String[][] expectedComponents) {
-        var parameters = new WccParameters(threshold, 4);
+        var parameters = new WccParameters(threshold, new Concurrency(4));
 
         DisjointSetStruct dss = new Wcc(
             graph,

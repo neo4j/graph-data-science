@@ -51,7 +51,7 @@ public class LeidenAlgorithmFactory<CONFIG extends LeidenBaseConfig> extends Gra
             parameters.randomSeed().orElse(0L),
             seedValues,
             parameters.tolerance(),
-            parameters.concurrency(),
+            parameters.concurrency().value(),
             progressTracker
         );
     }

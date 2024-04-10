@@ -28,6 +28,7 @@ import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -159,7 +160,7 @@ class BetweennessCentralityTest {
             concurrency,
             ProgressTracker.NULL_TRACKER
         ).compute().centralities();
-        
+
         assertEquals(5, actualResult.size(), "Expected 5 centrality values");
         assertEquals(0.0, actualResult.get((int) graph.toMappedNodeId("a")));
         assertEquals(3.0, actualResult.get((int) graph.toMappedNodeId("b")));
@@ -170,7 +171,7 @@ class BetweennessCentralityTest {
 
     @Test
     void testShouldLogProgress() {
-        var parameters = new BetweennessCentralityParameters(4, Optional.of(2L), Optional.empty(), false);
+        var parameters = new BetweennessCentralityParameters(new Concurrency(4), Optional.of(2L), Optional.empty(), false);
         var factory = new BetweennessCentralityFactory<>();
         var log = Neo4jProxy.testLog();
         var testGraph = fromGdl(DIAMOND, "diamond");
@@ -195,7 +196,7 @@ class BetweennessCentralityTest {
 
     @Test
     void testShouldLogProgressNoSampling() {
-        var parameters = new BetweennessCentralityParameters(4, Optional.empty(), Optional.empty(), false);
+        var parameters = new BetweennessCentralityParameters(new Concurrency(4), Optional.empty(), Optional.empty(), false);
         var factory = new BetweennessCentralityFactory<>();
         var log = Neo4jProxy.testLog();
         var testGraph = fromGdl(DIAMOND, "diamond");

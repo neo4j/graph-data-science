@@ -48,12 +48,14 @@ public class HashGNN extends Algorithm<HashGNNResult> {
     private final Graph graph;
     private final SplittableRandom rng;
     private final HashGNNParameters parameters;
+    private final int concurrency;
     private final MutableLong currentTotalFeatureCount = new MutableLong();
 
     public HashGNN(Graph graph, HashGNNParameters parameters, ProgressTracker progressTracker) {
         super(progressTracker);
         this.graph = graph;
         this.parameters = parameters;
+        this.concurrency = parameters.concurrency().value();
 
         long tempRandomSeed = this.parameters.randomSeed().orElse((new SplittableRandom().nextLong()));
         this.randomSeed = new SplittableRandom(tempRandomSeed).nextLong();
@@ -67,12 +69,12 @@ public class HashGNN extends Algorithm<HashGNNResult> {
         var degreePartition = PartitionUtils.degreePartition(
             graph,
             // Since degree only very approximately reflect the min hash task workload per node we decrease the partition sizes.
-            Math.toIntExact(Math.min(parameters.concurrency() * DEGREE_PARTITIONS_PER_THREAD, graph.nodeCount())),
+            Math.toIntExact(Math.min(concurrency * DEGREE_PARTITIONS_PER_THREAD, graph.nodeCount())),
             Function.identity(),
             Optional.of(1)
         );
         var rangePartition = PartitionUtils.rangePartition(
-            parameters.concurrency(),
+            concurrency,
             graph.nodeCount(),
             Function.identity(),
             Optional.of(1)
@@ -125,7 +127,7 @@ public class HashGNN extends Algorithm<HashGNNResult> {
                 embeddingDimension,
                 scaledNeighborInfluence,
                 graphs.size(),
-                parameters.concurrency(),
+                concurrency,
                 parameters.embeddingDensity(),
                 randomSeed + parameters.embeddingDensity() * iteration,
                 terminationFlag,
@@ -135,7 +137,7 @@ public class HashGNN extends Algorithm<HashGNNResult> {
             MinHashTask.compute(
                 degreePartition,
                 graphs,
-                parameters.concurrency(),
+                concurrency,
                 parameters.embeddingDensity(),
                 embeddingDimension,
                 currentEmbeddings,
@@ -162,7 +164,7 @@ public class HashGNN extends Algorithm<HashGNNResult> {
             var denseVectors = DensifyTask.compute(
                 graph,
                 rangePartition,
-                parameters.concurrency(),
+                concurrency,
                 it,
                 rng,
                 binaryOutputVectors,
@@ -185,7 +187,7 @@ public class HashGNN extends Algorithm<HashGNNResult> {
                 parameters.generateFeatures().get(),
                 graph,
                 partition,
-                parameters.concurrency(),
+                concurrency,
                 randomSeed,
                 progressTracker,
                 terminationFlag,
@@ -196,7 +198,7 @@ public class HashGNN extends Algorithm<HashGNNResult> {
             BinarizeTask.compute(
                 graph,
                 partition,
-                parameters.concurrency(),
+                concurrency,
                 parameters.featureProperties(),
                 it,
                 rng,
@@ -206,7 +208,7 @@ public class HashGNN extends Algorithm<HashGNNResult> {
             )
         ).orElseGet(() ->
             RawFeaturesTask.compute(
-                parameters.concurrency(),
+                concurrency,
                 parameters.featureProperties(),
                 progressTracker,
                 graph,

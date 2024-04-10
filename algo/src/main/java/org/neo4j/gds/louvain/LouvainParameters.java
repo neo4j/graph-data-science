@@ -21,10 +21,11 @@ package org.neo4j.gds.louvain;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 @Parameters
 public record LouvainParameters(
-    int concurrency,
+    Concurrency concurrency,
     int maxIterations,
     double tolerance,
     int maxLevels,

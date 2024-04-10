@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.List;
 import java.util.Optional;
@@ -78,7 +79,7 @@ class HashGNNMemoryEstimateDefinitionTest {
 
     @Test
     void shouldEstimateMemoryWithOutputDimension(){
-      
+
         var params = mock(HashGNNParameters.class);
         when(params.embeddingDensity()).thenReturn(10);
         when(params.heterogeneous()).thenReturn(false);
@@ -101,7 +102,7 @@ class HashGNNMemoryEstimateDefinitionTest {
         var concurrency = 4;
 
         var bigParameters = new HashGNNParameters(
-            concurrency,
+            new Concurrency(concurrency),
             3,
             100,
             1,
@@ -118,7 +119,7 @@ class HashGNNMemoryEstimateDefinitionTest {
             .memoryUsage();
 
         var smallParameters = new HashGNNParameters(
-            concurrency,
+            new Concurrency(concurrency),
             3,
             100,
             1,

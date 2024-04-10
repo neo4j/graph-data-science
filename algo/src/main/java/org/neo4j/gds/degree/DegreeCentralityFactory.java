@@ -41,7 +41,7 @@ public class DegreeCentralityFactory<CONFIG extends DegreeCentralityConfig> exte
         return new DegreeCentrality(
             graph,
             DefaultPool.INSTANCE,
-            parameters.concurrency(),
+            parameters.concurrency().value(),
             parameters.orientation(),
             parameters.hasRelationshipWeightProperty(),
             parameters.minBatchSize(),

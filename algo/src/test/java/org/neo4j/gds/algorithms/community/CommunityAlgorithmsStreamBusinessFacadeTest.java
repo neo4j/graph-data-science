@@ -28,6 +28,7 @@ import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
@@ -97,7 +98,7 @@ class CommunityAlgorithmsStreamBusinessFacadeTest {
 
             var config = mock(WccBaseConfig.class);
             when(config.concurrency()).thenReturn(4);
-            when(config.toParameters()).thenReturn(new WccParameters(0D, 4));
+            when(config.toParameters()).thenReturn(new WccParameters(0D, new Concurrency(4)));
             var logMock = mock(Log.class);
             when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
 

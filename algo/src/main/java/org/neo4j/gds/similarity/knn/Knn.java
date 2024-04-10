@@ -49,7 +49,7 @@ public class Knn extends Algorithm<KnnResult> {
             context.progressTracker(),
             context.executor(),
             parameters.kHolder(),
-            parameters.concurrency(),
+            parameters.concurrency().value(),
             parameters.minBatchSize(),
             parameters.maxIterations(),
             parameters.similarityCutoff(),

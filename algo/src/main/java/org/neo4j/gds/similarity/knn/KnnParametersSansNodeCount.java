@@ -19,13 +19,15 @@
  */
 package org.neo4j.gds.similarity.knn;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
+
 import java.util.List;
 import java.util.Optional;
 
 public class KnnParametersSansNodeCount {
 
     public static KnnParametersSansNodeCount create(
-        int concurrency,
+        Concurrency concurrency,
         int maxIterations,
         double similarityCutoff,
         double deltaThreshold,
@@ -74,7 +76,7 @@ public class KnnParametersSansNodeCount {
         );
     }
 
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final int maxIterations;
     private final double similarityCutoff;
     private final double deltaThreshold;
@@ -88,7 +90,7 @@ public class KnnParametersSansNodeCount {
     private final List<KnnNodePropertySpec> nodePropertySpecs;
 
     public KnnParametersSansNodeCount(
-        int concurrency,
+        Concurrency concurrency,
         int maxIterations,
         double similarityCutoff,
         double deltaThreshold,

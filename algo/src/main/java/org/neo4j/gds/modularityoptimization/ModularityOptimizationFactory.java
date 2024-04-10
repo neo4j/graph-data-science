@@ -64,7 +64,7 @@ public class ModularityOptimizationFactory<CONFIG extends ModularityOptimization
                 graph,
                 seedProperty
             ) : null;
-        
+
         return build(graph, configuration.toParameters(), seedPropertyValues, progressTracker);
     }
 
@@ -79,7 +79,7 @@ public class ModularityOptimizationFactory<CONFIG extends ModularityOptimization
             parameters.maxIterations(),
             parameters.tolerance(),
             seedProperty,
-            parameters.concurrency(),
+            parameters.concurrency().value(),
             parameters.batchSize(),
             DefaultPool.INSTANCE,
             progressTracker

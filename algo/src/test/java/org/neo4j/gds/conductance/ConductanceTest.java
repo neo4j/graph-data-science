@@ -28,6 +28,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -143,14 +144,14 @@ final class ConductanceTest {
 
     @Test
     void logProgress() {
-        var parameters = new ConductanceParameters(1, 10_000, false, "community");
+        var parameters = new ConductanceParameters(new Concurrency(1), 10_000, false, "community");
         var factory = new ConductanceAlgorithmFactory<>();
         var progressTask = factory.progressTask(naturalGraph.nodeCount());
         var log = Neo4jProxy.testLog();
         var progressTracker = new TaskProgressTracker(
             progressTask,
             log,
-            parameters.concurrency(),
+            parameters.concurrency().value(),
             EmptyTaskRegistryFactory.INSTANCE
         );
 

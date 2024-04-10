@@ -43,6 +43,6 @@ public interface LabelPropagationBaseConfig extends
 
     @Configuration.Ignore
     default LabelPropagationParameters toParameters() {
-        return new LabelPropagationParameters(concurrency(), maxIterations(), nodeWeightProperty(), seedProperty());
+        return new LabelPropagationParameters(typedConcurrency(), maxIterations(), nodeWeightProperty(), seedProperty());
     }
 }

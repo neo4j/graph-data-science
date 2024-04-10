@@ -21,12 +21,13 @@ package org.neo4j.gds.leiden;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.Optional;
 
 @Parameters
 public record LeidenParameters(
-    int concurrency,
+    Concurrency concurrency,
     double tolerance,
     @Nullable String seedProperty,
     int maxLevels,

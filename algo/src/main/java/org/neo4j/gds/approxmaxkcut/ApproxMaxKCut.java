@@ -88,7 +88,7 @@ public final class ApproxMaxKCut extends Algorithm<ApproxMaxKCutResult> {
         var currentCardinalities = new AtomicLongArray(parameters.k());
 
         var placeNodesRandomly = new PlaceNodesRandomly(
-            parameters.concurrency(),
+            parameters.concurrency().value(),
             parameters.k(),
             parameters.minCommunitySizes(),
             parameters.minBatchSize(),
@@ -100,7 +100,7 @@ public final class ApproxMaxKCut extends Algorithm<ApproxMaxKCutResult> {
         var localSearch = new LocalSearch(
             graph,
             comparator,
-            parameters.concurrency(),
+            parameters.concurrency().value(),
             parameters.k(),
             parameters.minCommunitySizes(),
             parameters.minBatchSize(),

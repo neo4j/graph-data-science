@@ -40,7 +40,7 @@ public class IntersectingTriangleCountFactory<CONFIG extends TriangleCountBaseCo
     public IntersectingTriangleCount build(Graph graph, TriangleCountParameters parameters, ProgressTracker progressTracker) {
         return IntersectingTriangleCount.create(
             graph,
-            parameters.concurrency(),
+            parameters.concurrency().value(),
             parameters.maxDegree(),
             DefaultPool.INSTANCE,
             progressTracker

@@ -32,6 +32,7 @@ import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -57,7 +58,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 class LabelPropagationTest {
 
     private static final LabelPropagationParameters DEFAULT_PARAMETERS = new LabelPropagationParameters(
-        4,
+        new Concurrency(4),
         10,
         null,
         null
@@ -94,7 +95,7 @@ class LabelPropagationTest {
     void shouldUseOriginalNodeIdWhenSeedPropertyIsMissing() {
         LabelPropagation lp = new LabelPropagation(
             graph,
-            new LabelPropagationParameters(4, 1, null, null),
+            new LabelPropagationParameters(new Concurrency(4), 1, null, null),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -116,7 +117,7 @@ class LabelPropagationTest {
     void shouldUseSeedProperty() {
         LabelPropagation lp = new LabelPropagation(
             graph,
-            new LabelPropagationParameters(4, 1, null, "seedId"),
+            new LabelPropagationParameters(new Concurrency(4), 1, null, "seedId"),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -217,7 +218,7 @@ class LabelPropagationTest {
         var testTracker = new TestProgressTracker(
             progressTask,
             log,
-            DEFAULT_PARAMETERS.concurrency(),
+            DEFAULT_PARAMETERS.concurrency().value(),
             EmptyTaskRegistryFactory.INSTANCE
         );
 

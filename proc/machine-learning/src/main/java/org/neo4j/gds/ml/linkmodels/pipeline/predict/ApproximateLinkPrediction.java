@@ -56,7 +56,7 @@ public class ApproximateLinkPrediction extends LinkPrediction {
             graph,
             sourceNodeFilter,
             targetNodeFilter,
-            knnParameters.concurrency(),
+            knnParameters.concurrency().value(),
             progressTracker
         );
         this.knnParameters = knnParameters;
@@ -83,7 +83,7 @@ public class ApproximateLinkPrediction extends LinkPrediction {
                 progressTracker
             )
         );
-        
+
         knn.setTerminationFlag(terminationFlag);
         var knnResult = knn.compute();
 

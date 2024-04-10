@@ -21,10 +21,11 @@ package org.neo4j.gds.degree;
 
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 @Parameters
 public record DegreeCentralityParameters(
-    int concurrency,
+    Concurrency concurrency,
     Orientation orientation,
     boolean hasRelationshipWeightProperty,
     int minBatchSize

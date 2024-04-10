@@ -35,6 +35,7 @@ import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.properties.graph.DoubleArrayGraphPropertyValues;
 import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterParameters;
 import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
@@ -290,7 +291,7 @@ class CsvToGraphStoreImporterIntegrationTest {
             true,
             useLabelMapping,
             RelationshipType.ALL_RELATIONSHIPS,
-            concurrency,
+            new Concurrency(concurrency),
             10_000
         );
     }

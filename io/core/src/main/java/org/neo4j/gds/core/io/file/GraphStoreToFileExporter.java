@@ -90,7 +90,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
         String rootTaskName,
         ExecutorService executorService
     ) {
-        super(graphStore, neoNodeProperties, nodeLabelMapping, parameters.defaultRelationshipType(), parameters.concurrency(), parameters.batchSize());
+        super(graphStore, neoNodeProperties, nodeLabelMapping, parameters.defaultRelationshipType(), parameters.concurrency().value(), parameters.batchSize());
         this.parameters = parameters;
         this.nodeVisitorSupplier = nodeVisitorSupplier;
         this.relationshipVisitorSupplier = relationshipVisitorSupplier;

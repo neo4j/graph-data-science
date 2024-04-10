@@ -43,7 +43,7 @@ public class LocalClusteringCoefficientFactory<CONFIG extends LocalClusteringCoe
     ) {
         return new LocalClusteringCoefficient(
             graph,
-            parameters.concurrency(),
+            parameters.concurrency().value(),
             parameters.maxDegree(),
             parameters.seedProperty(),
             progressTracker

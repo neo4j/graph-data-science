@@ -29,6 +29,7 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.graph.LongGraphPropertyValues;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterParameters;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
@@ -142,7 +143,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             true,
             false,
             RelationshipType.ALL_RELATIONSHIPS,
-            1,
+            new Concurrency(1),
             10_000
         );
         // export db
@@ -243,7 +244,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             false,
             false,
             RelationshipType.ALL_RELATIONSHIPS,
-            1,
+            new Concurrency(1),
             10_000
         );
 
@@ -299,7 +300,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             true,
             false,
             RelationshipType.ALL_RELATIONSHIPS,
-            2,
+            new Concurrency(2),
             10_000
         );
 
@@ -378,7 +379,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             false,
             false,
             RelationshipType.ALL_RELATIONSHIPS,
-            4,
+            new Concurrency(4),
             10_000
         );
 
@@ -410,7 +411,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
         assertCsvFiles(
             LongStream
-                .range(0, parameters.concurrency())
+                .range(0, parameters.concurrency().value())
                 .mapToObj(
                     i -> formatWithLocale(
                         CsvGraphPropertyVisitor.GRAPH_PROPERTY_DATA_FILE_NAME_TEMPLATE,
@@ -454,7 +455,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             true,
             false,
             RelationshipType.ALL_RELATIONSHIPS,
-            1,
+            new Concurrency(1),
             10_000
         );
 
@@ -653,7 +654,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             true,
             false,
             RelationshipType.ALL_RELATIONSHIPS,
-            1,
+            new Concurrency(1),
             10_000
         );
 
@@ -683,7 +684,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             true,
             false,
             RelationshipType.ALL_RELATIONSHIPS,
-            1,
+            new Concurrency(1),
             10_000
         );
 
@@ -737,7 +738,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             false,
             false,
             RelationshipType.ALL_RELATIONSHIPS,
-            1,
+            new Concurrency(1),
             10_000
         );
 
@@ -786,7 +787,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             true,
             false,
             RelationshipType.ALL_RELATIONSHIPS,
-            1,
+            new Concurrency(1),
             10_000
         );
 

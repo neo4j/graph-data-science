@@ -88,7 +88,7 @@ public interface BetweennessCentralityBaseConfig extends AlgoBaseConfig, Relatio
     @Configuration.Ignore
     default BetweennessCentralityParameters toParameters() {
         return new BetweennessCentralityParameters(
-            concurrency(),
+            typedConcurrency(),
             samplingSize(),
             samplingSeed(),
             hasRelationshipWeightProperty()

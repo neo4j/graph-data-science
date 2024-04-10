@@ -192,7 +192,7 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
         var knnUserConfigAbomination = knnBuilder.build();
 
         return KnnParametersSansNodeCount.create(
-            knnUserConfigAbomination.concurrency(),
+            knnUserConfigAbomination.typedConcurrency(),
             knnUserConfigAbomination.maxIterations(),
             knnUserConfigAbomination.similarityCutoff(),
             knnUserConfigAbomination.deltaThreshold(),
@@ -211,7 +211,7 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
     default double thresholdOrDefault() {
         return threshold().orElse(DEFAULT_THRESHOLD);
     }
-    
+
 
     @Configuration.Ignore
     default boolean isApproximateStrategy() {

@@ -36,6 +36,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.ArrayIdMap;
 import org.neo4j.gds.core.loading.LabelInformationBuilders;
@@ -98,7 +99,7 @@ class HashGNNTest {
     void binaryLowNeighborInfluence() {
         int embeddingDensity = 4;
         var parameters = new HashGNNParameters(
-            4,
+            new Concurrency(4),
             10,
             embeddingDensity,
             0.01,
@@ -119,7 +120,7 @@ class HashGNNTest {
     @Test
     void binaryHighEmbeddingDensityHighNeighborInfluence() {
         var parameters = new HashGNNParameters(
-            4,
+            new Concurrency(4),
             10,
             200,
             100,
@@ -152,7 +153,7 @@ class HashGNNTest {
     @MethodSource("determinismParams")
     void shouldBeDeterministic(int concurrency, boolean binarize, boolean dimReduce) {
         var parameters = new HashGNNParameters(
-            concurrency,
+            new Concurrency(concurrency),
             1,
             2,
             1,
@@ -181,7 +182,7 @@ class HashGNNTest {
         // this intends to test that if b has a unique feature before the first iteration, then it also has it after the first iteration
         // however we simulate what is before the first iteration by running with neighborInfluence 0
         Function<Double, HashGNNParameters> parametersMaker = (neighborInfluence) -> new HashGNNParameters(
-            4,
+            new Concurrency(4),
             1,
             embeddingDensity,
             neighborInfluence,
@@ -225,7 +226,7 @@ class HashGNNTest {
         int binarizationDimension = 8;
 
         Function<Double, HashGNNParameters> parametersMaker = (neighborInfluence) ->  new HashGNNParameters(
-            4,
+            new Concurrency(4),
             1,
             embeddingDensity,
             neighborInfluence,

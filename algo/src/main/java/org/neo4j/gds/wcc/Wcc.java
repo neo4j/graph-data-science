@@ -73,7 +73,7 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
 
         this.batchSize = ParallelUtil.adjustedBatchSize(
             graph.nodeCount(),
-            parameters.concurrency(),
+            parameters.concurrency().value(),
             minBatchSize,
             Integer.MAX_VALUE
         );
@@ -96,16 +96,16 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
         var disjointSetStruct = parameters.seedProperty()
             .map(seedProperty -> {
                 var initialComponents = CommunityCompanion.extractSeedingNodePropertyValues(graph, seedProperty);
-                return new HugeAtomicDisjointSetStruct(nodeCount, initialComponents, parameters.concurrency());
+                return new HugeAtomicDisjointSetStruct(nodeCount, initialComponents, parameters.concurrency().value());
             })
-            .orElseGet(() -> new HugeAtomicDisjointSetStruct(nodeCount, parameters.concurrency()));
+            .orElseGet(() -> new HugeAtomicDisjointSetStruct(nodeCount, parameters.concurrency().value()));
 
         if (graph.characteristics().isUndirected() || graph.characteristics().isInverseIndexed()) {
             new SampledStrategyBuilder()
                 .graph(graph)
                 .disjointSetStruct(disjointSetStruct)
                 .threshold(threshold())
-                .concurrency(parameters.concurrency())
+                .concurrency(parameters.concurrency().value())
                 .terminationFlag(terminationFlag)
                 .progressTracker(progressTracker)
                 .executorService(executorService)

@@ -34,6 +34,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -144,7 +145,7 @@ class WccTest {
     void seededWccOnUnionGraphs(Orientation orientation, String gdl, @SuppressWarnings("unused") String testName) {
         var graph = fromGdl(gdl, orientation);
 
-        var result = run(graph, new WccParameters(0D, Optional.of("componentId"), 4));
+        var result = run(graph, new WccParameters(0D, Optional.of("componentId"), new Concurrency(4)));
 
         var seen = new LongHashSet();
 
@@ -192,11 +193,11 @@ class WccTest {
 
         var log = Neo4jProxy.testLog();
         var factory = new WccAlgorithmFactory<>();
-        var parameters = new WccParameters(0D, 2);
+        var parameters = new WccParameters(0D, new Concurrency(2));
         var progressTracker = new TestProgressTracker(
             factory.progressTask(graph),
             log,
-            parameters.concurrency(),
+            parameters.concurrency().value(),
             EmptyTaskRegistryFactory.INSTANCE
         );
         var wcc = factory.build(graph, parameters, progressTracker);
@@ -243,11 +244,11 @@ class WccTest {
     }
 
     DisjointSetStruct run(Graph graph) {
-        return run(graph, new WccParameters(0D, 4));
+        return run(graph, new WccParameters(0D, new Concurrency(4)));
     }
 
     DisjointSetStruct run(Graph graph, WccParameters parameters) {
-        return run(graph, parameters, communitySize() / parameters.concurrency());
+        return run(graph, parameters, communitySize() / parameters.concurrency().value());
     }
 
     DisjointSetStruct run(Graph graph, WccParameters parameters, int concurrency) {
@@ -335,7 +336,7 @@ class WccTest {
         }
 
         private void assertResults(TestGraph graph) {
-            var config = new WccParameters(0D, 4);
+            var config = new WccParameters(0D, new Concurrency(4));
 
             var dss = new WccAlgorithmFactory<>()
                 .build(

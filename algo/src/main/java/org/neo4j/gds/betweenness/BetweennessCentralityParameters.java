@@ -20,12 +20,13 @@
 package org.neo4j.gds.betweenness;
 
 import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.Optional;
 
 @Parameters
 public record BetweennessCentralityParameters(
-    int concurrency,
+    Concurrency concurrency,
     Optional<Long> samplingSize,
     Optional<Long> samplingSeed,
     boolean hasRelationshipWeightProperty

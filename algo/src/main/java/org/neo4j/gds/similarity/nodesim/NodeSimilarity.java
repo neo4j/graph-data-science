@@ -26,6 +26,7 @@ import org.neo4j.gds.api.RelationshipConsumer;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.SetBitsIterable;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
@@ -231,7 +232,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
         // run WCC to determine components
         progressTracker.beginSubTask();
-        var wccParameters = new WccParameters(0D, concurrency);
+        var wccParameters = new WccParameters(0D, new Concurrency(concurrency));
         Wcc wcc = new WccAlgorithmFactory<>().build(graph, wccParameters, ProgressTracker.NULL_TRACKER);
         DisjointSetStruct disjointSets = wcc.compute();
         progressTracker.endSubTask();

@@ -21,6 +21,7 @@ package org.neo4j.gds.core.io.file;
 
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 @Parameters
 public record GraphStoreToFileExporterParameters(
@@ -29,7 +30,7 @@ public record GraphStoreToFileExporterParameters(
     boolean includeMetaData,
     boolean useLabelMapping,
     RelationshipType defaultRelationshipType,
-    int concurrency,
+    Concurrency concurrency,
     int batchSize
 ) {
 }

@@ -40,7 +40,7 @@ public class ConductanceAlgorithmFactory<CONFIG extends ConductanceBaseConfig> e
     public Conductance build(Graph graph, ConductanceParameters parameters, ProgressTracker progressTracker) {
         return new Conductance(
             graph,
-            parameters.concurrency(),
+            parameters.concurrency().value(),
             parameters.minBatchSize(),
             parameters.hasRelationshipWeightProperty(),
             parameters.communityProperty(),

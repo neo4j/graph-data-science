@@ -20,13 +20,14 @@
 package org.neo4j.gds.influenceMaximization;
 
 import org.neo4j.gds.annotation.Parameters;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 @Parameters
 public record CELFParameters(
     int seedSetSize,
     double propagationProbability,
     int monteCarloSimulations,
-    int concurrency,
+    Concurrency concurrency,
     long randomSeed,
     int batchSize
 ) {
