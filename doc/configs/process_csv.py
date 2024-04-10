@@ -33,6 +33,4 @@ with open(conf_filename) as conf, open(adoc_filename, "w") as adoc:
             name = BASE_LINK + LINKS[name] + f"[{name}]"
         
         line = f"| {name} | {type_} | {default} | {optional} | {description}"
-        
-        print(line)
         adoc.write(line + "\n")
