@@ -90,7 +90,7 @@ final class GenerateConfiguration {
         this.sourceVersion = sourceVersion;
     }
 
-    JavaFile generateConfig(ConfigParser.Spec config, String className) {
+    JavaFile generateConfig(Spec config, String className) {
         PackageElement rootPackage = elementUtils.getPackageOf(config.root());
         String packageName = rootPackage.getQualifiedName().toString();
         TypeSpec typeSpec = process(config, packageName, className);
@@ -101,7 +101,7 @@ final class GenerateConfiguration {
             .build();
     }
 
-    private TypeSpec process(ConfigParser.Spec config, String packageName, String generatedClassName) {
+    private TypeSpec process(Spec config, String packageName, String generatedClassName) {
         TypeSpec.Builder builder = classBuilder(config, packageName, generatedClassName);
 
         FieldDefinitions fieldDefinitions = defineFields(config);
@@ -113,8 +113,8 @@ final class GenerateConfiguration {
             .collect(Collectors.toList());
 
         var validationMethods = config.members().stream()
-            .filter(ConfigParser.Member::validates)
-            .map(ConfigParser.Member::methodName);
+            .filter(Spec.Member::validates)
+            .map(Spec.Member::methodName);
 
         MethodSpec constructor = defineConstructor(implMembers, validationMethods, fieldDefinitions.names());
         Optional<MethodSpec> factory = defineFactory(config, generatedClassName, constructor, fieldDefinitions.names());
@@ -156,7 +156,7 @@ final class GenerateConfiguration {
             .build();
     }
 
-    private TypeSpec.Builder classBuilder(ConfigParser.Spec config, String packageName, String generatedClassName) {
+    private TypeSpec.Builder classBuilder(Spec config, String packageName, String generatedClassName) {
         TypeSpec.Builder classBuilder = TypeSpec
             .classBuilder(ClassName.get(packageName, generatedClassName))
             .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -170,11 +170,11 @@ final class GenerateConfiguration {
         return classBuilder;
     }
 
-    private static FieldDefinitions defineFields(ConfigParser.Spec config) {
+    private static FieldDefinitions defineFields(Spec config) {
         NameAllocator names = new NameAllocator();
 
         ImmutableFieldDefinitions.Builder builder = ImmutableFieldDefinitions.builder().names(names);
-        config.members().stream().filter(ConfigParser.Member::isConfigValue).map(member ->
+        config.members().stream().filter(Spec.Member::isConfigValue).map(member ->
             FieldSpec.builder(
                 member.typeSpecWithAnnotation(Nullable.class),
                 names.newName(member.methodName(), member),
@@ -256,15 +256,15 @@ final class GenerateConfiguration {
     }
 
     private Optional<MethodSpec> defineFactory(
-        ConfigParser.Spec config,
+        Spec config,
         String generatedClassName,
         MethodSpec constructor,
         NameAllocator names
     ) {
-        List<ConfigParser.Member> normalizers = config
+        List<Spec.Member> normalizers = config
             .members()
             .stream()
-            .filter(ConfigParser.Member::normalizes)
+            .filter(Spec.Member::normalizes)
             .collect(Collectors.toList());
 
         if (normalizers.isEmpty()) {
@@ -286,7 +286,7 @@ final class GenerateConfiguration {
             .addParameters(constructor.parameters)
             .addStatement("$T $N = new $L($L)", interfaceType, instanceVarName, generatedClassName, constructorArgs);
 
-        for (ConfigParser.Member member : normalizers) {
+        for (Spec.Member member : normalizers) {
             factory.addStatement("$1N = $1N.$2N()", instanceVarName, member.methodName());
         }
 
@@ -444,7 +444,7 @@ final class GenerateConfiguration {
         );
     }
 
-    private Optional<MemberDefinition> memberDefinition(NameAllocator names, ConfigParser.Member member) {
+    private Optional<MemberDefinition> memberDefinition(NameAllocator names, Spec.Member member) {
         if (!member.isConfigValue()) {
             return Optional.empty();
         }
@@ -508,7 +508,7 @@ final class GenerateConfiguration {
 
     private Optional<MemberDefinition> memberDefinition(
         NameAllocator names,
-        ConfigParser.Member member,
+        Spec.Member member,
         TypeMirror targetType,
         TypeElement classElement,
         CharSequence methodName,
@@ -639,7 +639,7 @@ final class GenerateConfiguration {
 
     private Optional<MemberDefinition> memberDefinition(
         NameAllocator names,
-        ConfigParser.Member member,
+        Spec.Member member,
         TypeMirror targetType,
         Optional<TypeMirror> converterInputType
     ) {
@@ -769,7 +769,7 @@ final class GenerateConfiguration {
 
     @ValueClass
     interface MemberDefinition {
-        ConfigParser.Member member();
+        Spec.Member member();
 
         TypeMirror fieldType();
 
