@@ -4,4 +4,4 @@ Article Rank,gds.articleRank,maxIterations,Integer,20,yes,The maximum number of 
 Article Rank,gds.articleRank,tolerance,Float,0.0000001,yes,"Minimum change in scores between iterations. If all scores change less than the tolerance value the result is considered stable, and the algorithm returns."
 Article Rank,gds.articleRank,relationshipWeightProperty,String,null,yes,"Name of the relationship property to use as weights. If unspecified, the algorithm runs unweighted."
 Article Rank,gds.articleRank,sourceNodes,List or Node or Number,[],yes,The nodes or node ids to use for computing Personalized Page Rank.
-Article Rank,gds.articleRank,scaler,String or Map,None,yes,"The name of the scaler applied for the final scores. Supported values are `None`, `MinMax`, `Max`, `Mean`, `Log`, and `StdScore`.  To apply scaler-specific configuration, use the Map syntax: {scaler: 'name', …​}."
+Article Rank,gds.articleRank,scaler,String or Map,None,yes,"The name of the scaler applied for the final scores. Supported values are `None`, `MinMax`, `Max`, `Mean`, `Log`, and `StdScore`.  To apply scaler-specific configuration, use the Map syntax: `{scaler: 'name', ...}`."
