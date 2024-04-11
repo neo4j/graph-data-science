@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.LongArrayList;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -49,7 +50,7 @@ public class Knn extends Algorithm<KnnResult> {
             context.progressTracker(),
             context.executor(),
             parameters.kHolder(),
-            parameters.concurrency().value(),
+            parameters.concurrency(),
             parameters.minBatchSize(),
             parameters.maxIterations(),
             parameters.similarityCutoff(),
@@ -64,7 +65,7 @@ public class Knn extends Algorithm<KnnResult> {
     }
 
     private final Graph graph;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final int maxIterations;
     private final double similarityCutoff;
     private final int minBatchSize;
@@ -81,7 +82,7 @@ public class Knn extends Algorithm<KnnResult> {
         ProgressTracker progressTracker,
         ExecutorService executorService,
         K k,
-        int concurrency,
+        Concurrency concurrency,
         int minBatchSize,
         int maxIterations,
         double similarityCutoff,
@@ -166,7 +167,7 @@ public class Knn extends Algorithm<KnnResult> {
         }
         if (similarityCutoff > 0) {
             var neighborFilterTasks = PartitionUtils.rangePartition(
-                concurrency,
+                concurrency.value(),
                 neighbors.size(),
                 partition -> (Runnable) () -> partition.consume(
                     nodeId -> neighbors.filterHighSimilarityResult(nodeId, similarityCutoff)
@@ -174,7 +175,7 @@ public class Knn extends Algorithm<KnnResult> {
                 Optional.of(minBatchSize)
             );
             RunWithConcurrency.builder()
-                .concurrency(concurrency)
+                .concurrency(concurrency.value())
                 .tasks(neighborFilterTasks)
                 .terminationFlag(terminationFlag)
                 .executor(executorService)
@@ -196,7 +197,7 @@ public class Knn extends Algorithm<KnnResult> {
         var neighbors = new Neighbors(graph.nodeCount());
 
         var randomNeighborGenerators = PartitionUtils.rangePartition(
-            concurrency,
+            concurrency.value(),
             graph.nodeCount(),
             partition -> generateRandomNeighborsFactory.create(
                 partition,
@@ -208,7 +209,7 @@ public class Knn extends Algorithm<KnnResult> {
         );
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .tasks(randomNeighborGenerators)
             .terminationFlag(terminationFlag)
             .executor(executorService)
@@ -225,7 +226,7 @@ public class Knn extends Algorithm<KnnResult> {
         var allNewNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount);
 
         progressTracker.beginSubTask();
-        ParallelUtil.readParallel(concurrency, nodeCount, executorService, splitOldAndNewNeighborsFactory.create(
+        ParallelUtil.readParallel(concurrency.value(), nodeCount, executorService, splitOldAndNewNeighborsFactory.create(
             neighbors,
             allOldNeighbors,
             allNewNeighbors
@@ -249,7 +250,7 @@ public class Knn extends Algorithm<KnnResult> {
         progressTracker.endSubTask();
 
         var neighborsJoiners = PartitionUtils.rangePartition(
-            concurrency,
+            concurrency.value(),
             nodeCount,
             partition -> joinNeighborsFactory.create(
                 partition,
@@ -265,7 +266,7 @@ public class Knn extends Algorithm<KnnResult> {
 
         progressTracker.beginSubTask();
         RunWithConcurrency.builder()
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .tasks(neighborsJoiners)
             .terminationFlag(terminationFlag)
             .executor(executorService)
@@ -280,12 +281,12 @@ public class Knn extends Algorithm<KnnResult> {
         HugeObjectArray<LongArrayList> allNewNeighbors,
         HugeObjectArray<LongArrayList> reverseOldNeighbors,
         HugeObjectArray<LongArrayList> reverseNewNeighbors,
-        int concurrency,
+        Concurrency concurrency,
         int minBatchSize,
         ProgressTracker progressTracker
     ) {
         long nodeCount = allNewNeighbors.size();
-        long logBatchSize = ParallelUtil.adjustedBatchSize(nodeCount, concurrency, minBatchSize);
+        long logBatchSize = ParallelUtil.adjustedBatchSize(nodeCount, concurrency.value(), minBatchSize);
 
         // TODO: cursors
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {

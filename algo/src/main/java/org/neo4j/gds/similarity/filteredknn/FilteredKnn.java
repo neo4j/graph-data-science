@@ -97,7 +97,7 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
             context.progressTracker(),
             context.executor(),
             config.k(graph.nodeCount()),
-            config.concurrency(),
+            config.typedConcurrency(),
             1_000,
             config.maxIterations(),
             config.similarityCutoff(),
@@ -136,7 +136,7 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
                 seedingSummary.nodePairsCompared(),
                 seedingSummary.nodesCompared()
             ) : delegate.compute();
-        
+
         return new FilteredKnnResult(
             targetNodeFiltering,
             result,
