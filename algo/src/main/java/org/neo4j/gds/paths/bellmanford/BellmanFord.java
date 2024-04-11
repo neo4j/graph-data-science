@@ -26,6 +26,7 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipIterator;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
@@ -49,7 +50,7 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
     private final Graph graph;
     private final boolean trackNegativeCycles;
     private final boolean trackPaths;
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     public BellmanFord(
         Graph graph,
@@ -57,7 +58,7 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
         long sourceNode,
         boolean trackNegativeCycles,
         boolean trackPaths,
-        int concurrency
+        Concurrency concurrency
     ) {
         super(progressTracker);
         this.graph = graph;
@@ -83,7 +84,7 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
         var negativeCyclesIndex = new AtomicLong();
         var tasks = new ArrayList<BellmanFordTask>();
 
-        for (int i = 0; i < concurrency; ++i) {
+        for (int i = 0; i < concurrency.value(); ++i) {
             tasks.add(new BellmanFordTask(
                 graph.concurrentCopy(),
                 distances,
@@ -106,14 +107,14 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
             frontierIndex.set(0); // exhaust global queue
             RunWithConcurrency.builder()
                 .tasks(tasks)
-                .concurrency(concurrency)
+                .concurrency(concurrency.value())
                 .run();
             progressTracker.endSubTask();
             progressTracker.beginSubTask();
             frontierSize.set(0); // fill global queue again
             RunWithConcurrency.builder()
                 .tasks(tasks)
-                .concurrency(concurrency)
+                .concurrency(concurrency.value())
                 .run();
             progressTracker.endSubTask();
         }
@@ -161,21 +162,21 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
         long numberOfNegativeCycles,
         HugeLongArray negativeCycleVertices,
         long nodeCount,
-        int concurrency
+        Concurrency concurrency
     ) {
 
         AtomicLong cycleIndex = new AtomicLong();
 
         var partitions = PartitionUtils.rangePartition(
-            concurrency,
+            concurrency.value(),
             numberOfNegativeCycles,
             partition -> partition,
-            Optional.of(1 + (int) numberOfNegativeCycles / concurrency)
+            Optional.of(1 + (int) numberOfNegativeCycles / concurrency.value())
         );
 
         return ParallelUtil.parallelStream(
             partitions.stream(),
-            concurrency,
+            concurrency.value(),
             parallelStream -> parallelStream.flatMap(partition -> {
                 var pathResultBuilder = ImmutablePathResult.builder();
 
@@ -197,13 +198,13 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
     private static Stream<PathResult> pathResults(
         DistanceTracker tentativeDistances,
         long sourceNode,
-        int concurrency
+        Concurrency concurrency
     ) {
 
         var pathIndex = new AtomicLong(0L);
 
         var partitions = PartitionUtils.rangePartition(
-            concurrency,
+            concurrency.value(),
             tentativeDistances.size(),
             partition -> partition,
             Optional.empty()
@@ -211,7 +212,7 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
 
         return ParallelUtil.parallelStream(
             partitions.stream(),
-            concurrency,
+            concurrency.value(),
             parallelStream -> parallelStream.flatMap(partition -> {
                 var localPathIndex = new MutableLong(pathIndex.getAndAdd(partition.nodeCount()));
                 var pathResultBuilder = ImmutablePathResult.builder().sourceNode(sourceNode);

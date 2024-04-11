@@ -33,7 +33,7 @@ public class DagLongestPathFactory<CONFIG extends DagLongestPathBaseConfig> exte
         return new DagLongestPath(
             graph,
             progressTracker,
-            configuration.concurrency()
+            configuration.typedConcurrency()
         );
     }
 

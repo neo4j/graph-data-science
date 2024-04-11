@@ -23,6 +23,7 @@ package org.neo4j.gds.paths.delta;
 import com.carrotsearch.hppc.predicates.DoubleDoublePredicate;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 
@@ -63,36 +64,36 @@ public interface TentativeDistances {
 
     static DistanceOnly distanceOnly(
         long size,
-        int concurrency
+        Concurrency concurrency
     ) {
         var distances = HugeAtomicDoubleArray.of(
             size,
-            ParallelDoublePageCreator.of(concurrency, index -> DIST_INF)
+            ParallelDoublePageCreator.of(concurrency.value(), index -> DIST_INF)
         );
         return new DistanceOnly(distances);
     }
 
     static DistanceAndPredecessor distanceAndPredecessors(
         long size,
-        int concurrency
+        Concurrency concurrency
     ) {
         return distanceAndPredecessors(size, concurrency, DIST_INF, (a, b) -> Double.compare(a, b) > 0);
     }
 
     static DistanceAndPredecessor distanceAndPredecessors(
         long size,
-        int concurrency,
+        Concurrency concurrency,
         double distanceDefault,
         DoubleDoublePredicate distanceComparator
     ) {
         var distances = HugeAtomicDoubleArray.of(
             size,
-            ParallelDoublePageCreator.of(concurrency, index -> distanceDefault)
+            ParallelDoublePageCreator.of(concurrency.value(), index -> distanceDefault)
         );
 
         var predecessors = HugeAtomicLongArray.of(
             size,
-            ParalleLongPageCreator.of(concurrency, index -> NO_PREDECESSOR)
+            ParalleLongPageCreator.of(concurrency.value(), index -> NO_PREDECESSOR)
         );
 
         return new DistanceAndPredecessor(predecessors, distances, distanceComparator);

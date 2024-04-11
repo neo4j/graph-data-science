@@ -130,7 +130,7 @@ public class PathFindingAlgorithms {
             graph.toMappedNodeId(configuration.sourceNode()),
             configuration.trackNegativeCycles(),
             configuration.trackPaths(),
-            configuration.concurrency()
+            configuration.typedConcurrency()
         );
 
         return algorithm.compute();
@@ -207,7 +207,7 @@ public class PathFindingAlgorithms {
         var algorithm = new DagLongestPath(
             graph,
             progressTracker,
-            configuration.concurrency()
+            configuration.typedConcurrency()
         );
 
         return algorithm.compute();
@@ -289,6 +289,7 @@ public class PathFindingAlgorithms {
         var yens = Yens.sourceTarget(
             graph,
             configuration,
+            configuration.typedConcurrency(),
             progressTracker,
             requestScopedDependencies.getTerminationFlag()
         );
@@ -371,7 +372,7 @@ public class PathFindingAlgorithms {
         var algorithm = new TopologicalSort(
             graph,
             progressTracker,
-            configuration.concurrency(),
+            configuration.typedConcurrency(),
             configuration.computeMaxDistanceFromSource()
         );
 
@@ -383,7 +384,7 @@ public class PathFindingAlgorithms {
             return new WeightedAllShortestPaths(
                 graph,
                 DefaultPool.INSTANCE,
-                configuration.concurrency()
+                configuration.typedConcurrency()
             );
         } else {
             return new MSBFSAllShortestPaths(

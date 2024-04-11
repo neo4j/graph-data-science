@@ -24,6 +24,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -58,7 +59,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
     private final HugeAtomicLongArray inDegrees;
     private final Graph graph;
     private final long nodeCount;
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     // Saves the maximal distance from a source node, which is also the longest path in DAG
     private final Optional<HugeAtomicDoubleArray> longestPathDistances;
@@ -66,7 +67,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
     public TopologicalSort(
         Graph graph,
         ProgressTracker progressTracker,
-        int concurrency,
+        Concurrency concurrency,
         boolean computeMaxDistanceFromSource
 
     ) {
@@ -74,9 +75,9 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
         this.concurrency = concurrency;
-        this.inDegrees = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(this.concurrency));
+        this.inDegrees = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(this.concurrency.value()));
         this.longestPathDistances = computeMaxDistanceFromSource
-            ? Optional.of(HugeAtomicDoubleArray.of(nodeCount, ParallelDoublePageCreator.passThrough(this.concurrency)))
+            ? Optional.of(HugeAtomicDoubleArray.of(nodeCount, ParallelDoublePageCreator.passThrough(this.concurrency.value())))
             : Optional.empty();
         this.result = new TopologicalSortResult(nodeCount, longestPathDistances);
     }
@@ -96,7 +97,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
         this.progressTracker.beginSubTask("Initialization");
         ParallelUtil.parallelForEachNode(
             graph.nodeCount(),
-            concurrency,
+            concurrency.value(),
             terminationFlag,
             nodeId -> {
                 graph.concurrentCopy().forEachRelationship(
@@ -115,7 +116,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
     private void traverse() {
         this.progressTracker.beginSubTask("Traversal");
 
-        ForkJoinPool forkJoinPool = ExecutorServiceUtil.createForkJoinPool(concurrency);
+        ForkJoinPool forkJoinPool = ExecutorServiceUtil.createForkJoinPool(concurrency.value());
         var tasks = ConcurrentHashMap.<ForkJoinTask<Void>>newKeySet();
 
         LongFunction<CountedCompleter<Void>> taskProducer = longestPathDistances.isPresent()
@@ -135,7 +136,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
                 inDegrees
             );
 
-        ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, nodeId -> {
+        ParallelUtil.parallelForEachNode(nodeCount, concurrency.value(), TerminationFlag.RUNNING_TRUE, nodeId -> {
             if (inDegrees.get(nodeId) == 0L) {
                 result.addNode(nodeId);
                 tasks.add(taskProducer.apply(nodeId));

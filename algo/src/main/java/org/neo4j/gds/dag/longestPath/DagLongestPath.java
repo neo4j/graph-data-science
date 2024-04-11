@@ -28,6 +28,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -61,19 +62,19 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
     private final HugeAtomicLongArray inDegrees;
     private final Graph graph;
     private final long nodeCount;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final TentativeDistances parentsAndDistances;
 
     public DagLongestPath(
         Graph graph,
         ProgressTracker progressTracker,
-        int concurrency
+        Concurrency concurrency
     ) {
         super(progressTracker);
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
         this.concurrency = concurrency;
-        this.inDegrees = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(this.concurrency));
+        this.inDegrees = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(this.concurrency.value()));
         this.parentsAndDistances = TentativeDistances.distanceAndPredecessors(nodeCount, concurrency, Double.MIN_VALUE, (a, b) -> Double.compare(a, b) < 0);
     }
 
@@ -91,7 +92,7 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
         this.progressTracker.beginSubTask("Initialization");
         ParallelUtil.parallelForEachNode(
             graph.nodeCount(),
-            concurrency,
+            concurrency.value(),
             terminationFlag,
             nodeId -> {
                 graph.concurrentCopy().forEachRelationship(
@@ -110,7 +111,7 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
     private void traverse() {
         this.progressTracker.beginSubTask("Traversal");
 
-        ForkJoinPool forkJoinPool = ExecutorServiceUtil.createForkJoinPool(concurrency);
+        ForkJoinPool forkJoinPool = ExecutorServiceUtil.createForkJoinPool(concurrency.value());
         var tasks = ConcurrentHashMap.<ForkJoinTask<Void>>newKeySet();
 
         LongFunction<CountedCompleter<Void>> taskProducer =
@@ -122,7 +123,7 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
                 parentsAndDistances
             );
 
-        ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, nodeId -> {
+        ParallelUtil.parallelForEachNode(nodeCount, concurrency.value(), TerminationFlag.RUNNING_TRUE, nodeId -> {
             if (inDegrees.get(nodeId) == 0L) {
                 tasks.add(taskProducer.apply(nodeId));
                 parentsAndDistances.set(nodeId, nodeId, 0);
@@ -202,7 +203,7 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
 
     private static Stream<PathResult> pathResults(
         TentativeDistances tentativeDistances,
-        int concurrency
+        Concurrency concurrency
     ) {
         var distances = tentativeDistances.distances();
         var predecessors = tentativeDistances.predecessors().orElseThrow();
@@ -210,7 +211,7 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
         var pathIndex = new AtomicLong(0L);
 
         var partitions = PartitionUtils.rangePartition(
-            concurrency,
+            concurrency.value(),
             predecessors.size(),
             partition -> partition,
             Optional.empty()
@@ -218,7 +219,7 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
 
         return ParallelUtil.parallelStream(
             partitions.stream(),
-            concurrency,
+            concurrency.value(),
             parallelStream -> parallelStream.flatMap(partition -> {
                 var localPathIndex = new MutableLong(pathIndex.getAndAdd(partition.nodeCount()));
 

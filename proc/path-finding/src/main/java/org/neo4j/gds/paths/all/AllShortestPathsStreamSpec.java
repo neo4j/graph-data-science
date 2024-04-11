@@ -71,7 +71,7 @@ public class AllShortestPathsStreamSpec implements AlgorithmSpec<MSBFSASPAlgorit
                     return new WeightedAllShortestPaths(
                         graph,
                         DefaultPool.INSTANCE,
-                        configuration.concurrency()
+                        configuration.typedConcurrency()
                     );
                 } else {
                     return new MSBFSAllShortestPaths(

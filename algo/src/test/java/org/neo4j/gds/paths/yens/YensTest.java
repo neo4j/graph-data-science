@@ -62,7 +62,7 @@ class YensTest {
             .concurrency(concurrency);
     }
 
-    
+
     // https://en.wikipedia.org/wiki/Yen%27s_algorithm#/media/File:Yen's_K-Shortest_Path_Algorithm,_K=3,_A_to_F.gif
     @GdlGraph(aggregation = Aggregation.SINGLE)
     private static final String DB_CYPHER =
@@ -159,7 +159,7 @@ class YensTest {
         var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, log, 1, EmptyTaskRegistryFactory.INSTANCE);
 
-        Yens.sourceTarget(graph, config, progressTracker)
+        Yens.sourceTarget(graph, config, config.typedConcurrency(), progressTracker)
             .compute()
             .pathSet();
 
@@ -197,7 +197,7 @@ class YensTest {
         var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, log, 1, EmptyTaskRegistryFactory.INSTANCE);
 
-        Yens.sourceTarget(graph, config, progressTracker)
+        Yens.sourceTarget(graph, config, config.typedConcurrency(), progressTracker)
             .compute()
             .pathSet();
 
@@ -240,7 +240,7 @@ class YensTest {
             .build();
 
         var actualPathResults = Yens
-            .sourceTarget(graph, config, ProgressTracker.NULL_TRACKER)
+            .sourceTarget(graph, config, config.typedConcurrency(), ProgressTracker.NULL_TRACKER)
             .compute()
             .pathSet();
 

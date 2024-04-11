@@ -30,6 +30,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -57,7 +58,7 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
     private final Graph graph;
     private final long startNode;
     private final double delta;
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     private final HugeLongArray frontier;
     private final TentativeDistances distances;
@@ -74,7 +75,7 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
             graph,
             graph.toMappedNodeId(config.sourceNode()),
             config.delta(),
-            config.concurrency(),
+            config.typedConcurrency(),
             true,
             executorService,
             progressTracker
@@ -86,7 +87,7 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
         Graph graph,
         long startNode,
         double delta,
-        int concurrency,
+        Concurrency concurrency,
         boolean storePredecessors,
         ExecutorService executorService,
         ProgressTracker progressTracker
@@ -124,7 +125,7 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
         this.distances.set(startNode, -1, 0);
 
         var relaxTasks = IntStream
-            .range(0, concurrency)
+            .range(0, concurrency.value())
             .mapToObj(i -> new DeltaSteppingTask(graph, frontier, distances, delta, frontierIndex))
             .collect(Collectors.toList());
 
@@ -305,7 +306,7 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
     private static Stream<PathResult> pathResults(
         TentativeDistances tentativeDistances,
         long sourceNode,
-        int concurrency
+        Concurrency concurrency
     ) {
         var distances = tentativeDistances.distances();
         var predecessors = tentativeDistances.predecessors().orElseThrow();
@@ -313,7 +314,7 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
         var pathIndex = new AtomicLong(0L);
 
         var partitions = PartitionUtils.rangePartition(
-            concurrency,
+            concurrency.value(),
             predecessors.size(),
             partition -> partition,
             Optional.empty()
@@ -321,7 +322,7 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
 
         return ParallelUtil.parallelStream(
             partitions.stream(),
-            concurrency,
+            concurrency.value(),
             parallelStream -> parallelStream.flatMap(partition -> {
                 var localPathIndex = new MutableLong(pathIndex.getAndAdd(partition.nodeCount()));
 

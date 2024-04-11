@@ -98,7 +98,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<PathFindingResult
         this.frontier = HugeLongArray.newArray(graph.relationshipCount());
         this.distances = TentativeDistances.distanceAndPredecessors(
             graph.nodeCount(),
-            concurrency.value()
+            concurrency
         );
         this.mergedWithSource = new BitSet(graph.nodeCount());
         this.unvisitedTerminal = new BitSet(isTerminal.size());

@@ -21,6 +21,7 @@ package org.neo4j.gds.paths.bellmanford;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -71,7 +72,14 @@ class BellmanFordMultipleNegativeCyclesTest {
                 graph.toMappedNodeId("a5"),
                 graph.toMappedNodeId("a6"),
             };
-            var result = new BellmanFord(graph, ProgressTracker.NULL_TRACKER, a[0], true, true, 4).compute();
+            var result = new BellmanFord(
+                graph,
+                ProgressTracker.NULL_TRACKER,
+                a[0],
+                true,
+                true,
+                new Concurrency(4)
+            ).compute();
 
             assertThat(result.containsNegativeCycle()).isTrue();
             var negativeCycles = result
@@ -122,7 +130,14 @@ class BellmanFordMultipleNegativeCyclesTest {
                 graph.toMappedNodeId("a2"),
                 graph.toMappedNodeId("a3"),
             };
-            var result = new BellmanFord(graph, ProgressTracker.NULL_TRACKER, a[0], true, true, 4).compute();
+            var result = new BellmanFord(
+                graph,
+                ProgressTracker.NULL_TRACKER,
+                a[0],
+                true,
+                true,
+                new Concurrency(4)
+            ).compute();
 
             assertThat(result.negativeCycles().pathSet())
                 .hasSize(1)

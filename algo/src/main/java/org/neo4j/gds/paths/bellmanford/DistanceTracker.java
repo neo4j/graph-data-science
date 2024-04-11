@@ -21,6 +21,7 @@ package org.neo4j.gds.paths.bellmanford;
 
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
@@ -34,19 +35,19 @@ final class DistanceTracker {
 
     static DistanceTracker create(
         long size,
-        int concurrency
+        Concurrency concurrency
     ) {
         var distances = HugeAtomicDoubleArray.of(
             size,
-            ParallelDoublePageCreator.of(concurrency, index -> DIST_INF)
+            ParallelDoublePageCreator.of(concurrency.value(), index -> DIST_INF)
         );
         var predecessors = HugeAtomicLongArray.of(
             size,
-            ParalleLongPageCreator.of(concurrency, index -> NO_PREDECESSOR)
+            ParalleLongPageCreator.of(concurrency.value(), index -> NO_PREDECESSOR)
         );
         var lengths = HugeAtomicLongArray.of(
             size,
-            ParalleLongPageCreator.of(concurrency, index -> NO_LENGTH)
+            ParalleLongPageCreator.of(concurrency.value(), index -> NO_LENGTH)
         );
 
         return new DistanceTracker(predecessors, distances, lengths, size);

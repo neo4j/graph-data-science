@@ -19,4 +19,9 @@
  */
 package org.neo4j.gds.core.concurrency;
 
-public record Concurrency(int value) {}
+public record Concurrency(int value) {
+    public Concurrency {
+        if (value < 1)
+            throw new IllegalArgumentException("Valid values for Concurrency are int[1..], Value provided was `" + value + "`.");
+    }
+}
