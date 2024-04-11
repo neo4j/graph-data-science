@@ -29,6 +29,7 @@ import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -286,7 +287,7 @@ final class NodeSimilarityTest {
         var nodeSimilarity = new NodeSimilarity(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -319,7 +320,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -353,7 +354,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -387,7 +388,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -424,7 +425,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -458,7 +459,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -501,7 +502,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -538,7 +539,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -573,7 +574,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             undirectedGraph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -598,7 +599,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             naturalGraph,
             parameters,
-            1,
+            new Concurrency(1),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -608,7 +609,7 @@ final class NodeSimilarityTest {
         nodeSimilarity = new NodeSimilarity(
             naturalUnionGraph,
             parameters,
-            1,
+            new Concurrency(1),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -638,7 +639,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -698,7 +699,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -749,7 +750,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -790,7 +791,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -832,7 +833,7 @@ final class NodeSimilarityTest {
         var nodeSimilarity = new NodeSimilarity(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             DefaultPool.INSTANCE,
             progressTracker
         );
@@ -906,7 +907,7 @@ final class NodeSimilarityTest {
         new NodeSimilarity(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             DefaultPool.INSTANCE,
             progressTracker
         ).compute().streamResult().count();
@@ -953,7 +954,7 @@ final class NodeSimilarityTest {
         new NodeSimilarity(
             graph,
             parameters,
-            4,
+            new Concurrency(4),
             DefaultPool.INSTANCE,
             progressTracker
         ).compute().streamResult().count();
@@ -1006,7 +1007,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             graph,
             parameters1,
-            1,
+            new Concurrency(1),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -1033,7 +1034,7 @@ final class NodeSimilarityTest {
         nodeSimilarity = new NodeSimilarity(
             graph,
             parameters2,
-            1,
+            new Concurrency(1),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -1088,7 +1089,7 @@ final class NodeSimilarityTest {
         NodeSimilarity nodeSimilarity = new NodeSimilarity(
             naturalGraph,
             parameters,
-            4,
+            new Concurrency(4),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );

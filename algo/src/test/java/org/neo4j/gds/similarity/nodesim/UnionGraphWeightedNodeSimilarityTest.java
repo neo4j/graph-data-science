@@ -22,6 +22,7 @@ package org.neo4j.gds.similarity.nodesim;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -66,7 +67,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         var nodeSimilarity = new NodeSimilarity(
             graph,
             parameters,
-            1,
+            new Concurrency(1),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
