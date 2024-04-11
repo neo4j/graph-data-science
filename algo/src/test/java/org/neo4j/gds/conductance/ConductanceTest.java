@@ -122,7 +122,7 @@ final class ConductanceTest {
         var minBatchSize = concurrency > 1 ? 1 : 10_000;
         var conductance = new Conductance(
             orientation == Orientation.NATURAL ? naturalGraph : undirectedGraph,
-            4,
+            new Concurrency(4),
             minBatchSize,
             weighted,
             "community",
