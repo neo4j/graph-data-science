@@ -65,7 +65,7 @@ class KnnResultBuilderForStatsMode implements ResultBuilder<KnnStatsConfig, KnnR
         var similarityGraphResult = SimilarityResultCompanion.computeToGraph(
             graph,
             graph.nodeCount(),
-            configuration.concurrency(),
+            configuration.typedConcurrency(),
             result.get().streamSimilarityResult()
         );
 

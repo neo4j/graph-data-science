@@ -125,7 +125,7 @@ public class SimilarityAlgorithmsWriteBusinessFacade {
             result -> SimilarityResultCompanion.computeToGraph(
                 algorithmResult.graph(),
                 algorithmResult.graph().nodeCount(),
-                configuration.concurrency(),
+                configuration.typedConcurrency(),
                 result.similarityResultStream()
             ),
             FILTERED_KNN_SPECIFIC_FIELDS_SUPPLIER,

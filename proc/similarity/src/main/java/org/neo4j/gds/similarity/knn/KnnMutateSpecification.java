@@ -23,6 +23,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -88,7 +89,7 @@ public class KnnMutateSpecification implements AlgorithmSpec<Knn, KnnResult, Knn
                         similarityGraphResult = computeToGraph(
                             computationResult.graph(),
                             computationResult.graph().nodeCount(),
-                            config.concurrency(),
+                            config.typedConcurrency(),
                             Objects.requireNonNull(result),
                             knn.executorService()
                         );
@@ -135,7 +136,7 @@ public class KnnMutateSpecification implements AlgorithmSpec<Knn, KnnResult, Knn
     private static SimilarityGraphResult computeToGraph(
         Graph graph,
         long nodeCount,
-        int concurrency,
+        Concurrency concurrency,
         KnnResult result,
         ExecutorService executor
     ) {

@@ -103,7 +103,7 @@ public class SimilarityAlgorithmsStatsBusinessFacade {
             result -> SimilarityResultCompanion.computeToGraph(
                 algorithmResult.graph(),
                 algorithmResult.graph().nodeCount(),
-                configuration.concurrency(),
+                configuration.typedConcurrency(),
                 result.similarityResultStream()
             ),
             FILTERED_KNN_SPECIFIC_FIELDS_SUPPLIER,
@@ -113,7 +113,7 @@ public class SimilarityAlgorithmsStatsBusinessFacade {
         );
     }
 
-    
+
     <RESULT, ASF extends SimilaritySpecificFields> StatsResult<ASF> statsResult(
         AlgorithmComputationResult<RESULT> algorithmResult,
         Function<RESULT, SimilarityGraphResult> similarityGraphResultSupplier,

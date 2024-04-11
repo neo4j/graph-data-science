@@ -25,6 +25,7 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.similarity.specificfields.SimilaritySpecificFieldsWithDistribution;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -112,7 +113,7 @@ class SimilarityAlgorithmsWriteBusinessFacadeTest {
         var writeResult = businessFacade.write(
             algorithmResult,
             configurationMock,
-            (result) -> SimilarityResultCompanion.computeToGraph(graph,4,1,result.getRight()),
+            (result) -> SimilarityResultCompanion.computeToGraph(graph,4,new Concurrency(1), result.getRight()),
             (result,similarityDistribution) -> new SimilaritySpecificFieldsWithDistribution(4,2,similarityDistribution),
             20L,
             () -> SimilaritySpecificFieldsWithDistribution.EMPTY,
@@ -134,5 +135,5 @@ class SimilarityAlgorithmsWriteBusinessFacadeTest {
         assertThat(writeResult.postProcessingMillis()).isGreaterThanOrEqualTo(0L);
 
     }
-    
+
 }

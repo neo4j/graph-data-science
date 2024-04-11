@@ -53,7 +53,7 @@ class KnnMutateStep implements MutateOrWriteStep<KnnResult, Pair<RelationshipsWr
         var similarityGraphResult = SimilarityResultCompanion.computeToGraph(
             graph,
             graph.nodeCount(),
-            configuration.concurrency(),
+            configuration.typedConcurrency(),
             result.streamSimilarityResult()
         );
 

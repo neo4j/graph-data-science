@@ -22,6 +22,7 @@ package org.neo4j.gds.algorithms.similarity;
 import org.neo4j.gds.algorithms.similarity.specificfields.KnnSpecificFields;
 import org.neo4j.gds.algorithms.similarity.specificfields.SimilaritySpecificFieldsWithDistribution;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
@@ -37,7 +38,7 @@ public final class SimilarityResultCompanion {
     public static SimilarityGraphResult computeToGraph(
         Graph graph,
         long nodeCount,
-        int concurrency,
+        Concurrency concurrency,
         Stream<SimilarityResult> similarityResultStream
     ) {
 

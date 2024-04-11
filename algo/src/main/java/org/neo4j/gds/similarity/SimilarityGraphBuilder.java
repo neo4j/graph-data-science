@@ -23,6 +23,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.AdjacencyListBehavior;
@@ -71,12 +72,12 @@ public class SimilarityGraphBuilder {
 
     private final IdMap idMap;
     private final TerminationFlag terminationFlag;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final ExecutorService executorService;
 
     public SimilarityGraphBuilder(
         IdMap idMap,
-        int concurrency,
+        Concurrency concurrency,
         ExecutorService executorService,
         TerminationFlag terminationFlag
     ) {
@@ -92,13 +93,13 @@ public class SimilarityGraphBuilder {
             .relationshipType(RelationshipType.of("REL"))
             .orientation(Orientation.NATURAL)
             .addPropertyConfig(GraphFactory.PropertyConfig.of("property"))
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .executorService(executorService)
             .build();
 
         ParallelUtil.parallelStreamConsume(
             stream,
-            concurrency,
+            concurrency.value(),
             terminationFlag,
             similarityStream -> similarityStream.forEach(similarityResult -> relationshipsBuilder.addFromInternal(
                 idMap.toRootNodeId(similarityResult.sourceNodeId()),

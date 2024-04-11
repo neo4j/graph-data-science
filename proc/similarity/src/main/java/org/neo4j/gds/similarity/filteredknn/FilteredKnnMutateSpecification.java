@@ -91,7 +91,7 @@ public class FilteredKnnMutateSpecification implements AlgorithmSpec<FilteredKnn
                             similarityGraphResult = FilteredKnnHelpers.computeToGraph(
                                 computationResult.graph(),
                                 computationResult.graph().nodeCount(),
-                                config.concurrency(),
+                                config.typedConcurrency(),
                                 result,
                                 filteredKnn.executorService()
                             );

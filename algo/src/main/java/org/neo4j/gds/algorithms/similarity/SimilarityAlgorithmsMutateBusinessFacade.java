@@ -114,7 +114,7 @@ public class SimilarityAlgorithmsMutateBusinessFacade {
             result -> SimilarityResultCompanion.computeToGraph(
                 algorithmResult.graph(),
                 algorithmResult.graph().nodeCount(),
-                configuration.concurrency(),
+                configuration.typedConcurrency(),
                 result.similarityResultStream()
             ),
             FILTERED_KNN_SPECIFIC_FIELDS_SUPPLIER,
@@ -162,7 +162,7 @@ public class SimilarityAlgorithmsMutateBusinessFacade {
                 .algorithmSpecificFields(specificFields)
                 .configuration(configuration)
                 .build();
-            
+
         }).orElseGet(() -> RelationshipMutateResult.empty(emptyASFSupplier.get(), configuration));
 
     }
