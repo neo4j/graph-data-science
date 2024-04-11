@@ -24,6 +24,7 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -59,7 +60,7 @@ class FootballTest {
             randomSeed,
             null,
             TOLERANCE_DEFAULT,
-            1,
+            new Concurrency(1),
             ProgressTracker.NULL_TRACKER
         );
         var leidenResult = leiden.compute();

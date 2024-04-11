@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -58,7 +59,7 @@ class KarateTest {
             randomSeed,
             null,
             TOLERANCE_DEFAULT,
-            4,
+            new Concurrency(4),
             ProgressTracker.NULL_TRACKER
         );
         var leidenResult = leiden.compute();
@@ -96,7 +97,7 @@ class KarateTest {
             99,
             graph.nodeProperties("single"),
             TOLERANCE_DEFAULT,
-            4,
+            new Concurrency(4),
             ProgressTracker.NULL_TRACKER
         );
         var leidenResult = leiden.compute();

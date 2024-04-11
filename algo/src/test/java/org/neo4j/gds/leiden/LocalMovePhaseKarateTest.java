@@ -23,6 +23,7 @@ package org.neo4j.gds.leiden;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -60,7 +61,7 @@ class LocalMovePhaseKarateTest {
             nodeVolumes,
             communityVolumes,
             gamma,
-            1
+            new Concurrency(1)
         ).run();
 
 

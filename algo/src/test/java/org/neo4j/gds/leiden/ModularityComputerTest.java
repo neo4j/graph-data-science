@@ -23,6 +23,7 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.schema.Direction;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
@@ -82,7 +83,7 @@ class ModularityComputerTest {
             communityVolumes,
             1.0 / graph.relationshipCount(),
             1.0 / graph.relationshipCount(),
-            4,
+            new Concurrency(4),
             DefaultPool.INSTANCE,
             ProgressTracker.EmptyProgressTracker.NULL_TRACKER
         );
@@ -103,7 +104,7 @@ class ModularityComputerTest {
             localCommunities,
             1,
             DefaultPool.INSTANCE,
-            1,
+            new Concurrency(1),
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
         ).run();
@@ -115,7 +116,7 @@ class ModularityComputerTest {
             communityVolumes2,
             1.0 / graph.relationshipCount(),
             1.0 / graph.relationshipCount(),
-            4,
+            new Concurrency(4),
             DefaultPool.INSTANCE,
             ProgressTracker.EmptyProgressTracker.NULL_TRACKER
         );
