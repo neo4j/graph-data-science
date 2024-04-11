@@ -34,7 +34,7 @@ public class LouvainAlgorithmFactory<CONFIG extends LouvainBaseConfig> extends G
     public Louvain build(Graph graph, LouvainParameters parameters, ProgressTracker progressTracker) {
         return new Louvain(
             graph,
-            parameters.concurrency().value(),
+            parameters.concurrency(),
             parameters.maxIterations(),
             parameters.tolerance(),
             parameters.maxLevels(),

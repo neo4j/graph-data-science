@@ -27,6 +27,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -57,7 +58,7 @@ public final class Louvain extends Algorithm<LouvainResult> {
 
     private final int maxLevels;
 
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     private final int maxIterations;
 
@@ -67,7 +68,7 @@ public final class Louvain extends Algorithm<LouvainResult> {
 
     public Louvain(
         Graph graph,
-        int concurrency,
+        Concurrency concurrency,
         int maxIterations,
         double tolerance,
         int maxLevels,
@@ -172,7 +173,7 @@ public final class Louvain extends Algorithm<LouvainResult> {
         ModularityOptimizationResult modularityOptimizationResult
     ) {
         AtomicLong maxCommunityId = new AtomicLong(0L);
-        ParallelUtil.parallelForEachNode(rootGraph.nodeCount(), concurrency, terminationFlag, nodeId -> {
+        ParallelUtil.parallelForEachNode(rootGraph.nodeCount(), concurrency.value(), terminationFlag, nodeId -> {
             long prevId = level == 0
                 ? nodeId
                 : workingGraph.toMappedNodeId(dendrogramManager.getPrevious(nodeId));
@@ -201,7 +202,7 @@ public final class Louvain extends Algorithm<LouvainResult> {
             maxIterations,
             tolerance,
             seed,
-            concurrency,
+            concurrency.value(),
             DEFAULT_BATCH_SIZE,
             DefaultPool.INSTANCE,
             progressTracker
@@ -218,7 +219,7 @@ public final class Louvain extends Algorithm<LouvainResult> {
     ) {
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(maxCommunityId)
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .build();
 
         terminationFlag.assertRunning();
@@ -244,7 +245,7 @@ public final class Louvain extends Algorithm<LouvainResult> {
 
         // using degreePartitioning did not show an improvement -- assuming as tasks are too small
         var relationshipCreators = PartitionUtils.rangePartition(
-            concurrency,
+            concurrency.value(),
             workingGraph.nodeCount(),
             partition ->
                 new RelationshipCreator(
