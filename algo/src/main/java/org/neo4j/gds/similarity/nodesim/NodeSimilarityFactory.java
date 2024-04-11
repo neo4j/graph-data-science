@@ -21,6 +21,7 @@ package org.neo4j.gds.similarity.nodesim;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -39,7 +40,7 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
     public NodeSimilarity build(
         Graph graph,
         NodeSimilarityParameters parameters,
-        int concurrency,
+        Concurrency concurrency,
         ProgressTracker progressTracker
     ) {
         return new NodeSimilarity(
@@ -55,7 +56,7 @@ public class NodeSimilarityFactory<CONFIG extends NodeSimilarityBaseConfig> exte
 
     @Override
     public NodeSimilarity build(Graph graph, CONFIG configuration, ProgressTracker progressTracker) {
-        return build(graph, configuration.toParameters(), configuration.concurrency(), progressTracker);
+        return build(graph, configuration.toParameters(), configuration.typedConcurrency(), progressTracker);
     }
 
 

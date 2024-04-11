@@ -21,6 +21,7 @@ package org.neo4j.gds.similarity.nodesim;
 
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -49,7 +50,7 @@ public final class ComponentNodes {
         this.nodesSorted = nodesSorted;
     }
 
-    public static ComponentNodes create(LongUnaryOperator components, long nodeCount, int concurrency) {
+    public static ComponentNodes create(LongUnaryOperator components, long nodeCount, Concurrency concurrency) {
         return create(components, (v) -> true, nodeCount, concurrency);
     }
 
@@ -57,7 +58,7 @@ public final class ComponentNodes {
         LongUnaryOperator components,
         LongPredicate targetNodesFilter,
         long nodeCount,
-        int concurrency
+        Concurrency concurrency
     ) {
         var upperBoundPerComponent = computeIndexUpperBoundPerComponent(
             components,
@@ -103,17 +104,17 @@ public final class ComponentNodes {
     }
 
     static HugeAtomicLongArray computeIndexUpperBoundPerComponent(
-            LongUnaryOperator components,
-            long nodeCount,
-            LongPredicate includeNode,
-        int concurrency
+        LongUnaryOperator components,
+        long nodeCount,
+        LongPredicate includeNode,
+        Concurrency concurrency
     ) {
 
-        var upperBoundPerComponent = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(concurrency));
+        var upperBoundPerComponent = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(concurrency.value()));
 
         // init coordinate array to contain the nr of nodes per component
         // i.e. comp1 containing 3 nodes, comp2 containing 20 nodes: {(comp1, 3), (comp2, 20)}
-        ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, nodeId -> {
+        ParallelUtil.parallelForEachNode(nodeCount, concurrency.value(), TerminationFlag.RUNNING_TRUE, nodeId -> {
             {
                 if (includeNode.test(nodeId)) {
                     long componentId = components.applyAsLong(nodeId);
@@ -125,7 +126,7 @@ public final class ComponentNodes {
         // modify coordinate array to contain the upper bound of the global index for each component
         // i.e. comp1 containing 3 nodes, comp2 containing 20 nodes, comp1 randomly accessed prior to comp2:
         // {(comp1, 2), (comp2, 22)}
-        ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, componentId ->
+        ParallelUtil.parallelForEachNode(nodeCount, concurrency.value(), TerminationFlag.RUNNING_TRUE, componentId ->
         {
             if (upperBoundPerComponent.get(componentId) > 0) {
                 var nodeSum = atomicNodeSum.addAndGet(upperBoundPerComponent.get(componentId));
@@ -142,19 +143,19 @@ public final class ComponentNodes {
             LongUnaryOperator components,
             HugeAtomicLongArray idxUpperBoundPerComponent,
             LongPredicate includeNode,
-            int concurrency
+            Concurrency concurrency
     ) {
 
         // initialized to its max possible size of 1 node <=> 1 component in a disconnected graph
         long nodeCount = idxUpperBoundPerComponent.size();
         var nodesSortedByComponent = HugeLongArray.newArray(nodeCount);
-        var nodeIdxProviderArray = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(concurrency));
+        var nodeIdxProviderArray = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(concurrency.value()));
         idxUpperBoundPerComponent.copyTo(nodeIdxProviderArray, nodeCount);
 
         // fill nodesSortedByComponent with nodeId per component-sorted, unique index
         // i.e. comp1 containing 3 nodes, comp2 containing 20 nodes, named in order of processing:
         // {(0, n3), (1, n2), (2, n1), (3, n23), .., (22, n4)}
-        ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, indexId ->
+        ParallelUtil.parallelForEachNode(nodeCount, concurrency.value(), TerminationFlag.RUNNING_TRUE, indexId ->
         {
             long nodeId = nodeCount - indexId - 1;
             if (includeNode.test(nodeId)) {

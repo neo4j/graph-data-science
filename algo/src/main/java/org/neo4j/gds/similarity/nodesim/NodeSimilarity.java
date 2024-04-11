@@ -65,7 +65,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     private final NodeFilter targetNodeFilter;
 
     private final ExecutorService executorService;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final MetricSimilarityComputer similarityComputer;
 
     private HugeObjectArray<long[]> neighbors;
@@ -77,7 +77,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     public NodeSimilarity(
         Graph graph,
         NodeSimilarityParameters parameters,
-        int concurrency,
+        Concurrency concurrency,
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
@@ -95,7 +95,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
     public NodeSimilarity(
         Graph graph,
         NodeSimilarityParameters parameters,
-        int concurrency,
+        Concurrency concurrency,
         ExecutorService executorService,
         ProgressTracker progressTracker,
         NodeFilter sourceNodeFilter,
@@ -150,7 +150,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             // but run on primitives.
             return computeTopN();
         } else {
-            return concurrency > 1
+            return concurrency.value() > 1
                 ? computeParallel()
                 : computeSimilarityResultStream();
         }
@@ -163,7 +163,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         if (parameters.hasTopK() && !parameters.hasTopN()) {
             terminationFlag.assertRunning();
 
-            TopKMap topKMap = concurrency > 1
+            TopKMap topKMap = concurrency.value() > 1
                 ? computeTopKMapParallel()
                 : computeTopKMap();
 
@@ -173,7 +173,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
             Stream<SimilarityResult> similarities = computeToStream();
             similarityGraph = new SimilarityGraphBuilder(
                 graph,
-                concurrency,
+                concurrency.value(),
                 executorService,
                 terminationFlag
             ).build(similarities);
@@ -232,7 +232,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
         // run WCC to determine components
         progressTracker.beginSubTask();
-        var wccParameters = new WccParameters(0D, new Concurrency(concurrency));
+        var wccParameters = new WccParameters(0D, concurrency);
         Wcc wcc = new WccAlgorithmFactory<>().build(graph, wccParameters, ProgressTracker.NULL_TRACKER);
         DisjointSetStruct disjointSets = wcc.compute();
         progressTracker.endSubTask();
@@ -290,7 +290,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
     private Stream<SimilarityResult> computeAllParallel() {
         return ParallelUtil.parallelStream(
-            loggableAndTerminableSourceNodeStream(), concurrency, stream -> stream
+            loggableAndTerminableSourceNodeStream(), concurrency.value(), stream -> stream
                 .boxed()
                 .flatMap(this::computeSimilaritiesForNode)
         );
@@ -334,7 +334,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
         ParallelUtil.parallelStreamConsume(
             loggableAndTerminableSourceNodeStream(),
-            concurrency,
+            concurrency.value(),
             terminationFlag,
             stream -> stream
                 .forEach(sourceNodeId ->
@@ -490,7 +490,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
         // so work is halved. This does not hold for filtered similarity, since the targetNodes might be lesser indexed.
         boolean isNotFiltered = sourceNodeFilter.equals(NodeFilter.ALLOW_EVERYTHING) && targetNodeFilter.equals(
             NodeFilter.ALLOW_EVERYTHING);
-        if (concurrency == 1 && isNotFiltered) {
+        if (concurrency.value() == 1 && isNotFiltered) {
             workload = workload / 2;
         }
         return workload;

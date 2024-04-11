@@ -21,6 +21,7 @@ package org.neo4j.gds.similarity.filterednodesim;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -41,7 +42,7 @@ public class FilteredNodeSimilarityFactory<CONFIG extends FilteredNodeSimilarity
     public NodeSimilarity build(
         Graph graph,
         NodeSimilarityParameters parameters,
-        int concurrency,
+        Concurrency concurrency,
         NodeFilter sourceNodeFilter,
         NodeFilter targetNodeFilter,
         ProgressTracker progressTracker
@@ -64,7 +65,7 @@ public class FilteredNodeSimilarityFactory<CONFIG extends FilteredNodeSimilarity
         return build(
             graph,
             configuration.toParameters(),
-            configuration.concurrency(),
+            configuration.typedConcurrency(),
             sourceNodeFilter,
             targetNodeFilter,
             progressTracker
