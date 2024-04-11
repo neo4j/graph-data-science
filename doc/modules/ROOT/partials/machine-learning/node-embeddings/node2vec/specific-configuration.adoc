@@ -9,7 +9,7 @@
 | positiveSamplingFactor | Float | 0.001 | yes | Factor for influencing the distribution for positive samples. A higher value increases the probability that frequent nodes are down-sampled.
 | negativeSamplingExponent | Float | 0.75 | yes | Exponent applied to the node frequency to obtain the negative sampling distribution. A value of 1.0 samples proportionally to the frequency. A value of 0.0 samples each node equally.
 | embeddingDimension | Integer | 128 | yes | Size of the computed node embeddings.
-| embeddingInitializer | String | NORMALIZED | yes | Method to initialize embeddings. Values are sampled uniformly from a range [-a, a]. With NORMALIZED, a=0.5/embeddingDimension and with UNIFORM instead a=1.
+| embeddingInitializer | String | NORMALIZED | yes | Method to initialize embeddings. Values are sampled uniformly from a range `[-a, a]`. With `NORMALIZED`, `a=0.5/embeddingDimension` and with `UNIFORM` instead `a=1`.
 | iterations | Integer | 1 | yes | Number of training iterations.
 | initialLearningRate | Float | 0.01 | yes | Learning rate used initially for training the neural network. The learning rate decreases after each training iteration.
 | minLearningRate | Float | 0.0001 | yes | Lower bound for learning rate as it is decreased during training.
