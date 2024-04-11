@@ -20,6 +20,7 @@
 package org.neo4j.gds.allshortestpaths;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.msbfs.MultiSourceBFSAccessMethods;
 
@@ -41,12 +42,12 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
     private final BlockingQueue<AllShortestPathsStreamResult> resultQueue = new LinkedBlockingQueue<>();
 
     private final Graph graph;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final ExecutorService executorService;
 
     public MSBFSAllShortestPaths(
         Graph graph,
-        int concurrency,
+        Concurrency concurrency,
         ExecutorService executorService
     ) {
         super(ProgressTracker.NULL_TRACKER);
@@ -75,11 +76,11 @@ public class MSBFSAllShortestPaths extends MSBFSASPAlgorithm {
      */
     private final class ShortestPathTask implements Runnable {
 
-        private final int concurrency;
+        private final Concurrency concurrency;
         private final ExecutorService executorService;
 
         private ShortestPathTask(
-                int concurrency,
+                Concurrency concurrency,
                 ExecutorService executorService) {
             this.concurrency = concurrency;
             this.executorService = executorService;

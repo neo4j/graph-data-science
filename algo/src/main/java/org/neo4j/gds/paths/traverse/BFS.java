@@ -23,6 +23,7 @@ package org.neo4j.gds.paths.traverse;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
@@ -83,14 +84,14 @@ public final class BFS extends Algorithm<HugeLongArray> {
     // each node id in the `traversedNodes`.
     private final HugeAtomicBitSet visited;
 
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     public static BFS create(
         Graph graph,
         long startNodeId,
         ExitPredicate exitPredicate,
         Aggregator aggregatorFunction,
-        int concurrency,
+        Concurrency concurrency,
         ProgressTracker progressTracker,
         long maximumDepth
     ) {
@@ -111,7 +112,7 @@ public final class BFS extends Algorithm<HugeLongArray> {
         long startNodeId,
         ExitPredicate exitPredicate,
         Aggregator aggregatorFunction,
-        int concurrency,
+        Concurrency concurrency,
         ProgressTracker progressTracker,
         int delta,
         long maximumDepth
@@ -146,7 +147,7 @@ public final class BFS extends Algorithm<HugeLongArray> {
         HugeAtomicBitSet visited,
         ExitPredicate exitPredicate,
         Aggregator aggregatorFunction,
-        int concurrency,
+        Concurrency concurrency,
         ProgressTracker progressTracker,
         int delta,
         long maximumDepth
@@ -179,7 +180,7 @@ public final class BFS extends Algorithm<HugeLongArray> {
         // This is updated in `BFSTask` and is helping to maintain the correct traversal order for the output.
         var minimumChunk = HugeAtomicLongArray.of(
             graph.nodeCount(),
-            ParalleLongPageCreator.of(concurrency, l -> Long.MAX_VALUE)
+            ParalleLongPageCreator.of(concurrency.value(), l -> Long.MAX_VALUE)
         );
 
         visited.set(sourceNodeId);
@@ -257,8 +258,8 @@ public final class BFS extends Algorithm<HugeLongArray> {
         HugeAtomicLongArray minimumChunk,
         int delta
     ) {
-        var bfsTaskList = new ArrayList<BFSTask>(concurrency);
-        for (int i = 0; i < concurrency; ++i) {
+        var bfsTaskList = new ArrayList<BFSTask>(concurrency.value());
+        for (int i = 0; i < concurrency.value(); ++i) {
             bfsTaskList.add(new BFSTask(
                 graph,
                 traversedNodes,

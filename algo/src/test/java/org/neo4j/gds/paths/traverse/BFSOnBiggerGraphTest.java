@@ -22,6 +22,7 @@ package org.neo4j.gds.paths.traverse;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -108,7 +109,7 @@ class BFSOnBiggerGraphTest {
             source,
             (s, t, w) -> t == target ? ExitPredicate.Result.BREAK : ExitPredicate.Result.FOLLOW,
             (s, t, w) -> 1.,
-            concurrency,
+            new Concurrency(concurrency),
             ProgressTracker.NULL_TRACKER,
             delta,
             BFS.ALL_DEPTHS_ALLOWED
