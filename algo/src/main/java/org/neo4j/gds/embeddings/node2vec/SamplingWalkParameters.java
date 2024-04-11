@@ -22,20 +22,12 @@ package org.neo4j.gds.embeddings.node2vec;
 import org.neo4j.gds.annotation.Parameters;
 
 @Parameters
-public class WalkParameters extends org.neo4j.gds.traversal.WalkParameters {
-    final double negativeSamplingExponent;
-    final double positiveSamplingFactor;
-
-    public WalkParameters(
-        int walksPerNode,
-        int walkLength,
-        double returnFactor,
-        double inOutFactor,
-        double positiveSamplingFactor,
-        double negativeSamplingExponent
-    ) {
-        super(walksPerNode, walkLength, returnFactor, inOutFactor);
-        this.negativeSamplingExponent = negativeSamplingExponent;
-        this.positiveSamplingFactor = positiveSamplingFactor;
-    }
+public record SamplingWalkParameters(
+    int walksPerNode,
+    int walkLength,
+    double returnFactor,
+    double inOutFactor,
+    double positiveSamplingFactor,
+    double negativeSamplingExponent
+) {
 }

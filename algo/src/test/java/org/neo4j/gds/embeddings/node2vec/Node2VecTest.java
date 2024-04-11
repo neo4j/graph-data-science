@@ -117,8 +117,10 @@ class Node2VecTest {
             NO_SOURCE_NODES,
             NO_RANDOM_SEED,
             1000,
-            new WalkParameters(10, 80, 1.0, 1.0, 0.001, 0.75),
-            trainParameters,
+            new Node2VecParameters(
+                new SamplingWalkParameters(10, 80, 1.0, 1.0, 0.001, 0.75),
+                trainParameters
+            ),
             ProgressTracker.NULL_TRACKER
         ).compute().embeddings();
 
@@ -149,7 +151,7 @@ class Node2VecTest {
             .build();
         var progressTask = new Node2VecAlgorithmFactory<>().progressTask(currentGraph, config);
 
-        var walkParameters = new WalkParameters(10, 80, 1.0, 1.0, 0.001, 0.75);
+        var walkParameters = new SamplingWalkParameters(10, 80, 1.0, 1.0, 0.001, 0.75);
         var trainParameters = new TrainParameters(
             0.025,
             0.0001,
@@ -167,8 +169,7 @@ class Node2VecTest {
             NO_SOURCE_NODES,
             NO_RANDOM_SEED,
             1000,
-            walkParameters,
-            trainParameters,
+            new Node2VecParameters(walkParameters, trainParameters),
             progressTracker
         ).compute();
 
@@ -203,7 +204,7 @@ class Node2VecTest {
     void failOnNegativeWeights() {
         var negativeGraph = GdlFactory.of("CREATE (a)-[:REL {weight: -1}]->(b)").build().getUnion();
 
-        var walkParameters = new WalkParameters(10, 80, 1.0, 1.0, 0.001, 0.75);
+        var walkParameters = new SamplingWalkParameters(10, 80, 1.0, 1.0, 0.001, 0.75);
         var trainParameters = new TrainParameters(0.025, 0.0001, 1, 1, 1, 128, EmbeddingInitializer.NORMALIZED);
 
         var node2Vec = new Node2Vec(
@@ -212,8 +213,7 @@ class Node2VecTest {
             NO_SOURCE_NODES,
             NO_RANDOM_SEED,
             1000,
-            walkParameters,
-            trainParameters,
+            new Node2VecParameters(walkParameters, trainParameters),
             ProgressTracker.NULL_TRACKER
         );
 
@@ -231,7 +231,7 @@ class Node2VecTest {
 
 
         int embeddingDimension = 2;
-        var walkParameters = new WalkParameters(1, 20, 1.0, 1.0,  0.001, 0.75);
+        var walkParameters = new SamplingWalkParameters(1, 20, 1.0, 1.0,  0.001, 0.75);
         var trainParameters = new TrainParameters(0.025, 0.0001, 1, 1, 1, embeddingDimension, EmbeddingInitializer.NORMALIZED);
 
         var embeddings = new Node2Vec(
@@ -240,8 +240,7 @@ class Node2VecTest {
             NO_SOURCE_NODES,
             Optional.of(1337L),
             1000,
-            walkParameters,
-            trainParameters,
+            new Node2VecParameters(walkParameters, trainParameters),
             ProgressTracker.NULL_TRACKER
             ).compute().embeddings();
 
@@ -251,8 +250,7 @@ class Node2VecTest {
             NO_SOURCE_NODES,
             Optional.of(1337L),
             1000,
-            walkParameters,
-            trainParameters,
+            new Node2VecParameters(walkParameters, trainParameters),
             ProgressTracker.NULL_TRACKER
             ).compute().embeddings();
 
@@ -335,7 +333,7 @@ class Node2VecTest {
         var firstGraph = GraphFactory.create(firstIdMap, firstRelationships);
         var secondGraph = GraphFactory.create(secondIdMap, secondRelationships);
 
-        var walkParameters = new WalkParameters(10, 80, 1.0, 1.0, 0.01, 0.75);
+        var walkParameters = new SamplingWalkParameters(10, 80, 1.0, 1.0, 0.01, 0.75);
         var trainParameters = new TrainParameters(0.025, 0.0001, 1, 10, 5, embeddingDimension, embeddingInitializer);
 
         var firstEmbeddings = new Node2Vec(
@@ -344,10 +342,9 @@ class Node2VecTest {
             NO_SOURCE_NODES,
             Optional.of(1337L),
             1000,
-            walkParameters,
-            trainParameters,
+            new Node2VecParameters(walkParameters, trainParameters),
             ProgressTracker.NULL_TRACKER
-            ).compute().embeddings();
+        ).compute().embeddings();
 
         var secondEmbeddings = new Node2Vec(
             secondGraph,
@@ -355,10 +352,9 @@ class Node2VecTest {
             NO_SOURCE_NODES,
             Optional.of(1337L),
             1000,
-            walkParameters,
-            trainParameters,
+            new Node2VecParameters(walkParameters, trainParameters),
             ProgressTracker.NULL_TRACKER
-            ).compute().embeddings();
+        ).compute().embeddings();
 
         double cosineSum = 0;
         for (long originalNodeId = 0; originalNodeId < nodeCount; originalNodeId++) {

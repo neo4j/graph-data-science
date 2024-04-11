@@ -21,20 +21,6 @@ package org.neo4j.gds.traversal;
 
 import org.neo4j.gds.annotation.Parameters;
 
-/**
- * Parameter object holding Random Walk parameters.
- */
 @Parameters
-public class WalkParameters {
-    public final int walksPerNode;
-    public final int walkLength;
-    public final double returnFactor;
-    public final double inOutFactor;
-
-    public WalkParameters(int walksPerNode, int walkLength, double returnFactor, double inOutFactor) {
-        this.walksPerNode = walksPerNode;
-        this.walkLength = walkLength;
-        this.returnFactor = returnFactor;
-        this.inOutFactor = inOutFactor;
-    }
+public record WalkParameters(int walksPerNode, int walkLength, double returnFactor, double inOutFactor) {
 }

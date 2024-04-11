@@ -102,7 +102,7 @@ class WccThresholdTest {
     }
 
     private void assertResults(double threshold, TestGraph graph, String[][] expectedComponents) {
-        var parameters = WccParameters.create(threshold, null, 4);
+        var parameters = new WccParameters(threshold, 4);
 
         DisjointSetStruct dss = new Wcc(
             graph,

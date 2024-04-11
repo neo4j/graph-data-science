@@ -39,7 +39,7 @@ public class Node2Vec extends Algorithm<Node2VecResult> {
 
     private final Graph graph;
     private final int concurrency;
-    private final WalkParameters walkParameters;
+    private final SamplingWalkParameters samplingWalkParameters;
     private final List<Long> sourceNodes;
     private final Optional<Long> maybeRandomSeed;
     private final TrainParameters trainParameters;
@@ -52,18 +52,17 @@ public class Node2Vec extends Algorithm<Node2VecResult> {
         List<Long> sourceNodes,
         Optional<Long> maybeRandomSeed,
         int walkBufferSize,
-        WalkParameters walkParameters,
-        TrainParameters trainParameters,
+        Node2VecParameters node2VecParameters,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
         this.concurrency = concurrency;
-        this.walkParameters = walkParameters;
+        this.samplingWalkParameters = node2VecParameters.samplingWalkParameters();
         this.walkBufferSize = walkBufferSize;
         this.sourceNodes = sourceNodes;
         this.maybeRandomSeed = maybeRandomSeed;
-        this.trainParameters = trainParameters;
+        this.trainParameters = node2VecParameters.trainParameters();
     }
 
     @Override
@@ -83,10 +82,10 @@ public class Node2Vec extends Algorithm<Node2VecResult> {
         var probabilitiesBuilder = new RandomWalkProbabilities.Builder(
             graph.nodeCount(),
             concurrency,
-            walkParameters.positiveSamplingFactor,
-            walkParameters.negativeSamplingExponent
+            samplingWalkParameters.positiveSamplingFactor(),
+            samplingWalkParameters.negativeSamplingExponent()
         );
-        var walks = new CompressedRandomWalks(graph.nodeCount() * walkParameters.walksPerNode);
+        var walks = new CompressedRandomWalks(graph.nodeCount() * samplingWalkParameters.walksPerNode());
 
         progressTracker.beginSubTask("RandomWalk");
 
@@ -97,7 +96,7 @@ public class Node2Vec extends Algorithm<Node2VecResult> {
             maybeRandomSeed,
             concurrency,
             sourceNodes,
-            walkParameters,
+            samplingWalkParameters,
             walkBufferSize,
             DefaultPool.INSTANCE,
             progressTracker,
@@ -143,7 +142,7 @@ public class Node2Vec extends Algorithm<Node2VecResult> {
         Optional<Long> maybeRandomSeed,
         int concurrency,
         List<Long> sourceNodes,
-        WalkParameters walkParameters,
+        SamplingWalkParameters samplingWalkParameters,
         int walkBufferSize,
         ExecutorService executorService,
         ProgressTracker progressTracker,
@@ -164,7 +163,7 @@ public class Node2Vec extends Algorithm<Node2VecResult> {
             tasks.add(new Node2VecRandomWalkTask(
                 graph.concurrentCopy(),
                 nextNodeSupplier,
-                walkParameters.walksPerNode,
+                samplingWalkParameters.walksPerNode(),
                 cumulativeWeightsSupplier,
                 progressTracker,
                 terminationFlag,
@@ -173,9 +172,9 @@ public class Node2Vec extends Algorithm<Node2VecResult> {
                 randomWalkPropabilitiesBuilder,
                 walkBufferSize,
                 randomSeed,
-                walkParameters.walkLength,
-                walkParameters.returnFactor,
-                walkParameters.inOutFactor
+                samplingWalkParameters.walkLength(),
+                samplingWalkParameters.returnFactor(),
+                samplingWalkParameters.inOutFactor()
             ));
         }
         return tasks;

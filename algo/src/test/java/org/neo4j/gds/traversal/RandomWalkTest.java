@@ -41,7 +41,6 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.termination.TerminationFlag;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -100,7 +99,7 @@ class RandomWalkTest {
 
         List<long[]> result = randomWalk.compute().collect(Collectors.toList());
 
-        int expectedNumberOfWalks = walkParameters.walksPerNode * 3;
+        int expectedNumberOfWalks = walkParameters.walksPerNode() * 3;
         assertEquals(expectedNumberOfWalks, result.size());
         long nodeZero = graph.toMappedNodeId("a");
         long[] walkForNodeZero = result
@@ -108,7 +107,7 @@ class RandomWalkTest {
             .filter(arr -> arr[0] == nodeZero)
             .findFirst()
             .orElse(new long[0]);
-        int expectedStepsInWalkForNode0 = walkParameters.walkLength;
+        int expectedStepsInWalkForNode0 = walkParameters.walkLength();
         assertEquals(expectedStepsInWalkForNode0, walkForNodeZero.length);
     }
 
@@ -167,7 +166,7 @@ class RandomWalkTest {
             DefaultPool.INSTANCE
         );
 
-        int expectedNumberOfWalks = walkParameters.walksPerNode * 3;
+        int expectedNumberOfWalks = walkParameters.walksPerNode() * 3;
         List<long[]> result = randomWalk.compute().collect(Collectors.toList());
         assertEquals(expectedNumberOfWalks, result.size());
         long nodeZero = graph.toMappedNodeId("a");
@@ -176,7 +175,7 @@ class RandomWalkTest {
             .filter(arr -> arr[0] == nodeZero)
             .findFirst()
             .orElse(new long[0]);
-        int expectedStepsInWalkForNode0 = walkParameters.walkLength;
+        int expectedStepsInWalkForNode0 = walkParameters.walkLength();
         assertEquals(expectedStepsInWalkForNode0, walkForNodeZero.length);
     }
 
@@ -427,12 +426,7 @@ class RandomWalkTest {
             var stream = randomWalk.compute();
             long count = stream.limit(10).count();
 
-            randomWalk.setTerminationFlag(new TerminationFlag() {
-                @Override
-                public boolean running() {
-                    return false;
-                }
-            });
+            randomWalk.setTerminationFlag(() -> false);
 
             assertEquals(10, count);
         }

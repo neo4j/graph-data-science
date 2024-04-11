@@ -22,5 +22,5 @@ package org.neo4j.gds.embeddings.node2vec;
 import org.neo4j.gds.annotation.Parameters;
 
 @Parameters
-public record Node2VecParameters(WalkParameters walkParameters, TrainParameters trainParameters) {
+public record Node2VecParameters(SamplingWalkParameters samplingWalkParameters, TrainParameters trainParameters) {
 }
