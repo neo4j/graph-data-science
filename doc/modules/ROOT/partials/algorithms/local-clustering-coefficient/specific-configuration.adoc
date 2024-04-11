@@ -1,2 +1,2 @@
 // DO NOT EDIT: File generated automatically
-| triangleCountProperty | String | n/a | no | Node property that contains pre-computed triangle count.
+| triangleCountProperty | String | n/a | yes | Node property that contains pre-computed triangle count.

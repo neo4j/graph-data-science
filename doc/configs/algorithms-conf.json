@@ -517,7 +517,7 @@
           "name": "triangleCountProperty",
           "type": "String",
           "default": "n/a",
-          "optional": false,
+          "optional": true,
           "description": "Node property that contains pre-computed triangle count."
         }
       ],
@@ -679,7 +679,7 @@
           "type": "Integer",
           "default": "2^63^ - 1",
           "optional": true,
-          "description": "If a node has a degree higher than this it will not be considered by the algorithm. The triangle count for these nodes will be -1."
+          "description": "If a node has a degree higher than this it will not be considered by the algorithm. The triangle count for these nodes will be `-1`."
         }
       ],
       "page_path": "algorithms/triangle-count/"
