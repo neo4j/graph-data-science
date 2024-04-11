@@ -24,7 +24,8 @@ import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEs
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.paths.bellmanford.BellmanFordMutateConfig;
 import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordMutateResult;
-import org.neo4j.gds.procedures.algorithms.pathfinding.MutateStub;
+import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
+import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
 import org.neo4j.gds.results.MemoryEstimateResult;
 
 import java.util.Map;

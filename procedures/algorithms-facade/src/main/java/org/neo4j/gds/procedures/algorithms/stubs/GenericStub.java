@@ -17,7 +17,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.algorithms.pathfinding.stubs;
+package org.neo4j.gds.procedures.algorithms.stubs;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
@@ -31,7 +31,7 @@ import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
-import org.neo4j.gds.procedures.algorithms.pathfinding.AlgorithmHandle;
+import org.neo4j.gds.procedures.algorithms.AlgorithmHandle;
 import org.neo4j.gds.results.MemoryEstimateResult;
 
 import java.util.Map;
@@ -63,9 +63,9 @@ public class GenericStub {
     }
 
     /**
-     * @see org.neo4j.gds.procedures.algorithms.pathfinding.MutateStub#validateConfiguration(java.util.Map)
+     * @see org.neo4j.gds.procedures.algorithms.stubs.MutateStub#validateConfiguration(java.util.Map)
      */
-    <CONFIGURATION extends AlgoBaseConfig> void validateConfiguration(
+    public <CONFIGURATION extends AlgoBaseConfig> void validateConfiguration(
         Function<CypherMapWrapper, CONFIGURATION> parser,
         Map<String, Object> configuration
     ) {
@@ -79,9 +79,9 @@ public class GenericStub {
     }
 
     /**
-     * @see org.neo4j.gds.procedures.algorithms.pathfinding.MutateStub#parseConfiguration(java.util.Map)
+     * @see org.neo4j.gds.procedures.algorithms.stubs.MutateStub#parseConfiguration(java.util.Map)
      */
-    <CONFIGURATION extends AlgoBaseConfig> CONFIGURATION parseConfiguration(
+    public <CONFIGURATION extends AlgoBaseConfig> CONFIGURATION parseConfiguration(
         Function<CypherMapWrapper, CONFIGURATION> parser,
         Map<String, Object> configuration
     ) {
@@ -95,9 +95,9 @@ public class GenericStub {
     }
 
     /**
-     * @see org.neo4j.gds.procedures.algorithms.pathfinding.MutateStub#getMemoryEstimation(String, java.util.Map)
+     * @see org.neo4j.gds.procedures.algorithms.stubs.MutateStub#getMemoryEstimation(String, java.util.Map)
      */
-    <CONFIGURATION extends AlgoBaseConfig> MemoryEstimation getMemoryEstimation(
+    public <CONFIGURATION extends AlgoBaseConfig> MemoryEstimation getMemoryEstimation(
         String username,
         Map<String, Object> rawConfiguration,
         Function<CypherMapWrapper, CONFIGURATION> parser,
@@ -115,9 +115,9 @@ public class GenericStub {
     }
 
     /**
-     * @see org.neo4j.gds.procedures.algorithms.pathfinding.MutateStub#estimate(Object, java.util.Map)
+     * @see org.neo4j.gds.procedures.algorithms.stubs.MutateStub#estimate(Object, java.util.Map)
      */
-    <CONFIGURATION extends AlgoBaseConfig> Stream<MemoryEstimateResult> estimate(
+    public <CONFIGURATION extends AlgoBaseConfig> Stream<MemoryEstimateResult> estimate(
         Object graphName,
         Map<String, Object> rawConfiguration,
         Function<CypherMapWrapper, CONFIGURATION> parser,
@@ -137,9 +137,9 @@ public class GenericStub {
     }
 
     /**
-     * @see org.neo4j.gds.procedures.algorithms.pathfinding.MutateStub#execute(String, java.util.Map)
+     * @see org.neo4j.gds.procedures.algorithms.stubs.MutateStub#execute(String, java.util.Map)
      */
-    <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> Stream<RESULT_TO_CALLER> execute(
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> Stream<RESULT_TO_CALLER> execute(
         String graphNameAsString,
         Map<String, Object> rawConfiguration,
         Function<CypherMapWrapper, CONFIGURATION> parser,
