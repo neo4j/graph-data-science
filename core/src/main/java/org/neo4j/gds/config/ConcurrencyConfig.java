@@ -28,6 +28,7 @@ public interface ConcurrencyConfig {
 
     String CONCURRENCY_KEY = "concurrency";
     int DEFAULT_CONCURRENCY = 4;
+    Concurrency TYPED_DEFAULT_CONCURRENCY = new Concurrency(DEFAULT_CONCURRENCY);
     int CONCURRENCY_LIMITATION = 4;
 
     @Value.Default
