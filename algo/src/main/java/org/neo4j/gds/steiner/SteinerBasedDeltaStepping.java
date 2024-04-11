@@ -26,6 +26,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -67,7 +68,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<PathFindingResult
     private final Graph graph;
     private final long startNode;
     private final double delta;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final HugeLongArray frontier;
     private final TentativeDistances distances;
     private final ExecutorService executorService;
@@ -83,7 +84,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<PathFindingResult
         long startNode,
         double delta,
         BitSet isTerminal,
-        int concurrency,
+        Concurrency concurrency,
         int binSizeThreshold,
         ExecutorService executorService,
         ProgressTracker progressTracker
@@ -97,7 +98,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<PathFindingResult
         this.frontier = HugeLongArray.newArray(graph.relationshipCount());
         this.distances = TentativeDistances.distanceAndPredecessors(
             graph.nodeCount(),
-            concurrency
+            concurrency.value()
         );
         this.mergedWithSource = new BitSet(graph.nodeCount());
         this.unvisitedTerminal = new BitSet(isTerminal.size());
@@ -306,7 +307,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<PathFindingResult
         HugeLongPriorityQueue terminalQueue = HugeLongPriorityQueue.min(unvisitedTerminal.size());
         var terminalQueueLock = new ReentrantLock();
         var tasks = IntStream
-            .range(0, concurrency)
+            .range(0, concurrency.value())
             .mapToObj(i -> new SteinerBasedDeltaTask(
                 graph.concurrentCopy(),
                 frontier,

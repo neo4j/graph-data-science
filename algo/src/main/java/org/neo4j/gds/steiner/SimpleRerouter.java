@@ -22,6 +22,7 @@ package org.neo4j.gds.steiner;
 import com.carrotsearch.hppc.BitSet;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -58,7 +59,7 @@ public class SimpleRerouter extends ReroutingAlgorithm {
         Graph graph,
         long sourceId,
         List<Long> terminals,
-        int concurrency,
+        Concurrency concurrency,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
@@ -135,7 +136,7 @@ public class SimpleRerouter extends ReroutingAlgorithm {
 
         ParallelUtil.parallelForEachNode(
             graph.nodeCount(),
-            concurrency,
+            concurrency.value(),
             terminationFlag,
             nodeId -> {
                 if (parent.get(nodeId) != PRUNED && parent.get(nodeId) != ROOT_NODE) {

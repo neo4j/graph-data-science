@@ -353,7 +353,7 @@ public class PathFindingAlgorithms {
             mappedSourceNodeId,
             mappedTargetNodeIds,
             parameters.delta(),
-            parameters.concurrency().value(),
+            parameters.concurrency(),
             parameters.applyRerouting(),
             DefaultPool.INSTANCE,
             progressTracker

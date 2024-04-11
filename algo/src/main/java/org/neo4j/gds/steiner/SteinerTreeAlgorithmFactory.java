@@ -45,7 +45,7 @@ public class SteinerTreeAlgorithmFactory<CONFIG extends SteinerTreeBaseConfig> e
             graph.toMappedNodeId(parameters.sourceNode()),
             mappedTargetNodes,
             parameters.delta(),
-            parameters.concurrency().value(),
+            parameters.concurrency(),
             parameters.applyRerouting(),
             DefaultPool.INSTANCE,
             progressTracker

@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.Orientation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -139,7 +140,7 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             arguments(100, 0) //everything in a single bucket, can likewise
         );
     }
-    
+
     @ParameterizedTest
     @MethodSource("inputTuples")
     void shouldWorkCorrectly(double delta, int binSizeThreshold) {
@@ -151,7 +152,7 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             a[0],
             List.of(a[2], a[5]),
             delta,
-            1,
+            new Concurrency(1),
             false,
             binSizeThreshold,
             //setting custom threshold for such a small graph allows to not examine everything in a single iteration
@@ -173,7 +174,7 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             a[0],
             List.of(a[2], a[4]),
             2.0,
-            1,
+            new Concurrency(1),
             false,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
@@ -201,7 +202,7 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             0,
             2.0,
             isTerminal,
-            1,
+            new Concurrency(1),
             SteinerBasedDeltaStepping.BIN_SIZE_THRESHOLD,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
@@ -227,7 +228,7 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             a[0],
             List.of(a[2], a[3]),
             2.0,
-            1,
+            new Concurrency(1),
             false,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
@@ -256,7 +257,7 @@ class ShortestPathSteinerAlgorithmExtendedTest {
             a[0],
             List.of(a[1], a[3]),
             2.0,
-            1,
+            new Concurrency(1),
             false,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER

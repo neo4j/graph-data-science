@@ -24,6 +24,7 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
@@ -49,7 +50,7 @@ public class InverseRerouter extends ReroutingAlgorithm {
         BitSet isTerminal,
         HugeLongArray examinationQueue,
         LongAdder indexQueue,
-        int concurrency,
+        Concurrency concurrency,
         ProgressTracker progressTracker
     ) {
         super(graph, sourceId, concurrency, progressTracker);
@@ -199,7 +200,7 @@ public class InverseRerouter extends ReroutingAlgorithm {
                 parentId,
                 finalPruningGain
             );
-            
+
             if (bestAlternative.get(nodeId) != PRUNED) { //add to the priority Queue
                 priorityQueue.add(nodeId, gain);
             }
@@ -284,7 +285,7 @@ public class InverseRerouter extends ReroutingAlgorithm {
         );
         return bestGain.doubleValue();
     }
-    
+
     private double rerouteWithPruning(
         ReroutingChildrenManager childrenManager,
         HugeLongArray bestAlternative,
