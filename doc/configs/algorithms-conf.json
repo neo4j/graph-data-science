@@ -21,7 +21,7 @@
         {
           "name": "tolerance",
           "type": "Float",
-          "default": 1e-07,
+          "default": "0.0000001",
           "optional": true,
           "description": "Minimum change in scores between iterations. If all scores change less than the tolerance value the result is considered stable, and the algorithm returns."
         },
@@ -135,7 +135,7 @@
           "type": "String",
           "default": "NATURAL",
           "optional": true,
-          "description": "The orientation used to compute node degrees. Supported orientations are NATURAL, REVERSE and UNDIRECTED."
+          "description": "The orientation used to compute node degrees. Supported orientations are `NATURAL`, `REVERSE` and `UNDIRECTED`."
         },
         {
           "name": "relationshipWeightProperty",
@@ -161,7 +161,7 @@
         {
           "name": "tolerance",
           "type": "Float",
-          "default": 1e-07,
+          "default": "0.0000001",
           "optional": true,
           "description": "Minimum change in scores between iterations. If all scores change less than the tolerance value the result is considered stable and the algorithm returns."
         },
@@ -210,7 +210,7 @@
         {
           "name": "tolerance",
           "type": "Float",
-          "default": 1e-07,
+          "default": "0.0000001",
           "optional": true,
           "description": "Minimum change in scores between iterations. If all scores change less than the tolerance value the result is considered stable and the algorithm returns."
         },
@@ -677,7 +677,7 @@
         {
           "name": "maxDegree",
           "type": "Integer",
-          "default": "263 - 1",
+          "default": "2^63^ - 1",
           "optional": true,
           "description": "If a node has a degree higher than this it will not be considered by the algorithm. The triangle count for these nodes will be -1."
         }
