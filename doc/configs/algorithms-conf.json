@@ -1575,7 +1575,7 @@
           "type": "Float",
           "default": 0.0,
           "optional": true,
-          "description": "The desired ratio of the property embedding dimension to the total embeddingDimension. A positive value requires featureProperties to be non-empty."
+          "description": "The desired ratio of the property embedding dimension to the total `embeddingDimension`. A positive value requires `featureProperties` to be non-empty."
         },
         {
           "name": "featureProperties",
@@ -1610,7 +1610,7 @@
           "type": "Float",
           "default": 0.0,
           "optional": true,
-          "description": "The initial random vector for each node is scaled by its degree to the power of normalizationStrength."
+          "description": "The initial random vector for each node is scaled by its degree to the power of `normalizationStrength`."
         },
         {
           "name": "randomSeed",
@@ -1633,13 +1633,6 @@
       "name": "GraphSAGE",
       "procedure": "gds.beta.graphSage",
       "config": [
-        {
-          "name": "modelName",
-          "type": "String",
-          "default": "n/a",
-          "optional": false,
-          "description": "The name of a GraphSAGE model in the model catalog."
-        },
         {
           "name": "batchSize",
           "type": "Integer",
@@ -1729,7 +1722,7 @@
           "type": "String",
           "default": "NORMALIZED",
           "optional": true,
-          "description": "Method to initialize embeddings. Values are sampled uniformly from a range [-a, a]. With NORMALIZED, a=0.5/embeddingDimension and with UNIFORM instead a=1."
+          "description": "Method to initialize embeddings. Values are sampled uniformly from a range `[-a, a]`. With `NORMALIZED`, `a=0.5/embeddingDimension` and with `UNIFORM` instead `a=1`."
         },
         {
           "name": "iterations",
@@ -1792,7 +1785,7 @@
           "type": "Integer",
           "default": "n/a",
           "optional": false,
-          "description": "The number of features to sample per node in each iteration. Called K in the original paper. Must be at least 1."
+          "description": "The number of features to sample per node in each iteration. Called `K` in the original paper. Must be at least 1."
         },
         {
           "name": "heterogeneous",
@@ -1806,28 +1799,28 @@
           "type": "Float",
           "default": 1.0,
           "optional": true,
-          "description": "Controls how often neighbors' features are sampled in each iteration relative to sampling the node\u2019s own features. Must be non-negative."
+          "description": "Controls how often neighbors' features are sampled in each iteration relative to sampling the node's own features. Must be non-negative."
         },
         {
           "name": "binarizeFeatures",
           "type": "Map",
           "default": "n/a",
           "optional": true,
-          "description": "A map with keys dimension and threshold. If given, features are transformed into dimension binary features via hyperplane rounding. Increasing threshold makes the output more sparse, and it defaults to 0. The value of dimension must be at least 1."
+          "description": "A map with keys `dimension` and `threshold`. If given, features are transformed into `dimension` binary features via hyperplane rounding. Increasing `threshold` makes the output more sparse, and it defaults to `0`. The value of `dimension` must be at least 1."
         },
         {
           "name": "generateFeatures",
           "type": "Map",
           "default": "n/a",
           "optional": true,
-          "description": "A map with keys dimension and densityLevel. Should be given if and only if featureProperties is empty. If given, dimension binary features are generated with approximately densityLevel active features per node. Both must be at least 1 and densityLevel at most dimension."
+          "description": "A map with keys `dimension` and `densityLevel`. Should be given if and only if `featureProperties` is empty. If given, `dimension` binary features are generated with approximately `densityLevel` active features per node. Both must be at least 1 and `densityLevel` at most `dimension`."
         },
         {
           "name": "outputDimension",
           "type": "Integer",
           "default": "n/a",
           "optional": true,
-          "description": "If given, the embeddings are projected randomly into outputDimension dense features. Must be at least 1."
+          "description": "If given, the embeddings are projected randomly into `outputDimension` dense features. Must be at least 1."
         },
         {
           "name": "randomSeed",
