@@ -22,6 +22,7 @@ package org.neo4j.gds.embeddings.hashgnn;
 
 import org.apache.commons.math3.primes.Primes;
 import org.neo4j.gds.annotation.ValueClass;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.mem.MemoryUsage;
@@ -65,7 +66,7 @@ class HashTask implements Runnable {
         int embeddingDimension,
         double scaledNeighborInfluence,
         int numberOfRelationshipTypes,
-        int concurrency,
+        Concurrency concurrency,
         int embeddingDensity,
         long randomSeed,
         TerminationFlag terminationFlag,
@@ -84,7 +85,7 @@ class HashTask implements Runnable {
                 progressTracker
             )).collect(Collectors.toList());
         RunWithConcurrency.builder()
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .tasks(hashTasks)
             .terminationFlag(terminationFlag)
             .run();

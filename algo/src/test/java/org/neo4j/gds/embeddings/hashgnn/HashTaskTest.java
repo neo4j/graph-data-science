@@ -20,6 +20,7 @@
 package org.neo4j.gds.embeddings.hashgnn;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -37,7 +38,7 @@ class HashTaskTest {
             EMBEDDING_DIMENSION,
             NEIGHBOR_HASH_REPEATS,
             NUMBER_OF_RELATIONSHIPS,
-            4,
+            new Concurrency(4),
             EMBEDDING_DENSITY,
             42,
             TerminationFlag.RUNNING_TRUE,

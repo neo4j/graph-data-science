@@ -22,6 +22,7 @@ package org.neo4j.gds.embeddings.hashgnn;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -63,7 +64,7 @@ class GenerateFeaturesTask implements Runnable {
         GenerateFeaturesConfig generateFeatures,
         Graph graph,
         List<Partition> partition,
-        int concurrency,
+        Concurrency concurrency,
         long randomSeed,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag,
@@ -84,7 +85,7 @@ class GenerateFeaturesTask implements Runnable {
             ))
             .collect(Collectors.toList());
         RunWithConcurrency.builder()
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .tasks(tasks)
             .terminationFlag(terminationFlag)
             .run();

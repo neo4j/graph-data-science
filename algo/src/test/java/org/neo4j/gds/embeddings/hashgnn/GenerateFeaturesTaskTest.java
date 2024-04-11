@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -59,7 +60,7 @@ class GenerateFeaturesTaskTest {
             generateFeaturesConfig,
             graph,
             List.of(partition),
-            4,
+            new Concurrency(4),
             42L,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE,

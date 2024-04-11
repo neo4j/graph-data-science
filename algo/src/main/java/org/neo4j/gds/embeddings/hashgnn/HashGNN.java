@@ -25,6 +25,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -48,14 +49,14 @@ public class HashGNN extends Algorithm<HashGNNResult> {
     private final Graph graph;
     private final SplittableRandom rng;
     private final HashGNNParameters parameters;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final MutableLong currentTotalFeatureCount = new MutableLong();
 
     public HashGNN(Graph graph, HashGNNParameters parameters, ProgressTracker progressTracker) {
         super(progressTracker);
         this.graph = graph;
         this.parameters = parameters;
-        this.concurrency = parameters.concurrency().value();
+        this.concurrency = parameters.concurrency();
 
         long tempRandomSeed = this.parameters.randomSeed().orElse((new SplittableRandom().nextLong()));
         this.randomSeed = new SplittableRandom(tempRandomSeed).nextLong();
@@ -69,12 +70,12 @@ public class HashGNN extends Algorithm<HashGNNResult> {
         var degreePartition = PartitionUtils.degreePartition(
             graph,
             // Since degree only very approximately reflect the min hash task workload per node we decrease the partition sizes.
-            Math.toIntExact(Math.min(concurrency * DEGREE_PARTITIONS_PER_THREAD, graph.nodeCount())),
+            Math.toIntExact(Math.min(concurrency.value() * DEGREE_PARTITIONS_PER_THREAD, graph.nodeCount())),
             Function.identity(),
             Optional.of(1)
         );
         var rangePartition = PartitionUtils.rangePartition(
-            concurrency,
+            concurrency.value(),
             graph.nodeCount(),
             Function.identity(),
             Optional.of(1)
