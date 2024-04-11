@@ -202,7 +202,7 @@ public final class Louvain extends Algorithm<LouvainResult> {
             maxIterations,
             tolerance,
             seed,
-            concurrency.value(),
+            concurrency,
             DEFAULT_BATCH_SIZE,
             DefaultPool.INSTANCE,
             progressTracker

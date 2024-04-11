@@ -31,6 +31,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.assertj.Extractors;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
@@ -208,7 +209,7 @@ class ModularityOptimizationTest {
             maxIterations,
             TOLERANCE_DEFAULT,
             properties,
-            concurrency,
+            new Concurrency(concurrency),
             minBatchSize,
             DefaultPool.INSTANCE,
             progressTracker

@@ -62,7 +62,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public final class ModularityOptimization extends Algorithm<ModularityOptimizationResult> {
 
     public static final int K1COLORING_MAX_ITERATIONS = 5;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final int maxIterations;
     private final long nodeCount;
     private final int minBatchSize;
@@ -91,7 +91,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         int maxIterations,
         double tolerance,
         @Nullable NodePropertyValues seedProperty,
-        int concurrency,
+        Concurrency concurrency,
         int minBatchSize,
         ExecutorService executor,
         ProgressTracker progressTracker
@@ -173,7 +173,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     }
 
     private void computeColoring() {
-        var parameters = new K1ColoringParameters(new Concurrency(concurrency), K1COLORING_MAX_ITERATIONS, minBatchSize);
+        var parameters = new K1ColoringParameters(concurrency, K1COLORING_MAX_ITERATIONS, minBatchSize);
         K1Coloring coloring = new K1ColoringAlgorithmFactory<>().build(graph, parameters, progressTracker);
         coloring.setTerminationFlag(terminationFlag);
 
@@ -225,9 +225,9 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         this.nextCommunities = HugeLongArray.newArray(nodeCount);
         this.cumulativeNodeWeights = HugeDoubleArray.newArray(nodeCount);
 
-        this.communityWeightUpdates = HugeAtomicDoubleArray.of(nodeCount, ParallelDoublePageCreator.passThrough(concurrency));
+        this.communityWeightUpdates = HugeAtomicDoubleArray.of(nodeCount, ParallelDoublePageCreator.passThrough(concurrency.value()));
 
-        var initTasks = PartitionUtils.rangePartition(concurrency, nodeCount, (partition) ->
+        var initTasks = PartitionUtils.rangePartition(concurrency.value(), nodeCount, (partition) ->
                 new InitTask(
                     graph.concurrentCopy(),
                     currentCommunities,
@@ -318,7 +318,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         long colorCount = nextStartingCoordinate - currentStandingPosition;
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .tasks(createModularityOptimizationTasks(currentStandingPosition, colorCount))
             .executor(executor)
             .run();
@@ -326,7 +326,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
         ParallelUtil.parallelStreamConsume(
             LongStream.range(0, colorCount),
-            concurrency,
+            concurrency.value(),
             TerminationFlag.RUNNING_TRUE,
             stream -> stream.forEach(indexId -> {
                 long actualIndexId = currentStandingPosition + indexId;
@@ -337,7 +337,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         // apply communityWeight updates to communityWeights
         ParallelUtil.parallelStreamConsume(
             LongStream.range(0, nodeCount),
-            concurrency,
+            concurrency.value(),
             TerminationFlag.RUNNING_TRUE,
             stream -> stream.forEach(nodeId -> {
                 final double update = communityWeightUpdates.get(nodeId);
@@ -346,7 +346,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         );
 
         // reset communityWeightUpdates
-        communityWeightUpdates = HugeAtomicDoubleArray.of(nodeCount, ParallelDoublePageCreator.passThrough(concurrency));
+        communityWeightUpdates = HugeAtomicDoubleArray.of(nodeCount, ParallelDoublePageCreator.passThrough(concurrency.value()));
         return nextStartingCoordinate;
     }
 
@@ -356,7 +356,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     ) {
 
         return PartitionUtils.rangePartition(
-            concurrency,
+            concurrency.value(),
             colorCount,
             partition -> new ModularityOptimizationTask(
                 graph,

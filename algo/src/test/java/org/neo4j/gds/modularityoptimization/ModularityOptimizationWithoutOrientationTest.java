@@ -38,6 +38,7 @@ import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
@@ -278,7 +279,7 @@ class ModularityOptimizationWithoutOrientationTest {
             maxIterations,
             TOLERANCE_DEFAULT,
             properties,
-            concurrency,
+            new Concurrency(concurrency),
             minBatchSize,
             DefaultPool.INSTANCE,
             progressTracker

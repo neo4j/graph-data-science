@@ -21,6 +21,7 @@ package org.neo4j.gds.modularityoptimization;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -37,28 +38,28 @@ final class ModularityManager {
     private double totalWeight;
     private final HugeAtomicDoubleArray communityWeights;
     private HugeLongArray communities;
-    private final int concurrency;
+    private final Concurrency concurrency;
 
 
-    static ModularityManager create(Graph graph, int concurrency) {
+    static ModularityManager create(Graph graph, Concurrency concurrency) {
         return new ModularityManager(
             graph,
-            HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency)),
+            HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency.value())),
             concurrency
         );
     }
 
-    private ModularityManager(Graph graph, HugeAtomicDoubleArray communityWeights, int concurrency) {
+    private ModularityManager(Graph graph, HugeAtomicDoubleArray communityWeights, Concurrency concurrency) {
         this.graph = graph;
         this.communityWeights = communityWeights;
         this.concurrency = concurrency;
     }
 
     double calculateModularity() {
-        var insideRelationships = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency));
+        var insideRelationships = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency.value()));
         // using degreePartitioning did not show an improvement -- assuming as tasks are too small
         var tasks = PartitionUtils.rangePartition(
-            concurrency,
+            concurrency.value(),
             graph.nodeCount(),
             partition -> new InsideRelationshipCalculator(
                 partition,
@@ -69,13 +70,13 @@ final class ModularityManager {
         );
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .tasks(tasks)
             .run();
 
         double modularity = ParallelUtil.parallelStream(
             LongStream.range(0, graph.nodeCount()),
-            concurrency,
+            concurrency.value(),
             nodeStream ->
                 nodeStream
                     .mapToDouble(communityId -> {

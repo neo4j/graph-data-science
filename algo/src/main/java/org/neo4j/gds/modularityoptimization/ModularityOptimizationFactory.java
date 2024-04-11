@@ -79,7 +79,7 @@ public class ModularityOptimizationFactory<CONFIG extends ModularityOptimization
             parameters.maxIterations(),
             parameters.tolerance(),
             seedProperty,
-            parameters.concurrency().value(),
+            parameters.concurrency(),
             parameters.batchSize(),
             DefaultPool.INSTANCE,
             progressTracker
