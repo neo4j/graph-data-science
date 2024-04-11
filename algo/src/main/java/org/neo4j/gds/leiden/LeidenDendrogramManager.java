@@ -20,6 +20,7 @@
 package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -37,7 +38,7 @@ public class LeidenDendrogramManager {
 
     private final Graph rootGraph;
     private final long nodeCount;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final TerminationFlag terminationFlag;
     private final boolean trackIntermediateCommunities;
     private final HugeLongArray[] dendrograms;
@@ -46,7 +47,7 @@ public class LeidenDendrogramManager {
     LeidenDendrogramManager(
         Graph rootGraph,
         int maxIterations,
-        int concurrency,
+        Concurrency concurrency,
         boolean trackIntermediateCommunities,
         TerminationFlag terminationFlag
     ) {
@@ -94,7 +95,7 @@ public class LeidenDendrogramManager {
 
         //This is final output, we need to take seeds into account
         //and translate the community to output format; for this we need to take the initial seeding values into acount
-        ParallelUtil.parallelForEachNode(rootGraph.nodeCount(), concurrency, terminationFlag, nodeId -> {
+        ParallelUtil.parallelForEachNode(rootGraph.nodeCount(), concurrency.value(), terminationFlag, nodeId -> {
             long prevId = translateNode(workingGraph, previousAlgorithmDendrogram, nodeId, iteration);
             long communityId = communitiesToOuput.get(prevId);
             var reverseId = seedCommunityManager.mapToSeed(communityId);
@@ -116,7 +117,7 @@ public class LeidenDendrogramManager {
     ) {
 
         HugeLongArray finalAlgorithmDendrogram = algorithmDendrogram;
-        ParallelUtil.parallelForEachNode(rootGraph.nodeCount(), concurrency, terminationFlag, nodeId -> {
+        ParallelUtil.parallelForEachNode(rootGraph.nodeCount(), concurrency.value(), terminationFlag, nodeId -> {
             long prevId = translateNode(workingGraph, finalAlgorithmDendrogram, nodeId, iteration);
             long communityId = communitiesToWrite.get(prevId);
             finalAlgorithmDendrogram.set(nodeId, communityId);

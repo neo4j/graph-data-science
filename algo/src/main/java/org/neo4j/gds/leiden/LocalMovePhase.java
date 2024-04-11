@@ -21,6 +21,7 @@ package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -60,7 +61,7 @@ final class LocalMovePhase {
     private final HugeDoubleArray communityVolumes;
     private final double gamma;
 
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     long swaps;
 
@@ -70,9 +71,8 @@ final class LocalMovePhase {
         HugeDoubleArray nodeVolumes,
         HugeDoubleArray communityVolumes,
         double gamma,
-        int concurrency
+        Concurrency concurrency
     ) {
-        
         return new LocalMovePhase(
             graph,
             seedCommunities,
@@ -89,7 +89,7 @@ final class LocalMovePhase {
         HugeDoubleArray nodeVolumes,
         HugeDoubleArray communityVolumes,
         double gamma,
-        int concurrency
+        Concurrency concurrency
     ) {
         this.graph = graph;
         this.currentCommunities = seedCommunities;
@@ -104,7 +104,7 @@ final class LocalMovePhase {
      * @return The new community count.
      */
     public void run() {
-        var atomicCommunityVolumes = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency));
+        var atomicCommunityVolumes = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency.value()));
         graph.forEachNode(v -> {
             atomicCommunityVolumes.set(v, communityVolumes.get(v));
             return true;
@@ -120,7 +120,7 @@ final class LocalMovePhase {
             return true;
         });
         var tasks = new ArrayList<LocalMoveTask>();
-        for (int i = 0; i < concurrency; ++i) {
+        for (int i = 0; i < concurrency.value(); ++i) {
             tasks.add(new LocalMoveTask(
                 graph.concurrentCopy(),
                 currentCommunities,
@@ -136,9 +136,9 @@ final class LocalMovePhase {
 
         while (globalQueueSize.get() > 0) {
             globalQueueIndex.set(0); //exhaust global queue
-            RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency).run();
+            RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency.value()).run();
             globalQueueSize.set(0); //fill global queue again
-            RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency).run();
+            RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency.value()).run();
         }
         for (var task : tasks) {
             swaps += task.swaps;

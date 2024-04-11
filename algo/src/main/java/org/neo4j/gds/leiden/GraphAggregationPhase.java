@@ -33,6 +33,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
@@ -103,7 +104,7 @@ class GraphAggregationPhase {
     private final Direction direction;
     private final long maxCommunityId;
     private final ExecutorService executorService;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final TerminationFlag terminationFlag;
     private final ProgressTracker progressTracker;
 
@@ -113,7 +114,7 @@ class GraphAggregationPhase {
         HugeLongArray communities,
         long maxCommunityId,
         ExecutorService executorService,
-        int concurrency,
+        Concurrency concurrency,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker
     ) {
@@ -131,14 +132,14 @@ class GraphAggregationPhase {
     Graph run() {
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(maxCommunityId)
-            .concurrency(this.concurrency)
+            .concurrency(this.concurrency.value())
             .build();
 
         terminationFlag.assertRunning();
 
         ParallelUtil.parallelForEachNode(
             workingGraph.nodeCount(),
-            concurrency,
+            concurrency.value(),
             TerminationFlag.RUNNING_TRUE,
             nodeId -> nodesBuilder.addNode(communities.get(nodeId))
         );
@@ -165,7 +166,7 @@ class GraphAggregationPhase {
         LongToIntFunction customDegree = x -> workingGraph.degree(sortedNodesByCommunity.get(x));
         var relationshipCreators = PartitionUtils.customDegreePartitionWithBatchSize(
             workingGraph,
-            concurrency,
+            concurrency.value(),
             customDegree,
             partition ->
                 new RelationshipCreator(
@@ -186,21 +187,21 @@ class GraphAggregationPhase {
         return GraphFactory.create(idMap, relationshipsBuilder.build());
     }
 
-    static HugeLongArray getNodesSortedByCommunity(HugeLongArray communities, int concurrency) {
+    static HugeLongArray getNodesSortedByCommunity(HugeLongArray communities, Concurrency concurrency) {
         long nodeCount = communities.size();
 
         var sortedNodesByCommunity = HugeLongArray.newArray(nodeCount);
-        var communityCoordinateArray = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(concurrency));
+        var communityCoordinateArray = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(concurrency.value()));
 
 
-        ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, nodeId -> {
+        ParallelUtil.parallelForEachNode(nodeCount, concurrency.value(), TerminationFlag.RUNNING_TRUE, nodeId -> {
             {
                 long communityId = communities.get(nodeId);
                 communityCoordinateArray.getAndAdd(communityId, 1);
             }
         });
         AtomicLong atomicNodeSum = new AtomicLong();
-        ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, indexId ->
+        ParallelUtil.parallelForEachNode(nodeCount, concurrency.value(), TerminationFlag.RUNNING_TRUE, indexId ->
         {
             if (communityCoordinateArray.get(indexId) > 0) {
                 var nodeSum = atomicNodeSum.addAndGet(communityCoordinateArray.get(indexId));
@@ -208,7 +209,7 @@ class GraphAggregationPhase {
             }
         });
 
-        ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, indexId ->
+        ParallelUtil.parallelForEachNode(nodeCount, concurrency.value(), TerminationFlag.RUNNING_TRUE, indexId ->
         {
 
             long nodeId = nodeCount - indexId - 1;

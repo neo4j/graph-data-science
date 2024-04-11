@@ -21,6 +21,7 @@ package org.neo4j.gds.leiden;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -53,14 +54,14 @@ public final class ModularityComputer {
         HugeDoubleArray communityVolumes,
         double gamma,
         double coefficient,
-        int concurrency,
+        Concurrency concurrency,
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
-        var relationshipsOutsideCommunity = HugeAtomicDoubleArray.of(workingGraph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency));
+        var relationshipsOutsideCommunity = HugeAtomicDoubleArray.of(workingGraph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency.value()));
         // using degreePartitioning did not show an improvement -- assuming as tasks are too small
         var tasks = PartitionUtils.rangePartition(
-            concurrency,
+            concurrency.value(),
             workingGraph.nodeCount(),
             partition -> new OutsideRelationshipCalculator(
                 partition,
@@ -71,14 +72,14 @@ public final class ModularityComputer {
             ), Optional.empty()
         );
         RunWithConcurrency.builder()
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .tasks(tasks)
             .executor(executorService)
             .run();
 
         double modularity = ParallelUtil.parallelStream(
             LongStream.range(0, workingGraph.nodeCount()),
-            concurrency,
+            concurrency.value(),
             nodeStream ->
                 nodeStream
                     .mapToDouble(communityId -> {

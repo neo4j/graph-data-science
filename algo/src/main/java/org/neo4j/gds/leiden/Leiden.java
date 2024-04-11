@@ -25,6 +25,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
@@ -51,7 +52,7 @@ public class Leiden extends Algorithm<LeidenResult> {
     private final LeidenDendrogramManager dendrogramManager;
     private final Optional<NodePropertyValues> seedValues;
     private final ExecutorService executorService;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final long randomSeed;
 
     private final double tolerance;
@@ -65,7 +66,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         long randomSeed,
         @Nullable NodePropertyValues seedValues,
         double tolerance,
-        int concurrency,
+        Concurrency concurrency,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
@@ -309,7 +310,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         var volumeAdder = new DoubleAdder();
         if (rootGraph.hasRelationshipProperty()) {
             List<InitVolumeTask> tasks = PartitionUtils.rangePartition(
-                concurrency,
+                concurrency.value(),
                 rootGraph.nodeCount(),
                 partition -> new InitVolumeTask(
                     rootGraph.concurrentCopy(),
@@ -320,7 +321,7 @@ public class Leiden extends Algorithm<LeidenResult> {
                 Optional.empty()
             );
             RunWithConcurrency.builder().
-                concurrency(concurrency).
+                concurrency(concurrency.value()).
                 tasks(tasks).
                 executor(executorService)
                 .run();

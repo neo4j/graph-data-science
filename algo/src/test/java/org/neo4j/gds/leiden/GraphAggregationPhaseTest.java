@@ -22,6 +22,7 @@ package org.neo4j.gds.leiden;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.schema.Direction;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -80,7 +81,7 @@ class GraphAggregationPhaseTest {
             communities,
             1L,
             ExecutorServiceUtil.DEFAULT_SINGLE_THREAD_POOL,
-            4,
+            new Concurrency(4),
             TerminationFlag.RUNNING_TRUE,
             ProgressTracker.NULL_TRACKER
         );
@@ -109,7 +110,7 @@ class GraphAggregationPhaseTest {
     void testNodesSortedByCommunity() {
         //concurrency 1 examines  nodes with ordering  nodes 4,3,1,0,2,6,5,8,7
         HugeLongArray communities = HugeLongArray.of(0, 1, 3, 3, 3, 1, 0, 0, 0);
-        var sortedNodeByCommunity = GraphAggregationPhase.getNodesSortedByCommunity(communities, 1);
+        var sortedNodeByCommunity = GraphAggregationPhase.getNodesSortedByCommunity(communities, new Concurrency(1));
         var expected = new long[]{2, 3, 4, 7, 8, 6, 0, 5, 1};
         assertThat(sortedNodeByCommunity.toArray()).isEqualTo(expected);
 
@@ -119,7 +120,7 @@ class GraphAggregationPhaseTest {
     void testNodesSortedByCommunityWithConcurrency() {
 
         HugeLongArray communities = HugeLongArray.of(0, 1, 3, 3, 3, 1, 0, 0, 0);
-        var sortedNodeByCommunity = GraphAggregationPhase.getNodesSortedByCommunity(communities, 4);
+        var sortedNodeByCommunity = GraphAggregationPhase.getNodesSortedByCommunity(communities, new Concurrency(4));
         long[] actual = sortedNodeByCommunity.toArray();
         assertThat(actual).containsExactlyInAnyOrder(0, 1, 2, 3, 4, 5, 6, 7, 8);
         HashSet<Long> forbidden = new HashSet<>();

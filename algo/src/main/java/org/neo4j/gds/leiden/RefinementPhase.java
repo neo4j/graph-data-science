@@ -22,6 +22,7 @@ package org.neo4j.gds.leiden;
 import com.carrotsearch.hppc.BitSet;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -51,7 +52,7 @@ final class RefinementPhase {
     private final HugeDoubleArray encounteredCommunitiesWeights;
     private final long seed;
     private long communityCounter = 0L;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final ExecutorService executorService;
     private final HugeDoubleArray nextCommunityProbabilities;
     private final ProgressTracker progressTracker;
@@ -63,7 +64,7 @@ final class RefinementPhase {
         double gamma,
         double theta,
         long seed,
-        int concurrency,
+        Concurrency concurrency,
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
@@ -99,7 +100,7 @@ final class RefinementPhase {
         double gamma,
         double theta,
         long seed,
-        int concurrency,
+        Concurrency concurrency,
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
@@ -170,7 +171,7 @@ final class RefinementPhase {
     private void computeRelationshipsBetweenCommunities() {
         List<RefinementBetweenRelationshipCounter> tasks = PartitionUtils.degreePartition(
             workingGraph,
-            concurrency,
+            concurrency.value(),
             degreePartition -> new RefinementBetweenRelationshipCounter(
                 workingGraph.concurrentCopy(),
                 relationshipsBetweenCommunities,
@@ -181,7 +182,7 @@ final class RefinementPhase {
         );
 
         RunWithConcurrency.builder().
-            concurrency(concurrency)
+            concurrency(concurrency.value())
             .tasks(tasks)
             .executor(executorService).
             run();
