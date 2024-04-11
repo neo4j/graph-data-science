@@ -41,6 +41,7 @@ import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.ArrayIdMap;
 import org.neo4j.gds.core.loading.LabelInformationBuilders;
@@ -113,7 +114,7 @@ class Node2VecTest {
 
         HugeObjectArray<FloatVector> node2Vec = new Node2Vec(
             currentGraph,
-            4,
+            new Concurrency(4),
             NO_SOURCE_NODES,
             NO_RANDOM_SEED,
             1000,
@@ -165,7 +166,7 @@ class Node2VecTest {
         var progressTracker = new TestProgressTracker(progressTask, log, 4, EmptyTaskRegistryFactory.INSTANCE);
         new Node2Vec(
             currentGraph,
-            4,
+            new Concurrency(4),
             NO_SOURCE_NODES,
             NO_RANDOM_SEED,
             1000,
@@ -209,7 +210,7 @@ class Node2VecTest {
 
         var node2Vec = new Node2Vec(
             negativeGraph,
-            4,
+            new Concurrency(4),
             NO_SOURCE_NODES,
             NO_RANDOM_SEED,
             1000,
@@ -236,7 +237,7 @@ class Node2VecTest {
 
         var embeddings = new Node2Vec(
             graph,
-            4,
+            new Concurrency(4),
             NO_SOURCE_NODES,
             Optional.of(1337L),
             1000,
@@ -246,7 +247,7 @@ class Node2VecTest {
 
         var otherEmbeddings = new Node2Vec(
             graph,
-            4,
+            new Concurrency(4),
             NO_SOURCE_NODES,
             Optional.of(1337L),
             1000,
@@ -338,7 +339,7 @@ class Node2VecTest {
 
         var firstEmbeddings = new Node2Vec(
             firstGraph,
-            4,
+            new Concurrency(4),
             NO_SOURCE_NODES,
             Optional.of(1337L),
             1000,
@@ -348,7 +349,7 @@ class Node2VecTest {
 
         var secondEmbeddings = new Node2Vec(
             secondGraph,
-            4,
+            new Concurrency(4),
             NO_SOURCE_NODES,
             Optional.of(1337L),
             1000,

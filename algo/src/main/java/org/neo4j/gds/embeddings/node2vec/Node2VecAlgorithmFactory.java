@@ -49,7 +49,7 @@ public class Node2VecAlgorithmFactory<CONFIG extends Node2VecBaseConfig> extends
         validateConfig(configuration, graph);
         return new Node2Vec(
             graph,
-            configuration.concurrency(),
+            configuration.typedConcurrency(),
             configuration.sourceNodes(),
             configuration.randomSeed(),
             configuration.walkBufferSize(),

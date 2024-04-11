@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.Intersections;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.helper.FloatVectorTestUtils;
@@ -46,7 +47,7 @@ class Node2VecModelTest {
 
         var probabilitiesBuilder = new RandomWalkProbabilities.Builder(
             numberOfClusters * clusterSize,
-            4,
+            new Concurrency(4),
             0.001,
             0.75
         );
@@ -68,7 +69,7 @@ class Node2VecModelTest {
             nodeId -> nodeId,
             nodeCount,
             trainParameters,
-            4,
+            new Concurrency(4),
             Optional.empty(),
             walks,
             probabilitiesBuilder.build(),
@@ -152,7 +153,7 @@ class Node2VecModelTest {
 
         var probabilitiesBuilder = new RandomWalkProbabilities.Builder(
             numberOfClusters * clusterSize,
-            4,
+            new Concurrency(4),
             0.001,
             0.75
         );
@@ -167,7 +168,7 @@ class Node2VecModelTest {
             nodeId -> nodeId,
             nodeCount,
             trainParameters,
-            4,
+            new Concurrency(4),
             Optional.of(1337L),
             walks,
             probabilitiesBuilder.build(),
@@ -178,7 +179,7 @@ class Node2VecModelTest {
             nodeId -> nodeId,
             nodeCount,
             trainParameters,
-            4,
+            new Concurrency(4),
             Optional.of(1337L),
             walks,
             probabilitiesBuilder.build(),

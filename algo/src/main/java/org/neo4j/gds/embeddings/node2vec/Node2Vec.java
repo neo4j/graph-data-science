@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.node2vec;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -38,7 +39,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public class Node2Vec extends Algorithm<Node2VecResult> {
 
     private final Graph graph;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final SamplingWalkParameters samplingWalkParameters;
     private final List<Long> sourceNodes;
     private final Optional<Long> maybeRandomSeed;
@@ -48,7 +49,7 @@ public class Node2Vec extends Algorithm<Node2VecResult> {
 
     public Node2Vec(
         Graph graph,
-        int concurrency,
+        Concurrency concurrency,
         List<Long> sourceNodes,
         Optional<Long> maybeRandomSeed,
         int walkBufferSize,
@@ -72,7 +73,7 @@ public class Node2Vec extends Algorithm<Node2VecResult> {
         if (graph.hasRelationshipProperty()) {
             EmbeddingUtils.validateRelationshipWeightPropertyValue(
                 graph,
-                concurrency,
+                concurrency.value(),
                 weight -> weight >= 0,
                 "Node2Vec only supports non-negative weights.",
                 DefaultPool.INSTANCE
@@ -104,7 +105,7 @@ public class Node2Vec extends Algorithm<Node2VecResult> {
         );
 
         progressTracker.beginSubTask("create walks");
-        RunWithConcurrency.builder().concurrency(concurrency).tasks(tasks).run();
+        RunWithConcurrency.builder().concurrency(concurrency.value()).tasks(tasks).run();
         walks.setMaxWalkLength(tasks.stream()
             .map(Node2VecRandomWalkTask::maxWalkLength)
             .max(Integer::compareTo)
@@ -140,7 +141,7 @@ public class Node2Vec extends Algorithm<Node2VecResult> {
         RandomWalkProbabilities.Builder randomWalkPropabilitiesBuilder,
         Graph graph,
         Optional<Long> maybeRandomSeed,
-        int concurrency,
+        Concurrency concurrency,
         List<Long> sourceNodes,
         SamplingWalkParameters samplingWalkParameters,
         int walkBufferSize,
@@ -153,13 +154,13 @@ public class Node2Vec extends Algorithm<Node2VecResult> {
         var nextNodeSupplier = RandomWalkCompanion.nextNodeSupplier(graph, sourceNodes);
         var cumulativeWeightsSupplier = RandomWalkCompanion.cumulativeWeights(
             graph,
-            concurrency,
+            concurrency.value(),
             executorService,
             progressTracker
         );
 
         AtomicLong index = new AtomicLong();
-        for (int i = 0; i < concurrency; ++i) {
+        for (int i = 0; i < concurrency.value(); ++i) {
             tasks.add(new Node2VecRandomWalkTask(
                 graph.concurrentCopy(),
                 nextNodeSupplier,
