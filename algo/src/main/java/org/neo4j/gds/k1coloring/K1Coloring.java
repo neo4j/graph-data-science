@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -66,7 +67,7 @@ public class K1Coloring extends Algorithm<K1ColoringResult> {
     private final long nodeCount;
     private final ExecutorService executor;
     private final int minBatchSize;
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     private final long maxIterations;
 
@@ -81,7 +82,7 @@ public class K1Coloring extends Algorithm<K1ColoringResult> {
         Graph graph,
         long maxIterations,
         int minBatchSize,
-        int concurrency,
+        Concurrency concurrency,
         ExecutorService executor,
         ProgressTracker progressTracker
     ) {
@@ -167,7 +168,7 @@ public class K1Coloring extends Algorithm<K1ColoringResult> {
 
         long adjustedBatchSize = ParallelUtil.adjustedBatchSize(
             approximateRelationshipCount,
-            concurrency,
+            concurrency.value(),
             minBatchSize,
             Integer.MAX_VALUE
         );
@@ -185,7 +186,7 @@ public class K1Coloring extends Algorithm<K1ColoringResult> {
         );
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .tasks(steps)
             .executor(executor)
             .run();
@@ -196,7 +197,7 @@ public class K1Coloring extends Algorithm<K1ColoringResult> {
         progressTracker.beginSubTask(volume);
 
         // The nodesToColor bitset is not thread safe, therefore we have to align the batches to multiples of 64
-        List<Partition> partitions = PartitionUtils.numberAlignedPartitioning(concurrency, nodeCount, Long.SIZE);
+        List<Partition> partitions = PartitionUtils.numberAlignedPartitioning(concurrency.value(), nodeCount, Long.SIZE);
 
         var currentNodesToColor = currentNodesToColor();
         var nextNodesToColor = nextNodesToColor();
@@ -212,7 +213,7 @@ public class K1Coloring extends Algorithm<K1ColoringResult> {
         )).collect(Collectors.toList());
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .tasks(steps)
             .executor(executor)
             .run();

@@ -45,7 +45,7 @@ public class K1ColoringAlgorithmFactory<T extends K1ColoringBaseConfig> extends 
             graph,
             parameters.maxIterations(),
             parameters.batchSize(),
-            parameters.concurrency().value(),
+            parameters.concurrency(),
             DefaultPool.INSTANCE,
             progressTracker
         );

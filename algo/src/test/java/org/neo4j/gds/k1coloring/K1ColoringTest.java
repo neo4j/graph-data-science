@@ -30,6 +30,7 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -64,7 +65,7 @@ class K1ColoringTest {
             graph,
             1000,
             DEFAULT_BATCH_SIZE,
-            1,
+            new Concurrency(1),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -110,7 +111,7 @@ class K1ColoringTest {
             graph,
             100,
             DEFAULT_BATCH_SIZE,
-            8,
+            new Concurrency(8),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -152,7 +153,7 @@ class K1ColoringTest {
             graph,
             100,
             DEFAULT_BATCH_SIZE,
-            8,
+            new Concurrency(8),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -174,22 +175,22 @@ class K1ColoringTest {
             .build()
             .generate();
 
-        var concurrency = 4;
+        var concurrency = new Concurrency(4);
 
         var config = K1ColoringStreamConfigImpl.builder()
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .maxIterations(10)
             .build();
 
         var progressTask = new K1ColoringAlgorithmFactory<>().progressTask(graph, config);
         var log = Neo4jProxy.testLog();
-        var progressTracker = new TestProgressTracker(progressTask, log, concurrency, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TestProgressTracker(progressTask, log, concurrency.value(), EmptyTaskRegistryFactory.INSTANCE);
 
         var k1Coloring = new K1Coloring(
             graph,
             config.maxIterations(),
             DEFAULT_BATCH_SIZE,
-            config.concurrency(),
+            concurrency,
             DefaultPool.INSTANCE,
             progressTracker
         );
@@ -198,7 +199,7 @@ class K1ColoringTest {
 
         List<AtomicLong> progresses = progressTracker.getProgresses();
 
-        assertEquals(result.ranIterations() * concurrency + 1, progresses.size());
+        assertEquals(result.ranIterations() * concurrency.value() + 1, progresses.size());
         progresses.forEach(progress -> assertTrue(progress.get() <= 2 * graph.relationshipCount()));
 
         assertTrue(log.containsMessage(TestLog.INFO, ":: Start"));
