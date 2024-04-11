@@ -138,7 +138,7 @@ class BetweennessCentralityTest {
             new RandomDegreeSelectionStrategy(samplingSize, Optional.of(42L)),
             ForwardTraverser.Factory.unweighted(),
             DefaultPool.INSTANCE,
-            concurrency,
+            new Concurrency(concurrency),
             ProgressTracker.NULL_TRACKER
         ).compute().centralities();
 
@@ -157,7 +157,7 @@ class BetweennessCentralityTest {
             new FullSelectionStrategy(),
             ForwardTraverser.Factory.unweighted(),
             DefaultPool.INSTANCE,
-            concurrency,
+            new Concurrency(concurrency),
             ProgressTracker.NULL_TRACKER
         ).compute().centralities();
 

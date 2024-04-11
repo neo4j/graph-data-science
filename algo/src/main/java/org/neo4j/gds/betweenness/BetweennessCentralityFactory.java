@@ -57,7 +57,7 @@ public class BetweennessCentralityFactory<CONFIG extends BetweennessCentralityBa
             strategy,
             traverserFactory,
             DefaultPool.INSTANCE,
-            parameters.concurrency().value(),
+            parameters.concurrency(),
             progressTracker
         );
     }

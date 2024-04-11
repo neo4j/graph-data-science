@@ -22,6 +22,7 @@ package org.neo4j.gds.betweenness;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -78,7 +79,7 @@ class WeightedBetweennessCentralityTest {
             new RandomDegreeSelectionStrategy(7, Optional.of(42L)),
             ForwardTraverser.Factory.weighted(),
             DefaultPool.INSTANCE,
-            8,
+            new Concurrency(8),
             ProgressTracker.NULL_TRACKER
         );
         var algoUnweighted = new BetweennessCentrality(
@@ -86,7 +87,7 @@ class WeightedBetweennessCentralityTest {
             new RandomDegreeSelectionStrategy(7, Optional.of(42L)),
             ForwardTraverser.Factory.unweighted(),
             DefaultPool.INSTANCE,
-            8,
+            new Concurrency(8),
             ProgressTracker.NULL_TRACKER
         );
         var resultWeighted = algoWeighted.compute().centralities();
@@ -112,7 +113,7 @@ class WeightedBetweennessCentralityTest {
              new RandomDegreeSelectionStrategy(7, Optional.of(42L)),
              ForwardTraverser.Factory.weighted(),
              DefaultPool.INSTANCE,
-             8,
+             new Concurrency(8),
              ProgressTracker.NULL_TRACKER
          );
         var result = bc.compute().centralities();

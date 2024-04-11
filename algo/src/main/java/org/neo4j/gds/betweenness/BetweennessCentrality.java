@@ -28,6 +28,7 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
@@ -48,7 +49,7 @@ public class BetweennessCentrality extends Algorithm<BetwennessCentralityResult>
     private final SelectionStrategy selectionStrategy;
 
     private final ExecutorService executorService;
-    private final int concurrency;
+    private final Concurrency concurrency;
 
 
     public BetweennessCentrality(
@@ -56,7 +57,7 @@ public class BetweennessCentrality extends Algorithm<BetwennessCentralityResult>
         SelectionStrategy selectionStrategy,
         ForwardTraverser.Factory traverserFactory,
         ExecutorService executorService,
-        int concurrency,
+        Concurrency concurrency,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
@@ -64,7 +65,7 @@ public class BetweennessCentrality extends Algorithm<BetwennessCentralityResult>
         this.executorService = executorService;
         this.concurrency = concurrency;
         this.nodeCount = graph.nodeCount();
-        this.centrality = HugeAtomicDoubleArray.of(nodeCount, ParallelDoublePageCreator.passThrough(concurrency));
+        this.centrality = HugeAtomicDoubleArray.of(nodeCount, ParallelDoublePageCreator.passThrough(concurrency.value()));
         this.selectionStrategy = selectionStrategy;
         this.selectionStrategy.init(graph, executorService, concurrency);
         this.divisor = graph.schema().isUndirected() ? 2.0 : 1.0;
@@ -75,7 +76,7 @@ public class BetweennessCentrality extends Algorithm<BetwennessCentralityResult>
     @Override
     public BetwennessCentralityResult compute() {
         progressTracker.beginSubTask();
-        ParallelUtil.run(ParallelUtil.tasks(concurrency, BCTask::new), executorService);
+        ParallelUtil.run(ParallelUtil.tasks(concurrency.value(), BCTask::new), executorService);
         progressTracker.endSubTask();
         return new BetwennessCentralityResult(centrality);
     }
