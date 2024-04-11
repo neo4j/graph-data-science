@@ -23,6 +23,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.haa.HugeAtomicIntArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.paged.ParallelIntPageCreator;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -47,7 +48,7 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
 
     private final Graph graph;
     private final long nodeCount;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final ExecutorService executorService;
     private final HugeAtomicIntArray farness;
     private final HugeAtomicIntArray component;
@@ -55,7 +56,7 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
 
     ClosenessCentrality(
         Graph graph,
-        int concurrency,
+        Concurrency concurrency,
         CentralityComputer centralityComputer,
         ExecutorService executorService,
         ProgressTracker progressTracker
@@ -66,8 +67,8 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
         this.concurrency = concurrency;
         this.executorService = executorService;
         this.centralityComputer = centralityComputer;
-        this.farness = HugeAtomicIntArray.of(nodeCount, ParallelIntPageCreator.of(concurrency));
-        this.component = HugeAtomicIntArray.of(nodeCount, ParallelIntPageCreator.of(concurrency));
+        this.farness = HugeAtomicIntArray.of(nodeCount, ParallelIntPageCreator.of(concurrency.value()));
+        this.component = HugeAtomicIntArray.of(nodeCount, ParallelIntPageCreator.of(concurrency.value()));
     }
 
     @Override
@@ -90,7 +91,7 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
         };
         MultiSourceBFSAccessMethods
             .aggregatedNeighborProcessingWithoutSourceNodes(nodeCount, graph, consumer)
-            .run(concurrency, executorService);
+            .run(concurrency.value(), executorService);
         progressTracker.endSubTask();
     }
 
@@ -100,7 +101,7 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
         var closeness = HugeDoubleArray.newArray(nodeCount);
 
         var tasks = PartitionUtils.rangePartition(
-            concurrency,
+            concurrency.value(),
             nodeCount,
             partition -> (Runnable) () -> {
                 partition.consume(nodeId -> closeness.set(nodeId, centralityComputer.centrality(
@@ -115,7 +116,7 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
         ParallelUtil.run(tasks, executorService);
 
         progressTracker.endSubTask();
-        
+
         return closeness;
     }
 }

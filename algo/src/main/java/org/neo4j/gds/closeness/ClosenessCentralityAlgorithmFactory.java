@@ -36,7 +36,7 @@ public class ClosenessCentralityAlgorithmFactory<CONFIG extends ClosenessCentral
             : new DefaultCentralityComputer();
         return new ClosenessCentrality(
             graph,
-            parameters.concurrency().value(),
+            parameters.concurrency(),
             centralityComputer,
             DefaultPool.INSTANCE,
             progressTracker
