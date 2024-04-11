@@ -17,7 +17,7 @@ LINKS = {
     "logProgress": "common-configuration-logProgress",
 }
 
-conf_filename = pathlib.Path("json") / "algorithms-conf.json"
+conf_filename = "algorithms-conf.json"
 adoc_root = pathlib.Path("..") / "modules" / "ROOT" / "partials"
 
 with open(conf_filename) as conf_file:
