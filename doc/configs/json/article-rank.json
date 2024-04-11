@@ -44,5 +44,6 @@
       "optional": true,
       "description": "The name of the scaler applied for the final scores. Supported values are `None`, `MinMax`, `Max`, `Mean`, `Log`, and `StdScore`.  To apply scaler-specific configuration, use the Map syntax: `{scaler: 'name', ...}`."
     }
-  ]
+  ],
+  "page_path": "algorithms/article-rank/"
 }
