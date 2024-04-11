@@ -32,6 +32,7 @@ import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.ArrayIdMap;
 import org.neo4j.gds.core.loading.LabelInformationBuilders;
@@ -137,7 +138,7 @@ class FastRPTest {
         FastRP fastRP = new FastRP(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             minBatchSize,
             FeatureExtraction.propertyExtractors(graph, parameters.featureProperties()),
             ProgressTracker.NULL_TRACKER,
@@ -180,7 +181,7 @@ class FastRPTest {
         FastRP fastRP = new FastRP(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             minBatchSize,
             FeatureExtraction.propertyExtractors(graph, parameters.featureProperties()),
             ProgressTracker.NULL_TRACKER,
@@ -228,7 +229,7 @@ class FastRPTest {
         FastRP fastRP = new FastRP(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             minBatchSize,
             FeatureExtraction.propertyExtractors(graph, parameters.featureProperties()),
             ProgressTracker.NULL_TRACKER,
@@ -298,7 +299,7 @@ class FastRPTest {
         FastRP fastRP = new FastRP(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             minBatchSize,
             FeatureExtraction.propertyExtractors(graph, parameters.featureProperties()),
             ProgressTracker.NULL_TRACKER,
@@ -364,7 +365,7 @@ class FastRPTest {
         FastRP concurrentFastRP = new FastRP(
             graph,
             parameters,
-            4,
+            new Concurrency(4),
             minBatchSize,
             FeatureExtraction.propertyExtractors(graph, parameters.featureProperties()),
             ProgressTracker.NULL_TRACKER,
@@ -377,7 +378,7 @@ class FastRPTest {
         FastRP sequentialFastRP = new FastRP(
             graph,
             parameters,
-            1,
+            new Concurrency(1),
             minBatchSize,
             FeatureExtraction.propertyExtractors(graph, parameters.featureProperties()),
             ProgressTracker.NULL_TRACKER,
@@ -416,7 +417,7 @@ class FastRPTest {
         FastRP fastRP = new FastRP(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             minBatchSize,
             FeatureExtraction.propertyExtractors(graph, parameters.featureProperties()),
             ProgressTracker.NULL_TRACKER,
@@ -463,7 +464,7 @@ class FastRPTest {
         var fastRP = new FastRP(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             minBatchSize,
             List.of(),
             ProgressTracker.NULL_TRACKER,
@@ -519,7 +520,7 @@ class FastRPTest {
         FastRP fastRP = new FastRP(
             scalarGraph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             minBatchSize,
             List.of(),
             ProgressTracker.NULL_TRACKER,
@@ -562,7 +563,7 @@ class FastRPTest {
         new FastRP(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             minBatchSize,
             List.of(),
             progressTracker,
@@ -626,7 +627,7 @@ class FastRPTest {
             FastRP fastRP = new FastRP(
                 graph,
                 parameters,
-                concurrency,
+                new Concurrency(concurrency),
                 minBatchSize,
                 FeatureExtraction.propertyExtractors(graph, List.of("prop")),
                 ProgressTracker.NULL_TRACKER,
@@ -665,7 +666,7 @@ class FastRPTest {
             FastRP fastRP = new FastRP(
                 graph,
                 parameters,
-                concurrency,
+                new Concurrency(concurrency),
                 minBatchSize,
                 List.of(),
                 ProgressTracker.NULL_TRACKER,
@@ -763,7 +764,7 @@ class FastRPTest {
         var firstEmbeddings = new FastRP(
             firstGraph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             minBatchSize,
             List.of(),
             ProgressTracker.NULL_TRACKER,
@@ -773,7 +774,7 @@ class FastRPTest {
         var secondEmbeddings = new FastRP(
             secondGraph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             minBatchSize,
             List.of(),
             ProgressTracker.NULL_TRACKER,
@@ -805,7 +806,7 @@ class FastRPTest {
         var fastRPArray = new FastRP(
             graph,
             parameters,
-            concurrency,
+            new Concurrency(concurrency),
             minBatchSize,
             FeatureExtraction.propertyExtractors(graph, properties),
             ProgressTracker.NULL_TRACKER,

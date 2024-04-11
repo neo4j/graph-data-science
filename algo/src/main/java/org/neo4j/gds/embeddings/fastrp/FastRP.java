@@ -23,6 +23,7 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
@@ -56,7 +57,7 @@ public class FastRP extends Algorithm<FastRPResult> {
     private static final float EPSILON = 10f / Float.MAX_VALUE;
 
     private final Graph graph;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final float normalizationStrength;
     private final List<FeatureExtractor> featureExtractors;
     private final Optional<String> relationshipWeightProperty;
@@ -79,7 +80,7 @@ public class FastRP extends Algorithm<FastRPResult> {
     public FastRP(
         Graph graph,
         FastRPParameters parameters,
-        int concurrency,
+        Concurrency concurrency,
         int minBatchSize,
         List<FeatureExtractor> featureExtractors,
         ProgressTracker progressTracker,
@@ -127,7 +128,7 @@ public class FastRP extends Algorithm<FastRPResult> {
         this.partitions = PartitionUtils.degreePartitionStream(
             graph.nodeCount(),
             graph.relationshipCount(),
-            concurrency,
+            concurrency.value(),
             graph::degree
         ).collect(Collectors.toList());
     }
@@ -149,7 +150,7 @@ public class FastRP extends Algorithm<FastRPResult> {
 
         var sqrtEmbeddingDimension = (float) Math.sqrt(baseEmbeddingDimension);
         List<Runnable> tasks = PartitionUtils.rangePartition(
-            concurrency,
+            concurrency.value(),
             graph.nodeCount(),
             partition -> new InitRandomVectorTask(
                 partition,
@@ -158,7 +159,7 @@ public class FastRP extends Algorithm<FastRPResult> {
             Optional.of(minBatchSize)
         );
         RunWithConcurrency.builder()
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .tasks(tasks)
             .run();
 
@@ -171,7 +172,7 @@ public class FastRP extends Algorithm<FastRPResult> {
 
         ParallelUtil.parallelForEachNode(
             graph.nodeCount(),
-            concurrency,
+            concurrency.value(),
             terminationFlag,
             this::addInitialStateToEmbedding
         );
@@ -198,7 +199,7 @@ public class FastRP extends Algorithm<FastRPResult> {
             );
 
             ParallelUtil.parallelPartitionsConsume(
-                RunWithConcurrency.builder().executor(DefaultPool.INSTANCE).concurrency(concurrency),
+                RunWithConcurrency.builder().executor(DefaultPool.INSTANCE).concurrency(concurrency.value()),
                 partitions.stream(),
                 taskSupplier
             );
