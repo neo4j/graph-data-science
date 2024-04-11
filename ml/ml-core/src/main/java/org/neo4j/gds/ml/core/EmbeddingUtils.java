@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.core;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -73,26 +74,26 @@ public final class EmbeddingUtils {
 
     public static void validateRelationshipWeightPropertyValue(
         Graph graph,
-        int concurrency,
+        Concurrency concurrency,
         ExecutorService executorService
     ) {
         validateRelationshipWeightPropertyValue(graph, concurrency, weight -> !Double.isNaN(weight), "Consider using `defaultValue` when loading the graph.", executorService);
     }
 
-    public static void validateRelationshipWeightPropertyValue(Graph graph, int concurrency, DoublePredicate validator, String errorDetails, ExecutorService executorService) {
+    public static void validateRelationshipWeightPropertyValue(Graph graph, Concurrency concurrency, DoublePredicate validator, String errorDetails, ExecutorService executorService) {
         if (!graph.hasRelationshipProperty()) {
             throw new IllegalStateException("Expected a weighted graph");
         }
 
         var tasks = PartitionUtils.degreePartition(
             graph,
-            concurrency,
+            concurrency.value(),
             partition -> new RelationshipValidator(graph, partition, validator, errorDetails),
             Optional.empty()
         );
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .tasks(tasks)
             .executor(executorService)
             .run();

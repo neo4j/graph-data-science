@@ -69,7 +69,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         if (graph.hasRelationshipProperty()) {
             EmbeddingUtils.validateRelationshipWeightPropertyValue(
                 graph,
-                concurrency.value(),
+                concurrency,
                 weight -> weight >= 0,
                 "RandomWalk only supports non-negative weights.",
                 executorService

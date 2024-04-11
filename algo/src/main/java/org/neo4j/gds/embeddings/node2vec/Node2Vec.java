@@ -73,7 +73,7 @@ public class Node2Vec extends Algorithm<Node2VecResult> {
         if (graph.hasRelationshipProperty()) {
             EmbeddingUtils.validateRelationshipWeightPropertyValue(
                 graph,
-                concurrency.value(),
+                concurrency,
                 weight -> weight >= 0,
                 "Node2Vec only supports non-negative weights.",
                 DefaultPool.INSTANCE

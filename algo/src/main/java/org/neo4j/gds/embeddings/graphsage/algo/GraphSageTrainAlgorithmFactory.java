@@ -53,7 +53,7 @@ public final class GraphSageTrainAlgorithmFactory extends GraphAlgorithmFactory<
         var gdsVersion = GdsVersionInfoProvider.GDS_VERSION_INFO.gdsVersion();
 
         if(configuration.hasRelationshipWeightProperty()) {
-            validateRelationshipWeightPropertyValue(graph, configuration.concurrency(), executorService);
+            validateRelationshipWeightPropertyValue(graph, configuration.typedConcurrency(), executorService);
         }
 
         return configuration.isMultiLabel()

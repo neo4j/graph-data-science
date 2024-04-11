@@ -52,7 +52,7 @@ public class GraphSageAlgorithmFactory<CONFIG extends GraphSageBaseConfig> exten
         );
 
         if (graph.hasRelationshipProperty()) {
-            validateRelationshipWeightPropertyValue(graph, configuration.concurrency(), executorService);
+            validateRelationshipWeightPropertyValue(graph, configuration.typedConcurrency(), executorService);
         }
 
         return new GraphSage(
