@@ -27,6 +27,7 @@ import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -46,7 +47,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
 
     private final Graph graph;
     private final ExecutorService executor;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final Orientation orientation;
     private final boolean hasRelationshipWeightProperty;
     private final int minBatchSize;
@@ -54,7 +55,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
     public DegreeCentrality(
         Graph graph,
         ExecutorService executor,
-        int concurrency,
+        Concurrency concurrency,
         Orientation orientation,
         boolean hasRelationshipWeightProperty,
         int minBatchSize,
@@ -165,12 +166,12 @@ public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
         var degrees = HugeDoubleArray.newArray(graph.nodeCount());
         var tasks = PartitionUtils.degreePartition(
             graph,
-            concurrency,
+            concurrency.value(),
             partition -> taskFunction.apply(partition, degrees),
             Optional.of(minBatchSize)
         );
         RunWithConcurrency.builder()
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .tasks(tasks)
             .executor(executor)
             .run();
@@ -178,15 +179,15 @@ public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
     }
 
     private DegreeFunction computeDegreeAtomic(TaskFunctionAtomic taskFunction) {
-        var degrees = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency));
+        var degrees = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency.value()));
         var tasks = PartitionUtils.degreePartition(
             graph,
-            concurrency,
+            concurrency.value(),
             partition -> taskFunction.apply(partition, degrees),
             Optional.of(minBatchSize)
         );
         RunWithConcurrency.builder()
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .tasks(tasks)
             .executor(executor)
             .run();

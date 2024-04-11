@@ -125,7 +125,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         var nextNodeSupplier = RandomWalkCompanion.nextNodeSupplier(graph, sourceNodes);
         RandomWalkSampler.CumulativeWeightSupplier cumulativeWeightSupplier = RandomWalkCompanion.cumulativeWeights(
             graph,
-            concurrency.value(),
+            concurrency,
             executorService,
             progressTracker
         );

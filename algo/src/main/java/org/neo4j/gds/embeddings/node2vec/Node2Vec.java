@@ -154,7 +154,7 @@ public class Node2Vec extends Algorithm<Node2VecResult> {
         var nextNodeSupplier = RandomWalkCompanion.nextNodeSupplier(graph, sourceNodes);
         var cumulativeWeightsSupplier = RandomWalkCompanion.cumulativeWeights(
             graph,
-            concurrency.value(),
+            concurrency,
             executorService,
             progressTracker
         );

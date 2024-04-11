@@ -144,7 +144,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Gra
         var degreeCentrality = new DegreeCentrality(
             graph,
             DefaultPool.INSTANCE,
-            configuration.concurrency(),
+            configuration.typedConcurrency(),
             Orientation.NATURAL,
             configuration.hasRelationshipWeightProperty(),
             10_000,
