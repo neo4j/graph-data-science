@@ -223,7 +223,7 @@ public class PathFindingAlgorithms {
 
         var algorithm = RandomWalk.create(
             graph,
-            configuration.concurrency(),
+            configuration.typedConcurrency(),
             configuration.walkParameters(),
             configuration.sourceNodes(),
             configuration.walkBufferSize(),

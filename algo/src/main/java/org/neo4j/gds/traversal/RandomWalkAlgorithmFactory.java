@@ -44,7 +44,7 @@ public class RandomWalkAlgorithmFactory<CONFIG extends RandomWalkBaseConfig> ext
     ) {
         return RandomWalk.create(
             graph,
-            configuration.concurrency(),
+            configuration.typedConcurrency(),
             configuration.walkParameters(),
             configuration.sourceNodes(),
             configuration.walkBufferSize(),

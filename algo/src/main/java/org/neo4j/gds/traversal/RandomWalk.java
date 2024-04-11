@@ -21,6 +21,7 @@ package org.neo4j.gds.traversal;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -46,7 +47,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
 
     private static final long[] TOMBSTONE = new long[0];
 
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final ExecutorService executorService;
     private final Graph graph;
     private final long randomSeed;
@@ -57,7 +58,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
 
     public static RandomWalk create(
         Graph graph,
-        int concurrency,
+        Concurrency concurrency,
         WalkParameters walkParameters,
         List<Long> sourceNodes,
         int walkBufferSize,
@@ -68,7 +69,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         if (graph.hasRelationshipProperty()) {
             EmbeddingUtils.validateRelationshipWeightPropertyValue(
                 graph,
-                concurrency,
+                concurrency.value(),
                 weight -> weight >= 0,
                 "RandomWalk only supports non-negative weights.",
                 executorService
@@ -89,7 +90,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
 
     private RandomWalk(
         Graph graph,
-        int concurrency,
+        Concurrency concurrency,
         ExecutorService executorService,
         WalkParameters walkParameters,
         List<Long> sourceNodes,
@@ -124,7 +125,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
         var nextNodeSupplier = RandomWalkCompanion.nextNodeSupplier(graph, sourceNodes);
         RandomWalkSampler.CumulativeWeightSupplier cumulativeWeightSupplier = RandomWalkCompanion.cumulativeWeights(
             graph,
-            concurrency,
+            concurrency.value(),
             executorService,
             progressTracker
         );
@@ -142,7 +143,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
 
     private void startWalkers(RandomWalkTaskSupplier taskSupplier, Runnable whenCompleteAction) {
         var tasks = IntStream
-            .range(0, this.concurrency)
+            .range(0, this.concurrency.value())
             .mapToObj(i -> taskSupplier.get())
             .collect(Collectors.toList());
 
@@ -157,7 +158,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
 
         RunWithConcurrency.builder()
             .executor(this.executorService)
-            .concurrency(this.concurrency)
+            .concurrency(this.concurrency.value())
             .tasks(tasks)
             .terminationFlag(this.externalTerminationFlag)
             .mayInterruptIfRunning(true)
