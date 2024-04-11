@@ -1,1 +1,3 @@
-| batchSize            | Integer       | 100       | yes      | The number of nodes per batch.
+// DO NOT EDIT: File generated automatically
+| modelName | String | n/a | no | The name of a GraphSAGE model in the model catalog.
+| batchSize | Integer | 100 | yes | The number of nodes per batch.
