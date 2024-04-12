@@ -65,6 +65,11 @@ public interface ResultStore {
     NodeLabelEntry getNodeIdsByLabel(String nodeLabel);
 
     /**
+     * Removes node id information for the given label from this store.
+     */
+    void removeNodeLabel(String nodeLabel);
+
+    /**
      * Stores a relationship information in this store, held by the given graph.
      *
      * @param toOriginalId a mapping function to for the relationship source and target ids

@@ -77,6 +77,11 @@ public class EphemeralResultStore implements ResultStore {
     }
 
     @Override
+    public void removeNodeLabel(String nodeLabel) {
+        this.nodeIdsByLabel.remove(nodeLabel);
+    }
+
+    @Override
     public void addRelationship(String relationshipType, Graph graph, LongUnaryOperator toOriginalId) {
         addRelationship(relationshipType, NO_PROPERTY_KEY, graph, toOriginalId);
     }

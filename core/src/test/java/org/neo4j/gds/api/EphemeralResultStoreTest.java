@@ -82,6 +82,21 @@ class EphemeralResultStoreTest {
     }
 
     @Test
+    void shouldRemoveNodeLabel() {
+        var resultStore = new EphemeralResultStore();
+
+        var nodeCount = 1337L;
+        var toOriginalId = mock(LongUnaryOperator.class);
+        resultStore.addNodeLabel("Label", nodeCount, toOriginalId);
+
+        assertThat(resultStore.hasNodeLabel("Label")).isTrue();
+
+        resultStore.removeNodeLabel("Label");
+
+        assertThat(resultStore.hasNodeLabel("Label")).isFalse();
+    }
+
+    @Test
     void shouldStoreGraphBasedRelationshipsWithoutProperty() {
         var resultStore = new EphemeralResultStore();
 
