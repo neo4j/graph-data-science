@@ -17,6 +17,56 @@ LINKS = {
     "logProgress": "common-configuration-logProgress",
 }
 
+INCLUDED_ALGORITHMS = {
+    "Article Rank",
+    "Betweenness Centrality",
+    # "CELF",
+    # "Closeness Centrality",
+    "Degree Centrality",
+    "Eigenvector Centrality",
+    "PageRank",
+    # "Harmonic Centrality",
+    # "HITS",
+    "Conductance metric",
+    # "K-Core Decomposition",
+    # "K-1 Coloring",
+    # "K-Means Clustering",
+    # "Label Propagation",
+    # "Leiden",
+    "Local Clustering Coefficient",
+    # "Louvain",
+    "Modularity metric",
+    # "Modularity Optimization",
+    # "Strongly Connected Components",
+    "Triangle Count",
+    # "Weakly Connected Components",
+    # "Approximate Maximum k-cut",
+    # "Speaker-Listener Label Propagation",
+    "Node Similarity",
+    # "Filtered Node Similarity",
+    # "K-Nearest Neighbors",
+    # "Filtered K-Nearest Neighbors",
+    # "Delta-Stepping Single-Source Shortest Path",
+    # "Dijkstra Source-Target Shortest Path",
+    # "Dijkstra Single-Source Shortest Path",
+    # "A* Shortest Path",
+    # "Yen's Shortest Path algorithm",
+    # "Minimum Weight Spanning Tree",
+    # "Minimum Directed Steiner Tree",
+    # "Random Walk",
+    "Breadth First Search",
+    "Depth First Search",
+    # "Bellman-Ford Single-Source Shortest Path",
+    # "Longest Path for DAG",
+    # "All Pairs Shortest Path",
+    # "Topological Sort",
+    # "Longest Path for DAG",
+    "Fast Random Projection",
+    "GraphSAGE",
+    "Node2Vec",
+    "HashGNN"
+}
+
 conf_filename = "algorithms-conf.json"
 adoc_root = Path("..") / "modules" / "ROOT" / "partials"
 
@@ -24,11 +74,11 @@ with open(conf_filename) as conf_file:
     conf_json = json.load(conf_file)
 
     for algo in conf_json["algorithms"]:
-        adoc_filename = adoc_root / algo["page_path"] / "specific-configuration.adoc"
-
-        if not Path(adoc_filename).exists():
-            print(f"File '{adoc_filename}' skipped")
+        # TODO: remove when all algorithms are included
+        if algo["name"] not in INCLUDED_ALGORITHMS:
             continue
+
+        adoc_filename = adoc_root / algo["page_path"] / "specific-configuration.adoc"
 
         with open(adoc_filename, "w") as adoc_file:
             adoc_file.write("// DO NOT EDIT: File generated automatically\n")
