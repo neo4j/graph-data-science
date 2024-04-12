@@ -31,10 +31,17 @@ public final class HugeMergeSort {
     private static final int SEQUENTIAL_THRESHOLD = 100;
 
     public static void sort(HugeLongArray array, Concurrency concurrency) {
-        var temp = HugeLongArray.newArray(array.size());
+        var tempArray = HugeLongArray.newArray(array.size());
+        sort(array, concurrency, tempArray);
+    }
+
+    public static void sort(HugeLongArray array, Concurrency concurrency, HugeLongArray tempArray) {
+        if (tempArray.size() < array.size()) {
+            throw new IllegalArgumentException("Temporary must be greater or equal than the input array.");
+        }
         var forkJoinPool = ExecutorServiceUtil.createForkJoinPool(concurrency);
         try {
-            forkJoinPool.invoke(new MergeSortTask(null, array, temp, 0, array.size() - 1));
+            forkJoinPool.invoke(new MergeSortTask(null, array, tempArray, 0, array.size() - 1));
         } finally {
             forkJoinPool.shutdown();
         }

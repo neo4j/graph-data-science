@@ -98,9 +98,10 @@ public final class CompressedAdjacencyList implements AdjacencyList {
         return (firstAdjacencyIdAvgByteSize + compressedAdjacencyByteSize) * nodeCount;
     }
 
-    private byte[][] pages;
-    private HugeIntArray degrees;
-    private HugeLongArray offsets;
+    // TODO: expose in a nicer way
+    byte[][] pages;
+    HugeIntArray degrees;
+    HugeLongArray offsets;
 
     private final MemoryInfo memoryInfo;
 
