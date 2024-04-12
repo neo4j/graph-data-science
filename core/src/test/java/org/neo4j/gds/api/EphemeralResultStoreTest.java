@@ -53,6 +53,20 @@ class EphemeralResultStoreTest {
     }
 
     @Test
+    void shouldRemoveNodeProperty() {
+        var resultStore = new EphemeralResultStore();
+
+        var propertyValues = mock(NodePropertyValues.class);
+        resultStore.addNodePropertyValues(List.of("A", "B"), "foo", propertyValues);
+
+        assertThat(resultStore.getNodePropertyValues(List.of("A", "B"), "foo")).isNotNull();
+
+        resultStore.removeNodePropertyValues(List.of("A", "B"), "foo");
+
+        assertThat(resultStore.getNodePropertyValues(List.of("A", "B"), "foo")).isNull();
+    }
+
+    @Test
     void shouldStoreNodeLabel() {
         var resultStore = new EphemeralResultStore();
 

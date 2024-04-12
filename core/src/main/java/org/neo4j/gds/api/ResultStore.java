@@ -45,6 +45,11 @@ public interface ResultStore {
     NodePropertyValues getNodePropertyValues(List<String> nodeLabels, String propertyKey);
 
     /**
+     * Removes node property values from this store based on the property key.
+     */
+    void removeNodePropertyValues(List<String> nodeLabels, String propertyKey);
+
+    /**
      * Stores node id information for the given label in this store.
      */
     void addNodeLabel(String nodeLabel, long nodeCount, LongUnaryOperator toOriginalId);

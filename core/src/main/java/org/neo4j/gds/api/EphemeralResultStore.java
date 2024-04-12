@@ -57,6 +57,11 @@ public class EphemeralResultStore implements ResultStore {
     }
 
     @Override
+    public void removeNodePropertyValues(List<String> nodeLabels, String propertyKey) {
+        this.nodeProperties.remove(new NodeKey(nodeLabels, propertyKey));
+    }
+
+    @Override
     public void addNodeLabel(String nodeLabel, long nodeCount, LongUnaryOperator toOriginalId) {
         this.nodeIdsByLabel.put(nodeLabel, new NodeLabelEntry(nodeCount, toOriginalId));
     }
