@@ -21,6 +21,7 @@ package org.neo4j.gds.embeddings.graphsage.algo;
 
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -40,20 +41,23 @@ public class GraphSage extends Algorithm<GraphSageResult> {
     public static final String MODEL_TYPE = "graphSage";
 
     private final Graph graph;
-    private final GraphSageBaseConfig config;
     private final Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model;
     private final ExecutorService executor;
+    private final Concurrency concurrency;
+    private final int batchSize;
 
     public GraphSage(
         Graph graph,
         Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> model,
-        GraphSageBaseConfig config,
+        Concurrency concurrency,
+        int batchSize,
         ExecutorService executor,
         ProgressTracker progressTracker
     ) {
         super(progressTracker);
         this.graph = graph;
-        this.config = config;
+        this.concurrency = concurrency;
+        this.batchSize = batchSize;
         this.model = model;
         this.executor = executor;
     }
@@ -64,8 +68,8 @@ public class GraphSage extends Algorithm<GraphSageResult> {
 
         var embeddingsGenerator = new GraphSageEmbeddingsGenerator(
             layers,
-            config.batchSize(),
-            config.concurrency(),
+            batchSize,
+            concurrency,
             model.data().featureFunction(),
             model.trainConfig().randomSeed(),
             executor,

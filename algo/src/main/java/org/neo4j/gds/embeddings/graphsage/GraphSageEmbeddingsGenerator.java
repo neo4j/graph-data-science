@@ -20,6 +20,7 @@
 package org.neo4j.gds.embeddings.graphsage;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -38,7 +39,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class GraphSageEmbeddingsGenerator {
     private final Layer[] layers;
     private final int batchSize;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final FeatureFunction featureFunction;
     private final long randomSeed;
     private final ExecutorService executor;
@@ -47,7 +48,7 @@ public class GraphSageEmbeddingsGenerator {
     public GraphSageEmbeddingsGenerator(
         Layer[] layers,
         int batchSize,
-        int concurrency,
+        Concurrency concurrency,
         FeatureFunction featureFunction,
         Optional<Long> randomSeed,
         ExecutorService executor,
@@ -80,7 +81,7 @@ public class GraphSageEmbeddingsGenerator {
         );
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .tasks(tasks)
             .executor(executor)
             .run();

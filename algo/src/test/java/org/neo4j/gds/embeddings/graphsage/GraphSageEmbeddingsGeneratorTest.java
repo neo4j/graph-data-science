@@ -78,10 +78,12 @@ class GraphSageEmbeddingsGeneratorTest {
 
         GraphSageModelTrainer.ModelTrainResult result = trainModel.train(weightedGraph, features);
 
+
+
         GraphSageEmbeddingsGenerator embeddingsGenerator = new GraphSageEmbeddingsGenerator(
             result.layers(),
             config.batchSize(),
-            config.concurrency(),
+            config.typedConcurrency(),
             new SingleLabelFeatureFunction(),
             config.randomSeed(),
             DefaultPool.INSTANCE,
@@ -122,7 +124,7 @@ class GraphSageEmbeddingsGeneratorTest {
         var embeddingsGenerator = new GraphSageEmbeddingsGenerator(
             model.data().layers(),
             config.batchSize(),
-            config.concurrency(),
+            config.typedConcurrency(),
             model.data().featureFunction(),
             model.trainConfig().randomSeed(),
             DefaultPool.INSTANCE,
@@ -177,7 +179,7 @@ class GraphSageEmbeddingsGeneratorTest {
         var embeddingsGenerator = new GraphSageEmbeddingsGenerator(
             model.data().layers(),
             config.batchSize(),
-            config.concurrency(),
+            config.typedConcurrency(),
             model.data().featureFunction(),
             model.trainConfig().randomSeed(),
             DefaultPool.INSTANCE,
