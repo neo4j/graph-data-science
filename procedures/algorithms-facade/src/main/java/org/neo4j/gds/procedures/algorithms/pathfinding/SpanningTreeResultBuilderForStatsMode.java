@@ -23,14 +23,13 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
-import org.neo4j.gds.applications.algorithms.machinery.SideEffectProcessingCounts;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeStatsConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class SpanningTreeResultBuilderForStatsMode implements ResultBuilder<SpanningTreeStatsConfig, SpanningTree, Stream<SpanningTreeStatsResult>> {
+class SpanningTreeResultBuilderForStatsMode implements ResultBuilder<SpanningTreeStatsConfig, SpanningTree, Stream<SpanningTreeStatsResult>, Void> {
     @Override
     public Stream<SpanningTreeStatsResult> build(
         Graph graph,
@@ -38,7 +37,7 @@ class SpanningTreeResultBuilderForStatsMode implements ResultBuilder<SpanningTre
         SpanningTreeStatsConfig configuration,
         Optional<SpanningTree> result,
         AlgorithmProcessingTimings timings,
-        SideEffectProcessingCounts counts
+        Optional<Void> metadata
     ) {
         var builder = new SpanningTreeStatsResult.Builder();
 

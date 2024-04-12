@@ -73,7 +73,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     public <RESULT> RESULT bellmanFord(
         GraphName graphName,
         BellmanFordMutateConfig configuration,
-        ResultBuilder<BellmanFordMutateConfig, BellmanFordResult, RESULT> resultBuilder
+        ResultBuilder<BellmanFordMutateConfig, BellmanFordResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var mutateStep = new BellmanFordMutateStep(configuration);
 
@@ -91,7 +91,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     public <RESULT> RESULT breadthFirstSearch(
         GraphName graphName,
         BfsMutateConfig configuration,
-        ResultBuilder<BfsMutateConfig, HugeLongArray, RESULT> resultBuilder
+        ResultBuilder<BfsMutateConfig, HugeLongArray, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
         var mutateStep = new SearchMutateStep(mutateRelationshipType);
@@ -110,7 +110,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     public <RESULT> RESULT deltaStepping(
         GraphName graphName,
         AllShortestPathsDeltaMutateConfig configuration,
-        ResultBuilder<AllShortestPathsDeltaMutateConfig, PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<AllShortestPathsDeltaMutateConfig, PathFindingResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var mutateStep = new ShortestPathMutateStep(configuration);
 
@@ -128,7 +128,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     public <RESULT> RESULT depthFirstSearch(
         GraphName graphName,
         DfsMutateConfig configuration,
-        ResultBuilder<DfsMutateConfig, HugeLongArray, RESULT> resultBuilder
+        ResultBuilder<DfsMutateConfig, HugeLongArray, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
         var mutateStep = new SearchMutateStep(mutateRelationshipType);
@@ -147,7 +147,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     public <RESULT> RESULT singlePairShortestPathAStar(
         GraphName graphName,
         ShortestPathAStarMutateConfig configuration,
-        ResultBuilder<ShortestPathAStarMutateConfig, PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<ShortestPathAStarMutateConfig, PathFindingResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var mutateStep = new ShortestPathMutateStep(configuration);
 
@@ -165,7 +165,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     public <RESULT> RESULT singlePairShortestPathDijkstra(
         GraphName graphName,
         ShortestPathDijkstraMutateConfig configuration,
-        ResultBuilder<ShortestPathDijkstraMutateConfig, PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<ShortestPathDijkstraMutateConfig, PathFindingResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var mutateStep = new ShortestPathMutateStep(configuration);
 
@@ -183,7 +183,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     public <RESULT> RESULT singlePairShortestPathYens(
         GraphName graphName,
         ShortestPathYensMutateConfig configuration,
-        ResultBuilder<ShortestPathYensMutateConfig, PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<ShortestPathYensMutateConfig, PathFindingResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var mutateStep = new ShortestPathMutateStep(configuration);
 
@@ -201,7 +201,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     public <RESULT> RESULT singleSourceShortestPathDijkstra(
         GraphName graphName,
         AllShortestPathsDijkstraMutateConfig configuration,
-        ResultBuilder<AllShortestPathsDijkstraMutateConfig, PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<AllShortestPathsDijkstraMutateConfig, PathFindingResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var mutateStep = new ShortestPathMutateStep(configuration);
 
@@ -219,7 +219,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     public <RESULT> RESULT spanningTree(
         GraphName graphName,
         SpanningTreeMutateConfig configuration,
-        ResultBuilder<SpanningTreeMutateConfig, SpanningTree, RESULT> resultBuilder
+        ResultBuilder<SpanningTreeMutateConfig, SpanningTree, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var mutateOrWriteStep = new SpanningTreeMutateStep(configuration);
 
@@ -237,7 +237,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
     public <RESULT> RESULT steinerTree(
         GraphName graphName,
         SteinerTreeMutateConfig configuration,
-        ResultBuilder<SteinerTreeMutateConfig, SteinerTreeResult, RESULT> resultBuilder
+        ResultBuilder<SteinerTreeMutateConfig, SteinerTreeResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var mutateOrWriteStep = new SteinerTreeMutateStep(configuration);
 

@@ -23,14 +23,14 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
-import org.neo4j.gds.applications.algorithms.machinery.SideEffectProcessingCounts;
+import org.neo4j.gds.applications.algorithms.pathfinding.RelationshipsWritten;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.paths.traverse.BfsMutateConfig;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingMutateResult;
 
 import java.util.Optional;
 
-class BreadthFirstSearchResultBuilderForMutateMode implements ResultBuilder<BfsMutateConfig, HugeLongArray, PathFindingMutateResult> {
+class BreadthFirstSearchResultBuilderForMutateMode implements ResultBuilder<BfsMutateConfig, HugeLongArray, PathFindingMutateResult, RelationshipsWritten> {
     @Override
     public PathFindingMutateResult build(
         Graph graph,
@@ -38,14 +38,16 @@ class BreadthFirstSearchResultBuilderForMutateMode implements ResultBuilder<BfsM
         BfsMutateConfig configuration,
         Optional<HugeLongArray> result,
         AlgorithmProcessingTimings timings,
-        SideEffectProcessingCounts counts
+        Optional<RelationshipsWritten> metadata
     ) {
-        return new PathFindingMutateResult.Builder()
+        var resultBuilder = new PathFindingMutateResult.Builder()
             .withConfig(configuration)
             .withPreProcessingMillis(timings.preProcessingMillis)
             .withComputeMillis(timings.computeMillis)
-            .withMutateMillis(timings.postProcessingMillis)
-            .withRelationshipsWritten(counts.relationshipsWritten)
-            .build();
+            .withMutateMillis(timings.postProcessingMillis);
+
+        metadata.ifPresent(rw -> resultBuilder.withRelationshipsWritten(rw.value));
+
+        return resultBuilder.build();
     }
 }

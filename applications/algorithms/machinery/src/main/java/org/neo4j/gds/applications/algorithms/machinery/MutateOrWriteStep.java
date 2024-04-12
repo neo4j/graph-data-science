@@ -22,14 +22,15 @@ package org.neo4j.gds.applications.algorithms.machinery;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 
-public interface MutateOrWriteStep<RESULT_FROM_ALGORITHM> {
+public interface MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> {
     /**
      * Timings belong on the outside.
+     *
+     * @return metadata for reporting, for example number of relationships written
      */
-    void execute(
+    MUTATE_OR_WRITE_METADATA execute(
         Graph graph,
         GraphStore graphStore,
-        RESULT_FROM_ALGORITHM result,
-        SideEffectProcessingCountsBuilder countsBuilder
+        RESULT_FROM_ALGORITHM result
     );
 }

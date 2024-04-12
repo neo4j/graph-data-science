@@ -59,24 +59,22 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
     }
 
     @Override
-    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> RESULT_TO_CALLER processAlgorithm(
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER processAlgorithm(
         GraphName graphName,
         CONFIGURATION configuration,
         String humanReadableAlgorithmName,
         Supplier<MemoryEstimation> estimationFactory,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
-        Optional<MutateOrWriteStep<RESULT_FROM_ALGORITHM>> mutateOrWriteStep,
-        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
+        Optional<MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA>> mutateOrWriteStep,
+        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
     ) {
         // as we progress through the steps we gather some metadata
         var timingsBuilder = new AlgorithmProcessingTimingsBuilder();
-        var countsBuilder = new SideEffectProcessingCountsBuilder();
 
         Pair<Graph, GraphStore> graphWithGraphStore = graphLoadAndValidationWithTiming(
             timingsBuilder,
             graphName,
-            configuration,
-            resultBuilder
+            configuration
         );
 
         var graph = graphWithGraphStore.getLeft();
@@ -88,7 +86,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             configuration,
             Optional.empty(),
             timingsBuilder.build(),
-            countsBuilder.build()
+            Optional.empty()
         );
 
         memoryGuard.assertAlgorithmCanRun(humanReadableAlgorithmName, configuration, graph, estimationFactory);
@@ -98,12 +96,17 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             timingsBuilder,
             humanReadableAlgorithmName,
             algorithmComputation,
-            resultBuilder,
             graph
         );
 
         // do any side effects
-        mutateOrWriteWithTiming(mutateOrWriteStep, timingsBuilder, countsBuilder, graph, graphStore, result);
+        MUTATE_OR_WRITE_METADATA metadata = mutateOrWriteWithTiming(
+            mutateOrWriteStep,
+            timingsBuilder,
+            graph,
+            graphStore,
+            result
+        );
 
         // inject dependencies to render results
         return resultBuilder.build(
@@ -112,7 +115,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             configuration,
             Optional.ofNullable(result),
             timingsBuilder.build(),
-            countsBuilder.build()
+            Optional.ofNullable(metadata)
         );
     }
 
@@ -129,11 +132,10 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
      *     We can add that when needed as more instrumentation.</li>
      * </ul>
      */
-    <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> Pair<Graph, GraphStore> graphLoadAndValidationWithTiming(
+    <CONFIGURATION extends AlgoBaseConfig> Pair<Graph, GraphStore> graphLoadAndValidationWithTiming(
         AlgorithmProcessingTimingsBuilder timingsBuilder,
         GraphName graphName,
-        CONFIGURATION configuration,
-        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
+        CONFIGURATION configuration
     ) {
         try (ProgressTimer ignored = ProgressTimer.start(timingsBuilder::withPreProcessingMillis)) {
             // tee up the graph we want to work on
@@ -163,11 +165,10 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         return Optional.empty();
     }
 
-    <CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> RESULT_FROM_ALGORITHM computeWithTiming(
+    <RESULT_FROM_ALGORITHM> RESULT_FROM_ALGORITHM computeWithTiming(
         AlgorithmProcessingTimingsBuilder timingsBuilder,
         String humanReadableAlgorithmName,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
-        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder,
         Graph graph
     ) {
         try (ProgressTimer ignored = ProgressTimer.start(timingsBuilder::withComputeMillis)) {
@@ -193,18 +194,20 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         }
     }
 
-    <RESULT_FROM_ALGORITHM> void mutateOrWriteWithTiming(
-        Optional<MutateOrWriteStep<RESULT_FROM_ALGORITHM>> mutateOrWriteStep,
+    /**
+     * @return null if we are not in mutate or write mode; appropriate metadata otherwise
+     */
+    <RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> MUTATE_OR_WRITE_METADATA mutateOrWriteWithTiming(
+        Optional<MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA>> mutateOrWriteStep,
         AlgorithmProcessingTimingsBuilder timingsBuilder,
-        SideEffectProcessingCountsBuilder countsBuilder,
         Graph graph,
         GraphStore graphStore,
         RESULT_FROM_ALGORITHM result
     ) {
-        mutateOrWriteStep.ifPresent(step -> {
-            try (ProgressTimer ignored = ProgressTimer.start(timingsBuilder::withPostProcessingMillis)) {
-                step.execute(graph, graphStore, result, countsBuilder);
-            }
-        });
+        if (mutateOrWriteStep.isEmpty()) return null;
+
+        try (ProgressTimer ignored = ProgressTimer.start(timingsBuilder::withPostProcessingMillis)) {
+            return mutateOrWriteStep.get().execute(graph, graphStore, result);
+        }
     }
 }

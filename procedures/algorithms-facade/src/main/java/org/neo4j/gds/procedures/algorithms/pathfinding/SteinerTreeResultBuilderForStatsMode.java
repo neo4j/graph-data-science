@@ -23,14 +23,13 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
-import org.neo4j.gds.applications.algorithms.machinery.SideEffectProcessingCounts;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.steiner.SteinerTreeStatsConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class SteinerTreeResultBuilderForStatsMode implements ResultBuilder<SteinerTreeStatsConfig, SteinerTreeResult, Stream<SteinerStatsResult>> {
+class SteinerTreeResultBuilderForStatsMode implements ResultBuilder<SteinerTreeStatsConfig, SteinerTreeResult, Stream<SteinerStatsResult>, Void> {
     @Override
     public Stream<SteinerStatsResult> build(
         Graph graph,
@@ -38,7 +37,7 @@ class SteinerTreeResultBuilderForStatsMode implements ResultBuilder<SteinerTreeS
         SteinerTreeStatsConfig configuration,
         Optional<SteinerTreeResult> result,
         AlgorithmProcessingTimings timings,
-        SideEffectProcessingCounts counts
+        Optional<Void> metadata
     ) {
         var builder = new SteinerStatsResult.Builder();
 

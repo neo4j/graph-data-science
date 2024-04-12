@@ -27,11 +27,12 @@ import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsWriteModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.pathfinding.RelationshipsWritten;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitsConfiguration;
@@ -64,17 +65,17 @@ import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.BellmanFordMutateSt
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.BreadthFirstSearchMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.DeltaSteppingMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.DepthFirstSearchMutateStub;
-import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestPathAStarMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestPathDijkstraMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SinglePairShortestPathYensMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SingleSourceShortestPathDijkstraMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SpanningTreeMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SteinerTreeMutateStub;
-import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.procedures.algorithms.results.StandardModeResult;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 import org.neo4j.gds.procedures.algorithms.results.StandardWriteRelationshipsResult;
+import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
+import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.spanningtree.SpanningTreeStatsConfig;
 import org.neo4j.gds.spanningtree.SpanningTreeStreamConfig;
 import org.neo4j.gds.spanningtree.SpanningTreeWriteConfig;
@@ -249,7 +250,7 @@ public final class PathFindingProcedureFacade {
         String graphName,
         Map<String, Object> configuration
     ) {
-        ResultBuilder<AllShortestPathsConfig, Stream<AllShortestPathsStreamResult>, Stream<AllShortestPathsStreamResult>> resultBuilder =
+        ResultBuilder<AllShortestPathsConfig, Stream<AllShortestPathsStreamResult>, Stream<AllShortestPathsStreamResult>, Void> resultBuilder =
             (__, ___, ____, result, _____, ______) -> result.orElse(Stream.empty());
 
         return runStreamAlgorithm(
@@ -1097,7 +1098,7 @@ public final class PathFindingProcedureFacade {
         String graphNameAsString,
         Map<String, Object> rawConfiguration,
         Function<CypherMapWrapper, CONFIGURATION> configurationSupplier,
-        AlgorithmHandle<CONFIGURATION, PathFindingResult, Stream<PathFindingStreamResult>> algorithm
+        AlgorithmHandle<CONFIGURATION, PathFindingResult, Stream<PathFindingStreamResult>, Void> algorithm
     ) {
         var resultBuilder = new PathFindingResultBuilderForStreamMode<CONFIGURATION>(
             nodeLookup,
@@ -1111,8 +1112,8 @@ public final class PathFindingProcedureFacade {
         String graphNameAsString,
         Map<String, Object> rawConfiguration,
         Function<CypherMapWrapper, CONFIGURATION> configurationSupplier,
-        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, Stream<RESULT_TO_CALLER>> resultBuilder,
-        AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, Stream<RESULT_TO_CALLER>> algorithm
+        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, Stream<RESULT_TO_CALLER>, Void> resultBuilder,
+        AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, Stream<RESULT_TO_CALLER>, Void> algorithm
     ) {
         var graphName = GraphName.parse(graphNameAsString);
         var configuration = configurationCreator.createConfiguration(rawConfiguration, configurationSupplier);
@@ -1133,8 +1134,8 @@ public final class PathFindingProcedureFacade {
         String graphNameAsString,
         Map<String, Object> rawConfiguration,
         Function<CypherMapWrapper, CONFIGURATION> configurationSupplier,
-        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, Stream<RESULT_TO_CALLER>> resultBuilder,
-        AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, Stream<RESULT_TO_CALLER>> algorithm
+        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, Stream<RESULT_TO_CALLER>, Void> resultBuilder,
+        AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, Stream<RESULT_TO_CALLER>, Void> algorithm
     ) {
         var graphName = GraphName.parse(graphNameAsString);
         var configuration = configurationCreator.createConfigurationForStream(rawConfiguration, configurationSupplier);
@@ -1154,7 +1155,7 @@ public final class PathFindingProcedureFacade {
         String graphNameAsString,
         Map<String, Object> rawConfiguration,
         Function<CypherMapWrapper, CONFIGURATION> configurationSupplier,
-        AlgorithmHandle<CONFIGURATION, PathFindingResult, StandardWriteRelationshipsResult> algorithm
+        AlgorithmHandle<CONFIGURATION, PathFindingResult, StandardWriteRelationshipsResult, RelationshipsWritten> algorithm
     ) {
         var resultBuilder = new PathFindingResultBuilderForWriteMode<CONFIGURATION>();
 
@@ -1167,12 +1168,12 @@ public final class PathFindingProcedureFacade {
         );
     }
 
-    private <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> RESULT_TO_CALLER runWriteAlgorithm(
+    private <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER runWriteAlgorithm(
         String graphNameAsString,
         Map<String, Object> rawConfiguration,
         Function<CypherMapWrapper, CONFIGURATION> configurationSupplier,
-        AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> algorithm,
-        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
+        AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> algorithm,
+        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
     ) {
         var graphName = GraphName.parse(graphNameAsString);
         var configuration = configurationCreator.createConfiguration(rawConfiguration, configurationSupplier);

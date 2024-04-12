@@ -24,14 +24,13 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.SideEffectProcessingCountsBuilder;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.paths.bellmanford.BellmanFordMutateConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 
 import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
 
-class BellmanFordMutateStep implements MutateOrWriteStep<BellmanFordResult> {
+class BellmanFordMutateStep implements MutateOrWriteStep<BellmanFordResult, RelationshipsWritten> {
     private final BellmanFordMutateConfig configuration;
 
     BellmanFordMutateStep(BellmanFordMutateConfig configuration) {
@@ -39,11 +38,10 @@ class BellmanFordMutateStep implements MutateOrWriteStep<BellmanFordResult> {
     }
 
     @Override
-    public void execute(
+    public RelationshipsWritten execute(
         Graph graph,
         GraphStore graphStore,
-        BellmanFordResult result,
-        SideEffectProcessingCountsBuilder countsBuilder
+        BellmanFordResult result
     ) {
         var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
 
@@ -72,6 +70,6 @@ class BellmanFordMutateStep implements MutateOrWriteStep<BellmanFordResult> {
         graphStore.addRelationshipType(relationships);
 
         // reporting
-        countsBuilder.withRelationshipsWritten(relationships.topology().elementCount());
+        return new RelationshipsWritten(relationships.topology().elementCount());
     }
 }

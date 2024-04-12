@@ -23,7 +23,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
-import org.neo4j.gds.applications.algorithms.machinery.SideEffectProcessingCounts;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.paths.traverse.BfsStatsConfig;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
@@ -31,7 +30,7 @@ import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class BfsStatsResultBuilder implements ResultBuilder<BfsStatsConfig, HugeLongArray, Stream<StandardStatsResult>> {
+class BfsStatsResultBuilder implements ResultBuilder<BfsStatsConfig, HugeLongArray, Stream<StandardStatsResult>, Void> {
     @Override
     public Stream<StandardStatsResult> build(
         Graph graph,
@@ -39,7 +38,7 @@ class BfsStatsResultBuilder implements ResultBuilder<BfsStatsConfig, HugeLongArr
         BfsStatsConfig configuration,
         Optional<HugeLongArray> result,
         AlgorithmProcessingTimings timings,
-        SideEffectProcessingCounts counts
+        Optional<Void> metadata
     ) {
         return Stream.of(
             new StandardStatsResult(

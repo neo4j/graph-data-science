@@ -23,14 +23,14 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
-import org.neo4j.gds.applications.algorithms.machinery.SideEffectProcessingCounts;
+import org.neo4j.gds.applications.algorithms.pathfinding.RelationshipsWritten;
 import org.neo4j.gds.paths.bellmanford.BellmanFordMutateConfig;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordMutateResult;
 
 import java.util.Optional;
 
-class BellmanFordResultBuilderForMutateMode implements ResultBuilder<BellmanFordMutateConfig, BellmanFordResult, BellmanFordMutateResult> {
+class BellmanFordResultBuilderForMutateMode implements ResultBuilder<BellmanFordMutateConfig, BellmanFordResult, BellmanFordMutateResult, RelationshipsWritten> {
     @Override
     public BellmanFordMutateResult build(
         Graph graph,
@@ -38,7 +38,7 @@ class BellmanFordResultBuilderForMutateMode implements ResultBuilder<BellmanFord
         BellmanFordMutateConfig configuration,
         Optional<BellmanFordResult> result,
         AlgorithmProcessingTimings timings,
-        SideEffectProcessingCounts counts
+        Optional<RelationshipsWritten> metadata
     ) {
         var resultBuilder = new BellmanFordMutateResult.Builder();
         resultBuilder.withConfig(configuration);
@@ -47,7 +47,7 @@ class BellmanFordResultBuilderForMutateMode implements ResultBuilder<BellmanFord
         resultBuilder.withComputeMillis(timings.computeMillis);
         resultBuilder.withMutateMillis(timings.postProcessingMillis);
 
-        resultBuilder.withRelationshipsWritten(counts.relationshipsWritten);
+        metadata.ifPresent(rw -> resultBuilder.withRelationshipsWritten(rw.value));
 
         //noinspection OptionalIsPresent
         if (result.isPresent()) resultBuilder.withContainsNegativeCycle(result.get().containsNegativeCycle());

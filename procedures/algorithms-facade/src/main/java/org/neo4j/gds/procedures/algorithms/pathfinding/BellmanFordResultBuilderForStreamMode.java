@@ -24,7 +24,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
-import org.neo4j.gds.applications.algorithms.machinery.SideEffectProcessingCounts;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.bellmanford.BellmanFordStreamConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
@@ -32,7 +31,7 @@ import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class BellmanFordResultBuilderForStreamMode implements ResultBuilder<BellmanFordStreamConfig, BellmanFordResult, Stream<BellmanFordStreamResult>> {
+class BellmanFordResultBuilderForStreamMode implements ResultBuilder<BellmanFordStreamConfig, BellmanFordResult, Stream<BellmanFordStreamResult>, Void> {
     private final NodeLookup nodeLookup;
     private final boolean routeRequested;
 
@@ -48,7 +47,7 @@ class BellmanFordResultBuilderForStreamMode implements ResultBuilder<BellmanFord
         BellmanFordStreamConfig configuration,
         Optional<BellmanFordResult> result,
         AlgorithmProcessingTimings timings,
-        SideEffectProcessingCounts counts
+        Optional<Void> metadata
     ) {
         if (result.isEmpty()) return Stream.of();
 

@@ -32,13 +32,13 @@ import java.util.Optional;
  * Out-layer would be injecting custom dependencies as part of a constructor in the implementing class.
  * An example could be a boolean determined at runtime, governing which bits of data to output.
  */
-public interface ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> {
+public interface ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> {
     /**
      * You implement this and use as much or as little of the gathered data as is appropriate.
      * Plus your own injected dependencies of course.
      *
-     * @param configuration
-     * @param result        empty when graph was empty
+     * @param result   output from algorithm, empty when graph was empty
+     * @param metadata stuff for reporting, e.g. number of relationships written; empty if graph was empty
      */
     RESULT_TO_CALLER build(
         Graph graph,
@@ -46,6 +46,6 @@ public interface ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_C
         CONFIGURATION configuration,
         Optional<RESULT_FROM_ALGORITHM> result,
         AlgorithmProcessingTimings timings,
-        SideEffectProcessingCounts counts
+        Optional<MUTATE_OR_WRITE_METADATA> metadata
     );
 }

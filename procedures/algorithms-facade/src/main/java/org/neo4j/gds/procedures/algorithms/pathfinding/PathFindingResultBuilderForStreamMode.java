@@ -24,7 +24,6 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
-import org.neo4j.gds.applications.algorithms.machinery.SideEffectProcessingCounts;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.graphdb.Path;
 import org.neo4j.graphdb.RelationshipType;
@@ -38,7 +37,7 @@ import java.util.stream.Stream;
 import static org.neo4j.gds.paths.PathFactory.create;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
-public class PathFindingResultBuilderForStreamMode<CONFIGURATION> implements ResultBuilder<CONFIGURATION, PathFindingResult, Stream<PathFindingStreamResult>> {
+public class PathFindingResultBuilderForStreamMode<CONFIGURATION> implements ResultBuilder<CONFIGURATION, PathFindingResult, Stream<PathFindingStreamResult>, Void> {
     private final NodeLookup nodeLookup;
     private final boolean pathRequested;
 
@@ -54,7 +53,7 @@ public class PathFindingResultBuilderForStreamMode<CONFIGURATION> implements Res
         CONFIGURATION configuration,
         Optional<PathFindingResult> result,
         AlgorithmProcessingTimings timings,
-        SideEffectProcessingCounts counts
+        Optional<Void> metadata
     ) {
         if (result.isEmpty()) return Stream.of();
 

@@ -19,19 +19,18 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.SideEffectProcessingCountsBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.spanningtree.SpanningGraph;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
 
-class SteinerTreeWriteStep implements MutateOrWriteStep<SteinerTreeResult> {
+class SteinerTreeWriteStep implements MutateOrWriteStep<SteinerTreeResult, RelationshipsWritten> {
     private final RequestScopedDependencies requestScopedDependencies;
     private final SteinerTreeWriteConfig configuration;
 
@@ -44,11 +43,10 @@ class SteinerTreeWriteStep implements MutateOrWriteStep<SteinerTreeResult> {
     }
 
     @Override
-    public void execute(
+    public RelationshipsWritten execute(
         Graph graph,
         GraphStore graphStore,
-        SteinerTreeResult steinerTreeResult,
-        SideEffectProcessingCountsBuilder countsBuilder
+        SteinerTreeResult steinerTreeResult
     ) {
         var sourceNodeId = configuration.sourceNode();
 
@@ -76,6 +74,6 @@ class SteinerTreeWriteStep implements MutateOrWriteStep<SteinerTreeResult> {
 
         relationshipExporter.write(configuration.writeRelationshipType(), configuration.writeProperty());
 
-        countsBuilder.withRelationshipsWritten(steinerTreeResult.effectiveNodeCount() - 1);
+        return new RelationshipsWritten(steinerTreeResult.effectiveNodeCount() - 1);
     }
 }

@@ -24,23 +24,21 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.SideEffectProcessingCountsBuilder;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.spanningtree.SpanningGraph;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeMutateConfig;
 
-class SpanningTreeMutateStep implements MutateOrWriteStep<SpanningTree> {
+class SpanningTreeMutateStep implements MutateOrWriteStep<SpanningTree, RelationshipsWritten> {
     private final SpanningTreeMutateConfig configuration;
 
     SpanningTreeMutateStep(SpanningTreeMutateConfig configuration) {this.configuration = configuration;}
 
     @Override
-    public void execute(
+    public RelationshipsWritten execute(
         Graph graph,
         GraphStore graphStore,
-        SpanningTree result,
-        SideEffectProcessingCountsBuilder countsBuilder
+        SpanningTree result
     ) {
         var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
         var relationshipsBuilder = GraphFactory
@@ -72,6 +70,6 @@ class SpanningTreeMutateStep implements MutateOrWriteStep<SpanningTree> {
         graphStore.addRelationshipType(relationships);
 
         // reporting
-        countsBuilder.withRelationshipsWritten(result.effectiveNodeCount() - 1);
+        return new RelationshipsWritten(result.effectiveNodeCount() - 1);
     }
 }

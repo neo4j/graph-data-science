@@ -23,14 +23,14 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
-import org.neo4j.gds.applications.algorithms.machinery.SideEffectProcessingCounts;
+import org.neo4j.gds.applications.algorithms.pathfinding.RelationshipsWritten;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SpanningTreeMutateResult;
 import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeMutateConfig;
 
 import java.util.Optional;
 
-class SpanningTreeResultBuilderForMutateMode implements ResultBuilder<SpanningTreeMutateConfig, SpanningTree, SpanningTreeMutateResult> {
+class SpanningTreeResultBuilderForMutateMode implements ResultBuilder<SpanningTreeMutateConfig, SpanningTree, SpanningTreeMutateResult, RelationshipsWritten> {
     @Override
     public SpanningTreeMutateResult build(
         Graph graph,
@@ -38,7 +38,7 @@ class SpanningTreeResultBuilderForMutateMode implements ResultBuilder<SpanningTr
         SpanningTreeMutateConfig configuration,
         Optional<SpanningTree> result,
         AlgorithmProcessingTimings timings,
-        SideEffectProcessingCounts counts
+        Optional<RelationshipsWritten> metadata
     ) {
         var builder = new SpanningTreeMutateResult.Builder();
 
@@ -55,7 +55,7 @@ class SpanningTreeResultBuilderForMutateMode implements ResultBuilder<SpanningTr
         builder.withPreProcessingMillis(timings.preProcessingMillis);
         builder.withMutateMillis(timings.postProcessingMillis);
 
-        builder.withRelationshipsWritten(counts.relationshipsWritten);
+        metadata.ifPresent(rw -> builder.withRelationshipsWritten(rw.value));
 
         builder.withConfig(configuration);
 

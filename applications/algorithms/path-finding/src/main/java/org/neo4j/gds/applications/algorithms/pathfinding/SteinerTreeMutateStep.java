@@ -24,7 +24,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.SideEffectProcessingCountsBuilder;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.steiner.ShortestPathsSteinerAlgorithm;
 import org.neo4j.gds.steiner.SteinerTreeMutateConfig;
@@ -32,7 +31,7 @@ import org.neo4j.gds.steiner.SteinerTreeResult;
 
 import java.util.stream.LongStream;
 
-class SteinerTreeMutateStep implements MutateOrWriteStep<SteinerTreeResult> {
+class SteinerTreeMutateStep implements MutateOrWriteStep<SteinerTreeResult, RelationshipsWritten> {
     private final SteinerTreeMutateConfig configuration;
 
     SteinerTreeMutateStep(SteinerTreeMutateConfig configuration) {
@@ -40,11 +39,10 @@ class SteinerTreeMutateStep implements MutateOrWriteStep<SteinerTreeResult> {
     }
 
     @Override
-    public void execute(
+    public RelationshipsWritten execute(
         Graph graph,
         GraphStore graphStore,
-        SteinerTreeResult steinerTreeResult,
-        SideEffectProcessingCountsBuilder countsBuilder
+        SteinerTreeResult steinerTreeResult
     ) {
         var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
 
@@ -75,6 +73,6 @@ class SteinerTreeMutateStep implements MutateOrWriteStep<SteinerTreeResult> {
         graphStore.addRelationshipType(relationships);
 
         // the reporting
-        countsBuilder.withRelationshipsWritten(steinerTreeResult.effectiveNodeCount() - 1);
+        return new RelationshipsWritten(steinerTreeResult.effectiveNodeCount() - 1);
     }
 }

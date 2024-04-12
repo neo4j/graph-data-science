@@ -23,14 +23,14 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
-import org.neo4j.gds.applications.algorithms.machinery.SideEffectProcessingCounts;
+import org.neo4j.gds.applications.algorithms.pathfinding.RelationshipsWritten;
 import org.neo4j.gds.procedures.algorithms.pathfinding.SteinerMutateResult;
 import org.neo4j.gds.steiner.SteinerTreeMutateConfig;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 
 import java.util.Optional;
 
-class SteinerTreeResultBuilderForMutateMode implements ResultBuilder<SteinerTreeMutateConfig, SteinerTreeResult, SteinerMutateResult> {
+class SteinerTreeResultBuilderForMutateMode implements ResultBuilder<SteinerTreeMutateConfig, SteinerTreeResult, SteinerMutateResult, RelationshipsWritten> {
     @Override
     public SteinerMutateResult build(
         Graph graph,
@@ -38,7 +38,7 @@ class SteinerTreeResultBuilderForMutateMode implements ResultBuilder<SteinerTree
         SteinerTreeMutateConfig steinerTreeMutateConfig,
         Optional<SteinerTreeResult> steinerTreeResult,
         AlgorithmProcessingTimings timings,
-        SideEffectProcessingCounts counts
+        Optional<RelationshipsWritten> metadata
     ) {
         var builder = new SteinerMutateResult.Builder();
         builder.withConfig(steinerTreeMutateConfig);
@@ -47,7 +47,7 @@ class SteinerTreeResultBuilderForMutateMode implements ResultBuilder<SteinerTree
         builder.withComputeMillis(timings.computeMillis);
         builder.withMutateMillis(timings.postProcessingMillis);
 
-        builder.withRelationshipsWritten(counts.relationshipsWritten);
+        metadata.ifPresent(rw -> builder.withRelationshipsWritten(rw.value));
 
         steinerTreeResult.ifPresent(result -> {
             builder.withEffectiveNodeCount(result.effectiveNodeCount());

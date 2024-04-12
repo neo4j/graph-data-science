@@ -23,7 +23,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
-import org.neo4j.gds.applications.algorithms.machinery.SideEffectProcessingCounts;
 import org.neo4j.gds.paths.delta.config.AllShortestPathsDeltaStatsConfig;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
@@ -31,7 +30,7 @@ import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class DeltaSteppingResultBuilderForStatsMode implements ResultBuilder<AllShortestPathsDeltaStatsConfig, PathFindingResult, Stream<StandardStatsResult>> {
+class DeltaSteppingResultBuilderForStatsMode implements ResultBuilder<AllShortestPathsDeltaStatsConfig, PathFindingResult, Stream<StandardStatsResult>, Void> {
     @Override
     public Stream<StandardStatsResult> build(
         Graph graph,
@@ -39,7 +38,7 @@ class DeltaSteppingResultBuilderForStatsMode implements ResultBuilder<AllShortes
         AllShortestPathsDeltaStatsConfig configuration,
         Optional<PathFindingResult> result,
         AlgorithmProcessingTimings timings,
-        SideEffectProcessingCounts counts
+        Optional<Void> metadata
     ) {
         return Stream.of(
             new StandardStatsResult(timings.preProcessingMillis, timings.computeMillis, 0, configuration.toMap())

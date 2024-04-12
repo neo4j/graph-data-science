@@ -24,7 +24,6 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.SideEffectProcessingCountsBuilder;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
@@ -33,7 +32,7 @@ import org.neo4j.gds.spanningtree.SpanningTree;
 
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.K_SPANNING_TREE;
 
-class KSpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree> {
+class KSpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree, Void> {
     private final Log log;
     private final RequestScopedDependencies requestScopedDependencies;
     private final KSpanningTreeWriteConfig configuration;
@@ -49,11 +48,10 @@ class KSpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree> {
     }
 
     @Override
-    public void execute(
+    public Void execute(
         Graph graph,
         GraphStore graphStore,
-        SpanningTree spanningTree,
-        SideEffectProcessingCountsBuilder countsBuilder
+        SpanningTree spanningTree
     ) {
         var properties = new SpanningTreeBackedNodePropertyValues(spanningTree, graph.nodeCount());
         var resultStore = configuration.resolveResultStore(graphStore.resultStore());
@@ -81,5 +79,6 @@ class KSpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree> {
 
         // reporting
         // countsBuilder.withNodePropertiesWritten(...);
+        return null;
     }
 }

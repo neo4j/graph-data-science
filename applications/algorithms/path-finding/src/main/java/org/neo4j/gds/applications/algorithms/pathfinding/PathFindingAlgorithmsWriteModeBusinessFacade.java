@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmComputation;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
@@ -87,7 +87,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     public <RESULT> RESULT bellmanFord(
         GraphName graphName,
         BellmanFordWriteConfig configuration,
-        ResultBuilder<BellmanFordWriteConfig, BellmanFordResult, RESULT> resultBuilder
+        ResultBuilder<BellmanFordWriteConfig, BellmanFordResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var writeStep = new BellmanFordWriteStep(
             log,
@@ -109,7 +109,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     public <RESULT> RESULT deltaStepping(
         GraphName graphName,
         AllShortestPathsDeltaWriteConfig configuration,
-        ResultBuilder<AllShortestPathsDeltaWriteConfig, PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<AllShortestPathsDeltaWriteConfig, PathFindingResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
         return runAlgorithmAndWrite(
             graphName,
@@ -124,7 +124,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     public <RESULT> RESULT kSpanningTree(
         GraphName graphName,
         KSpanningTreeWriteConfig configuration,
-        ResultBuilder<KSpanningTreeWriteConfig, SpanningTree, RESULT> resultBuilder
+        ResultBuilder<KSpanningTreeWriteConfig, SpanningTree, RESULT, Void> resultBuilder
     ) {
         var writeStep = new KSpanningTreeWriteStep(
             log,
@@ -146,7 +146,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     public <RESULT> RESULT singlePairShortestPathAStar(
         GraphName graphName,
         ShortestPathAStarWriteConfig configuration,
-        ResultBuilder<ShortestPathAStarWriteConfig, PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<ShortestPathAStarWriteConfig, PathFindingResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
         return runAlgorithmAndWrite(
             graphName,
@@ -161,7 +161,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     public <RESULT> RESULT singlePairShortestPathDijkstra(
         GraphName graphName,
         ShortestPathDijkstraWriteConfig configuration,
-        ResultBuilder<ShortestPathDijkstraWriteConfig, PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<ShortestPathDijkstraWriteConfig, PathFindingResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
         return runAlgorithmAndWrite(
             graphName,
@@ -176,7 +176,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     public <RESULT> RESULT singlePairShortestPathYens(
         GraphName graphName,
         ShortestPathYensWriteConfig configuration,
-        ResultBuilder<ShortestPathYensWriteConfig, PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<ShortestPathYensWriteConfig, PathFindingResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
         return runAlgorithmAndWrite(
             graphName,
@@ -191,7 +191,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     public <RESULT> RESULT singleSourceShortestPathDijkstra(
         GraphName graphName,
         AllShortestPathsDijkstraWriteConfig configuration,
-        ResultBuilder<AllShortestPathsDijkstraWriteConfig, PathFindingResult, RESULT> resultBuilder
+        ResultBuilder<AllShortestPathsDijkstraWriteConfig, PathFindingResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
         return runAlgorithmAndWrite(
             graphName,
@@ -206,7 +206,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     public <RESULT> RESULT spanningTree(
         GraphName graphName,
         SpanningTreeWriteConfig configuration,
-        ResultBuilder<SpanningTreeWriteConfig, SpanningTree, RESULT> resultBuilder
+        ResultBuilder<SpanningTreeWriteConfig, SpanningTree, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var writeStep = new SpanningTreeWriteStep(
             log,
@@ -228,7 +228,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
     public <RESULT> RESULT steinerTree(
         GraphName graphName,
         SteinerTreeWriteConfig configuration,
-        ResultBuilder<SteinerTreeWriteConfig, SteinerTreeResult, RESULT> resultBuilder
+        ResultBuilder<SteinerTreeWriteConfig, SteinerTreeResult, RESULT, RelationshipsWritten> resultBuilder
     ) {
         var writeStep = new SteinerTreeWriteStep(requestScopedDependencies, configuration);
 
@@ -252,7 +252,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         String label,
         Supplier<MemoryEstimation> memoryEstimation,
         AlgorithmComputation<PathFindingResult> algorithm,
-        ResultBuilder<CONFIGURATION, PathFindingResult, RESULT_TO_CALLER> resultBuilder
+        ResultBuilder<CONFIGURATION, PathFindingResult, RESULT_TO_CALLER, RelationshipsWritten> resultBuilder
     ) {
         var writeStep = new ShortestPathWriteStep<>(
             log,
@@ -271,14 +271,14 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
         );
     }
 
-    private <CONFIGURATION extends AlgoBaseConfig & RelationshipWeightConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> RESULT_TO_CALLER runAlgorithmAndWrite(
+    private <CONFIGURATION extends AlgoBaseConfig & RelationshipWeightConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER runAlgorithmAndWrite(
         GraphName graphName,
         CONFIGURATION configuration,
         String label,
         Supplier<MemoryEstimation> memoryEstimation,
         AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithm,
-        MutateOrWriteStep<RESULT_FROM_ALGORITHM> writeStep,
-        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
+        MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> writeStep,
+        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
     ) {
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,

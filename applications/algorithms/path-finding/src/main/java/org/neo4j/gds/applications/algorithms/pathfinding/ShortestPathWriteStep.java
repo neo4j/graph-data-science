@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -27,7 +26,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ImmutableExportedRelationship;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.SideEffectProcessingCountsBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
@@ -48,7 +47,7 @@ import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfi
  * This is relationship writes as needed by path finding algorithms (for now).
  */
 class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & WritePathOptionsConfig> implements
-    MutateOrWriteStep<PathFindingResult> {
+    MutateOrWriteStep<PathFindingResult, RelationshipsWritten> {
     private final Log log;
     private final RequestScopedDependencies requestScopedDependencies;
     private final CONFIGURATION configuration;
@@ -68,11 +67,10 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
      * We do it synchronously, time it, and gather metadata about how many relationships we wrote.
      */
     @Override
-    public void execute(
+    public RelationshipsWritten execute(
         Graph graph,
         GraphStore graphStore,
-        PathFindingResult result,
-        SideEffectProcessingCountsBuilder countsBuilder
+        PathFindingResult result
     ) {
         var writeNodeIds = configuration.writeNodeIds();
         var writeCosts = configuration.writeCosts();
@@ -131,7 +129,7 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
             var relationshipsWritten = relationshipStreamExporter.write(writeRelationshipType, keys, types);
 
             // the final result is the side effect of writing to the database, plus this metadata
-            countsBuilder.withRelationshipsWritten(relationshipsWritten);
+            return new RelationshipsWritten(relationshipsWritten);
         }
     }
 

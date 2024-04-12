@@ -23,14 +23,14 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
-import org.neo4j.gds.applications.algorithms.machinery.SideEffectProcessingCounts;
+import org.neo4j.gds.applications.algorithms.pathfinding.RelationshipsWritten;
 import org.neo4j.gds.config.ToMapConvertible;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.procedures.algorithms.results.StandardWriteRelationshipsResult;
 
 import java.util.Optional;
 
-class PathFindingResultBuilderForWriteMode<CONFIGURATION extends ToMapConvertible> implements ResultBuilder<CONFIGURATION, PathFindingResult, StandardWriteRelationshipsResult> {
+class PathFindingResultBuilderForWriteMode<CONFIGURATION extends ToMapConvertible> implements ResultBuilder<CONFIGURATION, PathFindingResult, StandardWriteRelationshipsResult, RelationshipsWritten> {
     @Override
     public StandardWriteRelationshipsResult build(
         Graph graph,
@@ -38,14 +38,14 @@ class PathFindingResultBuilderForWriteMode<CONFIGURATION extends ToMapConvertibl
         CONFIGURATION configuration,
         Optional<PathFindingResult> pathFindingResult,
         AlgorithmProcessingTimings timings,
-        SideEffectProcessingCounts counts
+        Optional<RelationshipsWritten> metadata
     ) {
         return new StandardWriteRelationshipsResult(
             timings.preProcessingMillis,
             timings.computeMillis,
             0, // yeah, I don't understand it either :shrug:
             timings.postProcessingMillis,
-            counts.relationshipsWritten,
+            metadata.map(rw -> rw.value).orElse(0L),
             configuration.toMap()
         );
     }

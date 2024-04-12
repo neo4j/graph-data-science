@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -27,7 +26,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ImmutableExportedRelationship;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.SideEffectProcessingCountsBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.logging.Log;
@@ -43,7 +42,7 @@ import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfi
 import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.NODE_IDS_KEY;
 import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
 
-class BellmanFordWriteStep implements MutateOrWriteStep<BellmanFordResult> {
+class BellmanFordWriteStep implements MutateOrWriteStep<BellmanFordResult, RelationshipsWritten> {
     private final Log log;
     private final RequestScopedDependencies requestScopedDependencies;
     private final BellmanFordWriteConfig configuration;
@@ -59,11 +58,10 @@ class BellmanFordWriteStep implements MutateOrWriteStep<BellmanFordResult> {
     }
 
     @Override
-    public void execute(
+    public RelationshipsWritten execute(
         Graph graph,
         GraphStore graphStore,
-        BellmanFordResult result,
-        SideEffectProcessingCountsBuilder countsBuilder
+        BellmanFordResult result
     ) {
         var writeRelationshipType = configuration.writeRelationshipType();
 
@@ -110,7 +108,7 @@ class BellmanFordWriteStep implements MutateOrWriteStep<BellmanFordResult> {
         );
 
         // reporting
-        countsBuilder.withRelationshipsWritten(relationshipsWritten);
+        return new RelationshipsWritten(relationshipsWritten);
     }
 
     private Value[] createValues(IdMap idMap, PathResult pathResult, boolean writeNodeIds, boolean writeCosts) {

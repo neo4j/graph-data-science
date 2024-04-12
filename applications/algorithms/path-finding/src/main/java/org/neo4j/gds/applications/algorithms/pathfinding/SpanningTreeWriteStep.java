@@ -19,12 +19,11 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
-import org.neo4j.gds.applications.algorithms.machinery.SideEffectProcessingCountsBuilder;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.logging.Log;
@@ -34,7 +33,7 @@ import org.neo4j.gds.spanningtree.SpanningTreeWriteConfig;
 
 import static org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmLabels.SPANNING_TREE;
 
-class SpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree> {
+class SpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree, RelationshipsWritten> {
     private final Log log;
     private final RequestScopedDependencies requestScopedDependencies;
     private final SpanningTreeWriteConfig configuration;
@@ -50,11 +49,10 @@ class SpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree> {
     }
 
     @Override
-    public void execute(
+    public RelationshipsWritten execute(
         Graph graph,
         GraphStore graphStore,
-        SpanningTree result,
-        SideEffectProcessingCountsBuilder countsBuilder
+        SpanningTree result
     ) {
         var spanningGraph = new SpanningGraph(graph, result);
 
@@ -81,6 +79,6 @@ class SpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree> {
         relationshipExporter.write(configuration.writeRelationshipType(), configuration.writeProperty());
 
         // reporting
-        countsBuilder.withRelationshipsWritten(result.effectiveNodeCount() - 1);
+        return new RelationshipsWritten(result.effectiveNodeCount() - 1);
     }
 }

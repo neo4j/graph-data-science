@@ -17,12 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.machinery;
+package org.neo4j.gds.applications.algorithms.pathfinding;
 
-public class SideEffectProcessingCounts {
-    public final long relationshipsWritten;
+public class RelationshipsWritten {
+    public final long value;
 
-    public SideEffectProcessingCounts(long relationshipsWritten) {
-        this.relationshipsWritten = relationshipsWritten;
-    }
+    RelationshipsWritten(long value) {this.value = value;}
 }

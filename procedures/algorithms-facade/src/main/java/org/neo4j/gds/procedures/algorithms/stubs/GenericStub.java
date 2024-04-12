@@ -29,9 +29,9 @@ import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.Username;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.procedures.algorithms.AlgorithmHandle;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
-import org.neo4j.gds.procedures.algorithms.AlgorithmHandle;
 import org.neo4j.gds.results.MemoryEstimateResult;
 
 import java.util.Map;
@@ -139,12 +139,12 @@ public class GenericStub {
     /**
      * @see org.neo4j.gds.procedures.algorithms.stubs.MutateStub#execute(String, java.util.Map)
      */
-    public <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> Stream<RESULT_TO_CALLER> execute(
+    public <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> Stream<RESULT_TO_CALLER> execute(
         String graphNameAsString,
         Map<String, Object> rawConfiguration,
         Function<CypherMapWrapper, CONFIGURATION> parser,
-        AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> executor,
-        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
+        AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> executor,
+        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
     ) {
         var graphName = GraphName.parse(graphNameAsString);
         var configuration = configurationCreator.createConfiguration(rawConfiguration, parser);

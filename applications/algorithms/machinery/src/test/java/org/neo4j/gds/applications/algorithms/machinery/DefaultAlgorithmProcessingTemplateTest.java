@@ -80,7 +80,7 @@ class DefaultAlgorithmProcessingTemplateTest {
         var pathFindingResult = mock(ExampleResult.class);
         when(computation.compute(graph)).thenReturn(pathFindingResult);
 
-        var resultBuilder = new ResultBuilder<ExampleConfiguration, ExampleResult, Stream<String>>() {
+        var resultBuilder = new ResultBuilder<ExampleConfiguration, ExampleResult, Stream<String>, Void>() {
             @Override
             public Stream<String> build(
                 Graph graph,
@@ -88,7 +88,7 @@ class DefaultAlgorithmProcessingTemplateTest {
                 ExampleConfiguration configuration,
                 Optional<ExampleResult> pathFindingResult,
                 AlgorithmProcessingTimings timings,
-                SideEffectProcessingCounts counts
+                Optional<Void> metadata
             ) {
                 // we skip timings when no side effects requested
                 assertThat(timings.postProcessingMillis).isEqualTo(-1);
@@ -149,7 +149,7 @@ class DefaultAlgorithmProcessingTemplateTest {
         )).thenReturn(Pair.of(graph, graphStore));
 
         var pathFindingResult = mock(ExampleResult.class);
-        var resultBuilder = new ResultBuilder<ExampleConfiguration, ExampleResult, String>() {
+        var resultBuilder = new ResultBuilder<ExampleConfiguration, ExampleResult, String, Long>() {
             @Override
             public String build(
                 Graph actualGraph,
@@ -157,13 +157,13 @@ class DefaultAlgorithmProcessingTemplateTest {
                 ExampleConfiguration configuration,
                 Optional<ExampleResult> actualResult,
                 AlgorithmProcessingTimings timings,
-                SideEffectProcessingCounts counts
+                Optional<Long> metadata
             ) {
                 assertThat(actualGraph).isEqualTo(graph);
                 assertThat(actualGraphStore).isEqualTo(graphStore);
                 assertThat(actualResult).hasValue(pathFindingResult);
 
-                assertThat(counts.relationshipsWritten).isEqualTo(42L);
+                assertThat(metadata.orElseThrow()).isEqualTo(42L);
 
                 return "all assertions green!";
             }
@@ -176,15 +176,14 @@ class DefaultAlgorithmProcessingTemplateTest {
         AlgorithmComputation<ExampleResult> computation = mock(AlgorithmComputation.class);
         when(computation.compute(graph)).thenReturn(pathFindingResult);
 
-        var mutateOrWriteStep = new MutateOrWriteStep<ExampleResult>() {
+        var mutateOrWriteStep = new MutateOrWriteStep<ExampleResult, Long>() {
             @Override
-            public void execute(
+            public Long execute(
                 Graph graph,
                 GraphStore graphStore,
-                ExampleResult resultFromAlgorithm,
-                SideEffectProcessingCountsBuilder countsBuilder
+                ExampleResult resultFromAlgorithm
             ) {
-                countsBuilder.withRelationshipsWritten(42);
+                return 42L;
             }
         };
 
@@ -211,22 +210,20 @@ class DefaultAlgorithmProcessingTemplateTest {
             null
         ) {
             @Override
-            <CONFIGURATION extends AlgoBaseConfig, RESULT_TO_CALLER, RESULT_FROM_ALGORITHM> Pair<Graph, GraphStore> graphLoadAndValidationWithTiming(
+            <CONFIGURATION extends AlgoBaseConfig> Pair<Graph, GraphStore> graphLoadAndValidationWithTiming(
                 AlgorithmProcessingTimingsBuilder timingsBuilder,
                 GraphName graphName,
-                CONFIGURATION configuration,
-                ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder
+                CONFIGURATION configuration
             ) {
                 timingsBuilder.withPreProcessingMillis(23);
                 return Pair.of(mock(Graph.class), null);
             }
 
             @Override
-            <CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> RESULT_FROM_ALGORITHM computeWithTiming(
+            <RESULT_FROM_ALGORITHM> RESULT_FROM_ALGORITHM computeWithTiming(
                 AlgorithmProcessingTimingsBuilder timingsBuilder,
                 String humanReadableAlgorithmName,
                 AlgorithmComputation<RESULT_FROM_ALGORITHM> algorithmComputation,
-                ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> resultBuilder,
                 Graph graph
             ) {
                 timingsBuilder.withComputeMillis(117);
@@ -234,20 +231,19 @@ class DefaultAlgorithmProcessingTemplateTest {
             }
 
             @Override
-            <RESULT_FROM_ALGORITHM> void mutateOrWriteWithTiming(
-                Optional<MutateOrWriteStep<RESULT_FROM_ALGORITHM>> mutateOrWriteStep,
+            <RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> MUTATE_OR_WRITE_METADATA mutateOrWriteWithTiming(
+                Optional<MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA>> mutateOrWriteStep,
                 AlgorithmProcessingTimingsBuilder timingsBuilder,
-                SideEffectProcessingCountsBuilder countsBuilder,
                 Graph graph,
                 GraphStore graphStore,
                 RESULT_FROM_ALGORITHM resultFromAlgorithm
             ) {
-                mutateOrWriteStep.orElseThrow().execute(graph, graphStore, resultFromAlgorithm, countsBuilder);
                 timingsBuilder.withPostProcessingMillis(87);
+                return mutateOrWriteStep.orElseThrow().execute(graph, graphStore, resultFromAlgorithm);
             }
         };
 
-        var resultBuilder = new ResultBuilder<ExampleConfiguration, Void, Map<String, Long>>() {
+        var resultBuilder = new ResultBuilder<ExampleConfiguration, Void, Map<String, Long>, Long>() {
             @Override
             public Map<String, Long> build(
                 Graph graph,
@@ -255,13 +251,13 @@ class DefaultAlgorithmProcessingTemplateTest {
                 ExampleConfiguration configuration,
                 Optional<Void> unused,
                 AlgorithmProcessingTimings timings,
-                SideEffectProcessingCounts counts
+                Optional<Long> metadata
             ) {
                 return Map.of(
                     "preProcessingMillis", timings.preProcessingMillis,
                     "computeMillis", timings.computeMillis,
                     "postProcessingMillis", timings.postProcessingMillis,
-                    "relationshipsWritten", counts.relationshipsWritten
+                    "relationshipsWritten", metadata.orElseThrow()
                 );
             }
         };
@@ -272,7 +268,7 @@ class DefaultAlgorithmProcessingTemplateTest {
             null,
             null,
             null,
-            Optional.of((__, ___, ____, countsBuilder) -> countsBuilder.withRelationshipsWritten(6573)),
+            Optional.of((graph, graphStore, unused) -> 6573L),
             resultBuilder
         );
 

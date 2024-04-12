@@ -23,13 +23,13 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
-import org.neo4j.gds.applications.algorithms.machinery.SideEffectProcessingCounts;
+import org.neo4j.gds.applications.algorithms.pathfinding.RelationshipsWritten;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.steiner.SteinerTreeWriteConfig;
 
 import java.util.Optional;
 
-class SteinerTreeResultBuilderForWriteMode implements ResultBuilder<SteinerTreeWriteConfig, SteinerTreeResult, SteinerWriteResult> {
+class SteinerTreeResultBuilderForWriteMode implements ResultBuilder<SteinerTreeWriteConfig, SteinerTreeResult, SteinerWriteResult, RelationshipsWritten> {
     @Override
     public SteinerWriteResult build(
         Graph graph,
@@ -37,7 +37,7 @@ class SteinerTreeResultBuilderForWriteMode implements ResultBuilder<SteinerTreeW
         SteinerTreeWriteConfig steinerTreeWriteConfig,
         Optional<SteinerTreeResult> steinerTreeResult,
         AlgorithmProcessingTimings timings,
-        SideEffectProcessingCounts counts
+        Optional<RelationshipsWritten> metadata
     ) {
         var builder = new SteinerWriteResult.Builder();
         builder.withConfig(steinerTreeWriteConfig);
@@ -46,7 +46,7 @@ class SteinerTreeResultBuilderForWriteMode implements ResultBuilder<SteinerTreeW
         builder.withComputeMillis(timings.computeMillis);
         builder.withWriteMillis(timings.postProcessingMillis);
 
-        builder.withRelationshipsWritten(counts.relationshipsWritten);
+        metadata.ifPresent(rw -> builder.withRelationshipsWritten(rw.value));
 
         steinerTreeResult.ifPresent(result -> {
             builder.withEffectiveNodeCount(result.effectiveNodeCount());
