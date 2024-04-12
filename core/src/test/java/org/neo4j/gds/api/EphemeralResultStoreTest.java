@@ -113,6 +113,22 @@ class EphemeralResultStoreTest {
     }
 
     @Test
+    void shouldRemoveGraphBasedRelationshipsWithoutProperty() {
+        var resultStore = new EphemeralResultStore();
+
+        var graph = mock(Graph.class);
+        var toOriginalId = mock(LongUnaryOperator.class);
+
+        resultStore.addRelationship("Type", graph, toOriginalId);
+
+        assertThat(resultStore.hasRelationship("Type")).isTrue();
+
+        resultStore.removeRelationship("Type");
+
+        assertThat(resultStore.hasRelationship("Type")).isFalse();
+    }
+
+    @Test
     void shouldStoreGraphBasedRelationshipsWithProperty() {
         var resultStore = new EphemeralResultStore();
 
@@ -126,6 +142,22 @@ class EphemeralResultStoreTest {
         assertThat(relationshipEntry.toOriginalId()).isEqualTo(toOriginalId);
 
         assertThat(resultStore.hasRelationship("Type", List.of("prop"))).isTrue();
+    }
+
+    @Test
+    void shouldRemoveGraphBasedRelationshipsWithProperty() {
+        var resultStore = new EphemeralResultStore();
+
+        var graph = mock(Graph.class);
+        var toOriginalId = mock(LongUnaryOperator.class);
+
+        resultStore.addRelationship("Type", "prop", graph, toOriginalId);
+
+        assertThat(resultStore.hasRelationship("Type", List.of("prop"))).isTrue();
+
+        resultStore.removeRelationship("Type", "prop");
+
+        assertThat(resultStore.hasRelationship("Type", List.of("prop"))).isFalse();
     }
 
     @Test

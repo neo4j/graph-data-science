@@ -95,6 +95,16 @@ public interface ResultStore {
     RelationshipEntry getRelationship(String relationshipType, String propertyKey);
 
     /**
+     * Removes relationship information from this store based on the relationship type.
+     */
+    void removeRelationship(String relationshipType);
+
+    /**
+     * Removes relationship information from this store based on the relationship type and property key.
+     */
+    void removeRelationship(String relationshipType, String propertyKey);
+
+    /**
      * Stores a stream of relationships in this store.
      *
      * @param propertyKeys the property keys for the relationships
