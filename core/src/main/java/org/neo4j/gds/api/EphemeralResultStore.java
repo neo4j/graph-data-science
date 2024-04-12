@@ -116,6 +116,11 @@ public class EphemeralResultStore implements ResultStore {
     }
 
     @Override
+    public void removeRelationshipStream(String relationshipType, List<String> propertyKeys) {
+        this.relationshipStreams.remove(new RelationshipKey(relationshipType, propertyKeys));
+    }
+
+    @Override
     public RelationshipEntry getRelationship(String relationshipType) {
         return getRelationship(relationshipType, NO_PROPERTY_KEY);
     }

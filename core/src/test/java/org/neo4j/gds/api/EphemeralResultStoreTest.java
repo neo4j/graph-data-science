@@ -176,4 +176,20 @@ class EphemeralResultStoreTest {
         assertThat(resultStore.hasRelationshipStream("Type", List.of("foo"))).isTrue();
         assertThat(resultStore.hasRelationshipStream("Type", List.of())).isFalse();
     }
+
+    @Test
+    void shouldRemoveStreamBasedRelationships() {
+        var resultStore = new EphemeralResultStore();
+
+        var relationshipStream = mock(Stream.class);
+        var toOriginalId = mock(LongUnaryOperator.class);
+
+        resultStore.addRelationshipStream("Type", List.of("foo"), List.of(ValueType.DOUBLE), relationshipStream, toOriginalId);
+
+        assertThat(resultStore.hasRelationshipStream("Type", List.of("foo"))).isTrue();
+
+        resultStore.removeRelationshipStream("Type", List.of("foo"));
+
+        assertThat(resultStore.hasRelationshipStream("Type", List.of("foo"))).isFalse();
+    }
 }

@@ -125,6 +125,11 @@ public interface ResultStore {
     RelationshipStreamEntry getRelationshipStream(String relationshipType, List<String> propertyKeys);
 
     /**
+     * Removes a stream of relationships from this store based on the relationship type and property keys.
+     */
+    void removeRelationshipStream(String relationshipType, List<String> propertyKeys);
+
+    /**
      * Checks if this store has a relationship of the given type.
      * Does not include relationship streams.
      */
