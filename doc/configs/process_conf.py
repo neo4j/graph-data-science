@@ -43,3 +43,6 @@ with open(conf_filename) as conf_file:
                 
                 line = f"| {name} | {type_} | {default} | {optional} | {description}"
                 adoc_file.write(line + "\n")
+
+            for note in algo.get("config_notes", []):
+                adoc_file.write(f"5+| {note}\n")
