@@ -31,6 +31,7 @@ import org.neo4j.gds.ml.core.functions.Weights;
 import org.neo4j.gds.ml.core.tensor.Matrix;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -43,39 +44,47 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
     private static final double WEIGHT_BOUND = 1.0D;
 
     private final Graph graph;
-    private final GraphSageTrainConfig config;
+    private final GraphSageTrainParameters parameters;
+    private final int featureDimension;
     private final ExecutorService executor;
 
     private final String gdsVersion;
+    @Deprecated private final GraphSageTrainConfig config;
 
     public MultiLabelGraphSageTrain(
         Graph graph,
-        GraphSageTrainConfig config,
+        GraphSageTrainParameters parameters,
+        int projectedFeatureDimension,
         ExecutorService executor,
         ProgressTracker progressTracker,
-        String gdsVersion
+        String gdsVersion,
+        GraphSageTrainConfig config // TODO: Last trace of UI config in here--Once we attach Parameters to Models we can lose this too
     ) {
         super(progressTracker);
         this.graph = graph;
-        this.config = config;
+        this.featureDimension = projectedFeatureDimension;
+        this.parameters = parameters;
         this.executor = executor;
         this.gdsVersion = gdsVersion;
+        this.config = config;
     }
 
     @Override
     public Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> compute() {
         progressTracker.beginSubTask("GraphSageTrain");
-
-        var multiLabelFeatureExtractors = GraphSageHelper.multiLabelFeatureExtractors(graph, config);
-        var weightsByLabel = MultiLabelGraphSageTrain.makeWeightsByLabel(config, multiLabelFeatureExtractors);
-        var projectedFeatureDimension = config.projectedFeatureDimension().orElseThrow();
-        var multiLabelFeatureFunction = new MultiLabelFeatureFunction(weightsByLabel, projectedFeatureDimension);
+        var multiLabelFeatureExtractors = GraphSageHelper.multiLabelFeatureExtractors(
+            graph,
+            parameters.featureProperties()
+        );
+        var weightsByLabel = makeWeightsByLabel(parameters.randomSeed(), featureDimension, multiLabelFeatureExtractors);
+        var multiLabelFeatureFunction = new MultiLabelFeatureFunction(weightsByLabel, featureDimension);
         var trainer = new GraphSageModelTrainer(
-            config,
+            parameters,
             executor,
             progressTracker,
             multiLabelFeatureFunction,
-            multiLabelFeatureFunction.weightsByLabel().values()
+            multiLabelFeatureFunction.weightsByLabel().values(),
+            featureDimension
         );
 
         var trainResult = trainer.train(
@@ -96,7 +105,8 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
     }
 
     private static Map<NodeLabel, Weights<Matrix>> makeWeightsByLabel(
-        GraphSageTrainConfig config,
+        Optional<Long> randomSeed,
+        int projectedFeatureDimension,
         MultiLabelFeatureExtractors multiLabelFeatureExtractors
     ) {
         return multiLabelFeatureExtractors.featureCountPerLabel()
@@ -106,10 +116,10 @@ public class MultiLabelGraphSageTrain extends GraphSageTrain {
                 Map.Entry::getKey,
                 //TODO: how should we initialize the values in the matrix?
                 e -> generateWeights(
-                    config.projectedFeatureDimension().orElseThrow(),
+                    projectedFeatureDimension,
                     e.getValue(),
                     WEIGHT_BOUND,
-                    config.randomSeed().orElseGet(() -> ThreadLocalRandom.current().nextLong())
+                    randomSeed.orElseGet(() -> ThreadLocalRandom.current().nextLong())
                 )
             ));
     }

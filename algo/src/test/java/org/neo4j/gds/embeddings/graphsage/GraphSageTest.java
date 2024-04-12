@@ -146,10 +146,11 @@ class GraphSageTest {
 
         var trainAlgo = new SingleLabelGraphSageTrain(
             orphanGraph,
-            trainConfig,
+            trainConfig.toParameters(),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
-            testGdsVersion
+            testGdsVersion,
+            trainConfig
         );
         var model = trainAlgo.compute();
         modelCatalog.set(model);
@@ -181,7 +182,14 @@ class GraphSageTest {
             .concurrency(1)
             .build();
 
-        var graphSageTrain = new SingleLabelGraphSageTrain(graph, trainConfig, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER, testGdsVersion);
+        var graphSageTrain = new SingleLabelGraphSageTrain(
+            graph,
+            trainConfig.toParameters(),
+            DefaultPool.INSTANCE,
+            ProgressTracker.NULL_TRACKER,
+            testGdsVersion,
+            trainConfig
+        );
         var model = graphSageTrain.compute();
 
 

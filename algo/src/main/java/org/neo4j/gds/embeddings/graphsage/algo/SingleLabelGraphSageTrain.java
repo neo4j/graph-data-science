@@ -25,6 +25,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.GraphSageModelTrainer;
 import org.neo4j.gds.embeddings.graphsage.ModelData;
 import org.neo4j.gds.embeddings.graphsage.SingleLabelFeatureFunction;
+import org.neo4j.gds.ml.core.features.FeatureExtraction;
 
 import java.util.concurrent.ExecutorService;
 
@@ -33,34 +34,43 @@ import static org.neo4j.gds.embeddings.graphsage.GraphSageHelper.initializeSingl
 public class SingleLabelGraphSageTrain extends GraphSageTrain {
 
     private final Graph graph;
-    private final GraphSageTrainConfig config;
     private final ExecutorService executor;
 
     private final String gdsVersion;
+    private final GraphSageTrainParameters parameters;
+    @Deprecated  private final GraphSageTrainConfig config;
 
     public SingleLabelGraphSageTrain(
         Graph graph,
-        GraphSageTrainConfig config,
+        GraphSageTrainParameters parameters,
         ExecutorService executor,
         ProgressTracker progressTracker,
-        String gdsVersion
+        String gdsVersion,
+        GraphSageTrainConfig config // TODO: Last trace of UI config in here--Once we attach Parameters to Models we can lose this too
     ) {
         super(progressTracker);
         this.graph = graph;
-        this.config = config;
+        this.parameters = parameters;
         this.executor = executor;
         this.gdsVersion = gdsVersion;
+        this.config = config;
     }
 
     @Override
     public Model<ModelData, GraphSageTrainConfig, GraphSageModelTrainer.GraphSageTrainMetrics> compute() {
         progressTracker.beginSubTask("GraphSageTrain");
 
-        var graphSageModel = new GraphSageModelTrainer(config, executor, progressTracker);
+        var featureDimension = FeatureExtraction.featureCount(graph, parameters.featureProperties());
+        var graphSageModel = new GraphSageModelTrainer(
+            parameters,
+            featureDimension,
+            executor,
+            progressTracker
+        );
 
         GraphSageModelTrainer.ModelTrainResult trainResult = graphSageModel.train(
             graph,
-            initializeSingleLabelFeatures(graph, config)
+            initializeSingleLabelFeatures(graph, parameters.featureProperties())
         );
 
         progressTracker.endSubTask("GraphSageTrain");

@@ -73,8 +73,8 @@ class GraphSageHelperTest {
     void shouldInitializeFeaturesCorrectly(String name, GraphSageTrainConfig config, Map<String, double[]> expected) {
         var actual = config.isMultiLabel() ? GraphSageHelper.initializeMultiLabelFeatures(
             graph,
-            GraphSageHelper.multiLabelFeatureExtractors(graph, config)
-        ) : GraphSageHelper.initializeSingleLabelFeatures(graph, config);
+            GraphSageHelper.multiLabelFeatureExtractors(graph, config.featureProperties())
+        ) : GraphSageHelper.initializeSingleLabelFeatures(graph, config.featureProperties());
 
         soft.assertThat(actual.size()).isEqualTo(expected.size());
 
@@ -90,15 +90,9 @@ class GraphSageHelperTest {
     @Test
     void shouldValidateSingleLabelPerNode() {
         var graph = GdlFactory.of("(:Foo:Bar)").build().getUnion();
-        var config = GraphSageTrainConfigImpl.builder()
-            .modelName("foo")
-            .modelUser("")
-            .featureProperties(List.of("dummyProp"))
-            .projectedFeatureDimension(42)
-            .build();
         var exception = assertThrows(IllegalArgumentException.class, () ->
             GraphSageHelper.initializeMultiLabelFeatures(graph,
-                GraphSageHelper.multiLabelFeatureExtractors(graph, config)
+                GraphSageHelper.multiLabelFeatureExtractors(graph, List.of("dummyProp"))
             )
         );
         assertThat(exception).hasMessage(
@@ -157,7 +151,7 @@ class GraphSageHelperTest {
                 .featureProperties(List.of("a", "b"))
                 .build();
 
-            GraphSageHelper.initializeSingleLabelFeatures(graph, graphSageTrainConfig);
+            GraphSageHelper.initializeSingleLabelFeatures(graph, graphSageTrainConfig.featureProperties());
         }
     }
 
@@ -182,7 +176,7 @@ class GraphSageHelperTest {
 
             var features = GraphSageHelper.initializeSingleLabelFeatures(
                 validGraph,
-                graphSageTrainConfig
+                graphSageTrainConfig.featureProperties()
             );
             //TODO: check where rounding error is coming from
             assertThat(features.get(validGraph.toMappedNodeId("a"))).contains(new double[] {1.4, -1.1, 2.5}, Offset.offset(1e-6));
@@ -216,7 +210,7 @@ class GraphSageHelperTest {
             assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> GraphSageHelper.initializeSingleLabelFeatures(
                     graph,
-                    graphSageTrainConfig
+                    graphSageTrainConfig.featureProperties()
                 ))
                 .withMessageContaining(
                     formatWithLocale("Node with ID `%s` has invalid feature property value `NaN` for property `prop`", idFunction.of("b"))
@@ -242,7 +236,7 @@ class GraphSageHelperTest {
                 .featureProperties(List.of("dummyProp", "numEmployees", "rating"))
                 .build();
 
-            var actual = GraphSageHelper.initializeSingleLabelFeatures(graph, config);
+            var actual = GraphSageHelper.initializeSingleLabelFeatures(graph, config.featureProperties());
 
             var expected = HugeObjectArray.newArray(double[].class, 3);
             expected.setAll(i -> new double[] {5.0, 2.0, 7.0});

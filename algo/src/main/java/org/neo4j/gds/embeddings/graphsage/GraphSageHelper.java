@@ -29,7 +29,6 @@ import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfig;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainMemoryEstimateParameters;
 import org.neo4j.gds.embeddings.graphsage.algo.MultiLabelFeatureExtractors;
 import org.neo4j.gds.ml.core.NeighborhoodFunction;
@@ -45,10 +44,12 @@ import org.neo4j.gds.ml.core.tensor.Matrix;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
@@ -221,23 +222,16 @@ public final class GraphSageHelper {
 
     public static HugeObjectArray<double[]> initializeSingleLabelFeatures(
         Graph graph,
-        GraphSageTrainConfig config
+        Collection<String> featureProperties
     ) {
         var features = HugeObjectArray.newArray(double[].class, graph.nodeCount());
-        var extractors = featureExtractors(graph, config);
+        var extractors = FeatureExtraction.propertyExtractors(graph, featureProperties);
 
         return FeatureExtraction.extract(graph, extractors, features);
     }
 
-    static List<FeatureExtractor> featureExtractors(Graph graph, GraphSageTrainConfig config) {
-        return FeatureExtraction.propertyExtractors(graph, config.featureProperties());
-    }
-
-    public static MultiLabelFeatureExtractors multiLabelFeatureExtractors(
-        Graph graph,
-        GraphSageTrainConfig config
-    ) {
-        var filteredKeysPerLabel = filteredPropertyKeysPerNodeLabel(graph, config);
+    public static MultiLabelFeatureExtractors multiLabelFeatureExtractors(Graph graph, List<String> featureProperties) {
+        var filteredKeysPerLabel = filteredPropertyKeysPerNodeLabel(graph, featureProperties);
         var featureCountPerLabel = new HashMap<NodeLabel, Integer>();
         var extractorsPerLabel = new HashMap<NodeLabel, List<FeatureExtractor>>();
         graph.forEachNode(nodeId -> {
@@ -275,6 +269,27 @@ public final class GraphSageHelper {
         return features;
     }
 
+    public static List<LayerConfig> layerConfigs(int featureDimension, List<Integer> sampleSizes, Optional<Long> randomSeed, Aggregator.AggregatorType aggregatorType, ActivationFunction activationFunction, int embeddingDimension) {
+        Random random = new Random();
+        randomSeed.ifPresent(random::setSeed);
+
+        List<LayerConfig> result = new ArrayList<>(sampleSizes.size());
+        for (int i = 0; i < sampleSizes.size(); i++) {
+            LayerConfig layerConfig = LayerConfig.builder()
+                .aggregatorType(aggregatorType)
+                .activationFunction(activationFunction)
+                .rows(embeddingDimension)
+                .cols(i == 0 ? featureDimension : embeddingDimension)
+                .sampleSize(sampleSizes.get(i))
+                .randomSeed(random.nextLong())
+                .build();
+
+            result.add(layerConfig);
+        }
+
+        return result;
+    }
+
     private static Map<NodeLabel, Set<String>> propertyKeysPerNodeLabel(GraphSchema graphSchema) {
         return graphSchema
             .nodeSchema()
@@ -283,13 +298,13 @@ public final class GraphSageHelper {
             .collect(Collectors.toMap(NodeSchemaEntry::identifier, e -> e.properties().keySet()));
     }
 
-    private static Map<NodeLabel, Set<String>> filteredPropertyKeysPerNodeLabel(Graph graph, GraphSageTrainConfig config) {
+    private static Map<NodeLabel, Set<String>> filteredPropertyKeysPerNodeLabel(Graph graph, List<String> featureProperties) {
         return propertyKeysPerNodeLabel(graph.schema())
             .entrySet()
             .stream()
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
-                e -> config.featureProperties()
+                e -> featureProperties
                     .stream()
                     .filter(e.getValue()::contains)
                     .collect(Collectors.toSet())

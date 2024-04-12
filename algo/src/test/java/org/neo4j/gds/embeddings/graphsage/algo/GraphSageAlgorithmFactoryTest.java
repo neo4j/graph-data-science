@@ -81,18 +81,18 @@ class GraphSageAlgorithmFactoryTest {
     @MethodSource("parameters")
     void memoryEstimation(
         Function<ModelCatalog, GraphSageBaseConfig> gsConfigProvider,
-        GraphSageTrainConfig trainConfig,
+        GraphSageTrainMemoryEstimateParameters trainParameters,
         long nodeCount,
         LongUnaryOperator hugeObjectArraySize
     ) {
         var gsConfig = gsConfigProvider.apply(modelCatalog);
 
         // features: HugeOA[nodeCount * double[featureSize]]
-        var initialFeaturesArray = sizeOfDoubleArray(trainConfig.estimationFeatureDimension());
+        var initialFeaturesArray = sizeOfDoubleArray(trainParameters.estimationFeatureDimension());
         var initialFeaturesMemory = hugeObjectArraySize.applyAsLong(initialFeaturesArray);
 
         // result: HugeOA[nodeCount * double[embeddingDimension]]
-        var resultFeaturesArray = sizeOfDoubleArray(trainConfig.embeddingDimension());
+        var resultFeaturesArray = sizeOfDoubleArray(trainParameters.embeddingDimension());
         var resultFeaturesMemory = hugeObjectArraySize.applyAsLong(resultFeaturesArray);
 
         // batches:
@@ -105,7 +105,7 @@ class GraphSageAlgorithmFactoryTest {
         // additional final layer size
         batchSizes.add(PrimitiveTuples.pair(minBatchNodeCount, maxBatchNodeCount));
         var subGraphMemories = new ArrayList<MemoryRange>();
-        var layerConfigs = trainConfig.layerConfigs(trainConfig.estimationFeatureDimension());
+        var layerConfigs = trainParameters.layerConfigs();
         for (LayerConfig layerConfig : layerConfigs) {
             var sampleSize = layerConfig.sampleSize();
 
@@ -172,8 +172,8 @@ class GraphSageAlgorithmFactoryTest {
                 var maxMeans = sizeOfDoubleArray(maxNodeCount * featureOrEmbeddingSize);
 
                 //   MatrixMultiplyWithTransposedSecondOperand - new double[iterNodeCount * embeddingDimension]
-                var minProduct = sizeOfDoubleArray(minNodeCount * trainConfig.embeddingDimension());
-                var maxProduct = sizeOfDoubleArray(maxNodeCount * trainConfig.embeddingDimension());
+                var minProduct = sizeOfDoubleArray(minNodeCount * trainParameters.embeddingDimension());
+                var maxProduct = sizeOfDoubleArray(maxNodeCount * trainParameters.embeddingDimension());
 
                 //   activation function = same as input
                 var minActivation = minProduct;
@@ -186,8 +186,8 @@ class GraphSageAlgorithmFactoryTest {
                 var maxPreviousNodeCount = previousNodeCounts.getTwo();
 
                 //  MatrixMultiplyWithTransposedSecondOperand - new double[iterNodeCount(-1) * embeddingDimension]
-                var minWeightedPreviousLayer = sizeOfDoubleArray(minPreviousNodeCount * trainConfig.embeddingDimension());
-                var maxWeightedPreviousLayer = sizeOfDoubleArray(maxPreviousNodeCount * trainConfig.embeddingDimension());
+                var minWeightedPreviousLayer = sizeOfDoubleArray(minPreviousNodeCount * trainParameters.embeddingDimension());
+                var maxWeightedPreviousLayer = sizeOfDoubleArray(maxPreviousNodeCount * trainParameters.embeddingDimension());
 
                 // MatrixVectorSum = shape is matrix input == weightedPreviousLayer
                 var minBiasedWeightedPreviousLayer = minWeightedPreviousLayer;
@@ -198,20 +198,20 @@ class GraphSageAlgorithmFactoryTest {
                 var maxNeighborhoodActivations = maxBiasedWeightedPreviousLayer;
 
                 //  ElementwiseMax - double[iterNodeCount * embeddingDimension]
-                var minElementwiseMax = sizeOfDoubleArray(minNodeCount * trainConfig.embeddingDimension());
-                var maxElementwiseMax = sizeOfDoubleArray(maxNodeCount * trainConfig.embeddingDimension());
+                var minElementwiseMax = sizeOfDoubleArray(minNodeCount * trainParameters.embeddingDimension());
+                var maxElementwiseMax = sizeOfDoubleArray(maxNodeCount * trainParameters.embeddingDimension());
 
                 //  Slice - double[iterNodeCount * embeddingDimension]
-                var minSelfPreviousLayer = sizeOfDoubleArray(minNodeCount * trainConfig.embeddingDimension());
-                var maxSelfPreviousLayer = sizeOfDoubleArray(maxNodeCount * trainConfig.embeddingDimension());
+                var minSelfPreviousLayer = sizeOfDoubleArray(minNodeCount * trainParameters.embeddingDimension());
+                var maxSelfPreviousLayer = sizeOfDoubleArray(maxNodeCount * trainParameters.embeddingDimension());
 
                 //  MatrixMultiplyWithTransposedSecondOperand - new double[iterNodeCount * embeddingDimension]
-                var minSelf = sizeOfDoubleArray(minNodeCount * trainConfig.embeddingDimension());
-                var maxSelf = sizeOfDoubleArray(maxNodeCount * trainConfig.embeddingDimension());
+                var minSelf = sizeOfDoubleArray(minNodeCount * trainParameters.embeddingDimension());
+                var maxSelf = sizeOfDoubleArray(maxNodeCount * trainParameters.embeddingDimension());
 
                 //  MatrixMultiplyWithTransposedSecondOperand - new double[iterNodeCount * embeddingDimension]
-                var minNeighbors = sizeOfDoubleArray(minNodeCount * trainConfig.embeddingDimension());
-                var maxNeighbors = sizeOfDoubleArray(maxNodeCount * trainConfig.embeddingDimension());
+                var minNeighbors = sizeOfDoubleArray(minNodeCount * trainParameters.embeddingDimension());
+                var maxNeighbors = sizeOfDoubleArray(maxNodeCount * trainParameters.embeddingDimension());
 
                 //  MatrixSum - new double[iterNodeCount * embeddingDimension]
                 var minSum = minSelf;
@@ -234,14 +234,14 @@ class GraphSageAlgorithmFactoryTest {
 
         // normalize rows = same as input (output of aggregator)
         var lastLayerBatchNodeCount = batchSizes.get(batchSizes.size() - 1);
-        var minNormalizeRows = sizeOfDoubleArray(lastLayerBatchNodeCount.getOne() * trainConfig.embeddingDimension());
-        var maxNormalizeRows = sizeOfDoubleArray(lastLayerBatchNodeCount.getTwo() * trainConfig.embeddingDimension());
+        var minNormalizeRows = sizeOfDoubleArray(lastLayerBatchNodeCount.getOne() * trainParameters.embeddingDimension());
+        var maxNormalizeRows = sizeOfDoubleArray(lastLayerBatchNodeCount.getTwo() * trainParameters.embeddingDimension());
         aggregatorMemories.add(MemoryRange.of(minNormalizeRows, maxNormalizeRows));
 
         // previous layer representation = parent = local features: double[(bs..3bs) * featureSize]
         var firstLayerBatchNodeCount = batchSizes.get(0);
-        var minFirstLayerMemory = sizeOfDoubleArray(firstLayerBatchNodeCount.getOne() * trainConfig.estimationFeatureDimension());
-        var maxFirstLayerMemory = sizeOfDoubleArray(firstLayerBatchNodeCount.getTwo() * trainConfig.estimationFeatureDimension());
+        var minFirstLayerMemory = sizeOfDoubleArray(firstLayerBatchNodeCount.getOne() * trainParameters.estimationFeatureDimension());
+        var maxFirstLayerMemory = sizeOfDoubleArray(firstLayerBatchNodeCount.getTwo() * trainParameters.estimationFeatureDimension());
         aggregatorMemories.add(0, MemoryRange.of(minFirstLayerMemory, maxFirstLayerMemory));
 
         var lossFunctionMemory = Stream.concat(
@@ -509,7 +509,7 @@ class GraphSageAlgorithmFactoryTest {
 
                                         return arguments(
                                             streamConfigProvider,
-                                            trainConfig,
+                                            trainConfig.toMemoryEstimateParameters(),
                                             nodeCount,
                                             hugeObjectArraySize
                                         );

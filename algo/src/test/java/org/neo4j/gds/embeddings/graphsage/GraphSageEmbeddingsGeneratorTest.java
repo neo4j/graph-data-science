@@ -24,9 +24,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.CSRGraphStore;
-import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageTrainConfigImpl;
 import org.neo4j.gds.embeddings.graphsage.algo.MultiLabelGraphSageTrain;
@@ -35,6 +35,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.gdl.GdlFactory;
+import org.neo4j.gds.ml.core.features.FeatureExtraction;
 
 import java.util.Collections;
 import java.util.List;
@@ -63,18 +64,19 @@ class GraphSageEmbeddingsGeneratorTest {
     @ParameterizedTest
     @EnumSource(Aggregator.AggregatorType.class)
     void makesEmbeddings(Aggregator.AggregatorType aggregatorType) {
-        var config = GraphSageTrainConfigImpl.builder()
+        var parameters = GraphSageTrainConfigImpl.builder()
             .aggregator(aggregatorType)
             .embeddingDimension(EMBEDDING_DIMENSION)
             .featureProperties(Collections.nCopies(FEATURES_COUNT, "dummyProp"))
             .modelName(MODEL_NAME)
             .modelUser("")
             .relationshipWeightProperty("times")
-            .build();
+            .build()
+            .toParameters();
 
-        var features = GraphSageHelper.initializeSingleLabelFeatures(weightedGraph, config);
-
-        var trainModel = new GraphSageModelTrainer(config, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
+        var features = GraphSageHelper.initializeSingleLabelFeatures(weightedGraph, parameters.featureProperties());
+        var featureDimension = FeatureExtraction.featureCount(weightedGraph, parameters.featureProperties());
+        var trainModel = new GraphSageModelTrainer(parameters, featureDimension, DefaultPool.INSTANCE, ProgressTracker.NULL_TRACKER);
 
         GraphSageModelTrainer.ModelTrainResult result = trainModel.train(weightedGraph, features);
 
@@ -82,10 +84,10 @@ class GraphSageEmbeddingsGeneratorTest {
 
         GraphSageEmbeddingsGenerator embeddingsGenerator = new GraphSageEmbeddingsGenerator(
             result.layers(),
-            config.batchSize(),
-            config.typedConcurrency(),
+            parameters.batchSize(),
+            parameters.concurrency(),
             new SingleLabelFeatureFunction(),
-            config.randomSeed(),
+            parameters.randomSeed(),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER
         );
@@ -113,10 +115,12 @@ class GraphSageEmbeddingsGeneratorTest {
 
         var trainer = new MultiLabelGraphSageTrain(
             weightedGraph,
-            config,
+            config.toParameters(),
+            5,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
-            testGdsVersion
+            testGdsVersion,
+            config
         );
 
         var model = trainer.compute();
@@ -135,7 +139,7 @@ class GraphSageEmbeddingsGeneratorTest {
             weightedGraph,
             GraphSageHelper.initializeMultiLabelFeatures(
                 weightedGraph,
-                GraphSageHelper.multiLabelFeatureExtractors(weightedGraph, config)
+                GraphSageHelper.multiLabelFeatureExtractors(weightedGraph, config.featureProperties())
             )
         );
 
@@ -168,10 +172,11 @@ class GraphSageEmbeddingsGeneratorTest {
 
         var trainer = new SingleLabelGraphSageTrain(
             filteredGraph,
-            config,
+            config.toParameters(),
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER,
-            testGdsVersion
+            testGdsVersion,
+            config
         );
 
         var model = trainer.compute();
@@ -188,7 +193,7 @@ class GraphSageEmbeddingsGeneratorTest {
 
         var embeddings = embeddingsGenerator.makeEmbeddings(
             filteredGraph,
-            GraphSageHelper.initializeSingleLabelFeatures(filteredGraph, config)
+            GraphSageHelper.initializeSingleLabelFeatures(filteredGraph, config.featureProperties())
         );
 
         assertThat(embeddings)

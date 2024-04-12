@@ -106,6 +106,10 @@ public final class FeatureExtraction {
         return features;
     }
 
+    public static int featureCount(Graph graph, Collection<String> featureProperties) {
+        return featureCount(propertyExtractors(graph, featureProperties));
+    }
+
     public static int featureCount(Collection<FeatureExtractor> extractors) {
         return extractors.stream().mapToInt(FeatureExtractor::dimension).sum();
     }

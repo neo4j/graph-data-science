@@ -78,12 +78,9 @@ public class GraphSage extends Algorithm<GraphSageResult> {
 
         GraphSageTrainConfig trainConfig = model.trainConfig();
 
-        var features = trainConfig.isMultiLabel() ?
-            initializeMultiLabelFeatures(
-                graph,
-                GraphSageHelper.multiLabelFeatureExtractors(graph, trainConfig)
-            )
-            : initializeSingleLabelFeatures(graph, trainConfig);
+        var features = trainConfig.isMultiLabel()
+            ? initializeMultiLabelFeatures(graph, GraphSageHelper.multiLabelFeatureExtractors(graph, trainConfig.featureProperties()))
+            : initializeSingleLabelFeatures(graph, trainConfig.featureProperties());
 
         HugeObjectArray<double[]> embeddings = embeddingsGenerator.makeEmbeddings(
             graph,
