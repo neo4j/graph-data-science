@@ -146,11 +146,11 @@ class IndexInverseProcTest extends BaseProcTest {
         assertCypherResult(query, List.of(Map.of(
             "mapView", instanceOf(Map.class),
             "treeView", instanceOf(String.class),
-            "bytesMax", 524648L,
+            "bytesMax", 524656L,
             "heapPercentageMin", 0.1D,
             "nodeCount", 3L,
             "requiredMemory", "512 KiB",
-            "bytesMin", 524648L,
+            "bytesMin", 524656L,
             "heapPercentageMax", 0.1D,
             "relationshipCount", 3L
         )));

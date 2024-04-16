@@ -38,8 +38,8 @@ class InverseRelationshipsMemoryEstimateDefinitionTest {
         var uncompressedRunner = TestMethodRunner.runUncompressedOrdered();
 
         return Stream.of(
-            Arguments.of(compressedRunner, 1_462_328),
-            Arguments.of(uncompressedRunner, 2_248_816)
+            Arguments.of(compressedRunner, 1_462_336),
+            Arguments.of(uncompressedRunner, 2_248_824)
         );
     }
 
@@ -78,7 +78,7 @@ class InverseRelationshipsMemoryEstimateDefinitionTest {
                 "Inverse 'T2'"
             )
             .memoryRange()
-            .hasSameMinAndMaxEqualTo(2_924_624);
+            .hasSameMinAndMaxEqualTo(2_924_632);
     }
 
     @Test
@@ -99,7 +99,7 @@ class InverseRelationshipsMemoryEstimateDefinitionTest {
                 "Inverse 'T2'"
             )
             .memoryRange()
-            .hasSameMinAndMaxEqualTo(1_462_328);
+            .hasSameMinAndMaxEqualTo(1_462_336);
 
     }
 
@@ -122,6 +122,6 @@ class InverseRelationshipsMemoryEstimateDefinitionTest {
                 "Inverse '*'"
             )
             .memoryRange()
-            .hasSameMinAndMaxEqualTo(2_924_624);
+            .hasSameMinAndMaxEqualTo(2_924_632);
     }
 }

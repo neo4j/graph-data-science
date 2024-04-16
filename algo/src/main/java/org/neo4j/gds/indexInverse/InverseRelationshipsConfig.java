@@ -74,6 +74,11 @@ public interface InverseRelationshipsConfig extends AlgoBaseConfig {
         return new InverseRelationshipsConfigImpl(configuration);
     }
 
+    @Configuration.Ignore
+    default InverseRelationshipsParameters toParameters() {
+        return new InverseRelationshipsParameters(typedConcurrency(), relationshipTypes());
+    }
+
     @Configuration.GraphStoreValidationCheck
     default void validateNotIndexed(
         GraphStore graphStore,
