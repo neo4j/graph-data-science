@@ -19,22 +19,17 @@
  */
 package org.neo4j.gds.kcore;
 
-import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.community.kcore.KCoreDecompositionWriteResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
-import static org.neo4j.gds.kcore.KCoreCompanion.nodePropertyValues;
 import static org.neo4j.gds.kcore.KCoreDecomposition.KCORE_DESCRIPTION;
 
 @GdsCallable(name = "gds.kcore.write", description = KCORE_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
@@ -56,22 +51,6 @@ public class KCoreDecompositionWriteSpec implements AlgorithmSpec<KCoreDecomposi
 
     @Override
     public ComputationResultConsumer<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionWriteConfig, Stream<KCoreDecompositionWriteResult>> computationResultConsumer() {
-        return new WriteNodePropertiesComputationResultConsumer<>(
-            this::resultBuilder,
-            computationResult -> List.of(ImmutableNodeProperty.of(
-                computationResult.config().writeProperty(),
-                nodePropertyValues(computationResult.result()))),
-            name()
-        );
-    }
-
-    private AbstractResultBuilder<KCoreDecompositionWriteResult> resultBuilder(
-        ComputationResult<KCoreDecomposition, KCoreDecompositionResult, KCoreDecompositionWriteConfig> computationResult,
-        ExecutionContext executionContext
-    ) {
-        var builder = new KCoreDecompositionWriteResult.Builder();
-        computationResult.result().ifPresent(result -> builder.withDegeneracy(result.degeneracy()));
-
-        return builder;
+        return new NullComputationResultConsumer<>();
     }
 }

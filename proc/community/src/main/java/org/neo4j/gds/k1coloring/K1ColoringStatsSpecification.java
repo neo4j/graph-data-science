@@ -19,15 +19,13 @@
  */
 package org.neo4j.gds.k1coloring;
 
-import org.neo4j.gds.StatsComputationResultConsumer;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringStatsResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.stream.Stream;
 
@@ -57,17 +55,6 @@ public class K1ColoringStatsSpecification implements AlgorithmSpec<K1Coloring, K
 
     @Override
     public ComputationResultConsumer<K1Coloring, K1ColoringResult, K1ColoringStatsConfig, Stream<K1ColoringStatsResult>> computationResultConsumer() {
-        return new StatsComputationResultConsumer<>(K1ColoringStatsSpecification::resultBuilder);
-    }
-
-    private static AbstractResultBuilder<K1ColoringStatsResult> resultBuilder(
-        ComputationResult<K1Coloring, K1ColoringResult, K1ColoringStatsConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        var builder = new k1ColoringStatsBuilder(
-            executionContext.returnColumns(),
-            computeResult.config().concurrency()
-        );
-        return K1ColoringSpecificationHelper.resultBuilder(builder, computeResult, executionContext.returnColumns());
+        return new NullComputationResultConsumer<>();
     }
 }

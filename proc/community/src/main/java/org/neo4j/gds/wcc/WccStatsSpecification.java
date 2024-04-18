@@ -19,21 +19,17 @@
  */
 package org.neo4j.gds.wcc;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.community.wcc.WccStatsResult;
-import org.neo4j.gds.result.AbstractCommunityResultBuilder;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.stream.Stream;
-
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 
 @GdsCallable(name = "gds.wcc.stats", description = WccSpecification.WCC_DESCRIPTION, executionMode = ExecutionMode.STATS)
 public class WccStatsSpecification implements AlgorithmSpec<Wcc, DisjointSetStruct, WccStatsConfig, Stream<WccStatsResult>, WccAlgorithmFactory<WccStatsConfig>> {
@@ -55,29 +51,7 @@ public class WccStatsSpecification implements AlgorithmSpec<Wcc, DisjointSetStru
 
     @Override
     public ComputationResultConsumer<Wcc, DisjointSetStruct, WccStatsConfig, Stream<WccStatsResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging(
-            "Stats call failed",
-            executionContext.log(),
-            () -> Stream.of(
-            resultBuilder(computationResult, executionContext)
-                .withPreProcessingMillis(computationResult.preProcessingMillis())
-                .withComputeMillis(computationResult.computeMillis())
-                .withNodeCount(computationResult.graph().nodeCount())
-                .withConfig(computationResult.config())
-                .build()
-        ));
-    }
-
-    protected AbstractResultBuilder<WccStatsResult> resultBuilder(
-        ComputationResult<Wcc, DisjointSetStruct, WccStatsConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        AbstractCommunityResultBuilder<WccStatsResult> resultBuilder = new WccStatsResult.Builder(
-            executionContext.returnColumns(),
-            computeResult.config().concurrency()
-        );
-        computeResult.result().ifPresent(result -> resultBuilder.withCommunityFunction(result::setIdOf));
-        return resultBuilder;
+        return new NullComputationResultConsumer<>();
     }
 
 }

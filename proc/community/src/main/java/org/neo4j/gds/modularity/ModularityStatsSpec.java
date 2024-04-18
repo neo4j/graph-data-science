@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.modularity;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -50,28 +51,6 @@ public class ModularityStatsSpec implements AlgorithmSpec<ModularityCalculator, 
 
     @Override
     public ComputationResultConsumer<ModularityCalculator, ModularityResult, ModularityStatsConfig, Stream<ModularityStatsResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-
-
-            var config = computationResult.config();
-            var statsBuilder = new ModularityStatsResult.StatsBuilder(
-                executionContext.returnColumns(),
-                config.concurrency()
-            );
-            var result = computationResult.result()
-                .orElseGet(ModularityResult::empty);
-
-            var statsResult = statsBuilder
-                .withModularity(result.totalModularity())
-                .withCommunityCount(result.communityCount())
-                .withRelationshipCount(computationResult.graph().relationshipCount())
-                .withPreProcessingMillis(computationResult.preProcessingMillis())
-                .withComputeMillis(computationResult.computeMillis())
-                .withNodeCount(computationResult.graph().nodeCount())
-                .withConfig(computationResult.config())
-                .build();
-
-            return Stream.of(statsResult);
-        };
+        return new NullComputationResultConsumer<>();
     }
 }

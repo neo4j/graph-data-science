@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.kmeans;
 
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -28,10 +28,8 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.community.kmeans.KmeansStreamResult;
 
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.kmeans.Kmeans.KMEANS_DESCRIPTION;
 
 @GdsCallable(name = "gds.kmeans.stream", aliases = {"gds.beta.kmeans.stream"}, description = KMEANS_DESCRIPTION, executionMode = ExecutionMode.STREAM)
@@ -53,24 +51,6 @@ public class KmeansStreamSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kme
 
     @Override
     public ComputationResultConsumer<Kmeans, KmeansResult, KmeansStreamConfig, Stream<KmeansStreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging(
-            "Result streaming failed",
-            executionContext.log(),
-            () -> computationResult.result()
-                .map(result -> {
-                    var communities = result.communities();
-                    var distances = result.distanceFromCenter();
-                    var silhuette = result.silhouette();
-                    var graph = computationResult.graph();
-                    return LongStream
-                        .range(IdMap.START_NODE_ID, graph.nodeCount())
-                        .mapToObj(nodeId -> new KmeansStreamResult(
-                            graph.toOriginalNodeId(nodeId),
-                            communities.get(nodeId),
-                            distances.get(nodeId),
-                            silhuette == null ? -1 : silhuette.get(nodeId)
-                        ));
-                }).orElseGet(Stream::empty)
-        );
+        return new NullComputationResultConsumer<>();
     }
 }

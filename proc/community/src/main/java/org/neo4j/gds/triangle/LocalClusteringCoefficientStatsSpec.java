@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.triangle;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -51,23 +52,6 @@ public class LocalClusteringCoefficientStatsSpec implements AlgorithmSpec<LocalC
 
     @Override
     public ComputationResultConsumer<LocalClusteringCoefficient, LocalClusteringCoefficientResult, LocalClusteringCoefficientStatsConfig, Stream<LocalClusteringCoefficientStatsResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            var builder = LocalClusteringCoefficientStatsResult.statsBuilder();
-            computationResult.result()
-                .ifPresent(result ->
-                    builder
-                        .withAverageClusteringCoefficient(result.averageClusteringCoefficient())
-                );
-
-            builder
-                .withPreProcessingMillis(computationResult.preProcessingMillis())
-                .withComputeMillis(computationResult.computeMillis())
-                .withNodeCount(computationResult.graph().nodeCount())
-                .withConfig(computationResult.config());
-
-            return Stream.of(builder.build());
-        };
+        return new NullComputationResultConsumer<>();
     }
-
-
 }

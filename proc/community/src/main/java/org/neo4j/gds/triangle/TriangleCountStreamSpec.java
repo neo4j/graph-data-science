@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.triangle;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -26,7 +27,6 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStreamResult;
 
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
@@ -50,20 +50,6 @@ public class TriangleCountStreamSpec implements AlgorithmSpec<IntersectingTriang
 
     @Override
     public ComputationResultConsumer<IntersectingTriangleCount, TriangleCountResult, TriangleCountStreamConfig, Stream<TriangleCountStreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-
-
-            if (computationResult.result().isEmpty()) {
-                return Stream.of();
-            }
-
-            var graph = computationResult.graph();
-            var result = computationResult.result().get();
-            return LongStream.range(0, graph.nodeCount())
-                .mapToObj(i -> new TriangleCountStreamResult(
-                    graph.toOriginalNodeId(i),
-                    result.localTriangles().get(i)
-                ));
-        };
+        return new NullComputationResultConsumer<>();
     }
 }

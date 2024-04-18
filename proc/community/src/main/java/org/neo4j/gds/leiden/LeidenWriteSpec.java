@@ -19,22 +19,15 @@
  */
 package org.neo4j.gds.leiden;
 
-import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.community.leiden.LeidenWriteResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.leiden.LeidenStreamProc.DESCRIPTION;
@@ -59,42 +52,6 @@ public class LeidenWriteSpec implements AlgorithmSpec<Leiden, LeidenResult, Leid
 
     @Override
     public ComputationResultConsumer<Leiden, LeidenResult, LeidenWriteConfig, Stream<LeidenWriteResult>> computationResultConsumer() {
-        return new WriteNodePropertiesComputationResultConsumer<>(
-            this::resultBuilder,
-            computationResult -> List.of(ImmutableNodeProperty.of(
-                computationResult.config().writeProperty(),
-                LeidenCompanion.leidenNodeProperties(
-                    computationResult,
-                    computationResult.config().writeProperty()
-                )
-            )),
-            name()
-        );
+        return new NullComputationResultConsumer<>();
     }
-
-    @NotNull
-    private AbstractResultBuilder<LeidenWriteResult> resultBuilder(
-        ComputationResult<Leiden, LeidenResult, LeidenWriteConfig> computationResult,
-        ExecutionContext executionContext
-    ) {
-        var builder = new LeidenWriteResult.Builder(
-            executionContext.returnColumns(),
-            computationResult.config().concurrency()
-        );
-
-        computationResult.result().ifPresent(leidenResult -> {
-            builder
-                .withLevels(leidenResult.ranLevels())
-                .withDidConverge(leidenResult.didConverge())
-                .withModularities(Arrays.stream(leidenResult.modularities())
-                    .boxed()
-                    .collect(Collectors.toList()))
-                .withModularity(leidenResult.modularity())
-                .withCommunityFunction(leidenResult.communitiesFunction());
-        });
-
-        return builder
-            .withConfig(computationResult.config());
-    }
-
 }

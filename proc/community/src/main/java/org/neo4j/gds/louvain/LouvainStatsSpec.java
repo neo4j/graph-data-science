@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.louvain;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -50,27 +51,6 @@ public class LouvainStatsSpec implements AlgorithmSpec<Louvain, LouvainResult, L
 
     @Override
     public ComputationResultConsumer<Louvain, LouvainResult, LouvainStatsConfig, Stream<LouvainStatsResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-
-            var louvainStatsResultBuilder = new LouvainStatsResultsBuilder(
-                executionContext.returnColumns(),
-                computationResult.config().concurrency()
-            );
-
-            louvainStatsResultBuilder.withConfig(computationResult.config());
-
-            if (computationResult.result().isEmpty()) return Stream.of(louvainStatsResultBuilder.build());
-
-            var louvainResult = computationResult.result().get();
-            louvainStatsResultBuilder.withCommunityFunction(louvainResult.communitiesFunction());
-            louvainStatsResultBuilder.withComputeMillis(computationResult.computeMillis());
-            louvainStatsResultBuilder.withLevels(louvainResult.ranLevels());
-            louvainStatsResultBuilder.withModularities(louvainResult.modularities());
-            louvainStatsResultBuilder.withModularity(louvainResult.modularity());
-            louvainStatsResultBuilder.withNodeCount(computationResult.graph().nodeCount());
-            louvainStatsResultBuilder.withPreProcessingMillis(computationResult.preProcessingMillis());
-
-            return Stream.of(louvainStatsResultBuilder.build());
-        };
+        return new NullComputationResultConsumer<>();
     }
 }
