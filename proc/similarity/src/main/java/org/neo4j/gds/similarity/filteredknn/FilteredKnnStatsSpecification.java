@@ -19,25 +19,17 @@
  */
 package org.neo4j.gds.similarity.filteredknn;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.similarity.knn.KnnStatsResult;
-import org.neo4j.gds.similarity.SimilarityGraphResult;
-import org.neo4j.gds.similarity.SimilarityProc;
-import org.neo4j.gds.similarity.knn.KnnStatsResultBuilder;
 
-import java.util.Objects;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
-import static org.neo4j.gds.similarity.SimilarityProc.computeHistogram;
-import static org.neo4j.gds.similarity.SimilarityProc.shouldComputeHistogram;
 
 @GdsCallable(
     name = "gds.alpha.knn.filtered.stats",
@@ -63,49 +55,6 @@ public class FilteredKnnStatsSpecification implements AlgorithmSpec<FilteredKnn,
 
     @Override
     public ComputationResultConsumer<FilteredKnn, FilteredKnnResult, FilteredKnnStatsConfig, Stream<KnnStatsResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging(
-            "Graph stats failed",
-            executionContext.log(),
-            () -> {
-                var config = computationResult.config();
-                var resultBuilder = new KnnStatsResultBuilder();
-
-                computationResult.result()
-                    .ifPresent(result -> {
-                        resultBuilder
-                            .withRanIterations(result.ranIterations())
-                            .withNodePairsConsidered(result.nodePairsConsidered())
-                            .withDidConverge(result.didConverge());
-
-                        SimilarityProc.resultBuilderWithTimings(resultBuilder, computationResult);
-                        var filteredKnn = Objects.requireNonNull(computationResult.algorithm());
-
-                        if (shouldComputeHistogram(executionContext.returnColumns())) {
-                            try (ProgressTimer ignored = resultBuilder.timePostProcessing()) {
-                                SimilarityGraphResult similarityGraphResult = FilteredKnnHelpers.computeToGraph(
-                                    computationResult.graph(),
-                                    computationResult.graph().nodeCount(),
-                                    config.concurrency(),
-                                    result,
-                                    filteredKnn.executorService()
-                                );
-
-                                Graph similarityGraph = similarityGraphResult.similarityGraph();
-
-                                resultBuilder
-                                    .withHistogram(computeHistogram(similarityGraph))
-                                    .withNodesCompared(similarityGraphResult.comparedNodes())
-                                    .withRelationshipsWritten(similarityGraph.relationshipCount());
-                            }
-                        } else {
-                            resultBuilder
-                                .withNodesCompared(computationResult.graph().nodeCount())
-                                .withRelationshipsWritten(result.numberOfSimilarityPairs());
-                        }
-                    });
-
-
-                return Stream.of(resultBuilder.build());
-            });
+        return new NullComputationResultConsumer<>();
     }
 }

@@ -19,21 +19,18 @@
  */
 package org.neo4j.gds.similarity.knn;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.similarity.knn.KnnWriteResult;
-import org.neo4j.gds.similarity.SimilarityGraphResult;
-import org.neo4j.gds.similarity.SimilarityWriteConsumer;
 
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
 import static org.neo4j.gds.similarity.knn.KnnProc.KNN_DESCRIPTION;
-import static org.neo4j.gds.similarity.knn.KnnProc.computeToGraph;
 
 @GdsCallable(name = "gds.knn.write", description = KNN_DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
 public class KnnWriteSpecification implements AlgorithmSpec<Knn, KnnResult, KnnWriteConfig, Stream<KnnWriteResult>, KnnFactory<KnnWriteConfig>> {
@@ -54,35 +51,6 @@ public class KnnWriteSpecification implements AlgorithmSpec<Knn, KnnResult, KnnW
 
     @Override
     public ComputationResultConsumer<Knn, KnnResult, KnnWriteConfig, Stream<KnnWriteResult>> computationResultConsumer() {
-        return new SimilarityWriteConsumer<>(
-            this::resultBuilderFunction,
-            (computationResult) -> {
-                if(computationResult.result().isEmpty()) {
-                    return new SimilarityGraphResult(computationResult.graph(), 0, false);
-                }
-
-                return computeToGraph(
-                    computationResult.graph(),
-                    computationResult.graph().nodeCount(),
-                    computationResult.config().concurrency(),
-                    computationResult.result().get(),
-                    computationResult.algorithm().executorService()
-                );
-            },
-            name()
-        );
-    }
-
-    private KnnWriteResultBuilder resultBuilderFunction(ComputationResult<Knn, KnnResult, KnnWriteConfig> computationResult) {
-        var builder = new KnnWriteResultBuilder();
-
-        computationResult.result().ifPresent(result -> {
-            builder
-                .withDidConverge(result.didConverge())
-                .withNodePairsConsidered(result.nodePairsConsidered())
-                .withRanIterations(result.ranIterations());
-        });
-
-        return builder;
+        return new NullComputationResultConsumer<>();
     }
 }
