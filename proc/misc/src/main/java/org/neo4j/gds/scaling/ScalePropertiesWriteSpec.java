@@ -19,8 +19,7 @@
  */
 package org.neo4j.gds.scaling;
 
-import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -33,7 +32,6 @@ import org.neo4j.gds.scaleproperties.ScalePropertiesFactory;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 import org.neo4j.gds.scaleproperties.ScalePropertiesWriteConfig;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIPTION;
@@ -63,18 +61,6 @@ public class ScalePropertiesWriteSpec implements AlgorithmSpec<ScaleProperties, 
 
     @Override
     public ComputationResultConsumer<ScaleProperties, ScalePropertiesResult, ScalePropertiesWriteConfig, Stream<ScalePropertiesWriteResult>> computationResultConsumer() {
-        return new WriteNodePropertiesComputationResultConsumer<>(
-            (computationResult, __) -> {
-                var builder = new ScalePropertiesWriteResult.Builder();
-                computationResult.result()
-                    .ifPresent(result -> builder.withScalerStatistics(result.scalerStatistics()));
-                return builder;
-            },
-            computationResult -> List.of(ImmutableNodeProperty.of(
-                computationResult.config().writeProperty(),
-                ScalePropertiesProc.nodeProperties(computationResult)
-            )),
-            name()
-        );
+        return new NullComputationResultConsumer<>();
     }
 }

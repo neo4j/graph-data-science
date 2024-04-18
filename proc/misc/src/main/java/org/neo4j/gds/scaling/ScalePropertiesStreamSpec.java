@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.scaling;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -30,10 +31,8 @@ import org.neo4j.gds.scaleproperties.ScalePropertiesFactory;
 import org.neo4j.gds.scaleproperties.ScalePropertiesResult;
 import org.neo4j.gds.scaleproperties.ScalePropertiesStreamConfig;
 
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.scaling.ScalePropertiesProc.SCALE_PROPERTIES_DESCRIPTION;
 import static org.neo4j.gds.scaling.ScalePropertiesProc.validateLegacyScalers;
@@ -68,20 +67,6 @@ public class ScalePropertiesStreamSpec implements AlgorithmSpec<ScaleProperties,
 
     @Override
     public ComputationResultConsumer<ScaleProperties, ScalePropertiesResult, ScalePropertiesStreamConfig, Stream<ScalePropertiesStreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging(
-            "Result streaming failed",
-            executionContext.log(),
-            () -> computationResult.result()
-                .map(result -> {
-                    var graph = computationResult.graph();
-                    var nodeProperties = ScalePropertiesProc.nodeProperties(graph.nodeCount(), result.scaledProperties());
-                    return LongStream
-                        .range(0, graph.nodeCount())
-                        .mapToObj(nodeId -> new ScalePropertiesStreamResult(
-                            graph.toOriginalNodeId(nodeId),
-                            nodeProperties.doubleArrayValue(nodeId)
-                        ));
-                }).orElseGet(Stream::empty)
-        );
+        return new NullComputationResultConsumer<>();
     }
 }

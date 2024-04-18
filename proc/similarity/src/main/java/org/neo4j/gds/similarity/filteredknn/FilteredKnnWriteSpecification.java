@@ -19,18 +19,14 @@
  */
 package org.neo4j.gds.similarity.filteredknn;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.similarity.knn.KnnWriteResult;
-import org.neo4j.gds.similarity.SimilarityGraphResult;
-import org.neo4j.gds.similarity.SimilarityWriteConsumer;
-import org.neo4j.gds.similarity.knn.KnnWriteResultBuilder;
 
-import java.util.Objects;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
@@ -59,39 +55,6 @@ public class FilteredKnnWriteSpecification implements AlgorithmSpec<FilteredKnn,
 
     @Override
     public ComputationResultConsumer<FilteredKnn, FilteredKnnResult, FilteredKnnWriteConfig, Stream<KnnWriteResult>> computationResultConsumer() {
-        return new SimilarityWriteConsumer<>(
-            this::resultBuilderFunction,
-            this::similarityGraphResult,
-            name()
-        );
-    }
-
-    private KnnWriteResultBuilder resultBuilderFunction(ComputationResult<FilteredKnn, FilteredKnnResult, FilteredKnnWriteConfig> computationResult) {
-        var builder = new KnnWriteResultBuilder();
-
-        computationResult.result().ifPresent(result -> {
-            builder
-                .withDidConverge(result.didConverge())
-                .withNodePairsConsidered(result.nodePairsConsidered())
-                .withRanIterations(result.ranIterations());
-        });
-
-        return builder;
-    }
-
-    protected SimilarityGraphResult similarityGraphResult(ComputationResult<FilteredKnn, FilteredKnnResult, FilteredKnnWriteConfig> computationResult) {
-        if (computationResult.result().isEmpty()) {
-            return new SimilarityGraphResult(computationResult.graph(), 0, false);
-        }
-
-        FilteredKnn algorithm = Objects.requireNonNull(computationResult.algorithm());
-        FilteredKnnWriteConfig config = computationResult.config();
-        return FilteredKnnHelpers.computeToGraph(
-            computationResult.graph(),
-            computationResult.graph().nodeCount(),
-            config.concurrency(),
-            computationResult.result().get(),
-            algorithm.executorService()
-        );
+        return new NullComputationResultConsumer<>();
     }
 }

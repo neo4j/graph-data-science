@@ -19,20 +19,14 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
-import org.neo4j.gds.api.properties.nodes.EmptyDoubleNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientWriteResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
@@ -56,29 +50,6 @@ public class LocalClusteringCoefficientWriteSpec implements AlgorithmSpec<LocalC
 
     @Override
     public ComputationResultConsumer<LocalClusteringCoefficient, LocalClusteringCoefficientResult, LocalClusteringCoefficientWriteConfig, Stream<LocalClusteringCoefficientWriteResult>> computationResultConsumer() {
-        return new WriteNodePropertiesComputationResultConsumer<>(
-            this::resultBuilder,
-            computationResult -> List.of(ImmutableNodeProperty.of(
-                computationResult.config().writeProperty(),
-                computationResult.result()
-                    .map(LocalClusteringCoefficientResult::localClusteringCoefficients)
-                    .map(NodePropertyValuesAdapter::adapt)
-                    .orElse(EmptyDoubleNodePropertyValues.INSTANCE)
-            )),
-            name()
-
-        );    }
-
-
-    private AbstractResultBuilder<LocalClusteringCoefficientWriteResult> resultBuilder(
-        ComputationResult<LocalClusteringCoefficient, LocalClusteringCoefficientResult, LocalClusteringCoefficientWriteConfig> computationResult,
-        ExecutionContext executionContext
-    ) {
-        var builder = new LocalClusteringCoefficientWriteResult.Builder();
-
-        computationResult.result()
-            .ifPresent(result -> builder.withAverageClusteringCoefficient(result.averageClusteringCoefficient()));
-
-        return builder;
+        return new NullComputationResultConsumer<>();
     }
 }

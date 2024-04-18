@@ -19,19 +19,15 @@
  */
 package org.neo4j.gds.paths.kspanningtree;
 
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.applications.algorithms.pathfinding.SpanningTreeBackedNodePropertyValues;
-import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.AlgorithmSpecProgressTrackerProvider;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.kspanningtree.KSpanningTree;
 import org.neo4j.gds.kspanningtree.KSpanningTreeAlgorithmFactory;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.pathfinding.KSpanningTreeWriteResult;
 import org.neo4j.gds.spanningtree.SpanningTree;
 
@@ -63,49 +59,6 @@ public class KSpanningTreeWriteSpec implements
     }
 
     public ComputationResultConsumer<KSpanningTree, SpanningTree, KSpanningTreeWriteConfig, Stream<KSpanningTreeWriteResult>> computationResultConsumer() {
-
-        return (computationResult, executionContext) -> {
-            Graph graph = computationResult.graph();
-            KSpanningTreeWriteConfig config = computationResult.config();
-            KSpanningTree algorithm = computationResult.algorithm();
-            KSpanningTreeWriteResult.Builder builder = new KSpanningTreeWriteResult.Builder();
-
-            if (computationResult.result().isEmpty()) {
-                return Stream.of(builder.build());
-            }
-
-            var spanningTree = computationResult.result().get();
-
-            var properties = new SpanningTreeBackedNodePropertyValues(spanningTree, graph.nodeCount());
-
-            builder.withEffectiveNodeCount(spanningTree.effectiveNodeCount());
-            try (ProgressTimer ignored = ProgressTimer.start(builder::withWriteMillis)) {
-
-                var graphStore = computationResult.graphStore();
-                var resultStore = config.resolveResultStore(graphStore.resultStore());
-                executionContext.nodePropertyExporterBuilder()
-                    .withIdMap(graph)
-                    .withTerminationFlag(algorithm.getTerminationFlag())
-                    .withProgressTracker(
-                        AlgorithmSpecProgressTrackerProvider.createProgressTracker(
-                            name(),
-                            graph.nodeCount(),
-                            config.writeConcurrency(),
-                            executionContext
-                        )
-                    )
-                    .withArrowConnectionInfo(
-                        config.arrowConnectionInfo(),
-                        graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
-                    )
-                    .withResultStore(resultStore)
-                    .build()
-                    .write(config.writeProperty(), properties);
-            }
-            builder.withComputeMillis(computationResult.computeMillis());
-            builder.withPreProcessingMillis(computationResult.preProcessingMillis());
-            builder.withConfig(config);
-            return Stream.of(builder.build());
-        };
+        return new NullComputationResultConsumer<>();
     }
 }

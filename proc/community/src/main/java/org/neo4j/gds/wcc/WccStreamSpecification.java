@@ -19,8 +19,7 @@
  */
 package org.neo4j.gds.wcc;
 
-import org.neo4j.gds.CommunityProcCompanion;
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -29,10 +28,8 @@ import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.wcc.WccSpecification.WCC_DESCRIPTION;
 
 @GdsCallable(name = "gds.wcc.stream", description = WCC_DESCRIPTION, executionMode = ExecutionMode.STREAM)
@@ -55,25 +52,7 @@ public class WccStreamSpecification implements AlgorithmSpec<Wcc, DisjointSetStr
 
     @Override
     public ComputationResultConsumer<Wcc, DisjointSetStruct, WccStreamConfig, Stream<StreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging(
-            "Result streaming failed",
-            executionContext.log(),
-            () -> computationResult.result()
-                .map(result -> {
-                    var graph = computationResult.graph();
-                    var nodePropertyValues = CommunityProcCompanion.nodeProperties(
-                        computationResult.config(),
-                        result.asNodeProperties()
-                    );
-                    return LongStream
-                        .range(IdMap.START_NODE_ID, graph.nodeCount())
-                        .filter(nodePropertyValues::hasValue)
-                        .mapToObj(nodeId -> new StreamResult(
-                            graph.toOriginalNodeId(nodeId),
-                            nodePropertyValues.longValue(nodeId)
-                        ));
-                }).orElseGet(Stream::empty)
-        );
+        return new NullComputationResultConsumer<>();
     }
 
     @SuppressWarnings("unused")

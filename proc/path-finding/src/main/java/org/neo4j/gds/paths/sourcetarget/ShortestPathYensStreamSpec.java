@@ -19,17 +19,17 @@
  */
 package org.neo4j.gds.paths.sourcetarget;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.paths.ShortestPathStreamResultConsumer;
-import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingStreamResult;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 import org.neo4j.gds.paths.yens.Yens;
 import org.neo4j.gds.paths.yens.YensFactory;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
+import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingStreamResult;
 
 import java.util.stream.Stream;
 
@@ -56,7 +56,7 @@ public class ShortestPathYensStreamSpec implements AlgorithmSpec<Yens, PathFindi
 
     @Override
     public ComputationResultConsumer<Yens, PathFindingResult, ShortestPathYensStreamConfig, Stream<PathFindingStreamResult>> computationResultConsumer() {
-        return new ShortestPathStreamResultConsumer<>();
+        return new NullComputationResultConsumer<>();
     }
 
     @Override

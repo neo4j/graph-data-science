@@ -19,12 +19,7 @@
  */
 package org.neo4j.gds.similarity.filterednodesim;
 
-import org.HdrHistogram.DoubleHistogram;
-import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
-import org.neo4j.gds.core.write.RelationshipExporter;
-import org.neo4j.gds.core.write.RelationshipExporterBuilder;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -32,15 +27,11 @@ import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.similarity.SimilarityWriteResult;
-import org.neo4j.gds.similarity.SimilarityProc;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarity;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteResultBuilder;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
-import static org.neo4j.gds.core.ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT;
 import static org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamProc.DESCRIPTION;
 
 @GdsCallable(
@@ -70,81 +61,6 @@ public class FilteredNodeSimilarityWriteSpec implements
 
     @Override
     public ComputationResultConsumer<NodeSimilarity, NodeSimilarityResult, FilteredNodeSimilarityWriteConfig, Stream<SimilarityWriteResult>> computationResultConsumer() {
-        return (
-            computationResult,
-            executionContext
-        ) -> runWithExceptionLogging("Graph write failed", executionContext.log(), () -> {
-            var config = computationResult.config();
-            var resultBuilder = new NodeSimilarityWriteResultBuilder();
-
-            if (computationResult.result().isEmpty()) {
-                return Stream.of(resultBuilder.withConfig(config).build());
-            }
-
-            var algorithm = computationResult.algorithm();
-            var similarityGraphResult = computationResult.result().get().graphResult();
-            var similarityGraph = similarityGraphResult.similarityGraph();
-            // The relationships in the similarity graph refer to the node id space
-            // of the graph store. Because of that, we must not use the similarity
-            // graph itself to resolve the original node ids for a given source/target
-            // id as this can lead to either assertion errors or to wrong original ids.
-            // An exception is the topK graph where relationships refer to source/target
-            // ids within the node id space of the similarity graph. Therefore it is
-            // safe to use that graph for resolving original ids.
-            var rootIdMap = similarityGraphResult.isTopKGraph()
-                ? similarityGraph
-                : computationResult.graphStore().nodes();
-
-            SimilarityProc.withGraphsizeAndTimings(resultBuilder, computationResult, (ignore) -> similarityGraphResult);
-
-            if (similarityGraph.relationshipCount() > 0) {
-                String writeRelationshipType = config.writeRelationshipType();
-                String writeProperty = config.writeProperty();
-
-                runWithExceptionLogging(
-                    name() + " write-back failed",
-                    executionContext.log(),
-                    () -> {
-                        try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {
-                            var progressTracker = new TaskProgressTracker(
-                                RelationshipExporter.baseTask(name(), similarityGraph.relationshipCount()),
-                                executionContext.log(),
-                                RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY,
-                                executionContext.taskRegistryFactory()
-                            );
-                            var exporter = executionContext.relationshipExporterBuilder()
-                                .withIdMappingOperator(rootIdMap::toOriginalNodeId)
-                                .withGraph(similarityGraph)
-                                .withTerminationFlag(algorithm.getTerminationFlag())
-                                .withProgressTracker(progressTracker)
-                                .withArrowConnectionInfo(
-                                    config.arrowConnectionInfo(),
-                                    computationResult.graphStore().databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
-                                )
-                                .withResultStore(config.resolveResultStore(computationResult.graphStore().resultStore()))
-                                .build();
-
-                            if (SimilarityProc.shouldComputeHistogram(executionContext.returnColumns())) {
-                                DoubleHistogram histogram = new DoubleHistogram(HISTOGRAM_PRECISION_DEFAULT);
-                                exporter.write(
-                                    writeRelationshipType,
-                                    writeProperty,
-                                    (node1, node2, similarity) -> {
-                                        histogram.recordValue(similarity);
-                                        return true;
-                                    }
-                                );
-                                resultBuilder.withHistogram(histogram);
-                            } else {
-                                exporter.write(writeRelationshipType, writeProperty);
-                            }
-                        }
-                        // Have to return something..
-                        return 1;
-                    }
-                );
-            }
-            return Stream.of(resultBuilder.build());
-        });
+        return new NullComputationResultConsumer<>();
     }
 }

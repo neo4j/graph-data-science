@@ -19,16 +19,14 @@
  */
 package org.neo4j.gds.similarity.knn;
 
-import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.similarity.knn.KnnStatsResult;
-import org.neo4j.gds.similarity.SimilarityProc;
 
-import java.util.Objects;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
@@ -53,52 +51,6 @@ public class KnnStatsSpecification implements AlgorithmSpec<Knn, KnnResult, KnnS
 
     @Override
     public ComputationResultConsumer<Knn, KnnResult, KnnStatsConfig, Stream<KnnStatsResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-
-            var config = computationResult.config();
-            var builder = new KnnStatsResultBuilder();
-
-            computationResult.result().ifPresent(result -> {
-                builder
-                    .withRanIterations(result.ranIterations())
-                    .withNodePairsConsidered(result.nodePairsConsidered())
-                    .withDidConverge(result.didConverge());
-
-                // algorithm is only null if the result is null
-                var knn = Objects.requireNonNull(computationResult.algorithm());
-
-                if (SimilarityProc.shouldComputeHistogram(executionContext.returnColumns())) {
-                    try (ProgressTimer ignored = builder.timePostProcessing()) {
-                        var similarityGraphResult = KnnProc.computeToGraph(
-                            computationResult.graph(),
-                            computationResult.graph().nodeCount(),
-                            config.concurrency(),
-                            result,
-                            knn.executorService()
-                        );
-
-                        var similarityGraph = similarityGraphResult.similarityGraph();
-
-                        builder
-                            .withHistogram(SimilarityProc.computeHistogram(similarityGraph))
-                            .withNodesCompared(similarityGraphResult.comparedNodes())
-                            .withRelationshipsWritten(similarityGraph.relationshipCount());
-                    }
-                } else {
-                    builder
-                        .withNodesCompared(computationResult.graph().nodeCount())
-                        .withRelationshipsWritten(result.totalSimilarityPairs());
-                }
-            });
-
-
-            return Stream.of(
-                builder
-                    .withPreProcessingMillis(computationResult.preProcessingMillis())
-                    .withComputeMillis(computationResult.computeMillis())
-                    .withConfig(config)
-                    .build()
-            );
-        };
+        return new NullComputationResultConsumer<>();
     }
 }

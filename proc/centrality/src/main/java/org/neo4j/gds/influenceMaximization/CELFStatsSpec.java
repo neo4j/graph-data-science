@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.influenceMaximization;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -55,23 +56,6 @@ public class CELFStatsSpec implements AlgorithmSpec<CELF, CELFResult, InfluenceM
 
     @Override
     public ComputationResultConsumer<CELF, CELFResult, InfluenceMaximizationStatsConfig, Stream<CELFStatsResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            var celfResult = computationResult.result();
-            if (celfResult.isEmpty()) {
-                return Stream.empty();
-            }
-
-            var statsBuilder = CELFStatsResult.builder();
-
-            var statsResult = statsBuilder
-                .withTotalSpread(celfResult.map(res -> res.totalSpread()).orElse(0D))
-                .withNodeCount(computationResult.graph().nodeCount())
-                .withComputeMillis(computationResult.computeMillis())
-                .withConfig(computationResult.config())
-                .build();
-
-            return Stream.of(statsResult);
-        };
-
+        return new NullComputationResultConsumer<>();
     }
 }

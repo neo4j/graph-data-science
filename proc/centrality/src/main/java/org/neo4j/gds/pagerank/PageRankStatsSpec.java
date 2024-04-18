@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.pagerank;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -51,29 +52,6 @@ public class PageRankStatsSpec implements AlgorithmSpec<PageRankAlgorithm, PageR
 
     @Override
     public ComputationResultConsumer<PageRankAlgorithm, PageRankResult, PageRankStatsConfig, Stream<PageRankStatsResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-
-            var builder = new PageRankStatsResult.Builder(
-                executionContext.returnColumns(),
-                computationResult.config().concurrency()
-            );
-
-            computationResult.result().ifPresent(result -> {
-                builder
-                    .withDidConverge(result.didConverge())
-                    .withRanIterations(result.iterations())
-                    .withCentralityFunction(result.centralityScoreProvider())
-                    .withScalerVariant(computationResult.config().scaler());
-            });
-
-            return Stream.of(
-                builder.withPreProcessingMillis(computationResult.preProcessingMillis())
-                    .withComputeMillis(computationResult.computeMillis())
-                    .withNodeCount(computationResult.graph().nodeCount())
-                    .withConfig(computationResult.config())
-                    .build()
-            );
-        };
+        return new NullComputationResultConsumer<>();
     }
-
 }

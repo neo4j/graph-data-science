@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.conductance;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -26,10 +27,8 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.community.conductance.ConductanceStreamResult;
 
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.conductance.Conductance.CONDUCTANCE_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
@@ -53,17 +52,6 @@ public class ConductanceStreamSpec implements AlgorithmSpec<Conductance, Conduct
 
     @Override
     public ComputationResultConsumer<Conductance, ConductanceResult, ConductanceStreamConfig, Stream<ConductanceStreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging(
-            "Result streaming failed",
-            executionContext.log(),
-            () -> computationResult.result()
-                .map(result -> {
-                    var condunctances = result.communityConductances();
-                    return LongStream
-                        .range(0, condunctances.capacity())
-                        .filter(community -> !Double.isNaN(condunctances.get(community)))
-                        .mapToObj(community -> new ConductanceStreamResult(community, condunctances.get(community)));
-                }).orElseGet(Stream::empty)
-        );
+        return new NullComputationResultConsumer<>();
     }
 }

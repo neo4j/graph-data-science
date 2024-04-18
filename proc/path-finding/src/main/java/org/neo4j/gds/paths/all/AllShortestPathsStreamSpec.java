@@ -21,6 +21,7 @@ package org.neo4j.gds.paths.all;
 
 import org.neo4j.gds.AlgorithmFactory;
 import org.neo4j.gds.GraphAlgorithmFactory;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
 import org.neo4j.gds.allshortestpaths.MSBFSASPAlgorithm;
@@ -90,6 +91,6 @@ public class AllShortestPathsStreamSpec implements AlgorithmSpec<MSBFSASPAlgorit
 
     @Override
     public ComputationResultConsumer<MSBFSASPAlgorithm, Stream<AllShortestPathsStreamResult>, AllShortestPathsConfig, Stream<AllShortestPathsStreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> computationResult.result().orElseGet(Stream::empty);
+        return new NullComputationResultConsumer<>();
     }
 }

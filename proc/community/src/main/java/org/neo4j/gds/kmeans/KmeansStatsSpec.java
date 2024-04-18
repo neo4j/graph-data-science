@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.kmeans;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -29,7 +30,6 @@ import org.neo4j.gds.procedures.community.kmeans.KmeansStatsResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.kmeans.Kmeans.KMEANS_DESCRIPTION;
 
 @GdsCallable(name = "gds.kmeans.stats", aliases = {"gds.beta.kmeans.stats"}, description = KMEANS_DESCRIPTION, executionMode = ExecutionMode.STATS)
@@ -53,37 +53,6 @@ public class KmeansStatsSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kmea
 
     @Override
     public ComputationResultConsumer<Kmeans, KmeansResult, KmeansStatsConfig, Stream<KmeansStatsResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging(
-            "Stats call failed",
-            executionContext.log(),
-            () -> {
-                var returnColumns = executionContext.returnColumns();
-                var builder = new KmeansStatsResult.Builder(
-                    returnColumns,
-                    computationResult.config().concurrency()
-                );
-
-                computationResult.result().ifPresent(result -> {
-                    if (returnColumns.contains("centroids")) {
-                        builder.withCentroids(KmeansProcHelper.arrayMatrixToListMatrix(result.centers()));
-                    }
-                    if (returnColumns.contains("averageDistanceToCentroid")) {
-                        builder.withAverageDistanceToCentroid(result.averageDistanceToCentroid());
-                    }
-                    if (returnColumns.contains("averageSilhouette")) {
-                        builder.withAverageSilhouette(result.averageSilhouette());
-                    }
-                    builder.withCommunityFunction(result.communities()::get);
-                });
-
-                builder
-                    .withPreProcessingMillis(computationResult.preProcessingMillis())
-                    .withComputeMillis(computationResult.computeMillis())
-                    .withNodeCount(computationResult.graph().nodeCount())
-                    .withConfig(computationResult.config());
-                return Stream.of(builder.build());
-
-            }
-        );
+        return new NullComputationResultConsumer<>();
     }
 }

@@ -19,12 +19,12 @@
  */
 package org.neo4j.gds.labelpropagation;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationMutateResult;
 import org.neo4j.gds.procedures.community.labelpropagation.LabelPropagationStatsResult;
 
 import java.util.stream.Stream;
@@ -51,30 +51,6 @@ public class LabelPropagationStatsSpecification implements AlgorithmSpec<LabelPr
 
     @Override
     public ComputationResultConsumer<LabelPropagation, LabelPropagationResult, LabelPropagationStatsConfig, Stream<LabelPropagationStatsResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            var builder = LabelPropagationMutateResult.builder(
-                executionContext.returnColumns(),
-                computationResult.config().concurrency()
-            );
-
-            computationResult.result()
-                .ifPresent(result -> {
-                        builder
-                            .didConverge(result.didConverge())
-                            .ranIterations(result.ranIterations())
-                            .withCommunityFunction((nodeId) -> result.labels().get(nodeId));
-
-                    }
-                );
-
-            builder
-                .withPreProcessingMillis(computationResult.preProcessingMillis())
-                .withComputeMillis(computationResult.computeMillis())
-                .withNodeCount(computationResult.graph().nodeCount())
-                .withConfig(computationResult.config());
-
-
-            return Stream.of(builder.build());
-        };
+        return new NullComputationResultConsumer<>();
     }
 }

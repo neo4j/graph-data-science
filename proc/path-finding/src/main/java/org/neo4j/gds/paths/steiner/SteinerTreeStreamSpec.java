@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.paths.steiner;
 
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -31,10 +31,8 @@ import org.neo4j.gds.steiner.SteinerTreeAlgorithmFactory;
 import org.neo4j.gds.steiner.SteinerTreeResult;
 import org.neo4j.gds.steiner.SteinerTreeStreamConfig;
 
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 @GdsCallable(
@@ -58,30 +56,10 @@ public class SteinerTreeStreamSpec implements AlgorithmSpec<ShortestPathsSteiner
     @Override
     public NewConfigFunction<SteinerTreeStreamConfig> newConfigFunction() {
         return (__, config) -> SteinerTreeStreamConfig.of(config);
-
     }
 
+    @Override
     public ComputationResultConsumer<ShortestPathsSteinerAlgorithm, SteinerTreeResult, SteinerTreeStreamConfig, Stream<SteinerTreeStreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging(
-            "Result streaming failed",
-            executionContext.log(),
-            () -> computationResult.result()
-                .map(result -> {
-                    var sourceNode = computationResult.config().sourceNode();
-                    var graph = computationResult.graph();
-                    var parents = result.parentArray();
-                    var costs = result.relationshipToParentCost();
-                    return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
-                        .filter(nodeId -> parents.get(nodeId) != ShortestPathsSteinerAlgorithm.PRUNED)
-                        .mapToObj(nodeId -> {
-                            var originalId = graph.toOriginalNodeId(nodeId);
-                            return new SteinerTreeStreamResult(
-                                originalId,
-                                (sourceNode == originalId) ? sourceNode : graph.toOriginalNodeId(parents.get(nodeId)),
-                                costs.get(nodeId)
-                            );
-                        });
-                }).orElseGet(Stream::empty)
-        );
+        return new NullComputationResultConsumer<>();
     }
 }

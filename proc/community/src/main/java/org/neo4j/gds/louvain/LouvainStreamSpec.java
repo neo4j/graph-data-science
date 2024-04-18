@@ -19,8 +19,7 @@
  */
 package org.neo4j.gds.louvain;
 
-import org.neo4j.gds.CommunityProcCompanion;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -28,10 +27,8 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
 
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.louvain.LouvainConstants.DESCRIPTION;
 
@@ -54,30 +51,6 @@ public class LouvainStreamSpec implements AlgorithmSpec<Louvain, LouvainResult, 
 
     @Override
     public ComputationResultConsumer<Louvain, LouvainResult, LouvainStreamConfig, Stream<LouvainStreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging(
-            "Result streaming failed",
-            executionContext.log(),
-            () -> computationResult.result()
-                .map(result -> {
-                    var graph = computationResult.graph();
-                    var config = computationResult.config();
-                    var nodePropertyValues = CommunityProcCompanion.nodeProperties(
-                        config,
-                        NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent())
-                    );
-                    var includeIntermediateCommunities = config.includeIntermediateCommunities();
-
-                    return LongStream.range(0, graph.nodeCount())
-                        .boxed().
-                        filter(nodePropertyValues::hasValue)
-                        .map(nodeId -> {
-                            var communities = includeIntermediateCommunities
-                                ? result.getIntermediateCommunities(nodeId)
-                                : null;
-                            var communityId = nodePropertyValues.longValue(nodeId);
-                            return LouvainStreamResult.create(graph.toOriginalNodeId(nodeId), communities, communityId);
-                        });
-                }).orElseGet(Stream::empty)
-        );
+        return new NullComputationResultConsumer<>();
     }
 }

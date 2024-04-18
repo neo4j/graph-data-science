@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.similarity.knn;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -29,7 +30,6 @@ import org.neo4j.gds.similarity.SimilarityResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.similarity.knn.KnnProc.KNN_DESCRIPTION;
 
 @GdsCallable(name = "gds.knn.stream", description = KNN_DESCRIPTION, executionMode = ExecutionMode.STREAM)
@@ -52,20 +52,6 @@ public class KnnStreamSpecification implements AlgorithmSpec<Knn, KnnResult, Knn
 
     @Override
     public ComputationResultConsumer<Knn, KnnResult, KnnStreamConfig, Stream<SimilarityResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging(
-            "Result streaming failed",
-            executionContext.log(),
-            () -> computationResult.result()
-                .map(result -> {
-                    var graph = computationResult.graph();
-                    return result.streamSimilarityResult()
-                        .map(similarityResult -> {
-                            similarityResult.node1 = graph.toOriginalNodeId(similarityResult.node1);
-                            similarityResult.node2 = graph.toOriginalNodeId(similarityResult.node2);
-                            return similarityResult;
-                        });
-
-                }).orElseGet(Stream::empty)
-        );
+        return new NullComputationResultConsumer<>();
     }
 }

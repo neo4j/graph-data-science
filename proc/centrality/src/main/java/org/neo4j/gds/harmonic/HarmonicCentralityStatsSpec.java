@@ -19,15 +19,13 @@
  */
 package org.neo4j.gds.harmonic;
 
-import org.neo4j.gds.StatsComputationResultConsumer;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.centrality.CentralityStatsResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
 import java.util.stream.Stream;
 
@@ -54,21 +52,6 @@ public class HarmonicCentralityStatsSpec implements AlgorithmSpec<HarmonicCentra
 
     @Override
     public ComputationResultConsumer<HarmonicCentrality, HarmonicResult, HarmonicCentralityStatsConfig, Stream<CentralityStatsResult>> computationResultConsumer() {
-        return new StatsComputationResultConsumer<>(this::resultBuilder);
-    }
-
-    private AbstractResultBuilder<CentralityStatsResult> resultBuilder(
-        ComputationResult<HarmonicCentrality, HarmonicResult, HarmonicCentralityStatsConfig> computationResult,
-        ExecutionContext executionContext
-    ) {
-        var builder = new CentralityStatsResult.Builder(
-            executionContext.returnColumns(),
-            computationResult.config().concurrency()
-        );
-
-        computationResult.result()
-            .ifPresent(result -> builder.withCentralityFunction(result.centralityScoreProvider()));
-
-        return builder;
+        return new NullComputationResultConsumer<>();
     }
 }

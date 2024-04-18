@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.similarity.filterednodesim;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -31,7 +32,6 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamProc.DESCRIPTION;
 
 @GdsCallable(name = "gds.nodeSimilarity.filtered.stream", aliases = {"gds.alpha.nodeSimilarity.filtered.stream"}, description = DESCRIPTION, executionMode = ExecutionMode.STREAM)
@@ -60,21 +60,6 @@ public class FilteredNodeSimilarityStreamSpec implements AlgorithmSpec<
 
     @Override
     public ComputationResultConsumer<NodeSimilarity, NodeSimilarityResult, FilteredNodeSimilarityStreamConfig, Stream<SimilarityResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging(
-            "Result streaming failed",
-            executionContext.log(),
-            () -> computationResult.result()
-                .map(result -> {
-                    var graph = computationResult.graph();
-                    var similarityResultStream = result.streamResult();
-                    return similarityResultStream.map(internalSimilarityResult -> {
-                        internalSimilarityResult.node1 = graph.toOriginalNodeId(internalSimilarityResult.node1);
-                        internalSimilarityResult.node2 = graph.toOriginalNodeId(internalSimilarityResult.node2);
-
-                        return internalSimilarityResult;
-                    });
-                }).orElseGet(Stream::empty)
-        );
+        return new NullComputationResultConsumer<>();
     }
-
 }

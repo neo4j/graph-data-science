@@ -19,22 +19,15 @@
  */
 package org.neo4j.gds.kmeans;
 
-import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
-import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.community.kmeans.KmeansWriteResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.kmeans.Kmeans.KMEANS_DESCRIPTION;
@@ -57,51 +50,9 @@ public class KmeansWriteSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kmea
         return (__, config) -> KmeansWriteConfig.of(config);
     }
 
-        @Override
-        public ComputationResultConsumer<Kmeans, KmeansResult, KmeansWriteConfig, Stream<KmeansWriteResult>> computationResultConsumer() {
-            return new WriteNodePropertiesComputationResultConsumer<>(
-                this::resultBuilder,
-                computationResult -> {
-                    var nodePropertyValues  = computationResult.result()
-                        .map(KmeansResult::communities)
-                        .map(NodePropertyValuesAdapter::adapt)
-                        .orElse(EmptyLongNodePropertyValues.INSTANCE);
-
-                    return List.of(ImmutableNodeProperty.of(
-                    computationResult.config().writeProperty(),
-                        nodePropertyValues));
-                },
-                name()
-            );
-        }
-
-    @NotNull
-    private AbstractResultBuilder<KmeansWriteResult> resultBuilder(
-        ComputationResult<Kmeans, KmeansResult, KmeansWriteConfig> computationResult,
-        ExecutionContext executionContext
-    ) {
-        var builder = new KmeansWriteResult.Builder(
-            executionContext.returnColumns(),
-            computationResult.config().concurrency()
-        );
-        var returnColumns = executionContext.returnColumns();
-        computationResult.result().ifPresent(result -> {
-            if (returnColumns.contains("centroids")) {
-                builder.withCentroids(KmeansProcHelper.arrayMatrixToListMatrix(result.centers()));
-            }
-            if (returnColumns.contains("averageDistanceToCentroid")) {
-                builder.withAverageDistanceToCentroid(result.averageDistanceToCentroid());
-            }
-
-            if (returnColumns.contains("averageSilhouette")) {
-                builder.withAverageSilhouette(result.averageSilhouette());
-            }
-            builder.withCommunityFunction(result.communities()::get);
-
-        });
-
-        return builder
-            .withConfig(computationResult.config());
+    @Override
+    public ComputationResultConsumer<Kmeans, KmeansResult, KmeansWriteConfig, Stream<KmeansWriteResult>> computationResultConsumer() {
+        return new NullComputationResultConsumer<>();
     }
 
 }

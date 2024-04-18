@@ -19,23 +19,14 @@
  */
 package org.neo4j.gds.k1coloring;
 
-import org.neo4j.gds.CommunityProcCompanion;
-import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
-import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
-import org.neo4j.gds.core.write.NodeProperty;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.community.k1coloring.K1ColoringWriteResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
@@ -64,30 +55,6 @@ public class K1ColoringWriteSpecification implements AlgorithmSpec<K1Coloring, K
 
     @Override
     public ComputationResultConsumer<K1Coloring, K1ColoringResult, K1ColoringWriteConfig, Stream<K1ColoringWriteResult>> computationResultConsumer() {
-        return new WriteNodePropertiesComputationResultConsumer<>(
-            this::resultBuilder,
-            this::nodePropertyList,
-            name()
-        );
-    }
-
-    private AbstractResultBuilder<K1ColoringWriteResult> resultBuilder(
-        ComputationResult<K1Coloring, K1ColoringResult, K1ColoringWriteConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        var returnColumns = executionContext.returnColumns();
-        var builder = new K1ColoringWriteResultBuilder(returnColumns, computeResult.config().concurrency());
-        return K1ColoringSpecificationHelper.resultBuilder(builder, computeResult, returnColumns);
-    }
-
-    private List<NodeProperty> nodePropertyList(ComputationResult<K1Coloring, K1ColoringResult, K1ColoringWriteConfig> computationResult) {
-        var config = computationResult.config();
-        var properties = (NodePropertyValues) CommunityProcCompanion.considerSizeFilter(
-            config,
-            computationResult.result()
-                .map(k1ColoringResult -> NodePropertyValuesAdapter.adapt(k1ColoringResult.colors()))
-                .orElse(EmptyLongNodePropertyValues.INSTANCE)
-        );
-        return List.of(ImmutableNodeProperty.of(config.writeProperty(), properties));
+        return new NullComputationResultConsumer<>();
     }
 }

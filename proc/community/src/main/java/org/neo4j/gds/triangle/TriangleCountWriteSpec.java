@@ -19,20 +19,14 @@
  */
 package org.neo4j.gds.triangle;
 
-import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
-import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.community.triangleCount.TriangleCountWriteResult;
-import org.neo4j.gds.result.AbstractResultBuilder;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
@@ -57,28 +51,6 @@ public class TriangleCountWriteSpec implements AlgorithmSpec<IntersectingTriangl
 
     @Override
     public ComputationResultConsumer<IntersectingTriangleCount, TriangleCountResult, TriangleCountWriteConfig, Stream<TriangleCountWriteResult>> computationResultConsumer() {
-        return new WriteNodePropertiesComputationResultConsumer<>(
-            this::resultBuilder,
-            computationResult -> List.of(ImmutableNodeProperty.of(
-                computationResult.config().writeProperty(),
-                computationResult.result()
-                    .map(result -> NodePropertyValuesAdapter.adapt(result.localTriangles()))
-                    .orElse(EmptyLongNodePropertyValues.INSTANCE)
-            )),
-            name()
-
-        );
-    }
-
-    private AbstractResultBuilder<TriangleCountWriteResult> resultBuilder(
-        ComputationResult<IntersectingTriangleCount, TriangleCountResult, TriangleCountWriteConfig> computationResult,
-        ExecutionContext executionContext
-    ) {
-        var builder = new TriangleCountWriteResult.Builder();
-
-        computationResult.result()
-            .ifPresent(result -> builder.withGlobalTriangleCount(result.globalTriangles()));
-
-        return builder;
+        return new NullComputationResultConsumer<>();
     }
 }

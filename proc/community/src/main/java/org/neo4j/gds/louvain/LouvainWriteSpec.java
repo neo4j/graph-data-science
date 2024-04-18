@@ -19,11 +19,8 @@
  */
 package org.neo4j.gds.louvain;
 
-import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
-import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
@@ -31,7 +28,6 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.community.louvain.LouvainWriteResult;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.louvain.LouvainConstants.DESCRIPTION;
@@ -55,21 +51,6 @@ public class LouvainWriteSpec implements AlgorithmSpec<Louvain, LouvainResult, L
 
     @Override
     public ComputationResultConsumer<Louvain, LouvainResult, LouvainWriteConfig, Stream<LouvainWriteResult>> computationResultConsumer() {
-        return new WriteNodePropertiesComputationResultConsumer<>(
-            LouvainResultBuilder::createForWrite,
-            computationResult -> List.of(ImmutableNodeProperty.of(
-                computationResult.config().writeProperty(),
-                nodeProperties(computationResult)
-            )),
-            name()
-        );
-    }
-
-    @Deprecated
-    protected NodePropertyValues nodeProperties(ComputationResult<Louvain, LouvainResult, LouvainWriteConfig> computationResult) {
-        return LouvainNodePropertyValuesDelegate.extractNodeProperties(
-            computationResult,
-            computationResult.config().writeProperty()
-        );
+        return new NullComputationResultConsumer<>();
     }
 }

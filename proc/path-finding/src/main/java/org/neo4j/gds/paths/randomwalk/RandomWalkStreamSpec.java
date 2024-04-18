@@ -19,26 +19,19 @@
  */
 package org.neo4j.gds.paths.randomwalk;
 
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.paths.PathFactory;
 import org.neo4j.gds.procedures.algorithms.pathfinding.RandomWalkStreamResult;
 import org.neo4j.gds.traversal.RandomWalk;
 import org.neo4j.gds.traversal.RandomWalkAlgorithmFactory;
 import org.neo4j.gds.traversal.RandomWalkStreamConfig;
-import org.neo4j.graphdb.Path;
-import org.neo4j.graphdb.RelationshipType;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 
@@ -61,35 +54,7 @@ public class RandomWalkStreamSpec implements AlgorithmSpec<RandomWalk, Stream<lo
 
     @Override
     public ComputationResultConsumer<RandomWalk, Stream<long[]>, RandomWalkStreamConfig, Stream<RandomWalkStreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            var returnPath = executionContext.returnColumns().contains("path");
-            Function<List<Long>, Path> pathCreator = returnPath
-                ? (List<Long> nodes) -> PathFactory.create(executionContext.nodeLookup(), nodes, RelationshipType.withName("NEXT"))
-                : (List<Long> nodes) -> null;
-            return runWithExceptionLogging(
-                "Result streaming failed",
-                executionContext.log(),
-                () -> computationResult.result()
-                    .map(result -> {
-                        var graph = computationResult.graph();
-                        return result
-                            .map(nodes -> {
-                                var translatedNodes = translateInternalToNeoIds(nodes, graph);
-                                var path = pathCreator.apply(translatedNodes);
-                                return new RandomWalkStreamResult(translatedNodes, path);
-                            });
-                    }).orElseGet(Stream::empty)
-            );
-        };
-    }
-
-    private List<Long> translateInternalToNeoIds(long[] nodes, IdMap idMap) {
-        var translatedNodes = new ArrayList<Long>(nodes.length);
-        for (int i = 0; i < nodes.length; i++) {
-            translatedNodes.add(i, idMap.toOriginalNodeId(nodes[i]));
-        }
-        return translatedNodes;
-
+        return new NullComputationResultConsumer<>();
     }
 
     @Override

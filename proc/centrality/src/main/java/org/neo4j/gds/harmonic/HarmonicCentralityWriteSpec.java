@@ -19,19 +19,14 @@
  */
 package org.neo4j.gds.harmonic;
 
-import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
-import org.neo4j.gds.api.properties.nodes.EmptyDoubleNodePropertyValues;
-import org.neo4j.gds.core.write.ImmutableNodeProperty;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.centrality.CentralityWriteResult;
-import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
@@ -57,30 +52,6 @@ public class HarmonicCentralityWriteSpec implements AlgorithmSpec<HarmonicCentra
 
     @Override
     public ComputationResultConsumer<HarmonicCentrality, HarmonicResult, HarmonicCentralityWriteConfig, Stream<CentralityWriteResult>> computationResultConsumer() {
-        return new WriteNodePropertiesComputationResultConsumer<>(
-            this::resultBuilder,
-            computationResult -> List.of(ImmutableNodeProperty.of(
-                computationResult.config().writeProperty(),
-                computationResult.result()
-                    .map(HarmonicResult::nodePropertyValues)
-                    .orElse(EmptyDoubleNodePropertyValues.INSTANCE)
-            )),
-            name()
-        );
-    }
-
-    private AbstractCentralityResultBuilder<CentralityWriteResult> resultBuilder(
-        ComputationResult<HarmonicCentrality, HarmonicResult, HarmonicCentralityWriteConfig> computationResult,
-        ExecutionContext executionContext
-    ) {
-        var builder = new CentralityWriteResult.Builder(
-            executionContext.returnColumns(),
-            computationResult.config().concurrency()
-        );
-
-        computationResult.result()
-            .ifPresent(result -> builder.withCentralityFunction(result.centralityScoreProvider()));
-
-        return builder;
+        return new NullComputationResultConsumer<>();
     }
 }
