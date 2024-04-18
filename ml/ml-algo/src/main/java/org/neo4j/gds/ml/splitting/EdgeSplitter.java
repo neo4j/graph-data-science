@@ -30,6 +30,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
@@ -49,7 +50,7 @@ public abstract class EdgeSplitter {
     private final IdMap targetNodes;
     private final IdMap rootNodes;
 
-    final int concurrency;
+    final Concurrency concurrency;
 
     EdgeSplitter(
         Optional<Long> maybeSeed,
@@ -58,7 +59,7 @@ public abstract class EdgeSplitter {
         IdMap targetNodes,
         RelationshipType selectedRelationshipType,
         RelationshipType remainingRelationshipType,
-        int concurrency
+        Concurrency concurrency
     ) {
         this.rootNodes = rootNodes;
         this.selectedRelationshipType = selectedRelationshipType;

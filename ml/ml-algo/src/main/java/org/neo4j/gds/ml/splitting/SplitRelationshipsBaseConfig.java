@@ -124,12 +124,25 @@ public interface SplitRelationshipsBaseConfig extends AlgoBaseConfig, RandomSeed
     }
 
     @Configuration.Ignore
-    public default SplitRelationshipsEstimateParameters toMemoryEstimateParameters() {
+    default SplitRelationshipsEstimateParameters toMemoryEstimateParameters() {
         return new SplitRelationshipsEstimateParameters(
             hasRelationshipWeightProperty(),
             relationshipTypes(),
             negativeSamplingRatio(),
             holdoutFraction()
+        );
+    }
+
+    @Configuration.Ignore
+    default SplitRelationshipsParameters toParameters() {
+        return new SplitRelationshipsParameters(
+            typedConcurrency(),
+            holdoutRelationshipType(),
+            remainingRelationshipType(),
+            holdoutFraction(),
+            relationshipWeightProperty(),
+            negativeSamplingRatio(),
+            randomSeed()
         );
     }
 }

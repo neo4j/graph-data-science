@@ -25,6 +25,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -41,7 +42,7 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
         IdMap targetLabels,
         RelationshipType selectedRelationshipType,
         RelationshipType remainingRelationshipType,
-        int concurrency
+        Concurrency concurrency
     ) {
         super(
             maybeSeed,
@@ -62,7 +63,7 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
         LongAdder validRelationshipCountAdder = new LongAdder();
         var countValidRelationshipTasks = PartitionUtils.degreePartition(
             graph,
-            concurrency,
+            concurrency.value(),
             partition -> (Runnable) () -> {
                 var concurrentGraph = graph.concurrentCopy();
                 partition.consume(nodeId -> concurrentGraph.forEachRelationship(nodeId, (s, t) -> {
@@ -75,7 +76,7 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
             }, Optional.empty()
         );
 
-        RunWithConcurrency.builder().concurrency(concurrency).tasks(countValidRelationshipTasks).run();
+        RunWithConcurrency.builder().concurrency(concurrency.value()).tasks(countValidRelationshipTasks).run();
 
         return validRelationshipCountAdder.longValue();
     }

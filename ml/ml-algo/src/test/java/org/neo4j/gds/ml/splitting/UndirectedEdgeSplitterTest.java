@@ -31,6 +31,7 @@ import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -100,7 +101,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             graphStore.nodes(),
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
-            4
+            new Concurrency(4)
         );
 
         // select 20%, which is 1 (undirected) rels in this graph
@@ -131,7 +132,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             multiGraphStore.nodes(),
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
-            4
+            new Concurrency(4)
         );
 
         EdgeSplitter.SplitResult result = splitter.splitPositiveExamples(multiGraph, 0.5, Optional.empty());
@@ -162,7 +163,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             huuuuugeDenseGraph,
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
-            4
+            new Concurrency(4)
         );
         var splitResult = splitter.splitPositiveExamples(huuuuugeDenseGraph, 0.9, Optional.empty());
         var graph = GraphFactory.create(
@@ -206,7 +207,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             graph.idMap(),
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
-            4
+            new Concurrency(4)
         ).splitPositiveExamples(graph, 0.5, Optional.empty());
         var splitResult2 = new UndirectedEdgeSplitter(
             Optional.of(12L),
@@ -215,7 +216,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             graph.idMap(),
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
-            4
+            new Concurrency(4)
         ).splitPositiveExamples(graph, 0.5, Optional.empty());
         var remainingAreEqual = relationshipsAreEqual(
             graph.idMap(),
@@ -252,7 +253,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             graph,
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
-            4
+            new Concurrency(4)
         ).splitPositiveExamples(graph, 0.5, Optional.empty());
         var splitResult2 = new UndirectedEdgeSplitter(
             Optional.of(117L),
@@ -261,7 +262,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             graph,
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
-            4
+            new Concurrency(4)
         ).splitPositiveExamples(graph, 0.5, Optional.empty());
         var remainingAreEqual = relationshipsAreEqual(
             graph,
@@ -287,7 +288,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             graphStore.nodes(),
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
-            4
+            new Concurrency(4)
         );
 
         var sum = 0;
@@ -310,7 +311,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             graphStore.getGraph(NodeLabel.of("A")),
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
-            4
+            new Concurrency(4)
         );
 
         // select 40%, which is 1.2 rounded down to 1 (undirected) rels in this graph
@@ -346,7 +347,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             multiLabelGraphStore.getGraph(targetNodeLabels),
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
-            4
+            new Concurrency(4)
         );
 
         // select 70%, which is 6*0.7/2 rounded down to 2 (undirected) rels in this graph. 4 were invalid.
@@ -381,7 +382,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             graphStore.nodes(),
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
-            4
+            new Concurrency(4)
         );
 
         assertEquals(1, splitter.samplesPerNode(1, 100, 10));
@@ -397,7 +398,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             graphStore.nodes(),
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
-            4
+            new Concurrency(4)
         );
         EdgeSplitter.SplitResult split = splitter.splitPositiveExamples(graph, 0.01, Optional.of("foo"));
         var maybeProp = split.remainingRels().build().properties();
@@ -427,7 +428,7 @@ class UndirectedEdgeSplitterTest extends EdgeSplitterBaseTest {
             graphStore.nodes(),
             RelationshipType.of("SELECTED"),
             RelationshipType.of("REMAINING"),
-            4
+            new Concurrency(4)
         );
 
         // select 20%, which is 1 (undirected) rels in this graph

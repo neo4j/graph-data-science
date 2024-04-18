@@ -188,7 +188,7 @@ public class LinkPredictionRelationshipSampler {
             targetNodes,
             selectedRelType,
             remainingRelType,
-            trainConfig.concurrency()
+            trainConfig.typedConcurrency()
         );
 
         var splitResult = splitter.splitPositiveExamples(
@@ -242,8 +242,7 @@ public class LinkPredictionRelationshipSampler {
             .build();
     }
 
-
-    public static MemoryEstimation estimatePositiveRelations(
+    private static MemoryEstimation estimatePositiveRelations(
         String relationshipType,
         double testFraction,
         double trainFraction,
@@ -268,7 +267,7 @@ public class LinkPredictionRelationshipSampler {
     }
 
 
-    public static MemoryEstimation estimateNegativeSampling(
+    private static MemoryEstimation estimateNegativeSampling(
         String relationshipType,
         double testFraction,
         double trainFraction,
@@ -284,7 +283,6 @@ public class LinkPredictionRelationshipSampler {
                 return MemoryRange.of(negativeRelCount / 2).times(sizePerRel);
             })
             .build();
-
     }
 
     private static long estimateNegativeRelCount(
@@ -302,5 +300,4 @@ public class LinkPredictionRelationshipSampler {
              return (long) (testAndTrainPositiveRelCount * negativeSamplingRatio);
          }
     }
-
 }
