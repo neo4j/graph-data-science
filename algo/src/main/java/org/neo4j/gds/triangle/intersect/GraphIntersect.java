@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.triangle.intersect;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.api.IntersectionConsumer;
@@ -153,12 +152,6 @@ public abstract class GraphIntersect<CURSOR extends AdjacencyCursor> implements 
 
         return adjacencyList.peekVLong();
     }
-
-    private @NotNull CURSOR copyCursor(@NotNull CURSOR source, @Nullable CURSOR destination) {
-        return checkCursorInstance(source.shallowCopy(destination));
-    }
-
-    protected abstract CURSOR checkCursorInstance(AdjacencyCursor cursor);
 
     protected abstract CURSOR cursorForNode(@Nullable CURSOR reuse, long node, int degree);
 

@@ -42,11 +42,6 @@ public final class HugeGraphIntersect extends GraphIntersect<AdjacencyCursor> {
     }
 
     @Override
-    protected AdjacencyCursor checkCursorInstance(AdjacencyCursor cursor) {
-        return cursor;
-    }
-
-    @Override
     protected AdjacencyCursor cursorForNode(@Nullable AdjacencyCursor reuse, long node, int degree) {
         return adjacencyList.adjacencyCursor(reuse, node);
     }

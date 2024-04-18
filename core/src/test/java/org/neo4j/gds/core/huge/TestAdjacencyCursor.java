@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.core.huge;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.AdjacencyCursor;
 
 import java.util.List;
@@ -81,8 +79,4 @@ public class TestAdjacencyCursor implements AdjacencyCursor {
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination) {
-        throw new UnsupportedOperationException();
-    }
 }

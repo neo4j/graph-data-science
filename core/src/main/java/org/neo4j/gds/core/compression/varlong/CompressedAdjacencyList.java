@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.compression.varlong;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.RelationshipType;
@@ -175,17 +174,6 @@ public final class CompressedAdjacencyList implements AdjacencyList {
                 degree
             );
             currentPosition = 0;
-        }
-
-        @Override
-        public @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination) {
-            var dest = destination instanceof DecompressingCursor
-                ? (DecompressingCursor) destination
-                : new DecompressingCursor(pages);
-            dest.decompress.copyFrom(this.decompress);
-            dest.currentPosition = this.currentPosition;
-            dest.maxTargets = this.maxTargets;
-            return dest;
         }
 
         @Override

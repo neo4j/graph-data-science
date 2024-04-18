@@ -19,9 +19,6 @@
  */
 package org.neo4j.gds.api;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 /**
  * Cursor iterating over the target ids of one adjacency list.
  * A lot of the methods here are very low-level and break when looked at slightly askew.
@@ -93,16 +90,6 @@ public interface AdjacencyCursor {
     long advanceBy(int n);
 
     /**
-     * Create a shallow copy of this cursor.
-     * Iteration state is copied and will advance independently from this cursor.
-     * The underlying data might be shared between instances.
-     * If the provided {@code destination} argument is not null, it might be re-used instead of having to create a new instance.
-     * It is *not* guaranteed that the {@code destination} will be reused.
-     * If the {@code destination} is not if the same type than this cursor, the behavior of this method in undefined.
-     */
-    @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination);
-
-    /**
      * Returns a cursor that is always empty.
      */
     static AdjacencyCursor empty() {
@@ -156,9 +143,5 @@ public interface AdjacencyCursor {
             return NOT_FOUND;
         }
 
-        @Override
-        public @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination) {
-            return INSTANCE;
-        }
     }
 }
