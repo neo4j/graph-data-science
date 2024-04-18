@@ -23,6 +23,7 @@ import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.JobId;
@@ -103,7 +104,7 @@ class NodeClassificationPredictTest {
             LogisticRegressionClassifier.from(modelData),
             FeaturesFactory.extractLazyFeatures(graph, featureProperties),
             1,
-            1,
+            new Concurrency(1),
             true,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
@@ -157,7 +158,7 @@ class NodeClassificationPredictTest {
             LogisticRegressionClassifier.from(modelData),
             FeaturesFactory.extractLazyFeatures(graph, featureProperties),
             1,
-            1,
+            new Concurrency(1),
             true,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE
@@ -223,7 +224,7 @@ class NodeClassificationPredictTest {
             ClassifierFactory.create(modelData),
             FeaturesFactory.extractLazyFeatures(graph, featureProperties),
             100,
-            1,
+            new Concurrency(1),
             false,
             progressTracker,
             TerminationFlag.RUNNING_TRUE

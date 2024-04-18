@@ -178,7 +178,7 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
         progressTracker.beginSubTask();
         var splitConfig = pipeline.splitConfig();
         var nodeSplits = new NodeSplitter(
-            trainConfig.concurrency(),
+            trainConfig.typedConcurrency(),
             nodeIdMap.nodeCount(),
             progressTracker,
             nodeIdMap::toOriginalNodeId,
@@ -263,7 +263,7 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
             targets,
             evaluationSet,
             classifier,
-            trainConfig.concurrency(),
+            trainConfig.typedConcurrency(),
             terminationFlag,
             customProgressTracker
         );
@@ -329,7 +329,7 @@ public final class NodeClassificationTrain implements PipelineTrainer<NodeClassi
             terminationFlag,
             progressTracker,
             messageLogLevel,
-            trainConfig.concurrency(),
+            trainConfig.typedConcurrency(),
             trainConfig.randomSeed(),
             false,
             metricsHandler

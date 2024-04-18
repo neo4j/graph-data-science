@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.metrics;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeIntArray;
@@ -105,7 +106,7 @@ public abstract class SignedProbabilities {
         HugeIntArray labels,
         Classifier classifier,
         BatchQueue evaluationQueue,
-        int concurrency,
+        Concurrency concurrency,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker
     ) {
@@ -114,7 +115,7 @@ public abstract class SignedProbabilities {
         var signedProbabilities = SignedProbabilities.create(evaluationQueue.totalSize());
 
         var positiveClassIndex = (int) EdgeSplitter.POSITIVE;
-        evaluationQueue.parallelConsume(concurrency, __ -> batch -> {
+        evaluationQueue.parallelConsume(concurrency.value(), __ -> batch -> {
                 var probabilityMatrix = classifier.predictProbabilities(batch, features);
                 var offset = 0;
                 var batchIterator = batch.elementIds();

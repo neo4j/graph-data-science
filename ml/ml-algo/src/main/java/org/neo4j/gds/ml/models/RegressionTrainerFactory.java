@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.models;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -40,7 +41,7 @@ public final class RegressionTrainerFactory {
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker,
         LogLevel messageLogLevel,
-        int concurrency,
+        Concurrency concurrency,
         Optional<Long> randomSeed
     ) {
         switch (config.method()) {

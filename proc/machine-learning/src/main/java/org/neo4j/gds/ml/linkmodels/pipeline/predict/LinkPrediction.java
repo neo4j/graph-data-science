@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.linkmodels.LinkPredictionResult;
 import org.neo4j.gds.ml.models.Classifier;
@@ -36,7 +37,7 @@ public abstract class LinkPrediction {
 
     protected final LPNodeFilter targetNodeFilter;
 
-    protected final int concurrency;
+    protected final Concurrency concurrency;
     final ProgressTracker progressTracker;
 
     LinkPrediction(
@@ -45,7 +46,7 @@ public abstract class LinkPrediction {
         Graph graph,
         LPNodeFilter sourceNodeFilter,
         LPNodeFilter targetNodeFilter,
-        int concurrency,
+        Concurrency concurrency,
         ProgressTracker progressTracker
     ) {
         this.classifier = classifier;

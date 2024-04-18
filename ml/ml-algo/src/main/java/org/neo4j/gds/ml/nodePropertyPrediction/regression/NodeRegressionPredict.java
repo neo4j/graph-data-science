@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.nodePropertyPrediction.regression;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
@@ -32,14 +33,14 @@ public class NodeRegressionPredict {
 
     private final Regressor regressor;
     private final Features features;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final ProgressTracker progressTracker;
     private final TerminationFlag terminationFlag;
 
     public NodeRegressionPredict(
         Regressor regressor,
         Features features,
-        int concurrency,
+        Concurrency concurrency,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
@@ -60,7 +61,7 @@ public class NodeRegressionPredict {
         var predictedTargets = HugeDoubleArray.newArray(features.size());
         ParallelUtil.parallelForEachNode(
             features.size(),
-            concurrency,
+            concurrency.value(),
             terminationFlag,
             id -> predictedTargets.set(id, regressor.predict(features.get(id)))
         );

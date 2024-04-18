@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.pipeline.nodePipeline.regression;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
@@ -57,6 +58,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
 
     private final HugeDoubleArray targets;
     private final IdMap nodeIdMap;
+    private final Concurrency concurrency;
     private final NodeRegressionTrainingPipeline pipeline;
 
     private final List<RegressionMetrics> metrics;
@@ -126,6 +128,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         pipeline.splitConfig().validateMinNumNodesInSplitSets(nodesGraph);
 
         return new NodeRegressionTrain(
+            config.typedConcurrency(),
             pipeline,
             config,
             nodeFeatureProducer,
@@ -137,6 +140,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
     }
 
     private NodeRegressionTrain(
+        Concurrency concurrency,
         NodeRegressionTrainingPipeline pipeline,
         NodeRegressionPipelineTrainConfig trainConfig,
         NodeFeatureProducer<NodeRegressionPipelineTrainConfig> nodeFeatureProducer,
@@ -145,6 +149,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         List<RegressionMetrics> metrics,
         ProgressTracker progressTracker
     ) {
+        this.concurrency = concurrency;
         this.pipeline = pipeline;
         this.trainConfig = trainConfig;
         this.nodeFeatureProducer = nodeFeatureProducer;
@@ -164,7 +169,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         progressTracker.beginSubTask();
         var splitConfig = pipeline.splitConfig();
         var splits = new NodeSplitter(
-            trainConfig.concurrency(),
+            trainConfig.typedConcurrency(),
             nodeIdMap.nodeCount(),
             progressTracker,
             nodeIdMap::toOriginalNodeId,
@@ -246,7 +251,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         var localPredictions = HugeDoubleArray.newArray(evaluationSet.size());
         ParallelUtil.parallelForEachNode(
             evaluationSet.size(),
-            trainConfig.concurrency(),
+            concurrency.value(),
             terminationFlag,
             idx -> localPredictions.set(idx, regressor.predict(features.get(evaluationSet.get(idx))))
         );
@@ -256,7 +261,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         HugeDoubleArray localTargets = HugeDoubleArray.newArray(evaluationSet.size());
         ParallelUtil.parallelForEachNode(
             evaluationSet.size(),
-            trainConfig.concurrency(),
+            concurrency.value(),
             terminationFlag,
             idx -> localTargets.set(idx, targets.get(evaluationSet.get(idx)))
         );
@@ -314,7 +319,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
             terminationFlag,
             progressTracker,
             messageLogLevel,
-            trainConfig.concurrency(),
+            concurrency,
             trainConfig.randomSeed()
         );
 

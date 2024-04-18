@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.pipeline.linkPipeline;
 
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
@@ -63,7 +64,7 @@ public final class LinkFeatureExtractor {
     public static Features extractFeatures(
         Graph graph,
         List<LinkFeatureStep> linkFeatureSteps,
-        int concurrency,
+        Concurrency concurrency,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
@@ -76,7 +77,7 @@ public final class LinkFeatureExtractor {
 
         var partitions = PartitionUtils.degreePartition(
             graph,
-            concurrency,
+            concurrency.value(),
             Function.identity(),
             Optional.of(GradientDescentConfig.DEFAULT_BATCH_SIZE)
         );
@@ -96,7 +97,7 @@ public final class LinkFeatureExtractor {
         }
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .tasks(linkFeatureWriters)
             .terminationFlag(terminationFlag)
             .run();

@@ -56,7 +56,7 @@ public class ApproximateLinkPrediction extends LinkPrediction {
             graph,
             sourceNodeFilter,
             targetNodeFilter,
-            knnParameters.concurrency().value(),
+            knnParameters.concurrency(),
             progressTracker
         );
         this.knnParameters = knnParameters;

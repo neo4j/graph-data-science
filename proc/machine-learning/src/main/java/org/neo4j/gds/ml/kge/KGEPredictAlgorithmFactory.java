@@ -29,20 +29,18 @@ import java.util.Optional;
 
 public class KGEPredictAlgorithmFactory<CONFIG extends KGEPredictBaseConfig> extends GraphStoreAlgorithmFactory<TopKMapComputer, CONFIG> {
 
-    @Override
     public TopKMapComputer build(
         GraphStore graphStore,
-        CONFIG configuration,
+        KGEPredictParameters parameters,
         ProgressTracker progressTracker
     ) {
-
         BitSet sourceNodes = new BitSet(graphStore.nodeCount());
         BitSet targetNodes = new BitSet(graphStore.nodeCount());
 
-        Graph graph = graphStore.getGraph(configuration.relationshipTypesFilter(), Optional.empty());
+        Graph graph = graphStore.getGraph(parameters.relationshipTypesFilter(), Optional.empty());
 
-        var sourceNodeFilter = configuration.sourceNodeFilter().toNodeFilter(graph);
-        var targetNodeFilter = configuration.targetNodeFilter().toNodeFilter(graph);
+        var sourceNodeFilter = parameters.sourceNodeFilter().toNodeFilter(graph);
+        var targetNodeFilter = parameters.targetNodeFilter().toNodeFilter(graph);
 
         graph.forEachNode(node -> {
             if (sourceNodeFilter.test(node)) {
@@ -58,13 +56,22 @@ public class KGEPredictAlgorithmFactory<CONFIG extends KGEPredictBaseConfig> ext
             graph,
             sourceNodes,
             targetNodes,
-            configuration.nodeEmbeddingProperty(),
-            configuration.relationshipTypeEmbedding(),
-            configuration.scoringFunction(),
-            configuration.topK(),
-            configuration.concurrency(),
+            parameters.nodeEmbeddingProperty(),
+            parameters.relationshipTypeEmbedding(),
+            parameters.scoringFunction(),
+            parameters.topK(),
+            parameters.concurrency(),
             progressTracker
         );
+    }
+
+    @Override
+    public TopKMapComputer build(
+        GraphStore graphStore,
+        CONFIG configuration,
+        ProgressTracker progressTracker
+    ) {
+        return build(graphStore, configuration.toParameters(), progressTracker);
     }
 
     @Override

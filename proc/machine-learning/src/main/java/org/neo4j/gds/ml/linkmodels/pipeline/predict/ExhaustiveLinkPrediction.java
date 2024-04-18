@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.linkmodels.pipeline.predict;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.predicates.LongPredicate;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -51,7 +52,7 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
         Graph graph,
         LPNodeFilter sourceNodeFilter,
         LPNodeFilter targetNodeFilter,
-        int concurrency,
+        Concurrency concurrency,
         int topN,
         double threshold,
         ProgressTracker progressTracker,
@@ -105,7 +106,7 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
         ) {
             ParallelUtil.parallelForEachNode(
                 graph.nodeCount(),
-                concurrency,
+                concurrency.value(),
                 terminationFlag,
                 nodeId -> localLinkPredictor.get().accept(nodeId)
             );

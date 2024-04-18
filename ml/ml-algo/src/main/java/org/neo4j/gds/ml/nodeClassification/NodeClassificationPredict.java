@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.nodeClassification;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
@@ -53,7 +54,7 @@ public class NodeClassificationPredict {
         Classifier classifier,
         Features features,
         int batchSize,
-        int concurrency,
+        Concurrency concurrency,
         boolean produceProbabilities,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag

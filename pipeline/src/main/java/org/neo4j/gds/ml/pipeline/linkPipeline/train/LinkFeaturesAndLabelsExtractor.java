@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.pipeline.linkPipeline.train;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -74,7 +75,7 @@ final class LinkFeaturesAndLabelsExtractor {
     static FeaturesAndLabels extractFeaturesAndLabels(
         Graph graph,
         List<LinkFeatureStep> featureSteps,
-        int concurrency,
+        Concurrency concurrency,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
@@ -95,14 +96,14 @@ final class LinkFeaturesAndLabelsExtractor {
     private static HugeIntArray extractLabels(
         Graph graph,
         long numberOfTargets,
-        int concurrency,
+        Concurrency concurrency,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag
     ) {
         var globalLabels = HugeIntArray.newArray(numberOfTargets);
         var partitions = PartitionUtils.degreePartition(
             graph,
-            concurrency,
+            concurrency.value(),
             Function.identity(),
             Optional.of(GradientDescentConfig.DEFAULT_BATCH_SIZE)
         );
@@ -133,7 +134,7 @@ final class LinkFeaturesAndLabelsExtractor {
         }
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .tasks(tasks)
             .terminationFlag(terminationFlag)
             .run();

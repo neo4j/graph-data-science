@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.nodeClassification;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
@@ -35,7 +36,7 @@ public class ParallelNodeClassifier {
     private final Classifier classifier;
     private final Features features;
     private final int batchSize;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final TerminationFlag terminationFlag;
     private final ProgressTracker progressTracker;
 
@@ -43,7 +44,7 @@ public class ParallelNodeClassifier {
         Classifier classifier,
         Features features,
         int batchSize,
-        int concurrency,
+        Concurrency concurrency,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker
     ) {
@@ -73,8 +74,8 @@ public class ParallelNodeClassifier {
             predictedClasses,
             progressTracker
         );
-        BatchQueue.consecutive(evaluationSetSize, batchSize, concurrency)
-            .parallelConsume(consumer, concurrency, terminationFlag);
+        BatchQueue.consecutive(evaluationSetSize, batchSize, concurrency.value())
+            .parallelConsume(consumer, concurrency.value(), terminationFlag);
 
         return predictedClasses;
     }

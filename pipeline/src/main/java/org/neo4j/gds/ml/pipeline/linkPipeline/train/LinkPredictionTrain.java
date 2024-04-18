@@ -125,7 +125,7 @@ public final class LinkPredictionTrain {
         var trainData = extractFeaturesAndLabels(
             trainGraph,
             pipeline.featureSteps(),
-            config.concurrency(),
+            config.typedConcurrency(),
             progressTracker,
             terminationFlag
         );
@@ -228,7 +228,7 @@ public final class LinkPredictionTrain {
             terminationFlag,
             progressTracker,
             messageLogLevel,
-            config.concurrency(),
+            config.typedConcurrency(),
             config.randomSeed(),
             true,
             metricsHandler
@@ -240,7 +240,7 @@ public final class LinkPredictionTrain {
         var testData = extractFeaturesAndLabels(
             validationGraph,
             pipeline.featureSteps(),
-            config.concurrency(),
+            config.typedConcurrency(),
             progressTracker,
             terminationFlag
         );
@@ -252,7 +252,7 @@ public final class LinkPredictionTrain {
             testData.labels(),
             classifier,
             BatchQueue.consecutive(testData.size()),
-            config.concurrency(),
+            config.typedConcurrency(),
             terminationFlag,
             progressTracker
         );
@@ -277,7 +277,7 @@ public final class LinkPredictionTrain {
             trainData.labels(),
             classifier,
             BatchQueue.fromArray(evaluationSet),
-            config.concurrency(),
+            config.typedConcurrency(),
             terminationFlag,
             progressTracker
         );

@@ -26,6 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
@@ -86,7 +87,7 @@ class RandomForestRegressorTest {
     @ValueSource(ints = {1, 4})
     void usingOneTree(int concurrency) {
         var randomForestTrainer = new RandomForestRegressorTrainer(
-            concurrency,
+            new Concurrency(concurrency),
             RandomForestRegressorTrainerConfigImpl
                 .builder()
                 .maxDepth(1)
@@ -112,7 +113,7 @@ class RandomForestRegressorTest {
     @ValueSource(ints = {1, 4})
     void usingTwentyTrees(int concurrency) {
         var randomForestTrainer = new RandomForestRegressorTrainer(
-            concurrency,
+            new Concurrency(concurrency),
             RandomForestRegressorTrainerConfigImpl
                 .builder()
                 .maxDepth(3)
@@ -138,7 +139,7 @@ class RandomForestRegressorTest {
     @ValueSource(ints = {1, 4})
     void considerTrainSet(int concurrency) {
         var randomForestTrainer = new RandomForestRegressorTrainer(
-            concurrency,
+            new Concurrency(concurrency),
             RandomForestRegressorTrainerConfigImpl
                 .builder()
                 .maxDepth(3)

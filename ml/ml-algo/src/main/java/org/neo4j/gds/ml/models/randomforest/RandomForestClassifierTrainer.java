@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -63,7 +64,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
 
     private final int numberOfClasses;
     private final RandomForestClassifierTrainerConfig config;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final SplittableRandom random;
     private final ProgressTracker progressTracker;
     private final LogLevel messageLogLevel;
@@ -72,7 +73,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
     private final ModelSpecificMetricsHandler metricsHandler;
 
     public RandomForestClassifierTrainer(
-        int concurrency,
+        Concurrency concurrency,
         int numberOfClasses,
         RandomForestClassifierTrainerConfig config,
         Optional<Long> randomSeed,
@@ -138,7 +139,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
         ReadOnlyHugeLongArray trainSet
     ) {
         Optional<HugeAtomicLongArray> maybePredictions = metricsHandler.isRequested(OUT_OF_BAG_ERROR)
-            ? Optional.of(HugeAtomicLongArray.of(numberOfClasses * trainSet.size(), ParalleLongPageCreator.passThrough(concurrency)))
+            ? Optional.of(HugeAtomicLongArray.of(numberOfClasses * trainSet.size(), ParalleLongPageCreator.passThrough(concurrency.value())))
             : Optional.empty();
 
         var decisionTreeTrainConfig = DecisionTreeTrainerConfigImpl.builder()
@@ -167,7 +168,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
             )
         ).collect(Collectors.toList());
         RunWithConcurrency.builder()
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .tasks(tasks)
             .terminationFlag(terminationFlag)
             .run();

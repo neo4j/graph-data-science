@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.InspectableTestProgressTracker;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -41,7 +42,7 @@ class NodeSplitterTest {
     void testSplitter() {
         int numberOfExamples = 12;
         var splitter = new NodeSplitter(
-            4,
+            new Concurrency(4),
             numberOfExamples,
             ProgressTracker.NULL_TRACKER,
             i -> i,
@@ -85,7 +86,7 @@ class NodeSplitterTest {
         var progressTracker = new InspectableTestProgressTracker(Tasks.leaf("DUMMY"), "", new JobId());
         int numberOfExamples = 12;
         var splitter = new NodeSplitter(
-            4,
+            new Concurrency(4),
             numberOfExamples,
             progressTracker,
             i -> i,
@@ -121,7 +122,7 @@ class NodeSplitterTest {
             toMappedIds[Math.toIntExact(originalIds.get(i))] = i;
         }
         var splitter = new NodeSplitter(
-            4,
+            new Concurrency(4),
             numberOfExamples,
             ProgressTracker.NULL_TRACKER,
             i -> originalIds.get((int) i),

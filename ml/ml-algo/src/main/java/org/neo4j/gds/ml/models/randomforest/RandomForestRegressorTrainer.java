@@ -21,6 +21,7 @@ package org.neo4j.gds.ml.models.randomforest;
 
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -54,14 +55,14 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public class RandomForestRegressorTrainer implements RegressorTrainer {
 
     private final RandomForestRegressorTrainerConfig config;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final SplittableRandom random;
     private final TerminationFlag terminationFlag;
     private final ProgressTracker progressTracker;
     private final LogLevel messageLogLevel;
 
     public RandomForestRegressorTrainer(
-        int concurrency,
+        Concurrency concurrency,
         RandomForestRegressorTrainerConfig config,
         Optional<Long> randomSeed,
         TerminationFlag terminationFlag,
@@ -140,7 +141,7 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
             )
         ).collect(Collectors.toList());
         RunWithConcurrency.builder()
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .tasks(tasks)
             .terminationFlag(terminationFlag)
             .run();
