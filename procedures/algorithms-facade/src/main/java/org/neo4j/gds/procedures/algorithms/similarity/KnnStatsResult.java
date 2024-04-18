@@ -17,40 +17,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.similarity;
+package org.neo4j.gds.procedures.algorithms.similarity;
 
 import java.util.Map;
 
-@SuppressWarnings("unused")
-public class SimilarityStatsResult {
+public class KnnStatsResult extends SimilarityStatsResult {
+    public final long ranIterations;
+    public final boolean didConverge;
+    public final long nodePairsConsidered;
 
-    public long preProcessingMillis;
-    public long computeMillis;
-    public long postProcessingMillis;
-
-    public long nodesCompared;
-    public long similarityPairs;
-    public Map<String, Object> similarityDistribution;
-    public Map<String, Object> configuration;
-
-    public SimilarityStatsResult(
+    public KnnStatsResult(
         long preProcessingMillis,
         long computeMillis,
         long postProcessingMillis,
         long nodesCompared,
-        long similarityPairs,
+        long nodePairs,
         Map<String, Object> similarityDistribution,
+        boolean didConverge,
+        long ranIterations,
+        long nodePairsConsidered,
         Map<String, Object> configuration
-
     ) {
-        this.preProcessingMillis = preProcessingMillis;
-        this.computeMillis = computeMillis;
-        this.postProcessingMillis = postProcessingMillis;
-        this.nodesCompared = nodesCompared;
-        this.similarityPairs = similarityPairs;
-        this.similarityDistribution = similarityDistribution;
-        this.configuration = configuration;
-    }
+        super(
+            preProcessingMillis,
+            computeMillis,
+            postProcessingMillis,
+            nodesCompared,
+            nodePairs,
+            similarityDistribution,
+            configuration
+        );
 
-  
+        this.nodePairsConsidered = nodePairsConsidered;
+        this.ranIterations = ranIterations;
+        this.didConverge = didConverge;
+    }
 }

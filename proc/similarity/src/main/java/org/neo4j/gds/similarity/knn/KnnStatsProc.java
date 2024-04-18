@@ -20,7 +20,7 @@
 package org.neo4j.gds.similarity.knn;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.similarity.knn.KnnStatsResult;
+import org.neo4j.gds.procedures.algorithms.similarity.KnnStatsResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -44,7 +44,7 @@ public final class KnnStatsProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.similarity().knnStats(graphName, configuration);
+        return facade.similarity().theOtherFacade().knnStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.knn.stats.estimate", mode = READ)

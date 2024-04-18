@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.gds.ProcedureCallContextReturnColumns;
+import org.neo4j.gds.TransactionCloseableResourceRegistry;
 import org.neo4j.gds.TransactionNodeLookup;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
@@ -37,6 +38,7 @@ import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.modelcatalogservices.ModelCatalogServiceProvider;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
+import org.neo4j.gds.procedures.algorithms.runners.StatsModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -79,8 +81,7 @@ class AlgorithmFacadeFactoryProvider {
         GraphDatabaseService graphDatabaseService,
         DatabaseGraphStoreEstimationService databaseGraphStoreEstimationService,
         ApplicationsFacade applicationsFacade,
-        GenericStub genericStub,
-        StreamModeAlgorithmRunner streamModeAlgorithmRunner
+        GenericStub genericStub
     ) {
         /*
          * GDS services derived from Procedure Context.
@@ -112,6 +113,9 @@ class AlgorithmFacadeFactoryProvider {
             algorithmMemoryValidationService,
             requestScopedDependencies
         );
+        var closeableResourceRegistry = new TransactionCloseableResourceRegistry(kernelTransaction);
+        var streamModeAlgorithmRunner = new StreamModeAlgorithmRunner(closeableResourceRegistry, configurationCreator);
+        var statsModeAlgorithmRunner = new StatsModeAlgorithmRunner(configurationCreator);
 
         // procedure facade
         return new AlgorithmFacadeFactory(
@@ -127,7 +131,8 @@ class AlgorithmFacadeFactoryProvider {
             modelCatalogServiceProvider.createService(graphDatabaseService, log),
             applicationsFacade,
             genericStub,
-            streamModeAlgorithmRunner
+            streamModeAlgorithmRunner,
+            statsModeAlgorithmRunner
         );
     }
 }

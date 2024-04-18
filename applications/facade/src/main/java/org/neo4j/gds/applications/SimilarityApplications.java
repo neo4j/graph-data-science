@@ -24,22 +24,26 @@ import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithms;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsMutateModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.logging.Log;
 
 public final class SimilarityApplications {
     private final SimilarityAlgorithmsEstimationModeBusinessFacade estimationModeFacade;
     private final SimilarityAlgorithmsMutateModeBusinessFacade mutateModeFacade;
+    private final SimilarityAlgorithmsStatsModeBusinessFacade statsModeFacade;
     private final SimilarityAlgorithmsStreamModeBusinessFacade streamModeFacade;
 
     private SimilarityApplications(
         SimilarityAlgorithmsEstimationModeBusinessFacade estimationModeFacade,
         SimilarityAlgorithmsMutateModeBusinessFacade mutateModeFacade,
+        SimilarityAlgorithmsStatsModeBusinessFacade statsModeFacade,
         SimilarityAlgorithmsStreamModeBusinessFacade streamModeFacade
     ) {
         this.estimationModeFacade = estimationModeFacade;
         this.mutateModeFacade = mutateModeFacade;
         this.streamModeFacade = streamModeFacade;
+        this.statsModeFacade = statsModeFacade;
     }
 
     static SimilarityApplications create(
@@ -57,13 +61,19 @@ public final class SimilarityApplications {
             algorithmProcessingTemplate
         );
 
+        var statsModeFacade = new SimilarityAlgorithmsStatsModeBusinessFacade(
+            estimationModeFacade,
+            similarityAlgorithms,
+            algorithmProcessingTemplate
+        );
+
         var streamModeFacade = new SimilarityAlgorithmsStreamModeBusinessFacade(
             estimationModeFacade,
             similarityAlgorithms,
             algorithmProcessingTemplate
         );
 
-        return new SimilarityApplications(estimationModeFacade, mutateModeFacade, streamModeFacade);
+        return new SimilarityApplications(estimationModeFacade, mutateModeFacade, statsModeFacade, streamModeFacade);
     }
 
     public SimilarityAlgorithmsEstimationModeBusinessFacade estimate() {
@@ -72,6 +82,10 @@ public final class SimilarityApplications {
 
     public SimilarityAlgorithmsMutateModeBusinessFacade mutate() {
         return mutateModeFacade;
+    }
+
+    public SimilarityAlgorithmsStatsModeBusinessFacade stats() {
+        return statsModeFacade;
     }
 
     public SimilarityAlgorithmsStreamModeBusinessFacade stream() {

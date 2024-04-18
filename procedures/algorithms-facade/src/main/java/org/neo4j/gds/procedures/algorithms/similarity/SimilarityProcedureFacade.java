@@ -21,43 +21,75 @@ package org.neo4j.gds.procedures.algorithms.similarity;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsStreamModeBusinessFacade;
+import org.neo4j.gds.procedures.algorithms.runners.StatsModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.similarity.knn.KnnStatsConfig;
 import org.neo4j.gds.similarity.knn.KnnStreamConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
 public final class SimilarityProcedureFacade {
+    private final ProcedureReturnColumns procedureReturnColumns;
     private final KnnMutateStub knnMutateStub;
     private final ApplicationsFacade applicationsFacade;
     private final StreamModeAlgorithmRunner streamModeAlgorithmRunner;
+    private final StatsModeAlgorithmRunner statsModeAlgorithmRunner;
 
     private SimilarityProcedureFacade(
+        ProcedureReturnColumns procedureReturnColumns,
         KnnMutateStub knnMutateStub,
         ApplicationsFacade applicationsFacade,
-        StreamModeAlgorithmRunner streamModeAlgorithmRunner
+        StreamModeAlgorithmRunner streamModeAlgorithmRunner,
+        StatsModeAlgorithmRunner statsModeAlgorithmRunner
     ) {
+        this.procedureReturnColumns = procedureReturnColumns;
         this.knnMutateStub = knnMutateStub;
         this.applicationsFacade = applicationsFacade;
         this.streamModeAlgorithmRunner = streamModeAlgorithmRunner;
+        this.statsModeAlgorithmRunner = statsModeAlgorithmRunner;
     }
 
     public static SimilarityProcedureFacade create(
         ApplicationsFacade applicationsFacade,
         GenericStub genericStub,
         ProcedureReturnColumns procedureReturnColumns,
-        StreamModeAlgorithmRunner streamModeAlgorithmRunner
+        StreamModeAlgorithmRunner streamModeAlgorithmRunner,
+        StatsModeAlgorithmRunner statsModeAlgorithmRunner
     ) {
         var knnMutateStub = new KnnMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
 
-        return new SimilarityProcedureFacade(knnMutateStub, applicationsFacade, streamModeAlgorithmRunner);
+        return new SimilarityProcedureFacade(
+            procedureReturnColumns,
+            knnMutateStub,
+            applicationsFacade,
+            streamModeAlgorithmRunner,
+            statsModeAlgorithmRunner
+        );
     }
 
     public KnnMutateStub knnMutateStub() {
         return knnMutateStub;
+    }
+
+    public Stream<KnnStatsResult> knnStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("similarityDistribution");
+        var resultBuilder = new KnnResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
+
+        return statsModeAlgorithmRunner.runStatsModeAlgorithm(
+            graphName,
+            configuration,
+            KnnStatsConfig::of,
+            resultBuilder,
+            statsMode()::knn
+        );
     }
 
     public Stream<SimilarityResult> knnStream(
@@ -73,6 +105,10 @@ public final class SimilarityProcedureFacade {
             resultBuilder,
             streamMode()::knn
         );
+    }
+
+    private SimilarityAlgorithmsStatsModeBusinessFacade statsMode() {
+        return applicationsFacade.similarity().stats();
     }
 
     private SimilarityAlgorithmsStreamModeBusinessFacade streamMode() {

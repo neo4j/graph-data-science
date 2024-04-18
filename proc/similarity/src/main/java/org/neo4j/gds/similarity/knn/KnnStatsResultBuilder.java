@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.similarity.knn;
 
-import org.neo4j.gds.procedures.similarity.knn.KnnStatsResult;
+import org.neo4j.gds.procedures.algorithms.similarity.KnnStatsResult;
 import org.neo4j.gds.similarity.SimilarityResultBuilder;
 
 public class KnnStatsResultBuilder  extends SimilarityResultBuilder<KnnStatsResult> {
@@ -58,4 +58,3 @@ public class KnnStatsResultBuilder  extends SimilarityResultBuilder<KnnStatsResu
             return this;
         }
     }
-

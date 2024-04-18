@@ -19,35 +19,13 @@
  */
 package org.neo4j.gds.procedures.similarity;
 
-import org.neo4j.gds.algorithms.similarity.specificfields.KnnSpecificFields;
 import org.neo4j.gds.algorithms.RelationshipWriteResult;
-import org.neo4j.gds.algorithms.StatsResult;
-import org.neo4j.gds.procedures.similarity.knn.KnnStatsResult;
+import org.neo4j.gds.algorithms.similarity.specificfields.KnnSpecificFields;
 import org.neo4j.gds.procedures.similarity.knn.KnnWriteResult;
-import org.neo4j.gds.similarity.knn.KnnStatsConfig;
 import org.neo4j.gds.similarity.knn.KnnWriteConfig;
 
 final class KnnComputationResultTransformer {
     private KnnComputationResultTransformer() {}
-
-    static KnnStatsResult toStatsResult(
-        StatsResult<KnnSpecificFields> statsResult,
-        KnnStatsConfig config
-    ) {
-
-        return new KnnStatsResult(
-            statsResult.preProcessingMillis(),
-            statsResult.computeMillis(),
-            statsResult.postProcessingMillis(),
-            statsResult.algorithmSpecificFields().nodesCompared(),
-            statsResult.algorithmSpecificFields().relationshipsWritten(),
-            statsResult.algorithmSpecificFields().similarityDistribution(),
-            statsResult.algorithmSpecificFields().didConverge(),
-            statsResult.algorithmSpecificFields().ranIterations(),
-            statsResult.algorithmSpecificFields().nodePairsConsidered(),
-            config.toMap()
-        );
-    }
 
     static KnnWriteResult toWriteResult(
         RelationshipWriteResult<KnnSpecificFields> writeResult,

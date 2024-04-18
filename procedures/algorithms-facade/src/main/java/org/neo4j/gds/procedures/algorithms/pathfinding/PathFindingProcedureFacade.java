@@ -69,6 +69,7 @@ import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SteinerTreeMutateSt
 import org.neo4j.gds.procedures.algorithms.results.StandardModeResult;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 import org.neo4j.gds.procedures.algorithms.results.StandardWriteRelationshipsResult;
+import org.neo4j.gds.procedures.algorithms.runners.StatsModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -115,6 +116,7 @@ public final class PathFindingProcedureFacade {
 
     // infrastructure
     private final StreamModeAlgorithmRunner streamModeAlgorithmRunner;
+    private final StatsModeAlgorithmRunner statsModeAlgorithmRunner;
 
     private PathFindingProcedureFacade(
         ConfigurationCreator configurationCreator,
@@ -131,7 +133,8 @@ public final class PathFindingProcedureFacade {
         SingleSourceShortestPathDijkstraMutateStub singleSourceShortestPathDijkstraMutateStub,
         SpanningTreeMutateStub spanningTreeMutateStub,
         SteinerTreeMutateStub steinerTreeMutateStub,
-        StreamModeAlgorithmRunner streamModeAlgorithmRunner
+        StreamModeAlgorithmRunner streamModeAlgorithmRunner,
+        StatsModeAlgorithmRunner statsModeAlgorithmRunner
     ) {
         this.configurationCreator = configurationCreator;
         this.nodeLookup = nodeLookup;
@@ -151,6 +154,7 @@ public final class PathFindingProcedureFacade {
         this.steinerTreeMutateStub = steinerTreeMutateStub;
 
         this.streamModeAlgorithmRunner = streamModeAlgorithmRunner;
+        this.statsModeAlgorithmRunner = statsModeAlgorithmRunner;
     }
 
     /**
@@ -162,7 +166,8 @@ public final class PathFindingProcedureFacade {
         ProcedureReturnColumns procedureReturnColumns,
         ApplicationsFacade applicationsFacade,
         GenericStub genericStub,
-        StreamModeAlgorithmRunner streamModeAlgorithmRunner
+        StreamModeAlgorithmRunner streamModeAlgorithmRunner,
+        StatsModeAlgorithmRunner statsModeAlgorithmRunner
     ) {
         var aStarStub = new SinglePairShortestPathAStarMutateStub(
             genericStub,
@@ -229,7 +234,8 @@ public final class PathFindingProcedureFacade {
             singleSourceDijkstraStub,
             spanningTreeMutateStub,
             steinerTreeMutateStub,
-            streamModeAlgorithmRunner
+            streamModeAlgorithmRunner,
+            statsModeAlgorithmRunner
         );
     }
 
@@ -285,7 +291,7 @@ public final class PathFindingProcedureFacade {
     public Stream<BellmanFordStatsResult> bellmanFordStats(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new BellmanFordResultBuilderForStatsMode();
 
-        return runStatsAlgorithm(
+        return statsModeAlgorithmRunner.runStatsModeAlgorithm(
             graphName,
             configuration,
             BellmanFordStatsConfig::of,
@@ -350,7 +356,7 @@ public final class PathFindingProcedureFacade {
     public Stream<StandardStatsResult> breadthFirstSearchStats(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new BfsStatsResultBuilder();
 
-        return runStatsAlgorithm(
+        return statsModeAlgorithmRunner.runStatsModeAlgorithm(
             graphName,
             configuration,
             BfsStatsConfig::of,
@@ -410,7 +416,7 @@ public final class PathFindingProcedureFacade {
     public Stream<StandardStatsResult> deltaSteppingStats(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new DeltaSteppingResultBuilderForStatsMode();
 
-        return runStatsAlgorithm(
+        return statsModeAlgorithmRunner.runStatsModeAlgorithm(
             graphName,
             configuration,
             AllShortestPathsDeltaStatsConfig::of,
@@ -560,7 +566,7 @@ public final class PathFindingProcedureFacade {
     public Stream<StandardModeResult> randomWalkStats(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new RandomWalkResultBuilderForStatsMode();
 
-        return runStatsAlgorithm(
+        return statsModeAlgorithmRunner.runStatsModeAlgorithm(
             graphName,
             configuration,
             RandomWalkStatsConfig::of,
@@ -874,7 +880,7 @@ public final class PathFindingProcedureFacade {
     ) {
         var resultBuilder = new SpanningTreeResultBuilderForStatsMode();
 
-        return runStatsAlgorithm(
+        return statsModeAlgorithmRunner.runStatsModeAlgorithm(
             graphName,
             configuration,
             SpanningTreeStatsConfig::of,
@@ -964,7 +970,7 @@ public final class PathFindingProcedureFacade {
     public Stream<SteinerStatsResult> steinerTreeStats(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new SteinerTreeResultBuilderForStatsMode();
 
-        return runStatsAlgorithm(
+        return statsModeAlgorithmRunner.runStatsModeAlgorithm(
             graphName,
             configuration,
             SteinerTreeStatsConfig::of,
@@ -1100,20 +1106,6 @@ public final class PathFindingProcedureFacade {
             algorithm
         );
     }
-
-    private <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> Stream<RESULT_TO_CALLER> runStatsAlgorithm(
-        String graphNameAsString,
-        Map<String, Object> rawConfiguration,
-        Function<CypherMapWrapper, CONFIGURATION> configurationSupplier,
-        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, Stream<RESULT_TO_CALLER>, Void> resultBuilder,
-        AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, Stream<RESULT_TO_CALLER>, Void> algorithm
-    ) {
-        var graphName = GraphName.parse(graphNameAsString);
-        var configuration = configurationCreator.createConfiguration(rawConfiguration, configurationSupplier);
-
-        return algorithm.compute(graphName, configuration, resultBuilder);
-    }
-
 
     /**
      * A*, Dijkstra and Yens use the same variant of result builder

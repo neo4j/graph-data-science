@@ -29,7 +29,8 @@ import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.similarity.KnnMutateResult;
 import org.neo4j.gds.procedures.algorithms.similarity.KnnMutateStub;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityMutateResult;
-import org.neo4j.gds.procedures.similarity.knn.KnnStatsResult;
+import org.neo4j.gds.procedures.algorithms.similarity.SimilarityStatsResult;
+import org.neo4j.gds.procedures.algorithms.similarity.KnnStatsResult;
 import org.neo4j.gds.procedures.similarity.knn.KnnWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityResult;
@@ -275,21 +276,6 @@ public class SimilarityProcedureFacade {
     ) {
         var config = configurationCreator.createConfiguration(algoConfiguration, FilteredNodeSimilarityWriteConfig::of);
         return Stream.of(estimateBusinessFacade.nodeSimilarity(graphNameOrConfiguration, config));
-    }
-
-    public Stream<KnnStatsResult> knnStats(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var statsConfig = configurationCreator.createConfiguration(configuration, KnnStatsConfig::of);
-
-        var computationResult = statsBusinessFacade.knn(
-            graphName,
-            statsConfig,
-            procedureReturnColumns.contains("similarityDistribution")
-        );
-
-        return Stream.of(KnnComputationResultTransformer.toStatsResult(computationResult, statsConfig));
     }
 
     public Stream<KnnWriteResult> knnWrite(

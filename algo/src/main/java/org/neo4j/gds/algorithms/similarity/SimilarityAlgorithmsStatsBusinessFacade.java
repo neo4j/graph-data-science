@@ -29,14 +29,12 @@ import org.neo4j.gds.result.SimilarityStatistics;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnStatsConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStatsConfig;
-import org.neo4j.gds.similarity.knn.KnnStatsConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static org.neo4j.gds.algorithms.similarity.SimilarityResultCompanion.FILTERED_KNN_SPECIFIC_FIELDS_SUPPLIER;
-import static org.neo4j.gds.algorithms.similarity.SimilarityResultCompanion.KNN_SPECIFIC_FIELDS_SUPPLIER;
 import static org.neo4j.gds.algorithms.similarity.SimilarityResultCompanion.NODE_SIMILARITY_SPECIFIC_FIELDS_SUPPLIER;
 
 public class SimilarityAlgorithmsStatsBusinessFacade {
@@ -85,32 +83,6 @@ public class SimilarityAlgorithmsStatsBusinessFacade {
             NODE_SIMILARITY_SPECIFIC_FIELDS_SUPPLIER,
             intermediateResult.computeMilliseconds,
             () -> SimilaritySpecificFieldsWithDistribution.EMPTY,
-            computeSimilarityDistribution
-        );
-    }
-
-    public StatsResult<KnnSpecificFields> knn(
-        String graphName,
-        KnnStatsConfig configuration,
-        boolean computeSimilarityDistribution
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> similarityAlgorithmsFacade.knn(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        return statsResult(
-            algorithmResult,
-            result -> SimilarityResultCompanion.computeToGraph(
-                algorithmResult.graph(),
-                algorithmResult.graph().nodeCount(),
-                configuration.concurrency(),
-                result.streamSimilarityResult()
-            ),
-            KNN_SPECIFIC_FIELDS_SUPPLIER,
-            intermediateResult.computeMilliseconds,
-            () -> KnnSpecificFields.EMPTY,
             computeSimilarityDistribution
         );
     }
