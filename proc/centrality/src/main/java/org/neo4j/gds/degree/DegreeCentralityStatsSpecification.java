@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.degree;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -50,22 +51,6 @@ public class DegreeCentralityStatsSpecification implements AlgorithmSpec<DegreeC
 
     @Override
     public ComputationResultConsumer<DegreeCentrality, DegreeCentralityResult, DegreeCentralityStatsConfig, Stream<CentralityStatsResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> {
-            var builder = new CentralityStatsResult.Builder(
-                executionContext.returnColumns(),
-                computationResult.config().concurrency()
-            );
-
-            computationResult.result()
-                .ifPresent(result -> builder.withCentralityFunction(result.centralityScoreProvider()));
-
-            return Stream.of(
-                builder.withPreProcessingMillis(computationResult.preProcessingMillis())
-                    .withComputeMillis(computationResult.computeMillis())
-                    .withNodeCount(computationResult.graph().nodeCount())
-                    .withConfig(computationResult.config())
-                    .build()
-            );
-        };
+        return new NullComputationResultConsumer<>();
     }
 }
