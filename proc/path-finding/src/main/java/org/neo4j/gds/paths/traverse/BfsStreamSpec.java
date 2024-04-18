@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.paths.traverse;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -26,7 +27,6 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.pathfinding.BfsStreamResult;
-import org.neo4j.gds.procedures.algorithms.pathfinding.PathFactoryFacade;
 
 import java.util.stream.Stream;
 
@@ -52,7 +52,7 @@ public class BfsStreamSpec implements AlgorithmSpec<BFS, HugeLongArray, BfsStrea
 
     @Override
     public ComputationResultConsumer<BFS, HugeLongArray, BfsStreamConfig, Stream<BfsStreamResult>> computationResultConsumer() {
-        return new BfsStreamComputationResultConsumer(new PathFactoryFacade());
+        return new NullComputationResultConsumer<>();
     }
 
 }

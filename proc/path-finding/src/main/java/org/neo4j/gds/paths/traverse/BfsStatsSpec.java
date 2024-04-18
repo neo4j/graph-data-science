@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.paths.traverse;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
@@ -50,11 +51,6 @@ public class BfsStatsSpec implements AlgorithmSpec<BFS, HugeLongArray, BfsStatsC
 
     @Override
     public ComputationResultConsumer<BFS, HugeLongArray, BfsStatsConfig, Stream<StandardStatsResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> Stream.of(new StandardStatsResult(
-            computationResult.preProcessingMillis(),
-            computationResult.computeMillis(),
-            0,
-            computationResult.config().toMap()
-        ));
+        return new NullComputationResultConsumer<>();
     }
 }

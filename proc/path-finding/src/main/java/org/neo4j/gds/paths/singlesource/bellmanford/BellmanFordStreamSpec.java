@@ -19,22 +19,20 @@
  */
 package org.neo4j.gds.paths.singlesource.bellmanford;
 
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.paths.bellmanford.BellmanFord;
 import org.neo4j.gds.paths.bellmanford.BellmanFordAlgorithmFactory;
 import org.neo4j.gds.paths.bellmanford.BellmanFordResult;
 import org.neo4j.gds.paths.bellmanford.BellmanFordStreamConfig;
-import org.neo4j.gds.paths.dijkstra.PathFindingResult;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.pathfinding.BellmanFordStreamResult;
-
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 import static org.neo4j.gds.paths.singlesource.SingleSourceShortestPathConstants.BELLMAN_FORD_DESCRIPTION;
 
@@ -59,37 +57,7 @@ public class BellmanFordStreamSpec implements
 
     @Override
     public ComputationResultConsumer<BellmanFord, BellmanFordResult, BellmanFordStreamConfig, Stream<BellmanFordStreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging(
-            "Result streaming failed",
-            executionContext.log(),
-            () -> computationResult.result()
-                .map(result -> {
-                    var graph = computationResult.graph();
-                    var shouldReturnPath = executionContext
-                        .returnColumns()
-                        .contains("route") && computationResult.graphStore().capabilities().canWriteToLocalDatabase();
-
-                    var containsNegativeCycle = result.containsNegativeCycle();
-
-                    var resultBuilder = new BellmanFordStreamResult.Builder(graph, executionContext.nodeLookup())
-                        .withIsCycle(containsNegativeCycle);
-
-                    PathFindingResult algorithmResult;
-                    if (containsNegativeCycle) {
-                        algorithmResult = result.negativeCycles();
-                    } else {
-                        algorithmResult = result.shortestPaths();
-                    }
-
-                    var resultStream = algorithmResult.mapPaths(path -> resultBuilder.build(path, shouldReturnPath));
-
-                    // this is necessary in order to close the result stream which triggers
-                    // the progress tracker to close its root task
-                    executionContext.closeableResourceRegistry().register(resultStream);
-                    return resultStream;
-                })
-                .orElseGet(Stream::empty)
-        );
+        return new NullComputationResultConsumer<>();
     }
 
     @Override

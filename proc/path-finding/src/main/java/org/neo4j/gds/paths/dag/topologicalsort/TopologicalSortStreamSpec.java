@@ -19,23 +19,20 @@
  */
 package org.neo4j.gds.paths.dag.topologicalsort;
 
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.NullComputationResultConsumer;
+import org.neo4j.gds.dag.topologicalsort.TopologicalSort;
+import org.neo4j.gds.dag.topologicalsort.TopologicalSortFactory;
+import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
+import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.dag.topologicalsort.TopologicalSort;
-import org.neo4j.gds.dag.topologicalsort.TopologicalSortFactory;
-import org.neo4j.gds.dag.topologicalsort.TopologicalSortResult;
-import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
 import org.neo4j.gds.procedures.algorithms.pathfinding.TopologicalSortStreamResult;
 
-import java.util.function.LongFunction;
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 @GdsCallable(name = "gds.dag.topologicalSort.stream", description = Constants.TOPOLOGICAL_SORT_DESCRIPTION, executionMode = STREAM)
@@ -58,27 +55,6 @@ public class TopologicalSortStreamSpec implements AlgorithmSpec<TopologicalSort,
 
     @Override
     public ComputationResultConsumer<TopologicalSort, TopologicalSortResult, TopologicalSortStreamConfig, Stream<TopologicalSortStreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging(
-            "Result streaming failed",
-            executionContext.log(),
-            () -> computationResult.result()
-                .map(result -> {
-                    var graph = computationResult.graph();
-                    var distances = result.maxSourceDistances().orElse(null);
-                    LongFunction<Double> distanceFunction = distances != null
-                    ? (nodeId) -> distances.get(nodeId)
-                    : (nodeId) ->  null;
-                    var topologicallySortedNodes = result.sortedNodes();
-
-                    return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
-                        .mapToObj(index -> {
-                            var mappedNodeId = topologicallySortedNodes.get(index);
-                            return new TopologicalSortStreamResult(
-                                graph.toOriginalNodeId(mappedNodeId),
-                                distanceFunction.apply(mappedNodeId)
-                            );
-                        });
-                }).orElseGet(Stream::empty)
-        );
+        return new NullComputationResultConsumer<>();
     }
 }

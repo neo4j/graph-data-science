@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.paths.spanningtree;
 
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -31,10 +31,8 @@ import org.neo4j.gds.spanningtree.SpanningTree;
 import org.neo4j.gds.spanningtree.SpanningTreeAlgorithmFactory;
 import org.neo4j.gds.spanningtree.SpanningTreeStreamConfig;
 
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 @GdsCallable(
@@ -61,25 +59,8 @@ public class SpanningTreeStreamSpec implements AlgorithmSpec<Prim, SpanningTree,
 
     }
 
+    @Override
     public ComputationResultConsumer<Prim, SpanningTree, SpanningTreeStreamConfig, Stream<SpanningTreeStreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging(
-            "Result streaming failed",
-            executionContext.log(),
-            () -> computationResult.result()
-                .map(result -> {
-                    var sourceNode = computationResult.config().sourceNode();
-                    var graph = computationResult.graph();
-                    return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
-                        .filter(nodeId -> result.parent(nodeId) >= 0 || sourceNode == graph.toOriginalNodeId(nodeId))
-                        .mapToObj(nodeId -> {
-                            var originalId = graph.toOriginalNodeId(nodeId);
-                            return new SpanningTreeStreamResult(
-                                originalId,
-                                (sourceNode == originalId) ? sourceNode : graph.toOriginalNodeId(result.parent(nodeId)),
-                                result.costToParent(nodeId)
-                            );
-                        });
-                }).orElseGet(Stream::empty)
-        );
+        return new NullComputationResultConsumer<>();
     }
 }
