@@ -19,10 +19,8 @@
  */
 package org.neo4j.gds.embeddings.fastrp;
 
-import org.neo4j.gds.WriteNodePropertiesComputationResultConsumer;
-import org.neo4j.gds.core.write.NodeProperty;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.executor.AlgorithmSpec;
-import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.ExecutionMode;
@@ -30,7 +28,6 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.embeddings.results.DefaultNodeEmbeddingsWriteResult;
 
-import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.embeddings.fastrp.FastRPCompanion.DESCRIPTION;
@@ -54,20 +51,6 @@ public class FastRPWriteSpec implements AlgorithmSpec<FastRP, FastRPResult, Fast
 
     @Override
     public ComputationResultConsumer<FastRP, FastRPResult, FastRPWriteConfig, Stream<DefaultNodeEmbeddingsWriteResult>> computationResultConsumer() {
-        return new WriteNodePropertiesComputationResultConsumer<>(
-            this::resultBuilder,
-            computationResult -> List.of(NodeProperty.of(
-                computationResult.config().writeProperty(),
-                FastRPCompanion.nodeProperties(computationResult)
-            )),
-            name()
-        );
-    }
-
-    private DefaultNodeEmbeddingsWriteResult.Builder resultBuilder(
-        ComputationResult<FastRP, FastRPResult, FastRPWriteConfig> computeResult,
-        ExecutionContext executionContext
-    ) {
-        return new DefaultNodeEmbeddingsWriteResult.Builder();
+        return new NullComputationResultConsumer<>();
     }
 }

@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.embeddings.graphsage;
 
-import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.NullComputationResultConsumer;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSage;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageAlgorithmFactory;
 import org.neo4j.gds.embeddings.graphsage.algo.GraphSageResult;
@@ -28,14 +28,12 @@ import org.neo4j.gds.executor.AlgorithmSpec;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
-import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.executor.validation.ValidationConfiguration;
+import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.embeddings.graphsage.GraphSageStreamResult;
 
-import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPH_SAGE_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
@@ -59,20 +57,7 @@ public class GraphSageStreamSpec implements AlgorithmSpec<GraphSage, GraphSageRe
 
     @Override
     public ComputationResultConsumer<GraphSage, GraphSageResult, GraphSageStreamConfig, Stream<GraphSageStreamResult>> computationResultConsumer() {
-        return (computationResult, executionContext) -> runWithExceptionLogging(
-            "GraphSage streaming failed",
-            executionContext.log(),
-            () -> computationResult.result()
-                .map(result -> {
-                    var graph = computationResult.graph();
-                    var embeddings = result.embeddings();
-                    return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
-                        .mapToObj(internalNodeId -> new GraphSageStreamResult(
-                            graph.toOriginalNodeId(internalNodeId),
-                            embeddings.get(internalNodeId)
-                        ));
-                }).orElseGet(Stream::empty)
-        );
+        return new NullComputationResultConsumer<>();
     }
 
     @Override
