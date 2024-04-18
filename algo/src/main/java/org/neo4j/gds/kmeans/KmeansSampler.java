@@ -20,6 +20,7 @@
 package org.neo4j.gds.kmeans;
 
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.utils.StringFormatting;
 
@@ -60,7 +61,7 @@ public abstract class KmeansSampler {
         ClusterManager clusterManager,
         long nodeCount,
         int k,
-        int concurrency,
+        Concurrency concurrency,
         HugeDoubleArray distanceFromCenter,
         ExecutorService executorService,
         List<KmeansTask> tasks,
@@ -111,7 +112,7 @@ public abstract class KmeansSampler {
         public static SamplerType parse(Object input) {
             if (input instanceof String) {
                 var inputString = StringFormatting.toUpperCaseWithLocale((String) input);
-                
+
                 if (VALUES.containsKey(inputString)) {
                     return SamplerType.valueOf(VALUES.get(inputString));
                 }
