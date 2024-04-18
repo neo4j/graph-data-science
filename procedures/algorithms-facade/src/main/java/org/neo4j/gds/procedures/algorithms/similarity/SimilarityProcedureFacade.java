@@ -21,24 +21,61 @@ package org.neo4j.gds.procedures.algorithms.similarity;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsStreamModeBusinessFacade;
+import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
+import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.similarity.knn.KnnStreamConfig;
+
+import java.util.Map;
+import java.util.stream.Stream;
 
 public final class SimilarityProcedureFacade {
     private final KnnMutateStub knnMutateStub;
+    private final ApplicationsFacade applicationsFacade;
+    private final StreamModeAlgorithmRunner streamModeAlgorithmRunner;
 
-    private SimilarityProcedureFacade(KnnMutateStub knnMutateStub) {this.knnMutateStub = knnMutateStub;}
+    private SimilarityProcedureFacade(
+        KnnMutateStub knnMutateStub,
+        ApplicationsFacade applicationsFacade,
+        StreamModeAlgorithmRunner streamModeAlgorithmRunner
+    ) {
+        this.knnMutateStub = knnMutateStub;
+        this.applicationsFacade = applicationsFacade;
+        this.streamModeAlgorithmRunner = streamModeAlgorithmRunner;
+    }
 
     public static SimilarityProcedureFacade create(
         ApplicationsFacade applicationsFacade,
         GenericStub genericStub,
-        ProcedureReturnColumns procedureReturnColumns
+        ProcedureReturnColumns procedureReturnColumns,
+        StreamModeAlgorithmRunner streamModeAlgorithmRunner
     ) {
         var knnMutateStub = new KnnMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
 
-        return new SimilarityProcedureFacade(knnMutateStub);
+        return new SimilarityProcedureFacade(knnMutateStub, applicationsFacade, streamModeAlgorithmRunner);
     }
 
     public KnnMutateStub knnMutateStub() {
         return knnMutateStub;
+    }
+
+    public Stream<SimilarityResult> knnStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new KnnResultBuilderForStreamMode();
+
+        return streamModeAlgorithmRunner.runStreamModeAlgorithm(
+            graphName,
+            configuration,
+            KnnStreamConfig::of,
+            resultBuilder,
+            streamMode()::knn
+        );
+    }
+
+    private SimilarityAlgorithmsStreamModeBusinessFacade streamMode() {
+        return applicationsFacade.similarity().stream();
     }
 }

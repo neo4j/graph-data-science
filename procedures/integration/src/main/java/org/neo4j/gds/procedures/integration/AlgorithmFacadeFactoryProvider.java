@@ -20,7 +20,6 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.gds.ProcedureCallContextReturnColumns;
-import org.neo4j.gds.TransactionCloseableResourceRegistry;
 import org.neo4j.gds.TransactionNodeLookup;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
@@ -29,6 +28,7 @@ import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
+import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.logging.Log;
@@ -37,6 +37,8 @@ import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.modelcatalogservices.ModelCatalogServiceProvider;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
+import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
+import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.kernel.api.KernelTransaction;
 import org.neo4j.kernel.api.procedure.Context;
@@ -75,7 +77,10 @@ class AlgorithmFacadeFactoryProvider {
         RequestScopedDependencies requestScopedDependencies,
         KernelTransaction kernelTransaction,
         GraphDatabaseService graphDatabaseService,
-        DatabaseGraphStoreEstimationService databaseGraphStoreEstimationService
+        DatabaseGraphStoreEstimationService databaseGraphStoreEstimationService,
+        ApplicationsFacade applicationsFacade,
+        GenericStub genericStub,
+        StreamModeAlgorithmRunner streamModeAlgorithmRunner
     ) {
         /*
          * GDS services derived from Procedure Context.
@@ -84,7 +89,6 @@ class AlgorithmFacadeFactoryProvider {
          * I have tried to mark those layers in comments below.
          */
         var algorithmMemoryValidationService = new AlgorithmMemoryValidationService(log, useMaxMemoryEstimation);
-        var closeableResourceRegistry = new TransactionCloseableResourceRegistry(kernelTransaction);
         var mutateNodePropertyService = new MutateNodePropertyService(log);
         var mutateRelationshipService = new MutateRelationshipService(log);
         var nodeLookup = new TransactionNodeLookup(kernelTransaction);
@@ -111,7 +115,6 @@ class AlgorithmFacadeFactoryProvider {
 
         // procedure facade
         return new AlgorithmFacadeFactory(
-            closeableResourceRegistry,
             configurationCreator,
             nodeLookup,
             returnColumns,
@@ -121,7 +124,10 @@ class AlgorithmFacadeFactoryProvider {
             writeRelationshipService,
             algorithmRunner,
             algorithmEstimator,
-            modelCatalogServiceProvider.createService(graphDatabaseService, log)
+            modelCatalogServiceProvider.createService(graphDatabaseService, log),
+            applicationsFacade,
+            genericStub,
+            streamModeAlgorithmRunner
         );
     }
 }

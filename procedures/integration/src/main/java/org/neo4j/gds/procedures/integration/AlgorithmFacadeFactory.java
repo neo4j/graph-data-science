@@ -57,12 +57,12 @@ import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStreamBusinessFac
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
-import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.modelcatalogservices.ModelCatalogService;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
@@ -72,7 +72,6 @@ import org.neo4j.gds.procedures.similarity.SimilarityProcedureFacade;
 
 class AlgorithmFacadeFactory {
     // Request scoped parameters
-    private final CloseableResourceRegistry closeableResourceRegistry;
     private final ConfigurationCreator configurationCreator;
     private final NodeLookup nodeLookup;
     private final ProcedureCallContextReturnColumns returnColumns;
@@ -83,9 +82,11 @@ class AlgorithmFacadeFactory {
     private final AlgorithmEstimator algorithmEstimator;
     private final AlgorithmRunner algorithmRunner;
     private final ModelCatalogService modelCatalogService;
+    private final ApplicationsFacade applicationsFacade;
+    private final GenericStub genericStub;
+    private final StreamModeAlgorithmRunner streamModeAlgorithmRunner;
 
     AlgorithmFacadeFactory(
-        CloseableResourceRegistry closeableResourceRegistry,
         ConfigurationCreator configurationCreator,
         NodeLookup nodeLookup,
         ProcedureCallContextReturnColumns returnColumns,
@@ -95,9 +96,11 @@ class AlgorithmFacadeFactory {
         WriteRelationshipService writeRelationshipService,
         AlgorithmRunner algorithmRunner,
         AlgorithmEstimator algorithmEstimator,
-        ModelCatalogService modelCatalogService
+        ModelCatalogService modelCatalogService,
+        ApplicationsFacade applicationsFacade,
+        GenericStub genericStub,
+        StreamModeAlgorithmRunner streamModeAlgorithmRunner
     ) {
-        this.closeableResourceRegistry = closeableResourceRegistry;
         this.configurationCreator = configurationCreator;
         this.nodeLookup = nodeLookup;
         this.returnColumns = returnColumns;
@@ -108,6 +111,9 @@ class AlgorithmFacadeFactory {
         this.algorithmRunner = algorithmRunner;
         this.algorithmEstimator = algorithmEstimator;
         this.modelCatalogService = modelCatalogService;
+        this.applicationsFacade = applicationsFacade;
+        this.genericStub = genericStub;
+        this.streamModeAlgorithmRunner = streamModeAlgorithmRunner;
     }
 
     CentralityProcedureFacade createCentralityProcedureFacade() {
@@ -169,10 +175,7 @@ class AlgorithmFacadeFactory {
         );
     }
 
-    SimilarityProcedureFacade createSimilarityProcedureFacade(
-        ApplicationsFacade applicationsFacade,
-        GenericStub genericStub
-    ) {
+    SimilarityProcedureFacade createSimilarityProcedureFacade() {
         // algorithms facade
         var similarityAlgorithmsFacade = new SimilarityAlgorithmsFacade(algorithmRunner);
 
@@ -193,7 +196,8 @@ class AlgorithmFacadeFactory {
         var theOtherFacade = org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade.create(
             applicationsFacade,
             genericStub,
-            returnColumns
+            returnColumns,
+            streamModeAlgorithmRunner
         );
 
         return new SimilarityProcedureFacade(
@@ -239,17 +243,14 @@ class AlgorithmFacadeFactory {
         );
     }
 
-    PathFindingProcedureFacade createPathFindingProcedureFacade(
-        ApplicationsFacade applicationsFacade,
-        GenericStub genericStub
-    ) {
+    PathFindingProcedureFacade createPathFindingProcedureFacade() {
         return PathFindingProcedureFacade.create(
-            closeableResourceRegistry,
             configurationCreator,
             nodeLookup,
             returnColumns,
             applicationsFacade,
-            genericStub
+            genericStub,
+            streamModeAlgorithmRunner
         );
     }
 

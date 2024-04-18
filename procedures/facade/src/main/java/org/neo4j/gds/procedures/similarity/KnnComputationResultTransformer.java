@@ -20,37 +20,15 @@
 package org.neo4j.gds.procedures.similarity;
 
 import org.neo4j.gds.algorithms.similarity.specificfields.KnnSpecificFields;
-import org.neo4j.gds.algorithms.RelationshipMutateResult;
 import org.neo4j.gds.algorithms.RelationshipWriteResult;
 import org.neo4j.gds.algorithms.StatsResult;
-import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.procedures.algorithms.similarity.KnnMutateResult;
 import org.neo4j.gds.procedures.similarity.knn.KnnStatsResult;
 import org.neo4j.gds.procedures.similarity.knn.KnnWriteResult;
-import org.neo4j.gds.similarity.SimilarityResult;
-import org.neo4j.gds.similarity.knn.KnnMutateConfig;
-import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.knn.KnnStatsConfig;
 import org.neo4j.gds.similarity.knn.KnnWriteConfig;
 
-import java.util.stream.Stream;
-
 final class KnnComputationResultTransformer {
     private KnnComputationResultTransformer() {}
-
-    static Stream<SimilarityResult> toStreamResult(
-        StreamComputationResult<KnnResult> computationResult
-    ) {
-        return computationResult.result().map(result -> {
-            var graph = computationResult.graph();
-            return result.streamSimilarityResult()
-                .map(similarityResult -> {
-                    similarityResult.node1 = graph.toOriginalNodeId(similarityResult.node1);
-                    similarityResult.node2 = graph.toOriginalNodeId(similarityResult.node2);
-                    return similarityResult;
-                });
-        }).orElseGet(Stream::empty);
-    }
 
     static KnnStatsResult toStatsResult(
         StatsResult<KnnSpecificFields> statsResult,
@@ -90,26 +68,4 @@ final class KnnComputationResultTransformer {
             config.toMap()
         );
     }
-
-    static KnnMutateResult toMutateResult(
-        RelationshipMutateResult<KnnSpecificFields> mutateResult,
-        KnnMutateConfig config
-    ) {
-
-        return new KnnMutateResult(
-            mutateResult.preProcessingMillis(),
-            mutateResult.computeMillis(),
-            mutateResult.mutateMillis(),
-            mutateResult.postProcessingMillis(),
-            mutateResult.algorithmSpecificFields().nodesCompared(),
-            mutateResult.algorithmSpecificFields().relationshipsWritten(),
-            mutateResult.algorithmSpecificFields().similarityDistribution(),
-            mutateResult.algorithmSpecificFields().didConverge(),
-            mutateResult.algorithmSpecificFields().ranIterations(),
-            mutateResult.algorithmSpecificFields().nodePairsConsidered(),
-            config.toMap()
-        );
-    }
-
-
 }

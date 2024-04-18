@@ -277,20 +277,6 @@ public class SimilarityProcedureFacade {
         return Stream.of(estimateBusinessFacade.nodeSimilarity(graphNameOrConfiguration, config));
     }
 
-    public Stream<SimilarityResult> knnStream(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var streamConfig = configurationCreator.createConfigurationForStream(configuration, KnnStreamConfig::of);
-
-        var computationResult = streamBusinessFacade.knn(
-            graphName,
-            streamConfig
-        );
-
-        return KnnComputationResultTransformer.toStreamResult(computationResult);
-    }
-
     public Stream<KnnStatsResult> knnStats(
         String graphName,
         Map<String, Object> configuration
