@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.neo4j.gds.collections.haa.PageCreator;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.function.LongToDoubleFunction;
@@ -30,10 +31,10 @@ import static org.neo4j.gds.core.concurrency.ParallelUtil.parallelStreamConsume;
 
 public final class ParallelDoublePageCreator implements PageCreator.DoublePageCreator {
 
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final LongToDoubleFunction gen;
 
-    private ParallelDoublePageCreator(int concurrency, LongToDoubleFunction gen) {
+    private ParallelDoublePageCreator(Concurrency concurrency, LongToDoubleFunction gen) {
         this.concurrency = concurrency;
         this.gen = gen;
     }
@@ -71,14 +72,14 @@ public final class ParallelDoublePageCreator implements PageCreator.DoublePageCr
     }
 
     public static ParallelDoublePageCreator of(int concurrency, LongToDoubleFunction gen) {
-        return new ParallelDoublePageCreator(concurrency, gen);
+        return new ParallelDoublePageCreator(new Concurrency(concurrency), gen);
     }
 
     public static ParallelDoublePageCreator identity(int concurrency) {
-        return new ParallelDoublePageCreator(concurrency, i -> i);
+        return new ParallelDoublePageCreator(new Concurrency(concurrency), i -> i);
     }
 
     public static ParallelDoublePageCreator passThrough(int concurrency) {
-        return new ParallelDoublePageCreator(concurrency, null);
+        return new ParallelDoublePageCreator(new Concurrency(concurrency), null);
     }
 }

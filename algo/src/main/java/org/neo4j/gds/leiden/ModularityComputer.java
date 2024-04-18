@@ -79,7 +79,7 @@ public final class ModularityComputer {
 
         double modularity = ParallelUtil.parallelStream(
             LongStream.range(0, workingGraph.nodeCount()),
-            concurrency.value(),
+            concurrency,
             nodeStream ->
                 nodeStream
                     .mapToDouble(communityId -> {

@@ -326,7 +326,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
         ParallelUtil.parallelStreamConsume(
             LongStream.range(0, colorCount),
-            concurrency.value(),
+            concurrency,
             TerminationFlag.RUNNING_TRUE,
             stream -> stream.forEach(indexId -> {
                 long actualIndexId = currentStandingPosition + indexId;
@@ -337,7 +337,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         // apply communityWeight updates to communityWeights
         ParallelUtil.parallelStreamConsume(
             LongStream.range(0, nodeCount),
-            concurrency.value(),
+            concurrency,
             TerminationFlag.RUNNING_TRUE,
             stream -> stream.forEach(nodeId -> {
                 final double update = communityWeightUpdates.get(nodeId);

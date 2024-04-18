@@ -92,7 +92,7 @@ public class LocalSearch {
         );
 
         // Used to keep track of whether we can swap a node into another community or not.
-        this.swapStatus = HugeAtomicByteArray.of(graph.nodeCount(), new ParallelBytePageCreator(concurrency.value()));
+        this.swapStatus = HugeAtomicByteArray.of(graph.nodeCount(), new ParallelBytePageCreator(concurrency));
 
         this.weightTransformer = hasRelationshipWeightProperty ? weight -> weight : unused -> 1.0D;
     }

@@ -116,7 +116,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
     private void traverse() {
         this.progressTracker.beginSubTask("Traversal");
 
-        ForkJoinPool forkJoinPool = ExecutorServiceUtil.createForkJoinPool(concurrency.value());
+        ForkJoinPool forkJoinPool = ExecutorServiceUtil.createForkJoinPool(concurrency);
         var tasks = ConcurrentHashMap.<ForkJoinTask<Void>>newKeySet();
 
         LongFunction<CountedCompleter<Void>> taskProducer = longestPathDistances.isPresent()

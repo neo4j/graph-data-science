@@ -27,6 +27,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -76,7 +77,7 @@ class KCoreDecompositionTest {
         @ValueSource(ints = {1, 4})
         void shouldComputeCoreDecomposition(int concurrency) {
 
-            var kcore = new KCoreDecomposition(graph, concurrency, ProgressTracker.NULL_TRACKER, 1).compute();
+            var kcore = new KCoreDecomposition(graph, new Concurrency(concurrency), ProgressTracker.NULL_TRACKER, 1).compute();
             assertThat(kcore.degeneracy()).isEqualTo(2);
             var coreValues = kcore.coreValues();
 
@@ -170,7 +171,7 @@ class KCoreDecompositionTest {
         void shouldComputeCoreDecomposition(int concurrency) {
             IdFunction idFunction = graph::toMappedNodeId;
 
-            var kcore = new KCoreDecomposition(graph, concurrency, ProgressTracker.NULL_TRACKER, 1).compute();
+            var kcore = new KCoreDecomposition(graph, new Concurrency(concurrency), ProgressTracker.NULL_TRACKER, 1).compute();
             assertThat(kcore.degeneracy()).isEqualTo(3);
             var coreValues = kcore.coreValues();
 
@@ -205,7 +206,7 @@ class KCoreDecompositionTest {
         @Test
         void shouldComputeCoreDecomposition() {
 
-            var kcore = new KCoreDecomposition(graph, 1, ProgressTracker.NULL_TRACKER, 1).compute();
+            var kcore = new KCoreDecomposition(graph, new Concurrency(1), ProgressTracker.NULL_TRACKER, 1).compute();
             assertThat(kcore.degeneracy()).isEqualTo(0);
             var coreValues = kcore.coreValues();
 
@@ -240,7 +241,7 @@ class KCoreDecompositionTest {
 
         @Test
         void shouldAdvanceScanningDegreeCorrectly() {
-            var kcore = new KCoreDecomposition(graph, 1, ProgressTracker.NULL_TRACKER, 1).compute();
+            var kcore = new KCoreDecomposition(graph, new Concurrency(1), ProgressTracker.NULL_TRACKER, 1).compute();
             assertThat(kcore.degeneracy()).isEqualTo(3);
             var coreValues = kcore.coreValues();
 

@@ -23,6 +23,7 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.Collections;
 import java.util.Map;
@@ -57,6 +58,11 @@ public interface GraphProjectFromGraphConfig extends GraphProjectConfig {
 
     default int concurrency() {
         return ConcurrencyConfig.DEFAULT_CONCURRENCY;
+    }
+
+    @Configuration.Ignore
+    default Concurrency typedConcurrency() {
+        return new Concurrency(concurrency());
     }
 
     default Map<String, Object> parameters() {

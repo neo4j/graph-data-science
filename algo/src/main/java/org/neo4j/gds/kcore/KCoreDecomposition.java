@@ -23,6 +23,7 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.haa.HugeAtomicIntArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -41,7 +42,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
 
     public static final String KCORE_DESCRIPTION = "It computes the k-core values in a network";
     private final Graph graph;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private static final int CHUNK_SIZE = 64;
     private final int chunkSize;
     static int UNASSIGNED = -1;
@@ -49,7 +50,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
     //When only 2% nodes remain in the graph, we can create a smaller array to loop over these ones only
     static double REBUILD_CONSTANT = 0.02;
 
-    public KCoreDecomposition(Graph graph, int concurrency, ProgressTracker progressTracker) {
+    public KCoreDecomposition(Graph graph, Concurrency concurrency, ProgressTracker progressTracker) {
         super(progressTracker);
         this.graph = graph;
         this.concurrency = concurrency;
@@ -57,7 +58,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
     }
 
     @TestOnly
-    KCoreDecomposition(Graph graph, int concurrency, ProgressTracker progressTracker, int chunkSize) {
+    KCoreDecomposition(Graph graph, Concurrency concurrency, ProgressTracker progressTracker, int chunkSize) {
         super(progressTracker);
         this.graph = graph;
         this.concurrency = concurrency;
@@ -80,7 +81,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
 
         ParallelUtil.parallelForEachNode(
             graph.nodeCount(),
-            concurrency,
+            concurrency.value(),
             TerminationFlag.RUNNING_TRUE,
             v -> {
                 int degree = graph.degree(v);
@@ -119,7 +120,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
                 task.setPhase(KCoreDecompositionTask.KCoreDecompositionPhase.SCAN);
             }
 
-            RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency).run();
+            RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency.value()).run();
 
             int nextScanningDegree = tasks
                 .stream()
@@ -135,9 +136,9 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
                     task.setPhase(KCoreDecompositionTask.KCoreDecompositionPhase.ACT);
                 }
 
-                RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency).run();
+                RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency.value()).run();
                 scanningDegree++;
-                
+
             } else {
                 //this is a minor optimization not in paper:
                 // if we do not do any updates this round, let's skip directly to the smallest active degree remaining
@@ -160,7 +161,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
     ) {
         List<KCoreDecompositionTask> tasks = new ArrayList<>();
         var nodeProvider = new FullNodeProvider(graph.nodeCount());
-        for (int taskId = 0; taskId < concurrency; ++taskId) {
+        for (int taskId = 0; taskId < concurrency.value(); ++taskId) {
             tasks.add(new KCoreDecompositionTask(
                 graph.concurrentCopy(),
                 currentDegrees,
@@ -179,12 +180,12 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
         HugeLongArray nodeOrder = HugeLongArray.newArray(numberOfRemainingNodes);
         AtomicLong atomicIndex = new AtomicLong(0);
         var rebuildTasks = PartitionUtils.rangePartition(
-            concurrency,
+            concurrency.value(),
             graph.nodeCount(),
             partition -> new RebuildTask(partition, atomicIndex, core, nodeOrder),
             Optional.empty()
         );
-        RunWithConcurrency.builder().tasks(rebuildTasks).concurrency(concurrency).run();
+        RunWithConcurrency.builder().tasks(rebuildTasks).concurrency(concurrency.value()).run();
         var newNodeProvider = new ReducedNodeProvider(nodeOrder, numberOfRemainingNodes);
         for (var task : tasks) {
             task.updateNodeProvider(newNodeProvider);

@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.neo4j.gds.mem.HugeArrays.PAGE_SIZE;
@@ -34,7 +35,7 @@ class ParallelBytePageCreatorTest {
 
         byte[][] pages = new byte[numPages][];
 
-        ParallelBytePageCreator.of(1).fill(pages, lastPageSize, pageShift);
+        ParallelBytePageCreator.of(new Concurrency(1)).fill(pages, lastPageSize, pageShift);
 
         for (int pageIndex = 0; pageIndex < pages.length; pageIndex++) {
             byte[] page = pages[pageIndex];

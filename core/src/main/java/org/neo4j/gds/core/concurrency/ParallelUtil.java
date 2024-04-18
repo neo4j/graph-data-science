@@ -69,7 +69,7 @@ public final class ParallelUtil {
      * Executes the given function in parallel on the given {@link BaseStream}, using a FJ pool of the requested size.
      * The concurrency value is assumed to already be validated towards the edition limitation.
      */
-    public static <T extends BaseStream<?, T>, R> R parallelStream(T data, int concurrency, Function<T, R> fn) {
+    public static <T extends BaseStream<?, T>, R> R parallelStream(T data, Concurrency concurrency, Function<T, R> fn) {
         ForkJoinPool pool = ExecutorServiceUtil.createForkJoinPool(concurrency);
         try {
             return pool.submit(() -> fn.apply(data.parallel())).get();
@@ -89,7 +89,7 @@ public final class ParallelUtil {
      */
     public static <T extends BaseStream<?, T>> void parallelStreamConsume(
         T data,
-        int concurrency,
+        Concurrency concurrency,
         TerminationFlag terminationFlag,
         Consumer<T> consumer
     ) {
@@ -108,7 +108,7 @@ public final class ParallelUtil {
     ) {
         parallelStreamConsume(
             LongStream.range(0, nodeCount),
-            concurrency,
+            new Concurrency(concurrency),
             terminationFlag,
             stream -> stream.forEach(consumer)
         );

@@ -106,7 +106,7 @@ public class GraphSampleConstructor {
             relTypeFilterExpression,
             inputGraphStore.nodes(),
             idMap,
-            config.concurrency(),
+            config.typedConcurrency(),
             Map.of(),
             DefaultPool.INSTANCE,
             progressTracker

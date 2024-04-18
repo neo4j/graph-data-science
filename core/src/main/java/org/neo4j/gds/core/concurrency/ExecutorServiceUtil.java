@@ -70,8 +70,8 @@ public final class ExecutorServiceUtil {
         );
     }
 
-    public static ForkJoinPool createForkJoinPool(int concurrency) {
-        return new ForkJoinPool(concurrency, FJ_WORKER_THREAD_FACTORY, null, false);
+    public static ForkJoinPool createForkJoinPool(Concurrency concurrency) {
+        return new ForkJoinPool(concurrency.value(), FJ_WORKER_THREAD_FACTORY, null, false);
     }
 
     public static Thread newThread(Runnable code) {

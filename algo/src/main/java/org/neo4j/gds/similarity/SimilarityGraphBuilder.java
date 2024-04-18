@@ -99,7 +99,7 @@ public class SimilarityGraphBuilder {
 
         ParallelUtil.parallelStreamConsume(
             stream,
-            concurrency.value(),
+            concurrency,
             terminationFlag,
             similarityStream -> similarityStream.forEach(similarityResult -> relationshipsBuilder.addFromInternal(
                 idMap.toRootNodeId(similarityResult.sourceNodeId()),

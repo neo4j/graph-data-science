@@ -74,7 +74,8 @@ final class ParallelUtilTest {
 
     @ValueSource(ints = {1, 2, 4, 8, 16, 27, 32, 53, 64})
     @ParameterizedTest
-    void shouldParallelizeStreams(int concurrency) {
+    void shouldParallelizeStreams(int concurrencyValue) {
+        var concurrency = new Concurrency(concurrencyValue);
         long firstNum = 1;
         long lastNum = 1_000_000;
 
@@ -87,7 +88,7 @@ final class ParallelUtilTest {
             assertTrue(thread instanceof ForkJoinWorkerThread);
             assertThat(thread.getName()).contains("gds-forkjoin");
             ForkJoinPool threadPool = ((ForkJoinWorkerThread) thread).getPool();
-            assertEquals(concurrency, threadPool.getParallelism());
+            assertEquals(concurrency.value(), threadPool.getParallelism());
             assertNotSame(threadPool, commonPool);
 
             return s.reduce(0L, Long::sum);
@@ -98,14 +99,15 @@ final class ParallelUtilTest {
 
     @ValueSource(ints = {1, 2, 3, 4})
     @ParameterizedTest
-    void shouldParallelizeStreamsWithLimitedConcurrency(int concurrency) {
+    void shouldParallelizeStreamsWithLimitedConcurrency(int concurrencyValue) {
+        var concurrency = new Concurrency(concurrencyValue);
         LongStream data = LongStream.range(0, 100_000);
         Long result = parallelStream(data, concurrency, (s) -> {
             assertTrue(s.isParallel());
             Thread thread = Thread.currentThread();
             assertTrue(thread instanceof ForkJoinWorkerThread);
             ForkJoinPool threadPool = ((ForkJoinWorkerThread) thread).getPool();
-            assertEquals(concurrency, threadPool.getParallelism());
+            assertEquals(concurrency.value(), threadPool.getParallelism());
 
             return s.reduce(0L, Long::sum);
         });
@@ -115,14 +117,15 @@ final class ParallelUtilTest {
 
     @ValueSource(ints = {1, 2, 3, 4})
     @ParameterizedTest
-    void shouldParallelizeAndConsumeStreamsWithLimitedConcurrency(int concurrency) {
+    void shouldParallelizeAndConsumeStreamsWithLimitedConcurrency(int concurrencyValue) {
+        var concurrency = new Concurrency(concurrencyValue);
         LongStream data = LongStream.range(0, 100_000);
         parallelStreamConsume(data, concurrency, TerminationFlag.RUNNING_TRUE, (s) -> {
             assertTrue(s.isParallel());
             Thread thread = Thread.currentThread();
             assertTrue(thread instanceof ForkJoinWorkerThread);
             ForkJoinPool threadPool = ((ForkJoinWorkerThread) thread).getPool();
-            assertEquals(concurrency, threadPool.getParallelism());
+            assertEquals(concurrency.value(), threadPool.getParallelism());
 
             long result = s.reduce(0L, Long::sum);
             assertEquals((99_999L * 100_000L / 2), result);
@@ -133,7 +136,7 @@ final class ParallelUtilTest {
     void shouldTakeBaseStreams() {
         double[] data = {1.0, 2.5, 3.14};
 
-        double sum = parallelStream(Arrays.stream(data), 4, DoubleStream::sum);
+        double sum = parallelStream(Arrays.stream(data), new Concurrency(4), DoubleStream::sum);
 
         assertEquals(1.0 + 2.5 + 3.14, sum);
     }

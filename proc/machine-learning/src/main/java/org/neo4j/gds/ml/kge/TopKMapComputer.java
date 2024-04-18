@@ -98,7 +98,7 @@ public class TopKMapComputer extends Algorithm<KGEPredictResult> {
             try (var concurrentGraph = CloseableThreadLocal.withInitial(graph::concurrentCopy)) {
                 ParallelUtil.parallelStreamConsume(
                     new SetBitsIterable(sourceNodes).stream(),
-                    concurrency.value(),
+                    concurrency,
                     terminationFlag,
                     stream -> {
                         stream.forEach(node1 -> {

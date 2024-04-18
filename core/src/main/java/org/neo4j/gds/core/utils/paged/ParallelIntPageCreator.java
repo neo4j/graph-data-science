@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.paged;
 
 import org.neo4j.gds.collections.haa.PageCreator;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.stream.IntStream;
@@ -28,9 +29,9 @@ import static org.neo4j.gds.core.concurrency.ParallelUtil.parallelStreamConsume;
 
 public final class ParallelIntPageCreator implements PageCreator.IntPageCreator {
 
-    private final int concurrency;
+    private final Concurrency concurrency;
 
-    public ParallelIntPageCreator(int concurrency) {
+    public ParallelIntPageCreator(Concurrency concurrency) {
         this.concurrency = concurrency;
     }
 
@@ -59,6 +60,6 @@ public final class ParallelIntPageCreator implements PageCreator.IntPageCreator 
     }
 
     public static ParallelIntPageCreator of(int concurrency) {
-        return new ParallelIntPageCreator(concurrency);
+        return new ParallelIntPageCreator(new Concurrency(concurrency));
     }
 }

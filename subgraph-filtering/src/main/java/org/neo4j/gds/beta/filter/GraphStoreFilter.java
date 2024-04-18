@@ -156,7 +156,7 @@ public final class GraphStoreFilter {
                 expressions.relationshipExpression(),
                 inputNodes,
                 filteredNodes.idMap(),
-                config.concurrency(),
+                config.typedConcurrency(),
                 config.parameters(),
                 executorService,
                 progressTracker

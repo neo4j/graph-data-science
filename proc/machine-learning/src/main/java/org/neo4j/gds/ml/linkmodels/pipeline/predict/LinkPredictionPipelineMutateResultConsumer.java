@@ -55,7 +55,7 @@ class LinkPredictionPipelineMutateResultConsumer extends MutateComputationResult
         var graph = graphStore.getGraph(labelFilter);
 
         var config = computationResult.config();
-        var concurrency = config.concurrency();
+        var concurrency = config.typedConcurrency();
         var mutateRelationshipType = RelationshipType.of(config.mutateRelationshipType());
 
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
@@ -64,7 +64,7 @@ class LinkPredictionPipelineMutateResultConsumer extends MutateComputationResult
             .relationshipType(mutateRelationshipType)
             .orientation(Orientation.UNDIRECTED)
             .addPropertyConfig(GraphFactory.PropertyConfig.of(config.mutateProperty()))
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .executorService(DefaultPool.INSTANCE)
             .build();
 

@@ -30,7 +30,7 @@ public class KCoreDecompositionAlgorithmFactory<CONFIG extends KCoreDecompositio
     @Override
     public KCoreDecomposition build(Graph graph, CONFIG configuration, ProgressTracker progressTracker) {
 
-        return new KCoreDecomposition(graph, configuration.concurrency(), progressTracker);
+        return new KCoreDecomposition(graph, configuration.typedConcurrency(), progressTracker);
     }
 
     @Override

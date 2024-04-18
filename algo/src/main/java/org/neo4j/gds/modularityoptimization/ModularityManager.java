@@ -76,7 +76,7 @@ final class ModularityManager {
 
         double modularity = ParallelUtil.parallelStream(
             LongStream.range(0, graph.nodeCount()),
-            concurrency.value(),
+            concurrency,
             nodeStream ->
                 nodeStream
                     .mapToDouble(communityId -> {

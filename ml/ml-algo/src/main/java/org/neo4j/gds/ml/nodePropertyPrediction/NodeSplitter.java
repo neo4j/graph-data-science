@@ -62,7 +62,7 @@ public final class NodeSplitter {
         // sorting the internal id's by the corresponding originalIds makes this deterministic
         // based on the original node-id space -- supporting different graph-projections
         allTrainingExamples.setAll(toOriginalId);
-        HugeMergeSort.sort(allTrainingExamples, concurrency.value());
+        HugeMergeSort.sort(allTrainingExamples, concurrency);
         allTrainingExamples.setAll(i -> toMappedId.applyAsLong(allTrainingExamples.get(i)));
 
         ShuffleUtil.shuffleArray(allTrainingExamples, createRandomDataGenerator(randomSeed));

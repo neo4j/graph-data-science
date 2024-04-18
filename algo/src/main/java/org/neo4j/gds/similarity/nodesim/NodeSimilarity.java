@@ -290,7 +290,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
     private Stream<SimilarityResult> computeAllParallel() {
         return ParallelUtil.parallelStream(
-            loggableAndTerminableSourceNodeStream(), concurrency.value(), stream -> stream
+            loggableAndTerminableSourceNodeStream(), concurrency, stream -> stream
                 .boxed()
                 .flatMap(this::computeSimilaritiesForNode)
         );
@@ -334,7 +334,7 @@ public class NodeSimilarity extends Algorithm<NodeSimilarityResult> {
 
         ParallelUtil.parallelStreamConsume(
             loggableAndTerminableSourceNodeStream(),
-            concurrency.value(),
+            concurrency,
             terminationFlag,
             stream -> stream
                 .forEach(sourceNodeId ->

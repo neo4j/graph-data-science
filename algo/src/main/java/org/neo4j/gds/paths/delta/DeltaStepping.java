@@ -322,7 +322,7 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
 
         return ParallelUtil.parallelStream(
             partitions.stream(),
-            concurrency.value(),
+            concurrency,
             parallelStream -> parallelStream.flatMap(partition -> {
                 var localPathIndex = new MutableLong(pathIndex.getAndAdd(partition.nodeCount()));
 

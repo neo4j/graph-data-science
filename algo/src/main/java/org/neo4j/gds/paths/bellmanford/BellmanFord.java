@@ -176,7 +176,7 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
 
         return ParallelUtil.parallelStream(
             partitions.stream(),
-            concurrency.value(),
+            concurrency,
             parallelStream -> parallelStream.flatMap(partition -> {
                 var pathResultBuilder = ImmutablePathResult.builder();
 
@@ -212,7 +212,7 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
 
         return ParallelUtil.parallelStream(
             partitions.stream(),
-            concurrency.value(),
+            concurrency,
             parallelStream -> parallelStream.flatMap(partition -> {
                 var localPathIndex = new MutableLong(pathIndex.getAndAdd(partition.nodeCount()));
                 var pathResultBuilder = ImmutablePathResult.builder().sourceNode(sourceNode);

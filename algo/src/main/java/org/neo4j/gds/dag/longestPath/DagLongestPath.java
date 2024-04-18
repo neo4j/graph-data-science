@@ -111,7 +111,7 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
     private void traverse() {
         this.progressTracker.beginSubTask("Traversal");
 
-        ForkJoinPool forkJoinPool = ExecutorServiceUtil.createForkJoinPool(concurrency.value());
+        ForkJoinPool forkJoinPool = ExecutorServiceUtil.createForkJoinPool(concurrency);
         var tasks = ConcurrentHashMap.<ForkJoinTask<Void>>newKeySet();
 
         LongFunction<CountedCompleter<Void>> taskProducer =
@@ -219,7 +219,7 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
 
         return ParallelUtil.parallelStream(
             partitions.stream(),
-            concurrency.value(),
+            concurrency,
             parallelStream -> parallelStream.flatMap(partition -> {
                 var localPathIndex = new MutableLong(pathIndex.getAndAdd(partition.nodeCount()));
 

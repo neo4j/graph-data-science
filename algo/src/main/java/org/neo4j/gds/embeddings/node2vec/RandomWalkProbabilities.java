@@ -94,7 +94,7 @@ interface RandomWalkProbabilities {
 
             ParallelUtil.parallelStreamConsume(
                 LongStream.range(0, nodeCount),
-                concurrency.value(),
+                concurrency,
                 TerminationFlag.RUNNING_TRUE,
                 nodeStream -> nodeStream.forEach(nodeId -> {
                         double frequency = ((double) nodeFrequencies.get(nodeId)) / sum;
