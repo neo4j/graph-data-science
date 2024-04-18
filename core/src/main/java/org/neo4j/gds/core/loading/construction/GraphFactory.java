@@ -31,6 +31,7 @@ import org.neo4j.gds.api.GraphCharacteristics;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.PropertyState;
+import org.neo4j.gds.api.compress.AdjacencyCompressorFactory;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.GraphSchema;
@@ -43,6 +44,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.huge.HugeGraphBuilder;
+import org.neo4j.gds.core.loading.AdjacencyListBehavior;
 import org.neo4j.gds.core.loading.HighLimitIdMap;
 import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.ImmutableImportMetaData;
@@ -231,7 +233,8 @@ public final class GraphFactory {
         Optional<Concurrency> concurrency,
         Optional<Boolean> indexInverse,
         Optional<ExecutorService> executorService,
-        Optional<Boolean> usePooledBuilderProvider
+        Optional<Boolean> usePooledBuilderProvider,
+        Optional<AdjacencyListBehavior.Factory> adjacencyCompressorFactory
     ) {
         var loadRelationshipProperties = !propertyConfigs.isEmpty();
 
@@ -294,6 +297,7 @@ public final class GraphFactory {
             .importMetaData(importMetaData)
             .nodeCountSupplier(() -> nodes.rootNodeCount().orElse(0L))
             .importSizing(importSizing)
+            .adjacencyCompressorFactory(adjacencyCompressorFactory)
             .build();
 
         var singleTypeRelationshipsBuilderBuilder = new SingleTypeRelationshipsBuilderBuilder()
