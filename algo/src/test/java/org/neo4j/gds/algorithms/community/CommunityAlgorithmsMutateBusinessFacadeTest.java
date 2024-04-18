@@ -28,6 +28,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -96,6 +97,7 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
 
         var configMock = mock(MutateNodePropertyConfig.class);
         when(configMock.mutateProperty()).thenReturn("bugger-off");
+        when(configMock.typedConcurrency()).thenReturn(new Concurrency(4));
 
         var result = HugeLongArray.newArray(graph.nodeCount());
         result.setAll(graph::toOriginalNodeId);
@@ -130,7 +132,7 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
         assertThat(mutateResult.computeMillis()).isEqualTo(50);
         assertThat(mutateResult.mutateMillis()).isGreaterThanOrEqualTo(0L);
         assertThat(mutateResult.postProcessingMillis()).isGreaterThanOrEqualTo(0L);
-        
+
         var nodeProperty = graphStore.nodeProperty("bugger-off");
         assertThat(nodeProperty).isNotNull();
         var buggerOffValues = nodeProperty.values();
@@ -189,5 +191,5 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
             return true;
         });
     }
-    
+
 }

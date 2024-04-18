@@ -101,7 +101,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
                 config.consecutiveIds(),
                 result.asNodeProperties(),
                 config.minCommunitySize(),
-                config.concurrency(),
+                config.typedConcurrency(),
                 () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
             ),
             (result -> result::setIdOf),
@@ -167,7 +167,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
                 config.consecutiveIds(),
                 NodePropertyValuesAdapter.adapt(result),
                 Optional.empty(),
-                config.concurrency()
+                config.typedConcurrency()
             ),
             (result -> result::get),
             (result, componentCount, communitySummary) -> new StandardCommunityStatisticsSpecificFields(
@@ -241,7 +241,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
                 config.consecutiveIds(),
                 NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent()),
                 config.minCommunitySize(),
-                config.concurrency(),
+                config.typedConcurrency(),
                 () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
             ));
 
@@ -289,7 +289,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
                 config.consecutiveIds(),
                 NodePropertyValuesAdapter.adapt(result.labels()),
                 config.minCommunitySize(),
-                config.concurrency(),
+                config.typedConcurrency(),
                 () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
             )),
             (result -> result.labels()::get),
@@ -333,7 +333,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
                 config.consecutiveIds(),
                 NodePropertyValuesAdapter.adapt(result.dendrogramManager().getCurrent()),
                 config.minCommunitySize(),
-                config.concurrency(),
+                config.typedConcurrency(),
                 () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
             ));
 
@@ -419,7 +419,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
                 false,
                 NodePropertyValuesAdapter.adapt(result.colors()),
                 configuration.minCommunitySize(),
-                configuration.concurrency()
+                configuration.typedConcurrency()
             ),
             (result) -> {
                 long usedColors = (computeUsedColors) ? result.usedColors().cardinality() : 0;
@@ -464,7 +464,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
                 config.consecutiveIds(),
                 result.asNodeProperties(),
                 config.minCommunitySize(),
-                config.concurrency(),
+                config.typedConcurrency(),
                 () -> algorithmResult.graphStore().nodeProperty(config.seedProperty())
             ),
             result -> result::communityId,
@@ -584,7 +584,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
                 nodePropertyValues.nodeCount(),
                 communityFunctionSupplier.communityFunction(result),
                 DefaultPool.INSTANCE,
-                configuration.concurrency(),
+                configuration.typedConcurrency(),
                 statisticsComputationInstructions
             );
 

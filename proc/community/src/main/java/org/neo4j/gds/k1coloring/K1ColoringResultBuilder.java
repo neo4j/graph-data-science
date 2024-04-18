@@ -20,6 +20,7 @@
 package org.neo4j.gds.k1coloring;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
 abstract class K1ColoringResultBuilder<PROC_RESULT> extends AbstractCommunityResultBuilder<PROC_RESULT> {
@@ -27,7 +28,7 @@ abstract class K1ColoringResultBuilder<PROC_RESULT> extends AbstractCommunityRes
     long ranIterations;
     boolean didConverge;
 
-    K1ColoringResultBuilder(ProcedureReturnColumns returnColumns, int concurrency) {
+    K1ColoringResultBuilder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
         super(returnColumns, concurrency);
     }
 

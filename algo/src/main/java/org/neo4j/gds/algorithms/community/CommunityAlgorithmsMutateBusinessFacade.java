@@ -387,7 +387,7 @@ public class CommunityAlgorithmsMutateBusinessFacade {
                 nodePropertyValues.nodeCount(),
                 communityFunctionSupplier.communityFunction(result),
                 DefaultPool.INSTANCE,
-                configuration.concurrency(),
+                configuration.typedConcurrency(),
                 statisticsComputationInstructions
             );
 

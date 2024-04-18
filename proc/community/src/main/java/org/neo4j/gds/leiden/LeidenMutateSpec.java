@@ -78,7 +78,7 @@ public class LeidenMutateSpec implements AlgorithmSpec<Leiden, LeidenResult, Lei
     ) {
         var builder = new LeidenMutateResult.Builder(
             executionContext.returnColumns(),
-            computationResult.config().concurrency()
+            computationResult.config().typedConcurrency()
         );
 
         computationResult.result().ifPresent(leidenResult -> {

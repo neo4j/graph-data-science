@@ -29,6 +29,7 @@ package org.neo4j.gds.algorithms.community;
     import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
     import org.neo4j.gds.collections.ha.HugeLongArray;
     import org.neo4j.gds.config.AlgoBaseConfig;
+    import org.neo4j.gds.core.concurrency.Concurrency;
     import org.neo4j.gds.result.StatisticsComputationInstructions;
     import org.neo4j.gds.wcc.WccWriteConfig;
 
@@ -156,6 +157,7 @@ package org.neo4j.gds.algorithms.community;
         void writeWithCommunityStatistics() {
 
             var configurationMock = mock(WccWriteConfig.class);
+            when(configurationMock.typedConcurrency()).thenReturn(new Concurrency(4));
             var graph = mock(Graph.class);
             var graphStore = mock(GraphStore.class);
 
@@ -228,5 +230,5 @@ package org.neo4j.gds.algorithms.community;
                 .isEqualTo(3);
 
         }
-        
+
     }

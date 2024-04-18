@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.community.labelpropagation;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
 public abstract class LabelPropagationResultBuilder<PROC_RESULT> extends AbstractCommunityResultBuilder<PROC_RESULT> {
@@ -27,7 +28,7 @@ public abstract class LabelPropagationResultBuilder<PROC_RESULT> extends Abstrac
 
     protected boolean didConverge;
 
-    public LabelPropagationResultBuilder(ProcedureReturnColumns returnColumns, int concurrency) {
+    public LabelPropagationResultBuilder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
         super(returnColumns, concurrency);
     }
 

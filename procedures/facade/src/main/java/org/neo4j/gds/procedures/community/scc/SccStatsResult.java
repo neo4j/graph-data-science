@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.community.scc;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
@@ -46,7 +47,7 @@ public class SccStatsResult extends StandardStatsResult {
 
     public static class Builder extends AbstractCommunityResultBuilder<SccStatsResult> {
 
-        public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+        public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
             super(returnColumns, concurrency);
         }
 

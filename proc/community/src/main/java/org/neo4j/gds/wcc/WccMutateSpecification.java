@@ -79,7 +79,7 @@ public class WccMutateSpecification implements AlgorithmSpec<Wcc, DisjointSetStr
         return WccSpecification.resultBuilder(
             new WccMutateResult.Builder(
                 executionContext.returnColumns(),
-                computationResult.config().concurrency()
+                computationResult.config().typedConcurrency()
             ),
             computationResult
         );

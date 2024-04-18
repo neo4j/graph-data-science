@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.community.leiden;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
 import java.util.List;
@@ -71,7 +72,7 @@ public final class LeidenWriteResult extends LeidenStatsResult {
         double modularity;
         List<Double> modularities;
 
-        public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+        public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
             super(returnColumns, concurrency);
         }
 

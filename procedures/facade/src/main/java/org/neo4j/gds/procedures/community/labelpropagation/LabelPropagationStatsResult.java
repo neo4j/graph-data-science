@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.community.labelpropagation;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 
 import java.util.Map;
@@ -48,9 +49,9 @@ public class LabelPropagationStatsResult extends StandardStatsResult {
         this.communityDistribution = communityDistribution;
     }
 
-    static class Builder extends LabelPropagationResultBuilder<LabelPropagationStatsResult> {
+    public static class Builder extends LabelPropagationResultBuilder<LabelPropagationStatsResult> {
 
-        Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+        public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
             super(returnColumns, concurrency);
         }
 

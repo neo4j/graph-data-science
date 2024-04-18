@@ -22,6 +22,7 @@ package org.neo4j.gds.result;
 import org.HdrHistogram.Histogram;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.ProgressTimer;
 
@@ -37,7 +38,7 @@ import static org.neo4j.gds.result.CommunityStatistics.communityCountAndHistogra
 public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends AbstractResultBuilder<WRITE_RESULT> {
 
     private final ExecutorService executorService;
-    private final int concurrency;
+    private final Concurrency concurrency;
     protected boolean buildHistogram;
     protected boolean buildCommunityCount;
 
@@ -52,7 +53,7 @@ public abstract class AbstractCommunityResultBuilder<WRITE_RESULT> extends Abstr
 
     protected AbstractCommunityResultBuilder(
         ProcedureReturnColumns returnColumns,
-        int concurrency
+        Concurrency concurrency
     ) {
         this.buildHistogram = returnColumns.contains("communityDistribution") || returnColumns.contains("componentDistribution");
         this.buildCommunityCount = returnColumns.contains("communityCount") || returnColumns.contains("componentCount");

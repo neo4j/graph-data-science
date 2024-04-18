@@ -84,7 +84,7 @@ public class ModularityOptimizationMutateSpecification implements AlgorithmSpec<
         ExecutionContext executionContext
     ) {
         return ModularityOptimizationSpecificationHelper.resultBuilder(
-            new ModularityOptimizationMutateResult.Builder(executionContext.returnColumns(), computeResult.config().concurrency()),
+            new ModularityOptimizationMutateResult.Builder(executionContext.returnColumns(), computeResult.config().typedConcurrency()),
             computeResult
         );
     }

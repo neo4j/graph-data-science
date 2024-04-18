@@ -55,7 +55,7 @@ final class LabelPropagationComputationResultTransformer {
                 configuration.consecutiveIds(),
                 NodePropertyValuesAdapter.adapt(result.labels()),
                 configuration.minCommunitySize(),
-                configuration.concurrency()
+                configuration.typedConcurrency()
             );
 
 

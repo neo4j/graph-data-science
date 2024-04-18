@@ -90,7 +90,7 @@ public class LabelPropagationMutateSpecification implements AlgorithmSpec<LabelP
     ) {
         var builder = LabelPropagationMutateResult.builder(
             executionContext.returnColumns(),
-            computationResult.config().concurrency()
+            computationResult.config().typedConcurrency()
         );
 
         computationResult.result()

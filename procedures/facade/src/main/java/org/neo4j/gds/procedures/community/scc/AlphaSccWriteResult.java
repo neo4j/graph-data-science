@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.community.scc;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.config.WritePropertyConfig;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
 public class AlphaSccWriteResult {
@@ -90,7 +91,7 @@ public class AlphaSccWriteResult {
 
     public static class Builder extends AbstractCommunityResultBuilder<AlphaSccWriteResult> {
 
-        public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+        public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
             super(returnColumns, concurrency);
         }
 
@@ -130,4 +131,3 @@ public class AlphaSccWriteResult {
         }
     }
 }
-

@@ -80,13 +80,13 @@ public class SccMutateSpec implements AlgorithmSpec<Scc, HugeLongArray, SccMutat
         var config = computationResult.config();
         var mutateBuilder = new SccMutateResult.Builder(
             executionContext.returnColumns(),
-            config.concurrency()
+            config.typedConcurrency()
         )
             .buildCommunityCount(true)
             .buildHistogram(true);
 
         computationResult.result().ifPresent(result -> mutateBuilder.withCommunityFunction(result::get));
-        
+
         mutateBuilder
             .withNodeCount(computationResult.graph().nodeCount())
             .withConfig(config)

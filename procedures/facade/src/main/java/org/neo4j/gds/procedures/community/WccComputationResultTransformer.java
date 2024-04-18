@@ -52,7 +52,7 @@ final class WccComputationResultTransformer {
                 configuration.consecutiveIds(),
                 wccResult.asNodeProperties(),
                 configuration.minCommunitySize(),
-                configuration.concurrency()
+                configuration.typedConcurrency()
             );
 
             return LongStream

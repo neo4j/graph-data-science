@@ -52,7 +52,7 @@ final class K1ColoringComputationResultTransformer {
                 false,
                 NodePropertyValuesAdapter.adapt(k1ColoringResult.colors()),
                 configuration.minCommunitySize(),
-                configuration.concurrency()
+                configuration.typedConcurrency()
             );
             return LongStream
                 .range(IdMap.START_NODE_ID, graph.nodeCount())

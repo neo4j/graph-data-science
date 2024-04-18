@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.community.modularityoptimization;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.result.AbstractCommunityResultBuilder;
 
 public abstract class ModularityOptimizationResultBuilder<PROC_RESULT> extends AbstractCommunityResultBuilder<PROC_RESULT> {
@@ -29,7 +30,7 @@ public abstract class ModularityOptimizationResultBuilder<PROC_RESULT> extends A
 
     public ModularityOptimizationResultBuilder(
         ProcedureReturnColumns returnColumns,
-        int concurrency
+        Concurrency concurrency
     ) {
         super(returnColumns, concurrency);
     }
