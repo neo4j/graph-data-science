@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.function.ThrowingFunction;
+import org.neo4j.gds.TransactionCloseableResourceRegistry;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.DefaultAlgorithmProcessingTemplate;
@@ -44,6 +45,7 @@ import org.neo4j.gds.procedures.TaskRegistryFactoryService;
 import org.neo4j.gds.procedures.TerminationFlagAccessor;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
+import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.services.DatabaseIdAccessor;
 import org.neo4j.gds.services.UserAccessor;
@@ -199,26 +201,25 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             user,
             applicationsFacade
         );
+        var closeableResourceRegistry = new TransactionCloseableResourceRegistry(kernelTransaction);
+        var streamModeAlgorithmRunner = new StreamModeAlgorithmRunner(closeableResourceRegistry, configurationCreator);
         var algorithmFacadeFactory = algorithmFacadeFactoryProvider.createAlgorithmFacadeFactory(
             context,
             configurationCreator,
             requestScopedDependencies,
             kernelTransaction,
             graphDatabaseService,
-            databaseGraphStoreEstimationService
+            databaseGraphStoreEstimationService,
+            applicationsFacade,
+            genericStub,
+            streamModeAlgorithmRunner
         );
         var centralityProcedureFacade = algorithmFacadeFactory.createCentralityProcedureFacade();
         var communityProcedureFacade = algorithmFacadeFactory.createCommunityProcedureFacade();
         var miscAlgorithmsProcedureFacade = algorithmFacadeFactory.createMiscellaneousProcedureFacade();
         var nodeEmbeddingsProcedureFacade = algorithmFacadeFactory.createNodeEmbeddingsProcedureFacade();
-        var pathFindingProcedureFacade = algorithmFacadeFactory.createPathFindingProcedureFacade(
-            applicationsFacade,
-            genericStub
-        );
-        var similarityProcedureFacade = algorithmFacadeFactory.createSimilarityProcedureFacade(
-            applicationsFacade,
-            genericStub
-        );
+        var pathFindingProcedureFacade = algorithmFacadeFactory.createPathFindingProcedureFacade();
+        var similarityProcedureFacade = algorithmFacadeFactory.createSimilarityProcedureFacade();
 
         var pipelinesProcedureFacade = pipelinesProcedureFacadeProvider.createPipelinesProcedureFacade(context);
 

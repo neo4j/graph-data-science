@@ -44,7 +44,7 @@ public class KnnStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.similarity().knnStream(graphName, configuration);
+        return facade.similarity().theOtherFacade().knnStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.knn.stream.estimate", mode = READ)

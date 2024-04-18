@@ -21,17 +21,16 @@ package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
-import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsWriteModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.dag.longestPath.DagLongestPathStreamConfig;
@@ -70,6 +69,7 @@ import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.SteinerTreeMutateSt
 import org.neo4j.gds.procedures.algorithms.results.StandardModeResult;
 import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 import org.neo4j.gds.procedures.algorithms.results.StandardWriteRelationshipsResult;
+import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.spanningtree.SpanningTreeStatsConfig;
@@ -94,7 +94,6 @@ import java.util.stream.Stream;
  */
 public final class PathFindingProcedureFacade {
     // request scoped services
-    private final CloseableResourceRegistry closeableResourceRegistry;
     private final ConfigurationCreator configurationCreator;
     private final NodeLookup nodeLookup;
     private final ProcedureReturnColumns procedureReturnColumns;
@@ -114,8 +113,10 @@ public final class PathFindingProcedureFacade {
     private final SpanningTreeMutateStub spanningTreeMutateStub;
     private final SteinerTreeMutateStub steinerTreeMutateStub;
 
+    // infrastructure
+    private final StreamModeAlgorithmRunner streamModeAlgorithmRunner;
+
     private PathFindingProcedureFacade(
-        CloseableResourceRegistry closeableResourceRegistry,
         ConfigurationCreator configurationCreator,
         NodeLookup nodeLookup,
         ProcedureReturnColumns procedureReturnColumns,
@@ -129,9 +130,9 @@ public final class PathFindingProcedureFacade {
         SinglePairShortestPathYensMutateStub singlePairShortestPathYensMutateStub,
         SingleSourceShortestPathDijkstraMutateStub singleSourceShortestPathDijkstraMutateStub,
         SpanningTreeMutateStub spanningTreeMutateStub,
-        SteinerTreeMutateStub steinerTreeMutateStub
+        SteinerTreeMutateStub steinerTreeMutateStub,
+        StreamModeAlgorithmRunner streamModeAlgorithmRunner
     ) {
-        this.closeableResourceRegistry = closeableResourceRegistry;
         this.configurationCreator = configurationCreator;
         this.nodeLookup = nodeLookup;
         this.procedureReturnColumns = procedureReturnColumns;
@@ -148,18 +149,20 @@ public final class PathFindingProcedureFacade {
         this.singleSourceShortestPathDijkstraMutateStub = singleSourceShortestPathDijkstraMutateStub;
         this.spanningTreeMutateStub = spanningTreeMutateStub;
         this.steinerTreeMutateStub = steinerTreeMutateStub;
+
+        this.streamModeAlgorithmRunner = streamModeAlgorithmRunner;
     }
 
     /**
      * Encapsulating some of the boring structure stuff
      */
     public static PathFindingProcedureFacade create(
-        CloseableResourceRegistry closeableResourceRegistry,
         ConfigurationCreator configurationCreator,
         NodeLookup nodeLookup,
         ProcedureReturnColumns procedureReturnColumns,
         ApplicationsFacade applicationsFacade,
-        GenericStub genericStub
+        GenericStub genericStub,
+        StreamModeAlgorithmRunner streamModeAlgorithmRunner
     ) {
         var aStarStub = new SinglePairShortestPathAStarMutateStub(
             genericStub,
@@ -212,7 +215,6 @@ public final class PathFindingProcedureFacade {
         );
 
         return new PathFindingProcedureFacade(
-            closeableResourceRegistry,
             configurationCreator,
             nodeLookup,
             procedureReturnColumns,
@@ -226,7 +228,8 @@ public final class PathFindingProcedureFacade {
             yensStub,
             singleSourceDijkstraStub,
             spanningTreeMutateStub,
-            steinerTreeMutateStub
+            steinerTreeMutateStub,
+            streamModeAlgorithmRunner
         );
     }
 
@@ -237,7 +240,7 @@ public final class PathFindingProcedureFacade {
         ResultBuilder<AllShortestPathsConfig, Stream<AllShortestPathsStreamResult>, Stream<AllShortestPathsStreamResult>, Void> resultBuilder =
             (__, ___, ____, result, _____, ______) -> result.orElse(Stream.empty());
 
-        return runStreamAlgorithm(
+        return streamModeAlgorithmRunner.runStreamModeAlgorithm(
             graphName,
             configuration,
             AllShortestPathsConfig::of,
@@ -254,7 +257,7 @@ public final class PathFindingProcedureFacade {
         var routeRequested = procedureReturnColumns.contains("route");
         var resultBuilder = new BellmanFordResultBuilderForStreamMode(nodeLookup, routeRequested);
 
-        return runStreamAlgorithm(
+        return streamModeAlgorithmRunner.runStreamModeAlgorithm(
             graphName,
             configuration,
             BellmanFordStreamConfig::of,
@@ -375,7 +378,7 @@ public final class PathFindingProcedureFacade {
     public Stream<BfsStreamResult> breadthFirstSearchStream(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new BfsStreamResultBuilder(nodeLookup, procedureReturnColumns.contains("path"));
 
-        return runStreamAlgorithm(
+        return streamModeAlgorithmRunner.runStreamModeAlgorithm(
             graphName,
             configuration,
             BfsStreamConfig::of,
@@ -438,7 +441,7 @@ public final class PathFindingProcedureFacade {
             procedureReturnColumns.contains("path")
         );
 
-        return runStreamAlgorithm(
+        return streamModeAlgorithmRunner.runStreamModeAlgorithm(
             graphName,
             configuration,
             AllShortestPathsDeltaStreamConfig::of,
@@ -500,7 +503,7 @@ public final class PathFindingProcedureFacade {
     public Stream<DfsStreamResult> depthFirstSearchStream(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new DfsStreamResultBuilder(nodeLookup, procedureReturnColumns.contains("path"));
 
-        return runStreamAlgorithm(
+        return streamModeAlgorithmRunner.runStreamModeAlgorithm(
             graphName,
             configuration,
             DfsStreamConfig::of,
@@ -545,7 +548,7 @@ public final class PathFindingProcedureFacade {
             procedureReturnColumns.contains("path")
         );
 
-        return runStreamAlgorithm(
+        return streamModeAlgorithmRunner.runStreamModeAlgorithm(
             graphName,
             configuration,
             DagLongestPathStreamConfig::of,
@@ -588,7 +591,7 @@ public final class PathFindingProcedureFacade {
             procedureReturnColumns.contains("path")
         );
 
-        return runStreamAlgorithm(
+        return streamModeAlgorithmRunner.runStreamModeAlgorithm(
             graphName,
             configuration,
             RandomWalkStreamConfig::of,
@@ -899,7 +902,7 @@ public final class PathFindingProcedureFacade {
     public Stream<SpanningTreeStreamResult> spanningTreeStream(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new SpanningTreeResultBuilderForStreamMode();
 
-        return runStreamAlgorithm(
+        return streamModeAlgorithmRunner.runStreamModeAlgorithm(
             graphName,
             configuration,
             SpanningTreeStreamConfig::of,
@@ -989,7 +992,7 @@ public final class PathFindingProcedureFacade {
     public Stream<SteinerTreeStreamResult> steinerTreeStream(String graphName, Map<String, Object> configuration) {
         var resultBuilder = new SteinerTreeResultBuilderForStreamMode();
 
-        return runStreamAlgorithm(
+        return streamModeAlgorithmRunner.runStreamModeAlgorithm(
             graphName,
             configuration,
             SteinerTreeStreamConfig::of,
@@ -1050,7 +1053,7 @@ public final class PathFindingProcedureFacade {
     ) {
         var resultBuilder = new TopologicalSortResultBuilderForStreamMode();
 
-        return runStreamAlgorithm(
+        return streamModeAlgorithmRunner.runStreamModeAlgorithm(
             graphName,
             configuration,
             TopologicalSortStreamConfig::of,
@@ -1089,7 +1092,13 @@ public final class PathFindingProcedureFacade {
             procedureReturnColumns.contains("path")
         );
 
-        return runStreamAlgorithm(graphNameAsString, rawConfiguration, configurationSupplier, resultBuilder, algorithm);
+        return streamModeAlgorithmRunner.runStreamModeAlgorithm(
+            graphNameAsString,
+            rawConfiguration,
+            configurationSupplier,
+            resultBuilder,
+            algorithm
+        );
     }
 
     private <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> Stream<RESULT_TO_CALLER> runStatsAlgorithm(
@@ -1105,32 +1114,6 @@ public final class PathFindingProcedureFacade {
         return algorithm.compute(graphName, configuration, resultBuilder);
     }
 
-    /**
-     * Some reuse, all the algorithms use the same high level structure:
-     * <ol>
-     *     <li> configuration parsing
-     *     <li> parameter marshalling
-     *     <li> delegating to down stream layer to call the thing we are actually interested in
-     *     <li> handle resource closure
-     * </ol>
-     */
-    private <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER> Stream<RESULT_TO_CALLER> runStreamAlgorithm(
-        String graphNameAsString,
-        Map<String, Object> rawConfiguration,
-        Function<CypherMapWrapper, CONFIGURATION> configurationSupplier,
-        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, Stream<RESULT_TO_CALLER>, Void> resultBuilder,
-        AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, Stream<RESULT_TO_CALLER>, Void> algorithm
-    ) {
-        var graphName = GraphName.parse(graphNameAsString);
-        var configuration = configurationCreator.createConfigurationForStream(rawConfiguration, configurationSupplier);
-
-        var resultStream = algorithm.compute(graphName, configuration, resultBuilder);
-
-        // we need to do this for stream mode
-        closeableResourceRegistry.register(resultStream);
-
-        return resultStream;
-    }
 
     /**
      * A*, Dijkstra and Yens use the same variant of result builder
