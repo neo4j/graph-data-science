@@ -27,10 +27,10 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.graphdb.TransactionTerminatedException;
 import org.neo4j.kernel.api.exceptions.Status;
-import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 
 import java.util.Map;
 import java.util.Optional;
@@ -148,7 +148,9 @@ public class ProcedureExecutor<
                     return algo.compute();
                 } catch (Throwable e) {
                     algo.getProgressTracker().endSubTaskWithFailure();
-                    algorithmMetric.failed();
+                    if (! (e instanceof  IllegalArgumentException)){
+                        algorithmMetric.failed();
+                    }
                     throw e;
                 } finally {
                     if (algoSpec.releaseProgressTask()) {

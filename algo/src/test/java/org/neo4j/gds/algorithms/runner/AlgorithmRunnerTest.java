@@ -106,4 +106,41 @@ class AlgorithmRunnerTest {
         );
     }
 
+    @Test
+    void shouldNotRegisterAlgorithmMetricCountForIllegalArgumentExceptionFailure() {
+        var algorithmMetricMock = mock(ExecutionMetric.class);
+        var algorithmMetricsServiceMock = mock(AlgorithmMetricsService.class);
+        when(algorithmMetricsServiceMock.create(anyString())).thenReturn(algorithmMetricMock);
+
+        var logMock = mock(Log.class);
+        when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
+
+        var runner = new AlgorithmRunner(
+            logMock,
+            null,
+            algorithmMetricsServiceMock,
+            null,
+            null
+        );
+
+        var algorithmMock = mock(Algorithm.class, RETURNS_DEEP_STUBS);
+        when(algorithmMock.compute()).thenThrow(new IllegalArgumentException("Ooops"));
+
+        assertThatException().isThrownBy(
+            () -> runner.runAlgorithm(
+                algorithmMock,
+                "TestingMetrics"
+            )
+        ).withMessage("Ooops");
+
+        verify(algorithmMetricsServiceMock, times(1)).create("TestingMetrics");
+        verify(algorithmMetricMock, times(1)).start();
+        verify(algorithmMetricMock, times(1)).close();
+        verify(algorithmMetricMock, times(0)).failed();
+        verifyNoMoreInteractions(
+            algorithmMetricsServiceMock,
+            algorithmMetricMock
+        );
+    }
+
 }
