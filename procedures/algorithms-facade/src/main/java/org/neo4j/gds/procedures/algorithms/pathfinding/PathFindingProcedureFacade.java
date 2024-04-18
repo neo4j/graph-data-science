@@ -25,17 +25,14 @@ import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsWriteModeBusinessFacade;
-import org.neo4j.gds.applications.algorithms.pathfinding.RelationshipsWritten;
+import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.config.AlgoBaseConfig;
-import org.neo4j.gds.configuration.DefaultsConfiguration;
-import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.dag.longestPath.DagLongestPathStreamConfig;
 import org.neo4j.gds.dag.topologicalsort.TopologicalSortStreamConfig;
@@ -60,7 +57,6 @@ import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
 import org.neo4j.gds.procedures.algorithms.AlgorithmHandle;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.BellmanFordMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.BreadthFirstSearchMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.DeltaSteppingMutateStub;
@@ -158,25 +154,13 @@ public final class PathFindingProcedureFacade {
      * Encapsulating some of the boring structure stuff
      */
     public static PathFindingProcedureFacade create(
-        DefaultsConfiguration defaultsConfiguration,
-        LimitsConfiguration limitsConfiguration,
         CloseableResourceRegistry closeableResourceRegistry,
         ConfigurationCreator configurationCreator,
-        ConfigurationParser configurationParser,
         NodeLookup nodeLookup,
         ProcedureReturnColumns procedureReturnColumns,
-        User user,
-        ApplicationsFacade applicationsFacade
+        ApplicationsFacade applicationsFacade,
+        GenericStub genericStub
     ) {
-        var genericStub = new GenericStub(
-            defaultsConfiguration,
-            limitsConfiguration,
-            configurationCreator,
-            configurationParser,
-            user,
-            applicationsFacade
-        );
-
         var aStarStub = new SinglePairShortestPathAStarMutateStub(
             genericStub,
             applicationsFacade

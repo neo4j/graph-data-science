@@ -49,7 +49,7 @@ public class SimilaritySingleTypeRelationshipsHandler implements SingleTypeRelat
     private Map<String,Object> similaritySummary;
     private long relationshipCount;
 
-    SimilaritySingleTypeRelationshipsHandler(
+    public SimilaritySingleTypeRelationshipsHandler(
         Graph graph,
         Supplier<SimilarityGraphResult> similarityGraphResultSupplier,
         boolean shouldComputeStatistics
@@ -60,7 +60,7 @@ public class SimilaritySingleTypeRelationshipsHandler implements SingleTypeRelat
         this.graph = graph;
     }
 
-    Map<String, Object> similaritySummary() {
+    public Map<String, Object> similaritySummary() {
         return similaritySummary;
     }
 
@@ -127,5 +127,3 @@ public class SimilaritySingleTypeRelationshipsHandler implements SingleTypeRelat
         return relationshipCount;
     }
 }
-
-

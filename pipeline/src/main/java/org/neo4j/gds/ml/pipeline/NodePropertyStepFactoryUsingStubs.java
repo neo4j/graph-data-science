@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.pipeline;
 import org.neo4j.gds.ml.pipeline.stubs.BellmanFordStub;
 import org.neo4j.gds.ml.pipeline.stubs.BreadthFirstSearchStub;
 import org.neo4j.gds.ml.pipeline.stubs.DepthFirstSearchStub;
+import org.neo4j.gds.ml.pipeline.stubs.KnnStub;
 import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathAStarStub;
 import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathDijkstraStub;
 import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathYensStub;
@@ -31,6 +32,7 @@ import org.neo4j.gds.ml.pipeline.stubs.SpanningTreeStub;
 import org.neo4j.gds.ml.pipeline.stubs.SteinerTreeStub;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -69,18 +71,19 @@ final class NodePropertyStepFactoryUsingStubs {
     }
 
     private static NodePropertyStepFactoryUsingStubs create() {
-        Map<CanonicalProcedureName, Stub> supportedProcedures = Map.of(
-            CanonicalProcedureName.parse("gds.allshortestpaths.delta.mutate"), new SingleSourceShortestPathDeltaStub(),
-            CanonicalProcedureName.parse("gds.allshortestpaths.dijkstra.mutate"), new SingleSourceShortestPathDijkstraStub(),
-            CanonicalProcedureName.parse("gds.bellmanford.mutate"), new BellmanFordStub(),
-            CanonicalProcedureName.parse("gds.bfs.mutate"), new BreadthFirstSearchStub(),
-            CanonicalProcedureName.parse("gds.dfs.mutate"), new DepthFirstSearchStub(),
-            CanonicalProcedureName.parse("gds.shortestpath.astar.mutate"), new SinglePairShortestPathAStarStub(),
-            CanonicalProcedureName.parse("gds.shortestpath.dijkstra.mutate"), new SinglePairShortestPathDijkstraStub(),
-            CanonicalProcedureName.parse("gds.shortestpath.yens.mutate"), new SinglePairShortestPathYensStub(),
-            CanonicalProcedureName.parse("gds.spanningtree.mutate"), new SpanningTreeStub(),
-            CanonicalProcedureName.parse("gds.steinertree.mutate"), new SteinerTreeStub()
-        );
+        Map<CanonicalProcedureName, Stub> supportedProcedures = new HashMap<>();
+
+        supportedProcedures.put(CanonicalProcedureName.parse("gds.allshortestpaths.delta.mutate"), new SingleSourceShortestPathDeltaStub());
+        supportedProcedures.put(CanonicalProcedureName.parse("gds.allshortestpaths.dijkstra.mutate"), new SingleSourceShortestPathDijkstraStub());
+        supportedProcedures.put(CanonicalProcedureName.parse("gds.bellmanford.mutate"), new BellmanFordStub());
+        supportedProcedures.put(CanonicalProcedureName.parse("gds.bfs.mutate"), new BreadthFirstSearchStub());
+        supportedProcedures.put(CanonicalProcedureName.parse("gds.dfs.mutate"), new DepthFirstSearchStub());
+        supportedProcedures.put(CanonicalProcedureName.parse("gds.knn.mutate"), new KnnStub());
+        supportedProcedures.put(CanonicalProcedureName.parse("gds.shortestpath.astar.mutate"), new SinglePairShortestPathAStarStub());
+        supportedProcedures.put(CanonicalProcedureName.parse("gds.shortestpath.dijkstra.mutate"), new SinglePairShortestPathDijkstraStub());
+        supportedProcedures.put(CanonicalProcedureName.parse("gds.shortestpath.yens.mutate"), new SinglePairShortestPathYensStub());
+        supportedProcedures.put(CanonicalProcedureName.parse("gds.spanningtree.mutate"), new SpanningTreeStub());
+        supportedProcedures.put(CanonicalProcedureName.parse("gds.steinertree.mutate"), new SteinerTreeStub());
 
         return new NodePropertyStepFactoryUsingStubs(supportedProcedures);
     }

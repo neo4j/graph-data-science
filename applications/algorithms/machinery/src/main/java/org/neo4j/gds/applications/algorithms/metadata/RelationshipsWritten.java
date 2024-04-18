@@ -17,10 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.pathfinding;
+package org.neo4j.gds.applications.algorithms.metadata;
 
+/**
+ * Yay, microtypes!
+ */
 public class RelationshipsWritten {
     public final long value;
 
-    RelationshipsWritten(long value) {this.value = value;}
+    public RelationshipsWritten(long value) {this.value = value;}
 }

@@ -19,11 +19,10 @@
  */
 package org.neo4j.gds.similarity.nodesim;
 
-import org.neo4j.gds.procedures.similarity.SimilarityMutateResult;
+import org.neo4j.gds.procedures.algorithms.similarity.SimilarityMutateResult;
 import org.neo4j.gds.similarity.SimilarityResultBuilder;
 
 public class NodeSimilarityMutateResultBuilder extends SimilarityResultBuilder<SimilarityMutateResult> {
-
     @Override
     public SimilarityMutateResult build() {
         return new SimilarityMutateResult(
@@ -38,4 +37,3 @@ public class NodeSimilarityMutateResultBuilder extends SimilarityResultBuilder<S
         );
     }
 }
-

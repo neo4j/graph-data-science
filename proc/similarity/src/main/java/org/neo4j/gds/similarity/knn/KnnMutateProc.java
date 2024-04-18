@@ -20,7 +20,7 @@
 package org.neo4j.gds.similarity.knn;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.similarity.knn.KnnMutateResult;
+import org.neo4j.gds.procedures.algorithms.similarity.KnnMutateResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -44,7 +44,7 @@ public class KnnMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.similarity().knnMutate(graphName, configuration);
+        return facade.similarity().knnMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(value = "gds.knn.mutate.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class KnnMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.similarity().knnMutateEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.similarity().knnMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

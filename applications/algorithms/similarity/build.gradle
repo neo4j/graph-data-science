@@ -1,0 +1,16 @@
+apply plugin: 'java-library'
+
+description = 'Neo4j Graph Data Science :: Similarity Algorithms'
+
+group = 'org.neo4j.gds'
+
+dependencies {
+    implementation project(":algo")
+    implementation project(":algo-common")
+    implementation project(":algorithms-machinery")
+    implementation project(":config-api")
+    implementation project(":core")
+    implementation project(":logging")
+    implementation project(":memory-usage")
+    implementation project(":progress-tracking")
+}

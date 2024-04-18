@@ -70,7 +70,7 @@ public class KnnFactory<CONFIG extends KnnBaseConfig> extends GraphAlgorithmFact
 
     @Override
     public MemoryEstimation memoryEstimation(CONFIG configuration) {
-        return new KnnMemoryEstimateDefinition(configuration.tomMemoryEstimationParameters()).memoryEstimation();
+        return new KnnMemoryEstimateDefinition(configuration.toMemoryEstimationParameters()).memoryEstimation();
     }
 
     public static MemoryRange initialSamplerMemoryEstimation(KnnSampler.SamplerType samplerType, long boundedK) {

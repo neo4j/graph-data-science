@@ -71,7 +71,7 @@ public class SimilarityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
-            new KnnMemoryEstimateDefinition(configuration.tomMemoryEstimationParameters())
+            new KnnMemoryEstimateDefinition(configuration.toMemoryEstimationParameters())
         );
     }
 
@@ -83,7 +83,7 @@ public class SimilarityAlgorithmsEstimateBusinessFacade {
             graphNameOrConfiguration,
             configuration,
             Optional.empty(),
-            new FilteredKnnMemoryEstimateDefinition(configuration.tomMemoryEstimationParameters())
+            new FilteredKnnMemoryEstimateDefinition(configuration.toMemoryEstimationParameters())
         );
     }
 }

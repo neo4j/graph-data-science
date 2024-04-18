@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.algorithms;
 
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
 
 /**
  * This is the facade that faces pipelines, so everything you can pipeline I guess.
@@ -27,12 +28,21 @@ import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacad
  */
 public class AlgorithmsProcedureFacade {
     private final PathFindingProcedureFacade pathFindingProcedureFacade;
+    private final SimilarityProcedureFacade similarityProcedureFacade;
 
-    public AlgorithmsProcedureFacade(PathFindingProcedureFacade pathFindingProcedureFacade) {
+    public AlgorithmsProcedureFacade(
+        PathFindingProcedureFacade pathFindingProcedureFacade,
+        SimilarityProcedureFacade similarityProcedureFacade
+    ) {
         this.pathFindingProcedureFacade = pathFindingProcedureFacade;
+        this.similarityProcedureFacade = similarityProcedureFacade;
     }
 
     public PathFindingProcedureFacade pathFinding() {
         return pathFindingProcedureFacade;
+    }
+
+    public SimilarityProcedureFacade similarity() {
+        return similarityProcedureFacade;
     }
 }

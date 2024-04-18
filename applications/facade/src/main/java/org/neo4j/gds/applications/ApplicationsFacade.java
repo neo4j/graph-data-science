@@ -19,8 +19,9 @@
  */
 package org.neo4j.gds.applications;
 
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.DefaultCatalogBusinessFacade;
@@ -41,10 +42,16 @@ import java.util.function.Function;
 public final class ApplicationsFacade {
     private final CatalogBusinessFacade catalogBusinessFacade;
     private final PathFindingApplications pathFindingApplications;
+    private final SimilarityApplications similarityApplications;
 
-    ApplicationsFacade(CatalogBusinessFacade catalogBusinessFacade, PathFindingApplications pathFindingApplications) {
+    ApplicationsFacade(
+        CatalogBusinessFacade catalogBusinessFacade,
+        PathFindingApplications pathFindingApplications,
+        SimilarityApplications similarityApplications
+    ) {
         this.catalogBusinessFacade = catalogBusinessFacade;
         this.pathFindingApplications = pathFindingApplications;
+        this.similarityApplications = similarityApplications;
     }
 
     /**
@@ -66,16 +73,26 @@ public final class ApplicationsFacade {
             projectionMetricsService
         );
 
+        var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
+
         var pathFindingApplications = PathFindingApplications.create(
             log,
             requestScopedDependencies,
             algorithmProcessingTemplate,
-            algorithmEstimationTemplate
+            algorithmEstimationTemplate,
+            progressTrackerCreator
+        );
+
+        var similarityApplications = SimilarityApplications.create(
+            log,
+            algorithmProcessingTemplate,
+            progressTrackerCreator
         );
 
         return new ApplicationsFacadeBuilder()
             .with(catalogBusinessFacade)
             .with(pathFindingApplications)
+            .with(similarityApplications)
             .build();
     }
 
@@ -102,5 +119,9 @@ public final class ApplicationsFacade {
 
     public PathFindingApplications pathFinding() {
         return pathFindingApplications;
+    }
+
+    public SimilarityApplications similarity() {
+        return similarityApplications;
     }
 }

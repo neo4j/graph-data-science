@@ -19,8 +19,9 @@
  */
 package org.neo4j.gds.applications;
 
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithms;
 import org.neo4j.gds.applications.algorithms.pathfinding.PathFindingAlgorithmsEstimationModeBusinessFacade;
@@ -61,9 +62,10 @@ public final class PathFindingApplications {
         Log log,
         RequestScopedDependencies requestScopedDependencies,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
-        AlgorithmEstimationTemplate algorithmEstimationTemplate
+        AlgorithmEstimationTemplate algorithmEstimationTemplate,
+        ProgressTrackerCreator progressTrackerCreator
     ) {
-        var pathFindingAlgorithms = new PathFindingAlgorithms(log, requestScopedDependencies);
+        var pathFindingAlgorithms = new PathFindingAlgorithms(requestScopedDependencies, progressTrackerCreator);
 
         var estimationModeFacade = new PathFindingAlgorithmsEstimationModeBusinessFacade(algorithmEstimationTemplate);
 

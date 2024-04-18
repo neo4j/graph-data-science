@@ -59,14 +59,11 @@ import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.NodeLookup;
-import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.ApplicationsFacade;
-import org.neo4j.gds.configuration.DefaultsConfiguration;
-import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.modelcatalogservices.ModelCatalogService;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.embeddings.NodeEmbeddingsProcedureFacade;
@@ -74,14 +71,9 @@ import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.similarity.SimilarityProcedureFacade;
 
 class AlgorithmFacadeFactory {
-    // Global scoped dependencies
-    private final DefaultsConfiguration defaultsConfiguration;
-    private final LimitsConfiguration limitsConfiguration;
-
     // Request scoped parameters
     private final CloseableResourceRegistry closeableResourceRegistry;
     private final ConfigurationCreator configurationCreator;
-    private final ConfigurationParser configurationParser;
     private final NodeLookup nodeLookup;
     private final ProcedureCallContextReturnColumns returnColumns;
     private final MutateNodePropertyService mutateNodePropertyService;
@@ -90,15 +82,11 @@ class AlgorithmFacadeFactory {
     private final WriteRelationshipService writeRelationshipService;
     private final AlgorithmEstimator algorithmEstimator;
     private final AlgorithmRunner algorithmRunner;
-    private final User user;
     private final ModelCatalogService modelCatalogService;
 
     AlgorithmFacadeFactory(
-        DefaultsConfiguration defaultsConfiguration,
-        LimitsConfiguration limitsConfiguration,
         CloseableResourceRegistry closeableResourceRegistry,
         ConfigurationCreator configurationCreator,
-        ConfigurationParser configurationParser,
         NodeLookup nodeLookup,
         ProcedureCallContextReturnColumns returnColumns,
         MutateNodePropertyService mutateNodePropertyService,
@@ -107,18 +95,12 @@ class AlgorithmFacadeFactory {
         WriteRelationshipService writeRelationshipService,
         AlgorithmRunner algorithmRunner,
         AlgorithmEstimator algorithmEstimator,
-        User user,
         ModelCatalogService modelCatalogService
     ) {
-        this.defaultsConfiguration = defaultsConfiguration;
-        this.limitsConfiguration = limitsConfiguration;
-
         this.closeableResourceRegistry = closeableResourceRegistry;
         this.configurationCreator = configurationCreator;
-        this.configurationParser = configurationParser;
         this.nodeLookup = nodeLookup;
         this.returnColumns = returnColumns;
-        this.user = user;
         this.mutateNodePropertyService = mutateNodePropertyService;
         this.writeNodePropertyService = writeNodePropertyService;
         this.mutateRelationshipService = mutateRelationshipService;
@@ -187,7 +169,10 @@ class AlgorithmFacadeFactory {
         );
     }
 
-    SimilarityProcedureFacade createSimilarityProcedureFacade() {
+    SimilarityProcedureFacade createSimilarityProcedureFacade(
+        ApplicationsFacade applicationsFacade,
+        GenericStub genericStub
+    ) {
         // algorithms facade
         var similarityAlgorithmsFacade = new SimilarityAlgorithmsFacade(algorithmRunner);
 
@@ -205,6 +190,12 @@ class AlgorithmFacadeFactory {
         );
 
         // procedure facade
+        var theOtherFacade = org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade.create(
+            applicationsFacade,
+            genericStub,
+            returnColumns
+        );
+
         return new SimilarityProcedureFacade(
             configurationCreator,
             returnColumns,
@@ -212,9 +203,9 @@ class AlgorithmFacadeFactory {
             mutateBusinessFacade,
             statsBusinessFacade,
             streamBusinessFacade,
-            writeBusinessFacade
+            writeBusinessFacade,
+            theOtherFacade
         );
-
     }
 
     MiscAlgorithmsProcedureFacade createMiscellaneousProcedureFacade() {
@@ -248,17 +239,17 @@ class AlgorithmFacadeFactory {
         );
     }
 
-    PathFindingProcedureFacade createPathFindingProcedureFacade(ApplicationsFacade applicationsFacade) {
+    PathFindingProcedureFacade createPathFindingProcedureFacade(
+        ApplicationsFacade applicationsFacade,
+        GenericStub genericStub
+    ) {
         return PathFindingProcedureFacade.create(
-            defaultsConfiguration,
-            limitsConfiguration,
             closeableResourceRegistry,
             configurationCreator,
-            configurationParser,
             nodeLookup,
             returnColumns,
-            user,
-            applicationsFacade
+            applicationsFacade,
+            genericStub
         );
     }
 

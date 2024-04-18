@@ -33,9 +33,9 @@ import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.stream.Stream;
 
-final class SimilarityResultCompanion {
+public final class SimilarityResultCompanion {
 
-    static SimilarityGraphResult computeToGraph(
+    public static SimilarityGraphResult computeToGraph(
         Graph graph,
         long nodeCount,
         int concurrency,

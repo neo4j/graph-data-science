@@ -89,6 +89,9 @@ project(':graph-store-catalog-applications').projectDir = file('applications/gra
 include('path-finding-algorithms')
 project(':path-finding-algorithms').projectDir = file('applications/algorithms/path-finding')
 
+include('similarity-algorithms')
+project(':similarity-algorithms').projectDir = file('applications/algorithms/similarity')
+
 include('applications-facade')
 project(':applications-facade').projectDir = file('applications/facade')
 

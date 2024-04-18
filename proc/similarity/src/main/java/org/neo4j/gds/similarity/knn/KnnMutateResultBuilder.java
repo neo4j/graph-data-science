@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.similarity.knn;
 
-import org.neo4j.gds.procedures.similarity.SimilarityMutateResult;
-import org.neo4j.gds.procedures.similarity.knn.KnnMutateResult;
+import org.neo4j.gds.procedures.algorithms.similarity.SimilarityMutateResult;
+import org.neo4j.gds.procedures.algorithms.similarity.KnnMutateResult;
 import org.neo4j.gds.similarity.SimilarityResultBuilder;
 
 public class KnnMutateResultBuilder extends SimilarityResultBuilder<SimilarityMutateResult> {

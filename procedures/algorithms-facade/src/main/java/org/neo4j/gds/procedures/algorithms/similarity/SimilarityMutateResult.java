@@ -17,11 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.similarity;
+package org.neo4j.gds.procedures.algorithms.similarity;
 
 import java.util.Map;
 
-@SuppressWarnings("unused")
 public class SimilarityMutateResult {
     public final long preProcessingMillis;
     public final long computeMillis;
@@ -53,6 +52,4 @@ public class SimilarityMutateResult {
         this.similarityDistribution = similarityDistribution;
         this.configuration = configuration;
     }
-
-
 }

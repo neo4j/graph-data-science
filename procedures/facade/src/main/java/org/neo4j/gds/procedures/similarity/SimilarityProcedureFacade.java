@@ -26,7 +26,9 @@ import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStreamBusinessFac
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.similarity.knn.KnnMutateResult;
+import org.neo4j.gds.procedures.algorithms.similarity.KnnMutateResult;
+import org.neo4j.gds.procedures.algorithms.similarity.KnnMutateStub;
+import org.neo4j.gds.procedures.algorithms.similarity.SimilarityMutateResult;
 import org.neo4j.gds.procedures.similarity.knn.KnnStatsResult;
 import org.neo4j.gds.procedures.similarity.knn.KnnWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
@@ -39,7 +41,6 @@ import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityMutateConf
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityWriteConfig;
-import org.neo4j.gds.similarity.knn.KnnMutateConfig;
 import org.neo4j.gds.similarity.knn.KnnStatsConfig;
 import org.neo4j.gds.similarity.knn.KnnStreamConfig;
 import org.neo4j.gds.similarity.knn.KnnWriteConfig;
@@ -51,6 +52,10 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteConfig;
 import java.util.Map;
 import java.util.stream.Stream;
 
+/**
+ * @deprecated use {@link org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade} instead
+ */
+@Deprecated
 public class SimilarityProcedureFacade {
     private final ConfigurationCreator configurationCreator;
     private final ProcedureReturnColumns procedureReturnColumns;
@@ -60,6 +65,12 @@ public class SimilarityProcedureFacade {
     private final SimilarityAlgorithmsStreamBusinessFacade streamBusinessFacade;
     private final SimilarityAlgorithmsWriteBusinessFacade writeBusinessFacade;
 
+    /**
+     * @deprecated this sits here temporarily
+     */
+    @Deprecated
+    private final org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade theOtherFacade;
+
     public SimilarityProcedureFacade(
         ConfigurationCreator configurationCreator,
         ProcedureReturnColumns procedureReturnColumns,
@@ -67,7 +78,8 @@ public class SimilarityProcedureFacade {
         SimilarityAlgorithmsMutateBusinessFacade mutateBusinessFacade,
         SimilarityAlgorithmsStatsBusinessFacade statsBusinessFacade,
         SimilarityAlgorithmsStreamBusinessFacade streamBusinessFacade,
-        SimilarityAlgorithmsWriteBusinessFacade writeBusinessFacade
+        SimilarityAlgorithmsWriteBusinessFacade writeBusinessFacade,
+        org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade theOtherFacade
     ) {
         this.configurationCreator = configurationCreator;
         this.procedureReturnColumns = procedureReturnColumns;
@@ -76,6 +88,8 @@ public class SimilarityProcedureFacade {
         this.statsBusinessFacade = statsBusinessFacade;
         this.streamBusinessFacade = streamBusinessFacade;
         this.writeBusinessFacade = writeBusinessFacade;
+
+        this.theOtherFacade = theOtherFacade;
     }
 
     public Stream<SimilarityResult> nodeSimilarityStream(
@@ -307,21 +321,15 @@ public class SimilarityProcedureFacade {
         return Stream.of(KnnComputationResultTransformer.toWriteResult(computationResult, writeConfig));
     }
 
-    public Stream<KnnMutateResult> knnMutate(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var mutateConfig = configurationCreator.createConfiguration(configuration, KnnMutateConfig::of);
-
-        var computationResult = mutateBusinessFacade.knn(
-            graphName,
-            mutateConfig,
-            procedureReturnColumns.contains("similarityDistribution")
-        );
-
-        return Stream.of(KnnComputationResultTransformer.toMutateResult(computationResult, mutateConfig));
+    /**
+     * Bridge while this gets strangled
+     *
+     * @deprecated strangle.
+     */
+    @Deprecated
+    public KnnMutateStub knnMutateStub() {
+        return theOtherFacade.knnMutateStub();
     }
-
 
     public Stream<MemoryEstimateResult> knnStreamEstimate(
         Object graphNameOrConfiguration,
@@ -344,14 +352,6 @@ public class SimilarityProcedureFacade {
         Map<String, Object> algoConfiguration
     ) {
         var config = configurationCreator.createConfiguration(algoConfiguration, KnnWriteConfig::of);
-        return Stream.of(estimateBusinessFacade.knn(graphNameOrConfiguration, config));
-    }
-
-    public Stream<MemoryEstimateResult> knnMutateEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, KnnMutateConfig::of);
         return Stream.of(estimateBusinessFacade.knn(graphNameOrConfiguration, config));
     }
 
@@ -445,5 +445,13 @@ public class SimilarityProcedureFacade {
     ) {
         var config = configurationCreator.createConfiguration(algoConfiguration, FilteredKnnWriteConfig::of);
         return Stream.of(estimateBusinessFacade.filteredKnn(graphNameOrConfiguration, config));
+    }
+
+    /**
+     * @deprecated short term hack while migrating
+     */
+    @Deprecated
+    public org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade theOtherFacade() {
+        return theOtherFacade;
     }
 }

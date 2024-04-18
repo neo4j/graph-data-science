@@ -17,13 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.similarity.knn;
-
-import org.neo4j.gds.procedures.similarity.SimilarityMutateResult;
+package org.neo4j.gds.procedures.algorithms.similarity;
 
 import java.util.Map;
 
-@SuppressWarnings("unused")
 public class KnnMutateResult extends SimilarityMutateResult {
     public final long ranIterations;
     public final long nodePairsConsidered;

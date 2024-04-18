@@ -15,5 +15,6 @@ dependencies {
     implementation project(":metrics-api")
     implementation project(":path-finding-algorithms")
     implementation project(":progress-tracking")
+    implementation project(":similarity-algorithms")
     implementation project(":termination")
 }
