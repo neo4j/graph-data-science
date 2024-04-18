@@ -104,7 +104,7 @@ final class LocalMovePhase {
      * @return The new community count.
      */
     public void run() {
-        var atomicCommunityVolumes = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency.value()));
+        var atomicCommunityVolumes = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency));
         graph.forEachNode(v -> {
             atomicCommunityVolumes.set(v, communityVolumes.get(v));
             return true;

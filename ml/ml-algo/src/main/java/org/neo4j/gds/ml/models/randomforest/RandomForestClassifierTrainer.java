@@ -139,7 +139,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
         ReadOnlyHugeLongArray trainSet
     ) {
         Optional<HugeAtomicLongArray> maybePredictions = metricsHandler.isRequested(OUT_OF_BAG_ERROR)
-            ? Optional.of(HugeAtomicLongArray.of(numberOfClasses * trainSet.size(), ParalleLongPageCreator.passThrough(concurrency.value())))
+            ? Optional.of(HugeAtomicLongArray.of(numberOfClasses * trainSet.size(), ParalleLongPageCreator.passThrough(concurrency)))
             : Optional.empty();
 
         var decisionTreeTrainConfig = DecisionTreeTrainerConfigImpl.builder()

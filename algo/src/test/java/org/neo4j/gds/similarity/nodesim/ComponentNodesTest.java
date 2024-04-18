@@ -105,7 +105,7 @@ class ComponentNodesTest {
         // nodeId -> componentId
         var components = prepare7DistinctSizeComponents();
         // componentId, upperIdx of component
-        var upperBoundPerComponent = HugeAtomicLongArray.of(28, ParalleLongPageCreator.passThrough(4));
+        var upperBoundPerComponent = HugeAtomicLongArray.of(28, ParalleLongPageCreator.passThrough(new Concurrency(4)));
         upperBoundPerComponent.set(0, 2);
         upperBoundPerComponent.set(1, 7);
         upperBoundPerComponent.set(2, 11);
@@ -143,7 +143,7 @@ class ComponentNodesTest {
             }
         };
         // componentId, upperIdx of component
-        var upperBoundPerComponent = HugeAtomicLongArray.of(11, ParalleLongPageCreator.passThrough(4));
+        var upperBoundPerComponent = HugeAtomicLongArray.of(11, ParalleLongPageCreator.passThrough(new Concurrency(4)));
         upperBoundPerComponent.set(3, 3);
         upperBoundPerComponent.set(5, 10);
         upperBoundPerComponent.set(1, 8);
@@ -227,7 +227,7 @@ class ComponentNodesTest {
         nodesSorted.set(6, 4);
         nodesSorted.set(7, 3);
 
-        var upperBoundPerComponent = HugeAtomicLongArray.of(8, ParalleLongPageCreator.passThrough(4));
+        var upperBoundPerComponent = HugeAtomicLongArray.of(8, ParalleLongPageCreator.passThrough(new Concurrency(4)));
         // componentId, upperBound
         upperBoundPerComponent.set(0, 2);
         upperBoundPerComponent.set(1, 7);
@@ -263,7 +263,7 @@ class ComponentNodesTest {
         nodesSorted.setAll(x -> x);
         ShuffleUtil.shuffleArray(nodesSorted, new SplittableRandom(92));
 
-        var upperBoundPerComponent = HugeAtomicLongArray.of(1, ParalleLongPageCreator.passThrough(4));
+        var upperBoundPerComponent = HugeAtomicLongArray.of(1, ParalleLongPageCreator.passThrough(new Concurrency(4)));
         upperBoundPerComponent.set(0, 19);
 
         ComponentNodes componentNodesMock = Mockito.mock(ComponentNodes.class);

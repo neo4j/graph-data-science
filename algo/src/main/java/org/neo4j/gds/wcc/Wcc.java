@@ -96,9 +96,9 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
         var disjointSetStruct = parameters.seedProperty()
             .map(seedProperty -> {
                 var initialComponents = CommunityCompanion.extractSeedingNodePropertyValues(graph, seedProperty);
-                return new HugeAtomicDisjointSetStruct(nodeCount, initialComponents, parameters.concurrency().value());
+                return new HugeAtomicDisjointSetStruct(nodeCount, initialComponents, parameters.concurrency());
             })
-            .orElseGet(() -> new HugeAtomicDisjointSetStruct(nodeCount, parameters.concurrency().value()));
+            .orElseGet(() -> new HugeAtomicDisjointSetStruct(nodeCount, parameters.concurrency()));
 
         if (graph.characteristics().isUndirected() || graph.characteristics().isInverseIndexed()) {
             new SampledStrategyBuilder()

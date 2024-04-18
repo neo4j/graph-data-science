@@ -71,15 +71,15 @@ public final class ParallelDoublePageCreator implements PageCreator.DoublePageCr
         fillPage(page, base);
     }
 
-    public static ParallelDoublePageCreator of(int concurrency, LongToDoubleFunction gen) {
-        return new ParallelDoublePageCreator(new Concurrency(concurrency), gen);
+    public static ParallelDoublePageCreator of(Concurrency concurrency, LongToDoubleFunction gen) {
+        return new ParallelDoublePageCreator(concurrency, gen);
     }
 
-    public static ParallelDoublePageCreator identity(int concurrency) {
-        return new ParallelDoublePageCreator(new Concurrency(concurrency), i -> i);
+    public static ParallelDoublePageCreator identity(Concurrency concurrency) {
+        return new ParallelDoublePageCreator(concurrency, i -> i);
     }
 
-    public static ParallelDoublePageCreator passThrough(int concurrency) {
-        return new ParallelDoublePageCreator(new Concurrency(concurrency), null);
+    public static ParallelDoublePageCreator passThrough(Concurrency concurrency) {
+        return new ParallelDoublePageCreator(concurrency, null);
     }
 }

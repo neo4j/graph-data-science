@@ -180,7 +180,7 @@ public final class BFS extends Algorithm<HugeLongArray> {
         // This is updated in `BFSTask` and is helping to maintain the correct traversal order for the output.
         var minimumChunk = HugeAtomicLongArray.of(
             graph.nodeCount(),
-            ParalleLongPageCreator.of(concurrency.value(), l -> Long.MAX_VALUE)
+            ParalleLongPageCreator.of(concurrency, l -> Long.MAX_VALUE)
         );
 
         visited.set(sourceNodeId);

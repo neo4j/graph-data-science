@@ -67,8 +67,8 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
         this.concurrency = concurrency;
         this.executorService = executorService;
         this.centralityComputer = centralityComputer;
-        this.farness = HugeAtomicIntArray.of(nodeCount, ParallelIntPageCreator.of(concurrency.value()));
-        this.component = HugeAtomicIntArray.of(nodeCount, ParallelIntPageCreator.of(concurrency.value()));
+        this.farness = HugeAtomicIntArray.of(nodeCount, ParallelIntPageCreator.of(concurrency));
+        this.component = HugeAtomicIntArray.of(nodeCount, ParallelIntPageCreator.of(concurrency));
     }
 
     @Override

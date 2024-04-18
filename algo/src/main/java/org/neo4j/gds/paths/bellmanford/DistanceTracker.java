@@ -39,15 +39,15 @@ final class DistanceTracker {
     ) {
         var distances = HugeAtomicDoubleArray.of(
             size,
-            ParallelDoublePageCreator.of(concurrency.value(), index -> DIST_INF)
+            ParallelDoublePageCreator.of(concurrency, index -> DIST_INF)
         );
         var predecessors = HugeAtomicLongArray.of(
             size,
-            ParalleLongPageCreator.of(concurrency.value(), index -> NO_PREDECESSOR)
+            ParalleLongPageCreator.of(concurrency, index -> NO_PREDECESSOR)
         );
         var lengths = HugeAtomicLongArray.of(
             size,
-            ParalleLongPageCreator.of(concurrency.value(), index -> NO_LENGTH)
+            ParalleLongPageCreator.of(concurrency, index -> NO_LENGTH)
         );
 
         return new DistanceTracker(predecessors, distances, lengths, size);

@@ -24,6 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -58,7 +59,7 @@ class IntersectingTriangleCountFilteredGraphTest {
 
     @Inject
     private GraphStore graphStore;
-    
+
 
     @Test
     void testUnionGraphWithNodeFilter() {
@@ -73,7 +74,7 @@ class IntersectingTriangleCountFilteredGraphTest {
 
         var triangleCount = IntersectingTriangleCount.create(
             graph,
-            4,
+            new Concurrency(4),
             Long.MAX_VALUE,
             DefaultPool.INSTANCE,
             ProgressTracker.NULL_TRACKER

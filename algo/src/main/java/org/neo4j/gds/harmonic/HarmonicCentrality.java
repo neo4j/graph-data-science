@@ -52,7 +52,7 @@ public class HarmonicCentrality extends Algorithm<HarmonicResult> {
         this.graph = graph;
         this.concurrency = concurrency;
         this.executorService = executorService;
-        this.inverseFarness = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency.value()));
+        this.inverseFarness = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency));
         this.nodeCount = graph.nodeCount();
     }
 

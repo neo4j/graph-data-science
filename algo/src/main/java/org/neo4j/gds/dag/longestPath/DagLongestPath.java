@@ -74,7 +74,7 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
         this.graph = graph;
         this.nodeCount = graph.nodeCount();
         this.concurrency = concurrency;
-        this.inDegrees = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(this.concurrency.value()));
+        this.inDegrees = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(this.concurrency));
         this.parentsAndDistances = TentativeDistances.distanceAndPredecessors(nodeCount, concurrency, Double.MIN_VALUE, (a, b) -> Double.compare(a, b) < 0);
     }
 

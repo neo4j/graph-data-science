@@ -58,7 +58,7 @@ public final class ModularityComputer {
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
-        var relationshipsOutsideCommunity = HugeAtomicDoubleArray.of(workingGraph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency.value()));
+        var relationshipsOutsideCommunity = HugeAtomicDoubleArray.of(workingGraph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency));
         // using degreePartitioning did not show an improvement -- assuming as tasks are too small
         var tasks = PartitionUtils.rangePartition(
             concurrency.value(),

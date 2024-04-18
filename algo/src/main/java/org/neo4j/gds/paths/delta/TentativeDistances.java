@@ -68,7 +68,7 @@ public interface TentativeDistances {
     ) {
         var distances = HugeAtomicDoubleArray.of(
             size,
-            ParallelDoublePageCreator.of(concurrency.value(), index -> DIST_INF)
+            ParallelDoublePageCreator.of(concurrency, index -> DIST_INF)
         );
         return new DistanceOnly(distances);
     }
@@ -88,12 +88,12 @@ public interface TentativeDistances {
     ) {
         var distances = HugeAtomicDoubleArray.of(
             size,
-            ParallelDoublePageCreator.of(concurrency.value(), index -> distanceDefault)
+            ParallelDoublePageCreator.of(concurrency, index -> distanceDefault)
         );
 
         var predecessors = HugeAtomicLongArray.of(
             size,
-            ParalleLongPageCreator.of(concurrency.value(), index -> NO_PREDECESSOR)
+            ParalleLongPageCreator.of(concurrency, index -> NO_PREDECESSOR)
         );
 
         return new DistanceAndPredecessor(predecessors, distances, distanceComparator);

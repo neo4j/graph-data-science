@@ -27,6 +27,7 @@ import net.jqwik.api.Provide;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -227,7 +228,7 @@ abstract class ShardedLongLongMapTest {
             private final ShardedLongLongMap.Builder inner;
 
             DefaultBuilder(int concurrency) {
-                this.inner = ShardedLongLongMap.builder(concurrency);
+                this.inner = ShardedLongLongMap.builder(new Concurrency(concurrency));
             }
 
             @Override
@@ -265,13 +266,13 @@ abstract class ShardedLongLongMapTest {
 
         @Override
         TestBuilder builder(int concurrency) {
-            return new BatchedBuilder(concurrency);
+            return new BatchedBuilder(new Concurrency(concurrency));
         }
 
         private static final class BatchedBuilder implements TestBuilder {
             private final ShardedLongLongMap.BatchedBuilder inner;
 
-            BatchedBuilder(int concurrency) {
+            BatchedBuilder(Concurrency concurrency) {
                 inner = ShardedLongLongMap.batchedBuilder(concurrency);
             }
 

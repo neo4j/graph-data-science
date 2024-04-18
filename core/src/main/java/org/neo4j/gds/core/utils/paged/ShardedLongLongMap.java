@@ -27,6 +27,7 @@ import org.eclipse.collections.impl.collection.mutable.AbstractMultiReaderMutabl
 import org.eclipse.collections.impl.factory.primitive.LongLongMaps;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.IdMapAllocator;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.utils.CloseableThreadLocal;
@@ -44,15 +45,15 @@ public final class ShardedLongLongMap {
     private final int shardMask;
     private final long maxOriginalId;
 
-    public static Builder builder(int concurrency) {
+    public static Builder builder(Concurrency concurrency) {
         return new Builder(concurrency);
     }
 
-    public static BatchedBuilder batchedBuilder(int concurrency) {
+    public static BatchedBuilder batchedBuilder(Concurrency concurrency) {
         return batchedBuilder(concurrency, false);
     }
 
-    public static BatchedBuilder batchedBuilder(int concurrency, boolean overrideIds) {
+    public static BatchedBuilder batchedBuilder(Concurrency concurrency, boolean overrideIds) {
         return new BatchedBuilder(concurrency, overrideIds);
     }
 
@@ -108,8 +109,8 @@ public final class ShardedLongLongMap {
         return (int) (hash >>> shift);
     }
 
-    private static int numberOfShards(int concurrency) {
-        return BitUtil.nextHighestPowerOfTwo(concurrency * 4);
+    private static int numberOfShards(Concurrency concurrency) {
+        return BitUtil.nextHighestPowerOfTwo(concurrency.value() * 4);
     }
 
     private static <S extends MapShard> ShardedLongLongMap build(
@@ -208,7 +209,7 @@ public final class ShardedLongLongMap {
         private final int shardShift;
         private final int shardMask;
 
-        Builder(int concurrency) {
+        Builder(Concurrency concurrency) {
             this.nodeCount = new AtomicLong();
             int numberOfShards = numberOfShards(concurrency);
             this.shardShift = Long.SIZE - Integer.numberOfTrailingZeros(numberOfShards);
@@ -278,7 +279,7 @@ public final class ShardedLongLongMap {
         private final int shardShift;
         private final int shardMask;
 
-        BatchedBuilder(int concurrency, boolean overrideIds) {
+        BatchedBuilder(Concurrency concurrency, boolean overrideIds) {
             this.nodeCount = new AtomicLong();
             int numberOfShards = numberOfShards(concurrency);
             this.shardShift = Long.SIZE - Integer.numberOfTrailingZeros(numberOfShards);

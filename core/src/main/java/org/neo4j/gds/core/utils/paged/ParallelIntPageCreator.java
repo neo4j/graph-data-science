@@ -59,7 +59,7 @@ public final class ParallelIntPageCreator implements PageCreator.IntPageCreator 
         pages[pageIndex] = page;
     }
 
-    public static ParallelIntPageCreator of(int concurrency) {
-        return new ParallelIntPageCreator(new Concurrency(concurrency));
+    public static ParallelIntPageCreator of(Concurrency concurrency) {
+        return new ParallelIntPageCreator(concurrency);
     }
 }

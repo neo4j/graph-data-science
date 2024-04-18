@@ -24,6 +24,7 @@ import com.carrotsearch.hppc.LongLongScatterMap;
 import com.carrotsearch.hppc.cursors.LongLongCursor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -36,7 +37,7 @@ class HugeAtomicDisjointSetStructTest {
     private DisjointSetStruct struct;
 
     DisjointSetStruct newSet(int capacity) {
-        return new HugeAtomicDisjointSetStruct(capacity, 4);
+        return new HugeAtomicDisjointSetStruct(capacity, new Concurrency(4));
     }
 
     @BeforeEach

@@ -110,7 +110,7 @@ public final class ComponentNodes {
         Concurrency concurrency
     ) {
 
-        var upperBoundPerComponent = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(concurrency.value()));
+        var upperBoundPerComponent = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(concurrency));
 
         // init coordinate array to contain the nr of nodes per component
         // i.e. comp1 containing 3 nodes, comp2 containing 20 nodes: {(comp1, 3), (comp2, 20)}
@@ -149,7 +149,7 @@ public final class ComponentNodes {
         // initialized to its max possible size of 1 node <=> 1 component in a disconnected graph
         long nodeCount = idxUpperBoundPerComponent.size();
         var nodesSortedByComponent = HugeLongArray.newArray(nodeCount);
-        var nodeIdxProviderArray = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(concurrency.value()));
+        var nodeIdxProviderArray = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(concurrency));
         idxUpperBoundPerComponent.copyTo(nodeIdxProviderArray, nodeCount);
 
         // fill nodesSortedByComponent with nodeId per component-sorted, unique index

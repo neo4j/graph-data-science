@@ -21,6 +21,7 @@ package org.neo4j.gds.beta.pregel;
 
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
@@ -39,13 +40,13 @@ public final class PrimitiveSyncDoubleQueues extends PrimitiveDoubleQueues {
     }
 
     public static PrimitiveSyncDoubleQueues of(long nodeCount, int initialQueueCapacity) {
-        var currentTails = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(1));
-        var prevTails = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(1));
+        var currentTails = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(new Concurrency(1)));
+        var prevTails = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(new Concurrency(1)));
 
         var currentQueues = HugeObjectArray.newArray(double[].class, nodeCount);
         var prevQueues = HugeObjectArray.newArray(double[].class, nodeCount);
 
-        var referenceCounts = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(1));
+        var referenceCounts = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(new Concurrency(1)));
 
         var capacity = Math.max(initialQueueCapacity, MIN_CAPACITY);
         currentQueues.setAll(value -> new double[capacity]);

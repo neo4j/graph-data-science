@@ -65,7 +65,7 @@ public class BetweennessCentrality extends Algorithm<BetwennessCentralityResult>
         this.executorService = executorService;
         this.concurrency = concurrency;
         this.nodeCount = graph.nodeCount();
-        this.centrality = HugeAtomicDoubleArray.of(nodeCount, ParallelDoublePageCreator.passThrough(concurrency.value()));
+        this.centrality = HugeAtomicDoubleArray.of(nodeCount, ParallelDoublePageCreator.passThrough(concurrency));
         this.selectionStrategy = selectionStrategy;
         this.selectionStrategy.init(graph, executorService, concurrency);
         this.divisor = graph.schema().isUndirected() ? 2.0 : 1.0;

@@ -68,15 +68,15 @@ public final class ParalleLongPageCreator implements PageCreator.LongPageCreator
         fillPage(page, base);
     }
 
-    public static ParalleLongPageCreator of(int concurrency, LongUnaryOperator gen) {
-        return new ParalleLongPageCreator(new Concurrency(concurrency), gen);
+    public static ParalleLongPageCreator of(Concurrency concurrency, LongUnaryOperator gen) {
+        return new ParalleLongPageCreator(concurrency, gen);
     }
 
-    public static ParalleLongPageCreator identity(int concurrency) {
-        return new ParalleLongPageCreator(new Concurrency(concurrency), i -> i);
+    public static ParalleLongPageCreator identity(Concurrency concurrency) {
+        return new ParalleLongPageCreator(concurrency, i -> i);
     }
 
-    public static ParalleLongPageCreator passThrough(int concurrency) {
-        return new ParalleLongPageCreator(new Concurrency(concurrency), null);
+    public static ParalleLongPageCreator passThrough(Concurrency concurrency) {
+        return new ParalleLongPageCreator(concurrency, null);
     }
 }

@@ -24,6 +24,7 @@ import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.collections.haa.HugeAtomicLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
@@ -47,9 +48,9 @@ public final class PrimitiveAsyncDoubleQueues extends PrimitiveDoubleQueues {
         int initialQueueCapacity
     ) {
         var heads = HugeIntArray.newArray(nodeCount);
-        var tails = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(1));
+        var tails = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(new Concurrency(1)));
         var queues = HugeObjectArray.newArray(double[].class, nodeCount);
-        var referenceCounts = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(1));
+        var referenceCounts = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(new Concurrency(1)));
 
         var capacity = Math.max(initialQueueCapacity, MIN_CAPACITY);
         queues.setAll(value -> {

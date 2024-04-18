@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.PropertyState;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 import org.neo4j.gds.core.utils.paged.ShardedLongLongMap;
@@ -59,7 +60,7 @@ class HighLimitIdMapTest {
 
     @Test
     void shouldHandleUnmappedIds() {
-        var intermediateIdMapBuilder = ShardedLongLongMap.builder(1);
+        var intermediateIdMapBuilder = ShardedLongLongMap.builder(new Concurrency(1));
         intermediateIdMapBuilder.addNode(0);
         var intermediateIdMap = intermediateIdMapBuilder.build(0);
         var internalIdMap = new DirectIdMap(1);

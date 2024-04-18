@@ -38,7 +38,7 @@ class OutOfBagErrorTest {
             1,
             HugeIntArray.of(0),
             new Concurrency(4),
-            HugeAtomicLongArray.of(1, ParalleLongPageCreator.identity(1))
+            HugeAtomicLongArray.of(1, ParalleLongPageCreator.identity(new Concurrency(1)))
         );
 
         assertThat(outOfBagError).isEqualTo(0D);

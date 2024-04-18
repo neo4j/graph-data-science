@@ -25,6 +25,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
 import org.neo4j.gds.core.utils.paged.ParallelDoublePageCreator;
@@ -40,12 +41,12 @@ public final class ModularityCalculator extends Algorithm<ModularityResult> {
     private final Graph graph;
     private final LongUnaryOperator communityIdProvider;
     private final HugeLongLongMap communityMapper;
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     public static ModularityCalculator create(
         Graph graph,
         LongUnaryOperator seedCommunityIdProvider,
-        int concurrency
+        Concurrency concurrency
     ) {
         var communityMapper = createMapping(graph.nodeCount(), seedCommunityIdProvider);
         LongUnaryOperator communityIdProvider = nodeId -> communityMapper.getOrDefault(
@@ -59,7 +60,7 @@ public final class ModularityCalculator extends Algorithm<ModularityResult> {
         Graph graph,
         LongUnaryOperator communityIdProvider,
         HugeLongLongMap communityMapper,
-        int concurrency
+        Concurrency concurrency
     ) {
         super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
@@ -79,7 +80,7 @@ public final class ModularityCalculator extends Algorithm<ModularityResult> {
 
         // using degreePartitioning did not show an improvement -- assuming as tasks are too small
         var tasks = PartitionUtils.rangePartition(
-            concurrency,
+            concurrency.value(),
             nodeCount,
             partition -> new RelationshipCountCollector(
                 partition,
@@ -92,7 +93,7 @@ public final class ModularityCalculator extends Algorithm<ModularityResult> {
         );
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .tasks(tasks)
             .run();
 

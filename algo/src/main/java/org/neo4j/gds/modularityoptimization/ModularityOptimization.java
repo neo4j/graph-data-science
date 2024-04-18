@@ -225,7 +225,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         this.nextCommunities = HugeLongArray.newArray(nodeCount);
         this.cumulativeNodeWeights = HugeDoubleArray.newArray(nodeCount);
 
-        this.communityWeightUpdates = HugeAtomicDoubleArray.of(nodeCount, ParallelDoublePageCreator.passThrough(concurrency.value()));
+        this.communityWeightUpdates = HugeAtomicDoubleArray.of(nodeCount, ParallelDoublePageCreator.passThrough(concurrency));
 
         var initTasks = PartitionUtils.rangePartition(concurrency.value(), nodeCount, (partition) ->
                 new InitTask(
@@ -346,7 +346,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         );
 
         // reset communityWeightUpdates
-        communityWeightUpdates = HugeAtomicDoubleArray.of(nodeCount, ParallelDoublePageCreator.passThrough(concurrency.value()));
+        communityWeightUpdates = HugeAtomicDoubleArray.of(nodeCount, ParallelDoublePageCreator.passThrough(concurrency));
         return nextStartingCoordinate;
     }
 

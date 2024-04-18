@@ -191,7 +191,7 @@ class GraphAggregationPhase {
         long nodeCount = communities.size();
 
         var sortedNodesByCommunity = HugeLongArray.newArray(nodeCount);
-        var communityCoordinateArray = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(concurrency.value()));
+        var communityCoordinateArray = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(concurrency));
 
 
         ParallelUtil.parallelForEachNode(nodeCount, concurrency.value(), TerminationFlag.RUNNING_TRUE, nodeId -> {

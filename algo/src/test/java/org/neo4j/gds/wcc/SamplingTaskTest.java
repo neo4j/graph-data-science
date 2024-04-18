@@ -21,6 +21,7 @@ package org.neo4j.gds.wcc;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.CommunityHelper;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.dss.HugeAtomicDisjointSetStruct;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -50,7 +51,7 @@ class SamplingTaskTest {
 
     @Test
     void shouldOnlySampleTheFirstTwoElements() {
-        var components = new HugeAtomicDisjointSetStruct(graph.nodeCount(), 2);
+        var components = new HugeAtomicDisjointSetStruct(graph.nodeCount(), new Concurrency(2));
         var partition = Partition.of(0, graph.nodeCount());
 
         var task = new SampledStrategy.SamplingTask(

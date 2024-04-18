@@ -62,7 +62,7 @@ interface RandomWalkProbabilities {
             this.positiveSamplingFactor = positiveSamplingFactor;
             this.negativeSamplingExponent = negativeSamplingExponent;
 
-            this.nodeFrequencies = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(concurrency.value()));
+            this.nodeFrequencies = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(concurrency));
             this.sampleCount = new LongAdder();
         }
 

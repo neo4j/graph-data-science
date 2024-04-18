@@ -88,7 +88,7 @@ public class LocalSearch {
         //  double array.
         this.nodeToCommunityWeights = HugeAtomicDoubleArray.of(
             graph.nodeCount() * k,
-            ParallelDoublePageCreator.passThrough(concurrency.value())
+            ParallelDoublePageCreator.passThrough(concurrency)
         );
 
         // Used to keep track of whether we can swap a node into another community or not.

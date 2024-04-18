@@ -179,7 +179,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
     }
 
     private DegreeFunction computeDegreeAtomic(TaskFunctionAtomic taskFunction) {
-        var degrees = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency.value()));
+        var degrees = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency));
         var tasks = PartitionUtils.degreePartition(
             graph,
             concurrency.value(),
