@@ -45,6 +45,11 @@ public interface ResultStore {
     NodePropertyValues getNodePropertyValues(List<String> nodeLabels, String propertyKey);
 
     /**
+     * Removes node property values from this store based on the property key.
+     */
+    void removeNodePropertyValues(List<String> nodeLabels, String propertyKey);
+
+    /**
      * Stores node id information for the given label in this store.
      */
     void addNodeLabel(String nodeLabel, long nodeCount, LongUnaryOperator toOriginalId);
@@ -58,6 +63,11 @@ public interface ResultStore {
      * Retrieves node id information for the given label.
      */
     NodeLabelEntry getNodeIdsByLabel(String nodeLabel);
+
+    /**
+     * Removes node id information for the given label from this store.
+     */
+    void removeNodeLabel(String nodeLabel);
 
     /**
      * Stores a relationship information in this store, held by the given graph.
@@ -85,6 +95,16 @@ public interface ResultStore {
     RelationshipEntry getRelationship(String relationshipType, String propertyKey);
 
     /**
+     * Removes relationship information from this store based on the relationship type.
+     */
+    void removeRelationship(String relationshipType);
+
+    /**
+     * Removes relationship information from this store based on the relationship type and property key.
+     */
+    void removeRelationship(String relationshipType, String propertyKey);
+
+    /**
      * Stores a stream of relationships in this store.
      *
      * @param propertyKeys the property keys for the relationships
@@ -103,6 +123,11 @@ public interface ResultStore {
      * Retrieves a stream of relationships from this store based on the relationship type and property keys.
      */
     RelationshipStreamEntry getRelationshipStream(String relationshipType, List<String> propertyKeys);
+
+    /**
+     * Removes a stream of relationships from this store based on the relationship type and property keys.
+     */
+    void removeRelationshipStream(String relationshipType, List<String> propertyKeys);
 
     /**
      * Checks if this store has a relationship of the given type.

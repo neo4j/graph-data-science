@@ -57,6 +57,11 @@ public class EphemeralResultStore implements ResultStore {
     }
 
     @Override
+    public void removeNodePropertyValues(List<String> nodeLabels, String propertyKey) {
+        this.nodeProperties.remove(new NodeKey(nodeLabels, propertyKey));
+    }
+
+    @Override
     public void addNodeLabel(String nodeLabel, long nodeCount, LongUnaryOperator toOriginalId) {
         this.nodeIdsByLabel.put(nodeLabel, new NodeLabelEntry(nodeCount, toOriginalId));
     }
@@ -69,6 +74,11 @@ public class EphemeralResultStore implements ResultStore {
     @Override
     public NodeLabelEntry getNodeIdsByLabel(String nodeLabel) {
         return this.nodeIdsByLabel.get(nodeLabel);
+    }
+
+    @Override
+    public void removeNodeLabel(String nodeLabel) {
+        this.nodeIdsByLabel.remove(nodeLabel);
     }
 
     @Override
@@ -106,6 +116,11 @@ public class EphemeralResultStore implements ResultStore {
     }
 
     @Override
+    public void removeRelationshipStream(String relationshipType, List<String> propertyKeys) {
+        this.relationshipStreams.remove(new RelationshipKey(relationshipType, propertyKeys));
+    }
+
+    @Override
     public RelationshipEntry getRelationship(String relationshipType) {
         return getRelationship(relationshipType, NO_PROPERTY_KEY);
     }
@@ -113,6 +128,16 @@ public class EphemeralResultStore implements ResultStore {
     @Override
     public RelationshipEntry getRelationship(String relationshipType, String propertyKey) {
         return this.relationships.get(new RelationshipKey(relationshipType, List.of(propertyKey)));
+    }
+
+    @Override
+    public void removeRelationship(String relationshipType) {
+        removeRelationship(relationshipType, NO_PROPERTY_KEY);
+    }
+
+    @Override
+    public void removeRelationship(String relationshipType, String propertyKey) {
+        this.relationships.remove(new RelationshipKey(relationshipType, List.of(propertyKey)));
     }
 
     @Override
