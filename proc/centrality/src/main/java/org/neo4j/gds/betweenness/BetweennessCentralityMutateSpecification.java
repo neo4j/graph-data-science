@@ -73,7 +73,7 @@ public class BetweennessCentralityMutateSpecification implements AlgorithmSpec<B
     ) {
         var builder = new CentralityMutateResult.Builder(
             executionContext.returnColumns(),
-            computationResult.config().concurrency()
+            computationResult.config().typedConcurrency()
         );
 
         computationResult.result()

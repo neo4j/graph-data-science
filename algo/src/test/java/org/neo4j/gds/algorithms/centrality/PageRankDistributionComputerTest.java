@@ -20,6 +20,7 @@
 package org.neo4j.gds.algorithms.centrality;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.pagerank.PageRankConfig;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.scaling.ScalerFactory;
@@ -51,6 +52,7 @@ class PageRankDistributionComputerTest {
     void shouldReturnComputedDistribution() {
         var pageRankConfigMock = mock(PageRankConfig.class);
         when(pageRankConfigMock.scaler()).thenReturn(ScalerFactory.parse("none"));
+        when(pageRankConfigMock.typedConcurrency()).thenReturn(new Concurrency(4));
 
         var pageRankResultMock = mock(PageRankResult.class);
         when(pageRankResultMock.nodeCount()).thenReturn(190L);

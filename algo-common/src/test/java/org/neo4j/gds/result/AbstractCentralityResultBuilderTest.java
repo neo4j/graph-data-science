@@ -21,6 +21,7 @@ package org.neo4j.gds.result;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,7 +36,7 @@ class AbstractCentralityResultBuilderTest {
             }
 
         };
-        AbstractCentralityResultBuilder<Object> builder = new AbstractCentralityResultBuilder<>(procedureReturnColumns, 4) {
+        AbstractCentralityResultBuilder<Object> builder = new AbstractCentralityResultBuilder<>(procedureReturnColumns, new Concurrency(4)) {
             @Override
             protected Object buildResult() {
                 return null;

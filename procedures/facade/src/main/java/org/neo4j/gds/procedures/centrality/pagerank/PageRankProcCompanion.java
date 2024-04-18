@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.centrality.pagerank;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 
 public final class PageRankProcCompanion {
@@ -42,7 +43,7 @@ public final class PageRankProcCompanion {
 
         protected boolean didConverge;
 
-        public PageRankResultBuilder(ProcedureReturnColumns returnColumns, int concurrency) {
+        public PageRankResultBuilder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
             super(returnColumns, concurrency);
         }
 

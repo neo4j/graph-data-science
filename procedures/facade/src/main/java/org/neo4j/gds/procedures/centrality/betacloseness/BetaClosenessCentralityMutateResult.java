@@ -21,6 +21,7 @@ package org.neo4j.gds.procedures.centrality.betacloseness;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.procedures.algorithms.results.StandardMutateResult;
 
@@ -52,7 +53,7 @@ public final class BetaClosenessCentralityMutateResult extends StandardMutateRes
     public static final class Builder extends AbstractCentralityResultBuilder<BetaClosenessCentralityMutateResult> {
         public String mutateProperty;
 
-        public Builder(ProcedureReturnColumns returnColumns, int concurrency) {
+        public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
             super(returnColumns, concurrency);
         }
 

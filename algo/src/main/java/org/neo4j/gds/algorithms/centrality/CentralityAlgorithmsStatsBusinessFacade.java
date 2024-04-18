@@ -269,7 +269,7 @@ public class CentralityAlgorithmsStatsBusinessFacade {
                 algorithmResult.graph().nodeCount(),
                 centralityFunctionSupplier.centralityFunction(result),
                 DefaultPool.INSTANCE,
-                configuration.concurrency(),
+                configuration.typedConcurrency(),
                 shouldComputeCentralityDistribution
             );
 

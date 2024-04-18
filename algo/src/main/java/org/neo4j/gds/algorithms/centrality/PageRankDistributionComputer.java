@@ -55,7 +55,7 @@ final class PageRankDistributionComputer {
                     result.nodeCount(),
                     result.centralityScoreProvider(),
                     DefaultPool.INSTANCE,
-                    configuration.concurrency(),
+                    configuration.typedConcurrency(),
                     true
                 );
 

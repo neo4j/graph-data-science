@@ -34,6 +34,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.config.ArrowConnectionInfo;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankWriteConfig;
 import org.neo4j.gds.scaling.ScalerFactory;
@@ -107,7 +108,7 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
             graphStore
         );
 
-        when(graph.nodeCount()).thenReturn(4l);
+        when(graph.nodeCount()).thenReturn(4L);
 
 
         var nodePropertyServiceMock = mock(WriteNodePropertyService.class);
@@ -165,6 +166,7 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
     void writeWithStatistics() {
 
         var configurationMock = mock(BetweennessCentralityWriteConfig.class);
+        when(configurationMock.typedConcurrency()).thenReturn(new Concurrency(4));
         var graph = mock(Graph.class);
         var graphStore = mock(GraphStore.class);
 
@@ -264,6 +266,7 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
     void pageRankShouldHaveRealDistributionWhenScalerIsNotLog() {
         var pageRankConfigMock = mock(PageRankWriteConfig.class);
         when(pageRankConfigMock.scaler()).thenReturn(ScalerFactory.parse("none"));
+        when(pageRankConfigMock.typedConcurrency()).thenReturn(new Concurrency(4));
 
         var centralityAlgorithmsFacadeMock = mock(CentralityAlgorithmsFacade.class);
         var pageRankResultMock = mock(PageRankResult.class);

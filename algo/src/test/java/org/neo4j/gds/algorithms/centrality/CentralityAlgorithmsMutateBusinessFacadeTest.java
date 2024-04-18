@@ -29,6 +29,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -150,6 +151,7 @@ class CentralityAlgorithmsMutateBusinessFacadeTest {
 
         var configMock = mock(MutateNodePropertyConfig.class);
         when(configMock.mutateProperty()).thenReturn("foo");
+        when(configMock.typedConcurrency()).thenReturn(new Concurrency(4));
 
 
         var result = HugeDoubleArray.of(0.1, 0.2, 0.3, 0.4);

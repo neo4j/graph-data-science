@@ -21,6 +21,7 @@ package org.neo4j.gds.result;
 
 import org.HdrHistogram.DoubleHistogram;
 import org.neo4j.gds.core.ProcedureConstants;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -39,18 +40,18 @@ public final class CentralityStatistics {
         long nodeCount,
         LongToDoubleFunction centralityFunction,
         ExecutorService executorService,
-        int concurrency
+        Concurrency concurrency
     ) {
         DoubleHistogram histogram;
 
-        if (concurrency == 1) {
+        if (concurrency.value() == 1) {
             histogram = new DoubleHistogram(ProcedureConstants.HISTOGRAM_PRECISION_DEFAULT);
             for (long id = 0; id < nodeCount; id++) {
                 histogram.recordValue(centralityFunction.applyAsDouble(id));
             }
         } else {
             var tasks = PartitionUtils.rangePartition(
-                concurrency,
+                concurrency.value(),
                 nodeCount,
                 partition -> new RecordTask(partition, centralityFunction),
                 Optional.empty()
@@ -92,7 +93,7 @@ public final class CentralityStatistics {
         long nodeCount,
         LongToDoubleFunction centralityProvider,
         ExecutorService executorService,
-        int concurrency,
+        Concurrency concurrency,
         boolean shouldCompute
     ) {
         Optional<DoubleHistogram> maybeHistogram = Optional.empty();
