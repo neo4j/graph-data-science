@@ -42,9 +42,6 @@ import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityMutateConf
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityWriteConfig;
-import org.neo4j.gds.similarity.knn.KnnStatsConfig;
-import org.neo4j.gds.similarity.knn.KnnStreamConfig;
-import org.neo4j.gds.similarity.knn.KnnWriteConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfig;
@@ -276,30 +273,6 @@ public class SimilarityProcedureFacade {
     ) {
         var config = configurationCreator.createConfiguration(algoConfiguration, FilteredNodeSimilarityWriteConfig::of);
         return Stream.of(estimateBusinessFacade.nodeSimilarity(graphNameOrConfiguration, config));
-    }
-
-    public Stream<MemoryEstimateResult> knnStreamEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, KnnStreamConfig::of);
-        return Stream.of(estimateBusinessFacade.knn(graphNameOrConfiguration, config));
-    }
-
-    public Stream<MemoryEstimateResult> knnStatsEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, KnnStatsConfig::of);
-        return Stream.of(estimateBusinessFacade.knn(graphNameOrConfiguration, config));
-    }
-
-    public Stream<MemoryEstimateResult> knnWriteEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, KnnWriteConfig::of);
-        return Stream.of(estimateBusinessFacade.knn(graphNameOrConfiguration, config));
     }
 
     public Stream<SimilarityResult> filteredKnnStream(

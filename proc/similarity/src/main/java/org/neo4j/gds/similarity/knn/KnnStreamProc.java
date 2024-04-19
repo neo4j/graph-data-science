@@ -53,6 +53,6 @@ public class KnnStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.similarity().knnStreamEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.similarity().theOtherFacade().knnStreamEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

@@ -20,10 +20,10 @@
 package org.neo4j.gds.applications;
 
 import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
-import org.neo4j.gds.applications.algorithms.pathfinding.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.graphstorecatalog.CatalogBusinessFacade;
 import org.neo4j.gds.applications.graphstorecatalog.DefaultCatalogBusinessFacade;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -87,6 +87,7 @@ public final class ApplicationsFacade {
 
         var similarityApplications = SimilarityApplications.create(
             log,
+            algorithmEstimationTemplate,
             algorithmProcessingTemplate,
             progressTrackerCreator,
             writeRelationshipService

@@ -19,12 +19,30 @@
  */
 package org.neo4j.gds.applications.algorithms.similarity;
 
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.similarity.knn.KnnBaseConfig;
 import org.neo4j.gds.similarity.knn.KnnMemoryEstimateDefinition;
 
 public class SimilarityAlgorithmsEstimationModeBusinessFacade {
+    private final AlgorithmEstimationTemplate algorithmEstimationTemplate;
+
+    public SimilarityAlgorithmsEstimationModeBusinessFacade(AlgorithmEstimationTemplate algorithmEstimationTemplate) {
+        this.algorithmEstimationTemplate = algorithmEstimationTemplate;
+    }
+
     public MemoryEstimation knn(KnnBaseConfig knnMutateConfig) {
         return new KnnMemoryEstimateDefinition(knnMutateConfig.toMemoryEstimationParameters()).memoryEstimation();
+    }
+
+    public MemoryEstimateResult knn(KnnBaseConfig configuration, Object graphNameOrConfiguration) {
+        var memoryEstimation = knn(configuration);
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
     }
 }

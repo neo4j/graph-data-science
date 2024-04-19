@@ -38,6 +38,7 @@ import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.modelcatalogservices.ModelCatalogServiceProvider;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
+import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.runners.StatsModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.runners.WriteModeAlgorithmRunner;
@@ -115,6 +116,7 @@ class AlgorithmFacadeFactoryProvider {
             requestScopedDependencies
         );
 
+        var estimationModeRunner = new EstimationModeRunner(configurationCreator);
         var closeableResourceRegistry = new TransactionCloseableResourceRegistry(kernelTransaction);
         var streamModeAlgorithmRunner = new StreamModeAlgorithmRunner(closeableResourceRegistry, configurationCreator);
         var statsModeAlgorithmRunner = new StatsModeAlgorithmRunner(configurationCreator);
@@ -134,6 +136,7 @@ class AlgorithmFacadeFactoryProvider {
             modelCatalogServiceProvider.createService(graphDatabaseService, log),
             applicationsFacade,
             genericStub,
+            estimationModeRunner,
             streamModeAlgorithmRunner,
             statsModeAlgorithmRunner,
             writeModeAlgorithmRunner

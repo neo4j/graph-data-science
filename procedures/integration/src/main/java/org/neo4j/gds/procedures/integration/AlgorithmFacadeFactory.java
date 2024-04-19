@@ -62,6 +62,7 @@ import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.modelcatalogservices.ModelCatalogService;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.runners.StatsModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.runners.WriteModeAlgorithmRunner;
@@ -86,6 +87,7 @@ class AlgorithmFacadeFactory {
     private final ModelCatalogService modelCatalogService;
     private final ApplicationsFacade applicationsFacade;
     private final GenericStub genericStub;
+    private final EstimationModeRunner estimationModeRunner;
     private final StreamModeAlgorithmRunner streamModeAlgorithmRunner;
     private final StatsModeAlgorithmRunner statsModeAlgorithmRunner;
     private final WriteModeAlgorithmRunner writeModeAlgorithmRunner;
@@ -103,6 +105,7 @@ class AlgorithmFacadeFactory {
         ModelCatalogService modelCatalogService,
         ApplicationsFacade applicationsFacade,
         GenericStub genericStub,
+        EstimationModeRunner estimationModeRunner,
         StreamModeAlgorithmRunner streamModeAlgorithmRunner,
         StatsModeAlgorithmRunner statsModeAlgorithmRunner,
         WriteModeAlgorithmRunner writeModeAlgorithmRunner
@@ -119,6 +122,7 @@ class AlgorithmFacadeFactory {
         this.modelCatalogService = modelCatalogService;
         this.applicationsFacade = applicationsFacade;
         this.genericStub = genericStub;
+        this.estimationModeRunner = estimationModeRunner;
         this.streamModeAlgorithmRunner = streamModeAlgorithmRunner;
         this.statsModeAlgorithmRunner = statsModeAlgorithmRunner;
         this.writeModeAlgorithmRunner = writeModeAlgorithmRunner;
@@ -205,6 +209,7 @@ class AlgorithmFacadeFactory {
             applicationsFacade,
             genericStub,
             returnColumns,
+            estimationModeRunner,
             streamModeAlgorithmRunner,
             statsModeAlgorithmRunner,
             writeModeAlgorithmRunner
@@ -260,6 +265,7 @@ class AlgorithmFacadeFactory {
             returnColumns,
             applicationsFacade,
             genericStub,
+            estimationModeRunner,
             streamModeAlgorithmRunner,
             statsModeAlgorithmRunner,
             writeModeAlgorithmRunner

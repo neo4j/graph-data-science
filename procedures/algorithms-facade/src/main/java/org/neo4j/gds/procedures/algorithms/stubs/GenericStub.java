@@ -21,7 +21,7 @@ package org.neo4j.gds.procedures.algorithms.stubs;
 
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.configuration.DefaultsConfiguration;
@@ -44,7 +44,7 @@ public class GenericStub {
     private final ConfigurationCreator configurationCreator;
     private final ConfigurationParser configurationParser;
     private final User user;
-    private final ApplicationsFacade applicationsFacade;
+    private final AlgorithmEstimationTemplate algorithmEstimationTemplate;
 
     public GenericStub(
         DefaultsConfiguration defaultsConfiguration,
@@ -52,14 +52,14 @@ public class GenericStub {
         ConfigurationCreator configurationCreator,
         ConfigurationParser configurationParser,
         User user,
-        ApplicationsFacade applicationsFacade
+        AlgorithmEstimationTemplate algorithmEstimationTemplate
     ) {
         this.defaultsConfiguration = defaultsConfiguration;
         this.limitsConfiguration = limitsConfiguration;
         this.configurationCreator = configurationCreator;
         this.configurationParser = configurationParser;
         this.user = user;
-        this.applicationsFacade = applicationsFacade;
+        this.algorithmEstimationTemplate = algorithmEstimationTemplate;
     }
 
     /**
@@ -127,7 +127,7 @@ public class GenericStub {
 
         var configuration = parseConfiguration(parser, rawConfiguration);
 
-        var memoryEstimateResult = applicationsFacade.pathFinding().estimate().runEstimation(
+        var memoryEstimateResult = algorithmEstimationTemplate.estimate(
             configuration,
             graphName,
             memoryEstimation

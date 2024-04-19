@@ -53,6 +53,6 @@ public final class KnnStatsProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.similarity().knnStatsEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.similarity().theOtherFacade().knnStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

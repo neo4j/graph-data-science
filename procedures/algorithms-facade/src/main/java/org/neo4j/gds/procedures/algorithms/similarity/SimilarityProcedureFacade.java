@@ -21,9 +21,12 @@ package org.neo4j.gds.procedures.algorithms.similarity;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsWriteModeBusinessFacade;
+import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.runners.StatsModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.runners.WriteModeAlgorithmRunner;
@@ -40,6 +43,7 @@ public final class SimilarityProcedureFacade {
     private final ProcedureReturnColumns procedureReturnColumns;
     private final KnnMutateStub knnMutateStub;
     private final ApplicationsFacade applicationsFacade;
+    private final EstimationModeRunner estimationModeRunner;
     private final StreamModeAlgorithmRunner streamModeAlgorithmRunner;
     private final StatsModeAlgorithmRunner statsModeAlgorithmRunner;
     private final WriteModeAlgorithmRunner writeModeAlgorithmRunner;
@@ -48,6 +52,7 @@ public final class SimilarityProcedureFacade {
         ProcedureReturnColumns procedureReturnColumns,
         KnnMutateStub knnMutateStub,
         ApplicationsFacade applicationsFacade,
+        EstimationModeRunner estimationModeRunner,
         StreamModeAlgorithmRunner streamModeAlgorithmRunner,
         StatsModeAlgorithmRunner statsModeAlgorithmRunner,
         WriteModeAlgorithmRunner writeModeAlgorithmRunner
@@ -55,6 +60,7 @@ public final class SimilarityProcedureFacade {
         this.procedureReturnColumns = procedureReturnColumns;
         this.knnMutateStub = knnMutateStub;
         this.applicationsFacade = applicationsFacade;
+        this.estimationModeRunner = estimationModeRunner;
         this.streamModeAlgorithmRunner = streamModeAlgorithmRunner;
         this.statsModeAlgorithmRunner = statsModeAlgorithmRunner;
         this.writeModeAlgorithmRunner = writeModeAlgorithmRunner;
@@ -64,6 +70,7 @@ public final class SimilarityProcedureFacade {
         ApplicationsFacade applicationsFacade,
         GenericStub genericStub,
         ProcedureReturnColumns procedureReturnColumns,
+        EstimationModeRunner estimationModeRunner,
         StreamModeAlgorithmRunner streamModeAlgorithmRunner,
         StatsModeAlgorithmRunner statsModeAlgorithmRunner,
         WriteModeAlgorithmRunner writeModeAlgorithmRunner
@@ -74,6 +81,7 @@ public final class SimilarityProcedureFacade {
             procedureReturnColumns,
             knnMutateStub,
             applicationsFacade,
+            estimationModeRunner,
             streamModeAlgorithmRunner,
             statsModeAlgorithmRunner,
             writeModeAlgorithmRunner
@@ -100,6 +108,22 @@ public final class SimilarityProcedureFacade {
         );
     }
 
+    public Stream<MemoryEstimateResult> knnStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationModeRunner.runEstimation(
+            algorithmConfiguration,
+            KnnStatsConfig::of,
+            configuration -> estimationMode().knn(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
     public Stream<SimilarityResult> knnStream(
         String graphName,
         Map<String, Object> configuration
@@ -113,6 +137,22 @@ public final class SimilarityProcedureFacade {
             resultBuilder,
             streamMode()::knn
         );
+    }
+
+    public Stream<MemoryEstimateResult> knnStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationModeRunner.runEstimation(
+            algorithmConfiguration,
+            KnnStreamConfig::of,
+            configuration -> estimationMode().knn(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
     }
 
     public Stream<KnnWriteResult> knnWrite(
@@ -135,6 +175,26 @@ public final class SimilarityProcedureFacade {
             ),
             resultBuilder
         );
+    }
+
+    public Stream<MemoryEstimateResult> knnWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationModeRunner.runEstimation(
+            algorithmConfiguration,
+            KnnWriteConfig::of,
+            configuration -> estimationMode().knn(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
+    private SimilarityAlgorithmsEstimationModeBusinessFacade estimationMode() {
+        return applicationsFacade.similarity().estimate();
     }
 
     private SimilarityAlgorithmsStatsModeBusinessFacade statsMode() {

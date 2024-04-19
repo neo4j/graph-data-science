@@ -17,10 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.pathfinding;
+package org.neo4j.gds.applications.algorithms.machinery;
 
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
-import org.neo4j.gds.applications.algorithms.machinery.GraphDimensionsComputer;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
@@ -33,7 +31,6 @@ import org.neo4j.gds.memest.DatabaseGraphStoreEstimationService;
 import org.neo4j.gds.memest.FictitiousGraphStoreEstimationService;
 import org.neo4j.gds.memest.GraphMemoryEstimation;
 import org.neo4j.gds.memest.MemoryEstimationGraphConfigParser;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 
 import java.util.Map;
 
@@ -63,7 +60,7 @@ public class AlgorithmEstimationTemplate {
         this.requestScopedDependencies = requestScopedDependencies;
     }
 
-    <CONFIGURATION extends AlgoBaseConfig> MemoryEstimateResult estimate(
+    public <CONFIGURATION extends AlgoBaseConfig> MemoryEstimateResult estimate(
         CONFIGURATION configuration,
         Object graphNameOrConfiguration,
         MemoryEstimation memoryEstimation
