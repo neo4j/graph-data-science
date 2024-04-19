@@ -51,6 +51,7 @@ allprojects {
             jvmArgs += '--add-opens=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED'
             jvmArgs += '--add-opens=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED'
             jvmArgs += '--add-opens=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED'
+            jvmArgs += '-Djol.magicFieldOffset=true'
 
             // enable this to check for unintended use of boxed primitive iterators
             // note that this flag might cause OOMs on CI
