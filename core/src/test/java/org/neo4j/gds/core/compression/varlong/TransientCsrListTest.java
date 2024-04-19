@@ -272,43 +272,6 @@ class TransientCsrListTest {
 
     @ParameterizedTest
     @MethodSource("org.neo4j.gds.core.TestMethodRunner#adjacencyCompressions")
-    void shallowCopy(TestMethodRunner runner) {
-        runner.run(() -> {
-            withAdjacencyCursor(new long[]{0, 1, 2, 3, 4}, sourceCursor -> {
-                assertThat(sourceCursor.nextVLong()).isEqualTo(0);
-                withAdjacencyCursor(1, targetCursor -> {
-                    targetCursor = sourceCursor.shallowCopy(targetCursor);
-                    assertThat(targetCursor.nextVLong()).isEqualTo(1);
-                    assertThat(targetCursor.nextVLong()).isEqualTo(2);
-                    assertThat(targetCursor.nextVLong()).isEqualTo(3);
-                    assertThat(targetCursor.nextVLong()).isEqualTo(4);
-                    assertFalse(targetCursor.hasNextVLong());
-                });
-            });
-        });
-    }
-
-    @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.TestMethodRunner#adjacencyCompressions")
-    void shallowCopyAcrossBlocks(TestMethodRunner runner) {
-        runner.run(() -> {
-
-            withAdjacencyCursor(3 * CHUNK_SIZE, sourceCursor -> {
-                assertThat(sourceCursor.advanceBy(2 * CHUNK_SIZE + 1)).isEqualTo(2 * CHUNK_SIZE + 1);
-
-                withAdjacencyCursor(1, targetCursor -> {
-                    targetCursor = sourceCursor.shallowCopy(targetCursor);
-                    assertThat(targetCursor.nextVLong()).isEqualTo(2 * CHUNK_SIZE + 2);
-                    assertThat(targetCursor.nextVLong()).isEqualTo(2 * CHUNK_SIZE + 3);
-                    assertThat(targetCursor.nextVLong()).isEqualTo(2 * CHUNK_SIZE + 4);
-                    assertThat(targetCursor.nextVLong()).isEqualTo(2 * CHUNK_SIZE + 5);
-                });
-            });
-        });
-    }
-
-    @ParameterizedTest
-    @MethodSource("org.neo4j.gds.core.TestMethodRunner#adjacencyCompressions")
     void memoryInfo(TestMethodRunner runner) {
         runner.run(() -> {
             withAdjacencyList(3 * CHUNK_SIZE, adjacencyList -> {

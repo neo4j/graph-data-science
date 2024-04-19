@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.core.compression.packed;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.AdjacencyCursor;
 import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
@@ -117,14 +115,4 @@ public final class InlinedHeadPackedTailCursor implements AdjacencyCursor {
         return this.decompressingReader.advanceBy(n);
     }
 
-    @Override
-    public @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination) {
-        var dest = destination instanceof InlinedHeadPackedTailCursor
-            ? (InlinedHeadPackedTailCursor) destination
-            : new InlinedHeadPackedTailCursor(this.pages);
-        dest.decompressingReader.copyFrom(this.decompressingReader);
-        dest.currentPosition = this.currentPosition;
-        dest.maxTargets = this.maxTargets;
-        return dest;
-    }
 }

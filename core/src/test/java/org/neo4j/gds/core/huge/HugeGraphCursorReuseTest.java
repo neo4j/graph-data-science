@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.huge;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.AdjacencyCursor;
@@ -155,9 +154,5 @@ class HugeGraphCursorReuseTest {
             return NOT_FOUND;
         }
 
-        @Override
-        public @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination) {
-            return new TestAdjacencyCursor();
-        }
     }
 }

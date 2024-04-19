@@ -19,8 +19,6 @@
  */
 package org.neo4j.gds.core.huge;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.AdjacencyCursor;
 
 import java.util.Arrays;
@@ -141,19 +139,6 @@ public class CompositeAdjacencyCursor implements AdjacencyCursor {
             }
         }
         return NOT_FOUND;
-    }
-
-    @Override
-    public @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination) {
-        var destCursors = destination instanceof CompositeAdjacencyCursor
-            ? ((CompositeAdjacencyCursor) destination).cursors
-            : emptyList(cursors.size());
-
-        var destIter = destCursors.listIterator();
-        for (AdjacencyCursor cursor : cursors) {
-            destIter.set(cursor.shallowCopy(destIter.next()));
-        }
-        return new CompositeAdjacencyCursor(destCursors);
     }
 
     private List<AdjacencyCursor> emptyList(int size) {

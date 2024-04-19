@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.compression.uncompressed;
 
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.RelationshipType;
@@ -247,21 +246,6 @@ public final class UncompressedAdjacencyList implements AdjacencyList, Adjacency
         @Override
         public long peekVLong() {
             return currentPage[offset];
-        }
-
-        @Override
-        public @NotNull AdjacencyCursor shallowCopy(@Nullable AdjacencyCursor destination) {
-            var dest = destination instanceof Cursor
-                ? (Cursor) destination
-                : new Cursor(pages);
-
-            dest.currentPage = currentPage;
-
-            dest.degree = degree;
-            dest.limit = limit;
-            dest.offset = offset;
-
-            return dest;
         }
 
         @Override
