@@ -22,15 +22,23 @@ package org.neo4j.gds.api;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.extension.FakeClockExtension;
+import org.neo4j.gds.extension.Inject;
+import org.neo4j.time.FakeClock;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
+@FakeClockExtension
 class EphemeralResultStoreTest {
+
+    @Inject
+    FakeClock clock;
 
     @Test
     void shouldStoreNodeProperty() {
@@ -67,6 +75,22 @@ class EphemeralResultStoreTest {
     }
 
     @Test
+    void shouldEvictNodePropertyEntryAfter10Minutes() throws InterruptedException {
+        var resultStore = new EphemeralResultStore();
+
+        var propertyValues = mock(NodePropertyValues.class);
+        resultStore.addNodePropertyValues(List.of("A"), "prop", propertyValues);
+
+        assertThat(resultStore.getNodePropertyValues(List.of("A"), "prop")).isNotNull();
+
+        clock.forward(11, TimeUnit.MINUTES);
+        // make some room for the cache eviction thread to trigger a cleanup
+        Thread.sleep(100);
+
+        assertThat(resultStore.getNodePropertyValues(List.of("A"), "prop")).isNull();
+    }
+
+    @Test
     void shouldStoreNodeLabel() {
         var resultStore = new EphemeralResultStore();
 
@@ -92,6 +116,23 @@ class EphemeralResultStoreTest {
         assertThat(resultStore.hasNodeLabel("Label")).isTrue();
 
         resultStore.removeNodeLabel("Label");
+
+        assertThat(resultStore.hasNodeLabel("Label")).isFalse();
+    }
+
+    @Test
+    void shouldEvictNodeLabelEntryAfter10Minutes() throws InterruptedException {
+        var resultStore = new EphemeralResultStore();
+
+        var nodeCount = 1337L;
+        var toOriginalId = mock(LongUnaryOperator.class);
+        resultStore.addNodeLabel("Label", nodeCount, toOriginalId);
+
+        assertThat(resultStore.hasNodeLabel("Label")).isTrue();
+
+        clock.forward(11, TimeUnit.MINUTES);
+        // make some room for the cache eviction thread to trigger a cleanup
+        Thread.sleep(100);
 
         assertThat(resultStore.hasNodeLabel("Label")).isFalse();
     }
@@ -129,6 +170,24 @@ class EphemeralResultStoreTest {
     }
 
     @Test
+    void shouldEvictGraphBasedRelationshipsWithoutPropertyAfter10Minutes() throws InterruptedException {
+        var resultStore = new EphemeralResultStore();
+
+        var graph = mock(Graph.class);
+        var toOriginalId = mock(LongUnaryOperator.class);
+
+        resultStore.addRelationship("Type", graph, toOriginalId);
+
+        assertThat(resultStore.hasRelationship("Type")).isTrue();
+
+        clock.forward(11, TimeUnit.MINUTES);
+        // make some room for the cache eviction thread to trigger a cleanup
+        Thread.sleep(100);
+
+        assertThat(resultStore.hasRelationship("Type")).isFalse();
+    }
+
+    @Test
     void shouldStoreGraphBasedRelationshipsWithProperty() {
         var resultStore = new EphemeralResultStore();
 
@@ -156,6 +215,25 @@ class EphemeralResultStoreTest {
         assertThat(resultStore.hasRelationship("Type", List.of("prop"))).isTrue();
 
         resultStore.removeRelationship("Type", "prop");
+
+        assertThat(resultStore.hasRelationship("Type", List.of("prop"))).isFalse();
+    }
+
+    @Test
+    void shouldEvictGraphBasedRelationshipsWithPropertyAfter10Minutes() throws InterruptedException {
+        var resultStore = new EphemeralResultStore();
+
+        var graph = mock(Graph.class);
+        var toOriginalId = mock(LongUnaryOperator.class);
+
+        resultStore.addRelationship("Type", "prop", graph, toOriginalId);
+
+        assertThat(resultStore.hasRelationship("Type", List.of("prop"))).isTrue();
+
+
+        clock.forward(11, TimeUnit.MINUTES);
+        // make some room for the cache eviction thread to trigger a cleanup
+        Thread.sleep(100);
 
         assertThat(resultStore.hasRelationship("Type", List.of("prop"))).isFalse();
     }
@@ -189,6 +267,24 @@ class EphemeralResultStoreTest {
         assertThat(resultStore.hasRelationshipStream("Type", List.of("foo"))).isTrue();
 
         resultStore.removeRelationshipStream("Type", List.of("foo"));
+
+        assertThat(resultStore.hasRelationshipStream("Type", List.of("foo"))).isFalse();
+    }
+
+    @Test
+    void shouldEvictStreamBasedRelationshipsAfter10Minutes() throws InterruptedException {
+        var resultStore = new EphemeralResultStore();
+
+        var relationshipStream = mock(Stream.class);
+        var toOriginalId = mock(LongUnaryOperator.class);
+
+        resultStore.addRelationshipStream("Type", List.of("foo"), List.of(ValueType.DOUBLE), relationshipStream, toOriginalId);
+
+        assertThat(resultStore.hasRelationshipStream("Type", List.of("foo"))).isTrue();
+
+        clock.forward(11, TimeUnit.MINUTES);
+        // make some room for the cache eviction thread to trigger a cleanup
+        Thread.sleep(100);
 
         assertThat(resultStore.hasRelationshipStream("Type", List.of("foo"))).isFalse();
     }

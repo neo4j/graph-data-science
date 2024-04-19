@@ -19,13 +19,19 @@
  */
 package org.neo4j.gds.api;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.Scheduler;
+import com.github.benmanes.caffeine.cache.Ticker;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
+import org.neo4j.gds.core.utils.ClockService;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Stream;
 
@@ -34,16 +40,17 @@ public class EphemeralResultStore implements ResultStore {
     private static final String NO_PROPERTY_KEY = "";
     private static final List<String> NO_PROPERTIES_LIST = List.of(NO_PROPERTY_KEY);
 
-    private final Map<NodeKey, NodePropertyValues> nodeProperties;
-    private final Map<String, NodeLabelEntry> nodeIdsByLabel;
-    private final Map<RelationshipKey, RelationshipEntry> relationships;
-    private final Map<RelationshipKey, RelationshipStreamEntry> relationshipStreams;
+    private final Cache<NodeKey, NodePropertyValues> nodeProperties;
+    private final Cache<String, NodeLabelEntry> nodeIdsByLabel;
+    private final Cache<RelationshipKey, RelationshipEntry> relationships;
+    private final Cache<RelationshipKey, RelationshipStreamEntry> relationshipStreams;
 
     public EphemeralResultStore() {
-        this.nodeProperties = new HashMap<>();
-        this.nodeIdsByLabel = new HashMap<>();
-        this.relationships = new HashMap<>();
-        this.relationshipStreams = new HashMap<>();
+        var singleThreadScheduler = ExecutorServiceUtil.createSingleThreadScheduler("GDS-ResultStore");
+        this.nodeProperties = createCache(singleThreadScheduler);
+        this.nodeIdsByLabel = createCache(singleThreadScheduler);
+        this.relationships = createCache(singleThreadScheduler);
+        this.relationshipStreams = createCache(singleThreadScheduler);
     }
 
     @Override
@@ -53,12 +60,12 @@ public class EphemeralResultStore implements ResultStore {
 
     @Override
     public NodePropertyValues getNodePropertyValues(List<String> nodeLabels, String propertyKey) {
-        return this.nodeProperties.get(new NodeKey(nodeLabels, propertyKey));
+        return this.nodeProperties.getIfPresent(new NodeKey(nodeLabels, propertyKey));
     }
 
     @Override
     public void removeNodePropertyValues(List<String> nodeLabels, String propertyKey) {
-        this.nodeProperties.remove(new NodeKey(nodeLabels, propertyKey));
+        this.nodeProperties.invalidate(new NodeKey(nodeLabels, propertyKey));
     }
 
     @Override
@@ -68,17 +75,17 @@ public class EphemeralResultStore implements ResultStore {
 
     @Override
     public boolean hasNodeLabel(String nodeLabel) {
-        return this.nodeIdsByLabel.containsKey(nodeLabel);
+        return this.nodeIdsByLabel.getIfPresent(nodeLabel) != null;
     }
 
     @Override
     public NodeLabelEntry getNodeIdsByLabel(String nodeLabel) {
-        return this.nodeIdsByLabel.get(nodeLabel);
+        return this.nodeIdsByLabel.getIfPresent(nodeLabel);
     }
 
     @Override
     public void removeNodeLabel(String nodeLabel) {
-        this.nodeIdsByLabel.remove(nodeLabel);
+        this.nodeIdsByLabel.invalidate(nodeLabel);
     }
 
     @Override
@@ -112,12 +119,12 @@ public class EphemeralResultStore implements ResultStore {
 
     @Override
     public RelationshipStreamEntry getRelationshipStream(String relationshipType, List<String> propertyKeys) {
-        return this.relationshipStreams.get(new RelationshipKey(relationshipType, propertyKeys));
+        return this.relationshipStreams.getIfPresent(new RelationshipKey(relationshipType, propertyKeys));
     }
 
     @Override
     public void removeRelationshipStream(String relationshipType, List<String> propertyKeys) {
-        this.relationshipStreams.remove(new RelationshipKey(relationshipType, propertyKeys));
+        this.relationshipStreams.invalidate(new RelationshipKey(relationshipType, propertyKeys));
     }
 
     @Override
@@ -127,7 +134,7 @@ public class EphemeralResultStore implements ResultStore {
 
     @Override
     public RelationshipEntry getRelationship(String relationshipType, String propertyKey) {
-        return this.relationships.get(new RelationshipKey(relationshipType, List.of(propertyKey)));
+        return this.relationships.getIfPresent(new RelationshipKey(relationshipType, List.of(propertyKey)));
     }
 
     @Override
@@ -137,7 +144,7 @@ public class EphemeralResultStore implements ResultStore {
 
     @Override
     public void removeRelationship(String relationshipType, String propertyKey) {
-        this.relationships.remove(new RelationshipKey(relationshipType, List.of(propertyKey)));
+        this.relationships.invalidate(new RelationshipKey(relationshipType, List.of(propertyKey)));
     }
 
     @Override
@@ -147,12 +154,28 @@ public class EphemeralResultStore implements ResultStore {
 
     @Override
     public boolean hasRelationship(String relationshipType, List<String> propertyKeys) {
-        return this.relationships.containsKey(new RelationshipKey(relationshipType, propertyKeys));
+        return this.relationships.getIfPresent(new RelationshipKey(relationshipType, propertyKeys)) != null;
     }
 
     @Override
     public boolean hasRelationshipStream(String relationshipType, List<String> propertyKeys) {
-        return this.relationshipStreams.containsKey(new RelationshipKey(relationshipType, propertyKeys));
+        return this.relationshipStreams.getIfPresent(new RelationshipKey(relationshipType, propertyKeys)) != null;
+    }
+
+    private static <K, V> Cache<K, V> createCache(ScheduledExecutorService singleThreadScheduler) {
+        return Caffeine.newBuilder()
+            .expireAfterAccess(10, TimeUnit.MINUTES)
+            .ticker(new ClockServiceWrappingTicker())
+            .executor(singleThreadScheduler)
+            .scheduler(Scheduler.forScheduledExecutorService(singleThreadScheduler))
+            .build();
+    }
+
+    private static class ClockServiceWrappingTicker implements Ticker {
+        @Override
+        public long read() {
+            return ClockService.clock().millis() * 1000000;
+        }
     }
 
     private record NodeKey(List<String> nodeLabels, String propertyKey) {}
