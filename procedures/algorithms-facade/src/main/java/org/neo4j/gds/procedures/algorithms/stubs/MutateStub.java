@@ -20,7 +20,7 @@
 package org.neo4j.gds.procedures.algorithms.stubs;
 
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 
 import java.util.Map;
 import java.util.stream.Stream;

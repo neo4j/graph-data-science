@@ -31,7 +31,7 @@ import org.neo4j.gds.embeddings.hashgnn.HashGNNMemoryEstimateDefinition;
 import org.neo4j.gds.embeddings.node2vec.Node2VecBaseConfig;
 import org.neo4j.gds.embeddings.node2vec.Node2VecMemoryEstimateDefinition;
 import org.neo4j.gds.modelcatalogservices.ModelCatalogService;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 
 import java.util.Optional;
 

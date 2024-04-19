@@ -73,7 +73,7 @@ class ProcedureGeneratorTest {
             "    mode = org.neo4j.procedure.Mode.READ" + NL +
             ")" + NL +
             "@org.neo4j.procedure.Description(org.neo4j.gds.BaseProc.ESTIMATE_DESCRIPTION)" + NL +
-            "public java.util.stream.Stream<org.neo4j.gds.results.MemoryEstimateResult> estimate(" + NL +
+            "public java.util.stream.Stream<org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult> estimate(" + NL +
             "    @org.neo4j.procedure.Name(\"graphNameOrConfiguration\") java.lang.Object graphNameOrConfiguration," + NL +
             "    @org.neo4j.procedure.Name(\"algoConfiguration\") java.util.Map<java.lang.String, java.lang.Object> algoConfiguration) {" + NL +
             "  var specification = new gds.test.BarMutateSpecification();" + NL +
@@ -160,7 +160,7 @@ class ProcedureGeneratorTest {
             "    deprecatedBy = \"gds.bar.mutate.estimate\"" + NL +
             ")" + NL +
             "@org.neo4j.procedure.Description(org.neo4j.gds.BaseProc.ESTIMATE_DESCRIPTION)" + NL +
-            "public java.util.stream.Stream<org.neo4j.gds.results.MemoryEstimateResult> estimate(" + NL +
+            "public java.util.stream.Stream<org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult> estimate(" + NL +
             "    @org.neo4j.procedure.Name(\"graphNameOrConfiguration\") java.lang.Object graphNameOrConfiguration," + NL +
             "    @org.neo4j.procedure.Name(\"algoConfiguration\") java.util.Map<java.lang.String, java.lang.Object> algoConfiguration) {" + NL +
             "  executionContext().metricsFacade().deprecatedProcedures().called(\"gds.alpha.bar.mutate.estimate\");" + NL +

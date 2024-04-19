@@ -37,7 +37,7 @@ import org.neo4j.gds.paths.traverse.DfsBaseConfig;
 import org.neo4j.gds.paths.traverse.DfsMemoryEstimateDefinition;
 import org.neo4j.gds.paths.yens.YensMemoryEstimateDefinition;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensBaseConfig;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.spanningtree.SpanningTreeBaseConfig;
 import org.neo4j.gds.spanningtree.SpanningTreeMemoryEstimateDefinition;
 import org.neo4j.gds.steiner.SteinerTreeBaseConfig;
