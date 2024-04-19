@@ -226,7 +226,7 @@ public class Knn extends Algorithm<KnnResult> {
         var allNewNeighbors = HugeObjectArray.newArray(LongArrayList.class, nodeCount);
 
         progressTracker.beginSubTask();
-        ParallelUtil.readParallel(concurrency.value(), nodeCount, executorService, splitOldAndNewNeighborsFactory.create(
+        ParallelUtil.readParallel(concurrency, nodeCount, executorService, splitOldAndNewNeighborsFactory.create(
             neighbors,
             allOldNeighbors,
             allNewNeighbors

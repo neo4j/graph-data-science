@@ -86,7 +86,7 @@ final class ArrayIdMapBuilderOps {
             highestNodeId + 1
         );
         ParallelUtil.readParallel(
-            concurrency.value(),
+            concurrency,
             nodeCount,
             DefaultPool.INSTANCE,
             (start, end) -> addNodes(graphIds, idMapBuilder, start, end)

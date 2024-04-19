@@ -231,20 +231,20 @@ public final class ParallelUtil {
     }
 
     public static void readParallel(
-        final int concurrency,
+        final Concurrency concurrency,
         final long size,
         final ExecutorService executor,
         final BiLongConsumer task
     ) {
 
-        long batchSize = threadCount(concurrency, size);
-        if (!canRunInParallel(executor) || concurrency == 1) {
+        long batchSize = threadCount(concurrency.value(), size);
+        if (!canRunInParallel(executor) || concurrency.value() == 1) {
             for (long start = 0L; start < size; start += batchSize) {
                 long end = Math.min(size, start + batchSize);
                 task.apply(start, end);
             }
         } else {
-            Collection<Runnable> threads = new ArrayList<>(concurrency);
+            Collection<Runnable> threads = new ArrayList<>(concurrency.value());
             for (long start = 0L; start < size; start += batchSize) {
                 long end = Math.min(size, start + batchSize);
                 final long finalStart = start;
