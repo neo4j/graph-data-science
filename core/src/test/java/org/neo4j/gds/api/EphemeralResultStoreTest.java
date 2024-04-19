@@ -27,7 +27,6 @@ import org.neo4j.gds.extension.Inject;
 import org.neo4j.time.FakeClock;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Stream;
 
@@ -83,7 +82,7 @@ class EphemeralResultStoreTest {
 
         assertThat(resultStore.getNodePropertyValues(List.of("A"), "prop")).isNotNull();
 
-        clock.forward(11, TimeUnit.MINUTES);
+        clock.forward(EphemeralResultStore.CACHE_EVICTION_DURATION.plusMinutes(1));
         // make some room for the cache eviction thread to trigger a cleanup
         Thread.sleep(100);
 
@@ -130,7 +129,7 @@ class EphemeralResultStoreTest {
 
         assertThat(resultStore.hasNodeLabel("Label")).isTrue();
 
-        clock.forward(11, TimeUnit.MINUTES);
+        clock.forward(EphemeralResultStore.CACHE_EVICTION_DURATION.plusMinutes(1));
         // make some room for the cache eviction thread to trigger a cleanup
         Thread.sleep(100);
 
@@ -180,7 +179,7 @@ class EphemeralResultStoreTest {
 
         assertThat(resultStore.hasRelationship("Type")).isTrue();
 
-        clock.forward(11, TimeUnit.MINUTES);
+        clock.forward(EphemeralResultStore.CACHE_EVICTION_DURATION.plusMinutes(1));
         // make some room for the cache eviction thread to trigger a cleanup
         Thread.sleep(100);
 
@@ -231,7 +230,7 @@ class EphemeralResultStoreTest {
         assertThat(resultStore.hasRelationship("Type", List.of("prop"))).isTrue();
 
 
-        clock.forward(11, TimeUnit.MINUTES);
+        clock.forward(EphemeralResultStore.CACHE_EVICTION_DURATION.plusMinutes(1));
         // make some room for the cache eviction thread to trigger a cleanup
         Thread.sleep(100);
 
@@ -282,7 +281,7 @@ class EphemeralResultStoreTest {
 
         assertThat(resultStore.hasRelationshipStream("Type", List.of("foo"))).isTrue();
 
-        clock.forward(11, TimeUnit.MINUTES);
+        clock.forward(EphemeralResultStore.CACHE_EVICTION_DURATION.plusMinutes(1));
         // make some room for the cache eviction thread to trigger a cleanup
         Thread.sleep(100);
 

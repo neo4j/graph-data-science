@@ -28,10 +28,11 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
 import org.neo4j.gds.core.utils.ClockService;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Stream;
 
@@ -39,6 +40,7 @@ public class EphemeralResultStore implements ResultStore {
 
     private static final String NO_PROPERTY_KEY = "";
     private static final List<String> NO_PROPERTIES_LIST = List.of(NO_PROPERTY_KEY);
+    static final Duration CACHE_EVICTION_DURATION = Duration.of(10, ChronoUnit.MINUTES);
 
     private final Cache<NodeKey, NodePropertyValues> nodeProperties;
     private final Cache<String, NodeLabelEntry> nodeIdsByLabel;
@@ -164,7 +166,7 @@ public class EphemeralResultStore implements ResultStore {
 
     private static <K, V> Cache<K, V> createCache(ScheduledExecutorService singleThreadScheduler) {
         return Caffeine.newBuilder()
-            .expireAfterAccess(10, TimeUnit.MINUTES)
+            .expireAfterAccess(CACHE_EVICTION_DURATION)
             .ticker(new ClockServiceWrappingTicker())
             .executor(singleThreadScheduler)
             .scheduler(Scheduler.forScheduledExecutorService(singleThreadScheduler))
