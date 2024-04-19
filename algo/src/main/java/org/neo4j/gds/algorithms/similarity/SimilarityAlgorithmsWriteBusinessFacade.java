@@ -32,7 +32,6 @@ import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnWriteConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityWriteConfig;
-import org.neo4j.gds.similarity.knn.KnnWriteConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteConfig;
 
 import java.util.Optional;
@@ -41,7 +40,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static org.neo4j.gds.algorithms.similarity.SimilarityResultCompanion.FILTERED_KNN_SPECIFIC_FIELDS_SUPPLIER;
-import static org.neo4j.gds.algorithms.similarity.SimilarityResultCompanion.KNN_SPECIFIC_FIELDS_SUPPLIER;
 import static org.neo4j.gds.algorithms.similarity.SimilarityResultCompanion.NODE_SIMILARITY_SPECIFIC_FIELDS_SUPPLIER;
 
 public class SimilarityAlgorithmsWriteBusinessFacade {
@@ -108,39 +106,6 @@ public class SimilarityAlgorithmsWriteBusinessFacade {
             configuration.writeRelationshipType(),
             configuration.arrowConnectionInfo()
         );
-    }
-
-
-    public RelationshipWriteResult knn(
-        String graphName,
-        KnnWriteConfig configuration,
-        boolean computeSimilarityDistribution
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> similarityAlgorithmsFacade.knn(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        return write(
-            algorithmResult,
-            configuration,
-            result -> SimilarityResultCompanion.computeToGraph(
-                algorithmResult.graph(),
-                algorithmResult.graph().nodeCount(),
-                configuration.concurrency(),
-                result.streamSimilarityResult()
-            ),
-            KNN_SPECIFIC_FIELDS_SUPPLIER,
-            intermediateResult.computeMilliseconds,
-            () -> KnnSpecificFields.EMPTY,
-            computeSimilarityDistribution,
-            "KnnWrite",
-            configuration.writeProperty(),
-            configuration.writeRelationshipType(),
-            configuration.arrowConnectionInfo()
-        );
-
     }
 
     public RelationshipWriteResult filteredKnn(

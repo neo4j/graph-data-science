@@ -17,26 +17,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms.similarity;
+package org.neo4j.gds.similarity.knn;
 
-public final class WriteRelationshipResult {
+final class Constants {
+    static final String KNN_DESCRIPTION =
+        "The k-nearest neighbor graph algorithm constructs relationships between nodes if the distance " +
+            "between two nodes is among the k nearest distances compared to other nodes." +
+            "KNN computes distances based on the similarity of node properties";
 
-    private final long relationshipsWritten;
-    private final long writeMilliseconds;
-
-    WriteRelationshipResult(
-        long relationshipsWritten,
-        long writeMilliseconds
-    ) {
-        this.relationshipsWritten = relationshipsWritten;
-        this.writeMilliseconds = writeMilliseconds;
-    }
-
-    public long relationshipsWritten() {
-        return relationshipsWritten;
-    }
-
-    long writeMilliseconds() {
-        return writeMilliseconds;
-    }
+    private Constants() {}
 }

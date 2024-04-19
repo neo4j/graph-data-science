@@ -26,7 +26,7 @@ import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.algorithms.similarity.specificfields.KnnSpecificFields;
 import org.neo4j.gds.procedures.algorithms.similarity.KnnMutateResult;
 import org.neo4j.gds.procedures.algorithms.similarity.KnnStatsResult;
-import org.neo4j.gds.procedures.similarity.knn.KnnWriteResult;
+import org.neo4j.gds.procedures.algorithms.similarity.KnnWriteResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnMutateConfig;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;

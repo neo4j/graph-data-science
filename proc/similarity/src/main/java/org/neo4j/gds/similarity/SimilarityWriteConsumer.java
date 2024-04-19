@@ -32,7 +32,7 @@ import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.executor.ComputationResult;
 import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
-import org.neo4j.gds.procedures.similarity.SimilarityWriteResult;
+import org.neo4j.gds.procedures.algorithms.similarity.SimilarityWriteResult;
 
 import java.util.Optional;
 import java.util.function.Function;

@@ -20,6 +20,7 @@
 package org.neo4j.gds.procedures.integration;
 
 import org.neo4j.function.ThrowingFunction;
+import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.DefaultAlgorithmProcessingTemplate;
@@ -173,6 +174,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
 
         var algorithmProcessingTemplate = buildAlgorithmProcessingTemplate(requestScopedDependencies);
 
+        var writeRelationshipService = new WriteRelationshipService(log, requestScopedDependencies);
         var applicationsFacade = ApplicationsFacade.create(
             log,
             catalogBusinessFacadeDecorator,
@@ -180,7 +182,8 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             projectionMetricsService,
             algorithmEstimationTemplate,
             algorithmProcessingTemplate,
-            requestScopedDependencies
+            requestScopedDependencies,
+            writeRelationshipService
         );
 
         var catalogProcedureFacade = catalogFacadeProvider.createCatalogProcedureFacade(applicationsFacade, context);
@@ -207,7 +210,8 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             graphDatabaseService,
             databaseGraphStoreEstimationService,
             applicationsFacade,
-            genericStub
+            genericStub,
+            writeRelationshipService
         );
         var centralityProcedureFacade = algorithmFacadeFactory.createCentralityProcedureFacade();
         var communityProcedureFacade = algorithmFacadeFactory.createCommunityProcedureFacade();

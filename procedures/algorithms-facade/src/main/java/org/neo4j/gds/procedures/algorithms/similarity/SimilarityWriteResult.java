@@ -17,45 +17,39 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.similarity.knn;
-
-import org.neo4j.gds.procedures.similarity.SimilarityWriteResult;
+package org.neo4j.gds.procedures.algorithms.similarity;
 
 import java.util.Map;
 
-@SuppressWarnings("unused")
-public class KnnWriteResult extends SimilarityWriteResult {
-    public final long ranIterations;
-    public final boolean didConverge;
-    public final long nodePairsConsidered;
+public class SimilarityWriteResult {
+    public final long preProcessingMillis;
+    public final long computeMillis;
+    public final long writeMillis;
+    public final long postProcessingMillis;
 
-    public KnnWriteResult(
+    public final long nodesCompared;
+    public final long relationshipsWritten;
+
+    public final Map<String, Object> similarityDistribution;
+    public final Map<String, Object> configuration;
+
+    public SimilarityWriteResult(
         long preProcessingMillis,
         long computeMillis,
         long writeMillis,
         long postProcessingMillis,
         long nodesCompared,
         long relationshipsWritten,
-        boolean didConverge,
-        long ranIterations,
-        long nodePairsCompared,
         Map<String, Object> similarityDistribution,
         Map<String, Object> configuration
     ) {
-        super(
-            preProcessingMillis,
-            computeMillis,
-            writeMillis,
-            postProcessingMillis,
-            nodesCompared,
-            relationshipsWritten,
-            similarityDistribution,
-            configuration
-        );
-
-        this.nodePairsConsidered = nodePairsCompared;
-        this.ranIterations = ranIterations;
-        this.didConverge = didConverge;
+        this.preProcessingMillis = preProcessingMillis;
+        this.computeMillis = computeMillis;
+        this.writeMillis = writeMillis;
+        this.postProcessingMillis = postProcessingMillis;
+        this.nodesCompared = nodesCompared;
+        this.relationshipsWritten = relationshipsWritten;
+        this.similarityDistribution = similarityDistribution;
+        this.configuration = configuration;
     }
-
 }

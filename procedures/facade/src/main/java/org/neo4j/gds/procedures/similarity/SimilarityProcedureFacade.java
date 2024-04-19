@@ -27,11 +27,11 @@ import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsWriteBusinessFaca
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.similarity.KnnMutateResult;
-import org.neo4j.gds.procedures.algorithms.similarity.KnnMutateStub;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityMutateResult;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityStatsResult;
 import org.neo4j.gds.procedures.algorithms.similarity.KnnStatsResult;
-import org.neo4j.gds.procedures.similarity.knn.KnnWriteResult;
+import org.neo4j.gds.procedures.algorithms.similarity.KnnWriteResult;
+import org.neo4j.gds.procedures.algorithms.similarity.SimilarityWriteResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnMutateConfig;
@@ -276,31 +276,6 @@ public class SimilarityProcedureFacade {
     ) {
         var config = configurationCreator.createConfiguration(algoConfiguration, FilteredNodeSimilarityWriteConfig::of);
         return Stream.of(estimateBusinessFacade.nodeSimilarity(graphNameOrConfiguration, config));
-    }
-
-    public Stream<KnnWriteResult> knnWrite(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var writeConfig = configurationCreator.createConfiguration(configuration, KnnWriteConfig::of);
-
-        var computationResult = writeBusinessFacade.knn(
-            graphName,
-            writeConfig,
-            procedureReturnColumns.contains("similarityDistribution")
-        );
-
-        return Stream.of(KnnComputationResultTransformer.toWriteResult(computationResult, writeConfig));
-    }
-
-    /**
-     * Bridge while this gets strangled
-     *
-     * @deprecated strangle.
-     */
-    @Deprecated
-    public KnnMutateStub knnMutateStub() {
-        return theOtherFacade.knnMutateStub();
     }
 
     public Stream<MemoryEstimateResult> knnStreamEstimate(

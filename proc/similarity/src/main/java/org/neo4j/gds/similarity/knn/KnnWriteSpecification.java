@@ -25,12 +25,12 @@ import org.neo4j.gds.executor.ComputationResultConsumer;
 import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
-import org.neo4j.gds.procedures.similarity.knn.KnnWriteResult;
+import org.neo4j.gds.procedures.algorithms.similarity.KnnWriteResult;
 
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_RELATIONSHIP;
-import static org.neo4j.gds.similarity.knn.KnnProc.KNN_DESCRIPTION;
+import static org.neo4j.gds.similarity.knn.Constants.KNN_DESCRIPTION;
 
 @GdsCallable(name = "gds.knn.write", description = KNN_DESCRIPTION, executionMode = WRITE_RELATIONSHIP)
 public class KnnWriteSpecification implements AlgorithmSpec<Knn, KnnResult, KnnWriteConfig, Stream<KnnWriteResult>, KnnFactory<KnnWriteConfig>> {

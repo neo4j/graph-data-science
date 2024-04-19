@@ -21,7 +21,6 @@ package org.neo4j.gds.procedures.algorithms.pathfinding;
 
 import org.neo4j.gds.allshortestpaths.AllShortestPathsConfig;
 import org.neo4j.gds.allshortestpaths.AllShortestPathsStreamResult;
-import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
@@ -71,6 +70,7 @@ import org.neo4j.gds.procedures.algorithms.results.StandardStatsResult;
 import org.neo4j.gds.procedures.algorithms.results.StandardWriteRelationshipsResult;
 import org.neo4j.gds.procedures.algorithms.runners.StatsModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
+import org.neo4j.gds.procedures.algorithms.runners.WriteModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.results.MemoryEstimateResult;
 import org.neo4j.gds.spanningtree.SpanningTreeStatsConfig;
@@ -117,6 +117,7 @@ public final class PathFindingProcedureFacade {
     // infrastructure
     private final StreamModeAlgorithmRunner streamModeAlgorithmRunner;
     private final StatsModeAlgorithmRunner statsModeAlgorithmRunner;
+    private final WriteModeAlgorithmRunner writeModeAlgorithmRunner;
 
     private PathFindingProcedureFacade(
         ConfigurationCreator configurationCreator,
@@ -134,7 +135,8 @@ public final class PathFindingProcedureFacade {
         SpanningTreeMutateStub spanningTreeMutateStub,
         SteinerTreeMutateStub steinerTreeMutateStub,
         StreamModeAlgorithmRunner streamModeAlgorithmRunner,
-        StatsModeAlgorithmRunner statsModeAlgorithmRunner
+        StatsModeAlgorithmRunner statsModeAlgorithmRunner,
+        WriteModeAlgorithmRunner writeModeAlgorithmRunner
     ) {
         this.configurationCreator = configurationCreator;
         this.nodeLookup = nodeLookup;
@@ -155,6 +157,7 @@ public final class PathFindingProcedureFacade {
 
         this.streamModeAlgorithmRunner = streamModeAlgorithmRunner;
         this.statsModeAlgorithmRunner = statsModeAlgorithmRunner;
+        this.writeModeAlgorithmRunner = writeModeAlgorithmRunner;
     }
 
     /**
@@ -167,7 +170,8 @@ public final class PathFindingProcedureFacade {
         ApplicationsFacade applicationsFacade,
         GenericStub genericStub,
         StreamModeAlgorithmRunner streamModeAlgorithmRunner,
-        StatsModeAlgorithmRunner statsModeAlgorithmRunner
+        StatsModeAlgorithmRunner statsModeAlgorithmRunner,
+        WriteModeAlgorithmRunner writeModeAlgorithmRunner
     ) {
         var aStarStub = new SinglePairShortestPathAStarMutateStub(
             genericStub,
@@ -235,7 +239,8 @@ public final class PathFindingProcedureFacade {
             spanningTreeMutateStub,
             steinerTreeMutateStub,
             streamModeAlgorithmRunner,
-            statsModeAlgorithmRunner
+            statsModeAlgorithmRunner,
+            writeModeAlgorithmRunner
         );
     }
 
@@ -323,7 +328,7 @@ public final class PathFindingProcedureFacade {
         var resultBuilder = new BellmanFordResultBuilderForWriteMode();
 
         return Stream.of(
-            runWriteAlgorithm(
+            writeModeAlgorithmRunner.runWriteModeAlgorithm(
                 graphName,
                 configuration,
                 BellmanFordWriteConfig::of,
@@ -538,7 +543,7 @@ public final class PathFindingProcedureFacade {
         var resultBuilder = new KSpanningTreeResultBuilderForWriteMode();
 
         return Stream.of(
-            runWriteAlgorithm(
+            writeModeAlgorithmRunner.runWriteModeAlgorithm(
                 graphName,
                 configuration,
                 KSpanningTreeWriteConfig::of,
@@ -937,7 +942,7 @@ public final class PathFindingProcedureFacade {
         var resultBuilder = new SpanningTreeResultBuilderForWriteMode();
 
         return Stream.of(
-            runWriteAlgorithm(
+            writeModeAlgorithmRunner.runWriteModeAlgorithm(
                 graphName,
                 configuration,
                 SpanningTreeWriteConfig::of,
@@ -1027,7 +1032,7 @@ public final class PathFindingProcedureFacade {
         var resultBuilder = new SteinerTreeResultBuilderForWriteMode();
 
         return Stream.of(
-            runWriteAlgorithm(
+            writeModeAlgorithmRunner.runWriteModeAlgorithm(
                 graphName,
                 configuration,
                 SteinerTreeWriteConfig::of,
@@ -1118,26 +1123,13 @@ public final class PathFindingProcedureFacade {
     ) {
         var resultBuilder = new PathFindingResultBuilderForWriteMode<CONFIGURATION>();
 
-        return runWriteAlgorithm(
+        return writeModeAlgorithmRunner.runWriteModeAlgorithm(
             graphNameAsString,
             rawConfiguration,
             configurationSupplier,
             algorithm,
             resultBuilder
         );
-    }
-
-    private <CONFIGURATION extends AlgoBaseConfig, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> RESULT_TO_CALLER runWriteAlgorithm(
-        String graphNameAsString,
-        Map<String, Object> rawConfiguration,
-        Function<CypherMapWrapper, CONFIGURATION> configurationSupplier,
-        AlgorithmHandle<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> algorithm,
-        ResultBuilder<CONFIGURATION, RESULT_FROM_ALGORITHM, RESULT_TO_CALLER, MUTATE_OR_WRITE_METADATA> resultBuilder
-    ) {
-        var graphName = GraphName.parse(graphNameAsString);
-        var configuration = configurationCreator.createConfiguration(rawConfiguration, configurationSupplier);
-
-        return algorithm.compute(graphName, configuration, resultBuilder);
     }
 
     private PathFindingAlgorithmsEstimationModeBusinessFacade estimationMode() {

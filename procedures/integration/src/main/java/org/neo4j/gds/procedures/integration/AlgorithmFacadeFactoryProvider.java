@@ -40,6 +40,7 @@ import org.neo4j.gds.modelcatalogservices.ModelCatalogServiceProvider;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.runners.StatsModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
+import org.neo4j.gds.procedures.algorithms.runners.WriteModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.graphdb.GraphDatabaseService;
 import org.neo4j.kernel.api.KernelTransaction;
@@ -81,7 +82,8 @@ class AlgorithmFacadeFactoryProvider {
         GraphDatabaseService graphDatabaseService,
         DatabaseGraphStoreEstimationService databaseGraphStoreEstimationService,
         ApplicationsFacade applicationsFacade,
-        GenericStub genericStub
+        GenericStub genericStub,
+        WriteRelationshipService writeRelationshipService
     ) {
         /*
          * GDS services derived from Procedure Context.
@@ -97,7 +99,6 @@ class AlgorithmFacadeFactoryProvider {
 
         // Second layer
         var writeNodePropertyService = new WriteNodePropertyService(log, requestScopedDependencies);
-        var writeRelationshipService = new WriteRelationshipService(log, requestScopedDependencies);
 
         // Third layer
         var algorithmEstimator = new AlgorithmEstimator(
@@ -113,9 +114,11 @@ class AlgorithmFacadeFactoryProvider {
             algorithmMemoryValidationService,
             requestScopedDependencies
         );
+
         var closeableResourceRegistry = new TransactionCloseableResourceRegistry(kernelTransaction);
         var streamModeAlgorithmRunner = new StreamModeAlgorithmRunner(closeableResourceRegistry, configurationCreator);
         var statsModeAlgorithmRunner = new StatsModeAlgorithmRunner(configurationCreator);
+        var writeModeAlgorithmRunner = new WriteModeAlgorithmRunner(configurationCreator);
 
         // procedure facade
         return new AlgorithmFacadeFactory(
@@ -132,7 +135,8 @@ class AlgorithmFacadeFactoryProvider {
             applicationsFacade,
             genericStub,
             streamModeAlgorithmRunner,
-            statsModeAlgorithmRunner
+            statsModeAlgorithmRunner,
+            writeModeAlgorithmRunner
         );
     }
 }

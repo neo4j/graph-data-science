@@ -27,7 +27,6 @@ import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
-import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -51,17 +50,6 @@ public final class SimilarityResultCompanion {
 
         return new SimilarityGraphResult(similarityGraph, nodeCount, false);
     }
-
-    static SpecificFieldsWithSimilarityStatisticsSupplier<KnnResult, KnnSpecificFields> KNN_SPECIFIC_FIELDS_SUPPLIER = (result, similarityDistribution) -> {
-        return new KnnSpecificFields(
-            result.nodesCompared(),
-            result.nodePairsConsidered(),
-            result.didConverge(),
-            result.ranIterations(),
-            result.totalSimilarityPairs(),
-            similarityDistribution
-        );
-    };
 
     static SpecificFieldsWithSimilarityStatisticsSupplier<FilteredKnnResult, KnnSpecificFields> FILTERED_KNN_SPECIFIC_FIELDS_SUPPLIER = (result, similarityDistribution) -> {
         return new KnnSpecificFields(

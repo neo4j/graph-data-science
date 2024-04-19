@@ -64,6 +64,7 @@ import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.runners.StatsModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
+import org.neo4j.gds.procedures.algorithms.runners.WriteModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
@@ -87,6 +88,7 @@ class AlgorithmFacadeFactory {
     private final GenericStub genericStub;
     private final StreamModeAlgorithmRunner streamModeAlgorithmRunner;
     private final StatsModeAlgorithmRunner statsModeAlgorithmRunner;
+    private final WriteModeAlgorithmRunner writeModeAlgorithmRunner;
 
     AlgorithmFacadeFactory(
         ConfigurationCreator configurationCreator,
@@ -102,7 +104,8 @@ class AlgorithmFacadeFactory {
         ApplicationsFacade applicationsFacade,
         GenericStub genericStub,
         StreamModeAlgorithmRunner streamModeAlgorithmRunner,
-        StatsModeAlgorithmRunner statsModeAlgorithmRunner
+        StatsModeAlgorithmRunner statsModeAlgorithmRunner,
+        WriteModeAlgorithmRunner writeModeAlgorithmRunner
     ) {
         this.configurationCreator = configurationCreator;
         this.nodeLookup = nodeLookup;
@@ -118,6 +121,7 @@ class AlgorithmFacadeFactory {
         this.genericStub = genericStub;
         this.streamModeAlgorithmRunner = streamModeAlgorithmRunner;
         this.statsModeAlgorithmRunner = statsModeAlgorithmRunner;
+        this.writeModeAlgorithmRunner = writeModeAlgorithmRunner;
     }
 
     CentralityProcedureFacade createCentralityProcedureFacade() {
@@ -202,7 +206,8 @@ class AlgorithmFacadeFactory {
             genericStub,
             returnColumns,
             streamModeAlgorithmRunner,
-            statsModeAlgorithmRunner
+            statsModeAlgorithmRunner,
+            writeModeAlgorithmRunner
         );
 
         return new SimilarityProcedureFacade(
@@ -256,7 +261,8 @@ class AlgorithmFacadeFactory {
             applicationsFacade,
             genericStub,
             streamModeAlgorithmRunner,
-            statsModeAlgorithmRunner
+            statsModeAlgorithmRunner,
+            writeModeAlgorithmRunner
         );
     }
 

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications;
 
+import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -64,7 +65,8 @@ public final class ApplicationsFacade {
         ProjectionMetricsService projectionMetricsService,
         AlgorithmEstimationTemplate algorithmEstimationTemplate,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
-        RequestScopedDependencies requestScopedDependencies
+        RequestScopedDependencies requestScopedDependencies,
+        WriteRelationshipService writeRelationshipService
     ) {
         var catalogBusinessFacade = createCatalogBusinessFacade(
             log,
@@ -86,7 +88,8 @@ public final class ApplicationsFacade {
         var similarityApplications = SimilarityApplications.create(
             log,
             algorithmProcessingTemplate,
-            progressTrackerCreator
+            progressTrackerCreator,
+            writeRelationshipService
         );
 
         return new ApplicationsFacadeBuilder()

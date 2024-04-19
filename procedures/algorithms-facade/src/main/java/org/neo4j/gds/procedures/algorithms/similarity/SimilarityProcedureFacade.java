@@ -23,12 +23,15 @@ import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsStreamModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.procedures.algorithms.runners.StatsModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
+import org.neo4j.gds.procedures.algorithms.runners.WriteModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.knn.KnnStatsConfig;
 import org.neo4j.gds.similarity.knn.KnnStreamConfig;
+import org.neo4j.gds.similarity.knn.KnnWriteConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -39,19 +42,22 @@ public final class SimilarityProcedureFacade {
     private final ApplicationsFacade applicationsFacade;
     private final StreamModeAlgorithmRunner streamModeAlgorithmRunner;
     private final StatsModeAlgorithmRunner statsModeAlgorithmRunner;
+    private final WriteModeAlgorithmRunner writeModeAlgorithmRunner;
 
     private SimilarityProcedureFacade(
         ProcedureReturnColumns procedureReturnColumns,
         KnnMutateStub knnMutateStub,
         ApplicationsFacade applicationsFacade,
         StreamModeAlgorithmRunner streamModeAlgorithmRunner,
-        StatsModeAlgorithmRunner statsModeAlgorithmRunner
+        StatsModeAlgorithmRunner statsModeAlgorithmRunner,
+        WriteModeAlgorithmRunner writeModeAlgorithmRunner
     ) {
         this.procedureReturnColumns = procedureReturnColumns;
         this.knnMutateStub = knnMutateStub;
         this.applicationsFacade = applicationsFacade;
         this.streamModeAlgorithmRunner = streamModeAlgorithmRunner;
         this.statsModeAlgorithmRunner = statsModeAlgorithmRunner;
+        this.writeModeAlgorithmRunner = writeModeAlgorithmRunner;
     }
 
     public static SimilarityProcedureFacade create(
@@ -59,7 +65,8 @@ public final class SimilarityProcedureFacade {
         GenericStub genericStub,
         ProcedureReturnColumns procedureReturnColumns,
         StreamModeAlgorithmRunner streamModeAlgorithmRunner,
-        StatsModeAlgorithmRunner statsModeAlgorithmRunner
+        StatsModeAlgorithmRunner statsModeAlgorithmRunner,
+        WriteModeAlgorithmRunner writeModeAlgorithmRunner
     ) {
         var knnMutateStub = new KnnMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
 
@@ -68,7 +75,8 @@ public final class SimilarityProcedureFacade {
             knnMutateStub,
             applicationsFacade,
             streamModeAlgorithmRunner,
-            statsModeAlgorithmRunner
+            statsModeAlgorithmRunner,
+            writeModeAlgorithmRunner
         );
     }
 
@@ -107,11 +115,37 @@ public final class SimilarityProcedureFacade {
         );
     }
 
+    public Stream<KnnWriteResult> knnWrite(
+        String graphNameAsString,
+        Map<String, Object> rawConfiguration
+    ) {
+        var resultBuilder = new KnnResultBuilderForWriteMode();
+
+        var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("similarityDistribution");
+
+        return writeModeAlgorithmRunner.runWriteModeAlgorithm(
+            graphNameAsString,
+            rawConfiguration,
+            KnnWriteConfig::of,
+            (graphName, configuration, __) -> writeMode().knn(
+                graphName,
+                configuration,
+                resultBuilder,
+                shouldComputeSimilarityDistribution
+            ),
+            resultBuilder
+        );
+    }
+
     private SimilarityAlgorithmsStatsModeBusinessFacade statsMode() {
         return applicationsFacade.similarity().stats();
     }
 
     private SimilarityAlgorithmsStreamModeBusinessFacade streamMode() {
         return applicationsFacade.similarity().stream();
+    }
+
+    private SimilarityAlgorithmsWriteModeBusinessFacade writeMode() {
+        return applicationsFacade.similarity().write();
     }
 }

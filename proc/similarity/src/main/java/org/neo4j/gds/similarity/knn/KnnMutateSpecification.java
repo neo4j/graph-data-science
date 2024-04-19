@@ -20,6 +20,7 @@
 package org.neo4j.gds.similarity.knn;
 
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.core.huge.HugeGraph;
@@ -31,17 +32,20 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 import org.neo4j.gds.procedures.algorithms.similarity.KnnMutateResult;
+import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityProc;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.LoggingUtil.runWithExceptionLogging;
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_RELATIONSHIP;
-import static org.neo4j.gds.similarity.knn.KnnProc.KNN_DESCRIPTION;
+import static org.neo4j.gds.similarity.knn.Constants.KNN_DESCRIPTION;
 
 @GdsCallable(name = "gds.knn.mutate", description = KNN_DESCRIPTION, executionMode = MUTATE_RELATIONSHIP)
 public class KnnMutateSpecification implements AlgorithmSpec<Knn, KnnResult, KnnMutateConfig, Stream<KnnMutateResult>, KnnFactory<KnnMutateConfig>> {
@@ -81,7 +85,7 @@ public class KnnMutateSpecification implements AlgorithmSpec<Knn, KnnResult, Knn
 
                     SimilarityGraphResult similarityGraphResult;
                     try (ProgressTimer ignored = ProgressTimer.start(mutateMillis::addAndGet)) {
-                        similarityGraphResult = KnnProc.computeToGraph(
+                        similarityGraphResult = computeToGraph(
                             computationResult.graph(),
                             computationResult.graph().nodeCount(),
                             config.concurrency(),
@@ -128,4 +132,19 @@ public class KnnMutateSpecification implements AlgorithmSpec<Knn, KnnResult, Knn
         );
     }
 
+    private static SimilarityGraphResult computeToGraph(
+        Graph graph,
+        long nodeCount,
+        int concurrency,
+        KnnResult result,
+        ExecutorService executor
+    ) {
+        Graph similarityGraph = new SimilarityGraphBuilder(
+            graph,
+            concurrency,
+            executor,
+            TerminationFlag.RUNNING_TRUE
+        ).build(result.streamSimilarityResult());
+        return new SimilarityGraphResult(similarityGraph, nodeCount, false);
+    }
 }

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications;
 
+import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithms;
@@ -26,6 +27,7 @@ import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsEsti
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsStreamModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.logging.Log;
 
 public final class SimilarityApplications {
@@ -33,23 +35,27 @@ public final class SimilarityApplications {
     private final SimilarityAlgorithmsMutateModeBusinessFacade mutateModeFacade;
     private final SimilarityAlgorithmsStatsModeBusinessFacade statsModeFacade;
     private final SimilarityAlgorithmsStreamModeBusinessFacade streamModeFacade;
+    private final SimilarityAlgorithmsWriteModeBusinessFacade writeModeFacade;
 
     private SimilarityApplications(
         SimilarityAlgorithmsEstimationModeBusinessFacade estimationModeFacade,
         SimilarityAlgorithmsMutateModeBusinessFacade mutateModeFacade,
         SimilarityAlgorithmsStatsModeBusinessFacade statsModeFacade,
-        SimilarityAlgorithmsStreamModeBusinessFacade streamModeFacade
+        SimilarityAlgorithmsStreamModeBusinessFacade streamModeFacade,
+        SimilarityAlgorithmsWriteModeBusinessFacade writeModeFacade
     ) {
         this.estimationModeFacade = estimationModeFacade;
         this.mutateModeFacade = mutateModeFacade;
         this.streamModeFacade = streamModeFacade;
         this.statsModeFacade = statsModeFacade;
+        this.writeModeFacade = writeModeFacade;
     }
 
     static SimilarityApplications create(
         Log log,
         AlgorithmProcessingTemplate algorithmProcessingTemplate,
-        ProgressTrackerCreator progressTrackerCreator
+        ProgressTrackerCreator progressTrackerCreator,
+        WriteRelationshipService writeRelationshipService
     ) {
         var estimationModeFacade = new SimilarityAlgorithmsEstimationModeBusinessFacade();
         var similarityAlgorithms = new SimilarityAlgorithms(progressTrackerCreator);
@@ -73,7 +79,20 @@ public final class SimilarityApplications {
             algorithmProcessingTemplate
         );
 
-        return new SimilarityApplications(estimationModeFacade, mutateModeFacade, statsModeFacade, streamModeFacade);
+        var writeModeFacade = new SimilarityAlgorithmsWriteModeBusinessFacade(
+            estimationModeFacade,
+            similarityAlgorithms,
+            algorithmProcessingTemplate,
+            writeRelationshipService
+        );
+
+        return new SimilarityApplications(
+            estimationModeFacade,
+            mutateModeFacade,
+            statsModeFacade,
+            streamModeFacade,
+            writeModeFacade
+        );
     }
 
     public SimilarityAlgorithmsEstimationModeBusinessFacade estimate() {
@@ -90,5 +109,9 @@ public final class SimilarityApplications {
 
     public SimilarityAlgorithmsStreamModeBusinessFacade stream() {
         return streamModeFacade;
+    }
+
+    public SimilarityAlgorithmsWriteModeBusinessFacade write() {
+        return writeModeFacade;
     }
 }

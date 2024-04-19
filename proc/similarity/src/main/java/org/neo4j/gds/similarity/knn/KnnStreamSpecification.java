@@ -30,7 +30,7 @@ import org.neo4j.gds.similarity.SimilarityResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.similarity.knn.KnnProc.KNN_DESCRIPTION;
+import static org.neo4j.gds.similarity.knn.Constants.KNN_DESCRIPTION;
 
 @GdsCallable(name = "gds.knn.stream", description = KNN_DESCRIPTION, executionMode = ExecutionMode.STREAM)
 public class KnnStreamSpecification implements AlgorithmSpec<Knn, KnnResult, KnnStreamConfig, Stream<SimilarityResult>, KnnFactory<KnnStreamConfig>> {

@@ -17,24 +17,41 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.similarity.nodesim;
+package org.neo4j.gds.procedures.algorithms.similarity;
 
-import org.neo4j.gds.procedures.similarity.SimilarityWriteResult;
-import org.neo4j.gds.similarity.SimilarityResultBuilder;
+import java.util.Map;
 
-public  class NodeSimilarityWriteResultBuilder extends SimilarityResultBuilder<SimilarityWriteResult> {
+public class KnnWriteResult extends SimilarityWriteResult {
+    public final long ranIterations;
+    public final boolean didConverge;
+    public final long nodePairsConsidered;
 
-    @Override
-    public SimilarityWriteResult build() {
-        return new SimilarityWriteResult(
+    public KnnWriteResult(
+        long preProcessingMillis,
+        long computeMillis,
+        long writeMillis,
+        long postProcessingMillis,
+        long nodesCompared,
+        long relationshipsWritten,
+        boolean didConverge,
+        long ranIterations,
+        long nodePairsCompared,
+        Map<String, Object> similarityDistribution,
+        Map<String, Object> configuration
+    ) {
+        super(
             preProcessingMillis,
             computeMillis,
             writeMillis,
             postProcessingMillis,
             nodesCompared,
             relationshipsWritten,
-            distribution(),
-            config.toMap()
+            similarityDistribution,
+            configuration
         );
+
+        this.nodePairsConsidered = nodePairsCompared;
+        this.ranIterations = ranIterations;
+        this.didConverge = didConverge;
     }
 }
