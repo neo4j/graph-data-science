@@ -67,7 +67,7 @@ public class ReducingMessenger implements Messenger<ReducingMessenger.SingleMess
         this.receiveArray = sendArray;
         this.sendArray = tmp;
 
-        int concurrency = config.concurrency();
+        var concurrency = config.typedConcurrency();
         ParallelUtil.parallelForEachNode(
             graph.nodeCount(),
             concurrency,

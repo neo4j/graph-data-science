@@ -251,7 +251,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         var localPredictions = HugeDoubleArray.newArray(evaluationSet.size());
         ParallelUtil.parallelForEachNode(
             evaluationSet.size(),
-            concurrency.value(),
+            concurrency,
             terminationFlag,
             idx -> localPredictions.set(idx, regressor.predict(features.get(evaluationSet.get(idx))))
         );
@@ -261,7 +261,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         HugeDoubleArray localTargets = HugeDoubleArray.newArray(evaluationSet.size());
         ParallelUtil.parallelForEachNode(
             evaluationSet.size(),
-            concurrency.value(),
+            concurrency,
             terminationFlag,
             idx -> localTargets.set(idx, targets.get(evaluationSet.get(idx)))
         );

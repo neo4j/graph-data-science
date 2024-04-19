@@ -92,7 +92,7 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
         this.progressTracker.beginSubTask("Initialization");
         ParallelUtil.parallelForEachNode(
             graph.nodeCount(),
-            concurrency.value(),
+            concurrency,
             terminationFlag,
             nodeId -> {
                 graph.concurrentCopy().forEachRelationship(
@@ -123,7 +123,7 @@ public class DagLongestPath extends Algorithm<PathFindingResult> {
                 parentsAndDistances
             );
 
-        ParallelUtil.parallelForEachNode(nodeCount, concurrency.value(), TerminationFlag.RUNNING_TRUE, nodeId -> {
+        ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, nodeId -> {
             if (inDegrees.get(nodeId) == 0L) {
                 tasks.add(taskProducer.apply(nodeId));
                 parentsAndDistances.set(nodeId, nodeId, 0);

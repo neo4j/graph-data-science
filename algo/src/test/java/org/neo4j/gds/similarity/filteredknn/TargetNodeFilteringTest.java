@@ -20,6 +20,7 @@
 package org.neo4j.gds.similarity.filteredknn;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.similarity.knn.SimilarityFunction;
@@ -44,7 +45,7 @@ class TargetNodeFilteringTest {
             evenNodesAreTargetNodes,
             Optional.empty(),  /* not needed when not seeding */
             noSimilarityCutoff,
-            1
+            new Concurrency(1)
         );
 
         var targetNodeFilter = targetNodeFiltering.get(0);
@@ -81,7 +82,7 @@ class TargetNodeFilteringTest {
             allNodesAreTargetNodes,
             weSeedWithLowScores,
             noSimilarityCutoff,
-            1
+            new Concurrency(1)
         );
 
         // we only offer three high quality nodes
@@ -120,7 +121,7 @@ class TargetNodeFilteringTest {
             allNodesAreTargetNodes,
             weSeedWithLowScores,
             noSimilarityCutoff,
-            1
+            new Concurrency(1)
         );
 
         // this is only the seeds
@@ -142,7 +143,7 @@ class TargetNodeFilteringTest {
             evenNodesAreTargetNodes,
             Optional.empty(),  /* not needed when not seeding */
             noSimilarityCutoff,
-            1
+            new Concurrency(1)
         );
 
         var targetNodeFilterZero = targetNodeFiltering.get(0);
@@ -173,7 +174,7 @@ class TargetNodeFilteringTest {
             targetNodes,
             weSeed,
             noSimilarityCutoff,
-            1
+            new Concurrency(1)
         );
 
         assertThat(targetNodeFiltering.seedingSummary().seededOptimally()).isTrue();
@@ -201,7 +202,7 @@ class TargetNodeFilteringTest {
             targetNodes,
             weSeed,
             noSimilarityCutoff,
-            1
+            new Concurrency(1)
         );
 
         assertThat(targetNodeFiltering.seedingSummary().seededOptimally()).isFalse();

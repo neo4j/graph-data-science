@@ -136,7 +136,7 @@ public class SimpleRerouter extends ReroutingAlgorithm {
 
         ParallelUtil.parallelForEachNode(
             graph.nodeCount(),
-            concurrency.value(),
+            concurrency,
             terminationFlag,
             nodeId -> {
                 if (parent.get(nodeId) != PRUNED && parent.get(nodeId) != ROOT_NODE) {

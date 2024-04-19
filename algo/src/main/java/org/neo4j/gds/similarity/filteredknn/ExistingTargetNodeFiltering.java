@@ -22,6 +22,7 @@ package org.neo4j.gds.similarity.filteredknn;
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
@@ -57,7 +58,7 @@ public final class ExistingTargetNodeFiltering implements TargetNodeFiltering {
         LongPredicate targetNodePredicate,
         Optional<SimilarityFunction> optionalSimilarityFunction,
         double similarityCutoff,
-        int concurrency
+        Concurrency concurrency
     ) {
         var neighbourConsumers = HugeObjectArray.newArray(TargetNodeFilter.class, nodeCount);
         long[] startingSeeds = findSeeds(

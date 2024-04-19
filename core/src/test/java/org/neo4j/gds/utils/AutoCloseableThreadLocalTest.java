@@ -21,6 +21,7 @@ package org.neo4j.gds.utils;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -30,7 +31,7 @@ class AutoCloseableThreadLocalTest {
 
     @Test
     void threadLocalsShouldLiveUntilClosed() throws InterruptedException {
-        var concurrency = 4;
+        var concurrency = new Concurrency(4);
         var counter = new MutableLong(0);
         var threadLocal = AutoCloseableThreadLocal.withInitial(() -> new CloseableWithState(counter));
 
@@ -39,7 +40,8 @@ class AutoCloseableThreadLocalTest {
         // We need to make sure that the CloseableWithState outlives the thread and is around in the close method.
         ParallelUtil.parallelForEachNode(
             10_000_000,
-            concurrency, TerminationFlag.RUNNING_TRUE,
+            concurrency,
+            TerminationFlag.RUNNING_TRUE,
             (__) -> threadLocal.get()
         );
 
@@ -49,7 +51,7 @@ class AutoCloseableThreadLocalTest {
 
         threadLocal.close();
 
-        assertThat(counter.getValue()).isEqualTo(concurrency);
+        assertThat(counter.getValue()).isEqualTo(concurrency.value());
     }
 
 

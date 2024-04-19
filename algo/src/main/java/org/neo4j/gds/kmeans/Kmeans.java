@@ -292,7 +292,7 @@ public final class Kmeans extends Algorithm<KmeansResult> {
         }
         ParallelUtil.parallelForEachNode(
             graph.nodeCount(),
-            concurrency.value(),
+            concurrency,
             TerminationFlag.RUNNING_TRUE,
             nodeId -> {
                 if (nodePropertyValues.valueType() == ValueType.FLOAT_ARRAY) {
@@ -392,7 +392,7 @@ public final class Kmeans extends Algorithm<KmeansResult> {
                 bestDistance = averageDistanceFromCentroid;
                 ParallelUtil.parallelForEachNode(
                     graph.nodeCount(),
-                    concurrency.value(),
+                    concurrency,
                     terminationFlag,
                     v -> {
                         bestCommunities.set(v, currentCommunities.get(v));

@@ -81,7 +81,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
 
         ParallelUtil.parallelForEachNode(
             graph.nodeCount(),
-            concurrency.value(),
+            concurrency,
             TerminationFlag.RUNNING_TRUE,
             v -> {
                 int degree = graph.degree(v);

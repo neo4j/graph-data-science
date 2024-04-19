@@ -26,6 +26,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.pregel.Pregel;
 import org.neo4j.gds.beta.pregel.PregelComputation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -43,7 +44,7 @@ import static org.neo4j.gds.pagerank.PageRankAlgorithmFactory.Mode.EIGENVECTOR;
 public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends GraphAlgorithmFactory<PageRankAlgorithm, CONFIG> {
 
 
-    private static double averageDegree(Graph graph, int concurrency) {
+    private static double averageDegree(Graph graph, Concurrency concurrency) {
         var degreeSum = new LongAdder();
         ParallelUtil.parallelForEachNode(
             graph.nodeCount(),
@@ -104,7 +105,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Gra
             .forEach(mappedSourceNodes::add);
 
         if (mode == ARTICLE_RANK) {
-            double avgDegree = averageDegree(graph, configuration.concurrency());
+            double avgDegree = averageDegree(graph, configuration.typedConcurrency());
             computation = new ArticleRankComputation(configuration, mappedSourceNodes, degreeFunction, avgDegree);
         } else if (mode == EIGENVECTOR) {
             // Degrees are generally not respected in eigenvector centrality.

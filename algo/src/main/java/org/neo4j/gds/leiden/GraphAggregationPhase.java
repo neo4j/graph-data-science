@@ -139,7 +139,7 @@ class GraphAggregationPhase {
 
         ParallelUtil.parallelForEachNode(
             workingGraph.nodeCount(),
-            concurrency.value(),
+            concurrency,
             TerminationFlag.RUNNING_TRUE,
             nodeId -> nodesBuilder.addNode(communities.get(nodeId))
         );
@@ -194,14 +194,14 @@ class GraphAggregationPhase {
         var communityCoordinateArray = HugeAtomicLongArray.of(nodeCount, ParalleLongPageCreator.passThrough(concurrency));
 
 
-        ParallelUtil.parallelForEachNode(nodeCount, concurrency.value(), TerminationFlag.RUNNING_TRUE, nodeId -> {
+        ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, nodeId -> {
             {
                 long communityId = communities.get(nodeId);
                 communityCoordinateArray.getAndAdd(communityId, 1);
             }
         });
         AtomicLong atomicNodeSum = new AtomicLong();
-        ParallelUtil.parallelForEachNode(nodeCount, concurrency.value(), TerminationFlag.RUNNING_TRUE, indexId ->
+        ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, indexId ->
         {
             if (communityCoordinateArray.get(indexId) > 0) {
                 var nodeSum = atomicNodeSum.addAndGet(communityCoordinateArray.get(indexId));
@@ -209,7 +209,7 @@ class GraphAggregationPhase {
             }
         });
 
-        ParallelUtil.parallelForEachNode(nodeCount, concurrency.value(), TerminationFlag.RUNNING_TRUE, indexId ->
+        ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, indexId ->
         {
 
             long nodeId = nodeCount - indexId - 1;

@@ -145,7 +145,7 @@ public final class GraphStoreFilter {
             var filteredNodes = NodesFilter.filterNodes(
                 graphStore,
                 expressions.nodeExpression(),
-                config.concurrency(),
+                config.typedConcurrency(),
                 config.parameters(),
                 executorService,
                 progressTracker

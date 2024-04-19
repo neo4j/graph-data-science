@@ -106,7 +106,7 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
         ) {
             ParallelUtil.parallelForEachNode(
                 graph.nodeCount(),
-                concurrency.value(),
+                concurrency,
                 terminationFlag,
                 nodeId -> localLinkPredictor.get().accept(nodeId)
             );

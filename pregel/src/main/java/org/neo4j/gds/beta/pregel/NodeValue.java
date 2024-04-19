@@ -22,6 +22,7 @@ package org.neo4j.gds.beta.pregel;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
@@ -54,7 +55,7 @@ public abstract class NodeValue {
             .collect(Collectors.toMap(Element::propertyKey, Element::propertyType));
     }
 
-    static NodeValue of(PregelSchema schema, long nodeCount, int concurrency) {
+    static NodeValue of(PregelSchema schema, long nodeCount, Concurrency concurrency) {
         var properties = schema.elements()
             .stream()
             .collect(Collectors.toMap(
@@ -183,7 +184,7 @@ public abstract class NodeValue {
         }
     }
 
-    private static Object initArray(Element element, long nodeCount, int concurrency) {
+    private static Object initArray(Element element, long nodeCount, Concurrency concurrency) {
         switch (element.propertyType()) {
             case DOUBLE:
                 var doubleNodeValues = HugeDoubleArray.newArray(nodeCount);

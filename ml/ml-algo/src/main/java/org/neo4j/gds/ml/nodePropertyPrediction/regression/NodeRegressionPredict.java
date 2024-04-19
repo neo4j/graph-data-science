@@ -61,7 +61,7 @@ public class NodeRegressionPredict {
         var predictedTargets = HugeDoubleArray.newArray(features.size());
         ParallelUtil.parallelForEachNode(
             features.size(),
-            concurrency.value(),
+            concurrency,
             terminationFlag,
             id -> predictedTargets.set(id, regressor.predict(features.get(id)))
         );

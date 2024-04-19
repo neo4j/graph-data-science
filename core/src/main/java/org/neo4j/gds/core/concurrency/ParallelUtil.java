@@ -102,13 +102,13 @@ public final class ParallelUtil {
 
     public static void parallelForEachNode(
         long nodeCount,
-        int concurrency,
+        Concurrency concurrency,
         TerminationFlag terminationFlag,
         LongConsumer consumer
     ) {
         parallelStreamConsume(
             LongStream.range(0, nodeCount),
-            new Concurrency(concurrency),
+            concurrency,
             terminationFlag,
             stream -> stream.forEach(consumer)
         );

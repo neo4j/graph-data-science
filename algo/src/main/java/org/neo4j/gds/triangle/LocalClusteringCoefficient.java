@@ -92,7 +92,7 @@ public class LocalClusteringCoefficient extends Algorithm<LocalClusteringCoeffic
         DoubleAdder localClusteringCoefficientSum = new DoubleAdder();
 
         try (var concurrentGraphCopy = CloseableThreadLocal.withInitial(() -> graph.concurrentCopy())) {
-            ParallelUtil.parallelForEachNode(graph.nodeCount(), concurrency.value(), terminationFlag, nodeId -> {
+            ParallelUtil.parallelForEachNode(graph.nodeCount(), concurrency, terminationFlag, nodeId -> {
                 double localClusteringCoefficient = calculateCoefficient(
                     propertyValueFunction.applyAsDouble(nodeId),
                     graph.isMultiGraph() ?

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.similarity.filteredknn;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.similarity.knn.NeighbourConsumers;
@@ -48,7 +49,7 @@ public interface TargetNodeFiltering extends NeighbourConsumers {
         LongPredicate targetNodePredicate,
         Optional<SimilarityFunction> optionalSimilarityFunction,
         double similarityCutoff,
-        int concurrency
+        Concurrency concurrency
     ) {
 
         if (targetNodePredicate == NodeFilter.ALLOW_EVERYTHING) {

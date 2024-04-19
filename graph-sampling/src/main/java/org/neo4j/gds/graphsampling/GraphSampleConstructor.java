@@ -85,7 +85,7 @@ public class GraphSampleConstructor {
         var nodePropertyStore = NodesFilter.filterNodeProperties(
             inputGraphStore,
             idMap,
-            config.concurrency(),
+            config.typedConcurrency(),
             progressTracker
         );
 

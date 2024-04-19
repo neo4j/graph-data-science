@@ -57,7 +57,7 @@ public class WriteNodeLabelApplication {
             var filteredNodes = NodesFilter.filterNodes(
                 graphStore,
                 nodeFilter,
-                configuration.concurrency(),
+                configuration.typedConcurrency(),
                 Map.of(),
                 DefaultPool.INSTANCE,
                 ProgressTracker.NULL_TRACKER

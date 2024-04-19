@@ -97,7 +97,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
         this.progressTracker.beginSubTask("Initialization");
         ParallelUtil.parallelForEachNode(
             graph.nodeCount(),
-            concurrency.value(),
+            concurrency,
             terminationFlag,
             nodeId -> {
                 graph.concurrentCopy().forEachRelationship(
@@ -136,7 +136,7 @@ public class TopologicalSort extends Algorithm<TopologicalSortResult> {
                 inDegrees
             );
 
-        ParallelUtil.parallelForEachNode(nodeCount, concurrency.value(), TerminationFlag.RUNNING_TRUE, nodeId -> {
+        ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, nodeId -> {
             if (inDegrees.get(nodeId) == 0L) {
                 result.addNode(nodeId);
                 tasks.add(taskProducer.apply(nodeId));

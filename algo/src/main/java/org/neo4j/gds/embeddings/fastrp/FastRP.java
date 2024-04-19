@@ -172,7 +172,7 @@ public class FastRP extends Algorithm<FastRPResult> {
 
         ParallelUtil.parallelForEachNode(
             graph.nodeCount(),
-            concurrency.value(),
+            concurrency,
             terminationFlag,
             this::addInitialStateToEmbedding
         );

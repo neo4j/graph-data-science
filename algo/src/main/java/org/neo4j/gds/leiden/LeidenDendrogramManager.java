@@ -95,7 +95,7 @@ public class LeidenDendrogramManager {
 
         //This is final output, we need to take seeds into account
         //and translate the community to output format; for this we need to take the initial seeding values into acount
-        ParallelUtil.parallelForEachNode(rootGraph.nodeCount(), concurrency.value(), terminationFlag, nodeId -> {
+        ParallelUtil.parallelForEachNode(rootGraph.nodeCount(), concurrency, terminationFlag, nodeId -> {
             long prevId = translateNode(workingGraph, previousAlgorithmDendrogram, nodeId, iteration);
             long communityId = communitiesToOuput.get(prevId);
             var reverseId = seedCommunityManager.mapToSeed(communityId);
@@ -117,7 +117,7 @@ public class LeidenDendrogramManager {
     ) {
 
         HugeLongArray finalAlgorithmDendrogram = algorithmDendrogram;
-        ParallelUtil.parallelForEachNode(rootGraph.nodeCount(), concurrency.value(), terminationFlag, nodeId -> {
+        ParallelUtil.parallelForEachNode(rootGraph.nodeCount(), concurrency, terminationFlag, nodeId -> {
             long prevId = translateNode(workingGraph, finalAlgorithmDendrogram, nodeId, iteration);
             long communityId = communitiesToWrite.get(prevId);
             finalAlgorithmDendrogram.set(nodeId, communityId);

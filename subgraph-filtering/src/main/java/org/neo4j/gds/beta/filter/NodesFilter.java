@@ -29,6 +29,7 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.beta.filter.expression.EvaluationContext;
 import org.neo4j.gds.beta.filter.expression.Expression;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -63,7 +64,7 @@ public final class NodesFilter {
     public static FilteredNodes filterNodes(
         GraphStore inputGraphStore,
         Expression expression,
-        int concurrency,
+        Concurrency concurrency,
         Map<String, Object> parameterMap,
         ExecutorService executorService,
         ProgressTracker progressTracker
@@ -74,13 +75,13 @@ public final class NodesFilter {
             .idMapBuilderType(inputNodes.typeId())
             .deduplicateIds(false)
             .nodeCount(inputNodes.nodeCount())
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .maxOriginalId(inputNodes.highestOriginalId())
             .hasLabelInformation(!inputGraphStore.nodeLabels().isEmpty())
             .build();
 
         var partitions = PartitionUtils
-            .rangePartition(concurrency, inputGraphStore.nodeCount(), Function.identity(), Optional.empty())
+            .rangePartition(concurrency.value(), inputGraphStore.nodeCount(), Function.identity(), Optional.empty())
             .iterator();
 
         var tasks = NodeFilterTask.of(
@@ -94,7 +95,7 @@ public final class NodesFilter {
 
         progressTracker.beginSubTask();
         RunWithConcurrency.builder()
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .tasks(tasks)
             .executor(executorService)
             .run();
@@ -121,7 +122,7 @@ public final class NodesFilter {
     public static NodePropertyStore filterNodeProperties(
         GraphStore inputGraphStore,
         IdMap filteredIdMap,
-        int concurrency,
+        Concurrency concurrency,
         ProgressTracker progressTracker
     ) {
         var propertyKeys = inputGraphStore.nodePropertyKeys();
@@ -165,10 +166,10 @@ public final class NodesFilter {
         return builder.build();
     }
 
-    public static NodePropertiesBuilder<?> getPropertiesBuilder(
+    private static NodePropertiesBuilder<?> getPropertiesBuilder(
         IdMap idMap,
         NodePropertyValues inputNodePropertyValues,
-        int concurrency
+        Concurrency concurrency
     ) {
         NodePropertiesBuilder<?> propertiesBuilder = null;
 
@@ -176,7 +177,7 @@ public final class NodesFilter {
             case LONG:
                 var longNodePropertiesBuilder = LongNodePropertiesBuilder.of(
                     DefaultValue.forLong(),
-                    concurrency
+                    concurrency.value()
                 );
                 propertiesBuilder = new NodePropertiesBuilder<>(inputNodePropertyValues, longNodePropertiesBuilder) {
                     @Override
@@ -190,7 +191,7 @@ public final class NodesFilter {
             case DOUBLE:
                 var doubleNodePropertiesBuilder = new DoubleNodePropertiesBuilder(
                     DefaultValue.forDouble(),
-                    concurrency
+                    concurrency.value()
                 );
                 propertiesBuilder = new NodePropertiesBuilder<>(inputNodePropertyValues, doubleNodePropertiesBuilder) {
                     @Override
@@ -203,7 +204,7 @@ public final class NodesFilter {
             case DOUBLE_ARRAY:
                 var doubleArrayNodePropertiesBuilder = new DoubleArrayNodePropertiesBuilder(
                     DefaultValue.forDoubleArray(),
-                    concurrency
+                    concurrency.value()
                 );
                 propertiesBuilder = new NodePropertiesBuilder<>(inputNodePropertyValues, doubleArrayNodePropertiesBuilder) {
                     @Override
@@ -216,7 +217,7 @@ public final class NodesFilter {
             case FLOAT_ARRAY:
                 var floatArrayNodePropertiesBuilder = new FloatArrayNodePropertiesBuilder(
                     DefaultValue.forFloatArray(),
-                    concurrency
+                    concurrency.value()
                 );
 
                 propertiesBuilder = new NodePropertiesBuilder<>(inputNodePropertyValues, floatArrayNodePropertiesBuilder) {
@@ -230,7 +231,7 @@ public final class NodesFilter {
             case LONG_ARRAY:
                 var longArrayNodePropertiesBuilder = new LongArrayNodePropertiesBuilder(
                     DefaultValue.forFloatArray(),
-                    concurrency
+                    concurrency.value()
                 );
 
                 propertiesBuilder = new NodePropertiesBuilder<>(inputNodePropertyValues, longArrayNodePropertiesBuilder) {

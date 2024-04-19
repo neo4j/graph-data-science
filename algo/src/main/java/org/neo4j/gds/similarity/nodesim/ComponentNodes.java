@@ -114,7 +114,7 @@ public final class ComponentNodes {
 
         // init coordinate array to contain the nr of nodes per component
         // i.e. comp1 containing 3 nodes, comp2 containing 20 nodes: {(comp1, 3), (comp2, 20)}
-        ParallelUtil.parallelForEachNode(nodeCount, concurrency.value(), TerminationFlag.RUNNING_TRUE, nodeId -> {
+        ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, nodeId -> {
             {
                 if (includeNode.test(nodeId)) {
                     long componentId = components.applyAsLong(nodeId);
@@ -126,7 +126,7 @@ public final class ComponentNodes {
         // modify coordinate array to contain the upper bound of the global index for each component
         // i.e. comp1 containing 3 nodes, comp2 containing 20 nodes, comp1 randomly accessed prior to comp2:
         // {(comp1, 2), (comp2, 22)}
-        ParallelUtil.parallelForEachNode(nodeCount, concurrency.value(), TerminationFlag.RUNNING_TRUE, componentId ->
+        ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, componentId ->
         {
             if (upperBoundPerComponent.get(componentId) > 0) {
                 var nodeSum = atomicNodeSum.addAndGet(upperBoundPerComponent.get(componentId));
@@ -155,7 +155,7 @@ public final class ComponentNodes {
         // fill nodesSortedByComponent with nodeId per component-sorted, unique index
         // i.e. comp1 containing 3 nodes, comp2 containing 20 nodes, named in order of processing:
         // {(0, n3), (1, n2), (2, n1), (3, n23), .., (22, n4)}
-        ParallelUtil.parallelForEachNode(nodeCount, concurrency.value(), TerminationFlag.RUNNING_TRUE, indexId ->
+        ParallelUtil.parallelForEachNode(nodeCount, concurrency, TerminationFlag.RUNNING_TRUE, indexId ->
         {
             long nodeId = nodeCount - indexId - 1;
             if (includeNode.test(nodeId)) {
