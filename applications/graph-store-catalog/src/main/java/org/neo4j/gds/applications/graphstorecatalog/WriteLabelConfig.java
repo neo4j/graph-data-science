@@ -21,13 +21,14 @@ package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.config.BaseConfig;
+import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 
 import java.util.Map;
 
 @Configuration
-public interface WriteLabelConfig extends BaseConfig, WriteConfig {
+public interface WriteLabelConfig extends BaseConfig, ConcurrencyConfig, WriteConfig {
 
     static WriteLabelConfig of(Map<String, Object> rawConfig) {
         return new WriteLabelConfigImpl(CypherMapWrapper.create(rawConfig));
