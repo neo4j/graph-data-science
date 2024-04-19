@@ -80,7 +80,7 @@ public final class ModularityCalculator extends Algorithm<ModularityResult> {
 
         // using degreePartitioning did not show an improvement -- assuming as tasks are too small
         var tasks = PartitionUtils.rangePartition(
-            concurrency.value(),
+            concurrency,
             nodeCount,
             partition -> new RelationshipCountCollector(
                 partition,

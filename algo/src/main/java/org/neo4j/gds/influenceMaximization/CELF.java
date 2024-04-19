@@ -95,7 +95,7 @@ public class CELF extends Algorithm<CELFResult> {
         HugeDoubleArray singleSpreadArray = HugeDoubleArray.newArray(graph.nodeCount());
         progressTracker.beginSubTask(graph.nodeCount());
         var tasks = PartitionUtils.rangePartition(
-            this.concurrency.value(),
+            this.concurrency,
             graph.nodeCount(),
             partition -> new ICInitTask(
                 partition,

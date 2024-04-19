@@ -228,7 +228,7 @@ public abstract class IdMapBuilderTest {
         var highestOriginalId = max(originalIds);
         var idMapBuilder = builderFromHighestOriginalId(highestOriginalId, concurrency);
 
-        var tasks = PartitionUtils.rangePartition(concurrency.value(), nodeCount, partition -> (Runnable) () -> {
+        var tasks = PartitionUtils.rangePartition(concurrency, nodeCount, partition -> (Runnable) () -> {
             long nodesProcessed = 0;
             long[] buffer = new long[bufferSize];
             int offset = (int) partition.startNode();

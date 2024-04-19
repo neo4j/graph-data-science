@@ -53,7 +53,7 @@ final class ICLazyForwardMC {
         double[] spread = new double[batchSize];
 
         var tasks = PartitionUtils.rangePartition(
-            concurrency.value(),
+            concurrency,
             monteCarloSimulations,
             partition -> new ICLazyForwardTask(
                 partition,

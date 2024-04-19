@@ -87,7 +87,7 @@ class PlaceNodesRandomly {
 
         var partitionIndex = new AtomicInteger(0);
         var tasks = PartitionUtils.rangePartition(
-            concurrency.value(),
+            concurrency,
             graph.nodeCount(),
             partition -> new AssignNodes(
                 this.random.split(),

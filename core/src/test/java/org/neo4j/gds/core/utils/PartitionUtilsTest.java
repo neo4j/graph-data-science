@@ -28,6 +28,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
@@ -184,7 +185,7 @@ class PartitionUtilsTest {
     void testRangePartitioning(int concurrency, long nodeCount, List<Partition> expectedPartitions) {
         assertEquals(
             expectedPartitions,
-            PartitionUtils.rangePartition(concurrency, nodeCount, Function.identity(), Optional.empty())
+            PartitionUtils.rangePartition(new Concurrency(concurrency), nodeCount, Function.identity(), Optional.empty())
         );
     }
 
@@ -419,8 +420,8 @@ class PartitionUtilsTest {
 
         var nodeCount = 6;
         int[] degrees = {20, 20, 20, 20, 10, 10};
-        var concurrency = 4;
-        var degreesPerPartition = ParallelUtil.adjustedBatchSize(Arrays.stream(degrees).sum(), concurrency, 1);
+        var concurrency = new Concurrency(4);
+        var degreesPerPartition = ParallelUtil.adjustedBatchSize(Arrays.stream(degrees).sum(), concurrency.value(), 1);
 
         List<DegreePartition> partitions = PartitionUtils.degreePartitionWithBatchSize(
             nodeCount,

@@ -141,7 +141,7 @@ public final class EigenvectorComputation implements PregelComputation<PageRankC
         // since we only ever flip from true to false. If multiple
         // threads try to change the value, only one needs to succeed.
         var didConverge = new MutableBoolean(true);
-        var tasks = PartitionUtils.rangePartition(concurrency.value(), context.nodeCount(),
+        var tasks = PartitionUtils.rangePartition(concurrency, context.nodeCount(),
             partition -> (Runnable) () -> partition.consume(nodeId -> {
                 var normalizedNextRank = scaler.scaleProperty(nodeId);
                 var normalizedCurrRank = context.doubleNodeValue(nodeId, RANK);

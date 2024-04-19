@@ -167,7 +167,7 @@ public class Knn extends Algorithm<KnnResult> {
         }
         if (similarityCutoff > 0) {
             var neighborFilterTasks = PartitionUtils.rangePartition(
-                concurrency.value(),
+                concurrency,
                 neighbors.size(),
                 partition -> (Runnable) () -> partition.consume(
                     nodeId -> neighbors.filterHighSimilarityResult(nodeId, similarityCutoff)
@@ -197,7 +197,7 @@ public class Knn extends Algorithm<KnnResult> {
         var neighbors = new Neighbors(graph.nodeCount());
 
         var randomNeighborGenerators = PartitionUtils.rangePartition(
-            concurrency.value(),
+            concurrency,
             graph.nodeCount(),
             partition -> generateRandomNeighborsFactory.create(
                 partition,
@@ -250,7 +250,7 @@ public class Knn extends Algorithm<KnnResult> {
         progressTracker.endSubTask();
 
         var neighborsJoiners = PartitionUtils.rangePartition(
-            concurrency.value(),
+            concurrency,
             nodeCount,
             partition -> joinNeighborsFactory.create(
                 partition,

@@ -75,7 +75,7 @@ public class HashGNN extends Algorithm<HashGNNResult> {
             Optional.of(1)
         );
         var rangePartition = PartitionUtils.rangePartition(
-            concurrency.value(),
+            concurrency,
             graph.nodeCount(),
             Function.identity(),
             Optional.of(1)

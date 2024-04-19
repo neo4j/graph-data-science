@@ -227,7 +227,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
 
         this.communityWeightUpdates = HugeAtomicDoubleArray.of(nodeCount, ParallelDoublePageCreator.passThrough(concurrency));
 
-        var initTasks = PartitionUtils.rangePartition(concurrency.value(), nodeCount, (partition) ->
+        var initTasks = PartitionUtils.rangePartition(concurrency, nodeCount, (partition) ->
                 new InitTask(
                     graph.concurrentCopy(),
                     currentCommunities,
@@ -356,7 +356,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
     ) {
 
         return PartitionUtils.rangePartition(
-            concurrency.value(),
+            concurrency,
             colorCount,
             partition -> new ModularityOptimizationTask(
                 graph,

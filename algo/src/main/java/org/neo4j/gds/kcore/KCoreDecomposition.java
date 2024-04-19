@@ -180,7 +180,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
         HugeLongArray nodeOrder = HugeLongArray.newArray(numberOfRemainingNodes);
         AtomicLong atomicIndex = new AtomicLong(0);
         var rebuildTasks = PartitionUtils.rangePartition(
-            concurrency.value(),
+            concurrency,
             graph.nodeCount(),
             partition -> new RebuildTask(partition, atomicIndex, core, nodeOrder),
             Optional.empty()

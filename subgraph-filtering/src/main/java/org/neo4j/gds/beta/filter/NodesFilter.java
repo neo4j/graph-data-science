@@ -81,7 +81,7 @@ public final class NodesFilter {
             .build();
 
         var partitions = PartitionUtils
-            .rangePartition(concurrency.value(), inputGraphStore.nodeCount(), Function.identity(), Optional.empty())
+            .rangePartition(concurrency, inputGraphStore.nodeCount(), Function.identity(), Optional.empty())
             .iterator();
 
         var tasks = NodeFilterTask.of(

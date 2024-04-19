@@ -190,7 +190,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
 
     private void doCount() {
         var tasks = PartitionUtils.rangePartition(
-            ConcurrencyConfig.DEFAULT_CONCURRENCY,
+            ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY,
             nodeCount(),
             partition -> new RelationshipCounter(concurrentCopy(), partition),
             Optional.empty()

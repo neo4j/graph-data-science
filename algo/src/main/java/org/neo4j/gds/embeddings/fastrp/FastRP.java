@@ -150,7 +150,7 @@ public class FastRP extends Algorithm<FastRPResult> {
 
         var sqrtEmbeddingDimension = (float) Math.sqrt(baseEmbeddingDimension);
         List<Runnable> tasks = PartitionUtils.rangePartition(
-            concurrency.value(),
+            concurrency,
             graph.nodeCount(),
             partition -> new InitRandomVectorTask(
                 partition,

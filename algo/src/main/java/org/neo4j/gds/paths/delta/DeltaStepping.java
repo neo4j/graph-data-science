@@ -314,7 +314,7 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
         var pathIndex = new AtomicLong(0L);
 
         var partitions = PartitionUtils.rangePartition(
-            concurrency.value(),
+            concurrency,
             predecessors.size(),
             partition -> partition,
             Optional.empty()

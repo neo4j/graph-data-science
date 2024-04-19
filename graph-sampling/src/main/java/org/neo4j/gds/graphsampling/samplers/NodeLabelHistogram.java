@@ -58,7 +58,7 @@ public final class NodeLabelHistogram {
         var localLabelCounts = new ConcurrentLinkedQueue<LongLongHashMap>();
 
         var tasks = PartitionUtils.rangePartition(
-            concurrency.value(),
+            concurrency,
             inputGraph.nodeCount(),
             partition -> (Runnable) () -> {
                 var labelCount = new LongLongHashMap();

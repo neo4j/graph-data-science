@@ -186,9 +186,9 @@ final class ParallelUtilTest {
 
     @Test
     void batchingShouldCatenatePartitions() {
-        int minBatchSize = 21;
+        long minBatchSize = 21;
         int maxConcurrency = 8;
-        int nodeCount = 1337;
+        long nodeCount = 1337;
 
         String params = formatWithLocale(
                 " [bs=%d,c=%d,n=%d]",
@@ -196,7 +196,7 @@ final class ParallelUtilTest {
                 maxConcurrency,
                 nodeCount);
 
-        int batchSize = ParallelUtil.adjustedBatchSize(
+        long batchSize = ParallelUtil.adjustedBatchSize(
                 nodeCount,
                 maxConcurrency,
                 minBatchSize);

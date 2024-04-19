@@ -61,7 +61,7 @@ public final class ModularityComputer {
         var relationshipsOutsideCommunity = HugeAtomicDoubleArray.of(workingGraph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency));
         // using degreePartitioning did not show an improvement -- assuming as tasks are too small
         var tasks = PartitionUtils.rangePartition(
-            concurrency.value(),
+            concurrency,
             workingGraph.nodeCount(),
             partition -> new OutsideRelationshipCalculator(
                 partition,

@@ -168,7 +168,7 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
         AtomicLong cycleIndex = new AtomicLong();
 
         var partitions = PartitionUtils.rangePartition(
-            concurrency.value(),
+            concurrency,
             numberOfNegativeCycles,
             partition -> partition,
             Optional.of(1 + (int) numberOfNegativeCycles / concurrency.value())
@@ -204,7 +204,7 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
         var pathIndex = new AtomicLong(0L);
 
         var partitions = PartitionUtils.rangePartition(
-            concurrency.value(),
+            concurrency,
             tentativeDistances.size(),
             partition -> partition,
             Optional.empty()

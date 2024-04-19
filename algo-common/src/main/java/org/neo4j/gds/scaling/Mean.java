@@ -66,7 +66,7 @@ public final class Mean extends ScalarScaler {
                 ExecutorService executor
             ) {
                 var tasks = PartitionUtils.rangePartition(
-                    concurrency.value(),
+                    concurrency,
                     nodeCount,
                     partition -> new ComputeMaxMinSum(partition, properties, progressTracker),
                     Optional.empty()

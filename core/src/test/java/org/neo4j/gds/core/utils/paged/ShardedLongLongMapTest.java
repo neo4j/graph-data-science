@@ -74,7 +74,7 @@ abstract class ShardedLongLongMapTest {
 
     @Property
     void testBidirectionalMapping(@ForAll("ids") long[] originalIds) {
-        var builder = builder(1);
+        var builder = builder(new Concurrency(1));
         builder.addNodes(originalIds);
         var map = builder.build();
         for (var originalId : originalIds) {
@@ -84,7 +84,7 @@ abstract class ShardedLongLongMapTest {
 
     @Test
     void testAddingSingleNode() {
-        var builder = builder(1);
+        var builder = builder(new Concurrency(1));
         builder.addNodes(42);
         var map = builder.build();
         assertThat(map.toMappedNodeId(42)).isEqualTo(0L);
@@ -92,7 +92,7 @@ abstract class ShardedLongLongMapTest {
 
     @Property
     void testContains(@ForAll("ids") long[] originalIds) {
-        var builder = builder(1);
+        var builder = builder(new Concurrency(1));
         builder.addNodes(originalIds);
         var map = builder.build();
 
@@ -113,7 +113,7 @@ abstract class ShardedLongLongMapTest {
 
     @Property
     void testAddNode(@ForAll("ids") long[] originalIds) {
-        var builder = builder(1);
+        var builder = builder(new Concurrency(1));
         for (int i = 0; i < originalIds.length; i++) {
             long originalId = originalIds[i];
             long mappedId = builder.addNode(originalId);
@@ -123,7 +123,7 @@ abstract class ShardedLongLongMapTest {
 
     @Property
     void testMaxOriginalId(@ForAll("ids") long[] originalIds) {
-        var builder = builder(1);
+        var builder = builder(new Concurrency(1));
         builder.addNodes(originalIds);
         var map = builder.build();
         Arrays.sort(originalIds);
@@ -133,7 +133,7 @@ abstract class ShardedLongLongMapTest {
 
     @Property
     void testAddingMultipleNodes(@ForAll("ids") long[] originalIds) {
-        var builder = builder(1);
+        var builder = builder(new Concurrency(1));
         for (var originalId : originalIds) {
             builder.addNodes(originalId);
         }
@@ -148,7 +148,7 @@ abstract class ShardedLongLongMapTest {
     @ParameterizedTest
     @ValueSource(ints = {0, 1024, 4096, 5000, 9999})
     void testSize(int expectedSize) {
-        var builder = builder(1);
+        var builder = builder(new Concurrency(1));
         for (int i = 0; i < expectedSize; i++) {
             builder.addNodes(i);
         }
@@ -157,7 +157,7 @@ abstract class ShardedLongLongMapTest {
 
     @Property
     void testAddingUltraLargeOriginalIds(@ForAll("largeIds") long[] originalIds) {
-        var builder = builder(1);
+        var builder = builder(new Concurrency(1));
         builder.addNodes(originalIds);
         var map = builder.build();
 
@@ -171,7 +171,7 @@ abstract class ShardedLongLongMapTest {
 
     @Property(tries = 1)
     void testAddingMultipleNodesInParallel(@ForAll("fixedSizeIds") long[] originalIds) {
-        int concurrency = 4;
+        var concurrency = new Concurrency(4);
         var builder = builder(concurrency);
 
         var tasks = PartitionUtils.rangePartition(
@@ -197,7 +197,7 @@ abstract class ShardedLongLongMapTest {
         assertThat(mappedIds).doesNotHaveDuplicates();
     }
 
-    abstract TestBuilder builder(int concurrency);
+    abstract TestBuilder builder(Concurrency concurrency);
 
     interface TestBuilder {
         long addNode(long nodeId);
@@ -211,7 +211,7 @@ abstract class ShardedLongLongMapTest {
 
         @Property
         void testAddNodeWithDuplicates(@ForAll("ids") long[] originalIds) {
-            var builder = builder(1);
+            var builder = builder(new Concurrency(1));
             for (long originalId : originalIds) {
                 long mappedId = builder.addNode(originalId);
                 long duplicateMappedId = builder.addNode(originalId);
@@ -220,15 +220,15 @@ abstract class ShardedLongLongMapTest {
         }
 
         @Override
-        TestBuilder builder(int concurrency) {
+        TestBuilder builder(Concurrency concurrency) {
             return new DefaultBuilder(concurrency);
         }
 
         private static final class DefaultBuilder implements TestBuilder {
             private final ShardedLongLongMap.Builder inner;
 
-            DefaultBuilder(int concurrency) {
-                this.inner = ShardedLongLongMap.builder(new Concurrency(concurrency));
+            DefaultBuilder(Concurrency concurrency) {
+                this.inner = ShardedLongLongMap.builder(concurrency);
             }
 
             @Override
@@ -254,7 +254,7 @@ abstract class ShardedLongLongMapTest {
 
         @Property
         void testAddingMultipleNodesInBatch(@ForAll("ids") long[] originalIds) {
-            var builder = builder(1);
+            var builder = builder(new Concurrency(1));
             builder.addNodes(originalIds);
             var map = builder.build();
             var mappedIds = new long[originalIds.length];
@@ -265,8 +265,8 @@ abstract class ShardedLongLongMapTest {
         }
 
         @Override
-        TestBuilder builder(int concurrency) {
-            return new BatchedBuilder(new Concurrency(concurrency));
+        TestBuilder builder(Concurrency concurrency) {
+            return new BatchedBuilder(concurrency);
         }
 
         private static final class BatchedBuilder implements TestBuilder {

@@ -25,6 +25,7 @@ import org.immutables.builder.Builder;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipConsumer;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.dss.DisjointSetStruct;
@@ -55,7 +56,7 @@ final class SampledStrategy {
 
     private final Graph graph;
     private final DisjointSetStruct disjointSetStruct;
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     private final Optional<Double> threshold;
 
@@ -67,7 +68,7 @@ final class SampledStrategy {
     SampledStrategy(
         Graph graph,
         DisjointSetStruct disjointSetStruct,
-        int concurrency,
+        Concurrency concurrency,
         Optional<Double> threshold,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker,

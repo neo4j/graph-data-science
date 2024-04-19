@@ -98,7 +98,7 @@ public class PageRankAlgorithm extends Algorithm<PageRankResult> {
             executorService
         );
 
-        var tasks = PartitionUtils.rangePartition(concurrency.value(), graph.nodeCount(),
+        var tasks = PartitionUtils.rangePartition(concurrency, graph.nodeCount(),
             partition -> (Runnable) () -> partition.consume(nodeId -> scores.set(nodeId, scaler.scaleProperty(nodeId))),
             Optional.empty()
         );

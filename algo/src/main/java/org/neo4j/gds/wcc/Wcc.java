@@ -82,7 +82,7 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
             throw new IllegalArgumentException(formatWithLocale(
                 "Too many nodes (%d) to run WCC with the given concurrency (%d) and batchSize (%d)",
                 graph.nodeCount(),
-                parameters.concurrency(),
+                parameters.concurrency().value(),
                 batchSize
             ));
         }
@@ -105,7 +105,7 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
                 .graph(graph)
                 .disjointSetStruct(disjointSetStruct)
                 .threshold(threshold())
-                .concurrency(parameters.concurrency().value())
+                .concurrency(parameters.concurrency())
                 .terminationFlag(terminationFlag)
                 .progressTracker(progressTracker)
                 .executorService(executorService)

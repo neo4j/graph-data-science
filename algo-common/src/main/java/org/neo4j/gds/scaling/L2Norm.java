@@ -68,7 +68,7 @@ public final class L2Norm extends ScalarScaler {
                 ExecutorService executor
             ) {
                 var tasks = PartitionUtils.rangePartition(
-                    concurrency.value(),
+                    concurrency,
                     nodeCount,
                     partition -> new ComputeSquaredSum(partition, properties, progressTracker),
                     Optional.empty()

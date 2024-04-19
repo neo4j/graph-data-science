@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.AbstractIterator;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.cursor.HugeCursor;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.SetBitsIterable;
 import org.neo4j.gds.collections.ha.HugeLongArray;
@@ -47,14 +48,14 @@ public final class PartitionUtils {
     private PartitionUtils() {}
 
     public static <TASK> List<TASK> rangePartition(
-        int concurrency,
+        Concurrency concurrency,
         long nodeCount,
         Function<Partition, TASK> taskCreator,
         Optional<Integer> minBatchSize
     ) {
         long batchSize = ParallelUtil.adjustedBatchSize(
             nodeCount,
-            concurrency,
+            concurrency.value(),
             minBatchSize.orElse(ParallelUtil.DEFAULT_BATCH_SIZE)
         );
         return rangePartitionWithBatchSize(nodeCount, batchSize, taskCreator);

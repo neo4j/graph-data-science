@@ -109,7 +109,7 @@ public final class CommunityStatistics {
         var capacity = communitySizes.capacity();
 
         var tasks = PartitionUtils.rangePartition(
-            concurrency.value(),
+            concurrency,
             capacity,
             partition -> new CountTask(communitySizes, partition),
             Optional.empty()
@@ -213,7 +213,7 @@ public final class CommunityStatistics {
             var capacity = communitySizes.capacity();
 
             var tasks = PartitionUtils.rangePartition(
-                concurrency.value(),
+                concurrency,
                 capacity,
                 partition -> new CountAndRecordTask(communitySizes, partition),
                 Optional.empty()

@@ -64,7 +64,7 @@ public final class Max extends ScalarScaler {
                 ExecutorService executor
             ) {
                 var tasks = PartitionUtils.rangePartition(
-                    concurrency.value(),
+                    concurrency,
                     nodeCount,
                     partition -> new ComputeAbsMax(partition, properties, progressTracker),
                     Optional.empty()
