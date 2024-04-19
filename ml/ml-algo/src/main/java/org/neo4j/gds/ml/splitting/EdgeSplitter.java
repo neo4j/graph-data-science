@@ -170,7 +170,7 @@ public abstract class EdgeSplitter {
             .addAllPropertyConfigs(propertyKey
                 .map(key -> List.of(GraphFactory.PropertyConfig.of(key, Aggregation.SINGLE, DefaultValue.forDouble())))
                 .orElse(List.of()))
-            .concurrency(1)
+            .concurrency(new Concurrency(1))
             .executorService(DefaultPool.INSTANCE)
             .build();
     }

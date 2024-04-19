@@ -76,7 +76,7 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
             }, Optional.empty()
         );
 
-        RunWithConcurrency.builder().concurrency(concurrency.value()).tasks(countValidRelationshipTasks).run();
+        RunWithConcurrency.builder().concurrency(concurrency).tasks(countValidRelationshipTasks).run();
 
         return validRelationshipCountAdder.longValue();
     }

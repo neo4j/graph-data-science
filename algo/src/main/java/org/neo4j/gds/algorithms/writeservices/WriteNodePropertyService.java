@@ -25,6 +25,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.config.ArrowConnectionInfo;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.logging.Log;
 
 import java.util.Optional;
@@ -42,7 +43,7 @@ public class WriteNodePropertyService {
         Graph graph,
         GraphStore graphStore,
         NodePropertyValues nodePropertyValues,
-        int writeConcurrency,
+        Concurrency writeConcurrency,
         String writeProperty,
         String procedureName,
         Optional<ArrowConnectionInfo> arrowConnectionInfo,

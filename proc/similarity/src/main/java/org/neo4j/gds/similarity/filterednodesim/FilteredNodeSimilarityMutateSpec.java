@@ -27,6 +27,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
@@ -149,7 +150,7 @@ public class FilteredNodeSimilarityMutateSpec  implements AlgorithmSpec<
                 .relationshipType(relationshipType)
                 .orientation(Orientation.NATURAL)
                 .addPropertyConfig(GraphFactory.PropertyConfig.of(relationshipPropertyKey))
-                .concurrency(1)
+                .concurrency(new Concurrency(1))
                 .executorService(DefaultPool.INSTANCE)
                 .build();
 

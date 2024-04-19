@@ -338,7 +338,7 @@ public final class ParallelUtil {
 
     static void runWithConcurrency(RunWithConcurrency params) {
         runWithConcurrency(
-            params.concurrency(),
+            params.concurrency().value(),
             params.tasks(),
             params.forceUsageOfExecutor(),
             params.waitNanos(),

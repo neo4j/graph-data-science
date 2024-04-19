@@ -83,6 +83,7 @@ public class PageRankAlgorithm extends Algorithm<PageRankResult> {
 
     private void scaleScores(HugeDoubleArray scores) {
         var scalerFactory = config.scaler();
+        var concurrency = config.typedConcurrency();
 
         // Eigenvector produces L2NORM-scaled results by default.
         if (scalerFactory.type().equals(NoneScaler.TYPE) || (scalerFactory.type().equals(L2Norm.TYPE) && mode == PageRankAlgorithmFactory.Mode.EIGENVECTOR)) {
@@ -92,18 +93,18 @@ public class PageRankAlgorithm extends Algorithm<PageRankResult> {
         var scaler = scalerFactory.create(
             NodePropertyValuesAdapter.adapt(scores),
             graph.nodeCount(),
-            config.concurrency(),
+            concurrency,
             ProgressTracker.NULL_TRACKER,
             executorService
         );
 
-        var tasks = PartitionUtils.rangePartition(config.concurrency(), graph.nodeCount(),
+        var tasks = PartitionUtils.rangePartition(concurrency.value(), graph.nodeCount(),
             partition -> (Runnable) () -> partition.consume(nodeId -> scores.set(nodeId, scaler.scaleProperty(nodeId))),
             Optional.empty()
         );
 
         RunWithConcurrency.builder()
-            .concurrency(config.concurrency())
+            .concurrency(concurrency)
             .tasks(tasks)
             .executor(executorService)
             .run();

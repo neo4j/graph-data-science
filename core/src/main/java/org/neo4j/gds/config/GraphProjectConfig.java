@@ -25,6 +25,7 @@ import org.neo4j.gds.api.GraphStoreFactory;
 import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
 import org.neo4j.gds.core.StringIdentifierValidations;
 import org.neo4j.gds.core.Username;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.TimeUtil;
 
 import java.time.ZonedDateTime;
@@ -73,6 +74,11 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
     @Configuration.Key(READ_CONCURRENCY_KEY)
     default int readConcurrency() {
         return ConcurrencyConfig.DEFAULT_CONCURRENCY;
+    }
+
+    @Configuration.Ignore
+    default Concurrency typedReadConcurrency() {
+        return new Concurrency(readConcurrency());
     }
 
     @Configuration.Key(NODE_COUNT_KEY)

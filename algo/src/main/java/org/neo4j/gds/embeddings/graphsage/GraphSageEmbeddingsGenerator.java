@@ -81,7 +81,7 @@ public class GraphSageEmbeddingsGenerator {
         );
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(tasks)
             .executor(executor)
             .run();

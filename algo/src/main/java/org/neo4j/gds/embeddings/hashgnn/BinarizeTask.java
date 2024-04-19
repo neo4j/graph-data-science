@@ -101,7 +101,7 @@ class BinarizeTask implements Runnable {
             ))
             .collect(Collectors.toList());
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(tasks)
             .terminationFlag(terminationFlag)
             .run();

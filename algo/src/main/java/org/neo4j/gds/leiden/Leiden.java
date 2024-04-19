@@ -321,7 +321,7 @@ public class Leiden extends Algorithm<LeidenResult> {
                 Optional.empty()
             );
             RunWithConcurrency.builder().
-                concurrency(concurrency.value()).
+                concurrency(concurrency).
                 tasks(tasks).
                 executor(executorService)
                 .run();

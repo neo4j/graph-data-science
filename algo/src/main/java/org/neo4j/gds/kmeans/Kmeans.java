@@ -221,7 +221,7 @@ public final class Kmeans extends Algorithm<KmeansResult> {
                 || (parameters.samplerType() == KmeansSampler.SamplerType.UNIFORM);
             if (shouldComputeDistance) {
                 RunWithConcurrency.builder()
-                    .concurrency(concurrency.value())
+                    .concurrency(concurrency)
                     .tasks(tasks)
                     .executor(executorService)
                     .run();
@@ -352,7 +352,7 @@ public final class Kmeans extends Algorithm<KmeansResult> {
             Optional.of((int) nodeCount / concurrency.value())
         );
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(tasks)
             .executor(executorService)
             .run();
@@ -369,7 +369,7 @@ public final class Kmeans extends Algorithm<KmeansResult> {
             task.switchToPhase(TaskPhase.DISTANCE);
         }
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(tasks)
             .executor(executorService)
             .run();

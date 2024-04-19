@@ -159,7 +159,7 @@ public class FastRP extends Algorithm<FastRPResult> {
             Optional.of(minBatchSize)
         );
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(tasks)
             .run();
 
@@ -199,7 +199,7 @@ public class FastRP extends Algorithm<FastRPResult> {
             );
 
             ParallelUtil.parallelPartitionsConsume(
-                RunWithConcurrency.builder().executor(DefaultPool.INSTANCE).concurrency(concurrency.value()),
+                RunWithConcurrency.builder().executor(DefaultPool.INSTANCE).concurrency(concurrency),
                 partitions.stream(),
                 taskSupplier
             );

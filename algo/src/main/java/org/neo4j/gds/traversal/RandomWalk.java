@@ -158,7 +158,7 @@ public final class RandomWalk extends Algorithm<Stream<long[]>> {
 
         RunWithConcurrency.builder()
             .executor(this.executorService)
-            .concurrency(this.concurrency.value())
+            .concurrency(this.concurrency)
             .tasks(tasks)
             .terminationFlag(this.externalTerminationFlag)
             .mayInterruptIfRunning(true)

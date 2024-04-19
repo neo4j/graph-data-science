@@ -34,6 +34,7 @@ import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.ImmutableRelationshipPropertySchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchemaEntry;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.AdjacencyBuffer;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
@@ -58,7 +59,7 @@ abstract class SingleTypeRelationshipsBuilder {
     final Direction direction;
 
     private final ExecutorService executorService;
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     @Builder.Factory
     static SingleTypeRelationshipsBuilder singleTypeRelationshipsBuilder(
@@ -72,7 +73,7 @@ abstract class SingleTypeRelationshipsBuilder {
         boolean loadRelationshipProperty,
         Direction direction,
         ExecutorService executorService,
-        int concurrency
+        Concurrency concurrency
     ) {
         return inverseImporter.isPresent() ?
             new Indexed(
@@ -111,7 +112,7 @@ abstract class SingleTypeRelationshipsBuilder {
         boolean loadRelationshipProperty,
         Direction direction,
         ExecutorService executorService,
-        int concurrency
+        Concurrency concurrency
     ) {
         this.idMap = idMap;
         this.bufferSize = bufferSize;
@@ -223,7 +224,7 @@ abstract class SingleTypeRelationshipsBuilder {
             boolean loadRelationshipProperty,
             Direction direction,
             ExecutorService executorService,
-            int concurrency
+            Concurrency concurrency
         ) {
             super(
                 idMap,
@@ -295,7 +296,7 @@ abstract class SingleTypeRelationshipsBuilder {
             boolean loadRelationshipProperty,
             Direction direction,
             ExecutorService executorService,
-            int concurrency
+            Concurrency concurrency
         ) {
             super(
                 idMap,

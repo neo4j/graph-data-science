@@ -30,6 +30,7 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.values.storable.Values;
@@ -79,7 +80,7 @@ class NativeRelationshipPropertiesExporterTest  extends BaseTest {
             TestSupport.fullAccessTransaction(db),
             graphStore,
             Values::doubleValue,
-            concurrency,
+            new Concurrency(concurrency),
             1,
             ProgressTracker.NULL_TRACKER,
             TerminationFlag.RUNNING_TRUE

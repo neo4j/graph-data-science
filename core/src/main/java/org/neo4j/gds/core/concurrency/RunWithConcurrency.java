@@ -52,7 +52,7 @@ public interface RunWithConcurrency {
      * until all tasks are finished or the first Exception is thrown.
      * This behavior can be overridden by setting {@link #forceUsageOfExecutor()} to {@code true}.
      */
-    int concurrency();
+    Concurrency concurrency();
 
     /**
      * The tasks that will be executed.
@@ -243,7 +243,7 @@ public interface RunWithConcurrency {
 
     @Value.Check
     default void validate() {
-        if (concurrency() < 0) {
+        if (concurrency().value() < 0) {
             throw new IllegalArgumentException("[concurrency] must be at least 0, but got " + concurrency());
         }
         if (waitTime() < 0) {

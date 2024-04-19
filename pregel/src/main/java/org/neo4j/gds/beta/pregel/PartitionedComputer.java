@@ -27,6 +27,7 @@ import org.neo4j.gds.beta.pregel.context.ComputeContext;
 import org.neo4j.gds.beta.pregel.context.ComputeContext.BidirectionalComputeContext;
 import org.neo4j.gds.beta.pregel.context.InitContext;
 import org.neo4j.gds.beta.pregel.context.InitContext.BidirectionalInitContext;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -42,7 +43,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComputer<CONFIG> {
     private final ExecutorService executorService;
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     private List<PartitionedComputeStep<CONFIG, ?, ?, ?>> computeSteps;
 
@@ -53,7 +54,7 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
         NodeValue nodeValues,
         Messenger<?> messenger,
         HugeAtomicBitSet voteBits,
-        int concurrency,
+        Concurrency concurrency,
         ExecutorService executorService,
         ProgressTracker progressTracker
     ) {
@@ -110,7 +111,7 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
         switch (config.partitioning()) {
             case RANGE:
                 return PartitionUtils.rangePartition(
-                    concurrency,
+                    concurrency.value(),
                     graph.nodeCount(),
                     partitionFunction,
                     Optional.empty()
@@ -118,7 +119,7 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
             case DEGREE:
                 return PartitionUtils.degreePartition(
                     graph,
-                    concurrency,
+                    concurrency.value(),
                     partitionFunction::apply,
                     Optional.empty()
                 );

@@ -61,7 +61,7 @@ class KGEMutateResultConsumer extends MutateComputationResultConsumer<TopKMapCom
             .relationshipType(mutateRelationshipType)
             .orientation(Orientation.NATURAL)
             .addPropertyConfig(GraphFactory.PropertyConfig.builder().propertyKey(config.mutateProperty()).build())
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .executorService(DefaultPool.INSTANCE)
             .build();
 

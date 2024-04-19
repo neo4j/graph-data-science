@@ -120,7 +120,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
                 task.setPhase(KCoreDecompositionTask.KCoreDecompositionPhase.SCAN);
             }
 
-            RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency.value()).run();
+            RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency).run();
 
             int nextScanningDegree = tasks
                 .stream()
@@ -136,7 +136,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
                     task.setPhase(KCoreDecompositionTask.KCoreDecompositionPhase.ACT);
                 }
 
-                RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency.value()).run();
+                RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency).run();
                 scanningDegree++;
 
             } else {
@@ -185,7 +185,7 @@ public class KCoreDecomposition extends Algorithm<KCoreDecompositionResult> {
             partition -> new RebuildTask(partition, atomicIndex, core, nodeOrder),
             Optional.empty()
         );
-        RunWithConcurrency.builder().tasks(rebuildTasks).concurrency(concurrency.value()).run();
+        RunWithConcurrency.builder().tasks(rebuildTasks).concurrency(concurrency).run();
         var newNodeProvider = new ReducedNodeProvider(nodeOrder, numberOfRemainingNodes);
         for (var task : tasks) {
             task.updateNodeProvider(newNodeProvider);

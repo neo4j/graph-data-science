@@ -69,7 +69,7 @@ public class KmeansPlusPlusSampler extends KmeansSampler {
         for (int selectionClusterId = 1; selectionClusterId < k; ++selectionClusterId) {
 
             RunWithConcurrency.builder()
-                .concurrency(concurrency.value())
+                .concurrency(concurrency)
                 .tasks(tasks)
                 .executor(executorService)
                 .run();
@@ -111,7 +111,7 @@ public class KmeansPlusPlusSampler extends KmeansSampler {
         }
         //nowe we have k clusters and distanceFromClusterAlso for each node closest communit in 0...k-2
         RunWithConcurrency.builder()  //now run one last time just to save  have the vest community in 0...k-1
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(tasks)
             .executor(executorService)
             .run();

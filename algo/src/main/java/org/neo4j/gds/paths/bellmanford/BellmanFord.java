@@ -107,14 +107,14 @@ public class BellmanFord extends Algorithm<BellmanFordResult> {
             frontierIndex.set(0); // exhaust global queue
             RunWithConcurrency.builder()
                 .tasks(tasks)
-                .concurrency(concurrency.value())
+                .concurrency(concurrency)
                 .run();
             progressTracker.endSubTask();
             progressTracker.beginSubTask();
             frontierSize.set(0); // fill global queue again
             RunWithConcurrency.builder()
                 .tasks(tasks)
-                .concurrency(concurrency.value())
+                .concurrency(concurrency)
                 .run();
             progressTracker.endSubTask();
         }

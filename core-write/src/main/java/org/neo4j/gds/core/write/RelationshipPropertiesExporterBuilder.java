@@ -23,6 +23,7 @@ import org.neo4j.gds.api.ExportedRelationship;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.ArrowConnectionInfo;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.values.storable.Values;
@@ -42,7 +43,7 @@ public abstract class RelationshipPropertiesExporterBuilder {
     protected Stream<ExportedRelationship> relationships;
     protected LongUnaryOperator toOriginalId;
     protected long relationshipCount = -1L;
-    protected int concurrency = Runtime.getRuntime().availableProcessors();
+    protected Concurrency concurrency = new Concurrency(Runtime.getRuntime().availableProcessors());
     protected long batchSize = NativeNodePropertyExporter.MIN_BATCH_SIZE;
     protected Optional<ArrowConnectionInfo> arrowConnectionInfo;
     protected Optional<String> remoteDatabaseName; // coupled with arrowConnectionInfo, but should not appear in external API
@@ -104,7 +105,7 @@ public abstract class RelationshipPropertiesExporterBuilder {
         return this;
     }
 
-    public RelationshipPropertiesExporterBuilder withConcurrency(int concurrency) {
+    public RelationshipPropertiesExporterBuilder withConcurrency(Concurrency concurrency) {
         this.concurrency = concurrency;
         return this;
     }

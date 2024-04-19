@@ -162,7 +162,7 @@ public class Node2VecModel {
             );
 
             RunWithConcurrency.builder()
-                .concurrency(concurrency.value())
+                .concurrency(concurrency)
                 .tasks(tasks)
                 .run();
 

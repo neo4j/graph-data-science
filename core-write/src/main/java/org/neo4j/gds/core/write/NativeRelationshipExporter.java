@@ -25,6 +25,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipIterator;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
@@ -48,7 +49,7 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
     private final Graph graph;
     private final LongUnaryOperator toOriginalId;
     private final RelationshipPropertyTranslator propertyTranslator;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final long batchSize;
     private final TerminationFlag terminationFlag;
     private final ProgressTracker progressTracker;
@@ -83,7 +84,7 @@ public final class NativeRelationshipExporter extends StatementApi implements Re
         Graph graph,
         LongUnaryOperator toOriginalId,
         RelationshipPropertyTranslator propertyTranslator,
-        int concurrency,
+        Concurrency concurrency,
         long batchSize,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker

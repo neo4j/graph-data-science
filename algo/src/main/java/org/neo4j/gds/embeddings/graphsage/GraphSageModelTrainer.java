@@ -259,7 +259,7 @@ public class GraphSageModelTrainer {
 
             // run forward + maybe backward for each Batch
             RunWithConcurrency.builder()
-                .concurrency(parameters.concurrency().value())
+                .concurrency(parameters.concurrency())
                 .tasks(sampledBatchTasks)
                 .executor(executor)
                 .run();

@@ -318,7 +318,7 @@ public final class ModularityOptimization extends Algorithm<ModularityOptimizati
         long colorCount = nextStartingCoordinate - currentStandingPosition;
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(createModularityOptimizationTasks(currentStandingPosition, colorCount))
             .executor(executor)
             .run();

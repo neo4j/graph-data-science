@@ -26,6 +26,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.properties.nodes.DoubleNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -54,6 +55,7 @@ public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
     private final Graph graph;
     private final ScalePropertiesBaseConfig config;
     private final ExecutorService executor;
+    private final Concurrency concurrency;
 
     public ScaleProperties(
         Graph graph,
@@ -65,6 +67,7 @@ public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
         this.graph = graph;
         this.config = config;
         this.executor = executor;
+        this.concurrency = config.typedConcurrency();
     }
 
     @Override
@@ -103,7 +106,7 @@ public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
 
     private void initializeArrays(HugeObjectArray<double[]> scaledProperties, int propertyCount) {
         var tasks = PartitionUtils.rangePartition(
-            config.concurrency(),
+            concurrency.value(),
             graph.nodeCount(),
             (partition) -> (Runnable) () -> partition.consume((nodeId) -> scaledProperties.set(
                 nodeId,
@@ -112,7 +115,7 @@ public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
             Optional.empty()
         );
         RunWithConcurrency.builder()
-            .concurrency(config.concurrency())
+            .concurrency(concurrency)
             .tasks(tasks)
             .executor(executor)
             .run();
@@ -121,7 +124,7 @@ public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
     private void scaleProperty(HugeObjectArray<double[]> scaledProperties, Scaler scaler, int index) {
         var strategy = selectPropertyScalerStrategy(scaledProperties, scaler, index);
         var tasks = PartitionUtils.rangePartition(
-            config.concurrency(),
+            concurrency.value(),
             graph.nodeCount(),
             partition -> (Runnable) () -> {
                 partition.consume(strategy);
@@ -130,7 +133,7 @@ public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
             Optional.empty()
         );
         RunWithConcurrency.builder()
-            .concurrency(config.concurrency())
+            .concurrency(concurrency)
             .tasks(tasks)
             .executor(executor)
             .run();
@@ -172,7 +175,7 @@ public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
                 return scalerVariant.create(
                     nodeProperties,
                     graph.nodeCount(),
-                    config.concurrency(),
+                    concurrency,
                     progressTracker,
                     executor
                 );
@@ -181,7 +184,7 @@ public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
                     .mapToObj(idx -> scalerVariant.create(
                         transformLongArrayEntryToDoubleProperty(propertyName, nodeProperties, dimension, idx),
                         graph.nodeCount(),
-                        config.concurrency(),
+                        concurrency,
                         progressTracker,
                         executor
                     )).collect(Collectors.toList());
@@ -191,7 +194,7 @@ public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
                     .mapToObj(idx -> scalerVariant.create(
                         transformFloatArrayEntryToDoubleProperty(propertyName, nodeProperties, dimension, idx),
                         graph.nodeCount(),
-                        config.concurrency(),
+                        concurrency,
                         progressTracker,
                         executor
                     )).collect(Collectors.toList());
@@ -201,7 +204,7 @@ public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
                     .mapToObj(idx -> scalerVariant.create(
                         transformDoubleArrayEntryToDoubleProperty(propertyName, nodeProperties, dimension, idx),
                         graph.nodeCount(),
-                        config.concurrency(),
+                        concurrency,
                         progressTracker,
                         executor
                     )).collect(Collectors.toList());

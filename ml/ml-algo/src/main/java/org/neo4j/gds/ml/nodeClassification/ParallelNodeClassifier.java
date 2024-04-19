@@ -75,7 +75,7 @@ public class ParallelNodeClassifier {
             progressTracker
         );
         BatchQueue.consecutive(evaluationSetSize, batchSize, concurrency.value())
-            .parallelConsume(consumer, concurrency.value(), terminationFlag);
+            .parallelConsume(consumer, concurrency, terminationFlag);
 
         return predictedClasses;
     }

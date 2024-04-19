@@ -26,6 +26,7 @@ import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -38,6 +39,11 @@ public interface WriteConfig extends ConcurrencyConfig {
     @Configuration.Key(WRITE_CONCURRENCY_KEY)
     default int writeConcurrency() {
         return concurrency();
+    }
+
+    @Configuration.Ignore
+    default Concurrency typedWriteConcurrency() {
+        return new Concurrency(writeConcurrency());
     }
 
     @Configuration.Check

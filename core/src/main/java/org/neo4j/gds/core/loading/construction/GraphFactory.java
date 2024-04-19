@@ -40,6 +40,7 @@ import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.huge.HugeGraphBuilder;
@@ -219,7 +220,7 @@ public final class GraphFactory {
         List<PropertyConfig> propertyConfigs,
         Optional<Aggregation> aggregation,
         Optional<Boolean> skipDanglingRelationships,
-        Optional<Integer> concurrency,
+        Optional<Concurrency> concurrency,
         Optional<Boolean> indexInverse,
         Optional<ExecutorService> executorService
     ) {
@@ -253,11 +254,11 @@ public final class GraphFactory {
         int[] propertyKeyIds = IntStream.range(0, propertyConfigs.size()).toArray();
         double[] defaultValues = propertyConfigs.stream().mapToDouble(c -> c.defaultValue().doubleValue()).toArray();
 
-        int finalConcurrency = concurrency.orElse(1);
+        var finalConcurrency = concurrency.orElse(new Concurrency(1));
         var maybeRootNodeCount = nodes.rootNodeCount();
         var importSizing = maybeRootNodeCount.isPresent()
-            ? ImportSizing.of(finalConcurrency, maybeRootNodeCount.getAsLong())
-            : ImportSizing.of(finalConcurrency);
+            ? ImportSizing.of(finalConcurrency.value(), maybeRootNodeCount.getAsLong())
+            : ImportSizing.of(finalConcurrency.value());
 
         int bufferSize = RecordsBatchBuffer.DEFAULT_BUFFER_SIZE;
         if (maybeRootNodeCount.isPresent()) {

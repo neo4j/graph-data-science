@@ -93,7 +93,7 @@ public final class EmbeddingUtils {
         );
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(tasks)
             .executor(executorService)
             .run();

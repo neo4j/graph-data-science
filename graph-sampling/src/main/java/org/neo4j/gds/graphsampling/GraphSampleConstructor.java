@@ -162,7 +162,7 @@ public class GraphSampleConstructor {
             Optional.empty()
         );
         RunWithConcurrency.builder()
-            .concurrency(config.concurrency())
+            .concurrency(config.typedConcurrency())
             .tasks(tasks)
             .run();
         var idMap = nodesBuilder.build().idMap();

@@ -121,7 +121,7 @@ public final class RelationshipsFilter {
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()
             .nodes(outputNodes)
             .relationshipType(relType)
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .addAllPropertyConfigs(propertyConfigs)
             .indexInverse(graphStore.inverseIndexedRelationshipTypes().contains(relType))
             .build();
@@ -165,7 +165,7 @@ public final class RelationshipsFilter {
         );
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(relationshipFilterTasks)
             .executor(executorService)
             .run();

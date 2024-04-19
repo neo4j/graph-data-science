@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.ml.core.batch;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -80,12 +81,12 @@ public abstract class BatchQueue {
         return totalSize;
     }
 
-    public void parallelConsume(Consumer<Batch> consumer, int concurrency, TerminationFlag terminationFlag) {
+    public void parallelConsume(Consumer<Batch> consumer, Concurrency concurrency, TerminationFlag terminationFlag) {
         parallelConsume(concurrency, ignore -> consumer, terminationFlag);
     }
 
-    public void parallelConsume(int concurrency, List<? extends Consumer<Batch>> consumers, TerminationFlag terminationFlag) {
-        assert consumers.size() == concurrency;
+    public void parallelConsume(Concurrency concurrency, List<? extends Consumer<Batch>> consumers, TerminationFlag terminationFlag) {
+        assert consumers.size() == concurrency.value();
 
         var tasks = consumers.stream().map(ConsumerTask::new);
         RunWithConcurrency.builder()
@@ -95,9 +96,9 @@ public abstract class BatchQueue {
             .run();
     }
 
-    public void parallelConsume(int concurrency, IntFunction<? extends Consumer<Batch>> consumerSupplier, TerminationFlag terminationFlag) {
+    public void parallelConsume(Concurrency concurrency, IntFunction<? extends Consumer<Batch>> consumerSupplier, TerminationFlag terminationFlag) {
         var consumers = IntStream
-            .range(0, concurrency)
+            .range(0, concurrency.value())
             .mapToObj(consumerSupplier)
             .collect(Collectors.toList());
 

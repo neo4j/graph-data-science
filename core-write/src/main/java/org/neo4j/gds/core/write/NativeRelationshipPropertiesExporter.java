@@ -23,6 +23,7 @@ package org.neo4j.gds.core.write;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.DegreePartition;
@@ -48,7 +49,7 @@ public class NativeRelationshipPropertiesExporter extends StatementApi implement
     private final RelationshipPropertyTranslator propertyTranslator;
     private final ProgressTracker progressTracker;
 
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final long batchSize;
 
     private final TerminationFlag terminationFlag;
@@ -57,7 +58,7 @@ public class NativeRelationshipPropertiesExporter extends StatementApi implement
         TransactionContext tx,
         GraphStore graphStore,
         RelationshipPropertyTranslator propertyTranslator,
-        int concurrency,
+        Concurrency concurrency,
         long batchSize,
         ProgressTracker progressTracker,
         TerminationFlag terminationFlag

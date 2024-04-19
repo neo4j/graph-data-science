@@ -28,6 +28,7 @@ import org.neo4j.gds.api.RelationshipPropertyStore;
 import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.schema.ImmutableMutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.io.GraphStoreGraphPropertyVisitor;
@@ -62,7 +63,7 @@ public abstract class FileToGraphStoreImporter {
     private final GraphStoreRelationshipVisitor.Builder relationshipVisitorBuilder;
     private final GraphStoreGraphPropertyVisitor.Builder graphPropertyVisitorBuilder;
     private final Path importPath;
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     private final ImmutableMutableGraphSchema.Builder graphSchemaBuilder;
     private final GraphStoreBuilder graphStoreBuilder;
@@ -72,7 +73,7 @@ public abstract class FileToGraphStoreImporter {
     private ProgressTracker progressTracker;
 
     protected FileToGraphStoreImporter(
-        int concurrency,
+        Concurrency concurrency,
         Path importPath,
         Log log,
         TaskRegistryFactory taskRegistryFactory
@@ -84,7 +85,7 @@ public abstract class FileToGraphStoreImporter {
         this.importPath = importPath;
         this.graphSchemaBuilder = ImmutableMutableGraphSchema.builder();
         this.graphStoreBuilder = new GraphStoreBuilder()
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .capabilities(ImmutableStaticCapabilities.of(WriteMode.LOCAL));
         this.log = log;
         this.taskRegistryFactory = taskRegistryFactory;
@@ -158,7 +159,7 @@ public abstract class FileToGraphStoreImporter {
             importTasks
         );
 
-        return new TaskProgressTracker(task, log, concurrency, taskRegistryFactory);
+        return new TaskProgressTracker(task, log, concurrency.value(), taskRegistryFactory);
     }
 
     private Nodes importNodes(FileInput fileInput) {
@@ -177,7 +178,7 @@ public abstract class FileToGraphStoreImporter {
 
         NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder(nodeSchema)
             .maxOriginalId(fileInput.graphInfo().maxOriginalId())
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .nodeCount(fileInput.graphInfo().nodeCount())
             .deduplicateIds(false)
             .idMapBuilderType(fileInput.graphInfo().idMapBuilderType())
@@ -187,7 +188,7 @@ public abstract class FileToGraphStoreImporter {
 
         var nodesIterator = fileInput.nodes(Collector.EMPTY).iterator();
         Collection<Runnable> tasks = ParallelUtil.tasks(
-            concurrency,
+            concurrency.value(),
             (index) -> new ElementImportRunner<>(nodeVisitorBuilder.build(), nodesIterator, progressTracker)
         );
 
@@ -218,7 +219,7 @@ public abstract class FileToGraphStoreImporter {
 
         var relationshipsIterator = fileInput.relationships(Collector.EMPTY).iterator();
         Collection<Runnable> tasks = ParallelUtil.tasks(
-            concurrency,
+            concurrency.value(),
             (
                 index
             ) -> new ElementImportRunner<>(relationshipVisitorBuilder.build(), relationshipsIterator, progressTracker)
@@ -246,7 +247,7 @@ public abstract class FileToGraphStoreImporter {
             var graphPropertiesIterator = fileInput.graphProperties().iterator();
 
             var tasks = ParallelUtil.tasks(
-                concurrency,
+                concurrency.value(),
                 (index) -> new ElementImportRunner<>(
                     graphStoreGraphPropertyVisitor,
                     graphPropertiesIterator,

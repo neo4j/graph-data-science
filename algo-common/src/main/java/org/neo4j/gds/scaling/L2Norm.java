@@ -21,6 +21,7 @@ package org.neo4j.gds.scaling;
 
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.Partition;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -62,12 +63,12 @@ public final class L2Norm extends ScalarScaler {
             public ScalarScaler create(
                 NodePropertyValues properties,
                 long nodeCount,
-                int concurrency,
+                Concurrency concurrency,
                 ProgressTracker progressTracker,
                 ExecutorService executor
             ) {
                 var tasks = PartitionUtils.rangePartition(
-                    concurrency,
+                    concurrency.value(),
                     nodeCount,
                     partition -> new ComputeSquaredSum(partition, properties, progressTracker),
                     Optional.empty()

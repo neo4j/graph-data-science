@@ -97,7 +97,7 @@ public final class LinkFeatureExtractor {
         }
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(linkFeatureWriters)
             .terminationFlag(terminationFlag)
             .run();

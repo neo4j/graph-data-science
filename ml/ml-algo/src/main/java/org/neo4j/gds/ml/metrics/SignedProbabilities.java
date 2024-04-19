@@ -115,7 +115,7 @@ public abstract class SignedProbabilities {
         var signedProbabilities = SignedProbabilities.create(evaluationQueue.totalSize());
 
         var positiveClassIndex = (int) EdgeSplitter.POSITIVE;
-        evaluationQueue.parallelConsume(concurrency.value(), __ -> batch -> {
+        evaluationQueue.parallelConsume(concurrency, __ -> batch -> {
                 var probabilityMatrix = classifier.predictProbabilities(batch, features);
                 var offset = 0;
                 var batchIterator = batch.elementIds();

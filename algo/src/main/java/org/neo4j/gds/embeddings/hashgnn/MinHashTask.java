@@ -104,7 +104,7 @@ class MinHashTask implements Runnable {
             .flatMap(Function.identity())
             .collect(Collectors.toList());
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(tasks)
             .terminationFlag(terminationFlag)
             .run();

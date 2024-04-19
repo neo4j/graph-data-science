@@ -24,6 +24,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeIntArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -37,7 +38,7 @@ public class CELF extends Algorithm<CELFResult> {
     private final int seedSetCount;
     private final Graph graph;
     private final CELFParameters parameters;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final LongDoubleScatterMap seedSetNodes;
     private final HugeLongPriorityQueue spreads;
     private final ExecutorService executorService;
@@ -60,7 +61,7 @@ public class CELF extends Algorithm<CELFResult> {
 
         this.graph = graph;
         this.parameters = parameters;
-        this.concurrency = parameters.concurrency().value();
+        this.concurrency = parameters.concurrency();
         this.seedSetCount = (parameters.seedSetSize() <= graph.nodeCount())
             ? parameters.seedSetSize()
             : (int) graph.nodeCount(); // k <= nodeCount
@@ -94,7 +95,7 @@ public class CELF extends Algorithm<CELFResult> {
         HugeDoubleArray singleSpreadArray = HugeDoubleArray.newArray(graph.nodeCount());
         progressTracker.beginSubTask(graph.nodeCount());
         var tasks = PartitionUtils.rangePartition(
-            this.concurrency,
+            this.concurrency.value(),
             graph.nodeCount(),
             partition -> new ICInitTask(
                 partition,
@@ -105,7 +106,7 @@ public class CELF extends Algorithm<CELFResult> {
                 parameters.randomSeed(),
                 progressTracker
             ),
-            Optional.of(Math.toIntExact(graph.nodeCount()) / this.concurrency)
+            Optional.of(Math.toIntExact(graph.nodeCount()) / this.concurrency.value())
         );
 
         RunWithConcurrency.builder()

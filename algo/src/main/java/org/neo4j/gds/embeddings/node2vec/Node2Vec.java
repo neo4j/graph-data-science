@@ -105,7 +105,7 @@ public class Node2Vec extends Algorithm<Node2VecResult> {
         );
 
         progressTracker.beginSubTask("create walks");
-        RunWithConcurrency.builder().concurrency(concurrency.value()).tasks(tasks).run();
+        RunWithConcurrency.builder().concurrency(concurrency).tasks(tasks).run();
         walks.setMaxWalkLength(tasks.stream()
             .map(Node2VecRandomWalkTask::maxWalkLength)
             .max(Integer::compareTo)

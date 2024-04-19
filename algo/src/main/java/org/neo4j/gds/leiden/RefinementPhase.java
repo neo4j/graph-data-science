@@ -182,7 +182,7 @@ final class RefinementPhase {
         );
 
         RunWithConcurrency.builder().
-            concurrency(concurrency.value())
+            concurrency(concurrency)
             .tasks(tasks)
             .executor(executorService).
             run();

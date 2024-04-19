@@ -134,7 +134,7 @@ final class LinkFeaturesAndLabelsExtractor {
         }
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(tasks)
             .terminationFlag(terminationFlag)
             .run();

@@ -91,7 +91,7 @@ public class InverseRelationships extends Algorithm<Map<RelationshipType, Single
             RunWithConcurrency.
                 builder()
                 .tasks(tasks)
-                .concurrency(concurrency.value())
+                .concurrency(concurrency)
                 .executor(executorService)
                 .terminationFlag(terminationFlag)
                 .build()
@@ -115,7 +115,7 @@ public class InverseRelationships extends Algorithm<Map<RelationshipType, Single
     private RelationshipsBuilder initializeRelationshipsBuilder(RelationshipType relationshipType, List<RelationshipPropertySchema> propertySchemas) {
         RelationshipsBuilderBuilder relationshipsBuilderBuilder = GraphFactory.initRelationshipsBuilder()
             .relationshipType(relationshipType)
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .nodes(graphStore.nodes())
             .executorService(executorService)
             .orientation(Orientation.NATURAL)

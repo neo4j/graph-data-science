@@ -175,7 +175,7 @@ public class Knn extends Algorithm<KnnResult> {
                 Optional.of(minBatchSize)
             );
             RunWithConcurrency.builder()
-                .concurrency(concurrency.value())
+                .concurrency(concurrency)
                 .tasks(neighborFilterTasks)
                 .terminationFlag(terminationFlag)
                 .executor(executorService)
@@ -209,7 +209,7 @@ public class Knn extends Algorithm<KnnResult> {
         );
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(randomNeighborGenerators)
             .terminationFlag(terminationFlag)
             .executor(executorService)
@@ -266,7 +266,7 @@ public class Knn extends Algorithm<KnnResult> {
 
         progressTracker.beginSubTask();
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(neighborsJoiners)
             .terminationFlag(terminationFlag)
             .executor(executorService)

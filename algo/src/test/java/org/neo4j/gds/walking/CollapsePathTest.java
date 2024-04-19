@@ -25,6 +25,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -122,7 +123,7 @@ class CollapsePathTest {
             Collections.singletonList(new Graph[]{tookRel, tookRel}),
             false,
             RelationshipType.of("SAME_DRUG"),
-            2,
+            new Concurrency(2),
             DefaultPool.INSTANCE
 
         ).compute();
@@ -138,7 +139,7 @@ class CollapsePathTest {
             Collections.singletonList(new Graph[]{tookRel, tookRel}),
             true,
             RelationshipType.of("SAME_DRUG"),
-            2,
+            new Concurrency(2),
             DefaultPool.INSTANCE
 
         ).compute();
@@ -152,7 +153,7 @@ class CollapsePathTest {
             Collections.singletonList(new Graph[]{tookGraph, takenByGraph}),
             false,
             RelationshipType.of("SAME_DRUG"),
-            2,
+            new Concurrency(2),
             DefaultPool.INSTANCE
         ).compute();
 

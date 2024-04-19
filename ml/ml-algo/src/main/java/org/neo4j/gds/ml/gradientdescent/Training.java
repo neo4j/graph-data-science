@@ -139,7 +139,7 @@ public class Training {
         for (int i = 0; i < concurrency.value(); i++) {
             consumers.add(new ObjectiveUpdateConsumer(objective, trainSize));
         }
-        batches.parallelConsume(concurrency.value(), consumers, terminationFlag);
+        batches.parallelConsume(concurrency, consumers, terminationFlag);
         return consumers;
     }
 

@@ -50,7 +50,7 @@ public class CommonNeighbourAwareRandomWalk implements RandomWalkBasedNodesSampl
     private LongHashSet startNodesUsed;
 
     private static final double QUALITY_THRESHOLD_BASE = 0.05;
-    
+
     private final CommonNeighbourAwareRandomWalkConfig config;
     private final WalkerProducer walkerProducer;
 
@@ -70,7 +70,7 @@ public class CommonNeighbourAwareRandomWalk implements RandomWalkBasedNodesSampl
             inputGraph,
             progressTracker,
             config.nodeLabelStratification(),
-            config.concurrency(),
+            config.typedConcurrency(),
             config.samplingRatio()
         );
 
@@ -96,7 +96,7 @@ public class CommonNeighbourAwareRandomWalk implements RandomWalkBasedNodesSampl
         );
 
         RunWithConcurrency.builder()
-            .concurrency(config.concurrency())
+            .concurrency(config.typedConcurrency())
             .tasks(tasks)
             .run();
 

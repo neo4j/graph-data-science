@@ -108,7 +108,7 @@ abstract class PregelComputer<CONFIG extends PregelConfig> {
             nodeValues,
             messenger,
             voteBits,
-            config.concurrency(),
+            config.typedConcurrency(),
             executorService,
             progressTracker
         );

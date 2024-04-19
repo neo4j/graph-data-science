@@ -24,6 +24,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -39,7 +40,7 @@ public abstract class GraphStoreExporter {
     private final Map<String, LongFunction<Object>> neoNodeProperties;
     private final Optional<NodeLabelMapping> nodeLabelMapping;
     private final RelationshipType defaultRelationshipType;
-    protected final int concurrency;
+    protected final Concurrency concurrency;
     private final int batchSize;
 
     public enum IdMappingType implements IdMapFunction {
@@ -88,9 +89,8 @@ public abstract class GraphStoreExporter {
         Optional<NeoNodeProperties> neoNodeProperties,
         Optional<NodeLabelMapping> nodeLabelMapping,
         RelationshipType defaultRelationshipType,
-        int concurrency,
+        Concurrency concurrency,
         int batchSize
-
     ) {
         this.graphStore = graphStore;
         this.defaultRelationshipType = defaultRelationshipType;
@@ -127,7 +127,7 @@ public abstract class GraphStoreExporter {
             graphStore.capabilities(),
             graphProperties,
             batchSize,
-            concurrency,
+            concurrency.value(),
             idMappingType()
         );
 

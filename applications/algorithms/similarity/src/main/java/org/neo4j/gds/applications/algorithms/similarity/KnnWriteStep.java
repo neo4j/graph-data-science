@@ -77,7 +77,7 @@ class KnnWriteStep implements MutateOrWriteStep<KnnResult, Pair<RelationshipsWri
             graphStore,
             rootIdMap,
             KNN,
-            configuration.writeConcurrency(),
+            configuration.typedWriteConcurrency(),
             configuration.arrowConnectionInfo(),
             resultStore,
             similarityDistributionBuilder.similarityConsumer()

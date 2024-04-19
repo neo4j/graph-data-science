@@ -136,7 +136,7 @@ public class LocalSearch {
                 ).collect(Collectors.toList());
             progressTracker.beginSubTask();
             RunWithConcurrency.builder()
-                .concurrency(concurrency.value())
+                .concurrency(concurrency)
                 .tasks(nodeToCommunityWeightTasks)
                 .executor(executor)
                 .run();
@@ -162,7 +162,7 @@ public class LocalSearch {
                 ).collect(Collectors.toList());
             progressTracker.beginSubTask();
             RunWithConcurrency.builder()
-                .concurrency(concurrency.value())
+                .concurrency(concurrency)
                 .tasks(swapTasks)
                 .executor(executor)
                 .run();
@@ -185,7 +185,7 @@ public class LocalSearch {
             ).collect(Collectors.toList());
         progressTracker.beginSubTask();
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(costTasks)
             .executor(executor)
             .run();

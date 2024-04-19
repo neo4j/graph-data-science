@@ -168,7 +168,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
             )
         ).collect(Collectors.toList());
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(tasks)
             .terminationFlag(terminationFlag)
             .run();

@@ -136,9 +136,9 @@ final class LocalMovePhase {
 
         while (globalQueueSize.get() > 0) {
             globalQueueIndex.set(0); //exhaust global queue
-            RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency.value()).run();
+            RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency).run();
             globalQueueSize.set(0); //fill global queue again
-            RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency.value()).run();
+            RunWithConcurrency.builder().tasks(tasks).concurrency(concurrency).run();
         }
         for (var task : tasks) {
             swaps += task.swaps;

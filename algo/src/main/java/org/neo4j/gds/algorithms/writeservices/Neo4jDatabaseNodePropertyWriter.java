@@ -28,6 +28,7 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.config.ArrowConnectionInfo;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.utils.ProgressTimer;
@@ -65,7 +66,7 @@ final class Neo4jDatabaseNodePropertyWriter {
         Graph graph,
         GraphStore graphStore,
         NodePropertyValues nodePropertyValues,
-        int writeConcurrency,
+        Concurrency writeConcurrency,
         String writeProperty,
         String procedureName,
         Optional<ArrowConnectionInfo> arrowConnectionInfo,
@@ -122,14 +123,14 @@ final class Neo4jDatabaseNodePropertyWriter {
     private static ProgressTracker createProgressTracker(
         TaskRegistryFactory taskRegistryFactory,
         long taskVolume,
-        int writeConcurrency,
+        Concurrency writeConcurrency,
         String name,
         Log log
     ) {
         return new TaskProgressTracker(
             NodePropertyExporter.baseTask(name, taskVolume),
             (org.neo4j.logging.Log) log.getNeo4jLog(),
-            writeConcurrency,
+            writeConcurrency.value(),
             taskRegistryFactory
         );
     }

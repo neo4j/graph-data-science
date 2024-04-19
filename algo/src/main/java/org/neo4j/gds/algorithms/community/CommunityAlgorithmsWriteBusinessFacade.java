@@ -39,6 +39,7 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ArrowConnectionInfo;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.k1coloring.K1ColoringWriteConfig;
 import org.neo4j.gds.kcore.KCoreDecompositionWriteConfig;
@@ -113,7 +114,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             intermediateResult.computeMilliseconds,
             () -> StandardCommunityStatisticsSpecificFields.EMPTY,
             "WccWrite",
-            configuration.writeConcurrency(),
+            configuration.typedWriteConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
             configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
@@ -140,7 +141,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             intermediateResult.computeMilliseconds,
             () -> KCoreSpecificFields.EMPTY,
             "KCoreWrite",
-            configuration.writeConcurrency(),
+            configuration.typedWriteConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
             configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
@@ -178,7 +179,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             intermediateResult.computeMilliseconds,
             () -> StandardCommunityStatisticsSpecificFields.EMPTY,
             "SccWrite",
-            configuration.writeConcurrency(),
+            configuration.typedWriteConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
             configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
@@ -212,7 +213,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             intermediateResult.computeMilliseconds,
             () -> AlphaSccSpecificFields.EMPTY,
             "SccWrite",
-            configuration.writeConcurrency(),
+            configuration.typedWriteConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
             configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
@@ -261,7 +262,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             intermediateResult.computeMilliseconds,
             () -> LouvainSpecificFields.EMPTY,
             "LouvainWrite",
-            configuration.writeConcurrency(),
+            configuration.typedWriteConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
             configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
@@ -303,7 +304,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             intermediateResult.computeMilliseconds,
             () -> LabelPropagationSpecificFields.EMPTY,
             "LabelPropagationWrite",
-            configuration.writeConcurrency(),
+            configuration.typedWriteConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
             configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
@@ -355,7 +356,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             intermediateResult.computeMilliseconds,
             () -> LeidenSpecificFields.EMPTY,
             "LeidenWrite",
-            configuration.writeConcurrency(),
+            configuration.typedWriteConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
             configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
@@ -393,7 +394,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             intermediateResult.computeMilliseconds,
             () -> KmeansSpecificFields.EMPTY,
             "KmeansWrite",
-            configuration.writeConcurrency(),
+            configuration.typedWriteConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
             configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
@@ -434,7 +435,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             intermediateResult.computeMilliseconds,
             () -> K1ColoringSpecificFields.EMPTY,
             "K1ColoringWrite",
-            config.writeConcurrency(),
+            config.typedWriteConcurrency(),
             config.writeProperty(),
             config.arrowConnectionInfo(),
             config.resolveResultStore(algorithmResult.graphStore().resultStore())
@@ -480,7 +481,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             intermediateResult.computeMilliseconds,
             emptySupplier,
             "ModularityOptimizationWrite",
-            configuration.writeConcurrency(),
+            configuration.typedWriteConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
             configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
@@ -506,7 +507,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             intermediateResult.computeMilliseconds,
             () -> TriangleCountSpecificFields.EMPTY,
             "TriangleCountWrite",
-            config.writeConcurrency(),
+            config.typedWriteConcurrency(),
             config.writeProperty(),
             config.arrowConnectionInfo(),
             config.resolveResultStore(algorithmResult.graphStore().resultStore())
@@ -535,7 +536,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             intermediateResult.computeMilliseconds,
             () -> LocalClusteringCoefficientSpecificFields.EMPTY,
             "LocalClusteringCoefficientWrite",
-            config.writeConcurrency(),
+            config.typedWriteConcurrency(),
             config.writeProperty(),
             config.arrowConnectionInfo(),
             config.resolveResultStore(algorithmResult.graphStore().resultStore())
@@ -553,7 +554,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
         long computeMilliseconds,
         Supplier<ASF> emptyASFSupplier,
         String procedureName,
-        int writeConcurrency,
+        Concurrency writeConcurrency,
         String writeProperty,
         Optional<ArrowConnectionInfo> arrowConnectionInfo,
         Optional<ResultStore> resultStore
@@ -613,7 +614,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
         long computeMilliseconds,
         Supplier<ASF> emptyASFSupplier,
         String procedureName,
-        int writeConcurrency,
+        Concurrency writeConcurrency,
         String writeProperty,
         Optional<ArrowConnectionInfo> arrowConnectionInfo,
         Optional<ResultStore> resultStore

@@ -28,6 +28,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.BatchNodeIterable;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 
 import java.util.Collections;
@@ -489,7 +490,7 @@ class MultiLabelInformationTest {
 
             RunWithConcurrency.builder()
                 .tasks(tasks)
-                .concurrency(4)
+                .concurrency(new Concurrency(4))
                 .build()
                 .run();
 

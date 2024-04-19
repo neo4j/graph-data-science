@@ -31,6 +31,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.huge.DirectIdMap;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -161,11 +162,11 @@ class NativeNodePropertyExporterTest extends BaseTest {
 
         // with a node exporter
         var log = Neo4jProxy.testLog();
-        var writeConcurrency = 4;
+        var writeConcurrency = new Concurrency(4);
         var progressTracker = new TaskProgressTracker(
             NodePropertyExporter.baseTask("AlgoNameGoesHere", graph.nodeCount()),
             log,
-            writeConcurrency,
+            writeConcurrency.value(),
             EmptyTaskRegistryFactory.INSTANCE
         );
         var exporterBuilder = NativeNodePropertyExporter
@@ -212,7 +213,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
         TerminationFlag terminationFlag = () -> false;
         var exporter = NativeNodePropertyExporter
             .builder(TestSupport.fullAccessTransaction(db), new DirectIdMap(3), terminationFlag)
-            .parallel(executorService, 4)
+            .parallel(executorService, new Concurrency(4))
             .build();
 
         assertTransactionTermination(() -> exporter.write("foo", new DoubleTestPropertyValues(ignore -> 42.0)));

@@ -70,7 +70,7 @@ final class ModularityManager {
         );
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(tasks)
             .run();
 

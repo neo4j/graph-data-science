@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.write;
 
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.LazyBatchCollection;
@@ -40,7 +41,7 @@ public class NativeNodeLabelExporter extends StatementApi implements NodeLabelEx
     private final TerminationFlag terminationFlag;
     private final ExecutorService executorService;
     private final ProgressTracker progressTracker;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final long nodeCount;
     private final LongUnaryOperator toOriginalId;
     private final LongAdder nodeLabelsWritten;
@@ -61,7 +62,7 @@ public class NativeNodeLabelExporter extends StatementApi implements NodeLabelEx
         LongUnaryOperator toOriginalId,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker,
-        int concurrency,
+        Concurrency concurrency,
         ExecutorService executorService
     ) {
         super(tx);
@@ -80,7 +81,7 @@ public class NativeNodeLabelExporter extends StatementApi implements NodeLabelEx
         int nodeLabelToken = getOrCreateNodeLabelToken(nodeLabel);
         progressTracker.beginSubTask(nodeCount);
         try {
-            if (concurrency > 1 && ParallelUtil.canRunInParallel(executorService)) {
+            if (concurrency.value() > 1 && ParallelUtil.canRunInParallel(executorService)) {
                 writeParallel(nodeLabelToken);
             } else {
                 writeSequential(nodeLabelToken);
@@ -129,7 +130,7 @@ public class NativeNodeLabelExporter extends StatementApi implements NodeLabelEx
     private void writeParallel(WriteConsumer writer) {
         final long batchSize = ParallelUtil.adjustedBatchSize(
             nodeCount,
-            concurrency,
+            concurrency.value(),
             MIN_BATCH_SIZE,
             MAX_BATCH_SIZE
         );

@@ -95,7 +95,7 @@ public final class NodesFilter {
 
         progressTracker.beginSubTask();
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(tasks)
             .executor(executorService)
             .run();

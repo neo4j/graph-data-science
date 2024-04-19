@@ -217,7 +217,7 @@ final class ParallelUtilTest {
         withPool(threads, pool -> {
             final Tasks ts = new Tasks(tasks, 0);
             RunWithConcurrency.builder()
-                .concurrency(concurrency)
+                .concurrency(new Concurrency(concurrency))
                 .tasks(ts)
                 .executor(pool)
                 .run();
@@ -235,31 +235,31 @@ final class ParallelUtilTest {
             List<Consumer<Tasks>> runs = asList(
                 // null pool
                 t -> RunWithConcurrency.builder()
-                    .concurrency(8)
+                    .concurrency(new Concurrency(8))
                     .tasks(t)
                     .executor(null)
                     .run(),
                 // terminated pool
                 t -> RunWithConcurrency.builder()
-                    .concurrency(8)
+                    .concurrency(new Concurrency(8))
                     .tasks(t)
                     .executor(deadPool)
                     .run(),
                 // single task
                 t -> RunWithConcurrency.builder()
-                    .concurrency(8)
+                    .concurrency(new Concurrency(8))
                     .tasks(t.sized(1))
                     .executor(pool)
                     .run(),
                 // concurrency = 1
                 t -> RunWithConcurrency.builder()
-                    .concurrency(1)
+                    .concurrency(new Concurrency(1))
                     .tasks(t)
                     .executor(pool)
                     .run(),
                 // concurrency = 0
                 t -> RunWithConcurrency.builder()
-                    .concurrency(0)
+                    .concurrency(new Concurrency(1))
                     .tasks(t)
                     .executor(pool)
                     .run()
@@ -280,7 +280,7 @@ final class ParallelUtilTest {
         withPool(4, pool -> {
             Tasks tasks = new Tasks(4, 10);
             tasks.run(t -> RunWithConcurrency.builder()
-                .concurrency(2)
+                .concurrency(new Concurrency(2))
                 .tasks(t)
                 .executor(pool)
                 .run());
@@ -297,7 +297,7 @@ final class ParallelUtilTest {
         Tasks tasks = new Tasks(5, 10);
         try {
             tasks.run(t -> RunWithConcurrency.builder()
-                .concurrency(4)
+                .concurrency(new Concurrency(4))
                 .tasks(t)
                 .maxWaitRetries(100)
                 .executor(pool)
@@ -326,7 +326,7 @@ final class ParallelUtilTest {
             Tasks tasks = new Tasks(6, 10);
             Collection<RemainingAssertions> assertions = new ConcurrentLinkedQueue<>();
             final Thread thread = new Thread(() -> tasks.run(t -> RunWithConcurrency.builder()
-                .concurrency(2)
+                .concurrency(new Concurrency(2))
                 .tasks(t)
                 .executor(pool)
                 .run()));
@@ -363,7 +363,7 @@ final class ParallelUtilTest {
                 TerminationFlag isRunning = running::get;
                 var thread = ExecutorServiceUtil.newThread(() -> tasks.run(t ->
                     RunWithConcurrency.builder()
-                        .concurrency(2)
+                        .concurrency(new Concurrency(2))
                         .tasks(t)
                         .terminationFlag(isRunning)
                         .executor(pool)
@@ -393,7 +393,7 @@ final class ParallelUtilTest {
         Tasks tasks = new Tasks(5, 10);
         try {
             tasks.run(t -> RunWithConcurrency.builder()
-                .concurrency(4)
+                .concurrency(new Concurrency(4))
                 .tasks(t)
                 .maxWaitRetries(10)
                 .waitTime(5, TimeUnit.MILLISECONDS)
@@ -419,7 +419,7 @@ final class ParallelUtilTest {
             counter::incrementAndGet
         );
         assertThatThrownBy(() -> RunWithConcurrency.builder()
-            .concurrency(4)
+            .concurrency(new Concurrency(4))
             .tasks(tasks)
             .run())
             .isInstanceOf(RuntimeException.class)
@@ -445,7 +445,7 @@ final class ParallelUtilTest {
 
         try {
             RunWithConcurrency.builder()
-                .concurrency(7)
+                .concurrency(new Concurrency(7))
                 .tasks(tasks)
                 .run();
 

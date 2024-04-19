@@ -26,6 +26,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.ArrowConnectionInfo;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.logging.Log;
 
 import java.util.Optional;
@@ -46,7 +47,7 @@ public class WriteRelationshipService {
         GraphStore graphStore,
         IdMap rootIdMap,
         String taskName,
-        Integer concurrency,
+        Concurrency concurrency,
         Optional<ArrowConnectionInfo> arrowConnectionInfo,
         Optional<ResultStore> resultStore,
         RelationshipWithPropertyConsumer relationshipWithPropertyConsumer

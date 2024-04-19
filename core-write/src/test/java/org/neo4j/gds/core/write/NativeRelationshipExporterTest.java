@@ -37,6 +37,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -125,7 +126,7 @@ class NativeRelationshipExporterTest extends BaseTest {
                 graphStore.getGraph(RelationshipType.of("NEW_REL"), Optional.of("newWeight")),
                 RUNNING_TRUE
             )
-            .withConcurrency(concurrency)
+            .withConcurrency(new Concurrency(concurrency))
             .withRelationPropertyTranslator(relProperty -> Values.longValue((long) relProperty))
             .build()
             .write("NEW_REL", "newWeight");
@@ -260,7 +261,7 @@ class NativeRelationshipExporterTest extends BaseTest {
         return NativeRelationshipExporter
             .builder(TestSupport.fullAccessTransaction(db), fromGraph, RUNNING_TRUE)
             .withBatchSize(1)
-            .withConcurrency(concurrency)
+            .withConcurrency(new Concurrency(concurrency))
             .build();
     }
 

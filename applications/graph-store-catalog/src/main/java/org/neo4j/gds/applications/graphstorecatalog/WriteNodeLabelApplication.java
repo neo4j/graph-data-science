@@ -72,7 +72,7 @@ public class WriteNodeLabelApplication {
                     graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                 )
                 .withResultStore(resultStore)
-                .parallel(DefaultPool.INSTANCE, configuration.concurrency())
+                .parallel(DefaultPool.INSTANCE, configuration.typedWriteConcurrency())
                 .build();
 
             try {

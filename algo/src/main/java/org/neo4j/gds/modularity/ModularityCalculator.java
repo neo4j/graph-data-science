@@ -93,7 +93,7 @@ public final class ModularityCalculator extends Algorithm<ModularityResult> {
         );
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(tasks)
             .run();
 

@@ -26,6 +26,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -44,7 +45,7 @@ public final class NodeLabelHistogram {
         LongLongHashMap histogram();
     }
 
-    public static Result compute(Graph inputGraph, int concurrency, ProgressTracker progressTracker) {
+    public static Result compute(Graph inputGraph, Concurrency concurrency, ProgressTracker progressTracker) {
         progressTracker.beginSubTask("Count node labels");
         progressTracker.setSteps(inputGraph.nodeCount());
 
@@ -57,7 +58,7 @@ public final class NodeLabelHistogram {
         var localLabelCounts = new ConcurrentLinkedQueue<LongLongHashMap>();
 
         var tasks = PartitionUtils.rangePartition(
-            concurrency,
+            concurrency.value(),
             inputGraph.nodeCount(),
             partition -> (Runnable) () -> {
                 var labelCount = new LongLongHashMap();

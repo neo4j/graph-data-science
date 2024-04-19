@@ -186,7 +186,7 @@ public class K1Coloring extends Algorithm<K1ColoringResult> {
         );
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(steps)
             .executor(executor)
             .run();
@@ -213,7 +213,7 @@ public class K1Coloring extends Algorithm<K1ColoringResult> {
         )).collect(Collectors.toList());
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(steps)
             .executor(executor)
             .run();

@@ -93,7 +93,7 @@ public class SimilarityGraphBuilder {
             .relationshipType(RelationshipType.of("REL"))
             .orientation(Orientation.NATURAL)
             .addPropertyConfig(GraphFactory.PropertyConfig.of("property"))
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .executorService(executorService)
             .build();
 

@@ -99,7 +99,7 @@ public class RandomDegreeSelectionStrategy implements SelectionStrategy {
             })).collect(Collectors.toList());
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(tasks)
             .executor(executorService)
             .run();
@@ -151,7 +151,7 @@ public class RandomDegreeSelectionStrategy implements SelectionStrategy {
             }).collect(Collectors.toList());
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(tasks)
             .executor(executorService)
             .run();

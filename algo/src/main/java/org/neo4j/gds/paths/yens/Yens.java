@@ -124,7 +124,7 @@ public final class Yens extends Algorithm<PathFindingResult> {
             }
 
             RunWithConcurrency.builder()
-                .concurrency(concurrency.value())
+                .concurrency(concurrency)
                 .tasks(tasks)
                 .executor(DefaultPool.INSTANCE)
                 .run();

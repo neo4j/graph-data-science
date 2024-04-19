@@ -72,7 +72,7 @@ public final class ModularityComputer {
             ), Optional.empty()
         );
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(tasks)
             .executor(executorService)
             .run();

@@ -195,7 +195,7 @@ public class NodeFilteredGraph extends CSRGraphAdapter implements FilteredIdMap 
             Optional.empty()
         );
         RunWithConcurrency.builder()
-            .concurrency(ConcurrencyConfig.DEFAULT_CONCURRENCY)
+            .concurrency(ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY)
             .tasks(tasks)
             .run();
 

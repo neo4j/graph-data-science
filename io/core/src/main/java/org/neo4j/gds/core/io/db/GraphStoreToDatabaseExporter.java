@@ -56,7 +56,7 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter {
             .batchSize(parameters.batchSize())
             .enableDebugLog(parameters.enableDebugLog())
             .defaultRelationshipType(parameters.defaultRelationshipType())
-            .writeConcurrency(parameters.writeConcurrency())
+            .writeConcurrency(parameters.writeConcurrency().value())
             .databaseFormat(parameters.databaseFormat())
             .force(false)
             .highIO(false)

@@ -109,7 +109,7 @@ public class Conductance extends Algorithm<ConductanceResult> {
             Optional.of(minBatchSize)
         );
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(tasks)
             .executor(executor)
             .run();
@@ -184,7 +184,7 @@ public class Conductance extends Algorithm<ConductanceResult> {
         });
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(tasks)
             .run();
 
@@ -238,7 +238,7 @@ public class Conductance extends Algorithm<ConductanceResult> {
         });
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(tasks)
             .run();
 

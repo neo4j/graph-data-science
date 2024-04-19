@@ -171,7 +171,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
             Optional.of(minBatchSize)
         );
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(tasks)
             .executor(executor)
             .run();
@@ -187,7 +187,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
             Optional.of(minBatchSize)
         );
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(tasks)
             .executor(executor)
             .run();

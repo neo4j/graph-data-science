@@ -101,7 +101,7 @@ class PlaceNodesRandomly {
         );
         progressTracker.beginSubTask();
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(tasks)
             .executor(executor)
             .run();

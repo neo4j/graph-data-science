@@ -63,11 +63,12 @@ public class RandomWalkWithRestarts implements RandomWalkBasedNodesSampler {
 
         progressTracker.beginSubTask("Sample nodes");
 
+        var concurrency = config.typedConcurrency();
         var seenNodes = SeenNodes.create(
             inputGraph,
             progressTracker,
             config.nodeLabelStratification(),
-            config.concurrency(),
+            concurrency,
             config.samplingRatio()
         );
 
@@ -86,7 +87,7 @@ public class RandomWalkWithRestarts implements RandomWalkBasedNodesSampler {
             walkerProducer.getWalker(
                 seenNodes,
                 totalWeights,
-                QUALITY_THRESHOLD_BASE / (config.concurrency() * config.concurrency()),
+                QUALITY_THRESHOLD_BASE / (concurrency.value() * concurrency.value()),
                 new WalkQualities(initialStartQualities),
                 rng.split(),
                 inputGraph.concurrentCopy(),
@@ -96,7 +97,7 @@ public class RandomWalkWithRestarts implements RandomWalkBasedNodesSampler {
         );
 
         RunWithConcurrency.builder()
-            .concurrency(config.concurrency())
+            .concurrency(concurrency)
             .tasks(tasks)
             .run();
 

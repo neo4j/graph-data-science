@@ -180,7 +180,7 @@ public class SimilarityAlgorithmsWriteBusinessFacade {
                 graphStore,
                 rootIdMap,
                 taskName,
-                configuration.writeConcurrency(),
+                configuration.typedWriteConcurrency(),
                 arrowConnectionInfo,
                 resultStore,
                 similarityDistributionBuilder.similarityConsumer()

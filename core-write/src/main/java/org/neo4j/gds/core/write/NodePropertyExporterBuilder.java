@@ -24,6 +24,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.config.ConcurrencyConfig;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -40,7 +41,7 @@ public abstract class NodePropertyExporterBuilder {
     protected TerminationFlag terminationFlag;
 
     protected ExecutorService executorService;
-    protected int writeConcurrency = ConcurrencyConfig.DEFAULT_CONCURRENCY;
+    protected Concurrency writeConcurrency = ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY;
     protected ProgressTracker progressTracker = ProgressTracker.NULL_TRACKER;
     protected Optional<ArrowConnectionInfo> arrowConnectionInfo = Optional.empty();
     protected Optional<String> remoteDatabaseName; // coupled with arrowConnectionInfo, but should not appear in external API
@@ -81,7 +82,7 @@ public abstract class NodePropertyExporterBuilder {
         return this;
     }
 
-    public NodePropertyExporterBuilder parallel(ExecutorService es, int writeConcurrency) {
+    public NodePropertyExporterBuilder parallel(ExecutorService es, Concurrency writeConcurrency) {
         this.executorService = es;
         this.writeConcurrency = writeConcurrency;
         return this;

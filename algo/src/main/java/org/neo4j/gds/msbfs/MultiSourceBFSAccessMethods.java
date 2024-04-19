@@ -279,7 +279,7 @@ public final class MultiSourceBFSAccessMethods {
         var bfss = allSourceBfss(threads);
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(bfss)
             .maxWaitRetries((long) threads << 2)
             .waitTime(100L, TimeUnit.MICROSECONDS)

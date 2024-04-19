@@ -87,7 +87,7 @@ public final class OutOfBagError implements Metric {
         );
 
         RunWithConcurrency.builder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .tasks(tasks)
             .run();
 

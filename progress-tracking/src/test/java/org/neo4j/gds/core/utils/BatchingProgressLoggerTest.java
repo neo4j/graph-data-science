@@ -26,6 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.neo4j.gds.assertj.Extractors;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.progress.BatchingProgressLogger;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -234,7 +235,7 @@ class BatchingProgressLoggerTest {
             .collect(Collectors.toList());
 
         RunWithConcurrency.builder()
-            .concurrency(4)
+            .concurrency(new Concurrency(4))
             .tasks(tasks)
             .run();
 
