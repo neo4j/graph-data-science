@@ -60,7 +60,7 @@ class PartitionUtilsTest {
     void testAlignment() {
         long alignTo = 64;
         long nodeCount = 200;
-        int concurrency = 2;
+        var concurrency = new Concurrency(2);
 
         List<Partition> partitions = PartitionUtils.numberAlignedPartitioning(
             concurrency,
@@ -80,7 +80,7 @@ class PartitionUtilsTest {
     void testAlignmentWithTaskSupplier() {
         long alignTo = 64;
         long nodeCount = 200;
-        int concurrency = 2;
+        var concurrency = new Concurrency(2);
 
         var tasks = PartitionUtils.numberAlignedPartitioning(
             concurrency,
@@ -109,7 +109,7 @@ class PartitionUtilsTest {
         long alignTo = 42;
         long maxSize = 100;
         long nodeCount = 400;
-        int concurrency = 3;
+        var concurrency = new Concurrency(3);
 
         List<Partition> partitions = PartitionUtils.numberAlignedPartitioningWithMaxSize(
             concurrency,
@@ -131,7 +131,7 @@ class PartitionUtilsTest {
         long alignTo = 42;
         long maxSize = 100;
         long nodeCount = 400;
-        int concurrency = 3;
+        var concurrency = new Concurrency(3);
 
         var tasks = PartitionUtils.numberAlignedPartitioningWithMaxSize(
             concurrency,

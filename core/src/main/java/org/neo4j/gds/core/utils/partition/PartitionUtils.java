@@ -66,7 +66,7 @@ public final class PartitionUtils {
     }
 
     public static List<Partition> numberAlignedPartitioning(
-        int concurrency,
+        Concurrency concurrency,
         long nodeCount,
         long alignTo
     ) {
@@ -74,7 +74,7 @@ public final class PartitionUtils {
     }
 
     public static <TASK> List<TASK> numberAlignedPartitioning(
-        int concurrency,
+        Concurrency concurrency,
         long nodeCount,
         long alignTo,
         Function<Partition, TASK> taskCreator
@@ -83,7 +83,7 @@ public final class PartitionUtils {
     }
 
     public static List<Partition> numberAlignedPartitioningWithMaxSize(
-        int concurrency,
+        Concurrency concurrency,
         long nodeCount,
         long alignTo,
         long maxPartitionSize
@@ -98,7 +98,7 @@ public final class PartitionUtils {
     }
 
     public static <TASK> List<TASK> numberAlignedPartitioningWithMaxSize(
-        int concurrency,
+        Concurrency concurrency,
         long nodeCount,
         long alignTo,
         long maxPartitionSize,
@@ -112,7 +112,7 @@ public final class PartitionUtils {
             ));
         }
 
-        final long initialBatchSize = ParallelUtil.adjustedBatchSize(nodeCount, new Concurrency(concurrency), alignTo);
+        final long initialBatchSize = ParallelUtil.adjustedBatchSize(nodeCount, concurrency, alignTo);
         final long remainder = initialBatchSize % alignTo;
         long adjustedBatchSize = remainder == 0 ? initialBatchSize : initialBatchSize + (alignTo - remainder);
         if (adjustedBatchSize > maxPartitionSize) {

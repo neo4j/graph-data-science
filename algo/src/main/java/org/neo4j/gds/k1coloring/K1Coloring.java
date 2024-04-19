@@ -197,7 +197,7 @@ public class K1Coloring extends Algorithm<K1ColoringResult> {
         progressTracker.beginSubTask(volume);
 
         // The nodesToColor bitset is not thread safe, therefore we have to align the batches to multiples of 64
-        List<Partition> partitions = PartitionUtils.numberAlignedPartitioning(concurrency.value(), nodeCount, Long.SIZE);
+        List<Partition> partitions = PartitionUtils.numberAlignedPartitioning(concurrency, nodeCount, Long.SIZE);
 
         var currentNodesToColor = currentNodesToColor();
         var nextNodesToColor = nextNodesToColor();

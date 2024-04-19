@@ -61,7 +61,7 @@ public class RandomDegreeSelectionStrategy implements SelectionStrategy {
         this.sampleSet = new BitSet(graph.nodeCount());
         this.graphSize = graph.nodeCount();
         nodeQueue.set(0);
-        var partitions = PartitionUtils.numberAlignedPartitioning(concurrency.value(), graph.nodeCount(), Long.SIZE);
+        var partitions = PartitionUtils.numberAlignedPartitioning(concurrency, graph.nodeCount(), Long.SIZE);
         var maxDegree = maxDegree(graph, partitions, executorService, concurrency);
         selectNodes(graph, partitions, maxDegree, executorService, concurrency);
     }
