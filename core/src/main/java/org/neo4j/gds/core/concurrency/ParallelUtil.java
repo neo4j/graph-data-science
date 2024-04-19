@@ -306,7 +306,7 @@ public final class ParallelUtil {
 
     static void runWithConcurrency(RunWithConcurrency params) {
         runWithConcurrency(
-            params.concurrency().value(),
+            params.concurrency(),
             params.tasks(),
             params.forceUsageOfExecutor(),
             params.waitNanos(),
@@ -319,7 +319,7 @@ public final class ParallelUtil {
 
     // only called from an existing Params object, rely on its validation
     private static void runWithConcurrency(
-        int concurrency,
+        Concurrency concurrency,
         Iterator<? extends Runnable> tasks,
         boolean forceUsageOfExecutor,
         long waitNanos,
@@ -329,7 +329,7 @@ public final class ParallelUtil {
         @Nullable ExecutorService executor
     ) {
         // Params validation ensures that `forceUsageOfExecutor==true && canRunInParallel(executor)==false` cannot happen
-        if (!canRunInParallel(executor) || (concurrency <= 1 && !forceUsageOfExecutor)) {
+        if (!canRunInParallel(executor) || (concurrency.value() == 1 && !forceUsageOfExecutor)) { // concurrency.value() == 1 could be a method Concurrency#singleThreaded or something
             while (tasks.hasNext()) {
                 Runnable task = tasks.next();
                 terminationFlag.assertRunning();
@@ -338,8 +338,7 @@ public final class ParallelUtil {
             return;
         }
 
-        CompletionService completionService =
-            new CompletionService(executor, concurrency);
+        CompletionService completionService = new CompletionService(executor, concurrency);
 
         PushbackIterator<Runnable> ts =
             new PushbackIterator<>(tasks);
@@ -348,9 +347,9 @@ public final class ParallelUtil {
         // generally assumes that tasks.size is notably larger than concurrency
         try {
             //noinspection StatementWithEmptyBody - add first concurrency tasks
-            for (int i = concurrency; i-- > 0
-                                      && terminationFlag.running()
-                                      && completionService.trySubmit(ts); )
+            for (int i = concurrency.value(); i-- > 0
+                                              && terminationFlag.running()
+                                              && completionService.trySubmit(ts); )
                 ;
 
             terminationFlag.assertRunning();
@@ -478,7 +477,7 @@ public final class ParallelUtil {
             }
         }
 
-        CompletionService(final ExecutorService executor, final int targetConcurrency) {
+        CompletionService(final ExecutorService executor, final Concurrency targetConcurrency) {
             if (!canRunInParallel(executor)) {
                 throw new IllegalArgumentException(
                     "executor already terminated or not usable");
@@ -486,7 +485,7 @@ public final class ParallelUtil {
             if (executor instanceof ThreadPoolExecutor) {
                 pool = (ThreadPoolExecutor) executor;
                 availableConcurrency = pool.getCorePoolSize();
-                int capacity = Math.max(targetConcurrency, availableConcurrency) + 1;
+                int capacity = Math.max(targetConcurrency.value(), availableConcurrency) + 1;
                 completionQueue = new ArrayBlockingQueue<>(capacity);
             } else {
                 pool = null;
