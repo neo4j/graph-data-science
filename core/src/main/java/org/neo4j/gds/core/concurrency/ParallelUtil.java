@@ -154,35 +154,6 @@ public final class ParallelUtil {
      * @return a batch size, so that {@code nodeCount} is equally divided by {@code concurrency}
      *     but no smaller than {@code minBatchSize}.
      */
-    public static int adjustedBatchSize(
-        final int nodeCount,
-        int concurrency,
-        final int minBatchSize
-    ) {
-        if (concurrency <= 0) {
-            concurrency = nodeCount;
-        }
-        int targetBatchSize = threadCount(concurrency, nodeCount);
-        return Math.max(minBatchSize, targetBatchSize);
-    }
-
-    /**
-     * @return a batch size, so that {@code nodeCount} is equally divided by {@code concurrency}
-     *     but no smaller than {@link #DEFAULT_BATCH_SIZE}.
-     * @see #adjustedBatchSize(int, int, int)
-     */
-    public static int adjustedBatchSize(
-        final int nodeCount,
-        final int concurrency
-    ) {
-        return adjustedBatchSize(nodeCount, concurrency, DEFAULT_BATCH_SIZE);
-    }
-
-    /**
-     * @return a batch size, so that {@code nodeCount} is equally divided by {@code concurrency}
-     *     but no smaller than {@code minBatchSize}.
-     * @see #adjustedBatchSize(int, int, int)
-     */
     public static long adjustedBatchSize(
         final long nodeCount,
         int concurrency,
