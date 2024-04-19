@@ -74,9 +74,10 @@ class HighLimitIdMapTest {
     @Test
     void shouldReturnCorrectTypeIds() {
         long[] nodes = LongStream.range(0, 42).toArray();
-        var builder = HighLimitIdMapBuilder.of(1, ArrayIdMapBuilder.of(nodes.length));
+        var concurrency = new Concurrency(1);
+        var builder = HighLimitIdMapBuilder.of(concurrency, ArrayIdMapBuilder.of(nodes.length));
         builder.allocate(nodes.length).insert(nodes);
-        var idMap = builder.build(LabelInformationBuilders.allNodes(), nodes.length - 1, 1);
+        var idMap = builder.build(LabelInformationBuilders.allNodes(), nodes.length - 1, concurrency);
 
         assertThat(idMap.typeId()).contains(HighLimitIdMapBuilder.ID).contains(ArrayIdMapBuilder.ID);
         assertThat(HighLimitIdMap.innerTypeId(idMap.typeId()).get()).isEqualTo(ArrayIdMapBuilder.ID);
@@ -102,16 +103,17 @@ class HighLimitIdMapTest {
 
         @Test
         void testToRootNodeId() {
-            var filteredIdMapA = idMap.withFilteredLabels(List.of(NodeLabel.of("A")), 1).get();
+            var concurrency = new Concurrency(1);
+            var filteredIdMapA = idMap.withFilteredLabels(List.of(NodeLabel.of("A")), concurrency).get();
             long expectedA = idMap.toMappedNodeId(1000);
             assertThat(filteredIdMapA.toRootNodeId(0)).isEqualTo(expectedA);
 
-            var filteredIdMapB = idMap.withFilteredLabels(List.of(NodeLabel.of("B")), 1).get();
+            var filteredIdMapB = idMap.withFilteredLabels(List.of(NodeLabel.of("B")), concurrency).get();
             long expectedB = idMap.toMappedNodeId(2000);
             assertThat(filteredIdMapB.toRootNodeId(0)).isEqualTo(expectedB);
 
 
-            var filteredIdMapC = idMap.withFilteredLabels(List.of(NodeLabel.of("C")), 1).get();
+            var filteredIdMapC = idMap.withFilteredLabels(List.of(NodeLabel.of("C")), concurrency).get();
             long expectedC = idMap.toMappedNodeId(3000);
             assertThat(filteredIdMapC.toRootNodeId(0)).isEqualTo(expectedC);
         }

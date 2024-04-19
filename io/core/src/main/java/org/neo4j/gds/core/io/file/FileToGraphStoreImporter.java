@@ -85,7 +85,7 @@ public abstract class FileToGraphStoreImporter {
         this.importPath = importPath;
         this.graphSchemaBuilder = ImmutableMutableGraphSchema.builder();
         this.graphStoreBuilder = new GraphStoreBuilder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .capabilities(ImmutableStaticCapabilities.of(WriteMode.LOCAL));
         this.log = log;
         this.taskRegistryFactory = taskRegistryFactory;

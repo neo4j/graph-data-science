@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.ArrayIdMap;
 import org.neo4j.gds.core.loading.ArrayIdMapBuilder;
 import org.neo4j.gds.core.loading.GrowingArrayIdMapBuilder;
@@ -34,7 +35,7 @@ public class OpenGdsIdMapBehavior implements IdMapBehavior {
 
     @Override
     public IdMapBuilder create(
-        int concurrency,
+        Concurrency concurrency,
         Optional<Long> maxOriginalId,
         Optional<Long> nodeCount
     ) {
@@ -44,7 +45,7 @@ public class OpenGdsIdMapBehavior implements IdMapBehavior {
     }
 
     @Override
-    public IdMapBuilder create(String id, int concurrency, Optional<Long> maxOriginalId, Optional<Long> nodeCount) {
+    public IdMapBuilder create(String id, Concurrency concurrency, Optional<Long> maxOriginalId, Optional<Long> nodeCount) {
         var idLowerCase = id.toLowerCase(Locale.US);
         if (idLowerCase.equals(ArrayIdMapBuilder.ID)) {
             return create(concurrency, maxOriginalId, nodeCount);

@@ -33,8 +33,8 @@ public final class HighLimitIdMapBuilder implements IdMapBuilder {
 
     private final CloseableThreadLocal<BulkAdder> bulkAdders;
 
-    public static HighLimitIdMapBuilder of(int concurrency, IdMapBuilder internalIdMapBuilder) {
-        return new HighLimitIdMapBuilder(new Concurrency(concurrency), internalIdMapBuilder);
+    public static HighLimitIdMapBuilder of(Concurrency concurrency, IdMapBuilder internalIdMapBuilder) {
+        return new HighLimitIdMapBuilder(concurrency, internalIdMapBuilder);
     }
 
     private HighLimitIdMapBuilder(Concurrency concurrency, IdMapBuilder internalIdMapBuilder) {
@@ -56,7 +56,7 @@ public final class HighLimitIdMapBuilder implements IdMapBuilder {
     }
 
     @Override
-    public IdMap build(LabelInformation.Builder labelInformationBuilder, long highestNodeId, int concurrency) {
+    public IdMap build(LabelInformation.Builder labelInformationBuilder, long highestNodeId, Concurrency concurrency) {
         var intermediateIdMap = this.originalToIntermediateMapping.build();
         var highestIntermediateId = intermediateIdMap.size() - 1;
         var internalIdMap = this.intermediateToInternalMapping.build(labelInformationBuilder, highestIntermediateId, concurrency);

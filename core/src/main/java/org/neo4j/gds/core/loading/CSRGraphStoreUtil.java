@@ -34,6 +34,7 @@ import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.utils.StringJoining;
@@ -117,7 +118,7 @@ public final class CSRGraphStoreUtil {
             .nodes(ImmutableNodes.of(schema.nodeSchema(), graph.idMap(), nodeProperties))
             .relationshipImportResult(relationshipImportResult)
             .graphProperties(GraphPropertyStore.empty())
-            .concurrency(concurrency)
+            .concurrency(new Concurrency(concurrency))
             .build();
     }
 

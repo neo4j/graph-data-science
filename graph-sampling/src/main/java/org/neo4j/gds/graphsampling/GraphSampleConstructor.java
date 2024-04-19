@@ -126,7 +126,7 @@ public class GraphSampleConstructor {
             .schema(filteredSchema)
             .nodes(ImmutableNodes.of(filteredSchema.nodeSchema(), idMap, nodePropertyStore))
             .relationshipImportResult(relationshipImportResult)
-            .concurrency(config.concurrency())
+            .concurrency(config.typedConcurrency())
             .build();
 
         progressTracker.endSubTask("Construct graph");

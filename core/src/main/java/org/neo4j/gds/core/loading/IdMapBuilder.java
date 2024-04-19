@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.api.IdMap;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 public interface IdMapBuilder {
 
@@ -38,6 +39,6 @@ public interface IdMapBuilder {
     IdMap build(
         LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,
-        int concurrency
+        Concurrency concurrency
     );
 }

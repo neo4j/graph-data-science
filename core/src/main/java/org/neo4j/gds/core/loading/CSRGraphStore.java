@@ -49,6 +49,7 @@ import org.neo4j.gds.api.schema.MutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.huge.CSRCompositeRelationshipIterator;
 import org.neo4j.gds.core.huge.HugeGraphBuilder;
 import org.neo4j.gds.core.huge.NodeFilteredGraph;
@@ -77,7 +78,7 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 @Value.Style(typeBuilder = "GraphStoreBuilder")
 public final class CSRGraphStore implements GraphStore {
 
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     private final DatabaseInfo databaseInfo;
 
@@ -103,7 +104,7 @@ public final class CSRGraphStore implements GraphStore {
         NodePropertyStore nodeProperties,
         Map<RelationshipType, SingleTypeRelationships> relationships,
         GraphPropertyStore graphProperties,
-        int concurrency
+        Concurrency concurrency
     ) {
         this.databaseInfo = databaseInfo;
         this.capabilities = capabilities;
@@ -130,7 +131,7 @@ public final class CSRGraphStore implements GraphStore {
         Nodes nodes,
         RelationshipImportResult relationshipImportResult,
         Optional<GraphPropertyStore> graphProperties,
-        int concurrency
+        Concurrency concurrency
     ) {
         return new CSRGraphStore(
             databaseInfo,

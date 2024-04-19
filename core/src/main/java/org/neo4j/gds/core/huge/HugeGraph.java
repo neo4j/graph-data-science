@@ -44,6 +44,7 @@ import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.collections.primitive.PrimitiveLongIterable;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.Collection;
 import java.util.List;
@@ -610,7 +611,7 @@ public class HugeGraph implements CSRGraph {
     }
 
     @Override
-    public Optional<FilteredIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+    public Optional<FilteredIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, Concurrency concurrency) {
         return idMap.withFilteredLabels(nodeLabels, concurrency);
     }
 

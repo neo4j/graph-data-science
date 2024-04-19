@@ -100,7 +100,7 @@ public final class GraphFactory {
         var idMapType = idMapBuilderType.orElse(IdMap.NO_TYPE);
         var idMapBuilder = idMapBehavior.create(
             idMapType,
-            threadCount,
+            new Concurrency(threadCount),
             maxOriginalId,
             nodeCount
         );

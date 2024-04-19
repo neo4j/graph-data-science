@@ -29,6 +29,7 @@ import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.IdMapBehaviorServiceProvider;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.ImportSizing;
 import org.neo4j.gds.core.loading.LabelInformation;
@@ -68,7 +69,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         var idMapBuilder = IdMapBehaviorServiceProvider
             .idMapBehavior()
             .create(
-                concurrency,
+                new Concurrency(concurrency),
                 Optional.of(dimensions.highestPossibleNodeCount()),
                 Optional.of(dimensions.nodeCount())
             );
@@ -180,7 +181,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         var idMap = idMapBuilder.build(
             labelInformationBuilder,
             Math.max(dimensions.highestPossibleNodeCount() - 1, 0),
-            concurrency
+            new Concurrency(concurrency)
         );
 
         Map<PropertyMapping, NodePropertyValues> nodeProperties = nodePropertyImporter == null

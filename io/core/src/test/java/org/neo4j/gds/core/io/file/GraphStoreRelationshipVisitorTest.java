@@ -178,7 +178,7 @@ class GraphStoreRelationshipVisitorTest {
             .nodes(nodes)
             .relationshipImportResult(actualRelationships)
             .databaseInfo(DatabaseInfo.of(DatabaseId.random(), DatabaseLocation.LOCAL))
-            .concurrency(1)
+            .concurrency(new Concurrency(1))
             .build()
             .getUnion();
     }

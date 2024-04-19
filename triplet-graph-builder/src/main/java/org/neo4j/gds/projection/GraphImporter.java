@@ -152,7 +152,7 @@ public final class GraphImporter {
             : this.writeMode;
 
         var graphStoreBuilder = new GraphStoreBuilder()
-            .concurrency(this.config.readConcurrency())
+            .concurrency(this.config.typedReadConcurrency())
             .capabilities(ImmutableStaticCapabilities.of(writeMode))
             .databaseInfo(databaseInfo);
 
