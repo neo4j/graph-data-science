@@ -218,11 +218,11 @@ class PartitionUtilsTest {
     @MethodSource("degreeDistributionWithPartitions")
     @ParameterizedTest
     void testDegreePartitioning(String distribution, List<DegreePartition> expectedPartitions) {
-        var concurrency = 4;
+        var concurrency = new Concurrency(4);
 
         var graph = RandomGraphGenerator.builder()
             .nodeCount(10_000)
-            .averageDegree(concurrency)
+            .averageDegree(concurrency.value())
             .seed(42)
             .relationshipDistribution(RelationshipDistribution.parse(distribution))
             .build()
@@ -329,7 +329,7 @@ class PartitionUtilsTest {
         LongToIntFunction weightFunction = x -> weights[(int) x];
         var partitions = PartitionUtils.customDegreePartitionWithBatchSize(
             graph,
-            3,
+            new Concurrency(3),
             weightFunction,
             Function.identity(),
             Optional.of(1),
@@ -359,7 +359,7 @@ class PartitionUtilsTest {
         LongToIntFunction weightFunction = x -> weights[(int) x];
         var partitions = PartitionUtils.customDegreePartitionWithBatchSize(
             graph,
-            3,
+            new Concurrency(3),
             weightFunction,
             Function.identity(),
             Optional.of(1),
@@ -453,7 +453,7 @@ class PartitionUtilsTest {
         int[] degrees = {20, 20, 20, 20, 10, 10};
         var nodeCount = degrees.length;
         long relCount = Arrays.stream(degrees).sum();
-        var concurrency = 4;
+        var concurrency = new Concurrency(4);
 
         Stream<DegreePartition> partitions = PartitionUtils.degreePartitionStream(
             nodeCount,

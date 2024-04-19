@@ -64,7 +64,7 @@ public class UndirectedEdgeSplitter extends EdgeSplitter {
 
         var countValidRelationshipTasks = PartitionUtils.degreePartition(
             graph,
-            concurrency.value(),
+            concurrency,
             partition -> (Runnable) () -> {
                 var concurrentGraph = graph.concurrentCopy();
                 partition.consume(nodeId -> concurrentGraph.forEachRelationship(nodeId, (s, t) -> {

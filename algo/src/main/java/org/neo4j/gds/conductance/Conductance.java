@@ -104,7 +104,7 @@ public class Conductance extends Algorithm<ConductanceResult> {
 
         var tasks = PartitionUtils.degreePartition(
             graph,
-            concurrency.value(),
+            concurrency,
             partition -> new CountRelationships(graph.concurrentCopy(), partition),
             Optional.of(minBatchSize)
         );

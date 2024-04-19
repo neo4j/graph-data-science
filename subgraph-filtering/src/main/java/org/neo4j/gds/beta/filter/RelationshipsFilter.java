@@ -148,7 +148,7 @@ public final class RelationshipsFilter {
             outputNodes.nodeCount(),
             relevantRelationshipsCount,
             nodeId -> compositeIterator.degree(inputNodes.toMappedNodeId(outputNodes.toOriginalNodeId(nodeId))),
-            concurrency.value(),
+            concurrency,
             partition -> new RelationshipFilterTask(
                 partition,
                 relationshipExpr,

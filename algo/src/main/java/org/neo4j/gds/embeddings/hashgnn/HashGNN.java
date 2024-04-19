@@ -67,10 +67,12 @@ public class HashGNN extends Algorithm<HashGNNResult> {
     public HashGNNResult compute() {
         progressTracker.beginSubTask("HashGNN");
 
+        // Since degree only very approximately reflect the min hash task workload per node we decrease the partition sizes.
+        int decreasedConcurrency = Math.toIntExact(Math.min(concurrency.value() * DEGREE_PARTITIONS_PER_THREAD, graph.nodeCount()));
+
         var degreePartition = PartitionUtils.degreePartition(
             graph,
-            // Since degree only very approximately reflect the min hash task workload per node we decrease the partition sizes.
-            Math.toIntExact(Math.min(concurrency.value() * DEGREE_PARTITIONS_PER_THREAD, graph.nodeCount())),
+            new Concurrency(decreasedConcurrency),
             Function.identity(),
             Optional.of(1)
         );

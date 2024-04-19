@@ -77,7 +77,7 @@ public final class LinkFeatureExtractor {
 
         var partitions = PartitionUtils.degreePartition(
             graph,
-            concurrency.value(),
+            concurrency,
             Function.identity(),
             Optional.of(GradientDescentConfig.DEFAULT_BATCH_SIZE)
         );

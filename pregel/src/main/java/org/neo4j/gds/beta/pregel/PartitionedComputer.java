@@ -119,7 +119,7 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
             case DEGREE:
                 return PartitionUtils.degreePartition(
                     graph,
-                    concurrency.value(),
+                    concurrency,
                     partitionFunction::apply,
                     Optional.empty()
                 );

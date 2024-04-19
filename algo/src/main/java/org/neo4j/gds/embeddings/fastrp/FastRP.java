@@ -128,7 +128,7 @@ public class FastRP extends Algorithm<FastRPResult> {
         this.partitions = PartitionUtils.degreePartitionStream(
             graph.nodeCount(),
             graph.relationshipCount(),
-            concurrency.value(),
+            concurrency,
             graph::degree
         ).collect(Collectors.toList());
     }

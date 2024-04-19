@@ -176,7 +176,7 @@ public class ToUndirected extends Algorithm<SingleTypeRelationships> {
 
         return PartitionUtils.degreePartition(
             graphStore.getGraph(fromRelationshipType),
-            concurrency.value(),
+            concurrency,
             taskCreator,
             Optional.empty()
         );

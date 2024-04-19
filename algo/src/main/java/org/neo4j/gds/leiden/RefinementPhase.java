@@ -171,7 +171,7 @@ final class RefinementPhase {
     private void computeRelationshipsBetweenCommunities() {
         List<RefinementBetweenRelationshipCounter> tasks = PartitionUtils.degreePartition(
             workingGraph,
-            concurrency.value(),
+            concurrency,
             degreePartition -> new RefinementBetweenRelationshipCounter(
                 workingGraph.concurrentCopy(),
                 relationshipsBetweenCommunities,

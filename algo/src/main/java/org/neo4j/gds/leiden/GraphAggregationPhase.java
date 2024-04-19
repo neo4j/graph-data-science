@@ -166,7 +166,7 @@ class GraphAggregationPhase {
         LongToIntFunction customDegree = x -> workingGraph.degree(sortedNodesByCommunity.get(x));
         var relationshipCreators = PartitionUtils.customDegreePartitionWithBatchSize(
             workingGraph,
-            concurrency.value(),
+            concurrency,
             customDegree,
             partition ->
                 new RelationshipCreator(

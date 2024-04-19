@@ -125,17 +125,17 @@ public final class PartitionUtils {
 
     public static <TASK> List<TASK> degreePartition(
         Graph graph,
-        int concurrency,
+        Concurrency concurrency,
         Function<DegreePartition, TASK> taskCreator,
         Optional<Integer> minBatchSize
     ) {
-        if (concurrency == 1) {
+        if (concurrency.value() == 1) {
             return List.of(taskCreator.apply(new DegreePartition(0, graph.nodeCount(), graph.relationshipCount())));
         }
 
         var batchSize = Math.max(
             minBatchSize.orElse(ParallelUtil.DEFAULT_BATCH_SIZE),
-            BitUtil.ceilDiv(graph.relationshipCount(), concurrency)
+            BitUtil.ceilDiv(graph.relationshipCount(), concurrency.value())
         );
         return degreePartitionWithBatchSize(graph.nodeCount(), graph::degree, batchSize, taskCreator);
     }
@@ -144,24 +144,24 @@ public final class PartitionUtils {
         long nodeCount,
         long relationshipCount,
         DegreeFunction degrees,
-        int concurrency,
+        Concurrency concurrency,
         Function<DegreePartition, TASK> taskCreator,
         Optional<Integer> minBatchSize
     ) {
-        if (concurrency == 1) {
+        if (concurrency.value() == 1) {
             return List.of(taskCreator.apply(new DegreePartition(0, nodeCount, relationshipCount)));
         }
 
         var batchSize = Math.max(
             minBatchSize.orElse(ParallelUtil.DEFAULT_BATCH_SIZE),
-            BitUtil.ceilDiv(relationshipCount, concurrency)
+            BitUtil.ceilDiv(relationshipCount, concurrency.value())
         );
         return degreePartitionWithBatchSize(nodeCount, degrees, batchSize, taskCreator);
     }
 
     public static <TASK> List<TASK> customDegreePartitionWithBatchSize(
         Graph graph,
-        int concurrency,
+        Concurrency concurrency,
         LongToIntFunction customDegreeFunction,
         Function<DegreePartition, TASK> taskCreator,
         Optional<Integer> minBatchSize,
@@ -172,7 +172,7 @@ public final class PartitionUtils {
         );
         var batchSize = Math.max(
             minBatchSize.orElse(ParallelUtil.DEFAULT_BATCH_SIZE),
-            BitUtil.ceilDiv(actualWeightSum, concurrency)
+            BitUtil.ceilDiv(actualWeightSum, concurrency.value())
         );
         return degreePartitionWithBatchSize(graph.nodeCount(), customDegreeFunction::applyAsInt, batchSize, taskCreator);
     }
@@ -183,10 +183,10 @@ public final class PartitionUtils {
     public static Stream<DegreePartition> degreePartitionStream(
         long nodeCount,
         long relationshipCount,
-        int concurrency,
+        Concurrency concurrency,
         DegreeFunction degrees
     ) {
-        if (concurrency == 1) {
+        if (concurrency.value() == 1) {
             return Stream.of(new DegreePartition(0, nodeCount, relationshipCount));
         }
 

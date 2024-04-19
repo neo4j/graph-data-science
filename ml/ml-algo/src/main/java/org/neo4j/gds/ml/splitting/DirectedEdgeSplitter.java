@@ -63,7 +63,7 @@ public class DirectedEdgeSplitter extends EdgeSplitter {
         LongAdder validRelationshipCountAdder = new LongAdder();
         var countValidRelationshipTasks = PartitionUtils.degreePartition(
             graph,
-            concurrency.value(),
+            concurrency,
             partition -> (Runnable) () -> {
                 var concurrentGraph = graph.concurrentCopy();
                 partition.consume(nodeId -> concurrentGraph.forEachRelationship(nodeId, (s, t) -> {
