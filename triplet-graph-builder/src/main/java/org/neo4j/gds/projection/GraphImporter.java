@@ -21,10 +21,8 @@ package org.neo4j.gds.projection;
 
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.compress.AdjacencyCompressor;
 import org.neo4j.gds.api.schema.ImmutableMutableGraphSchema;
 import org.neo4j.gds.api.schema.MutableGraphSchema;
@@ -45,9 +43,6 @@ import org.neo4j.gds.core.loading.construction.NodeLabelToken;
 import org.neo4j.gds.core.loading.construction.PropertyValues;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.values.AnyValue;
-import org.neo4j.values.storable.TextValue;
-import org.neo4j.values.virtual.MapValue;
 
 import java.util.List;
 import java.util.Map;
@@ -89,47 +84,6 @@ public final class GraphImporter {
         this.graphSchemaBuilder = MutableGraphSchema.builder();
     }
 
-    static GraphImporter of(
-        TextValue graphNameValue,
-        String username,
-        String query,
-        DatabaseId databaseId,
-        AnyValue configMap,
-        WriteMode writeMode,
-        PropertyState propertyState
-    ) {
-        var graphName = graphNameValue.stringValue();
-
-        validateGraphName(graphName, username, databaseId);
-        var config = GraphProjectFromCypherAggregationConfig.of(
-            username,
-            graphName,
-            query,
-            (configMap instanceof MapValue) ? (MapValue) configMap : MapValue.EMPTY
-        );
-
-        var idMapBuilder = idMapBuilder(config.readConcurrency(), propertyState);
-
-        return new GraphImporter(
-            config,
-            config.undirectedRelationshipTypes(),
-            config.inverseIndexedRelationshipTypes(),
-            idMapBuilder,
-            writeMode,
-            query
-        );
-    }
-
-    private static void validateGraphName(String graphName, String username, DatabaseId databaseId) {
-        if (GraphStoreCatalog.exists(username, databaseId, graphName)) {
-            throw new IllegalArgumentException("Graph " + graphName + " already exists");
-        }
-    }
-
-    private static LazyIdMapBuilder idMapBuilder(int readConcurrency, PropertyState propertyState) {
-        return new LazyIdMapBuilder(readConcurrency, true, true, propertyState);
-    }
-
     public void update(
         long sourceNode,
         long targetNode,
@@ -149,10 +103,9 @@ public final class GraphImporter {
             if (this.relImporters.containsKey(relationshipType)) {
                 relImporter = this.relImporters.get(relationshipType);
             } else {
-                var finalRelationshipProperties = relationshipProperties;
                 relImporter = this.relImporters.computeIfAbsent(
                     relationshipType,
-                    type -> newRelImporter(type, finalRelationshipProperties)
+                    type -> newRelImporter(type, relationshipProperties)
                 );
             }
 
@@ -189,7 +142,7 @@ public final class GraphImporter {
 
         // in case something else has written something with the same graph name
         // validate again before doing the heavier graph building
-        validateGraphName(config.graphName(), config.username(), databaseInfo.databaseId());
+//        validateGraphName(config.graphName(), config.username(), databaseInfo.databaseId());
 
         this.idMapBuilder.prepareForFlush();
 
@@ -211,17 +164,17 @@ public final class GraphImporter {
 
         var projectMillis = timer.stop().getDuration();
 
-        return AggregationResult.builder()
-            .graphName(graphName)
-            .nodeCount(graphStore.nodeCount())
-            .relationshipCount(graphStore.relationshipCount())
-            .projectMillis(projectMillis)
-            .addConfiguration(this.config.asProcedureResultConfigurationField()
+        return new AggregationResult(
+            graphName,
+            graphStore.nodeCount(),
+            graphStore.relationshipCount(),
+            projectMillis,
+            this.config.asProcedureResultConfigurationField()
                 .entrySet()
                 .stream()
-                .filter(e -> e.getValue() != null))
-            .query(this.query)
-            .build();
+                .filter(e -> e.getValue() != null),
+            this.query
+        );
     }
 
     private RelationshipsBuilder newRelImporter(RelationshipType relType, @Nullable PropertyValues properties) {
