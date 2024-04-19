@@ -24,4 +24,8 @@ public record Concurrency(int value) {
         if (value < 1)
             throw new IllegalArgumentException("Valid values for Concurrency are int[1..], Value provided was `" + value + "`.");
     }
+
+    public long squared() {
+        return (long) value * value;
+    }
 }

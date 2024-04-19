@@ -88,7 +88,7 @@ public class CommonNeighbourAwareRandomWalk implements RandomWalkBasedNodesSampl
             walkerProducer.getWalker(
                 seenNodes,
                 totalWeights,
-                QUALITY_THRESHOLD_BASE / (concurrency.value() * concurrency.value()),
+                QUALITY_THRESHOLD_BASE / concurrency.squared(),
                 new WalkQualities(initialStartQualities),
                 rng.split(),
                 inputGraph.concurrentCopy(),
