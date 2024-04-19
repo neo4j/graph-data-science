@@ -83,7 +83,7 @@ public class CollapsePath extends Algorithm<SingleTypeRelationships> {
             nodeCount
         );
 
-        var tasks = ParallelUtil.tasks(concurrency.value(), collapsePathTaskSupplier);
+        var tasks = ParallelUtil.tasks(concurrency, collapsePathTaskSupplier);
 
         RunWithConcurrency.builder()
             .concurrency(concurrency)

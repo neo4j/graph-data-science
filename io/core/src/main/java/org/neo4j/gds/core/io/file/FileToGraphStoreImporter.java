@@ -188,7 +188,7 @@ public abstract class FileToGraphStoreImporter {
 
         var nodesIterator = fileInput.nodes(Collector.EMPTY).iterator();
         Collection<Runnable> tasks = ParallelUtil.tasks(
-            concurrency.value(),
+            concurrency,
             (index) -> new ElementImportRunner<>(nodeVisitorBuilder.build(), nodesIterator, progressTracker)
         );
 
@@ -219,7 +219,7 @@ public abstract class FileToGraphStoreImporter {
 
         var relationshipsIterator = fileInput.relationships(Collector.EMPTY).iterator();
         Collection<Runnable> tasks = ParallelUtil.tasks(
-            concurrency.value(),
+            concurrency,
             (
                 index
             ) -> new ElementImportRunner<>(relationshipVisitorBuilder.build(), relationshipsIterator, progressTracker)
@@ -247,7 +247,7 @@ public abstract class FileToGraphStoreImporter {
             var graphPropertiesIterator = fileInput.graphProperties().iterator();
 
             var tasks = ParallelUtil.tasks(
-                concurrency.value(),
+                concurrency,
                 (index) -> new ElementImportRunner<>(
                     graphStoreGraphPropertyVisitor,
                     graphPropertiesIterator,

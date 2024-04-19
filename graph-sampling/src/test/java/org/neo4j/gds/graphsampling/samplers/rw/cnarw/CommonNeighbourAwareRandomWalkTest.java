@@ -525,8 +525,8 @@ class CommonNeighbourAwareRandomWalkTest {
             -1
         ).memoryUsage();
 
-        assertMemoryRange(mem1k, 116_224L);
-        assertMemoryRange(mem10k, 1_161_352L);
+        assertMemoryRange(mem1k, 116_232L);
+        assertMemoryRange(mem10k, 1_161_360L);
 
         assertMemoryRangeIsClose(mem10k, mem1k.times(10), Percentage.withPercentage(1));
     }
@@ -552,9 +552,9 @@ class CommonNeighbourAwareRandomWalkTest {
             -1
         ).memoryUsage();
 
-        assertMemoryRange(mem01, 745_352L);
-        assertMemoryRange(mem05, 1_161_352L);
-        assertMemoryRange(mem09, 1_577_352);
+        assertMemoryRange(mem01, 745_360L);
+        assertMemoryRange(mem05, 1_161_360L);
+        assertMemoryRange(mem09, 1_577_360L);
 
         MemoryRange delta = mem05.elementWiseSubtract(mem01);
         MemoryRange twoDelta = mem09.elementWiseSubtract(mem01);
@@ -572,7 +572,7 @@ class CommonNeighbourAwareRandomWalkTest {
             CommonNeighbourAwareRandomWalk.memoryEstimation(config),
             GraphDimensions.of(1000),
             -1,
-            MemoryRange.of(132_224L)
+            MemoryRange.of(132_232L)
         );
     }
 
@@ -608,9 +608,9 @@ class CommonNeighbourAwareRandomWalkTest {
             -1
         ).memoryUsage();
 
-        assertMemoryRange(mem1k, 1_177_352L);
-        assertMemoryRange(mem3k, 1_209_352L);
-        assertMemoryRange(mem5k, 1_241_352L);
+        assertMemoryRange(mem1k, 1_177_360L);
+        assertMemoryRange(mem3k, 1_209_360L);
+        assertMemoryRange(mem5k, 1_241_360L);
 
         MemoryRange delta = mem3k.elementWiseSubtract(mem1k);
         MemoryRange twoDelta = mem5k.elementWiseSubtract(mem1k);
@@ -628,7 +628,7 @@ class CommonNeighbourAwareRandomWalkTest {
             CommonNeighbourAwareRandomWalk.memoryEstimation(config),
             GraphDimensions.of(1000),
             -1,
-            MemoryRange.of(32_224L)
+            MemoryRange.of(32_232L)
         );
     }
 
@@ -643,7 +643,7 @@ class CommonNeighbourAwareRandomWalkTest {
             CommonNeighbourAwareRandomWalk.memoryEstimation(config),
             GraphDimensions.of(1000),
             -1,
-            MemoryRange.of(124_264L)
+            MemoryRange.of(124_272L)
         );
     }
 }

@@ -76,7 +76,7 @@ public class BetweennessCentrality extends Algorithm<BetwennessCentralityResult>
     @Override
     public BetwennessCentralityResult compute() {
         progressTracker.beginSubTask();
-        ParallelUtil.run(ParallelUtil.tasks(concurrency.value(), BCTask::new), executorService);
+        ParallelUtil.run(ParallelUtil.tasks(concurrency, BCTask::new), executorService);
         progressTracker.endSubTask();
         return new BetwennessCentralityResult(centrality);
     }

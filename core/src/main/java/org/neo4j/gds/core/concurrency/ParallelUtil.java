@@ -255,22 +255,22 @@ public final class ParallelUtil {
     }
 
     public static Collection<Runnable> tasks(
-        final int concurrency,
+        final Concurrency concurrency,
         final Supplier<? extends Runnable> newTask
     ) {
         final Collection<Runnable> tasks = new ArrayList<>();
-        for (int i = 0; i < concurrency; i++) {
+        for (int i = 0; i < concurrency.value(); i++) {
             tasks.add(newTask.get());
         }
         return tasks;
     }
 
     public static Collection<Runnable> tasks(
-        final int concurrency,
+        final Concurrency concurrency,
         final IntFunction<? extends Runnable> newTask
     ) {
         final Collection<Runnable> tasks = new ArrayList<>();
-        for (int i = 0; i < concurrency; i++) {
+        for (int i = 0; i < concurrency.value(); i++) {
             tasks.add(newTask.apply(i));
         }
         return tasks;

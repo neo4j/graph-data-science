@@ -21,6 +21,7 @@ package org.neo4j.gds.triangle;
 
 import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
@@ -31,8 +32,12 @@ public class TriangleStreamFactory extends GraphAlgorithmFactory<TriangleStream,
         return "TriangleStream";
     }
 
+    public TriangleStream build(Graph graph, Concurrency concurrency, ProgressTracker progressTracker) {
+        return TriangleStream.create(graph, DefaultPool.INSTANCE, concurrency);
+    }
+
     @Override
     public TriangleStream build(Graph graph, TriangleCountBaseConfig configuration, ProgressTracker progressTracker) {
-        return TriangleStream.create(graph, DefaultPool.INSTANCE, configuration.concurrency());
+        return build(graph, configuration.typedConcurrency(), progressTracker);
     }
 }

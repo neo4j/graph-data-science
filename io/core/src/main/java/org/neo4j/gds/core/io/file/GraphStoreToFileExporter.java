@@ -167,7 +167,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
         var nodeInputIterator = nodeInput.iterator();
 
         var tasks = ParallelUtil.tasks(
-            concurrency.value(),
+            concurrency,
             (index) -> new ElementImportRunner<>(nodeVisitorSupplier.apply(index), nodeInputIterator, progressTracker)
         );
 
@@ -188,7 +188,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
         var relationshipInputIterator = relationshipInput.iterator();
 
         var tasks = ParallelUtil.tasks(
-            concurrency.value(),
+            concurrency,
             (index) -> new ElementImportRunner<>(
                 relationshipVisitorSupplier.apply(index),
                 relationshipInputIterator,
@@ -215,7 +215,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
             var graphPropertyInputIterator = graphPropertyInput.iterator();
 
             var tasks = ParallelUtil.tasks(
-                concurrency.value(),
+                concurrency,
                 (index) -> new ElementImportRunner<>(
                     graphPropertyVisitorSupplier.apply(index),
                     graphPropertyInputIterator,
