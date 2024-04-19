@@ -25,7 +25,7 @@ import org.neo4j.gds.applications.algorithms.similarity.SimilarityAlgorithmsEsti
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
-import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.similarity.knn.KnnMutateConfig;
 
 import java.util.Map;
