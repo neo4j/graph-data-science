@@ -286,7 +286,7 @@ public class Knn extends Algorithm<KnnResult> {
         ProgressTracker progressTracker
     ) {
         long nodeCount = allNewNeighbors.size();
-        long logBatchSize = ParallelUtil.adjustedBatchSize(nodeCount, concurrency.value(), minBatchSize);
+        long logBatchSize = ParallelUtil.adjustedBatchSize(nodeCount, concurrency, minBatchSize);
 
         // TODO: cursors
         for (long nodeId = 0; nodeId < nodeCount; nodeId++) {

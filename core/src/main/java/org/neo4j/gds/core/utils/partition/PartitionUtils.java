@@ -23,10 +23,10 @@ import com.carrotsearch.hppc.AbstractIterator;
 import com.carrotsearch.hppc.BitSet;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.cursor.HugeCursor;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.SetBitsIterable;
-import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.mem.BitUtil;
 
 import java.util.ArrayList;
@@ -55,7 +55,7 @@ public final class PartitionUtils {
     ) {
         long batchSize = ParallelUtil.adjustedBatchSize(
             nodeCount,
-            concurrency.value(),
+            concurrency,
             minBatchSize.orElse(ParallelUtil.DEFAULT_BATCH_SIZE)
         );
         return rangePartitionWithBatchSize(nodeCount, batchSize, taskCreator);
@@ -112,7 +112,7 @@ public final class PartitionUtils {
             ));
         }
 
-        final long initialBatchSize = ParallelUtil.adjustedBatchSize(nodeCount, concurrency, alignTo);
+        final long initialBatchSize = ParallelUtil.adjustedBatchSize(nodeCount, new Concurrency(concurrency), alignTo);
         final long remainder = initialBatchSize % alignTo;
         long adjustedBatchSize = remainder == 0 ? initialBatchSize : initialBatchSize + (alignTo - remainder);
         if (adjustedBatchSize > maxPartitionSize) {
@@ -312,7 +312,7 @@ public final class PartitionUtils {
     }
 
     public static List<Long> rangePartitionActualBatchSizes(
-        int concurrency,
+        Concurrency concurrency,
         long nodeCount,
         Optional<Integer> minBatchSize
     ) {

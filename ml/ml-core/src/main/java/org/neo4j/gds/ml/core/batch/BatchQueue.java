@@ -49,7 +49,7 @@ public abstract class BatchQueue {
     public static int computeBatchSize(long totalSize, int minBatchSize, int concurrency) {
         return Math.toIntExact(Math.min(
             Integer.MAX_VALUE,
-            ParallelUtil.adjustedBatchSize(totalSize, concurrency, minBatchSize)
+            ParallelUtil.adjustedBatchSize(totalSize, new Concurrency(concurrency), minBatchSize)
         ));
     }
 

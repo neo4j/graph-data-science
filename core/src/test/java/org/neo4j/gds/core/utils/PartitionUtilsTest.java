@@ -421,7 +421,7 @@ class PartitionUtilsTest {
         var nodeCount = 6;
         int[] degrees = {20, 20, 20, 20, 10, 10};
         var concurrency = new Concurrency(4);
-        var degreesPerPartition = ParallelUtil.adjustedBatchSize(Arrays.stream(degrees).sum(), concurrency.value(), 1);
+        var degreesPerPartition = ParallelUtil.adjustedBatchSize(Arrays.stream(degrees).sum(), concurrency, 1);
 
         List<DegreePartition> partitions = PartitionUtils.degreePartitionWithBatchSize(
             nodeCount,

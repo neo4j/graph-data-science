@@ -67,7 +67,7 @@ public final class CommunityStatistics {
             // execution.
             var batchSize = ParallelUtil.adjustedBatchSize(
                 nodeCount,
-                concurrency.value(),
+                concurrency,
                 ParallelUtil.DEFAULT_BATCH_SIZE,
                 // 10 is just a magic number that has been proven
                 // to perform well in benchmarking.

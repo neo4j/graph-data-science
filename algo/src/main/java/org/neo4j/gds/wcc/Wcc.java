@@ -73,7 +73,7 @@ public class Wcc extends Algorithm<DisjointSetStruct> {
 
         this.batchSize = ParallelUtil.adjustedBatchSize(
             graph.nodeCount(),
-            parameters.concurrency().value(),
+            parameters.concurrency(),
             minBatchSize,
             Integer.MAX_VALUE
         );

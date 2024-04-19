@@ -71,7 +71,7 @@ class PlaceNodesRandomly {
         this.progressTracker = progressTracker;
 
         this.rangePartitionActualBatchSizes = PartitionUtils.rangePartitionActualBatchSizes(
-            concurrency.value(),
+            concurrency,
             graph.nodeCount(),
             Optional.of(minBatchSize)
         );

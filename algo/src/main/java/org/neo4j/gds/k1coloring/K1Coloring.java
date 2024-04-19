@@ -168,7 +168,7 @@ public class K1Coloring extends Algorithm<K1ColoringResult> {
 
         long adjustedBatchSize = ParallelUtil.adjustedBatchSize(
             approximateRelationshipCount,
-            concurrency.value(),
+            concurrency,
             minBatchSize,
             Integer.MAX_VALUE
         );

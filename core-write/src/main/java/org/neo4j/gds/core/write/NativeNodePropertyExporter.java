@@ -175,7 +175,7 @@ public class NativeNodePropertyExporter extends StatementApi implements NodeProp
     private void writeParallel(WriteConsumer writer) {
         final long batchSize = ParallelUtil.adjustedBatchSize(
             nodeCount,
-            concurrency.value(),
+            concurrency,
             MIN_BATCH_SIZE,
             MAX_BATCH_SIZE
         );
