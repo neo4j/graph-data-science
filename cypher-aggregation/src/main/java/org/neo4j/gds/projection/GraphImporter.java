@@ -211,12 +211,15 @@ public final class GraphImporter {
 
         var projectMillis = timer.stop().getDuration();
 
-        return AggregationResultImpl.builder()
+        return AggregationResult.builder()
             .graphName(graphName)
             .nodeCount(graphStore.nodeCount())
             .relationshipCount(graphStore.relationshipCount())
             .projectMillis(projectMillis)
-            .configuration(this.config.asProcedureResultConfigurationField())
+            .addConfiguration(this.config.asProcedureResultConfigurationField()
+                .entrySet()
+                .stream()
+                .filter(e -> e.getValue() != null))
             .query(this.query)
             .build();
     }

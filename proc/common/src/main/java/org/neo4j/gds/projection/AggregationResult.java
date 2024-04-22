@@ -19,31 +19,22 @@
  */
 package org.neo4j.gds.projection;
 
-import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.annotation.CustomProcedure;
+import org.neo4j.gds.annotation.GenerateBuilder;
 
 import java.util.Map;
 
-@Configuration
-public interface AggregationResult {
-    @CustomProcedure.ResultField
-    String graphName();
-
-    @CustomProcedure.ResultField
-    long nodeCount();
-
-    @CustomProcedure.ResultField
-    long relationshipCount();
-
-    @CustomProcedure.ResultField
-    long projectMillis();
-
-    @CustomProcedure.ResultField
-    Map<String, Object> configuration();
-
-    @CustomProcedure.ResultField
-    String query();
-
-    @Configuration.ToMap
-    Map<String, Object> toMap();
+@CustomProcedure.ResultType
+@GenerateBuilder
+public record AggregationResult(
+    @CustomProcedure.ResultField String graphName,
+    @CustomProcedure.ResultField long nodeCount,
+    @CustomProcedure.ResultField long relationshipCount,
+    @CustomProcedure.ResultField long projectMillis,
+    @CustomProcedure.ResultField Map<String, Object> configuration,
+    @CustomProcedure.ResultField String query
+) {
+    public static AggregationResultBuilder builder() {
+        return AggregationResultBuilder.builder();
+    }
 }

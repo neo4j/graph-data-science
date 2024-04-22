@@ -52,9 +52,17 @@ public @interface CustomProcedure {
     Namespace namespace() default Namespace.PROCEDURE;
 
     /**
+     * Annotated types are stand-ins for actual result types for documentation purposes.
+     */
+    @Target(ElementType.TYPE)
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface ResultType {
+    }
+
+    /**
      * Annotated methods are included in the result definition.
      */
-    @Target(ElementType.METHOD)
+    @Target({ElementType.METHOD, ElementType.FIELD})
     @Retention(RetentionPolicy.RUNTIME)
     @interface ResultField {
     }
