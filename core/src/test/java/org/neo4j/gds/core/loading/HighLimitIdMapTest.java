@@ -42,7 +42,7 @@ class HighLimitIdMapTest {
 
     @BeforeEach
     void setup() {
-        var builder = new LazyIdMapBuilder(4, true, false, PropertyState.PERSISTENT);
+        var builder = new LazyIdMapBuilder(new Concurrency(4), true, false, PropertyState.PERSISTENT);
         builder.addNode(1000, NodeLabelTokens.ofStrings("A"));
         builder.addNode(2000, NodeLabelTokens.ofStrings("B"));
         builder.addNode(3000, NodeLabelTokens.ofStrings("C"));

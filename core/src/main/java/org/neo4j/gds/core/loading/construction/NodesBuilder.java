@@ -64,7 +64,7 @@ public final class NodesBuilder {
     public static final long UNKNOWN_MAX_ID = -1L;
 
     private final long maxOriginalId;
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     private final IdMapBuilder idMapBuilder;
     private final Function<String, PropertyState> propertyStates;
@@ -80,7 +80,7 @@ public final class NodesBuilder {
     NodesBuilder(
         long maxOriginalId,
         long maxIntermediateId,
-        int concurrency,
+        Concurrency concurrency,
         NodesBuilderContext nodesBuilderContext,
         IdMapBuilder idMapBuilder,
         boolean hasLabelInformation,
@@ -186,7 +186,7 @@ public final class NodesBuilder {
     public Nodes build(long highestNeoId) {
         var localLabelTokenToPropertyKeys = closeThreadLocalBuilders();
 
-        var idMap = this.idMapBuilder.build(labelInformationBuilder, highestNeoId, new Concurrency(concurrency));
+        var idMap = this.idMapBuilder.build(labelInformationBuilder, highestNeoId, concurrency);
         var nodeProperties = buildProperties(idMap);
         var nodeSchema = buildNodeSchema(idMap, localLabelTokenToPropertyKeys, nodeProperties);
         var nodePropertyStore = NodePropertyStore.builder().properties(nodeProperties).build();

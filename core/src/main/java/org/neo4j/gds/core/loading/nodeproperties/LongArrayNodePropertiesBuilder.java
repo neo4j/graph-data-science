@@ -24,6 +24,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.properties.nodes.LongArrayNodePropertyValues;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArrayArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.utils.Neo4jValueConversion;
@@ -37,11 +38,11 @@ public class LongArrayNodePropertiesBuilder implements InnerNodePropertiesBuilde
 
     private final HugeSparseLongArrayArray.Builder builder;
     private final long[] defaultValue;
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     public LongArrayNodePropertiesBuilder(
         DefaultValue defaultValue,
-        int concurrency
+        Concurrency concurrency
     ) {
         this.defaultValue = defaultValue.longArrayValue();
         this.concurrency = concurrency;
@@ -71,7 +72,7 @@ public class LongArrayNodePropertiesBuilder implements InnerNodePropertiesBuilde
 
         var drainingIterator = propertiesByNeoIds.drainingIterator();
 
-        var tasks = IntStream.range(0, concurrency).mapToObj(threadId -> (Runnable) () -> {
+        var tasks = IntStream.range(0, concurrency.value()).mapToObj(threadId -> (Runnable) () -> {
             var batch = drainingIterator.drainingBatch();
 
             while (drainingIterator.next(batch)) {

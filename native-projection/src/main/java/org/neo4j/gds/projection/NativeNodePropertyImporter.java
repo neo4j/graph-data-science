@@ -33,6 +33,7 @@ import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.PropertyReference;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.NodeLabelTokenSet;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.internal.kernel.api.PropertyCursor;
@@ -144,7 +145,7 @@ public final class NativeNodePropertyImporter {
     }
 
     public static final class Builder {
-        private int concurrency = ConcurrencyConfig.DEFAULT_CONCURRENCY;
+        private Concurrency concurrency = ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY;
         private Map<NodeLabel, PropertyMappings> propertyMappings;
         private GraphDimensions dimensions;
 
@@ -152,7 +153,7 @@ public final class NativeNodePropertyImporter {
         private Builder() {
         }
 
-        public Builder concurrency(int concurrency) {
+        public Builder concurrency(Concurrency concurrency) {
             this.concurrency = concurrency;
             return this;
         }
@@ -187,7 +188,7 @@ public final class NativeNodePropertyImporter {
 
         static BuildersByLabel create(
             Map<NodeLabel, PropertyMappings> propertyMappingsByLabel,
-            int concurrency
+            Concurrency concurrency
         ) {
             var propertyBuildersByKey = new HashMap<String, NodePropertiesFromStoreBuilder>();
 

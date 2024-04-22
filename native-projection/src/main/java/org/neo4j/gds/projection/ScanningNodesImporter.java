@@ -60,7 +60,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
-        int concurrency
+        Concurrency concurrency
     ) {
         var expectedCapacity = dimensions.highestPossibleNodeCount();
 
@@ -69,7 +69,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         var idMapBuilder = IdMapBehaviorServiceProvider
             .idMapBehavior()
             .create(
-                new Concurrency(concurrency),
+                concurrency,
                 Optional.of(dimensions.highestPossibleNodeCount()),
                 Optional.of(dimensions.nodeCount())
             );
@@ -115,7 +115,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         GraphLoaderContext loadingContext,
         GraphDimensions dimensions,
         ProgressTracker progressTracker,
-        int concurrency,
+        Concurrency concurrency,
         Map<NodeLabel, PropertyMappings> propertyMappingsByLabel,
         LoadablePropertyMappings propertyMappings,
         @Nullable NativeNodePropertyImporter nodePropertyImporter,
@@ -181,7 +181,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
         var idMap = idMapBuilder.build(
             labelInformationBuilder,
             Math.max(dimensions.highestPossibleNodeCount() - 1, 0),
-            new Concurrency(concurrency)
+            concurrency
         );
 
         Map<PropertyMapping, NodePropertyValues> nodeProperties = nodePropertyImporter == null
@@ -199,7 +199,7 @@ final class ScanningNodesImporter extends ScanningRecordsImporter<NodeReference,
     private static @Nullable NativeNodePropertyImporter initializeNodePropertyImporter(
         LoadablePropertyMappings propertyMappings,
         GraphDimensions dimensions,
-        int concurrency
+        Concurrency concurrency
     ) {
         var propertyMappingsByLabel = propertyMappings.storedProperties();
         boolean loadProperties = propertyMappingsByLabel

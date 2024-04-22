@@ -199,7 +199,7 @@ public final class GdlFactory extends CSRGraphStoreFactory<GraphProjectFromGdlCo
             .hasLabelInformation(true)
             .hasProperties(true)
             .deduplicateIds(false)
-            .concurrency(1)
+            .concurrency(new Concurrency(1))
             .propertyState(graphProjectConfig.propertyState())
             .idMapBuilderType(this.idMapBuilderType)
             .build();

@@ -219,7 +219,7 @@ public final class Louvain extends Algorithm<LouvainResult> {
     ) {
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(maxCommunityId)
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .build();
 
         terminationFlag.assertRunning();

@@ -31,6 +31,7 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.compress.AdjacencyCompressor.ValueMapper;
 import org.neo4j.gds.api.compress.AdjacencyListsWithProperties;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -173,7 +174,7 @@ public abstract class AdjacencyListBuilderBaseTest {
         AdjacencyBuffer adjacencyBuffer = new AdjacencyBufferBuilder()
             .adjacencyCompressorFactory(adjacencyCompressorFactory)
             .importMetaData(importMetaData)
-            .importSizing(ImportSizing.of(1, nodeCount))
+            .importSizing(ImportSizing.of(new Concurrency(1), nodeCount))
             .build();
 
         var relationshipsBatchBuffer = new RelationshipsBatchBufferBuilder<Integer>()

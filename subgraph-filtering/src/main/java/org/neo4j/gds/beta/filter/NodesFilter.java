@@ -75,7 +75,7 @@ public final class NodesFilter {
             .idMapBuilderType(inputNodes.typeId())
             .deduplicateIds(false)
             .nodeCount(inputNodes.nodeCount())
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .maxOriginalId(inputNodes.highestOriginalId())
             .hasLabelInformation(!inputGraphStore.nodeLabels().isEmpty())
             .build();
@@ -177,7 +177,7 @@ public final class NodesFilter {
             case LONG:
                 var longNodePropertiesBuilder = LongNodePropertiesBuilder.of(
                     DefaultValue.forLong(),
-                    concurrency.value()
+                    concurrency
                 );
                 propertiesBuilder = new NodePropertiesBuilder<>(inputNodePropertyValues, longNodePropertiesBuilder) {
                     @Override
@@ -191,7 +191,7 @@ public final class NodesFilter {
             case DOUBLE:
                 var doubleNodePropertiesBuilder = new DoubleNodePropertiesBuilder(
                     DefaultValue.forDouble(),
-                    concurrency.value()
+                    concurrency
                 );
                 propertiesBuilder = new NodePropertiesBuilder<>(inputNodePropertyValues, doubleNodePropertiesBuilder) {
                     @Override
@@ -204,7 +204,7 @@ public final class NodesFilter {
             case DOUBLE_ARRAY:
                 var doubleArrayNodePropertiesBuilder = new DoubleArrayNodePropertiesBuilder(
                     DefaultValue.forDoubleArray(),
-                    concurrency.value()
+                    concurrency
                 );
                 propertiesBuilder = new NodePropertiesBuilder<>(inputNodePropertyValues, doubleArrayNodePropertiesBuilder) {
                     @Override
@@ -217,7 +217,7 @@ public final class NodesFilter {
             case FLOAT_ARRAY:
                 var floatArrayNodePropertiesBuilder = new FloatArrayNodePropertiesBuilder(
                     DefaultValue.forFloatArray(),
-                    concurrency.value()
+                    concurrency
                 );
 
                 propertiesBuilder = new NodePropertiesBuilder<>(inputNodePropertyValues, floatArrayNodePropertiesBuilder) {
@@ -231,7 +231,7 @@ public final class NodesFilter {
             case LONG_ARRAY:
                 var longArrayNodePropertiesBuilder = new LongArrayNodePropertiesBuilder(
                     DefaultValue.forFloatArray(),
-                    concurrency.value()
+                    concurrency
                 );
 
                 propertiesBuilder = new NodePropertiesBuilder<>(inputNodePropertyValues, longArrayNodePropertiesBuilder) {

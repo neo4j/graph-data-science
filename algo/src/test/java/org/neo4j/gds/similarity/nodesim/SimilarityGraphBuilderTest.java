@@ -116,7 +116,7 @@ class SimilarityGraphBuilderTest {
     @Test
     void testConstructFromFilteredGraph() {
         NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder()
-            .concurrency(4)
+            .concurrency(new Concurrency(4))
             .hasLabelInformation(true)
             .maxOriginalId(3)
             .build();

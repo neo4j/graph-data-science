@@ -86,21 +86,21 @@ public final class GraphFactory {
         Optional<Boolean> hasLabelInformation,
         Optional<Boolean> hasProperties,
         Optional<Boolean> deduplicateIds,
-        Optional<Integer> concurrency,
+        Optional<Concurrency> concurrency,
         Optional<PropertyState> propertyState,
         Optional<String> idMapBuilderType
     ) {
         boolean labelInformation = nodeSchema
             .map(schema -> !(schema.availableLabels().isEmpty() && schema.containsOnlyAllNodesLabel()))
             .or(() -> hasLabelInformation).orElse(false);
-        int threadCount = concurrency.orElse(1);
+        var threadCount = concurrency.orElse(new Concurrency(1));
 
         var idMapBehavior = IdMapBehaviorServiceProvider.idMapBehavior();
 
         var idMapType = idMapBuilderType.orElse(IdMap.NO_TYPE);
         var idMapBuilder = idMapBehavior.create(
             idMapType,
-            new Concurrency(threadCount),
+            threadCount,
             maxOriginalId,
             nodeCount
         );
@@ -153,7 +153,7 @@ public final class GraphFactory {
         long maxOriginalId,
         long maxIntermediateId,
         IdMapBuilder idMapBuilder,
-        int concurrency,
+        Concurrency concurrency,
         NodeSchema nodeSchema,
         boolean hasLabelInformation,
         boolean deduplicateIds
@@ -257,8 +257,8 @@ public final class GraphFactory {
         var finalConcurrency = concurrency.orElse(new Concurrency(1));
         var maybeRootNodeCount = nodes.rootNodeCount();
         var importSizing = maybeRootNodeCount.isPresent()
-            ? ImportSizing.of(finalConcurrency.value(), maybeRootNodeCount.getAsLong())
-            : ImportSizing.of(finalConcurrency.value());
+            ? ImportSizing.of(finalConcurrency, maybeRootNodeCount.getAsLong())
+            : ImportSizing.of(finalConcurrency);
 
         int bufferSize = RecordsBatchBuffer.DEFAULT_BUFFER_SIZE;
         if (maybeRootNodeCount.isPresent()) {

@@ -178,7 +178,7 @@ public abstract class FileToGraphStoreImporter {
 
         NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder(nodeSchema)
             .maxOriginalId(fileInput.graphInfo().maxOriginalId())
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .nodeCount(fileInput.graphInfo().nodeCount())
             .deduplicateIds(false)
             .idMapBuilderType(fileInput.graphInfo().idMapBuilderType())

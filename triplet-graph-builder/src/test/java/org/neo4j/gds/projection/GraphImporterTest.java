@@ -26,6 +26,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.LazyIdMapBuilder;
@@ -54,7 +55,7 @@ class GraphImporterTest {
             GraphProjectConfig.emptyWithName("", "g"),
             List.of(),
             List.of(),
-            new LazyIdMapBuilder(4, true, true, PropertyState.REMOTE),
+            new LazyIdMapBuilder(new Concurrency(4), true, true, PropertyState.REMOTE),
             Capabilities.WriteMode.REMOTE,
             ""
         );
@@ -93,7 +94,7 @@ class GraphImporterTest {
             GraphProjectConfig.emptyWithName("", "g"),
             List.of(),
             List.of(),
-            new LazyIdMapBuilder(4, true, true, PropertyState.REMOTE),
+            new LazyIdMapBuilder(new Concurrency(4), true, true, PropertyState.REMOTE),
             Capabilities.WriteMode.REMOTE,
             ""
         );
@@ -130,7 +131,7 @@ class GraphImporterTest {
             GraphProjectConfig.emptyWithName("", "g"),
             List.of(),
             List.of(),
-            new LazyIdMapBuilder(4, true, true, PropertyState.REMOTE),
+            new LazyIdMapBuilder(new Concurrency(4), true, true, PropertyState.REMOTE),
             Capabilities.WriteMode.REMOTE,
             ""
         );
@@ -168,7 +169,7 @@ class GraphImporterTest {
             GraphProjectConfig.emptyWithName("", "g"),
             List.of(),
             List.of(),
-            new LazyIdMapBuilder(4, true, true, PropertyState.REMOTE),
+            new LazyIdMapBuilder(new Concurrency(4), true, true, PropertyState.REMOTE),
             Capabilities.WriteMode.REMOTE,
             ""
         );
@@ -207,7 +208,7 @@ class GraphImporterTest {
             GraphProjectConfig.emptyWithName("", "g"),
             List.of(),
             List.of(),
-            new LazyIdMapBuilder(4, true, true, PropertyState.REMOTE),
+            new LazyIdMapBuilder(new Concurrency(4), true, true, PropertyState.REMOTE),
             Capabilities.WriteMode.REMOTE,
             ""
         );
@@ -246,7 +247,7 @@ class GraphImporterTest {
             GraphProjectConfig.emptyWithName("", "g"),
             List.of(),
             List.of(),
-            new LazyIdMapBuilder(4, true, true, PropertyState.REMOTE),
+            new LazyIdMapBuilder(new Concurrency(4), true, true, PropertyState.REMOTE),
             Capabilities.WriteMode.REMOTE,
             ""
         );

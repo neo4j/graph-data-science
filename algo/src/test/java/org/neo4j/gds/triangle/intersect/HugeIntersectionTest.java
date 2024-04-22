@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
@@ -68,7 +69,7 @@ final class HugeIntersectionTest {
         Random random = new Random(0);
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(2 + DEGREE)
-            .concurrency(1)
+            .concurrency(new Concurrency(1))
             .build();
 
         for (long i = 0; i < 3 + DEGREE; ++i) {

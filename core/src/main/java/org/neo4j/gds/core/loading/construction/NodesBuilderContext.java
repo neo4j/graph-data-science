@@ -23,6 +23,7 @@ import com.carrotsearch.hppc.IntObjectMap;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.schema.NodeSchema;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.NodeLabelTokenSet;
 import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 
@@ -45,12 +46,12 @@ final class NodesBuilderContext {
     // Thread-global mapping as all threads need to write to the same property builders.
     private final ConcurrentMap<String, NodePropertiesFromStoreBuilder> propertyKeyToPropertyBuilder;
 
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     /**
      * Used if no node schema information is available and needs to be inferred from the input data.
      */
-    static NodesBuilderContext lazy(int concurrency) {
+    static NodesBuilderContext lazy(Concurrency concurrency) {
         return new NodesBuilderContext(
             TokenToNodeLabels::lazy,
             NodeLabelTokenToPropertyKeys::lazy,
@@ -62,7 +63,7 @@ final class NodesBuilderContext {
     /**
      * Used if a node schema is available upfront.
      */
-    static NodesBuilderContext fixed(NodeSchema nodeSchema, int concurrency) {
+    static NodesBuilderContext fixed(NodeSchema nodeSchema, Concurrency concurrency) {
         var propertyBuildersByPropertyKey = nodeSchema.unionProperties().entrySet().stream().collect(toMap(
             Map.Entry::getKey,
             e -> NodePropertiesFromStoreBuilder.of(e.getValue().defaultValue(), concurrency)
@@ -84,7 +85,7 @@ final class NodesBuilderContext {
         Supplier<TokenToNodeLabels> tokenToNodeLabelSupplier,
         Supplier<NodeLabelTokenToPropertyKeys> nodeLabelTokenToPropertyKeysSupplier,
         ConcurrentMap<String, NodePropertiesFromStoreBuilder> propertyKeyToPropertyBuilder,
-        int concurrency
+        Concurrency concurrency
     ) {
         this.tokenToNodeLabelSupplier = tokenToNodeLabelSupplier;
         this.nodeLabelTokenToPropertyKeysSupplier = nodeLabelTokenToPropertyKeysSupplier;

@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.loading;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.BitUtil;
 
 import java.util.OptionalInt;
@@ -50,12 +51,12 @@ public final class ImportSizing {
         this.pageSize = pageSize;
     }
 
-    public static ImportSizing of(int concurrency, long nodeCount) {
-        return determineBestThreadSize(nodeCount, concurrency);
+    public static ImportSizing of(Concurrency concurrency, long nodeCount) {
+        return determineBestThreadSize(nodeCount, concurrency.value());
     }
 
-    public static ImportSizing of(int concurrency) {
-        return determineBestThreadSize(concurrency);
+    public static ImportSizing of(Concurrency concurrency) {
+        return determineBestThreadSize(concurrency.value());
     }
 
     private static ImportSizing determineBestThreadSize(long nodeCount, long targetThreads) {

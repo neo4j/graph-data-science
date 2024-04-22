@@ -132,7 +132,7 @@ class GraphAggregationPhase {
     Graph run() {
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(maxCommunityId)
-            .concurrency(this.concurrency.value())
+            .concurrency(this.concurrency)
             .build();
 
         terminationFlag.assertRunning();

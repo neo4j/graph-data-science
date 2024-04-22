@@ -23,6 +23,7 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
@@ -79,7 +80,7 @@ public class AlgorithmEstimationTemplate {
                 estimationBuilder,
                 memoryEstimation,
                 graphMemoryEstimation.dimensions(),
-                configuration.concurrency()
+                configuration.typedConcurrency()
             );
         }
 
@@ -88,7 +89,7 @@ public class AlgorithmEstimationTemplate {
 
             var graphDimensions = dimensionsFromActualGraph(graphName, configuration);
 
-            return estimate(estimationBuilder, memoryEstimation, graphDimensions, configuration.concurrency());
+            return estimate(estimationBuilder, memoryEstimation, graphDimensions, configuration.typedConcurrency());
         }
 
         throw new IllegalArgumentException(formatWithLocale(
@@ -121,13 +122,13 @@ public class AlgorithmEstimationTemplate {
         MemoryEstimations.Builder estimationBuilder,
         MemoryEstimation memoryEstimation,
         GraphDimensions graphDimensions,
-        int concurrency
+        Concurrency concurrency
     ) {
         var rootEstimation = estimationBuilder
             .add("algorithm", memoryEstimation)
             .build();
 
-        var memoryTree = rootEstimation.estimate(graphDimensions, concurrency);
+        var memoryTree = rootEstimation.estimate(graphDimensions, concurrency.value());
 
         return new MemoryEstimateResult(new MemoryTreeWithDimensions(memoryTree, graphDimensions));
     }
