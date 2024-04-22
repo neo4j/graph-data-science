@@ -152,4 +152,6 @@ public interface ResultStore {
     record RelationshipEntry(Graph graph, LongUnaryOperator toOriginalId) {}
 
     record RelationshipStreamEntry(Stream<ExportedRelationship> relationshipStream, List<ValueType> propertyTypes, LongUnaryOperator toOriginalId) {}
+
+    ResultStore EMPTY = new EmptyResultStore();
 }
