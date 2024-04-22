@@ -54,9 +54,9 @@ class ListGraphApplicationTest {
             Pair.of(config3, graphStore3)
         );
         when(graphListingService.listGraphs(new User("foo", false))).thenReturn(listOfConfigsWithStores);
-        var gswc1 = GraphStoreWithConfig.of(graphStore1, config1);
-        var gswc2 = GraphStoreWithConfig.of(graphStore2, config2);
-        var gswc3 = GraphStoreWithConfig.of(graphStore3, config3);
+        var gswc1 = new GraphStoreWithConfig(graphStore1, config1);
+        var gswc2 = new GraphStoreWithConfig(graphStore2, config2);
+        var gswc3 = new GraphStoreWithConfig(graphStore3, config3);
         List<Pair<GraphStoreWithConfig, Map<String, Object>>> listOfGraphStoresWithConfigsSansDegreeDistributions = List.of(
             Pair.of(gswc1, null),
             Pair.of(gswc2, null),
@@ -92,8 +92,8 @@ class ListGraphApplicationTest {
             Pair.of(config3, graphStore3)
         );
         when(graphListingService.listGraphs(new User("foo", false))).thenReturn(listOfConfigsWithStores);
-        var gswc1 = GraphStoreWithConfig.of(graphStore1, config1);
-        var gswc2 = GraphStoreWithConfig.of(graphStore2, config2);
+        var gswc1 = new GraphStoreWithConfig(graphStore1, config1);
+        var gswc2 = new GraphStoreWithConfig(graphStore2, config2);
         List<Pair<GraphStoreWithConfig, Map<String, Object>>> listOfGraphStoresWithConfigsSansDegreeDistributions = List.of(
             Pair.of(gswc1, null),
             Pair.of(gswc2, null)

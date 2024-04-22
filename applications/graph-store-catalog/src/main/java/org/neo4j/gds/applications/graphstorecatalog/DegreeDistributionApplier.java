@@ -51,7 +51,7 @@ class DegreeDistributionApplier {
         TerminationFlag terminationFlag
     ) {
         return graphEntries.stream().map(configAndStore -> {
-            var graphStoreWithConfig = GraphStoreWithConfig.of(configAndStore.getValue(), configAndStore.getKey());
+            var graphStoreWithConfig = new GraphStoreWithConfig(configAndStore.getValue(), configAndStore.getKey());
             var degreeDistribution = getOrCreateDegreeDistribution(
                 includeDegreeDistribution,
                 graphStoreWithConfig,

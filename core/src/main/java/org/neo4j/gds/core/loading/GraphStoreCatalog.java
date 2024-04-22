@@ -329,7 +329,7 @@ public final class GraphStoreCatalog {
             if (config.graphName() == null || graphStore == null) {
                 throw new IllegalArgumentException("Both name and graph store must be not null");
             }
-            GraphStoreWithConfig graphStoreWithConfig = GraphStoreWithConfig.of(graphStore, config);
+            GraphStoreWithConfig graphStoreWithConfig = new GraphStoreWithConfig(graphStore, config);
 
             if (!overwrite && graphsByName.containsKey(userCatalogKey)) {
                 throw new IllegalStateException(

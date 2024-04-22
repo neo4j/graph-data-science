@@ -57,8 +57,8 @@ class DegreeDistributionApplierTest {
         );
 
         assertThat(result).containsExactly(
-            Pair.of(GraphStoreWithConfig.of(graphStore1, config1), null),
-            Pair.of(GraphStoreWithConfig.of(graphStore2, config2), null)
+            Pair.of(new GraphStoreWithConfig(graphStore1, config1), null),
+            Pair.of(new GraphStoreWithConfig(graphStore2, config2), null)
         );
     }
 
@@ -97,8 +97,8 @@ class DegreeDistributionApplierTest {
         );
 
         assertThat(result).containsExactly(
-            Pair.of(GraphStoreWithConfig.of(graphStore1, config1), Map.of("some", 42)),
-            Pair.of(GraphStoreWithConfig.of(graphStore2, config2), Map.of("degdist", 87))
+            Pair.of(new GraphStoreWithConfig(graphStore1, config1), Map.of("some", 42)),
+            Pair.of(new GraphStoreWithConfig(graphStore2, config2), Map.of("degdist", 87))
         );
 
         // the caching bit
@@ -153,8 +153,8 @@ class DegreeDistributionApplierTest {
         );
 
         assertThat(result).containsExactly(
-            Pair.of(GraphStoreWithConfig.of(graphStore1, config1), Map.of("dd1", 7, "dd2", 11)),
-            Pair.of(GraphStoreWithConfig.of(graphStore2, config2), Map.of("dd1", 512, "dd2", 1024))
+            Pair.of(new GraphStoreWithConfig(graphStore1, config1), Map.of("dd1", 7, "dd2", 11)),
+            Pair.of(new GraphStoreWithConfig(graphStore2, config2), Map.of("dd1", 512, "dd2", 1024))
         );
     }
 }

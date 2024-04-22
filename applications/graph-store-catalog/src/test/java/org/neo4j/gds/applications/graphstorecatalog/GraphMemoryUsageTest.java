@@ -42,7 +42,7 @@ class GraphMemoryUsageTest {
                 var config = gdlFactory.graphProjectConfig();
                 var graphStore = gdlFactory.build();
 
-                var graphStoreWithConfig = GraphStoreWithConfig.of(graphStore, config);
+                var graphStoreWithConfig = new GraphStoreWithConfig(graphStore, config);
                 var graphMemoryUsage = GraphMemoryUsage.of(graphStoreWithConfig);
                 assertThat(graphMemoryUsage.detailSizeInBytes.get("adjacencyLists"))
                     .asInstanceOf(InstanceOfAssertFactories.MAP)

@@ -170,7 +170,7 @@ class CatalogProcedureFacadeTest {
         when(businessFacade.listGraphs(new User("Bob", false), "foo", false, null))
             .thenReturn(
                 List.of(
-                    Pair.of(GraphStoreWithConfig.of(new StubGraphStore(), mock(GraphProjectConfig.class)), null)
+                    Pair.of(new GraphStoreWithConfig(new StubGraphStore(), mock(GraphProjectConfig.class)), null)
                 )
             );
         var graphs = catalogFacade.listGraphs("foo");
@@ -207,7 +207,7 @@ class CatalogProcedureFacadeTest {
             .thenReturn(
                 List.of(
                     Pair.of(
-                        GraphStoreWithConfig.of(new StubGraphStore(), mock(GraphProjectConfig.class)),
+                        new GraphStoreWithConfig(new StubGraphStore(), mock(GraphProjectConfig.class)),
                         Map.of("deg", 117, "ree", 23, "dist", 512)
                     )
                 )
@@ -254,7 +254,7 @@ class CatalogProcedureFacadeTest {
         when(businessFacade.listGraphs(new User("Bob", false), "foo", false, null))
             .thenReturn(
                 List.of(
-                    Pair.of(GraphStoreWithConfig.of(new StubGraphStore(), mock(GraphProjectConfig.class)), null)
+                    Pair.of(new GraphStoreWithConfig(new StubGraphStore(), mock(GraphProjectConfig.class)), null)
                 )
             );
         var graphs = catalogFacade.listGraphs("foo");
@@ -293,7 +293,7 @@ class CatalogProcedureFacadeTest {
         when(businessFacade.listGraphs(new User("Bob", false), "foo", false, null))
             .thenReturn(
                 List.of(
-                    Pair.of(GraphStoreWithConfig.of(new StubGraphStore(), mock(GraphProjectConfig.class)), null)
+                    Pair.of(new GraphStoreWithConfig(new StubGraphStore(), mock(GraphProjectConfig.class)), null)
                 )
             );
         var graphs = catalogFacade.listGraphs("foo");
