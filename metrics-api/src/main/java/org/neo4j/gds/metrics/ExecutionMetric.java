@@ -29,7 +29,7 @@ public abstract class ExecutionMetric implements AutoCloseable {
 
     public abstract void start();
 
-    public abstract void failed();
+    public abstract void failed(Exception e);
 
     @Override
     public abstract void close();

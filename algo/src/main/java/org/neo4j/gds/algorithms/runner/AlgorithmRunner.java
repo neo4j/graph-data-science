@@ -146,7 +146,7 @@ public final class AlgorithmRunner {
         } catch (Exception e) {
             log.warn("Computation failed", e);
             algorithm.getProgressTracker().endSubTaskWithFailure();
-            algorithmMetric.failed();
+            algorithmMetric.failed(e);
             throw e;
         }
     }

@@ -29,7 +29,7 @@ public final class PassthroughExecutionMetric extends ExecutionMetric {
     public void start() {}
 
     @Override
-    public void failed() {}
+    public void failed(Exception e) {}
 
     @Override
     public void close() {}

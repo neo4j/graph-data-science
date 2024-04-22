@@ -203,7 +203,7 @@ abstract class GraphAggregator implements CompatUserAggregator {
             projectionMetric.start();
             result = buildGraph();
         } catch (Exception e) {
-            projectionMetric.failed();
+            projectionMetric.failed(e);
             throw new ProcedureException(
                 Status.Procedure.ProcedureCallFailed,
                 e,

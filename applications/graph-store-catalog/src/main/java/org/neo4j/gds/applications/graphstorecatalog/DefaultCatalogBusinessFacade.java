@@ -23,27 +23,27 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.beta.filter.GraphFilterResult;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.CatalogRequest;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
-import org.neo4j.gds.beta.filter.GraphFilterResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.write.NodeLabelExporterBuilder;
 import org.neo4j.gds.core.write.NodePropertyExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipPropertiesExporterBuilder;
-import org.neo4j.gds.legacycypherprojection.GraphProjectCypherResult;
 import org.neo4j.gds.graphsampling.RandomWalkBasedNodesSampler;
 import org.neo4j.gds.graphsampling.config.RandomWalkWithRestartsConfig;
+import org.neo4j.gds.legacycypherprojection.GraphProjectCypherResult;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.projections.ProjectionMetricsService;
 import org.neo4j.gds.projection.GraphProjectNativeResult;
 import org.neo4j.gds.results.MemoryEstimateResult;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -246,7 +246,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
                 configuration
             );
         } catch (Exception e) {
-            projectMetric.failed();
+            projectMetric.failed(e);
             throw e;
         }
     }
@@ -319,7 +319,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
                 configuration
             );
         } catch (Exception e) {
-            projectMetric.failed();
+            projectMetric.failed(e);
             throw e;
         }
     }
@@ -395,7 +395,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
                 originGraphConfiguration.graphStore()
             );
         } catch (Exception e) {
-            subGraphMetric.failed();
+            subGraphMetric.failed(e);
             throw e;
         }
     }

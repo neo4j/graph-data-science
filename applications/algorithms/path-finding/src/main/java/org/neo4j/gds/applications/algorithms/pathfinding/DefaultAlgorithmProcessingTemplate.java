@@ -159,7 +159,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             return algorithmComputation.compute(graph);
         } catch (RuntimeException e) {
             log.warn("computation failed, halting metrics gathering", e);
-            executionMetric.failed();
+            executionMetric.failed(e);
             throw e;
         }
     }
