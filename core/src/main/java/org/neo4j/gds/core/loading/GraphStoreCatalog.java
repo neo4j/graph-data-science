@@ -172,14 +172,6 @@ public final class GraphStoreCatalog {
     }
 
     public static void set(GraphProjectConfig config, GraphStore graphStore) {
-        set(config, graphStore, false);
-    }
-
-    public static void overwrite(GraphProjectConfig config, GraphStore graphStore) {
-        set(config, graphStore, true);
-    }
-
-    private static void set(GraphProjectConfig config, GraphStore graphStore, boolean overwrite) {
         userCatalogs.compute(config.username(), (user, userCatalog) -> {
             if (userCatalog == null) {
                 userCatalog = new UserCatalog();
@@ -187,8 +179,7 @@ public final class GraphStoreCatalog {
             userCatalog.set(
                 UserCatalog.UserCatalogKey.of(graphStore.databaseInfo().databaseId(), config.graphName()),
                 config,
-                graphStore,
-                overwrite
+                graphStore
             );
             return userCatalog;
         });
@@ -318,15 +309,14 @@ public final class GraphStoreCatalog {
         private void set(
             UserCatalogKey userCatalogKey,
             GraphProjectConfig config,
-            GraphStore graphStore,
-            boolean overwrite
+            GraphStore graphStore
         ) {
             if (config.graphName() == null || graphStore == null) {
                 throw new IllegalArgumentException("Both name and graph store must be not null");
             }
             GraphStoreCatalogEntry graphStoreCatalogEntry = new GraphStoreCatalogEntry(graphStore, config);
 
-            if (!overwrite && graphsByName.containsKey(userCatalogKey)) {
+            if (graphsByName.containsKey(userCatalogKey)) {
                 throw new IllegalStateException(
                     formatWithLocale(
                         "Graph name %s already loaded",
