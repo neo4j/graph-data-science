@@ -35,7 +35,7 @@ GRANT ROLE admin TO carol;
 ----
 
 As we can see, `alice` and `bob` are standard users with read access to the database.
-`carol` is an administrator by virtue of being granted the `admin` role (for more information about this role see the https://neo4j.com/docs/cypher-manual/current/administration/security/administration/#administration-security-administration-introduction[Cypher manual]).
+`carol` is an administrator by virtue of being granted the `admin` role (for more information about this role see the https://neo4j.com/docs/operations-manual/current/authentication-authorization/built-in-roles/[Operations manual]).
 
 Now `alice` and `bob` each project a few graphs.
 They both project a graph called `graphA` and `bob` also projects a graph called `graphB`.
