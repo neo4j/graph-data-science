@@ -25,36 +25,43 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.similarity.knn.KnnMutateConfig;
-import org.neo4j.gds.similarity.knn.KnnResult;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnWriteConfig;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
-class KnnResultBuilderForMutateMode implements ResultBuilder<KnnMutateConfig, KnnResult, KnnMutateResult, Pair<RelationshipsWritten, Map<String, Object>>> {
-    /**
-     * @param metadata number of relationships written, and the similarity distribution
-     */
+class FilteredKnnResultBuilderForWriteMode implements ResultBuilder<FilteredKnnWriteConfig, FilteredKnnResult, Stream<KnnWriteResult>, Pair<RelationshipsWritten, Map<String, Object>>> {
     @Override
-    public KnnMutateResult build(
+    public Stream<KnnWriteResult> build(
         Graph graph,
         GraphStore graphStore,
-        KnnMutateConfig configuration,
-        Optional<KnnResult> result,
+        FilteredKnnWriteConfig configuration,
+        Optional<FilteredKnnResult> result,
         AlgorithmProcessingTimings timings,
         Optional<Pair<RelationshipsWritten, Map<String, Object>>> metadata
     ) {
         var configurationMap = configuration.toMap();
 
-        return result.map(r -> KnnMutateResult.create(
+        if (result.isEmpty()) return Stream.of(
+            KnnWriteResult.emptyFrom(
+                timings,
+                configurationMap
+            )
+        );
+
+        var knnWriteResult = KnnWriteResult.from(
             timings,
-            configurationMap,
             metadata.orElseThrow().getLeft(),
             metadata.orElseThrow().getRight(),
-            r.nodesCompared(),
-            r.didConverge(),
-            r.ranIterations(),
-            r.nodePairsConsidered()
-        )).orElseGet(() -> KnnMutateResult.emptyFrom(timings, configurationMap));
+            result.get().nodesCompared(),
+            result.get().didConverge(),
+            result.get().ranIterations(),
+            result.get().nodePairsConsidered(),
+            configurationMap
+        );
+
+        return Stream.of(knnWriteResult);
     }
 }

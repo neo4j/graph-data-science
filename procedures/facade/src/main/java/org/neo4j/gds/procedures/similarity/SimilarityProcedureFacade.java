@@ -26,18 +26,11 @@ import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStreamBusinessFac
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.algorithms.similarity.KnnMutateResult;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityMutateResult;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityStatsResult;
-import org.neo4j.gds.procedures.algorithms.similarity.KnnStatsResult;
-import org.neo4j.gds.procedures.algorithms.similarity.KnnWriteResult;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityWriteResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityResult;
-import org.neo4j.gds.similarity.filteredknn.FilteredKnnMutateConfig;
-import org.neo4j.gds.similarity.filteredknn.FilteredKnnStatsConfig;
-import org.neo4j.gds.similarity.filteredknn.FilteredKnnStreamConfig;
-import org.neo4j.gds.similarity.filteredknn.FilteredKnnWriteConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityMutateConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamConfig;
@@ -273,98 +266,6 @@ public class SimilarityProcedureFacade {
     ) {
         var config = configurationCreator.createConfiguration(algoConfiguration, FilteredNodeSimilarityWriteConfig::of);
         return Stream.of(estimateBusinessFacade.nodeSimilarity(graphNameOrConfiguration, config));
-    }
-
-    public Stream<SimilarityResult> filteredKnnStream(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var streamConfig = configurationCreator.createConfigurationForStream(configuration, FilteredKnnStreamConfig::of);
-
-        var computationResult = streamBusinessFacade.filteredKnn(
-            graphName,
-            streamConfig
-        );
-
-        return FilteredKnnComputationResultTransformer.toStreamResult(computationResult);
-    }
-
-    public Stream<KnnStatsResult> filteredKnnStats(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var statsConfig = configurationCreator.createConfiguration(configuration, FilteredKnnStatsConfig::of);
-
-        var computationResult = statsBusinessFacade.filteredKnn(
-            graphName,
-            statsConfig,
-            procedureReturnColumns.contains("similarityDistribution")
-        );
-
-        return Stream.of(FilteredKnnComputationResultTransformer.toStatsResult(computationResult, statsConfig));
-    }
-
-    public Stream<KnnMutateResult> filteredKnnMutate(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var mutateConfig = configurationCreator.createConfiguration(configuration, FilteredKnnMutateConfig::of);
-
-        var computationResult = mutateBusinessFacade.filteredKnn(
-            graphName,
-            mutateConfig,
-            procedureReturnColumns.contains("similarityDistribution")
-        );
-
-        return Stream.of(FilteredKnnComputationResultTransformer.toMutateResult(computationResult, mutateConfig));
-    }
-
-    public Stream<KnnWriteResult> filteredKnnWrite(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var writeConfig = configurationCreator.createConfiguration(configuration, FilteredKnnWriteConfig::of);
-
-        var computationResult = writeBusinessFacade.filteredKnn(
-            graphName,
-            writeConfig,
-            procedureReturnColumns.contains("similarityDistribution")
-        );
-
-        return Stream.of(FilteredKnnComputationResultTransformer.toWriteResult(computationResult, writeConfig));
-    }
-
-
-    public Stream<MemoryEstimateResult> filteredKnnStreamEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, FilteredKnnStreamConfig::of);
-        return Stream.of(estimateBusinessFacade.filteredKnn(graphNameOrConfiguration, config));
-    }
-
-    public Stream<MemoryEstimateResult> filteredKnnStatsEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, FilteredKnnStatsConfig::of);
-        return Stream.of(estimateBusinessFacade.filteredKnn(graphNameOrConfiguration, config));
-    }
-
-    public Stream<MemoryEstimateResult> filteredKnnMutateEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, FilteredKnnMutateConfig::of);
-        return Stream.of(estimateBusinessFacade.filteredKnn(graphNameOrConfiguration, config));
-    }
-
-    public Stream<MemoryEstimateResult> filteredKnnWriteEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, FilteredKnnWriteConfig::of);
-        return Stream.of(estimateBusinessFacade.filteredKnn(graphNameOrConfiguration, config));
     }
 
     /**

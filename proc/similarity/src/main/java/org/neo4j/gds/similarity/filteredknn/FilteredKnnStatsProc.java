@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.similarity.filteredknn;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.similarity.KnnStatsResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
@@ -36,8 +35,7 @@ import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESC
 import static org.neo4j.gds.similarity.filteredknn.FilteredKnnConstants.PROCEDURE_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public final class FilteredKnnStatsProc extends BaseProc {
-
+public final class FilteredKnnStatsProc {
     @Context
     public GraphDataScienceProcedures facade;
 
@@ -47,7 +45,7 @@ public final class FilteredKnnStatsProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.similarity().filteredKnnStats(graphName, configuration);
+        return facade.similarity().theOtherFacade().filteredKnnStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.knn.filtered.stats.estimate", mode = READ)
@@ -56,8 +54,7 @@ public final class FilteredKnnStatsProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.similarity().filteredKnnStatsEstimate(graphNameOrConfiguration, algoConfiguration);
-
+        return facade.similarity().theOtherFacade().filteredKnnStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(name = "gds.alpha.knn.filtered.stats", mode = READ, deprecatedBy = "gds.knn.filtered.stats")
@@ -68,10 +65,8 @@ public final class FilteredKnnStatsProc extends BaseProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.alpha.knn.filtered.stats");
-        executionContext()
+        facade.deprecatedProcedures().called("gds.alpha.knn.filtered.stats");
+        facade
             .log()
             .warn(
                 "Procedure `gds.alpha.knn.filtered.stats` has been deprecated, please use `gds.knn.filtered.stats`.");

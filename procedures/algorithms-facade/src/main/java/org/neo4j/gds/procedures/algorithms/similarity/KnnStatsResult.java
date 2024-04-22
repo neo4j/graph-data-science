@@ -19,6 +19,9 @@
  */
 package org.neo4j.gds.procedures.algorithms.similarity;
 
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+
+import java.util.Collections;
 import java.util.Map;
 
 public class KnnStatsResult extends SimilarityStatsResult {
@@ -51,5 +54,20 @@ public class KnnStatsResult extends SimilarityStatsResult {
         this.nodePairsConsidered = nodePairsConsidered;
         this.ranIterations = ranIterations;
         this.didConverge = didConverge;
+    }
+
+    static KnnStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new KnnStatsResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.postProcessingMillis,
+            0,
+            0,
+            Collections.emptyMap(),
+            false,
+            0,
+            0,
+            configurationMap
+        );
     }
 }

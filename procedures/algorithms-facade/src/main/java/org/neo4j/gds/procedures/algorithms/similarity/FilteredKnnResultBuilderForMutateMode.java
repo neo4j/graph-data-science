@@ -25,13 +25,13 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.similarity.knn.KnnMutateConfig;
-import org.neo4j.gds.similarity.knn.KnnResult;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnMutateConfig;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 
 import java.util.Map;
 import java.util.Optional;
 
-class KnnResultBuilderForMutateMode implements ResultBuilder<KnnMutateConfig, KnnResult, KnnMutateResult, Pair<RelationshipsWritten, Map<String, Object>>> {
+class FilteredKnnResultBuilderForMutateMode implements ResultBuilder<FilteredKnnMutateConfig, FilteredKnnResult, KnnMutateResult, Pair<RelationshipsWritten, Map<String, Object>>> {
     /**
      * @param metadata number of relationships written, and the similarity distribution
      */
@@ -39,8 +39,8 @@ class KnnResultBuilderForMutateMode implements ResultBuilder<KnnMutateConfig, Kn
     public KnnMutateResult build(
         Graph graph,
         GraphStore graphStore,
-        KnnMutateConfig configuration,
-        Optional<KnnResult> result,
+        FilteredKnnMutateConfig configuration,
+        Optional<FilteredKnnResult> result,
         AlgorithmProcessingTimings timings,
         Optional<Pair<RelationshipsWritten, Map<String, Object>>> metadata
     ) {

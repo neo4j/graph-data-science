@@ -22,6 +22,8 @@ package org.neo4j.gds.applications.algorithms.similarity;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnBaseConfig;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnMemoryEstimateDefinition;
 import org.neo4j.gds.similarity.knn.KnnBaseConfig;
 import org.neo4j.gds.similarity.knn.KnnMemoryEstimateDefinition;
 
@@ -30,6 +32,20 @@ public class SimilarityAlgorithmsEstimationModeBusinessFacade {
 
     public SimilarityAlgorithmsEstimationModeBusinessFacade(AlgorithmEstimationTemplate algorithmEstimationTemplate) {
         this.algorithmEstimationTemplate = algorithmEstimationTemplate;
+    }
+
+    public MemoryEstimation filteredKnn(KnnBaseConfig configuration) {
+        return new FilteredKnnMemoryEstimateDefinition(configuration.toMemoryEstimationParameters()).memoryEstimation();
+    }
+
+    public MemoryEstimateResult filteredKnn(FilteredKnnBaseConfig configuration, Object graphNameOrConfiguration) {
+        var memoryEstimation = filteredKnn(configuration);
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
     }
 
     public MemoryEstimation knn(KnnBaseConfig knnMutateConfig) {

@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.pipeline;
 import org.neo4j.gds.ml.pipeline.stubs.BellmanFordStub;
 import org.neo4j.gds.ml.pipeline.stubs.BreadthFirstSearchStub;
 import org.neo4j.gds.ml.pipeline.stubs.DepthFirstSearchStub;
+import org.neo4j.gds.ml.pipeline.stubs.FilteredKnnStub;
 import org.neo4j.gds.ml.pipeline.stubs.KnnStub;
 import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathAStarStub;
 import org.neo4j.gds.ml.pipeline.stubs.SinglePairShortestPathDijkstraStub;
@@ -79,6 +80,7 @@ final class NodePropertyStepFactoryUsingStubs {
         supportedProcedures.put(CanonicalProcedureName.parse("gds.bfs.mutate"), new BreadthFirstSearchStub());
         supportedProcedures.put(CanonicalProcedureName.parse("gds.dfs.mutate"), new DepthFirstSearchStub());
         supportedProcedures.put(CanonicalProcedureName.parse("gds.knn.mutate"), new KnnStub());
+        supportedProcedures.put(CanonicalProcedureName.parse("gds.knn.filtered.mutate"), new FilteredKnnStub());
         supportedProcedures.put(CanonicalProcedureName.parse("gds.shortestpath.astar.mutate"), new SinglePairShortestPathAStarStub());
         supportedProcedures.put(CanonicalProcedureName.parse("gds.shortestpath.dijkstra.mutate"), new SinglePairShortestPathDijkstraStub());
         supportedProcedures.put(CanonicalProcedureName.parse("gds.shortestpath.yens.mutate"), new SinglePairShortestPathYensStub());

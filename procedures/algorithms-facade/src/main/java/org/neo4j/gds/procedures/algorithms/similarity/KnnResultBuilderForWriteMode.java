@@ -28,7 +28,6 @@ import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.knn.KnnWriteConfig;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -43,34 +42,24 @@ class KnnResultBuilderForWriteMode implements ResultBuilder<KnnWriteConfig, KnnR
         AlgorithmProcessingTimings timings,
         Optional<Pair<RelationshipsWritten, Map<String, Object>>> metadata
     ) {
+        var configurationMap = configuration.toMap();
+
         if (result.isEmpty()) return Stream.of(
-            new KnnWriteResult(
-                timings.preProcessingMillis,
-                timings.computeMillis,
-                timings.postProcessingMillis,
-                0,
-                0,
-                0,
-                false,
-                0,
-                0,
-                Collections.emptyMap(),
-                configuration.toMap()
+            KnnWriteResult.emptyFrom(
+                timings,
+                configurationMap
             )
         );
 
-        KnnWriteResult knnWriteResult = new KnnWriteResult(
-            timings.preProcessingMillis,
-            timings.computeMillis,
-            timings.postProcessingMillis,
-            0,
+        var knnWriteResult = KnnWriteResult.from(
+            timings,
+            metadata.orElseThrow().getLeft(),
+            metadata.orElseThrow().getRight(),
             result.get().nodesCompared(),
-            metadata.orElseThrow().getLeft().value,
             result.get().didConverge(),
             result.get().ranIterations(),
             result.get().nodePairsConsidered(),
-            metadata.orElseThrow().getRight(),
-            configuration.toMap()
+            configurationMap
         );
 
         return Stream.of(knnWriteResult);

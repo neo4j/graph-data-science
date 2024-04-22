@@ -19,10 +19,9 @@
  */
 package org.neo4j.gds.similarity.filteredknn;
 
-import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.similarity.KnnMutateResult;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -33,19 +32,20 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
+import static org.neo4j.gds.similarity.filteredknn.FilteredKnnConstants.PROCEDURE_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class FilteredKnnMutateProc extends BaseProc {
-
+public class FilteredKnnMutateProc {
     @Context
     public GraphDataScienceProcedures facade;
+
     @Procedure(name = "gds.knn.filtered.mutate", mode = READ)
-    @Description(FilteredKnnConstants.PROCEDURE_DESCRIPTION)
+    @Description(PROCEDURE_DESCRIPTION)
     public Stream<KnnMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.similarity().filteredKnnMutate(graphName, configuration);
+        return facade.similarity().theOtherFacade().filteredKnnMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(value = "gds.knn.filtered.mutate.estimate", mode = READ)
@@ -54,25 +54,23 @@ public class FilteredKnnMutateProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.similarity().filteredKnnMutateEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.similarity().theOtherFacade().filteredKnnMutateStub().estimate(
+            graphNameOrConfiguration,
+            algoConfiguration
+        );
     }
 
     @Procedure(name = "gds.alpha.knn.filtered.mutate", mode = READ, deprecatedBy = "gds.knn.filtered.mutate")
-    @Description(FilteredKnnConstants.PROCEDURE_DESCRIPTION)
+    @Description(PROCEDURE_DESCRIPTION)
     @Internal
     @Deprecated
     public Stream<KnnMutateResult> alphaMutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.alpha.knn.filtered.mutate");
-
-        executionContext()
-            .log()
-            .warn(
-                "Procedure `gds.alpha.knn.filtered.mutate` has been deprecated, please use `gds.knn.filtered.mutate`.");
+        facade.deprecatedProcedures().called("gds.alpha.knn.filtered.mutate");
+        facade.log().warn(
+            "Procedure `gds.alpha.knn.filtered.mutate` has been deprecated, please use `gds.knn.filtered.mutate`.");
         return mutate(graphName, configuration);
     }
 }

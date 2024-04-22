@@ -19,42 +19,34 @@
  */
 package org.neo4j.gds.procedures.algorithms.similarity;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
-import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.similarity.knn.KnnMutateConfig;
-import org.neo4j.gds.similarity.knn.KnnResult;
+import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnStreamConfig;
 
-import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
-class KnnResultBuilderForMutateMode implements ResultBuilder<KnnMutateConfig, KnnResult, KnnMutateResult, Pair<RelationshipsWritten, Map<String, Object>>> {
-    /**
-     * @param metadata number of relationships written, and the similarity distribution
-     */
+class FilteredKnnResultBuilderForStreamMode implements ResultBuilder<FilteredKnnStreamConfig, FilteredKnnResult, Stream<SimilarityResult>, Void> {
     @Override
-    public KnnMutateResult build(
+    public Stream<SimilarityResult> build(
         Graph graph,
         GraphStore graphStore,
-        KnnMutateConfig configuration,
-        Optional<KnnResult> result,
+        FilteredKnnStreamConfig configuration,
+        Optional<FilteredKnnResult> result,
         AlgorithmProcessingTimings timings,
-        Optional<Pair<RelationshipsWritten, Map<String, Object>>> metadata
+        Optional<Void> unused
     ) {
-        var configurationMap = configuration.toMap();
+        if (result.isEmpty()) return Stream.empty();
 
-        return result.map(r -> KnnMutateResult.create(
-            timings,
-            configurationMap,
-            metadata.orElseThrow().getLeft(),
-            metadata.orElseThrow().getRight(),
-            r.nodesCompared(),
-            r.didConverge(),
-            r.ranIterations(),
-            r.nodePairsConsidered()
-        )).orElseGet(() -> KnnMutateResult.emptyFrom(timings, configurationMap));
+        //noinspection SimplifyStreamApiCallChains
+        return result.get().similarityResultStream().map(sr -> {
+            sr.node1 = graph.toOriginalNodeId(sr.node1);
+            sr.node2 = graph.toOriginalNodeId(sr.node2);
+            return sr;
+        });
     }
 }

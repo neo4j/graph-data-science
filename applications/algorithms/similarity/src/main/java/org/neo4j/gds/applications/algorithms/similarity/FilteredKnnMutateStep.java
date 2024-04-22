@@ -20,64 +20,56 @@
 package org.neo4j.gds.applications.algorithms.similarity;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
+import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.similarity.knn.KnnResult;
-import org.neo4j.gds.similarity.knn.KnnWriteConfig;
+import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnMutateConfig;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 
 import java.util.Map;
 
-import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.KNN;
-
-final class KnnWriteStep implements MutateOrWriteStep<KnnResult, Pair<RelationshipsWritten, Map<String, Object>>> {
-    private final KnnWriteConfig configuration;
+final class FilteredKnnMutateStep implements MutateOrWriteStep<FilteredKnnResult, Pair<RelationshipsWritten, Map<String, Object>>> {
+    private final SimilarityMutation similarityMutation;
+    private final FilteredKnnMutateConfig configuration;
     private final boolean shouldComputeSimilarityDistribution;
-    private final SimilarityWrite similarityWrite;
 
-    private KnnWriteStep(
-        KnnWriteConfig configuration,
-        boolean shouldComputeSimilarityDistribution,
-        SimilarityWrite similarityWrite
+    private FilteredKnnMutateStep(
+        SimilarityMutation similarityMutation,
+        FilteredKnnMutateConfig configuration,
+        boolean shouldComputeSimilarityDistribution
     ) {
+        this.similarityMutation = similarityMutation;
         this.configuration = configuration;
         this.shouldComputeSimilarityDistribution = shouldComputeSimilarityDistribution;
-        this.similarityWrite = similarityWrite;
     }
 
-    static KnnWriteStep create(
-        KnnWriteConfig configuration,
-        boolean shouldComputeSimilarityDistribution,
-        WriteRelationshipService writeRelationshipService
+    static FilteredKnnMutateStep create(
+        Log log,
+        FilteredKnnMutateConfig configuration,
+        boolean shouldComputeSimilarityDistribution
     ) {
-        var similarityWrite = new SimilarityWrite(writeRelationshipService);
+        var mutateRelationshipService = new MutateRelationshipService(log);
+        var similarityMutation = new SimilarityMutation(mutateRelationshipService);
 
-        return new KnnWriteStep(
-            configuration,
-            shouldComputeSimilarityDistribution,
-            similarityWrite
-        );
+        return new FilteredKnnMutateStep(similarityMutation, configuration, shouldComputeSimilarityDistribution);
     }
 
     @Override
     public Pair<RelationshipsWritten, Map<String, Object>> execute(
         Graph graph,
         GraphStore graphStore,
-        KnnResult result
+        FilteredKnnResult result
     ) {
-        return similarityWrite.execute(
+        return similarityMutation.execute(
             graph,
             graphStore,
             configuration,
             configuration,
-            configuration,
-            configuration,
-            shouldComputeSimilarityDistribution,
-            configuration.resolveResultStore(graphStore.resultStore()),
-            result.streamSimilarityResult(),
-            KNN
+            result.similarityResultStream(),
+            shouldComputeSimilarityDistribution
         );
     }
 }

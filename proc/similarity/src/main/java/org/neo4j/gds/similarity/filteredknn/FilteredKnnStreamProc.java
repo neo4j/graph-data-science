@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.similarity.filteredknn;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityResult;
@@ -33,20 +32,20 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
+import static org.neo4j.gds.similarity.filteredknn.FilteredKnnConstants.PROCEDURE_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class FilteredKnnStreamProc extends BaseProc {
-
+public class FilteredKnnStreamProc {
     @Context
     public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.knn.filtered.stream", mode = READ)
-    @Description(FilteredKnnConstants.PROCEDURE_DESCRIPTION)
+    @Description(PROCEDURE_DESCRIPTION)
     public Stream<SimilarityResult> stream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.similarity().filteredKnnStream(graphName, configuration);
+        return facade.similarity().theOtherFacade().filteredKnnStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.knn.filtered.stream.estimate", mode = READ)
@@ -55,22 +54,20 @@ public class FilteredKnnStreamProc extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.similarity().filteredKnnStreamEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.similarity().theOtherFacade().filteredKnnStreamEstimate(graphNameOrConfiguration, algoConfiguration);
 
     }
 
     @Procedure(value = "gds.alpha.knn.filtered.stream", mode = READ, deprecatedBy = "gds.knn.filtered.stream")
-    @Description(FilteredKnnConstants.PROCEDURE_DESCRIPTION)
+    @Description(PROCEDURE_DESCRIPTION)
     @Internal
     @Deprecated
     public Stream<SimilarityResult> alphaStream(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.alpha.knn.filtered.stream");
-        executionContext()
+        facade.deprecatedProcedures().called("gds.alpha.knn.filtered.stream");
+        facade
             .log()
             .warn(
                 "Procedure `gds.alpha.knn.filtered.stream` has been deprecated, please use `gds.knn.filtered.stream`.");

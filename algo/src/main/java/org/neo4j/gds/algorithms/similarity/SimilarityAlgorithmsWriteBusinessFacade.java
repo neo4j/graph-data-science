@@ -22,7 +22,6 @@ package org.neo4j.gds.algorithms.similarity;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.RelationshipWriteResult;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
-import org.neo4j.gds.algorithms.similarity.specificfields.KnnSpecificFields;
 import org.neo4j.gds.algorithms.similarity.specificfields.SimilaritySpecificFields;
 import org.neo4j.gds.algorithms.similarity.specificfields.SimilaritySpecificFieldsWithDistribution;
 import org.neo4j.gds.config.AlgoBaseConfig;
@@ -30,7 +29,6 @@ import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
-import org.neo4j.gds.similarity.filteredknn.FilteredKnnWriteConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityWriteConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteConfig;
 
@@ -39,7 +37,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static org.neo4j.gds.algorithms.similarity.SimilarityResultCompanion.FILTERED_KNN_SPECIFIC_FIELDS_SUPPLIER;
 import static org.neo4j.gds.algorithms.similarity.SimilarityResultCompanion.NODE_SIMILARITY_SPECIFIC_FIELDS_SUPPLIER;
 
 public class SimilarityAlgorithmsWriteBusinessFacade {
@@ -106,38 +103,6 @@ public class SimilarityAlgorithmsWriteBusinessFacade {
             configuration.writeRelationshipType(),
             configuration.arrowConnectionInfo()
         );
-    }
-
-    public RelationshipWriteResult filteredKnn(
-        String graphName,
-        FilteredKnnWriteConfig configuration,
-        boolean computeSimilarityDistribution
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> similarityAlgorithmsFacade.filteredKnn(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        return write(
-            algorithmResult,
-            configuration,
-            result -> SimilarityResultCompanion.computeToGraph(
-                algorithmResult.graph(),
-                algorithmResult.graph().nodeCount(),
-                configuration.typedConcurrency(),
-                result.similarityResultStream()
-            ),
-            FILTERED_KNN_SPECIFIC_FIELDS_SUPPLIER,
-            intermediateResult.computeMilliseconds,
-            () -> KnnSpecificFields.EMPTY,
-            computeSimilarityDistribution,
-            "FilteredKnnWrite",
-            configuration.writeProperty(),
-            configuration.writeRelationshipType(),
-            configuration.arrowConnectionInfo()
-        );
-
     }
 
     <RESULT, ASF extends SimilaritySpecificFields, CONFIG extends AlgoBaseConfig & WriteRelationshipConfig> RelationshipWriteResult<ASF> write(

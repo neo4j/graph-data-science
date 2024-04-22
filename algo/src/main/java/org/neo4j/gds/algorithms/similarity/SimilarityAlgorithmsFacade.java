@@ -21,16 +21,11 @@ package org.neo4j.gds.algorithms.similarity;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
-import org.neo4j.gds.similarity.filteredknn.FilteredKnnBaseConfig;
-import org.neo4j.gds.similarity.filteredknn.FilteredKnnFactory;
-import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityBaseConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityFactory;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityFactory;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
-
-import java.util.Optional;
 
 public class SimilarityAlgorithmsFacade {
 
@@ -61,18 +56,6 @@ public class SimilarityAlgorithmsFacade {
             config,
             config.relationshipWeightProperty(),
             new FilteredNodeSimilarityFactory<>()
-        );
-    }
-
-    AlgorithmComputationResult<FilteredKnnResult> filteredKnn(
-        String graphName,
-        FilteredKnnBaseConfig config
-    ) {
-        return algorithmRunner.run(
-            graphName,
-            config,
-            Optional.empty(),
-            new FilteredKnnFactory<>()
         );
     }
 }
