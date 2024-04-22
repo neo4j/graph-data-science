@@ -1,5 +1,7 @@
 Thank you for your contribution to the Graph Data Science project.
 
+**Note:** This repository is a public mirror. We will review your PR and cherry-pick it into the internal repository. After approval, the changes will be visible within the next days.
+
 <!-- Please include a summary of the change, such as, which issue was fixed or feature was added. 
 If relevant, link to the corresponding issue.
 Please also include relevant motivation and context. List any dependencies that are required for this change. -->
