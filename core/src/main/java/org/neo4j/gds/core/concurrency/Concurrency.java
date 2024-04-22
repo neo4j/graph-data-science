@@ -19,10 +19,18 @@
  */
 package org.neo4j.gds.core.concurrency;
 
-public record Concurrency(int value) {
-    public Concurrency {
-        if (value < 1)
+public class Concurrency {
+    private final int value;
+
+    public Concurrency(int value) {
+        if (value < 1) {
             throw new IllegalArgumentException("Valid values for Concurrency are int[1..], Value provided was `" + value + "`.");
+        }
+        this.value = value;
+    }
+
+    public int value() {
+        return value;
     }
 
     public long squared() {
