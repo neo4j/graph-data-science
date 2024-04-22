@@ -211,7 +211,7 @@ public final class GraphImporter {
 
         var projectMillis = timer.stop().getDuration();
 
-        return AggregationResultImpl.builder()
+        return AggregationResult.builder()
             .graphName(graphName)
             .nodeCount(graphStore.nodeCount())
             .relationshipCount(graphStore.relationshipCount())
