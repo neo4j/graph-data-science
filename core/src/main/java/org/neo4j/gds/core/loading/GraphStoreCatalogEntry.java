@@ -20,6 +20,11 @@
 package org.neo4j.gds.core.loading;
 
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 
-public record GraphStoreCatalogEntry(GraphStore graphStore, GraphProjectConfig config) {}
+public record GraphStoreCatalogEntry(
+    GraphStore graphStore,
+    GraphProjectConfig config,
+    ResultStore resultStore
+) {}

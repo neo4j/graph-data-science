@@ -172,7 +172,7 @@ public class GraphStoreCatalogService {
         return GraphStoreCatalog.graphStoreCount();
     }
 
-    public Map<GraphProjectConfig, GraphStore> getGraphStores(User user) {
+    public Collection<GraphStoreCatalogEntry> getGraphStores(User user) {
         return GraphStoreCatalog.getGraphStores(user.getUsername());
     }
 

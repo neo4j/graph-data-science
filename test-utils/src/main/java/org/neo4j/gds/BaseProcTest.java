@@ -182,10 +182,9 @@ public class BaseProcTest extends BaseTest {
     protected Graph findLoadedGraph(String graphName) {
         return GraphStoreCatalog
             .getGraphStores("", DatabaseId.of(db.databaseName()))
-            .entrySet()
             .stream()
-            .filter(e -> e.getKey().graphName().equals(graphName))
-            .map(e -> e.getValue().getUnion())
+            .filter(catalogEntry -> catalogEntry.config().graphName().equals(graphName))
+            .map(catalogEntry -> catalogEntry.graphStore().getUnion())
             .findFirst()
             .orElseThrow(() -> new RuntimeException(formatWithLocale("Graph %s not found.", graphName)));
     }
@@ -193,10 +192,9 @@ public class BaseProcTest extends BaseTest {
     private Set<Graph> getLoadedGraphs(String graphName) {
         return GraphStoreCatalog
             .getGraphStores("", DatabaseId.of(db.databaseName()))
-            .entrySet()
             .stream()
-            .filter(e -> e.getKey().graphName().equals(graphName))
-            .map(e -> e.getValue().getUnion())
+            .filter(catalogEntry -> catalogEntry.config().graphName().equals(graphName))
+            .map(catalogEntry -> catalogEntry.graphStore().getUnion())
             .collect(Collectors.toSet());
     }
 

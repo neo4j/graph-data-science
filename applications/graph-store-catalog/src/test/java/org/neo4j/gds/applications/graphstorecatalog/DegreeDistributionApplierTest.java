@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.GraphName;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -49,16 +50,16 @@ class DegreeDistributionApplierTest {
         var graphStore2 = new StubGraphStore();
         List<Pair<GraphStoreCatalogEntry, Map<String, Object>>> result = degreeDistributionApplier.process(
             List.of(
-                new GraphStoreCatalogEntry(graphStore1, config1),
-                new GraphStoreCatalogEntry(graphStore2, config2)
+                new GraphStoreCatalogEntry(graphStore1, config1, ResultStore.EMPTY),
+                new GraphStoreCatalogEntry(graphStore2, config2, ResultStore.EMPTY)
                 ),
             false,
             null
         );
 
         assertThat(result).containsExactly(
-            Pair.of(new GraphStoreCatalogEntry(graphStore1, config1), null),
-            Pair.of(new GraphStoreCatalogEntry(graphStore2, config2), null)
+            Pair.of(new GraphStoreCatalogEntry(graphStore1, config1, ResultStore.EMPTY), null),
+            Pair.of(new GraphStoreCatalogEntry(graphStore2, config2, ResultStore.EMPTY), null)
         );
     }
 
@@ -89,16 +90,16 @@ class DegreeDistributionApplierTest {
         when(degreeDistributionService.compute(graphStore2, null)).thenReturn(Map.of("degdist", 87));
         List<Pair<GraphStoreCatalogEntry, Map<String, Object>>> result = degreeDistributionApplier.process(
             List.of(
-                new GraphStoreCatalogEntry(graphStore1, config1),
-                new GraphStoreCatalogEntry(graphStore2, config2)
+                new GraphStoreCatalogEntry(graphStore1, config1, ResultStore.EMPTY),
+                new GraphStoreCatalogEntry(graphStore2, config2, ResultStore.EMPTY)
             ),
             true,
             null
         );
 
         assertThat(result).containsExactly(
-            Pair.of(new GraphStoreCatalogEntry(graphStore1, config1), Map.of("some", 42)),
-            Pair.of(new GraphStoreCatalogEntry(graphStore2, config2), Map.of("degdist", 87))
+            Pair.of(new GraphStoreCatalogEntry(graphStore1, config1, ResultStore.EMPTY), Map.of("some", 42)),
+            Pair.of(new GraphStoreCatalogEntry(graphStore2, config2, ResultStore.EMPTY), Map.of("degdist", 87))
         );
 
         // the caching bit
@@ -145,16 +146,16 @@ class DegreeDistributionApplierTest {
         ).thenReturn(Optional.of(Map.of("dd1", 512, "dd2", 1024)));
         List<Pair<GraphStoreCatalogEntry, Map<String, Object>>> result = degreeDistributionApplier.process(
             List.of(
-                new GraphStoreCatalogEntry(graphStore1, config1),
-                new GraphStoreCatalogEntry(graphStore2, config2)
+                new GraphStoreCatalogEntry(graphStore1, config1, ResultStore.EMPTY),
+                new GraphStoreCatalogEntry(graphStore2, config2, ResultStore.EMPTY)
             ),
             true,
             null
         );
 
         assertThat(result).containsExactly(
-            Pair.of(new GraphStoreCatalogEntry(graphStore1, config1), Map.of("dd1", 7, "dd2", 11)),
-            Pair.of(new GraphStoreCatalogEntry(graphStore2, config2), Map.of("dd1", 512, "dd2", 1024))
+            Pair.of(new GraphStoreCatalogEntry(graphStore1, config1, ResultStore.EMPTY), Map.of("dd1", 7, "dd2", 11)),
+            Pair.of(new GraphStoreCatalogEntry(graphStore2, config2, ResultStore.EMPTY), Map.of("dd1", 512, "dd2", 1024))
         );
     }
 }

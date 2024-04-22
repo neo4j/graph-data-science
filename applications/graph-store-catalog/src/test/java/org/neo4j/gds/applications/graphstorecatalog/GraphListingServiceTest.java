@@ -20,11 +20,12 @@
 package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 
-import java.util.Map;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,9 +49,9 @@ class GraphListingServiceTest {
         var result = graphListingService.listGraphs(new User("Bossman", true));
 
         assertThat(result).containsExactly(
-            new GraphStoreCatalogEntry(graphStore1.graphStore(), graphStore1.config()),
-            new GraphStoreCatalogEntry(graphStore2.graphStore(), graphStore2.config()),
-            new GraphStoreCatalogEntry(graphStore3.graphStore(), graphStore3.config())
+            new GraphStoreCatalogEntry(graphStore1.graphStore(), graphStore1.config(), ResultStore.EMPTY),
+            new GraphStoreCatalogEntry(graphStore2.graphStore(), graphStore2.config(), ResultStore.EMPTY),
+            new GraphStoreCatalogEntry(graphStore3.graphStore(), graphStore3.config(), ResultStore.EMPTY)
         );
     }
 
@@ -62,21 +63,21 @@ class GraphListingServiceTest {
         var graphStore1 = stubCatalogEntryWithUsername();
         var graphStore2 = stubCatalogEntryWithUsername();
         var graphStore3 = stubCatalogEntryWithUsername();
-        when(graphStoreCatalogService.getGraphStores(new User("nobody", false))).thenReturn(Map.of(
-            graphStore1.config(), graphStore1.graphStore(),
-            graphStore2.config(), graphStore2.graphStore(),
-            graphStore3.config(), graphStore3.graphStore()
+        when(graphStoreCatalogService.getGraphStores(new User("nobody", false))).thenReturn(List.of(
+            new GraphStoreCatalogEntry(graphStore1.graphStore(), graphStore1.config(), ResultStore.EMPTY),
+            new GraphStoreCatalogEntry(graphStore2.graphStore(), graphStore2.config(), ResultStore.EMPTY),
+            new GraphStoreCatalogEntry(graphStore3.graphStore(), graphStore3.config(), ResultStore.EMPTY)
         ));
         var result = graphListingService.listGraphs(new User("nobody", false));
 
         assertThat(result).containsExactlyInAnyOrder(
-            new GraphStoreCatalogEntry(graphStore1.graphStore(), graphStore1.config()),
-            new GraphStoreCatalogEntry(graphStore2.graphStore(), graphStore2.config()),
-            new GraphStoreCatalogEntry(graphStore3.graphStore(), graphStore3.config())
+            new GraphStoreCatalogEntry(graphStore1.graphStore(), graphStore1.config(), ResultStore.EMPTY),
+            new GraphStoreCatalogEntry(graphStore2.graphStore(), graphStore2.config(), ResultStore.EMPTY),
+            new GraphStoreCatalogEntry(graphStore3.graphStore(), graphStore3.config(),ResultStore.EMPTY)
         );
     }
 
     private static GraphStoreCatalogEntry stubCatalogEntryWithUsername() {
-        return new GraphStoreCatalogEntry(new StubGraphStore(), new StubGraphProjectConfig());
+        return new GraphStoreCatalogEntry(new StubGraphStore(), new StubGraphProjectConfig(), ResultStore.EMPTY);
     }
 }

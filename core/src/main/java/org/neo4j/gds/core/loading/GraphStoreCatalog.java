@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.EphemeralResultStore;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
@@ -30,6 +31,7 @@ import org.neo4j.gds.utils.ExceptionUtil;
 import org.neo4j.gds.utils.StringJoining;
 import org.neo4j.logging.Log;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
@@ -214,7 +216,7 @@ public final class GraphStoreCatalog {
         return userCatalogs
             .values()
             .stream()
-            .mapToInt(userCatalog -> userCatalog.getGraphStores().values().size())
+            .mapToInt(userCatalog -> userCatalog.getGraphStores().size())
             .sum();
     }
 
@@ -222,7 +224,7 @@ public final class GraphStoreCatalog {
         return userCatalogs
             .values()
             .stream()
-            .mapToInt(userCatalog -> userCatalog.getGraphStores(databaseId).values().size())
+            .mapToInt(userCatalog -> userCatalog.getGraphStores(databaseId).size())
             .sum();
     }
 
@@ -258,11 +260,11 @@ public final class GraphStoreCatalog {
         userCatalogs.forEach((user, userCatalog) -> userCatalog.remove(databaseId.databaseName()));
     }
 
-    public static Map<GraphProjectConfig, GraphStore> getGraphStores(String username) {
+    public static Collection<GraphStoreCatalogEntry> getGraphStores(String username) {
         return getUserCatalog(username).getGraphStores();
     }
 
-    public static Map<GraphProjectConfig, GraphStore> getGraphStores(String username, DatabaseId databaseId) {
+    public static Collection<GraphStoreCatalogEntry> getGraphStores(String username, DatabaseId databaseId) {
         return getUserCatalog(username).getGraphStores(databaseId);
     }
 
@@ -314,7 +316,9 @@ public final class GraphStoreCatalog {
             if (config.graphName() == null || graphStore == null) {
                 throw new IllegalArgumentException("Both name and graph store must be not null");
             }
-            GraphStoreCatalogEntry graphStoreCatalogEntry = new GraphStoreCatalogEntry(graphStore, config);
+            // We assume that a set operation in the graph store catalog is the beginning of a graph stores lifetime.
+            // Therefore, we initialize a new result store at this point.
+            GraphStoreCatalogEntry graphStoreCatalogEntry = new GraphStoreCatalogEntry(graphStore, config, new EphemeralResultStore());
 
             if (graphsByName.containsKey(userCatalogKey)) {
                 throw new IllegalStateException(
@@ -406,27 +410,16 @@ public final class GraphStoreCatalog {
                 .map(catalogEntry -> new GraphStoreCatalogEntryWithUsername(catalogEntry, userName));
         }
 
-        private Map<GraphProjectConfig, GraphStore> getGraphStores() {
-            return graphsByName.values()
-                .stream()
-                .collect(
-                    Collectors.toMap(
-                        GraphStoreCatalogEntry::config,
-                        GraphStoreCatalogEntry::graphStore
-                    )
-                );
+        private Collection<GraphStoreCatalogEntry> getGraphStores() {
+            return graphsByName.values();
         }
 
-        private Map<GraphProjectConfig, GraphStore> getGraphStores(DatabaseId databaseId) {
+        private Collection<GraphStoreCatalogEntry> getGraphStores(DatabaseId databaseId) {
             return graphsByName.entrySet()
                 .stream()
                 .filter(entry -> entry.getKey().databaseName().equals(databaseId.databaseName()))
-                .collect(
-                    Collectors.toMap(
-                        entry -> entry.getValue().config(),
-                        entry -> entry.getValue().graphStore()
-                    )
-                );
+                .map(Map.Entry::getValue)
+                .toList();
         }
     }
 

@@ -170,7 +170,11 @@ class CatalogProcedureFacadeTest {
         when(businessFacade.listGraphs(new User("Bob", false), "foo", false, null))
             .thenReturn(
                 List.of(
-                    Pair.of(new GraphStoreCatalogEntry(new StubGraphStore(), mock(GraphProjectConfig.class)), null)
+                    Pair.of(new GraphStoreCatalogEntry(
+                        new StubGraphStore(),
+                        mock(GraphProjectConfig.class),
+                        ResultStore.EMPTY
+                    ), null)
                 )
             );
         var graphs = catalogFacade.listGraphs("foo");
@@ -207,7 +211,7 @@ class CatalogProcedureFacadeTest {
             .thenReturn(
                 List.of(
                     Pair.of(
-                        new GraphStoreCatalogEntry(new StubGraphStore(), mock(GraphProjectConfig.class)),
+                        new GraphStoreCatalogEntry(new StubGraphStore(), mock(GraphProjectConfig.class), ResultStore.EMPTY),
                         Map.of("deg", 117, "ree", 23, "dist", 512)
                     )
                 )
@@ -254,7 +258,11 @@ class CatalogProcedureFacadeTest {
         when(businessFacade.listGraphs(new User("Bob", false), "foo", false, null))
             .thenReturn(
                 List.of(
-                    Pair.of(new GraphStoreCatalogEntry(new StubGraphStore(), mock(GraphProjectConfig.class)), null)
+                    Pair.of(new GraphStoreCatalogEntry(
+                        new StubGraphStore(),
+                        mock(GraphProjectConfig.class),
+                        ResultStore.EMPTY
+                    ), null)
                 )
             );
         var graphs = catalogFacade.listGraphs("foo");
@@ -293,7 +301,11 @@ class CatalogProcedureFacadeTest {
         when(businessFacade.listGraphs(new User("Bob", false), "foo", false, null))
             .thenReturn(
                 List.of(
-                    Pair.of(new GraphStoreCatalogEntry(new StubGraphStore(), mock(GraphProjectConfig.class)), null)
+                    Pair.of(new GraphStoreCatalogEntry(
+                        new StubGraphStore(),
+                        mock(GraphProjectConfig.class),
+                        ResultStore.EMPTY
+                    ), null)
                 )
             );
         var graphs = catalogFacade.listGraphs("foo");

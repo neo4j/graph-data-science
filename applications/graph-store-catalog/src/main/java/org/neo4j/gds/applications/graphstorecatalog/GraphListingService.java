@@ -49,7 +49,6 @@ class GraphListingService {
     }
 
     private Stream<GraphStoreCatalogEntry> listForUser(User user) {
-        return graphStoreCatalogService.getGraphStores(user).entrySet().stream()
-            .map(entry -> new GraphStoreCatalogEntry(entry.getValue(), entry.getKey()));
+        return graphStoreCatalogService.getGraphStores(user).stream();
     }
 }
