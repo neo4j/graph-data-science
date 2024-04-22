@@ -64,11 +64,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.RESIDENT_MEMORY;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.TEMPORARY_MEMORY;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfIntArray;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfOpenHashContainer;
+import static org.neo4j.gds.mem.Estimate.sizeOfDoubleArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfIntArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfLongArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfObjectArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfOpenHashContainer;
 
 @ModelCatalogExtension
 class GraphSageAlgorithmFactoryTest {

@@ -23,8 +23,8 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.GraphStoreWithConfig;
-import org.neo4j.gds.mem.JolMemoryUsage;
 import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 import org.openjdk.jol.info.GraphWalker;
 
 import java.util.Collections;
@@ -45,7 +45,7 @@ public final class GraphMemoryUsage {
         var graphStore = graphStoreWithConfig.graphStore();
         var detailMemory = internalSizeOfGraph(graphStore, totalSize);
 
-        var memoryUsage = MemoryUsage.humanReadable(totalSize.longValue());
+        var memoryUsage = Estimate.humanReadable(totalSize.longValue());
 
         return new GraphMemoryUsage(
             graphStoreWithConfig.config().graphName(),
@@ -64,7 +64,7 @@ public final class GraphMemoryUsage {
     private static final Object DUMMY = new Object();
 
     private static Map<String, Object> internalSizeOfGraph(GraphStore graphStore, MutableLong totalSize) {
-        if (JolMemoryUsage.sizeOf(DUMMY) == -1L) {
+        if (MemoryUsage.sizeOf(DUMMY) == -1L) {
             return Map.of();
         }
         var mappingSparseLongArray = new MutableLong();

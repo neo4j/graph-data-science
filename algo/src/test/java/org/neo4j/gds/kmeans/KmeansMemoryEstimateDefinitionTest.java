@@ -22,7 +22,7 @@ package org.neo4j.gds.kmeans;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 import java.util.List;
 
@@ -60,7 +60,7 @@ class KmeansMemoryEstimateDefinitionTest {
         when(params.isSeeded()).thenReturn(true);
         var memoryEstimation = new KmeansMemoryEstimateDefinition(params).memoryEstimation();
 
-        var sizeOfCentroids = 4 * MemoryUsage.sizeOfInstance(List.class) // four lists
+        var sizeOfCentroids = 4 * Estimate.sizeOfInstance(List.class) // four lists
                             + 6 * 24; // eight doubles
         MemoryEstimationAssert.assertThat(memoryEstimation).
             memoryRange(graphDimensions, 4)

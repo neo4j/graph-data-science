@@ -25,7 +25,7 @@ import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
@@ -104,10 +104,10 @@ class HashTask implements Runnable {
         List<int[]> preAggregationHashes();
 
         static long memoryEstimation(int ambientDimension, int numRelTypes) {
-            long neighborAggregation = MemoryUsage.sizeOfIntArrayList(ambientDimension);
-            long selfAggregation = MemoryUsage.sizeOfIntArray(ambientDimension);
-            long preAggregation = MemoryUsage.sizeOfIntArrayList(numRelTypes) + MemoryUsage.sizeOfIntArray(ambientDimension) * numRelTypes;
-            return neighborAggregation + selfAggregation + preAggregation + MemoryUsage.sizeOfInstance(Hashes.class);
+            long neighborAggregation = Estimate.sizeOfIntArrayList(ambientDimension);
+            long selfAggregation = Estimate.sizeOfIntArray(ambientDimension);
+            long preAggregation = Estimate.sizeOfIntArrayList(numRelTypes) + Estimate.sizeOfIntArray(ambientDimension) * numRelTypes;
+            return neighborAggregation + selfAggregation + preAggregation + Estimate.sizeOfInstance(Hashes.class);
         }
     }
 

@@ -44,7 +44,7 @@ import java.util.function.LongConsumer;
 
 import static org.neo4j.gds.core.loading.AdjacencyPreAggregation.preAggregate;
 import static org.neo4j.gds.mem.BitUtil.ceilDiv;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfObjectArray;
 import static org.neo4j.kernel.api.StatementConstants.NO_SUCH_PROPERTY_KEY;
 
 /**

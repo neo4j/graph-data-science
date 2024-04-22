@@ -22,8 +22,8 @@ package org.neo4j.gds.procedures.catalog;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.DegreeDistribution;
-import org.neo4j.gds.mem.JolMemoryUsage;
 import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 import java.time.ZonedDateTime;
 import java.util.Locale;
@@ -80,10 +80,10 @@ public class GraphInfo {
         GraphProjectConfig graphProjectConfig,
         GraphStore graphStore
     ) {
-        var sizeInBytes = JolMemoryUsage.sizeOf(graphStore);
+        var sizeInBytes = MemoryUsage.sizeOf(graphStore);
 
         var memoryUsage = sizeInBytes >= 0
-            ? MemoryUsage.humanReadable(sizeInBytes)
+            ? Estimate.humanReadable(sizeInBytes)
             : null;
 
         return create(

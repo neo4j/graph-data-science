@@ -20,11 +20,11 @@
 package org.neo4j.gds.ml.metrics;
 
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.mem.MemoryUsage;
 import org.neo4j.gds.ml.core.batch.BatchQueue;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.models.Features;
@@ -46,10 +46,10 @@ public abstract class SignedProbabilities {
     private long negativeCount;
 
     public static long estimateMemory(long relationshipSetSize) {
-        return MemoryUsage.sizeOfInstance(SignedProbabilities.class) +
-               MemoryUsage.sizeOfInstance(Optional.class) +
-               MemoryUsage.sizeOfInstance(ArrayList.class) +
-               MemoryUsage.sizeOfInstance(Double.class) * relationshipSetSize;
+        return Estimate.sizeOfInstance(SignedProbabilities.class) +
+               Estimate.sizeOfInstance(Optional.class) +
+               Estimate.sizeOfInstance(ArrayList.class) +
+               Estimate.sizeOfInstance(Double.class) * relationshipSetSize;
     }
 
     static SignedProbabilities create(long capacity) {

@@ -25,7 +25,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 import java.util.function.LongUnaryOperator;
 
@@ -67,7 +67,7 @@ public class HashGNNMemoryEstimateDefinition implements MemoryEstimateDefinition
 
         LongUnaryOperator denseResultEstimation = n -> HugeObjectArray.memoryEstimation(
             n,
-            MemoryUsage.sizeOfDoubleArray(outputDimension.orElse(binaryDimension))
+            Estimate.sizeOfDoubleArray(outputDimension.orElse(binaryDimension))
         );
 
         if (outputDimension.isPresent()) {
@@ -75,7 +75,7 @@ public class HashGNNMemoryEstimateDefinition implements MemoryEstimateDefinition
         } else {
             // in the sparse case we store the bitset, but we convert the result to double[] before returning to the user
             builder.rangePerNode("Embeddings output", n -> MemoryRange.of(
-                HugeObjectArray.memoryEstimation(n, MemoryUsage.sizeOfBitset(binaryDimension)),
+                HugeObjectArray.memoryEstimation(n, Estimate.sizeOfBitset(binaryDimension)),
                 denseResultEstimation.applyAsLong(n)
             ));
         }

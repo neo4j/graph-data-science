@@ -24,7 +24,7 @@ import org.neo4j.gds.ml.core.samplers.IntUniformSamplerFromRange;
 
 import java.util.SplittableRandom;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.mem.Estimate.sizeOfInstance;
 
 // NOTE: This class is not thead safe.
 public final class FeatureBagger {

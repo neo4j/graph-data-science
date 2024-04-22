@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.utils.mem;
 
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 import java.util.Objects;
 import java.util.function.LongUnaryOperator;
@@ -155,9 +155,9 @@ public final class MemoryRange {
     @Override
     public String toString() {
         if (min == max) {
-            return MemoryUsage.humanReadable(min);
+            return Estimate.humanReadable(min);
         } else {
-            return "[" + MemoryUsage.humanReadable(min) + " ... " + MemoryUsage.humanReadable(max) + "]";
+            return "[" + Estimate.humanReadable(min) + " ... " + Estimate.humanReadable(max) + "]";
         }
     }
 }

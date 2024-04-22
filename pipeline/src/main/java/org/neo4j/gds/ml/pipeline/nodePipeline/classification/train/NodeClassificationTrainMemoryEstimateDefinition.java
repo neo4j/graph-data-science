@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.delegateEstimation;
 import static org.neo4j.gds.core.utils.mem.MemoryEstimations.maxEstimation;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfDoubleArray;
 
 public class NodeClassificationTrainMemoryEstimateDefinition {
 

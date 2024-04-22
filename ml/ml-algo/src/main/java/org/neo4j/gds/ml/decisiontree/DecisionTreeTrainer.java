@@ -28,7 +28,7 @@ import org.neo4j.gds.ml.models.Features;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.mem.Estimate.sizeOfInstance;
 
 public abstract class DecisionTreeTrainer<PREDICTION extends Number> {
 

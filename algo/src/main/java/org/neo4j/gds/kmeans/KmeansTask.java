@@ -26,7 +26,7 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.core.utils.partition.Partition;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 
 public abstract class KmeansTask implements Runnable {
@@ -59,10 +59,10 @@ public abstract class KmeansTask implements Runnable {
     static MemoryEstimation memoryEstimation(int k, int fakeDimensions) {
         var builder = MemoryEstimations.builder(KmeansTask.class);
         builder
-            .fixed("communitySizes", MemoryUsage.sizeOfLongArray(k))
+            .fixed("communitySizes", Estimate.sizeOfLongArray(k))
             .add("communityCoordinateSums", MemoryEstimations.of("communityCoordinateSums", MemoryRange.of(
-                k * MemoryUsage.sizeOfFloatArray(fakeDimensions),
-                k * MemoryUsage.sizeOfDoubleArray(fakeDimensions)
+                k * Estimate.sizeOfFloatArray(fakeDimensions),
+                k * Estimate.sizeOfDoubleArray(fakeDimensions)
             )));
         return builder.build();
     }
@@ -220,4 +220,3 @@ public abstract class KmeansTask implements Runnable {
         }
     }
 }
-

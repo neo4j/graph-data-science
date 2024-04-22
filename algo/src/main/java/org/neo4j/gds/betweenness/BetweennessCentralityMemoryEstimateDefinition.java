@@ -29,9 +29,9 @@ import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfLongArray;
 
 public class BetweennessCentralityMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
@@ -72,7 +72,7 @@ public class BetweennessCentralityMemoryEstimateDefinition implements MemoryEsti
                     "traverser",
                     (dimensions, concurrency) -> MemoryEstimations.builder(ForwardTraverser.class)
                         .add("nodeQueue", HugeLongPriorityQueue.memoryEstimation())
-                        .perNode("visited", MemoryUsage::sizeOfBitset)
+                        .perNode("visited", Estimate::sizeOfBitset)
                         .build()
                 )
             );

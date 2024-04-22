@@ -36,7 +36,7 @@ import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.IdToVariable;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -131,7 +131,7 @@ class K1ColoringWriteProcTest extends BaseProcTest {
             assertTrue(row.getNumber("bytesMin").longValue() > 0);
             assertTrue(row.getNumber("bytesMax").longValue() > 0);
 
-            String bytesHuman = MemoryUsage.humanReadable(row.getNumber("bytesMin").longValue());
+            String bytesHuman = Estimate.humanReadable(row.getNumber("bytesMin").longValue());
             assertNotNull(bytesHuman);
             assertTrue(row.getString("requiredMemory").contains(bytesHuman));
         });

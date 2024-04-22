@@ -21,7 +21,7 @@ package org.neo4j.gds.core.utils.mem;
 
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -74,7 +74,7 @@ public final class MemoryEstimations {
     public static MemoryEstimation of(final Class<?> instanceType) {
         return new LeafEstimation(
                 "instance",
-                (dimensions, concurrency) -> MemoryRange.of(MemoryUsage.sizeOfInstance(instanceType)));
+                (dimensions, concurrency) -> MemoryRange.of(Estimate.sizeOfInstance(instanceType)));
     }
 
     /**
@@ -342,7 +342,7 @@ public final class MemoryEstimations {
         public Builder field(final String description, final Class<?> type) {
             components.add(new LeafEstimation(
                     description,
-                    (dimensions, concurrency) -> MemoryRange.of(MemoryUsage.sizeOfInstance(type))));
+                    (dimensions, concurrency) -> MemoryRange.of(Estimate.sizeOfInstance(type))));
             return this;
         }
 

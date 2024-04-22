@@ -27,7 +27,7 @@ class JolMemoryUsageTest {
 
     @Test
     void ofShouldNotFailIfJOLFails() {
-        assertThatCode(() -> JolMemoryUsage.sizeOf(new JOLMightFail())).doesNotThrowAnyException();
+        assertThatCode(() -> MemoryUsage.sizeOf(new JOLMightFail())).doesNotThrowAnyException();
     }
 
     // The nested recursive ThreadLocal causes JOL to be unable to access some attributes of the class on the ZULU JVM

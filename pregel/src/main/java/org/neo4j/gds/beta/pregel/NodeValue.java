@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.utils.StringFormatting;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -90,18 +90,18 @@ public abstract class NodeValue {
                         builder.add(entry, MemoryEstimations.builder()
                             .fixed(
                                 HugeObjectArray.class.getSimpleName(),
-                                MemoryUsage.sizeOfInstance(HugeObjectArray.class)
+                                Estimate.sizeOfInstance(HugeObjectArray.class)
                             )
-                            .perNode("long[10]", nodeCount -> nodeCount * MemoryUsage.sizeOfLongArray(10))
+                            .perNode("long[10]", nodeCount -> nodeCount * Estimate.sizeOfLongArray(10))
                             .build());
                         break;
                     case DOUBLE_ARRAY:
                         builder.add(entry, MemoryEstimations.builder()
                             .fixed(
                                 HugeObjectArray.class.getSimpleName(),
-                                MemoryUsage.sizeOfInstance(HugeObjectArray.class)
+                                Estimate.sizeOfInstance(HugeObjectArray.class)
                             )
-                            .perNode("double[10]", nodeCount -> nodeCount * MemoryUsage.sizeOfDoubleArray(10))
+                            .perNode("double[10]", nodeCount -> nodeCount * Estimate.sizeOfDoubleArray(10))
                             .build());
                         break;
                     default:

@@ -23,7 +23,7 @@ import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 public final class FastRPMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
@@ -35,13 +35,13 @@ public final class FastRPMemoryEstimateDefinition implements MemoryEstimateDefin
 
     @Override
     public MemoryEstimation memoryEstimation() {
-        var sizeOfEmbeddingArray = MemoryUsage.sizeOfFloatArray(parameters.embeddingDimension());
+        var sizeOfEmbeddingArray = Estimate.sizeOfFloatArray(parameters.embeddingDimension());
         var featurePropertySize = parameters.featureProperties().size();
         return MemoryEstimations
             .builder(FastRP.class.getSimpleName())
             .fixed(
                 "propertyVectors",
-                MemoryUsage.sizeOfFloatArray((long) featurePropertySize * parameters.propertyDimension())
+                Estimate.sizeOfFloatArray((long) featurePropertySize * parameters.propertyDimension())
             )
             .perNode("embeddings", nodeCount -> HugeObjectArray.memoryEstimation(nodeCount, sizeOfEmbeddingArray))
             .perNode("embeddingsA", nodeCount -> HugeObjectArray.memoryEstimation(nodeCount, sizeOfEmbeddingArray))

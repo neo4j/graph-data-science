@@ -49,7 +49,7 @@ import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.TestGraph;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.logging.Log;
 
 import java.util.Optional;
@@ -220,7 +220,7 @@ class ModularityOptimizationWithoutOrientationTest {
             .perNode("cumulativeNodeWeights", HugeDoubleArray::memoryEstimation)
             .perNode("nodeCommunityInfluences", HugeDoubleArray::memoryEstimation)
             .perNode("communityWeights", HugeAtomicDoubleArray::memoryEstimation)
-            .perNode("colorsUsed", MemoryUsage::sizeOfBitset)
+            .perNode("colorsUsed", Estimate::sizeOfBitset)
             .perNode("colors", HugeLongArray::memoryEstimation)
             .rangePerNode(
                 "reversedSeedCommunityMapping", (nodeCount) ->
@@ -231,8 +231,8 @@ class ModularityOptimizationWithoutOrientationTest {
                 .rangePerNode(
                     "communityInfluences",
                     (nodeCount) -> MemoryRange.of(
-                        MemoryUsage.sizeOfLongDoubleHashMap(50),
-                        MemoryUsage.sizeOfLongDoubleHashMap(Math.max(50, nodeCount))
+                        Estimate.sizeOfLongDoubleHashMap(50),
+                        Estimate.sizeOfLongDoubleHashMap(Math.max(50, nodeCount))
                     )
                 )
                 .build()

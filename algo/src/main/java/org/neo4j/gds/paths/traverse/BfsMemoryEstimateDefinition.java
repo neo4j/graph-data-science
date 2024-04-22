@@ -27,7 +27,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 public class BfsMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
@@ -43,7 +43,7 @@ public class BfsMemoryEstimateDefinition implements MemoryEstimateDefinition {
         //per thread
         builder.rangePerGraphDimension("localNodes", (dimensions, concurrency) -> {
             // lower-bound: each node is in exactly one localNode array
-            var lowerBound = MemoryUsage.sizeOfLongArrayList(dimensions.nodeCount() + dimensions.nodeCount() / 64);
+            var lowerBound = Estimate.sizeOfLongArrayList(dimensions.nodeCount() + dimensions.nodeCount() / 64);
 
             //In the upper bound, we can consider two scenarios:
             //  -each node except the starting will be added by every thread exactly once
@@ -56,7 +56,7 @@ public class BfsMemoryEstimateDefinition implements MemoryEstimateDefinition {
                 concurrency * (dimensions.nodeCount() - 1)
             );
 
-            var upperBound = MemoryUsage.sizeOfLongArrayList(maximumTotalSizeOfAggregatedLocalNodes + dimensions.nodeCount() / 64);
+            var upperBound = Estimate.sizeOfLongArrayList(maximumTotalSizeOfAggregatedLocalNodes + dimensions.nodeCount() / 64);
             //The  nodeCount()/64 refers to the  chunk separator in localNodes
             return MemoryRange.of(lowerBound, Math.max(lowerBound, upperBound));
         }).perGraphDimension("chunks", (dimensions, concurrency) ->

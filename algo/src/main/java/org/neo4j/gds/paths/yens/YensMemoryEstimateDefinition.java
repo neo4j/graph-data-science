@@ -22,7 +22,7 @@ package org.neo4j.gds.paths.yens;
 import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateDefinition;
 import org.neo4j.gds.paths.dijkstra.DijkstraMemoryEstimateParameters;
 
@@ -38,7 +38,7 @@ public class YensMemoryEstimateDefinition implements MemoryEstimateDefinition {
     public MemoryEstimation memoryEstimation() {
         return MemoryEstimations.builder(Yens.class)
             .perThread("Yens Task", MemoryEstimations.builder(YensTask.class)
-                .fixed("neighbors", MemoryUsage.sizeOfLongArray(numberOfShortestPathsToFind))
+                .fixed("neighbors", Estimate.sizeOfLongArray(numberOfShortestPathsToFind))
                 .add(
                     "Dijkstra",
                     new DijkstraMemoryEstimateDefinition(new DijkstraMemoryEstimateParameters(true, false))

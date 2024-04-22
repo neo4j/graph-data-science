@@ -23,7 +23,7 @@ import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.mem.GcListenerExtension;
 import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.logging.Log;
 
 import java.util.StringJoiner;
@@ -128,8 +128,8 @@ public class AlgorithmMemoryValidationService {
             errorMessage.add(formatWithLocale(
                 "Procedure was blocked since %s estimated memory (%s) exceeds current free memory (%s).",
                 memoryString,
-                MemoryUsage.humanReadable(requiredBytes),
-                MemoryUsage.humanReadable(availableBytes)
+                Estimate.humanReadable(requiredBytes),
+                Estimate.humanReadable(availableBytes)
             ));
 
             if (graphStoresCount > 0) {

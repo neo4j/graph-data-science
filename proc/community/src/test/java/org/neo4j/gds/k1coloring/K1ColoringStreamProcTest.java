@@ -53,7 +53,7 @@ import org.neo4j.gds.extension.IdToVariable;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
 import org.neo4j.gds.logging.Log;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.metrics.PassthroughExecutionMetricRegistrar;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
@@ -142,7 +142,7 @@ class K1ColoringStreamProcTest extends BaseProcTest {
             assertTrue(row.getNumber("bytesMin").longValue() > 0);
             assertTrue(row.getNumber("bytesMax").longValue() > 0);
 
-            String bytesHuman = MemoryUsage.humanReadable(row.getNumber("bytesMin").longValue());
+            String bytesHuman = Estimate.humanReadable(row.getNumber("bytesMin").longValue());
             assertNotNull(bytesHuman);
             assertTrue(row.getString("requiredMemory").contains(bytesHuman));
         });

@@ -28,7 +28,7 @@ import org.neo4j.gds.core.compression.MemoryInfo;
 import org.neo4j.gds.core.compression.MemoryInfoUtil;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
 import org.neo4j.gds.core.compression.common.MemoryTracker;
-import org.neo4j.gds.mem.JolMemoryUsage;
+import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -75,9 +75,9 @@ public final class UncompressedAdjacencyListBuilder implements AdjacencyListBuil
             .bytesOffHeap(0);
 
         var sizeOnHeap = new MutableLong();
-        JolMemoryUsage.sizeOfObject(pages).ifPresent(sizeOnHeap::add);
-        JolMemoryUsage.sizeOfObject(degrees).ifPresent(sizeOnHeap::add);
-        JolMemoryUsage.sizeOfObject(offsets).ifPresent(sizeOnHeap::add);
+        MemoryUsage.sizeOfObject(pages).ifPresent(sizeOnHeap::add);
+        MemoryUsage.sizeOfObject(degrees).ifPresent(sizeOnHeap::add);
+        MemoryUsage.sizeOfObject(offsets).ifPresent(sizeOnHeap::add);
         memoryInfoBuilder.bytesOnHeap(sizeOnHeap.longValue());
 
         return memoryInfoBuilder.build();

@@ -20,8 +20,8 @@
 package org.neo4j.gds.collections.ha;
 
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.mem.HugeArrays;
-import org.neo4j.gds.mem.MemoryUsage;
 
 import static io.qala.datagen.RandomShortApi.integer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -117,7 +117,7 @@ final class HugeLongArrayTest extends HugeArrayTestBase<long[], Long, HugeLongAr
 
     @Override
     long bufferSize(final int size) {
-        return MemoryUsage.sizeOfLongArray(size);
+        return Estimate.sizeOfLongArray(size);
     }
 
     @Override

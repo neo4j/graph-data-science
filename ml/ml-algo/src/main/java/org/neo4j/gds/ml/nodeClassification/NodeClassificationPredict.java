@@ -40,7 +40,7 @@ import org.neo4j.gds.ml.models.logisticregression.LogisticRegressionClassifier;
 
 import java.util.Optional;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfDoubleArray;
 
 public class NodeClassificationPredict {
 

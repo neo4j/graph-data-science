@@ -34,7 +34,7 @@ import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.ml.decisiontree.ClassifierImpurityCriterionType;
 import org.neo4j.gds.ml.decisiontree.DecisionTreeClassifierTrainer;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
@@ -56,7 +56,7 @@ import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.mem.Estimate.sizeOfInstance;
 import static org.neo4j.gds.ml.metrics.classification.OutOfBagError.OUT_OF_BAG_ERROR;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -260,7 +260,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
 
             var bootstrappedDatasetEstimation = MemoryRange
                 .of(HugeLongArray.memoryEstimation(usedNumberOfTrainingSamples))
-                .add(MemoryUsage.sizeOfBitset(usedNumberOfTrainingSamples));
+                .add(Estimate.sizeOfBitset(usedNumberOfTrainingSamples));
 
             return MemoryRange.of(sizeOfInstance(TrainDecisionTreeTask.class))
                 .add(FeatureBagger.memoryEstimation(numberOfBaggedFeatures))

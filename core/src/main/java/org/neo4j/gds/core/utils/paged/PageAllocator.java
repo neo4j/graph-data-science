@@ -21,7 +21,7 @@ package org.neo4j.gds.core.utils.paged;
 
 import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.mem.BitUtil;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 import java.lang.reflect.Array;
 
@@ -53,10 +53,10 @@ public abstract class PageAllocator<T> {
         Class<?> componentType = arrayClass.getComponentType();
         assert componentType != null && componentType.isPrimitive();
 
-        long bytesPerElement = MemoryUsage.sizeOfInstance(componentType);
+        long bytesPerElement = Estimate.sizeOfInstance(componentType);
         int pageSize = PageUtil.pageSizeFor(PageUtil.PAGE_SIZE_32KB, (int) bytesPerElement);
 
-        long bytesPerPage = MemoryUsage.sizeOfArray(pageSize, bytesPerElement);
+        long bytesPerPage = Estimate.sizeOfArray(pageSize, bytesPerElement);
 
         T[] emptyPages = (T[]) Array.newInstance(componentType, 0, 0);
         PageFactory<T> newPage = () -> (T) Array.newInstance(componentType, pageSize);

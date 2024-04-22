@@ -24,8 +24,8 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import java.util.SplittableRandom;
 import java.util.function.IntPredicate;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfInstance;
+import static org.neo4j.gds.mem.Estimate.sizeOfLongArray;
 
 public class IntUniformSamplerFromRange {
     public static final double RETRY_SAMPLING_RATIO = 0.6;

@@ -28,7 +28,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.ParalleLongPageCreator;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 import java.util.Arrays;
 
@@ -66,7 +66,7 @@ public final class PrimitiveAsyncDoubleQueues extends PrimitiveDoubleQueues {
         return MemoryEstimations.builder(PrimitiveAsyncDoubleQueues.class)
             .perNode(
                 "queues",
-                nodeCount -> HugeObjectArray.memoryEstimation(nodeCount, MemoryUsage.sizeOfDoubleArray(MIN_CAPACITY))
+                nodeCount -> HugeObjectArray.memoryEstimation(nodeCount, Estimate.sizeOfDoubleArray(MIN_CAPACITY))
             )
             .perNode("heads", HugeIntArray::memoryEstimation)
             .perNode("tails", HugeAtomicLongArray::memoryEstimation)

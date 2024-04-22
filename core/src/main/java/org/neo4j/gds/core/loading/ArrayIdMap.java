@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -55,7 +55,7 @@ public class ArrayIdMap extends LabeledIdMap {
         .perGraphDimension(
             "Node Label BitSets",
             (dimensions, concurrency) ->
-                MemoryRange.of(dimensions.estimationNodeLabelCount() * MemoryUsage.sizeOfBitset(dimensions.nodeCount()))
+                MemoryRange.of(dimensions.estimationNodeLabelCount() * Estimate.sizeOfBitset(dimensions.nodeCount()))
         )
         .build();
 

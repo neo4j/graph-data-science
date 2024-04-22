@@ -28,7 +28,7 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfLongArray;
 
 public class NeighborList {
 

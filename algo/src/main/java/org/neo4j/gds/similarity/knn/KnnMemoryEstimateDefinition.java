@@ -28,10 +28,10 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 
 import java.util.function.LongFunction;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfIntArray;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfOpenHashContainer;
+import static org.neo4j.gds.mem.Estimate.sizeOfInstance;
+import static org.neo4j.gds.mem.Estimate.sizeOfIntArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfLongArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfOpenHashContainer;
 
 public class KnnMemoryEstimateDefinition implements MemoryEstimateDefinition {
 

@@ -30,7 +30,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.BoundedLongLongPriorityQueue;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.ml.linkmodels.ExhaustiveLinkPredictionResult;
 import org.neo4j.gds.ml.models.Classifier;
 import org.neo4j.gds.ml.pipeline.linkPipeline.LinkFeatureExtractor;
@@ -76,7 +76,7 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
         return MemoryEstimations.builder(ExhaustiveLinkPrediction.class.getSimpleName())
             .add("Priority queue", BoundedLongLongPriorityQueue.memoryEstimation(config.topN().orElseThrow()))
             .perGraphDimension("Predict links operation", (dim, threads) -> MemoryRange.of(
-                MemoryUsage.sizeOfDoubleArray(linkFeatureDimension) + MemoryUsage.sizeOfLongHashSet(dim.averageDegree())
+                Estimate.sizeOfDoubleArray(linkFeatureDimension) + Estimate.sizeOfLongHashSet(dim.averageDegree())
             ).times(threads))
             .build();
     }

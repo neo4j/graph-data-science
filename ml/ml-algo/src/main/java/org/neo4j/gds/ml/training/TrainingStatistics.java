@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.mem.Estimate.sizeOfInstance;
 
 public final class TrainingStatistics {
 

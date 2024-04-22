@@ -34,7 +34,7 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.queue.HugeLongPriorityQueue;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.paths.ImmutablePathResult;
 import org.neo4j.gds.paths.PathResult;
 import org.neo4j.gds.paths.delta.TentativeDistances;
@@ -128,7 +128,7 @@ public final class SteinerBasedDeltaStepping extends Algorithm<PathFindingResult
         builder.perNode("distance array", HugeAtomicDoubleArray::memoryEstimation)
             .perNode("predecessor array", HugeAtomicLongArray::memoryEstimation);
 
-        builder.perNode("merged with source", MemoryUsage::sizeOfBitset);
+        builder.perNode("merged with source", Estimate::sizeOfBitset);
 
         return builder.build();
     }

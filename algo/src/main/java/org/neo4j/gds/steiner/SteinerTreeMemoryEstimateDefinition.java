@@ -25,7 +25,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayQueue;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 public class SteinerTreeMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
@@ -38,7 +38,7 @@ public class SteinerTreeMemoryEstimateDefinition implements MemoryEstimateDefini
     @Override
     public MemoryEstimation memoryEstimation() {
         var memoryEstimationBuilder = MemoryEstimations.builder()
-            .perNode("terminal bitset", MemoryUsage::sizeOfBitset)
+            .perNode("terminal bitset", Estimate::sizeOfBitset)
             .perNode("parent", HugeLongArray::memoryEstimation)
             .perNode("parent cost ", HugeDoubleArray::memoryEstimation)
 

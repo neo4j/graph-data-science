@@ -22,7 +22,7 @@ package org.neo4j.gds.core.utils.paged;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 public final class HugeLongArrayQueue {
 
@@ -41,7 +41,7 @@ public final class HugeLongArrayQueue {
     }
 
     public static long memoryEstimation(long fixedSize) {
-        return HugeLongArray.memoryEstimation(fixedSize) + MemoryUsage.sizeOfInstance(HugeLongArrayQueue.class);
+        return HugeLongArray.memoryEstimation(fixedSize) + Estimate.sizeOfInstance(HugeLongArrayQueue.class);
     }
 
     private HugeLongArrayQueue(HugeLongArray array) {

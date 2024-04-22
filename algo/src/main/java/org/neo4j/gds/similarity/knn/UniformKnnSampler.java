@@ -25,7 +25,7 @@ import org.neo4j.gds.ml.core.samplers.LongUniformSamplerFromRange;
 import java.util.SplittableRandom;
 import java.util.function.LongPredicate;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.mem.Estimate.sizeOfInstance;
 
 class UniformKnnSampler implements KnnSampler {
 

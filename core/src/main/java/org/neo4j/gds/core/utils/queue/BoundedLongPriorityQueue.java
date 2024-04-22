@@ -26,8 +26,8 @@ import java.util.Arrays;
 import java.util.stream.DoubleStream;
 import java.util.stream.LongStream;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfDoubleArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfLongArray;
 
 public abstract class BoundedLongPriorityQueue {
 

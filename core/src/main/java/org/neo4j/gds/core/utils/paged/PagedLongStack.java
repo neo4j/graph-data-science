@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.core.utils.paged;
 
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 public class PagedLongStack extends PagedDataStructure<long[]> {
 
@@ -46,8 +46,8 @@ public class PagedLongStack extends PagedDataStructure<long[]> {
 
         assert size >= 0;
         long numberOfPages = (long) Math.ceil(size / 4096.0);
-        long totalSizeForPages = MemoryUsage.sizeOfArray(numberOfPages, (MemoryUsage.sizeOfLongArray(4096)));
-        return totalSizeForPages + 3 * MemoryUsage.sizeOfInstance(int.class) + MemoryUsage.sizeOfInstance(long.class);
+        long totalSizeForPages = Estimate.sizeOfArray(numberOfPages, (Estimate.sizeOfLongArray(4096)));
+        return totalSizeForPages + 3 * Estimate.sizeOfInstance(int.class) + Estimate.sizeOfInstance(long.class);
 
     }
 
@@ -84,7 +84,7 @@ public class PagedLongStack extends PagedDataStructure<long[]> {
         if (pageTop < 0) {
             int pageIndex = this.pageIndex;
             --pageIndex;
-            
+
             pageLimit = pages[pageIndex].length;
             return pages[pageIndex][pageLimit - 1];
         }

@@ -23,7 +23,7 @@ import org.neo4j.gds.MemoryEstimateDefinition;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 public class RandomWalkMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
@@ -35,10 +35,10 @@ public class RandomWalkMemoryEstimateDefinition implements MemoryEstimateDefinit
 
     @Override
     public MemoryEstimation memoryEstimation() {
-        var memoryUsagePerWalk = MemoryUsage.sizeOfLongArray(parameters.walkLength());
-        var sizeOfBuffer = MemoryUsage.sizeOfObjectArray(parameters.walkBufferSize());
+        var memoryUsagePerWalk = Estimate.sizeOfLongArray(parameters.walkLength());
+        var sizeOfBuffer = Estimate.sizeOfObjectArray(parameters.walkBufferSize());
 
-        var maxMemoryUsage = sizeOfBuffer + MemoryUsage.sizeOfArray(parameters.walkBufferSize(), memoryUsagePerWalk);
+        var maxMemoryUsage = sizeOfBuffer + Estimate.sizeOfArray(parameters.walkBufferSize(), memoryUsagePerWalk);
 
         return MemoryEstimations.builder(RandomWalk.class.getSimpleName())
             .fixed("random walk buffer", MemoryRange.of(sizeOfBuffer, maxMemoryUsage))

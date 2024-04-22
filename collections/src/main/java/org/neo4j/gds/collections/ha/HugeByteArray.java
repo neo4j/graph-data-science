@@ -31,9 +31,9 @@ import static org.neo4j.gds.mem.HugeArrays.exclusiveIndexOfPage;
 import static org.neo4j.gds.mem.HugeArrays.indexInPage;
 import static org.neo4j.gds.mem.HugeArrays.numberOfPages;
 import static org.neo4j.gds.mem.HugeArrays.pageIndex;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfByteArray;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfObjectArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfByteArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfInstance;
+import static org.neo4j.gds.mem.Estimate.sizeOfObjectArray;
 
 /**
  * A long-indexable version of a primitive byte array ({@code byte[]}) that can contain more than 2 bn. elements.

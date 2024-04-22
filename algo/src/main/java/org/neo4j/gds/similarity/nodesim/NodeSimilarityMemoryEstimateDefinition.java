@@ -30,8 +30,8 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.wcc.WccMemoryEstimateDefinition;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfDoubleArray;
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfLongArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfDoubleArray;
+import static org.neo4j.gds.mem.Estimate.sizeOfLongArray;
 
 public class NodeSimilarityMemoryEstimateDefinition implements MemoryEstimateDefinition {
     private final NodeSimilarityEstimateParameters parameters;

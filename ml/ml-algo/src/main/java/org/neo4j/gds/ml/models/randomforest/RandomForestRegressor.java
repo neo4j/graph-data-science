@@ -25,7 +25,7 @@ import org.neo4j.gds.ml.models.Regressor;
 
 import java.util.List;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.mem.Estimate.sizeOfInstance;
 
 public class RandomForestRegressor implements Regressor {
 

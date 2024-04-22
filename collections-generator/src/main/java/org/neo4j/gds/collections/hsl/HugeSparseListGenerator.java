@@ -30,7 +30,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import org.neo4j.gds.collections.CollectionStep;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 import javax.annotation.processing.Generated;
 import javax.lang.model.element.Modifier;
@@ -138,7 +138,7 @@ final class HugeSparseListGenerator implements CollectionStep.Generator<HugeSpar
     private static FieldSpec pageSizeInBytesField(FieldSpec pageSizeField) {
         return FieldSpec
             .builder(TypeName.LONG, "PAGE_SIZE_IN_BYTES", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
-            .initializer("$T.sizeOfLongArray($N)", MemoryUsage.class, pageSizeField)
+            .initializer("$T.sizeOfLongArray($N)", Estimate.class, pageSizeField)
             .build();
     }
 
@@ -336,7 +336,7 @@ final class HugeSparseListGenerator implements CollectionStep.Generator<HugeSpar
                 .addStatement(
                     "int newSize = $T.oversize(minNewSize, $T.BYTES_OBJECT_REF)",
                     ARRAY_UTIL,
-                    MemoryUsage.class
+                    Estimate.class
                 )
                 .addStatement("this.$N = $T.copyOf(this.$N, newSize)", pages, Arrays.class, pages)
                 .build())

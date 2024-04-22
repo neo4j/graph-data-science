@@ -26,7 +26,7 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeLongArrayStack;
 import org.neo4j.gds.core.utils.paged.PagedLongStack;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 public class SccMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
@@ -36,7 +36,7 @@ public class SccMemoryEstimateDefinition implements MemoryEstimateDefinition {
         builder
             .perNode("index", HugeLongArray::memoryEstimation)
             .perNode("connectedComponents", HugeLongArray::memoryEstimation)
-            .perNode("visited", MemoryUsage::sizeOfBitset)
+            .perNode("visited", Estimate::sizeOfBitset)
             .add("boundaries", HugeLongArrayStack.memoryEstimation())
             .add("stack", HugeLongArrayStack.memoryEstimation());
 

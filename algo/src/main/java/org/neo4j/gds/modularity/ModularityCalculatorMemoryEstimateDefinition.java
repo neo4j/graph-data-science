@@ -25,7 +25,7 @@ import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.paged.HugeLongLongMap;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 public class ModularityCalculatorMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
@@ -43,7 +43,7 @@ public class ModularityCalculatorMemoryEstimateDefinition implements MemoryEstim
                 "Community Modularity",
                 nodeCount -> HugeObjectArray.memoryEstimation(
                     nodeCount,
-                    MemoryUsage.sizeOfInstance(CommunityModularity.class)
+                    Estimate.sizeOfInstance(CommunityModularity.class)
                 )
             )
             .perThread("RelationshipCountCollector", perTask)

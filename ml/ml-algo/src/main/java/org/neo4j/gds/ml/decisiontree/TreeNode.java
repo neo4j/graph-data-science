@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.decisiontree;
 
 import java.util.Objects;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.mem.Estimate.sizeOfInstance;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class TreeNode<PREDICTION extends Number> {

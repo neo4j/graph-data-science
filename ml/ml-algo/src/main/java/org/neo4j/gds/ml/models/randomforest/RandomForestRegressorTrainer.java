@@ -31,7 +31,7 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.tasks.LogLevel;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.ml.decisiontree.DecisionTreePredictor;
 import org.neo4j.gds.ml.decisiontree.DecisionTreeRegressorTrainer;
 import org.neo4j.gds.ml.decisiontree.DecisionTreeTrainerConfig;
@@ -49,7 +49,7 @@ import java.util.function.LongUnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.mem.Estimate.sizeOfInstance;
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public class RandomForestRegressorTrainer implements RegressorTrainer {
@@ -199,7 +199,7 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
 
             var bootstrappedDatasetEstimation = MemoryRange
                 .of(HugeLongArray.memoryEstimation(usedNumberOfTrainingSamples))
-                .add(MemoryUsage.sizeOfBitset(usedNumberOfTrainingSamples));
+                .add(Estimate.sizeOfBitset(usedNumberOfTrainingSamples));
 
             return MemoryRange.of(sizeOfInstance(TrainDecisionTreeTask.class))
                 .add(FeatureBagger.memoryEstimation(numberOfBaggedFeatures))

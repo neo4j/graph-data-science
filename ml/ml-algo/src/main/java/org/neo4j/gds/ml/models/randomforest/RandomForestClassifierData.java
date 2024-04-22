@@ -35,7 +35,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.function.LongUnaryOperator;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.mem.Estimate.sizeOfInstance;
 
 @ValueClass
 @SuppressWarnings("immutables:subtype")

@@ -26,7 +26,7 @@ import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 public class ModularityOptimizationMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
@@ -38,7 +38,7 @@ public class ModularityOptimizationMemoryEstimateDefinition implements MemoryEst
             .perNode("cumulativeNodeWeights", HugeDoubleArray::memoryEstimation)
             .perNode("nodeCommunityInfluences", HugeDoubleArray::memoryEstimation)
             .perNode("communityWeights", HugeAtomicDoubleArray::memoryEstimation)
-            .perNode("colorsUsed", MemoryUsage::sizeOfBitset)
+            .perNode("colorsUsed", Estimate::sizeOfBitset)
             .perNode("colors", HugeLongArray::memoryEstimation)
             .rangePerNode(
                 "reversedSeedCommunityMapping", (nodeCount) ->
@@ -49,8 +49,8 @@ public class ModularityOptimizationMemoryEstimateDefinition implements MemoryEst
                 .rangePerNode(
                     "communityInfluences",
                     (nodeCount) -> MemoryRange.of(
-                        MemoryUsage.sizeOfLongDoubleHashMap(50),
-                        MemoryUsage.sizeOfLongDoubleHashMap(Math.max(50, nodeCount))
+                        Estimate.sizeOfLongDoubleHashMap(50),
+                        Estimate.sizeOfLongDoubleHashMap(Math.max(50, nodeCount))
                     )
                 )
                 .build()

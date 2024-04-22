@@ -23,7 +23,7 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.ml.models.Features;
 
-import static org.neo4j.gds.mem.MemoryUsage.sizeOfInstance;
+import static org.neo4j.gds.mem.Estimate.sizeOfInstance;
 
 public class DecisionTreeRegressorTrainer extends DecisionTreeTrainer<Double> {
 

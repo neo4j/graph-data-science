@@ -38,7 +38,7 @@ import org.neo4j.gds.core.utils.mem.MemoryRange;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.mem.BitUtil;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 import static org.neo4j.gds.RelationshipType.ALL_RELATIONSHIPS;
 import static org.neo4j.gds.collections.PageUtil.indexInPage;
@@ -105,8 +105,8 @@ public final class UncompressedAdjacencyList implements AdjacencyList, Adjacency
     private static MemoryRange listSize(long avgDegree, long nodeCount) {
         long uncompressedAdjacencySize = nodeCount * avgDegree * Long.BYTES;
         int pages = PageUtil.numPagesFor(uncompressedAdjacencySize, BumpAllocator.PAGE_SHIFT, BumpAllocator.PAGE_MASK);
-        long bytesPerPage = MemoryUsage.sizeOfByteArray(BumpAllocator.PAGE_SIZE);
-        return MemoryRange.of(pages * bytesPerPage + MemoryUsage.sizeOfObjectArray(pages));
+        long bytesPerPage = Estimate.sizeOfByteArray(BumpAllocator.PAGE_SIZE);
+        return MemoryRange.of(pages * bytesPerPage + Estimate.sizeOfObjectArray(pages));
     }
 
     private final long[][] pages;

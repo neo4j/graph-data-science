@@ -23,7 +23,7 @@ import org.neo4j.gds.collections.ArrayUtil;
 import org.neo4j.gds.collections.PageUtil;
 import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.mem.HugeArrays;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -60,18 +60,18 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
         assert size >= 0;
 
         if (size <= HugeArrays.MAX_ARRAY_LENGTH) {
-            return MemoryUsage.sizeOfInstance(SingleHugeLongArray.class) + MemoryUsage.sizeOfLongArray((int) size);
+            return Estimate.sizeOfInstance(SingleHugeLongArray.class) + Estimate.sizeOfLongArray((int) size);
         }
-        long sizeOfInstance = MemoryUsage.sizeOfInstance(PagedHugeLongArray.class);
+        long sizeOfInstance = Estimate.sizeOfInstance(PagedHugeLongArray.class);
 
         int numPages = HugeArrays.numberOfPages(size);
 
-        long memoryUsed = MemoryUsage.sizeOfObjectArray(numPages);
-        final long pageBytes = MemoryUsage.sizeOfLongArray(HugeArrays.PAGE_SIZE);
+        long memoryUsed = Estimate.sizeOfObjectArray(numPages);
+        final long pageBytes = Estimate.sizeOfLongArray(HugeArrays.PAGE_SIZE);
         memoryUsed += (numPages - 1) * pageBytes;
         final int lastPageSize = HugeArrays.exclusiveIndexOfPage(size);
 
-        return sizeOfInstance + memoryUsed + MemoryUsage.sizeOfLongArray(lastPageSize);
+        return sizeOfInstance + memoryUsed + Estimate.sizeOfLongArray(lastPageSize);
     }
 
     /**
@@ -349,7 +349,7 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
 
         @Override
         public long sizeOf() {
-            return MemoryUsage.sizeOfLongArray(size);
+            return Estimate.sizeOfLongArray(size);
         }
 
         @Override
@@ -361,7 +361,7 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
         public long release() {
             if (page != null) {
                 page = null;
-                return MemoryUsage.sizeOfLongArray(size);
+                return Estimate.sizeOfLongArray(size);
             }
             return 0L;
         }
@@ -401,12 +401,12 @@ public abstract class HugeLongArray extends HugeArray<long[], Long, HugeLongArra
 
         static long memoryUsed(long[][] pages, long size) {
             var numPages = pages.length;
-            long memoryUsed = MemoryUsage.sizeOfObjectArray(numPages);
-            long pageBytes = MemoryUsage.sizeOfLongArray(HugeArrays.PAGE_SIZE);
+            long memoryUsed = Estimate.sizeOfObjectArray(numPages);
+            long pageBytes = Estimate.sizeOfLongArray(HugeArrays.PAGE_SIZE);
             memoryUsed += pageBytes * (numPages - 1);
 
             int lastPageSize = HugeArrays.exclusiveIndexOfPage(size);
-            memoryUsed += MemoryUsage.sizeOfLongArray(lastPageSize);
+            memoryUsed += Estimate.sizeOfLongArray(lastPageSize);
             return memoryUsed;
         }
 

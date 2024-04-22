@@ -30,7 +30,7 @@ import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 import java.util.List;
 import java.util.Optional;
@@ -130,7 +130,7 @@ final class RefinementPhase {
             .perNode("merged community volumes", HugeDoubleArray::memoryEstimation)
             .perNode("relationships between communities", HugeDoubleArray::memoryEstimation)
             .perNode("refined communities", HugeLongArray::memoryEstimation)
-            .perNode("merge tracking bitset", MemoryUsage::sizeOfBitset)
+            .perNode("merge tracking bitset", Estimate::sizeOfBitset)
             .build();
     }
 

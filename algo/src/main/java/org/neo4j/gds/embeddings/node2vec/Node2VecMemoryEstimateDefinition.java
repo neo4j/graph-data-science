@@ -25,7 +25,7 @@ import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 public final class Node2VecMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
@@ -44,7 +44,7 @@ public final class Node2VecMemoryEstimateDefinition implements MemoryEstimateDef
         return MemoryEstimations.builder(Node2Vec.class)
             .perNode("random walks", (nodeCount) -> {
                 var numberOfRandomWalks = nodeCount * walksPerNode;
-                var randomWalkMemoryUsage = MemoryUsage.sizeOfLongArray(walkLength);
+                var randomWalkMemoryUsage = Estimate.sizeOfLongArray(walkLength);
                 return HugeObjectArray.memoryEstimation(numberOfRandomWalks, randomWalkMemoryUsage);
             })
             .add("probability cache", randomWalksMemoryEstimation())
@@ -62,7 +62,7 @@ public final class Node2VecMemoryEstimateDefinition implements MemoryEstimateDef
 
 
     private MemoryEstimation modelMemoryEstimation(int embeddingDimension) {
-        var vectorMemoryEstimation = MemoryUsage.sizeOfFloatArray(embeddingDimension);
+        var vectorMemoryEstimation = Estimate.sizeOfFloatArray(embeddingDimension);
 
         return MemoryEstimations.builder(Node2VecModel.class)
             .perNode(

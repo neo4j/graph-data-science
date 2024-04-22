@@ -21,7 +21,7 @@ package org.neo4j.gds.core.utils.queue;
 
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.Estimate;
 
 import java.util.Arrays;
 import java.util.stream.DoubleStream;
@@ -35,9 +35,9 @@ public abstract class BoundedLongLongPriorityQueue {
 
     public static MemoryEstimation memoryEstimation(int capacity) {
         return MemoryEstimations.builder(BoundedLongLongPriorityQueue.class)
-            .fixed("elements1", MemoryUsage.sizeOfLongArray(capacity))
-            .fixed("elements2", MemoryUsage.sizeOfLongArray(capacity))
-            .fixed("priorities", MemoryUsage.sizeOfDoubleArray(capacity))
+            .fixed("elements1", Estimate.sizeOfLongArray(capacity))
+            .fixed("elements2", Estimate.sizeOfLongArray(capacity))
+            .fixed("priorities", Estimate.sizeOfDoubleArray(capacity))
             .build();
     }
 
