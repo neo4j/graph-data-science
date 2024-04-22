@@ -216,7 +216,10 @@ public final class GraphImporter {
             .nodeCount(graphStore.nodeCount())
             .relationshipCount(graphStore.relationshipCount())
             .projectMillis(projectMillis)
-            .configuration(this.config.asProcedureResultConfigurationField())
+            .addConfiguration(this.config.asProcedureResultConfigurationField()
+                .entrySet()
+                .stream()
+                .filter(e -> e.getValue() != null))
             .query(this.query)
             .build();
     }
