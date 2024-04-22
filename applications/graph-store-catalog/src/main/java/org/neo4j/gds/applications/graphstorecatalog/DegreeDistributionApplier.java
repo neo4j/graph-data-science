@@ -21,9 +21,7 @@ package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -46,18 +44,17 @@ class DegreeDistributionApplier {
     }
 
     List<Pair<GraphStoreCatalogEntry, Map<String, Object>>> process(
-        Collection<Pair<GraphProjectConfig, GraphStore>> graphEntries,
+        Collection<GraphStoreCatalogEntry> graphEntries,
         boolean includeDegreeDistribution,
         TerminationFlag terminationFlag
     ) {
-        return graphEntries.stream().map(configAndStore -> {
-            var graphStoreWithConfig = new GraphStoreCatalogEntry(configAndStore.getValue(), configAndStore.getKey());
+        return graphEntries.stream().map(catalogEntry -> {
             var degreeDistribution = getOrCreateDegreeDistribution(
                 includeDegreeDistribution,
-                graphStoreWithConfig,
+                catalogEntry,
                 terminationFlag
             );
-            return Pair.of(graphStoreWithConfig, degreeDistribution);
+            return Pair.of(catalogEntry, degreeDistribution);
         }).collect(Collectors.toList());
     }
 

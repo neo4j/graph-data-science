@@ -275,26 +275,21 @@ public final class GraphStoreCatalog {
         return getUserCatalog(username).getGraphStores(databaseId);
     }
 
-    public static Stream<GraphStoreWithUserNameAndConfig> getAllGraphStores() {
+    public static Stream<GraphStoreCatalogEntryWithUsername> getAllGraphStores() {
         return userCatalogs
             .entrySet()
             .stream()
-            .flatMap(entry -> entry.getValue().streamGraphStores(entry.getKey()));
+            .flatMap(entry -> entry
+                .getValue()
+                .streamGraphStores(entry.getKey())
+            );
     }
 
     private static UserCatalog getUserCatalog(String username) {
         return userCatalogs.getOrDefault(username, UserCatalog.EMPTY);
     }
 
-    @ValueClass
-    public interface GraphStoreWithUserNameAndConfig {
-
-        GraphStore graphStore();
-
-        String userName();
-
-        GraphProjectConfig config();
-    }
+    public record GraphStoreCatalogEntryWithUsername(GraphStoreCatalogEntry catalogEntry, String username) {}
 
     static class UserCatalog {
 
@@ -414,17 +409,11 @@ public final class GraphStoreCatalog {
             graphsByName.keySet().removeIf(userCatalogKey -> userCatalogKey.databaseName().equals(databaseName));
         }
 
-        private Stream<GraphStoreWithUserNameAndConfig> streamGraphStores(String userName) {
+        private Stream<GraphStoreCatalogEntryWithUsername> streamGraphStores(String userName) {
             return graphsByName
                 .values()
                 .stream()
-                .map(
-                    graphStoreWithConfig -> ImmutableGraphStoreWithUserNameAndConfig.of(
-                        graphStoreWithConfig.graphStore(),
-                        userName,
-                        graphStoreWithConfig.config()
-                    )
-                );
+                .map(catalogEntry -> new GraphStoreCatalogEntryWithUsername(catalogEntry, userName));
         }
 
         private Map<GraphProjectConfig, GraphStore> getGraphStores() {

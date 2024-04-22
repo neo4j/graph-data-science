@@ -49,9 +49,9 @@ class DegreeDistributionApplierTest {
         var graphStore2 = new StubGraphStore();
         List<Pair<GraphStoreCatalogEntry, Map<String, Object>>> result = degreeDistributionApplier.process(
             List.of(
-                Pair.of(config1, graphStore1),
-                Pair.of(config2, graphStore2)
-            ),
+                new GraphStoreCatalogEntry(graphStore1, config1),
+                new GraphStoreCatalogEntry(graphStore2, config2)
+                ),
             false,
             null
         );
@@ -89,8 +89,8 @@ class DegreeDistributionApplierTest {
         when(degreeDistributionService.compute(graphStore2, null)).thenReturn(Map.of("degdist", 87));
         List<Pair<GraphStoreCatalogEntry, Map<String, Object>>> result = degreeDistributionApplier.process(
             List.of(
-                Pair.of(config1, graphStore1),
-                Pair.of(config2, graphStore2)
+                new GraphStoreCatalogEntry(graphStore1, config1),
+                new GraphStoreCatalogEntry(graphStore2, config2)
             ),
             true,
             null
@@ -145,8 +145,8 @@ class DegreeDistributionApplierTest {
         ).thenReturn(Optional.of(Map.of("dd1", 512, "dd2", 1024)));
         List<Pair<GraphStoreCatalogEntry, Map<String, Object>>> result = degreeDistributionApplier.process(
             List.of(
-                Pair.of(config1, graphStore1),
-                Pair.of(config2, graphStore2)
+                new GraphStoreCatalogEntry(graphStore1, config1),
+                new GraphStoreCatalogEntry(graphStore2, config2)
             ),
             true,
             null

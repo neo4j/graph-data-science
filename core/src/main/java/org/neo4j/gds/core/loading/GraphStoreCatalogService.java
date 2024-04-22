@@ -28,6 +28,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
+import org.neo4j.gds.core.loading.GraphStoreCatalog.GraphStoreCatalogEntryWithUsername;
 
 import java.util.Collection;
 import java.util.Map;
@@ -161,8 +162,10 @@ public class GraphStoreCatalogService {
         );
     }
 
-    public Stream<GraphStoreCatalog.GraphStoreWithUserNameAndConfig> getAllGraphStores() {
-        return GraphStoreCatalog.getAllGraphStores();
+    public Stream<GraphStoreCatalogEntry> getAllGraphStores() {
+        return GraphStoreCatalog
+            .getAllGraphStores()
+            .map(GraphStoreCatalogEntryWithUsername::catalogEntry);
     }
 
     public long graphStoreCount() {

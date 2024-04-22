@@ -22,9 +22,7 @@ package org.neo4j.gds.applications.graphstorecatalog;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.GraphName;
-import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
-import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 
 import java.util.List;
@@ -48,10 +46,10 @@ class ListGraphApplicationTest {
         var graphStore1 = new StubGraphStore();
         var graphStore2 = new StubGraphStore();
         var graphStore3 = new StubGraphStore();
-        List<Pair<GraphProjectConfig, GraphStore>> listOfConfigsWithStores = List.of(
-            Pair.of(config1, graphStore1),
-            Pair.of(config2, graphStore2),
-            Pair.of(config3, graphStore3)
+        List<GraphStoreCatalogEntry> listOfConfigsWithStores = List.of(
+            new GraphStoreCatalogEntry(graphStore1, config1),
+            new GraphStoreCatalogEntry(graphStore2, config2),
+            new GraphStoreCatalogEntry(graphStore3, config3)
         );
         when(graphListingService.listGraphs(new User("foo", false))).thenReturn(listOfConfigsWithStores);
         var gswc1 = new GraphStoreCatalogEntry(graphStore1, config1);
@@ -86,10 +84,10 @@ class ListGraphApplicationTest {
         var graphStore1 = new StubGraphStore();
         var graphStore2 = new StubGraphStore();
         var graphStore3 = new StubGraphStore();
-        List<Pair<GraphProjectConfig, GraphStore>> listOfConfigsWithStores = List.of(
-            Pair.of(config1, graphStore1),
-            Pair.of(config2, graphStore2),
-            Pair.of(config3, graphStore3)
+        List<GraphStoreCatalogEntry> listOfConfigsWithStores = List.of(
+            new GraphStoreCatalogEntry(graphStore1, config1),
+            new GraphStoreCatalogEntry(graphStore2, config2),
+            new GraphStoreCatalogEntry(graphStore3, config3)
         );
         when(graphListingService.listGraphs(new User("foo", false))).thenReturn(listOfConfigsWithStores);
         var gswc1 = new GraphStoreCatalogEntry(graphStore1, config1);
@@ -99,8 +97,8 @@ class ListGraphApplicationTest {
             Pair.of(gswc2, null)
         );
         when(degreeDistributionApplier.process(List.of(
-            Pair.of(config1, graphStore1),
-            Pair.of(config2, graphStore2)
+            new GraphStoreCatalogEntry(graphStore1, config1),
+            new GraphStoreCatalogEntry(graphStore2, config2)
         ), false, null)).thenReturn(
             listOfGraphStoresWithConfigsSansDegreeDistributions);
         var result = application.list(

@@ -29,7 +29,7 @@ import org.neo4j.gds.termination.TerminationFlag;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.function.Predicate;
 
 public final class ListGraphApplication {
     private final GraphListingService graphListingService;
@@ -55,14 +55,14 @@ public final class ListGraphApplication {
         boolean includeDegreeDistribution,
         TerminationFlag terminationFlag
     ) {
-        var graphEntries = graphListingService.listGraphs(user);
-
-        if (graphName.isPresent()) {
-            // we should only list the provided graph
-            graphEntries = graphEntries.stream()
-                .filter(e -> e.getKey().graphName().equals(graphName.get().getValue()))
-                .collect(Collectors.toList());
-        }
+        Predicate<String> graphNameFilter = graphName
+            .map(GraphName::getValue)
+            .map(name -> (Predicate<String>) name::equals)
+            .orElseGet(() -> __ -> true);
+        var graphEntries = graphListingService.listGraphs(user)
+            .stream()
+            .filter(catalogEntry -> graphNameFilter.test(catalogEntry.config().graphName()))
+            .toList();
 
         return degreeDistributionApplier.process(graphEntries, includeDegreeDistribution, terminationFlag);
     }
