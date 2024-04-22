@@ -21,8 +21,6 @@ package org.neo4j.gds.applications.algorithms.similarity;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
-import org.neo4j.gds.algorithms.similarity.SimilarityResultCompanion;
-import org.neo4j.gds.algorithms.similarity.SimilaritySingleTypeRelationshipsHandler;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
@@ -33,15 +31,26 @@ import org.neo4j.gds.similarity.knn.KnnResult;
 
 import java.util.Map;
 
-class KnnMutateStep implements MutateOrWriteStep<KnnResult, Pair<RelationshipsWritten, Map<String, Object>>> {
-    private final Log log;
+final class KnnMutateStep implements MutateOrWriteStep<KnnResult, Pair<RelationshipsWritten, Map<String, Object>>> {
+    private final SimilarityMutation similarityMutation;
     private final KnnMutateConfig configuration;
     private final boolean shouldComputeSimilarityDistribution;
 
-    KnnMutateStep(Log log, KnnMutateConfig configuration, boolean shouldComputeSimilarityDistribution) {
-        this.log = log;
+    private KnnMutateStep(
+        SimilarityMutation similarityMutation,
+        KnnMutateConfig configuration,
+        boolean shouldComputeSimilarityDistribution
+    ) {
         this.configuration = configuration;
         this.shouldComputeSimilarityDistribution = shouldComputeSimilarityDistribution;
+        this.similarityMutation = similarityMutation;
+    }
+
+    static KnnMutateStep create(Log log, KnnMutateConfig configuration, boolean shouldComputeSimilarityDistribution) {
+        var mutateRelationshipService = new MutateRelationshipService(log);
+        var similarityMutation = new SimilarityMutation(mutateRelationshipService);
+
+        return new KnnMutateStep(similarityMutation, configuration, shouldComputeSimilarityDistribution);
     }
 
     @Override
@@ -50,29 +59,13 @@ class KnnMutateStep implements MutateOrWriteStep<KnnResult, Pair<RelationshipsWr
         GraphStore graphStore,
         KnnResult result
     ) {
-        var similarityGraphResult = SimilarityResultCompanion.computeToGraph(
+        return similarityMutation.execute(
             graph,
-            graph.nodeCount(),
-            configuration.typedConcurrency(),
-            result.streamSimilarityResult()
-        );
-
-        var similaritySingleTypeRelationshipsHandler = new SimilaritySingleTypeRelationshipsHandler(
-            graph,
-            () -> similarityGraphResult,
+            graphStore,
+            configuration,
+            configuration,
+            result.streamSimilarityResult(),
             shouldComputeSimilarityDistribution
         );
-
-        var addRelationshipResult = new MutateRelationshipService(log).mutate(
-            graphStore,
-            configuration.mutateRelationshipType(),
-            configuration.mutateProperty(),
-            similaritySingleTypeRelationshipsHandler
-        );
-
-        var relationshipsWritten = new RelationshipsWritten(addRelationshipResult.relationshipsAdded());
-        var similaritySummary = similaritySingleTypeRelationshipsHandler.similaritySummary();
-
-        return Pair.of(relationshipsWritten, similaritySummary);
     }
 }

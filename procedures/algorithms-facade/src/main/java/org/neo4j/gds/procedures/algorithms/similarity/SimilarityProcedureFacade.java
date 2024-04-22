@@ -32,6 +32,9 @@ import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.runners.WriteModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.similarity.SimilarityResult;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnStatsConfig;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnStreamConfig;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnWriteConfig;
 import org.neo4j.gds.similarity.knn.KnnStatsConfig;
 import org.neo4j.gds.similarity.knn.KnnStreamConfig;
 import org.neo4j.gds.similarity.knn.KnnWriteConfig;
@@ -41,6 +44,7 @@ import java.util.stream.Stream;
 
 public final class SimilarityProcedureFacade {
     private final ProcedureReturnColumns procedureReturnColumns;
+    private final FilteredKnnMutateStub filteredKnnMutateStub;
     private final KnnMutateStub knnMutateStub;
     private final ApplicationsFacade applicationsFacade;
     private final EstimationModeRunner estimationModeRunner;
@@ -50,6 +54,7 @@ public final class SimilarityProcedureFacade {
 
     private SimilarityProcedureFacade(
         ProcedureReturnColumns procedureReturnColumns,
+        FilteredKnnMutateStub filteredKnnMutateStub,
         KnnMutateStub knnMutateStub,
         ApplicationsFacade applicationsFacade,
         EstimationModeRunner estimationModeRunner,
@@ -58,6 +63,7 @@ public final class SimilarityProcedureFacade {
         WriteModeAlgorithmRunner writeModeAlgorithmRunner
     ) {
         this.procedureReturnColumns = procedureReturnColumns;
+        this.filteredKnnMutateStub = filteredKnnMutateStub;
         this.knnMutateStub = knnMutateStub;
         this.applicationsFacade = applicationsFacade;
         this.estimationModeRunner = estimationModeRunner;
@@ -75,10 +81,12 @@ public final class SimilarityProcedureFacade {
         StatsModeAlgorithmRunner statsModeAlgorithmRunner,
         WriteModeAlgorithmRunner writeModeAlgorithmRunner
     ) {
+        var filteredKnnMutateStub = new FilteredKnnMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
         var knnMutateStub = new KnnMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
 
         return new SimilarityProcedureFacade(
             procedureReturnColumns,
+            filteredKnnMutateStub,
             knnMutateStub,
             applicationsFacade,
             estimationModeRunner,
@@ -86,6 +94,102 @@ public final class SimilarityProcedureFacade {
             statsModeAlgorithmRunner,
             writeModeAlgorithmRunner
         );
+    }
+
+    public FilteredKnnMutateStub filteredKnnMutateStub() {
+        return filteredKnnMutateStub;
+    }
+
+    public Stream<KnnStatsResult> filteredKnnStats(String graphName, Map<String, Object> configuration) {
+        var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("similarityDistribution");
+        var resultBuilder = new FilteredKnnResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
+
+        return statsModeAlgorithmRunner.runStatsModeAlgorithm(
+            graphName,
+            configuration,
+            FilteredKnnStatsConfig::of,
+            resultBuilder,
+            statsMode()::filteredKnn
+        );
+    }
+
+    public Stream<MemoryEstimateResult> filteredKnnStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationModeRunner.runEstimation(
+            algorithmConfiguration,
+            FilteredKnnStatsConfig::of,
+            configuration -> estimationMode().filteredKnn(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<SimilarityResult> filteredKnnStream(String graphName, Map<String, Object> configuration) {
+        var resultBuilder = new FilteredKnnResultBuilderForStreamMode();
+
+        return streamModeAlgorithmRunner.runStreamModeAlgorithm(
+            graphName,
+            configuration,
+            FilteredKnnStreamConfig::of,
+            resultBuilder,
+            streamMode()::filteredKnn
+        );
+    }
+
+    public Stream<MemoryEstimateResult> filteredKnnStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationModeRunner.runEstimation(
+            algorithmConfiguration,
+            FilteredKnnStreamConfig::of,
+            configuration -> estimationMode().filteredKnn(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<KnnWriteResult> filteredKnnWrite(String graphNameAsString, Map<String, Object> rawConfiguration) {
+        var resultBuilder = new FilteredKnnResultBuilderForWriteMode();
+
+        var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("similarityDistribution");
+
+        return writeModeAlgorithmRunner.runWriteModeAlgorithm(
+            graphNameAsString,
+            rawConfiguration,
+            FilteredKnnWriteConfig::of,
+            (graphName, configuration, __) -> writeMode().filteredKnn(
+                graphName,
+                configuration,
+                resultBuilder,
+                shouldComputeSimilarityDistribution
+            ),
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> filteredKnnWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationModeRunner.runEstimation(
+            algorithmConfiguration,
+            FilteredKnnWriteConfig::of,
+            configuration -> estimationMode().filteredKnn(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
     }
 
     public KnnMutateStub knnMutateStub() {

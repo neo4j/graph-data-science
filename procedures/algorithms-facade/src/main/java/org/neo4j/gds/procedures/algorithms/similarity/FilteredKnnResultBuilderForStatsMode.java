@@ -19,42 +19,51 @@
  */
 package org.neo4j.gds.procedures.algorithms.similarity;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
-import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
-import org.neo4j.gds.similarity.knn.KnnMutateConfig;
-import org.neo4j.gds.similarity.knn.KnnResult;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnStatsConfig;
 
-import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
-class KnnResultBuilderForMutateMode implements ResultBuilder<KnnMutateConfig, KnnResult, KnnMutateResult, Pair<RelationshipsWritten, Map<String, Object>>> {
-    /**
-     * @param metadata number of relationships written, and the similarity distribution
-     */
+class FilteredKnnResultBuilderForStatsMode implements ResultBuilder<FilteredKnnStatsConfig, FilteredKnnResult, Stream<KnnStatsResult>, Void> {
+    private final boolean shouldComputeSimilarityDistribution;
+
+    FilteredKnnResultBuilderForStatsMode(boolean shouldComputeSimilarityDistribution) {
+        this.shouldComputeSimilarityDistribution = shouldComputeSimilarityDistribution;
+    }
+
     @Override
-    public KnnMutateResult build(
+    public Stream<KnnStatsResult> build(
         Graph graph,
         GraphStore graphStore,
-        KnnMutateConfig configuration,
-        Optional<KnnResult> result,
+        FilteredKnnStatsConfig configuration,
+        Optional<FilteredKnnResult> result,
         AlgorithmProcessingTimings timings,
-        Optional<Pair<RelationshipsWritten, Map<String, Object>>> metadata
+        Optional<Void> unused
     ) {
         var configurationMap = configuration.toMap();
 
-        return result.map(r -> KnnMutateResult.create(
+        if (result.isEmpty()) return Stream.of(KnnStatsResult.emptyFrom(
+            timings,
+            configurationMap
+        ));
+
+        return new SimilarityStatsProcessor().process(
+            graph,
+            configuration,
+            result.get().similarityResultStream(),
+            shouldComputeSimilarityDistribution,
             timings,
             configurationMap,
-            metadata.orElseThrow().getLeft(),
-            metadata.orElseThrow().getRight(),
-            r.nodesCompared(),
-            r.didConverge(),
-            r.ranIterations(),
-            r.nodePairsConsidered()
-        )).orElseGet(() -> KnnMutateResult.emptyFrom(timings, configurationMap));
+            result.get().nodesCompared(),
+            result.get().numberOfSimilarityPairs(),
+            result.get().didConverge(),
+            result.get().ranIterations(),
+            result.get().nodePairsConsidered()
+        );
     }
 }

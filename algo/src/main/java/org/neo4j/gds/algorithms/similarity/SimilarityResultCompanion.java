@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.algorithms.similarity;
 
-import org.neo4j.gds.algorithms.similarity.specificfields.KnnSpecificFields;
 import org.neo4j.gds.algorithms.similarity.specificfields.SimilaritySpecificFieldsWithDistribution;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -27,7 +26,6 @@ import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityResult;
-import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -51,17 +49,6 @@ public final class SimilarityResultCompanion {
 
         return new SimilarityGraphResult(similarityGraph, nodeCount, false);
     }
-
-    static SpecificFieldsWithSimilarityStatisticsSupplier<FilteredKnnResult, KnnSpecificFields> FILTERED_KNN_SPECIFIC_FIELDS_SUPPLIER = (result, similarityDistribution) -> {
-        return new KnnSpecificFields(
-            result.nodesCompared(),
-            result.nodePairsConsidered(),
-            result.didConverge(),
-            result.ranIterations(),
-            result.numberOfSimilarityPairs(),
-            similarityDistribution
-        );
-    };
 
     static SpecificFieldsWithSimilarityStatisticsSupplier<NodeSimilarityResult, SimilaritySpecificFieldsWithDistribution> NODE_SIMILARITY_SPECIFIC_FIELDS_SUPPLIER = ((result, similarityDistribution) -> {
         var graphResult = result.graphResult();

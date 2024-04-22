@@ -21,8 +21,6 @@ package org.neo4j.gds.algorithms.similarity;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
-import org.neo4j.gds.similarity.filteredknn.FilteredKnnStreamConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfig;
@@ -49,15 +47,6 @@ public class SimilarityAlgorithmsStreamBusinessFacade {
         FilteredNodeSimilarityStreamConfig config
     ) {
         var result = similarityAlgorithmsFacade.filteredNodeSimilarity(graphName, config);
-
-        return createStreamComputationResult(result);
-    }
-
-    public StreamComputationResult<FilteredKnnResult> filteredKnn(
-        String graphName,
-        FilteredKnnStreamConfig config
-    ) {
-        var result = similarityAlgorithmsFacade.filteredKnn(graphName, config);
 
         return createStreamComputationResult(result);
     }

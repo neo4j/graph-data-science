@@ -19,6 +19,10 @@
  */
 package org.neo4j.gds.procedures.algorithms.similarity;
 
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
+
+import java.util.Collections;
 import java.util.Map;
 
 public class KnnMutateResult extends SimilarityMutateResult {
@@ -55,4 +59,44 @@ public class KnnMutateResult extends SimilarityMutateResult {
         this.nodePairsConsidered = nodePairsConsidered;
     }
 
+    static KnnMutateResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new KnnMutateResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.postProcessingMillis,
+            0,
+            0,
+            0,
+            Collections.emptyMap(),
+            false,
+            0,
+            0,
+            configurationMap
+        );
+    }
+
+    static KnnMutateResult create(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configurationMap,
+        RelationshipsWritten relationshipsWritten,
+        Map<String, Object> similarityDistribution,
+        long nodesCompared,
+        boolean didConverge,
+        long ranIterations,
+        long nodePairsConsidered
+    ) {
+        return new KnnMutateResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.postProcessingMillis,
+            0,
+            nodesCompared,
+            relationshipsWritten.value,
+            similarityDistribution,
+            didConverge,
+            ranIterations,
+            nodePairsConsidered,
+            configurationMap
+        );
+    }
 }

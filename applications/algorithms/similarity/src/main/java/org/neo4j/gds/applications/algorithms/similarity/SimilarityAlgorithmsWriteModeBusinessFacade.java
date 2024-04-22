@@ -25,12 +25,15 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnWriteConfig;
 import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.knn.KnnWriteConfig;
 
 import java.util.Map;
 import java.util.Optional;
 
+import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.FILTERED_KNN;
 import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.KNN;
 
 public class SimilarityAlgorithmsWriteModeBusinessFacade {
@@ -51,13 +54,40 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
         this.writeRelationshipService = writeRelationshipService;
     }
 
+    public <RESULT> RESULT filteredKnn(
+        GraphName graphName,
+        FilteredKnnWriteConfig configuration,
+        ResultBuilder<FilteredKnnWriteConfig, FilteredKnnResult, RESULT, Pair<RelationshipsWritten, Map<String, Object>>> resultBuilder,
+        boolean shouldComputeSimilarityDistribution
+    ) {
+        var writeStep = FilteredKnnWriteStep.create(
+            configuration,
+            shouldComputeSimilarityDistribution,
+            writeRelationshipService
+        );
+
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            FILTERED_KNN,
+            () -> estimationFacade.filteredKnn(configuration),
+            graph -> similarityAlgorithms.filteredKnn(graph, configuration),
+            Optional.of(writeStep),
+            resultBuilder
+        );
+    }
+
     public <RESULT> RESULT knn(
         GraphName graphName,
         KnnWriteConfig configuration,
         ResultBuilder<KnnWriteConfig, KnnResult, RESULT, Pair<RelationshipsWritten, Map<String, Object>>> resultBuilder,
         boolean shouldComputeSimilarityDistribution
     ) {
-        var writeStep = new KnnWriteStep(configuration, shouldComputeSimilarityDistribution, writeRelationshipService);
+        var writeStep = KnnWriteStep.create(
+            configuration,
+            shouldComputeSimilarityDistribution,
+            writeRelationshipService
+        );
 
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,

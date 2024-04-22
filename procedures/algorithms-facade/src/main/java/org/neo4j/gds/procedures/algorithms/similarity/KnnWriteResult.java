@@ -19,6 +19,10 @@
  */
 package org.neo4j.gds.procedures.algorithms.similarity;
 
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
+
+import java.util.Collections;
 import java.util.Map;
 
 public class KnnWriteResult extends SimilarityWriteResult {
@@ -53,5 +57,46 @@ public class KnnWriteResult extends SimilarityWriteResult {
         this.nodePairsConsidered = nodePairsCompared;
         this.ranIterations = ranIterations;
         this.didConverge = didConverge;
+    }
+
+    static KnnWriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new KnnWriteResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.postProcessingMillis,
+            0,
+            0,
+            0,
+            false,
+            0,
+            0,
+            Collections.emptyMap(),
+            configurationMap
+        );
+    }
+
+    static KnnWriteResult from(
+        AlgorithmProcessingTimings timings,
+        RelationshipsWritten relationshipsWritten,
+        Map<String, Object> similarityDistribution,
+        long nodesCompared,
+        boolean didConverge,
+        long ranIterations,
+        long nodePairsConsidered,
+        Map<String, Object> configuration
+    ) {
+        return new KnnWriteResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.postProcessingMillis,
+            0,
+            nodesCompared,
+            relationshipsWritten.value,
+            didConverge,
+            ranIterations,
+            nodePairsConsidered,
+            similarityDistribution,
+            configuration
+        );
     }
 }

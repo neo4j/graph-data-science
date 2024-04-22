@@ -25,12 +25,15 @@ import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTempla
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnMutateConfig;
+import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.knn.KnnMutateConfig;
 import org.neo4j.gds.similarity.knn.KnnResult;
 
 import java.util.Map;
 import java.util.Optional;
 
+import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.FILTERED_KNN;
 import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.KNN;
 
 public class SimilarityAlgorithmsMutateModeBusinessFacade {
@@ -50,13 +53,32 @@ public class SimilarityAlgorithmsMutateModeBusinessFacade {
         this.algorithmProcessingTemplate = algorithmProcessingTemplate;
     }
 
+    public <RESULT> RESULT filteredKnn(
+        GraphName graphName,
+        FilteredKnnMutateConfig configuration,
+        ResultBuilder<FilteredKnnMutateConfig, FilteredKnnResult, RESULT, Pair<RelationshipsWritten, Map<String, Object>>> resultBuilder,
+        boolean shouldComputeSimilarityDistribution
+    ) {
+        var mutateStep = FilteredKnnMutateStep.create(log, configuration, shouldComputeSimilarityDistribution);
+
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            FILTERED_KNN,
+            () -> estimationFacade.filteredKnn(configuration),
+            graph -> similarityAlgorithms.filteredKnn(graph, configuration),
+            Optional.of(mutateStep),
+            resultBuilder
+        );
+    }
+
     public <RESULT> RESULT knn(
         GraphName graphName,
         KnnMutateConfig configuration,
         ResultBuilder<KnnMutateConfig, KnnResult, RESULT, Pair<RelationshipsWritten, Map<String, Object>>> resultBuilder,
         boolean shouldComputeSimilarityDistribution
     ) {
-        var mutateStep = new KnnMutateStep(log, configuration, shouldComputeSimilarityDistribution);
+        var mutateStep = KnnMutateStep.create(log, configuration, shouldComputeSimilarityDistribution);
 
         return algorithmProcessingTemplate.processAlgorithm(
             graphName,
