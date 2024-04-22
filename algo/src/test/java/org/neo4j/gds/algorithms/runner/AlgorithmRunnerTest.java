@@ -27,6 +27,7 @@ import org.neo4j.gds.metrics.ExecutionMetric;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 
 import static org.assertj.core.api.Assertions.assertThatException;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
@@ -61,7 +62,7 @@ class AlgorithmRunnerTest {
         verify(algorithmMetricsServiceMock, times(1)).create("TestingMetrics");
         verify(algorithmMetricMock, times(1)).start();
         verify(algorithmMetricMock, times(1)).close();
-        verify(algorithmMetricMock, times(0)).failed();
+        verify(algorithmMetricMock, times(0)).failed(any());
         verifyNoMoreInteractions(
             algorithmMetricsServiceMock,
             algorithmMetricMock
@@ -99,48 +100,12 @@ class AlgorithmRunnerTest {
         verify(algorithmMetricsServiceMock, times(1)).create("TestingMetrics");
         verify(algorithmMetricMock, times(1)).start();
         verify(algorithmMetricMock, times(1)).close();
-        verify(algorithmMetricMock, times(1)).failed();
+        verify(algorithmMetricMock, times(1)).failed(any());
         verifyNoMoreInteractions(
             algorithmMetricsServiceMock,
             algorithmMetricMock
         );
     }
 
-    @Test
-    void shouldNotRegisterAlgorithmMetricCountForIllegalArgumentExceptionFailure() {
-        var algorithmMetricMock = mock(ExecutionMetric.class);
-        var algorithmMetricsServiceMock = mock(AlgorithmMetricsService.class);
-        when(algorithmMetricsServiceMock.create(anyString())).thenReturn(algorithmMetricMock);
-
-        var logMock = mock(Log.class);
-        when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
-
-        var runner = new AlgorithmRunner(
-            logMock,
-            null,
-            algorithmMetricsServiceMock,
-            null,
-            null
-        );
-
-        var algorithmMock = mock(Algorithm.class, RETURNS_DEEP_STUBS);
-        when(algorithmMock.compute()).thenThrow(new IllegalArgumentException("Ooops"));
-
-        assertThatException().isThrownBy(
-            () -> runner.runAlgorithm(
-                algorithmMock,
-                "TestingMetrics"
-            )
-        ).withMessage("Ooops");
-
-        verify(algorithmMetricsServiceMock, times(1)).create("TestingMetrics");
-        verify(algorithmMetricMock, times(1)).start();
-        verify(algorithmMetricMock, times(1)).close();
-        verify(algorithmMetricMock, times(0)).failed();
-        verifyNoMoreInteractions(
-            algorithmMetricsServiceMock,
-            algorithmMetricMock
-        );
-    }
 
 }

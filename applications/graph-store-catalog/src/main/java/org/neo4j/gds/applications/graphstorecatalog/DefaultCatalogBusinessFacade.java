@@ -308,7 +308,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
                 configuration
             );
         } catch (Exception e) {
-            projectMetric.failed();
+            projectMetric.failed(e);
             throw e;
         }
     }
@@ -381,7 +381,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
                 configuration
             );
         } catch (Exception e) {
-            projectMetric.failed();
+            projectMetric.failed(e);
             throw e;
         }
     }
@@ -457,7 +457,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
                 originGraphConfiguration.graphStore()
             );
         } catch (Exception e) {
-            subGraphMetric.failed();
+            subGraphMetric.failed(e);
             throw e;
         }
     }
@@ -991,7 +991,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
                 samplerType
             );
         } catch (Exception e) {
-            samplingMetric.failed();
+            samplingMetric.failed(e);
             throw e;
         }
 

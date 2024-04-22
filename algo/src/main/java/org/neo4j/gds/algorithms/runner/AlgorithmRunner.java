@@ -138,9 +138,7 @@ public final class AlgorithmRunner {
         } catch (Exception e) {
             log.warn("Computation failed", e);
             algorithm.getProgressTracker().endSubTaskWithFailure();
-            if (! (e instanceof  IllegalArgumentException)){
-                algorithmMetric.failed();
-            }
+            algorithmMetric.failed(e);
             throw e;
         }
     }

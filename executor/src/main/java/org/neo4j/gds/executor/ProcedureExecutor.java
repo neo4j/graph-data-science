@@ -146,11 +146,10 @@ public class ProcedureExecutor<
                 ) {
                     algorithmMetric.start();
                     return algo.compute();
-                } catch (Throwable e) {
+                } catch (Exception e) {
                     algo.getProgressTracker().endSubTaskWithFailure();
-                    if (! (e instanceof  IllegalArgumentException)){
-                        algorithmMetric.failed();
-                    }
+                    algorithmMetric.failed(e);
+
                     throw e;
                 } finally {
                     if (algoSpec.releaseProgressTask()) {
