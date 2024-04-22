@@ -37,9 +37,14 @@ public class TransactionAlgorithmMetaDataSetter implements AlgorithmMetaDataSett
         if (kernelTransaction == null) {
             return;
         }
-        var metaData = kernelTransaction.getMetaData();
-        if (metaData instanceof AlgorithmMetaData) {
-            ((AlgorithmMetaData) metaData).set(algoConfig);
+
+        try {
+            var metaData = kernelTransaction.getMetaData();
+            if (metaData instanceof AlgorithmMetaData) {
+                ((AlgorithmMetaData) metaData).set(algoConfig);
+            }
+        } catch (UnsupportedOperationException ignored) {
+            // Cypher Parallel Runtime does not support `kernelTransaction.getMetaData()` => we ignore it
         }
     }
 }
