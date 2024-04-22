@@ -20,15 +20,15 @@
 package org.neo4j.gds.core.compression.packed;
 
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.neo4j.gds.core.compression.MemoryInfo;
 import org.neo4j.gds.api.compress.AdjacencyListBuilder;
 import org.neo4j.gds.api.compress.ModifiableSlice;
+import org.neo4j.gds.collections.ha.HugeIntArray;
+import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.compression.MemoryInfo;
 import org.neo4j.gds.core.compression.MemoryInfoUtil;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
 import org.neo4j.gds.core.compression.common.MemoryTracker;
-import org.neo4j.gds.collections.ha.HugeIntArray;
-import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.mem.MemoryUsage;
+import org.neo4j.gds.mem.JolMemoryUsage;
 import org.neo4j.internal.unsafe.UnsafeUtil;
 import org.neo4j.memory.EmptyMemoryTracker;
 
@@ -84,8 +84,8 @@ public final class PackedAdjacencyListBuilder implements AdjacencyListBuilder<Ad
             .bytesOffHeap(bytesOffHeap);
 
         var sizeOnHeap = new MutableLong();
-        MemoryUsage.sizeOfObject(degrees).ifPresent(sizeOnHeap::add);
-        MemoryUsage.sizeOfObject(offsets).ifPresent(sizeOnHeap::add);
+        JolMemoryUsage.sizeOfObject(degrees).ifPresent(sizeOnHeap::add);
+        JolMemoryUsage.sizeOfObject(offsets).ifPresent(sizeOnHeap::add);
         memoryInfoBuilder.bytesOnHeap(sizeOnHeap.longValue());
 
         return memoryInfoBuilder.build();

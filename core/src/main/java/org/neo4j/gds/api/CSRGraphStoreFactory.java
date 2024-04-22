@@ -44,6 +44,7 @@ import org.neo4j.gds.core.loading.nodeproperties.NodePropertiesFromStoreBuilder;
 import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
+import org.neo4j.gds.mem.JolMemoryUsage;
 import org.neo4j.gds.mem.MemoryUsage;
 
 import java.util.List;
@@ -87,7 +88,7 @@ public abstract class CSRGraphStoreFactory<CONFIG extends GraphProjectConfig> ex
 
     protected void logLoadingSummary(GraphStore graphStore) {
         progressTracker().logDebug(() -> {
-            var sizeInBytes = MemoryUsage.sizeOf(graphStore);
+            var sizeInBytes = JolMemoryUsage.sizeOf(graphStore);
             if (sizeInBytes >= 0) {
                 var memoryUsage = MemoryUsage.humanReadable(sizeInBytes);
                 return formatWithLocale("Actual memory usage of the loaded graph: %s", memoryUsage);

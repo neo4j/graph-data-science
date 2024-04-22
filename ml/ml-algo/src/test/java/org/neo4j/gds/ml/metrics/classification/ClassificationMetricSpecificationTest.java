@@ -140,8 +140,9 @@ class ClassificationMetricSpecificationTest {
     void shouldEstimateMemoryUsage() {
         var nodeCount = 1_000_000_000;
         var numberOfClasses = 1000;
-        var actual = ClassificationMetricSpecification
-            .memoryEstimation(numberOfClasses).estimate(GraphDimensions.of(nodeCount), 1).memoryUsage();
+        var actual = ClassificationMetricSpecification.memoryEstimation(numberOfClasses).
+            estimate(GraphDimensions.of(nodeCount), 1)
+            .memoryUsage();
         var expected = MemoryRange.of(1, numberOfClasses).times(24);
         assertThat(actual).isEqualTo(expected);
     }

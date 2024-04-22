@@ -26,6 +26,8 @@ import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryUsage;
 
+import java.util.List;
+
 public class KmeansMemoryEstimateDefinition implements MemoryEstimateDefinition {
 
     private final KmeansParameters parameters;
@@ -56,11 +58,15 @@ public class KmeansMemoryEstimateDefinition implements MemoryEstimateDefinition 
         }
 
         if (parameters.isSeeded()) {
+            var sizeOfBoxedDouble = 8 + 8 + 8; // Double.BYTES + field + object
+            var sizeOfList = MemoryUsage.sizeOfInstance(List.class);
             var centroids = parameters.seedCentroids();
-            builder.fixed("seededCentroids", MemoryUsage.sizeOf(centroids));
+            var sizeOfCentroids = centroids.stream()
+                .mapToLong(listOfDoubles -> sizeOfList + (long) listOfDoubles.size() * sizeOfBoxedDouble)
+                .sum();
+            builder.fixed("seededCentroids", sizeOfList + sizeOfCentroids);
         }
 
         return builder.build();
     }
-
 }

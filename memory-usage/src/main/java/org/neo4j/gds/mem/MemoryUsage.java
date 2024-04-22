@@ -29,19 +29,12 @@ import com.carrotsearch.hppc.LongDoubleHashMap;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.ObjectLongIdentityHashMap;
 import com.carrotsearch.hppc.ObjectLongMap;
-import org.neo4j.gds.annotation.SuppressForbidden;
-import org.openjdk.jol.info.GraphWalker;
-import org.openjdk.jol.vm.VM;
 
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.nio.charset.StandardCharsets;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
-import java.util.OptionalLong;
 
 import static java.lang.Integer.numberOfTrailingZeros;
 
@@ -303,23 +296,6 @@ public final class MemoryUsage {
         return alignObjectSize(size);
     }
 
-    public static long sizeOf(Object thing) {
-        if (!VmInfoHolder.VM_INFO_AVAILABLE) {
-            return -1L;
-        }
-
-        try {
-            return new GraphWalker().walk(thing).totalSize();
-        } catch (RuntimeException e) {
-            return -1;
-        }
-    }
-
-    public static OptionalLong sizeOfObject(Object thing) {
-        long size = sizeOf(thing);
-        return size == -1 ? OptionalLong.empty() : OptionalLong.of(size);
-    }
-
     /**
      * Aligns an object size to be the next multiple of object alignment bytes.
      */
@@ -359,73 +335,6 @@ public final class MemoryUsage {
         // we can never arrive here, longs are not large enough to
         // represent > 16384 yobibytes
         throw new UnsupportedOperationException();
-    }
-
-    // nested class so we initialize the VM object lazily when we actually need it
-    private static final class VmInfoHolder {
-
-        private static final boolean VM_INFO_AVAILABLE = isVmInfoAvailable();
-
-        /*
-         * Try to initialize JOL without having it print warnings or throw errors because
-         * we run on an unsupported VM
-         */
-        @SuppressForbidden(reason = "we want to use system.out here")
-        private static boolean isVmInfoAvailable() {
-            macWorkaround();
-
-            var sysOut = System.out;
-            try {
-                var swallowSysOut = new PrintStream(NullOutputStream.NULL_OUTPUT_STREAM, true, StandardCharsets.UTF_8);
-                System.setOut(swallowSysOut);
-                VM.current();
-                swallowSysOut.flush();
-                return true;
-            } catch (Exception unavailable) {
-                return false;
-            } finally {
-                System.setOut(sysOut);
-            }
-        }
-
-        /**
-         * JOL currently kills the JVM on Mac OS X when trying to attach to the Hotspot SA.
-         * This happens with several JVMs (Java.net, Azul) and on both platforms (x86, ARM).
-         * <p>
-         * We can work around this by skipping the Hotspot SA attach.
-         * See <a href="https://bugs.openjdk.org/browse/CODETOOLS-7903447">OpenJDK issue</a>
-         * </p>
-         */
-        @Deprecated(forRemoval = true)
-        private static void macWorkaround() {
-            if (System.getProperty("os.name").contains("Mac")) {
-                System.setProperty("jol.skipHotspotSAAttach", "true");
-            }
-        }
-
-        private static final class NullOutputStream extends OutputStream {
-
-            static final OutputStream NULL_OUTPUT_STREAM = new NullOutputStream();
-
-            private NullOutputStream() {
-            }
-
-            @Override
-            public void write(int b) {
-                //nothing
-            }
-
-            @Override
-            public void write(byte[] b) {
-                // nothing
-            }
-
-            @Override
-            public void write(byte[] b, int off, int len) {
-                // nothing
-            }
-
-        }
     }
 
     private MemoryUsage() {

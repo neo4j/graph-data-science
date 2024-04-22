@@ -60,10 +60,12 @@ class KmeansMemoryEstimateDefinitionTest {
         when(params.isSeeded()).thenReturn(true);
         var memoryEstimation = new KmeansMemoryEstimateDefinition(params).memoryEstimation();
 
+        var sizeOfCentroids = 4 * MemoryUsage.sizeOfInstance(List.class) // four lists
+                            + 6 * 24; // eight doubles
         MemoryEstimationAssert.assertThat(memoryEstimation).
             memoryRange(graphDimensions, 4)
-            .hasMin(33928L + MemoryUsage.sizeOf(centroidsSeeds))
-            .hasMax(54920L + MemoryUsage.sizeOf(centroidsSeeds));
+            .hasMin(33928L + sizeOfCentroids)
+            .hasMax(54920L + sizeOfCentroids);
     }
 
     @Test

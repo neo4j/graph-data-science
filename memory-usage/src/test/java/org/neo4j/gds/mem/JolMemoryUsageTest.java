@@ -23,11 +23,11 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 
-class MemoryUsageTest {
+class JolMemoryUsageTest {
 
     @Test
     void ofShouldNotFailIfJOLFails() {
-        assertThatCode(() -> MemoryUsage.sizeOf(new JOLMightFail())).doesNotThrowAnyException();
+        assertThatCode(() -> JolMemoryUsage.sizeOf(new JOLMightFail())).doesNotThrowAnyException();
     }
 
     // The nested recursive ThreadLocal causes JOL to be unable to access some attributes of the class on the ZULU JVM
