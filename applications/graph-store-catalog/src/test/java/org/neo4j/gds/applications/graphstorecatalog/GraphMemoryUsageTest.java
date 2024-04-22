@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.core.TestMethodRunner;
-import org.neo4j.gds.core.loading.GraphStoreWithConfig;
+import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.utils.GdsFeatureToggles;
 
@@ -42,7 +42,7 @@ class GraphMemoryUsageTest {
                 var config = gdlFactory.graphProjectConfig();
                 var graphStore = gdlFactory.build();
 
-                var graphStoreWithConfig = new GraphStoreWithConfig(graphStore, config);
+                var graphStoreWithConfig = new GraphStoreCatalogEntry(graphStore, config);
                 var graphMemoryUsage = GraphMemoryUsage.of(graphStoreWithConfig);
                 assertThat(graphMemoryUsage.detailSizeInBytes.get("adjacencyLists"))
                     .asInstanceOf(InstanceOfAssertFactories.MAP)

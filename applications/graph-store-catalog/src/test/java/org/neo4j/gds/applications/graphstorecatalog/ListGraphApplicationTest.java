@@ -25,7 +25,7 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.core.loading.GraphStoreWithConfig;
+import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 
 import java.util.List;
 import java.util.Map;
@@ -54,10 +54,10 @@ class ListGraphApplicationTest {
             Pair.of(config3, graphStore3)
         );
         when(graphListingService.listGraphs(new User("foo", false))).thenReturn(listOfConfigsWithStores);
-        var gswc1 = new GraphStoreWithConfig(graphStore1, config1);
-        var gswc2 = new GraphStoreWithConfig(graphStore2, config2);
-        var gswc3 = new GraphStoreWithConfig(graphStore3, config3);
-        List<Pair<GraphStoreWithConfig, Map<String, Object>>> listOfGraphStoresWithConfigsSansDegreeDistributions = List.of(
+        var gswc1 = new GraphStoreCatalogEntry(graphStore1, config1);
+        var gswc2 = new GraphStoreCatalogEntry(graphStore2, config2);
+        var gswc3 = new GraphStoreCatalogEntry(graphStore3, config3);
+        List<Pair<GraphStoreCatalogEntry, Map<String, Object>>> listOfGraphStoresWithConfigsSansDegreeDistributions = List.of(
             Pair.of(gswc1, null),
             Pair.of(gswc2, null),
             Pair.of(gswc3, null)
@@ -92,9 +92,9 @@ class ListGraphApplicationTest {
             Pair.of(config3, graphStore3)
         );
         when(graphListingService.listGraphs(new User("foo", false))).thenReturn(listOfConfigsWithStores);
-        var gswc1 = new GraphStoreWithConfig(graphStore1, config1);
-        var gswc2 = new GraphStoreWithConfig(graphStore2, config2);
-        List<Pair<GraphStoreWithConfig, Map<String, Object>>> listOfGraphStoresWithConfigsSansDegreeDistributions = List.of(
+        var gswc1 = new GraphStoreCatalogEntry(graphStore1, config1);
+        var gswc2 = new GraphStoreCatalogEntry(graphStore2, config2);
+        List<Pair<GraphStoreCatalogEntry, Map<String, Object>>> listOfGraphStoresWithConfigsSansDegreeDistributions = List.of(
             Pair.of(gswc1, null),
             Pair.of(gswc2, null)
         );

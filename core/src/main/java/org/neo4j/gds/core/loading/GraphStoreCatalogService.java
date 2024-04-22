@@ -49,12 +49,12 @@ public class GraphStoreCatalogService {
         return GraphStoreCatalog.exists(user.getUsername(), databaseId, graphName.getValue());
     }
 
-    public GraphStoreWithConfig removeGraph(
+    public GraphStoreCatalogEntry removeGraph(
         CatalogRequest request,
         GraphName graphName,
         boolean shouldFailIfMissing
     ) {
-        var result = new AtomicReference<GraphStoreWithConfig>();
+        var result = new AtomicReference<GraphStoreCatalogEntry>();
         GraphStoreCatalog.remove(
             request,
             graphName.getValue(),
@@ -64,7 +64,7 @@ public class GraphStoreCatalogService {
         return result.get();
     }
 
-    public GraphStoreWithConfig get(CatalogRequest catalogRequest, GraphName graphName) {
+    public GraphStoreCatalogEntry get(CatalogRequest catalogRequest, GraphName graphName) {
         return GraphStoreCatalog.get(catalogRequest, graphName.getValue());
     }
 

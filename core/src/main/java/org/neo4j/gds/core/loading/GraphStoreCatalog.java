@@ -68,7 +68,7 @@ public final class GraphStoreCatalog {
         GraphStoreCatalog.log = Optional.of(log);
     }
 
-    public static GraphStoreWithConfig get(CatalogRequest request, String graphName) {
+    public static GraphStoreCatalogEntry get(CatalogRequest request, String graphName) {
         var userCatalogKey = UserCatalog.UserCatalogKey.of(request.databaseName(), graphName);
         var ownCatalog = getUserCatalog(request.username());
 
@@ -114,7 +114,7 @@ public final class GraphStoreCatalog {
     public static void remove(
         CatalogRequest request,
         String graphName,
-        Consumer<GraphStoreWithConfig> removedGraphConsumer,
+        Consumer<GraphStoreCatalogEntry> removedGraphConsumer,
         boolean failOnMissing
     ) {
         var userCatalogKey = UserCatalog.UserCatalogKey.of(request.databaseName(), graphName);
@@ -162,12 +162,12 @@ public final class GraphStoreCatalog {
     }
 
     @TestOnly
-    public static GraphStoreWithConfig get(String username, DatabaseId databaseId, String graphName) {
+    public static GraphStoreCatalogEntry get(String username, DatabaseId databaseId, String graphName) {
         return get(CatalogRequest.of(username, databaseId), graphName);
     }
 
     @TestOnly
-    public static GraphStoreWithConfig get(String username, String databaseName, String graphName) {
+    public static GraphStoreCatalogEntry get(String username, String databaseName, String graphName) {
         return get(CatalogRequest.of(username, databaseName), graphName);
     }
 
@@ -316,7 +316,7 @@ public final class GraphStoreCatalog {
 
         private static final UserCatalog EMPTY = new UserCatalog();
 
-        private final Map<UserCatalogKey, GraphStoreWithConfig> graphsByName = new ConcurrentHashMap<>();
+        private final Map<UserCatalogKey, GraphStoreCatalogEntry> graphsByName = new ConcurrentHashMap<>();
 
         private final Map<UserCatalogKey, Map<String, Object>> degreeDistributionByName = new ConcurrentHashMap<>();
 
@@ -329,7 +329,7 @@ public final class GraphStoreCatalog {
             if (config.graphName() == null || graphStore == null) {
                 throw new IllegalArgumentException("Both name and graph store must be not null");
             }
-            GraphStoreWithConfig graphStoreWithConfig = new GraphStoreWithConfig(graphStore, config);
+            GraphStoreCatalogEntry graphStoreCatalogEntry = new GraphStoreCatalogEntry(graphStore, config);
 
             if (!overwrite && graphsByName.containsKey(userCatalogKey)) {
                 throw new IllegalStateException(
@@ -339,7 +339,7 @@ public final class GraphStoreCatalog {
                     )
                 );
             }
-            graphsByName.put(userCatalogKey, graphStoreWithConfig);
+            graphsByName.put(userCatalogKey, graphStoreCatalogEntry);
         }
 
         private void setDegreeDistribution(UserCatalogKey userCatalogKey, Map<String, Object> degreeDistribution) {
@@ -362,7 +362,7 @@ public final class GraphStoreCatalog {
             degreeDistributionByName.remove(userCatalogKey);
         }
 
-        private @Nullable GraphStoreWithConfig get(UserCatalogKey userCatalogKey, boolean failOnMissing) {
+        private @Nullable GraphStoreCatalogEntry get(UserCatalogKey userCatalogKey, boolean failOnMissing) {
             var graphStoreWithConfig = graphsByName.get(userCatalogKey);
 
             if (graphStoreWithConfig == null && failOnMissing) {
@@ -397,7 +397,7 @@ public final class GraphStoreCatalog {
 
         private boolean remove(
             UserCatalogKey userCatalogKey,
-            Consumer<GraphStoreWithConfig> removedGraphConsumer,
+            Consumer<GraphStoreCatalogEntry> removedGraphConsumer,
             boolean failOnMissing
         ) {
             return Optional.ofNullable(get(userCatalogKey, failOnMissing))
@@ -432,8 +432,8 @@ public final class GraphStoreCatalog {
                 .stream()
                 .collect(
                     Collectors.toMap(
-                        GraphStoreWithConfig::config,
-                        GraphStoreWithConfig::graphStore
+                        GraphStoreCatalogEntry::config,
+                        GraphStoreCatalogEntry::graphStore
                     )
                 );
         }

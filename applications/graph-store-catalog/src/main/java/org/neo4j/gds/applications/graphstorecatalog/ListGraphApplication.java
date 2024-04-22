@@ -22,8 +22,8 @@ package org.neo4j.gds.applications.graphstorecatalog;
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
@@ -49,7 +49,7 @@ public final class ListGraphApplication {
         return new ListGraphApplication(graphListingService, degreeDistributionApplier);
     }
 
-    public List<Pair<GraphStoreWithConfig, Map<String, Object>>> list(
+    public List<Pair<GraphStoreCatalogEntry, Map<String, Object>>> list(
         User user,
         Optional<GraphName> graphName,
         boolean includeDegreeDistribution,

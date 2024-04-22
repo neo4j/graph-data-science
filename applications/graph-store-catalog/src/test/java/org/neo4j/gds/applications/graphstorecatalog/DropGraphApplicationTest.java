@@ -24,8 +24,8 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.loading.CatalogRequest;
+import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
-import org.neo4j.gds.core.loading.GraphStoreWithConfig;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -45,8 +45,8 @@ class DropGraphApplicationTest {
         var dropGraphService = new DropGraphApplication(graphStoreCatalogService);
 
         var catalogRequest = CatalogRequest.of("some user", DatabaseId.of("some database"));
-        var graphStoreWithConfig1 = mock(GraphStoreWithConfig.class);
-        var graphStoreWithConfig2 = mock(GraphStoreWithConfig.class);
+        var graphStoreWithConfig1 = mock(GraphStoreCatalogEntry.class);
+        var graphStoreWithConfig2 = mock(GraphStoreCatalogEntry.class);
         when(graphStoreCatalogService.removeGraph(catalogRequest, GraphName.parse("foo"), false)).thenReturn(
             graphStoreWithConfig1);
         when(graphStoreCatalogService.removeGraph(catalogRequest, GraphName.parse("bar"), false)).thenReturn(
@@ -72,9 +72,9 @@ class DropGraphApplicationTest {
         var g2 = GraphName.parse("bar");
         var g3 = GraphName.parse("baz");
         var g4 = GraphName.parse("quux");
-        when(graphStoreCatalogService.get(request, g1)).thenReturn(mock(GraphStoreWithConfig.class));
+        when(graphStoreCatalogService.get(request, g1)).thenReturn(mock(GraphStoreCatalogEntry.class));
         when(graphStoreCatalogService.get(request, g2)).thenThrow(new NoSuchElementException("aha!"));
-        when(graphStoreCatalogService.get(request, g3)).thenReturn(mock(GraphStoreWithConfig.class));
+        when(graphStoreCatalogService.get(request, g3)).thenReturn(mock(GraphStoreCatalogEntry.class));
         when(graphStoreCatalogService.get(request, g4)).thenThrow(new NoSuchElementException("another!"));
         try {
             dropGraphService.compute(
@@ -103,8 +103,8 @@ class DropGraphApplicationTest {
         var dropGraphService = new DropGraphApplication(graphStoreCatalogService);
 
         var request = CatalogRequest.of("some user", DatabaseId.of("some database"));
-        var graphStoreWithConfig1 = mock(GraphStoreWithConfig.class);
-        var graphStoreWithConfig2 = mock(GraphStoreWithConfig.class);
+        var graphStoreWithConfig1 = mock(GraphStoreCatalogEntry.class);
+        var graphStoreWithConfig2 = mock(GraphStoreCatalogEntry.class);
         var g1 = GraphName.parse("foo");
         var g2 = GraphName.parse("bar");
         var g3 = GraphName.parse("baz");

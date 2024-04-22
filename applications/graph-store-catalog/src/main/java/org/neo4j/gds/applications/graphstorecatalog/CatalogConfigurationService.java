@@ -28,9 +28,9 @@ import org.neo4j.gds.config.GraphProjectFromGraphConfig;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.core.CypherMapAccess;
 import org.neo4j.gds.core.CypherMapWrapper;
-import org.neo4j.gds.core.loading.GraphStoreWithConfig;
-import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
+import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 import org.neo4j.gds.graphsampling.config.CommonNeighbourAwareRandomWalkConfig;
+import org.neo4j.gds.legacycypherprojection.GraphProjectFromCypherConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 
 import java.util.Collection;
@@ -152,7 +152,7 @@ public class CatalogConfigurationService {
         GraphName originGraphName,
         String nodeFilter,
         String relationshipFilter,
-        GraphStoreWithConfig originGraphConfiguration,
+        GraphStoreCatalogEntry originGraphConfiguration,
         Map<String, Object> rawConfiguration
     ) {
         var cypherConfig = CypherMapWrapper.create(rawConfiguration);

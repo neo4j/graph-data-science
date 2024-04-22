@@ -32,7 +32,7 @@ import org.neo4j.gds.core.DimensionsMap;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.loading.GraphStoreWithConfig;
+import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
 
 import java.util.Collection;
@@ -114,7 +114,7 @@ public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
             .build();
     }
 
-    public static GraphStoreWithConfig graphStoreFromCatalog(
+    public static GraphStoreCatalogEntry graphStoreFromCatalog(
         String graphName,
         BaseConfig config,
         String username,

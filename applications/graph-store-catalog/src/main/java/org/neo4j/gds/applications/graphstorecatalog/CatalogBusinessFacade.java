@@ -22,11 +22,11 @@ package org.neo4j.gds.applications.graphstorecatalog;
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.User;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.beta.filter.GraphFilterResult;
 import org.neo4j.gds.core.loading.GraphDropNodePropertiesResult;
 import org.neo4j.gds.core.loading.GraphDropRelationshipResult;
-import org.neo4j.gds.beta.filter.GraphFilterResult;
-import org.neo4j.gds.core.loading.GraphStoreWithConfig;
-import org.neo4j.gds.termination.TerminationFlag;
+import org.neo4j.gds.core.loading.GraphStoreCatalogEntry;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
 import org.neo4j.gds.core.write.NodeLabelExporterBuilder;
@@ -35,7 +35,7 @@ import org.neo4j.gds.core.write.RelationshipExporterBuilder;
 import org.neo4j.gds.core.write.RelationshipPropertiesExporterBuilder;
 import org.neo4j.gds.legacycypherprojection.GraphProjectCypherResult;
 import org.neo4j.gds.projection.GraphProjectNativeResult;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.graphdb.GraphDatabaseService;
 
@@ -46,7 +46,7 @@ import java.util.stream.Stream;
 public interface CatalogBusinessFacade {
     boolean graphExists(User user, DatabaseId databaseId, String graphNameAsString);
 
-    List<GraphStoreWithConfig> dropGraph(
+    List<GraphStoreCatalogEntry> dropGraph(
         Object graphNameOrListOfGraphNames,
         boolean failIfMissing,
         String databaseName,
@@ -55,7 +55,7 @@ public interface CatalogBusinessFacade {
         User operator
     );
 
-    List<Pair<GraphStoreWithConfig, Map<String, Object>>> listGraphs(
+    List<Pair<GraphStoreCatalogEntry, Map<String, Object>>> listGraphs(
         User user,
         String graphName,
         boolean includeDegreeDistribution,
