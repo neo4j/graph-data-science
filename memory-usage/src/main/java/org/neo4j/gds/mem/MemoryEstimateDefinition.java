@@ -17,33 +17,9 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.mem;
+package org.neo4j.gds.mem;
 
-import org.neo4j.gds.core.GraphDimensions;
+public interface MemoryEstimateDefinition {
 
-import java.util.Collection;
-import java.util.Collections;
-
-/**
- * A description of an object that has resources residing in memory.
- */
-public interface MemoryEstimation {
-
-    /**
-     * @return a textual description for this component.
-     */
-    String description();
-
-    /**
-     * @return nested resources of this component.
-     */
-    default Collection<MemoryEstimation> components() {
-        return Collections.emptyList();
-    }
-
-    default MemoryEstimation times(long factor) {
-        return MemoryEstimations.andThen(this, memoryRange -> memoryRange.times(factor));
-    }
-
-    MemoryTree estimate(GraphDimensions dimensions, int concurrency);
+    MemoryEstimation memoryEstimation();
 }

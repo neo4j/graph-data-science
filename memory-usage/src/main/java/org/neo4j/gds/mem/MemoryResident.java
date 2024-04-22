@@ -17,14 +17,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.core.utils.mem;
+package org.neo4j.gds.mem;
 
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.core.GraphDimensions;
 
-@ValueClass
-public interface MemoryEstimationWithDimensions {
-    MemoryEstimation memoryEstimation();
+/**
+ * A calculation of an object that has resources residing in memory.
+ */
+@FunctionalInterface
+public interface MemoryResident {
 
-    GraphDimensions graphDimensions();
+    /**
+     * @return the number of bytes that this object occupies in memory.
+     */
+    MemoryRange estimateMemoryUsage(
+            GraphDimensions dimensions,
+            int concurrency
+    );
 }

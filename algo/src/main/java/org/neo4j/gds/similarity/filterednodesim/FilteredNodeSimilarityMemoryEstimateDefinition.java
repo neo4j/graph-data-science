@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.similarity.filterednodesim;
 
-import org.neo4j.gds.MemoryEstimateDefinition;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
+import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMemoryEstimateDefinition;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityParameters;
 

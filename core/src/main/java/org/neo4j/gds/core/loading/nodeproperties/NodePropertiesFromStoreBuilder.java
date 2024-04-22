@@ -26,8 +26,8 @@ import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.collections.hsa.HugeSparseCollections;
 import org.neo4j.gds.core.loading.HighLimitIdMap;
 import org.neo4j.gds.core.loading.ValueConverter;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.values.storable.Value;
 import org.neo4j.values.storable.Values;
 

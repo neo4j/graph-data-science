@@ -22,7 +22,7 @@ package org.neo4j.gds.core.loading;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
-import org.neo4j.gds.core.utils.mem.MemoryTree;
+import org.neo4j.gds.mem.MemoryTree;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

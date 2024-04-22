@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.beta.pregel;
 
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimation;
 
 class AsyncQueueMessenger implements Messenger<PrimitiveAsyncDoubleQueues.Iterator> {
 

@@ -30,7 +30,7 @@ import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsProc;
 import org.neo4j.graphdb.QueryExecutionException;
 

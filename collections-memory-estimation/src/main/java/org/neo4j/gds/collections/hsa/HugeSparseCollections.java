@@ -20,7 +20,7 @@
 package org.neo4j.gds.collections.hsa;
 
 import org.neo4j.gds.collections.PageUtil;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.mem.Estimate;
 
 public final class HugeSparseCollections {

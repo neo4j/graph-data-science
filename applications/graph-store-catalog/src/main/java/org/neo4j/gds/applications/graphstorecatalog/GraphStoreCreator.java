@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimation;
 
 public interface GraphStoreCreator extends GraphStoreLoader {
     MemoryEstimation estimateMemoryUsageDuringLoading();

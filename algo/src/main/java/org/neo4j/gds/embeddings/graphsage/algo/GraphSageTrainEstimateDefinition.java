@@ -19,16 +19,16 @@
  */
 package org.neo4j.gds.embeddings.graphsage.algo;
 
-import org.neo4j.gds.MemoryEstimateDefinition;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
 import org.neo4j.gds.embeddings.graphsage.GraphSageHelper;
 
-import static org.neo4j.gds.core.utils.mem.MemoryEstimations.RESIDENT_MEMORY;
-import static org.neo4j.gds.core.utils.mem.MemoryEstimations.TEMPORARY_MEMORY;
+import static org.neo4j.gds.mem.MemoryEstimations.RESIDENT_MEMORY;
+import static org.neo4j.gds.mem.MemoryEstimations.TEMPORARY_MEMORY;
 import static org.neo4j.gds.mem.Estimate.sizeOfDoubleArray;
 
 public class GraphSageTrainEstimateDefinition implements MemoryEstimateDefinition {

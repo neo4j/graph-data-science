@@ -22,9 +22,9 @@ package org.neo4j.gds.ml.metrics.classification;
 import org.eclipse.collections.api.block.function.primitive.LongIntToObjectFunction;
 import org.intellij.lang.annotations.RegExp;
 import org.neo4j.gds.collections.LongMultiSet;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.Metric;
 

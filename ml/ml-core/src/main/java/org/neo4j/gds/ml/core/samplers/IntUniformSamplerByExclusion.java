@@ -20,7 +20,7 @@
 package org.neo4j.gds.ml.core.samplers;
 
 import com.carrotsearch.hppc.IntArrayList;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryRange;
 
 import java.util.Arrays;
 import java.util.SplittableRandom;

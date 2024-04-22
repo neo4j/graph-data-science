@@ -28,7 +28,7 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.graphdb.Path;
 
 import java.time.Instant;
@@ -191,7 +191,7 @@ class RandomWalkStreamProcTest extends BaseProcTest {
         // we're done or fail the test
         assertThat(pool.getActiveCount()).isEqualTo(0);
     }
-    
+
     @Test
     void shouldRunMemoryEstimation() {
         String query = GdsCypher.call(DEFAULT_GRAPH_NAME)

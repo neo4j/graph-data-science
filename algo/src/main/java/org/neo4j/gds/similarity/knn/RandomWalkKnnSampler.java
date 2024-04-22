@@ -21,7 +21,7 @@ package org.neo4j.gds.similarity.knn;
 
 import com.carrotsearch.hppc.LongHashSet;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.ml.core.samplers.LongUniformSamplerFromRange;
 import org.neo4j.gds.ml.core.samplers.RandomWalkSampler;
 

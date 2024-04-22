@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.ml.core.samplers;
 
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryRange;
 
 import java.util.SplittableRandom;
 import java.util.function.LongPredicate;

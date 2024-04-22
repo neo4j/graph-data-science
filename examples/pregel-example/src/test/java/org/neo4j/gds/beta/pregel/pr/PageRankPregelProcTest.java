@@ -25,7 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.BaseProcTest;
 import org.neo4j.gds.GdsCypher;
 import org.neo4j.gds.catalog.GraphProjectProc;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.extension.IdFunction;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -70,7 +70,7 @@ class PageRankPregelProcTest extends BaseProcTest {
         ", (i)-[:REL]->(e)" +
         ", (j)-[:REL]->(e)" +
         ", (k)-[:REL]->(e)";
-    
+
     private static final double RESULT_ERROR = 1e-3;
 
     @Inject

@@ -21,7 +21,7 @@ package org.neo4j.gds.assertions;
 
 import org.assertj.core.api.AbstractAssert;
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimation;
 
 public final class MemoryEstimationAssert extends AbstractAssert<MemoryEstimationAssert, MemoryEstimation> {
 
@@ -71,5 +71,5 @@ public final class MemoryEstimationAssert extends AbstractAssert<MemoryEstimatio
         var memoryTree = actual.estimate(graphDimensions, concurrency);
         return MemoryTreeAssert.assertThat(memoryTree);
     }
-    
+
 }

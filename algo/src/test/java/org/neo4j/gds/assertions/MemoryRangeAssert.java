@@ -21,7 +21,7 @@ package org.neo4j.gds.assertions;
 
 import org.assertj.core.api.AbstractAssert;
 import org.assertj.core.api.LongAssert;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryRange;
 
 public final class MemoryRangeAssert extends AbstractAssert<MemoryRangeAssert, MemoryRange> {
 

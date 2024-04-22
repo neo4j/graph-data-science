@@ -26,9 +26,9 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.LabeledIdMap;
 import org.neo4j.gds.collections.hsa.HugeSparseCollections;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.mem.Estimate;
 

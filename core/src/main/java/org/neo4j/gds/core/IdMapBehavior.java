@@ -20,7 +20,7 @@
 package org.neo4j.gds.core;
 
 import org.neo4j.gds.core.loading.IdMapBuilder;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimation;
 
 import java.util.Optional;
 

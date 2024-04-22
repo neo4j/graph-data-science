@@ -20,8 +20,8 @@
 package org.neo4j.gds.similarity.nodesim;
 
 import com.carrotsearch.hppc.AbstractIterator;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.core.utils.queue.BoundedLongLongPriorityQueue;
 import org.neo4j.gds.similarity.SimilarityResult;
 

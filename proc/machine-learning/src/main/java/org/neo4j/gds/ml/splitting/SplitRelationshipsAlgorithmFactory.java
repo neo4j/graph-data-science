@@ -21,7 +21,7 @@ package org.neo4j.gds.ml.splitting;
 
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 
 public class SplitRelationshipsAlgorithmFactory extends GraphStoreAlgorithmFactory<SplitRelationships, SplitRelationshipsMutateConfig> {

@@ -21,7 +21,7 @@ package org.neo4j.gds.core.utils.progress.tasks;
 
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.neo4j.gds.core.utils.ClockService;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryRange;
 
 import java.util.List;
 

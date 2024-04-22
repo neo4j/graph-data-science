@@ -22,7 +22,7 @@ package org.neo4j.gds.beta.pregel.triangleCount;
 import com.carrotsearch.hppc.LongHashSet;
 import com.carrotsearch.hppc.procedures.LongProcedure;
 import org.apache.commons.lang3.mutable.MutableLong;
-import org.neo4j.gds.MemoryEstimateDefinition;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.Messages;
 import org.neo4j.gds.beta.pregel.Pregel;

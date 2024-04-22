@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.similarity.knn;
 
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.similarity.SimilarityResult;
 
 import java.util.SplittableRandom;

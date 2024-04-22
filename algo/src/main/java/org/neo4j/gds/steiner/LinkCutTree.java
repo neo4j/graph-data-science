@@ -20,8 +20,8 @@
 package org.neo4j.gds.steiner;
 
 import org.neo4j.gds.collections.ha.HugeObjectArray;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
 
 class LinkCutTree {
     //Look here: https://dl.acm.org/doi/pdf/10.1145/3828.3835

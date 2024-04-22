@@ -17,11 +17,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.mem;
 
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.core.GraphDimensions;
 
-public interface MemoryEstimateDefinition {
+public final class MemoryTreeWithDimensions {
+    public final MemoryTree memoryTree;
+    public final GraphDimensions graphDimensions;
 
-    MemoryEstimation memoryEstimation();
+    public MemoryTreeWithDimensions(
+            final MemoryTree memoryTree,
+            final GraphDimensions graphDimensions) {
+        this.memoryTree = memoryTree;
+        this.graphDimensions = graphDimensions;
+    }
 }

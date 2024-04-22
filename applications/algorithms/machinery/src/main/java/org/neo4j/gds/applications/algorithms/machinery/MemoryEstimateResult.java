@@ -20,9 +20,9 @@
 package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.core.GraphDimensions;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
-import org.neo4j.gds.core.utils.mem.MemoryTree;
-import org.neo4j.gds.core.utils.mem.MemoryTreeWithDimensions;
+import org.neo4j.gds.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryTree;
+import org.neo4j.gds.mem.MemoryTreeWithDimensions;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

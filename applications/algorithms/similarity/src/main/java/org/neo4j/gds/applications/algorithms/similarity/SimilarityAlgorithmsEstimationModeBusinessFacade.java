@@ -21,9 +21,9 @@ package org.neo4j.gds.applications.algorithms.similarity;
 
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnBaseConfig;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnMemoryEstimateDefinition;
+import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.similarity.knn.KnnBaseConfig;
 import org.neo4j.gds.similarity.knn.KnnMemoryEstimateDefinition;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfig;

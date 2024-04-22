@@ -20,7 +20,7 @@
 package org.neo4j.gds.pregel;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.MemoryEstimateDefinition;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.beta.pregel.BidirectionalPregelComputation;

@@ -19,10 +19,10 @@
  */
 package org.neo4j.gds.ml.splitting;
 
-import org.neo4j.gds.MemoryEstimateDefinition;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryEstimateDefinition;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 
 public class SplitRelationshipsEstimateDefinition implements MemoryEstimateDefinition {
     private final SplitRelationshipsEstimateParameters estimateParameters;

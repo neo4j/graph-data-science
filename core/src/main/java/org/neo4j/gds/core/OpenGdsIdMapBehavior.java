@@ -25,7 +25,7 @@ import org.neo4j.gds.core.loading.GrowingArrayIdMapBuilder;
 import org.neo4j.gds.core.loading.HighLimitIdMap;
 import org.neo4j.gds.core.loading.HighLimitIdMapBuilder;
 import org.neo4j.gds.core.loading.IdMapBuilder;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimation;
 
 import java.util.Locale;
 import java.util.Optional;

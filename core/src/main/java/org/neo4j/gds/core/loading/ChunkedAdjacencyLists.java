@@ -26,9 +26,9 @@ import org.neo4j.gds.collections.hsl.HugeSparseByteArrayList;
 import org.neo4j.gds.collections.hsl.HugeSparseIntList;
 import org.neo4j.gds.collections.hsl.HugeSparseLongArrayList;
 import org.neo4j.gds.collections.hsl.HugeSparseLongList;
-import org.neo4j.gds.core.utils.mem.MemoryEstimation;
-import org.neo4j.gds.core.utils.mem.MemoryEstimations;
-import org.neo4j.gds.core.utils.mem.MemoryRange;
+import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.mem.MemoryEstimations;
+import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.mem.Estimate;
 
