@@ -26,6 +26,6 @@ public class ResultStoreRelationshipPropertiesExporterBuilder extends Relationsh
 
     @Override
     public RelationshipPropertiesExporter build() {
-        return new ResultStoreRelationshipPropertiesExporter(graphStore, graphStore.resultStore());
+        return new ResultStoreRelationshipPropertiesExporter(graphStore, graphStore.resultStore(), toOriginalId);
     }
 }

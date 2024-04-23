@@ -31,7 +31,7 @@ import static org.mockito.Mockito.mock;
 class ResultStoreRelationshipExporterTest {
 
     @Test
-    void shouldWriteRelationshipWithoutPropertyToGraphStore() {
+    void shouldWriteRelationshipWithoutPropertyToResultStore() {
         var resultStore = new EphemeralResultStore();
         var graph = mock(Graph.class);
         var toOriginalId = mock(LongUnaryOperator.class);
@@ -45,7 +45,7 @@ class ResultStoreRelationshipExporterTest {
     }
 
     @Test
-    void shouldWriteRelationshipWithPropertyToGraphStore() {
+    void shouldWriteRelationshipWithPropertyToResultStore() {
         var resultStore = new EphemeralResultStore();
         var graph = mock(Graph.class);
         var toOriginalId = mock(LongUnaryOperator.class);

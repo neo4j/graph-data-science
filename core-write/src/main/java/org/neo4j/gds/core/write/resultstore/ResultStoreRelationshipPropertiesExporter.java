@@ -25,24 +25,27 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.core.write.RelationshipPropertiesExporter;
 
 import java.util.List;
+import java.util.function.LongUnaryOperator;
 
 public class ResultStoreRelationshipPropertiesExporter implements RelationshipPropertiesExporter {
 
     private final GraphStore graphStore;
     private final ResultStore resultStore;
+    private final LongUnaryOperator toOriginalId;
 
     ResultStoreRelationshipPropertiesExporter(
         GraphStore graphStore,
-        ResultStore resultStore
+        ResultStore resultStore,
+        LongUnaryOperator toOriginalId
     ) {
         this.graphStore = graphStore;
         this.resultStore = resultStore;
+        this.toOriginalId = toOriginalId;
     }
 
     @Override
     public void write(String relationshipType, List<String> propertyKeys) {
         var relationshipIterator = graphStore.getCompositeRelationshipIterator(RelationshipType.of(relationshipType), propertyKeys);
-        // Multiple relationship properties are not result of any algorithm and are always
-        // fetched from the graph store directly. Therefore, no action is needed here.
+        resultStore.addRelationshipIterator(relationshipType, propertyKeys, relationshipIterator, toOriginalId);
     }
 }
