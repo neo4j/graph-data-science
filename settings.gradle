@@ -62,6 +62,9 @@ project(':csv').projectDir = file('io/csv')
 include('cypher-aggregation')
 project(':cypher-aggregation').projectDir = file('cypher-aggregation')
 
+include('triplet-graph-builder')
+project(':triplet-graph-builder').projectDir = file('triplet-graph-builder')
+
 include('legacy-cypher-projection')
 project(':legacy-cypher-projection').projectDir = file('legacy-cypher-projection')
 
