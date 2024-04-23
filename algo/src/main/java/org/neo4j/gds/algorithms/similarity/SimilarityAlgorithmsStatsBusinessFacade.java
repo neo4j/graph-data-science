@@ -27,7 +27,6 @@ import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.result.SimilarityStatistics;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStatsConfig;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -40,27 +39,6 @@ public class SimilarityAlgorithmsStatsBusinessFacade {
 
     public SimilarityAlgorithmsStatsBusinessFacade(SimilarityAlgorithmsFacade similarityAlgorithmsFacade) {
         this.similarityAlgorithmsFacade = similarityAlgorithmsFacade;
-    }
-
-    public StatsResult<SimilaritySpecificFieldsWithDistribution> nodeSimilarity(
-        String graphName,
-        NodeSimilarityStatsConfig configuration,
-        boolean computeSimilarityDistribution
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> similarityAlgorithmsFacade.nodeSimilarity(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        return statsResult(
-            algorithmResult,
-            result -> result.graphResult(),
-            NODE_SIMILARITY_SPECIFIC_FIELDS_SUPPLIER,
-            intermediateResult.computeMilliseconds,
-            () -> SimilaritySpecificFieldsWithDistribution.EMPTY,
-            computeSimilarityDistribution
-        );
     }
 
     public StatsResult<SimilaritySpecificFieldsWithDistribution> filteredNodeSimilarity(

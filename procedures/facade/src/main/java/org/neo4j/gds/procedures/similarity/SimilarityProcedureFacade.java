@@ -35,7 +35,6 @@ import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityMutateConf
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityWriteConfig;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteConfig;
 
 import java.util.Map;
@@ -81,21 +80,6 @@ public class SimilarityProcedureFacade {
         this.theOtherFacade = theOtherFacade;
     }
 
-    public Stream<SimilarityStatsResult> nodeSimilarityStats(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var statsConfig = configurationCreator.createConfiguration(configuration, NodeSimilarityStatsConfig::of);
-
-        var computationResult = statsBusinessFacade.nodeSimilarity(
-            graphName,
-            statsConfig,
-            procedureReturnColumns.contains("similarityDistribution")
-        );
-
-        return Stream.of(NodeSimilarityComputationResultTransformer.toStatsResult(computationResult, statsConfig));
-    }
-
     public Stream<SimilarityWriteResult> nodeSimilarityWrite(
         String graphName,
         Map<String, Object> configuration
@@ -109,14 +93,6 @@ public class SimilarityProcedureFacade {
         );
 
         return Stream.of(NodeSimilarityComputationResultTransformer.toWriteResult(computationResult));
-    }
-
-    public Stream<MemoryEstimateResult> nodeSimilarityEstimateStats(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, NodeSimilarityStatsConfig::of);
-        return Stream.of(estimateBusinessFacade.nodeSimilarity(graphNameOrConfiguration, config));
     }
 
     public Stream<MemoryEstimateResult> nodeSimilarityEstimateWrite(

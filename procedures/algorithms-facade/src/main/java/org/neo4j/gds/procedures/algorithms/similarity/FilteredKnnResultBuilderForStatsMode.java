@@ -30,6 +30,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 class FilteredKnnResultBuilderForStatsMode implements ResultBuilder<FilteredKnnStatsConfig, FilteredKnnResult, Stream<KnnStatsResult>, Void> {
+    private final SimilarityStatsProcessor similarityStatsProcessor = new SimilarityStatsProcessor();
+
     private final boolean shouldComputeSimilarityDistribution;
 
     FilteredKnnResultBuilderForStatsMode(boolean shouldComputeSimilarityDistribution) {
@@ -52,18 +54,35 @@ class FilteredKnnResultBuilderForStatsMode implements ResultBuilder<FilteredKnnS
             configurationMap
         ));
 
-        return new SimilarityStatsProcessor().process(
+        var filteredKnnResult = result.get();
+
+        var similarityGraphResult = similarityStatsProcessor.computeSimilarityGraph(
             graph,
             configuration,
-            result.get().similarityResultStream(),
+            filteredKnnResult.similarityResultStream()
+        );
+        var communityStatistics = similarityStatsProcessor.computeCommunityStatistics(
+            similarityGraphResult,
+            shouldComputeSimilarityDistribution
+        );
+        var similarityDistribution = similarityStatsProcessor.computeSimilarityDistribution(
             shouldComputeSimilarityDistribution,
-            timings,
-            configurationMap,
-            result.get().nodesCompared(),
-            result.get().numberOfSimilarityPairs(),
-            result.get().didConverge(),
-            result.get().ranIterations(),
-            result.get().nodePairsConsidered()
+            similarityGraphResult
+        );
+
+        return Stream.of(
+            new KnnStatsResult(
+                timings.preProcessingMillis,
+                timings.computeMillis,
+                communityStatistics.computeMilliseconds(),
+                filteredKnnResult.nodesCompared(),
+                filteredKnnResult.numberOfSimilarityPairs(),
+                similarityDistribution,
+                filteredKnnResult.didConverge(),
+                filteredKnnResult.ranIterations(),
+                filteredKnnResult.nodePairsConsidered(),
+                configurationMap
+            )
         );
     }
 }

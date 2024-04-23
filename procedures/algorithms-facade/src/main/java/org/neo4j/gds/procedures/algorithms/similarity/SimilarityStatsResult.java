@@ -19,6 +19,9 @@
  */
 package org.neo4j.gds.procedures.algorithms.similarity;
 
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+
+import java.util.Collections;
 import java.util.Map;
 
 public class SimilarityStatsResult {
@@ -48,5 +51,17 @@ public class SimilarityStatsResult {
         this.similarityPairs = similarityPairs;
         this.similarityDistribution = similarityDistribution;
         this.configuration = configuration;
+    }
+
+    static SimilarityStatsResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new SimilarityStatsResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.postProcessingMillis,
+            0,
+            0,
+            Collections.emptyMap(),
+            configurationMap
+        );
     }
 }

@@ -21,26 +21,32 @@ package org.neo4j.gds.procedures.algorithms.similarity;
 
 import org.neo4j.gds.algorithms.similarity.SimilarityResultCompanion;
 import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.result.SimilarityStatistics;
+import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 
 import java.util.Map;
 import java.util.stream.Stream;
 
 class SimilarityStatsProcessor {
-    Stream<KnnStatsResult> process(
-        Graph graph, ConcurrencyConfig concurrencyConfiguration,
+    SimilarityGraphResult computeSimilarityGraph(
+        Graph graph, ConcurrencyConfig configuration,
+        Stream<SimilarityResult> similarityResultStream
+    ) {
+        return SimilarityResultCompanion.computeToGraph(
+            graph,
+            graph.nodeCount(),
+            configuration.typedConcurrency(),
+            similarityResultStream
+        );
+    }
+
+    Map<String, Object> computeSimilarityDistribution(
+        Graph graph,
+        ConcurrencyConfig concurrencyConfiguration,
         Stream<SimilarityResult> similarityResultStream,
-        boolean shouldComputeSimilarityDistribution,
-        AlgorithmProcessingTimings timings,
-        Map<String, Object> configurationMap,
-        long nodesCompared,
-        long nodePairs,
-        boolean didConverge,
-        long ranIterations,
-        long nodePairsConsidered
+        boolean shouldComputeSimilarityDistribution
     ) {
         var similarityGraphResult = SimilarityResultCompanion.computeToGraph(
             graph,
@@ -49,26 +55,28 @@ class SimilarityStatsProcessor {
             similarityResultStream
         );
 
-        var communityStatistics = SimilarityStatistics.similarityStats(
-            similarityGraphResult::similarityGraph,
+        return computeSimilarityDistribution(shouldComputeSimilarityDistribution, similarityGraphResult);
+    }
+
+    Map<String, Object> computeSimilarityDistribution(
+        boolean shouldComputeSimilarityDistribution,
+        SimilarityGraphResult similarityGraphResult
+    ) {
+        var communityStatistics = computeCommunityStatistics(
+            similarityGraphResult,
             shouldComputeSimilarityDistribution
         );
 
-        var similaritySummary = SimilarityStatistics.similaritySummary(communityStatistics.histogram());
+        return SimilarityStatistics.similaritySummary(communityStatistics.histogram());
+    }
 
-        return Stream.of(
-            new KnnStatsResult(
-                timings.preProcessingMillis,
-                timings.computeMillis,
-                communityStatistics.computeMilliseconds(),
-                nodesCompared,
-                nodePairs,
-                similaritySummary,
-                didConverge,
-                ranIterations,
-                nodePairsConsidered,
-                configurationMap
-            )
+    SimilarityStatistics.SimilarityStats computeCommunityStatistics(
+        SimilarityGraphResult graphResult,
+        boolean shouldComputeSimilarityDistribution
+    ) {
+        return SimilarityStatistics.similarityStats(
+            graphResult::similarityGraph,
+            shouldComputeSimilarityDistribution
         );
     }
 }

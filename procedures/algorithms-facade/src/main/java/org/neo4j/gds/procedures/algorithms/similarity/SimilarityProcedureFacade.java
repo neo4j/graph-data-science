@@ -38,6 +38,7 @@ import org.neo4j.gds.similarity.filteredknn.FilteredKnnWriteConfig;
 import org.neo4j.gds.similarity.knn.KnnStatsConfig;
 import org.neo4j.gds.similarity.knn.KnnStreamConfig;
 import org.neo4j.gds.similarity.knn.KnnWriteConfig;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfig;
 
 import java.util.Map;
@@ -309,6 +310,35 @@ public final class SimilarityProcedureFacade {
 
     public NodeSimilarityMutateStub nodeSimilarityMutateStub() {
         return nodeSimilarityMutateStub;
+    }
+
+    public Stream<SimilarityStatsResult> nodeSimilarityStats(String graphName, Map<String, Object> configuration) {
+        var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("similarityDistribution");
+        var resultBuilder = new NodeSimilarityResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
+
+        return statsModeAlgorithmRunner.runStatsModeAlgorithm(
+            graphName,
+            configuration,
+            NodeSimilarityStatsConfig::of,
+            resultBuilder,
+            statsMode()::nodeSimilarity
+        );
+    }
+
+    public Stream<MemoryEstimateResult> nodeSimilarityStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationModeRunner.runEstimation(
+            algorithmConfiguration,
+            NodeSimilarityStatsConfig::of,
+            configuration -> estimationMode().nodeSimilarity(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
     }
 
     public Stream<SimilarityResult> nodeSimilarityStream(String graphName, Map<String, Object> configuration) {

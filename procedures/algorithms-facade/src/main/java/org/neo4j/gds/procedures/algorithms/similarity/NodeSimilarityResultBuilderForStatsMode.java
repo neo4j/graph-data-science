@@ -23,66 +23,57 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
-import org.neo4j.gds.similarity.knn.KnnResult;
-import org.neo4j.gds.similarity.knn.KnnStatsConfig;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class KnnResultBuilderForStatsMode implements ResultBuilder<KnnStatsConfig, KnnResult, Stream<KnnStatsResult>, Void> {
+class NodeSimilarityResultBuilderForStatsMode implements ResultBuilder<NodeSimilarityStatsConfig, NodeSimilarityResult, Stream<SimilarityStatsResult>, Void> {
     private final SimilarityStatsProcessor similarityStatsProcessor = new SimilarityStatsProcessor();
 
     private final boolean shouldComputeSimilarityDistribution;
 
-    KnnResultBuilderForStatsMode(boolean shouldComputeSimilarityDistribution) {
+    NodeSimilarityResultBuilderForStatsMode(boolean shouldComputeSimilarityDistribution) {
         this.shouldComputeSimilarityDistribution = shouldComputeSimilarityDistribution;
     }
 
     @Override
-    public Stream<KnnStatsResult> build(
+    public Stream<SimilarityStatsResult> build(
         Graph graph,
         GraphStore graphStore,
-        KnnStatsConfig configuration,
-        Optional<KnnResult> result,
+        NodeSimilarityStatsConfig configuration,
+        Optional<NodeSimilarityResult> result,
         AlgorithmProcessingTimings timings,
         Optional<Void> unused
     ) {
         var configurationMap = configuration.toMap();
 
-        if (result.isEmpty()) return Stream.of(KnnStatsResult.emptyFrom(
+        if (result.isEmpty()) return Stream.of(SimilarityStatsResult.emptyFrom(
             timings,
             configurationMap
         ));
 
-        var knnResult = result.get();
+        var nodeSimilarityResult = result.get();
+        var graphResult = nodeSimilarityResult.graphResult();
 
-        var similarityGraphResult = similarityStatsProcessor.computeSimilarityGraph(
-            graph,
-            configuration,
-            knnResult.streamSimilarityResult()
-        );
         var communityStatistics = similarityStatsProcessor.computeCommunityStatistics(
-            similarityGraphResult,
+            graphResult,
             shouldComputeSimilarityDistribution
         );
         var similarityDistribution = similarityStatsProcessor.computeSimilarityDistribution(
-            graph,
-            configuration,
-            knnResult.streamSimilarityResult(),
-            shouldComputeSimilarityDistribution
+            shouldComputeSimilarityDistribution,
+            graphResult
         );
 
         return Stream.of(
-            new KnnStatsResult(
+            new SimilarityStatsResult(
                 timings.preProcessingMillis,
                 timings.computeMillis,
                 communityStatistics.computeMilliseconds(),
-                knnResult.nodesCompared(),
-                knnResult.totalSimilarityPairs(),
+                graphResult.comparedNodes(),
+                graphResult.similarityGraph().relationshipCount(),
                 similarityDistribution,
-                knnResult.didConverge(),
-                knnResult.ranIterations(),
-                knnResult.nodePairsConsidered(),
                 configurationMap
             )
         );
