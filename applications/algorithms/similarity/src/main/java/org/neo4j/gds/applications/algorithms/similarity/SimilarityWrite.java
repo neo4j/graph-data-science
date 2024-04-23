@@ -31,6 +31,7 @@ import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
+import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 
 import java.util.Map;
@@ -63,6 +64,28 @@ class SimilarityWrite {
             similarityResultStream
         );
 
+        return execute(
+            graphStore,
+            writeConfiguration,
+            writePropertyConfiguration,
+            writeRelationshipConfiguration,
+            shouldComputeSimilarityDistribution,
+            resultStore,
+            taskName,
+            similarityGraphResult
+        );
+    }
+
+    Pair<RelationshipsWritten, Map<String, Object>> execute(
+        GraphStore graphStore,
+        WriteConfig writeConfiguration,
+        WritePropertyConfig writePropertyConfiguration,
+        WriteRelationshipConfig writeRelationshipConfiguration,
+        boolean shouldComputeSimilarityDistribution,
+        Optional<ResultStore> resultStore,
+        String taskName,
+        SimilarityGraphResult similarityGraphResult
+    ) {
         var similarityGraph = similarityGraphResult.similarityGraph();
 
         var rootIdMap = similarityGraphResult.isTopKGraph()

@@ -30,7 +30,6 @@ import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityWriteConfig;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteConfig;
 
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
@@ -50,33 +49,6 @@ public class SimilarityAlgorithmsWriteBusinessFacade {
     ) {
         this.similarityAlgorithmsFacade = similarityAlgorithmsFacade;
         this.writeRelationshipService = writeRelationshipService;
-    }
-
-    public RelationshipWriteResult nodeSimilarity(
-        String graphName,
-        NodeSimilarityWriteConfig configuration,
-        boolean computeSimilarityDistribution
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> similarityAlgorithmsFacade.nodeSimilarity(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        return write(
-            algorithmResult,
-            configuration,
-            result -> result.graphResult(),
-            NODE_SIMILARITY_SPECIFIC_FIELDS_SUPPLIER,
-            intermediateResult.computeMilliseconds,
-            () -> SimilaritySpecificFieldsWithDistribution.EMPTY,
-            computeSimilarityDistribution,
-            "NodeSimilarityWrite",
-            configuration.writeProperty(),
-            configuration.writeRelationshipType(),
-            configuration.arrowConnectionInfo()
-        );
-
     }
 
     public RelationshipWriteResult<SimilaritySpecificFieldsWithDistribution> filteredNodeSimilarity(

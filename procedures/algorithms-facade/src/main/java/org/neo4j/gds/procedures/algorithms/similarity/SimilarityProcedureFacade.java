@@ -40,6 +40,7 @@ import org.neo4j.gds.similarity.knn.KnnStreamConfig;
 import org.neo4j.gds.similarity.knn.KnnWriteConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfig;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -360,6 +361,44 @@ public final class SimilarityProcedureFacade {
         var result = estimationModeRunner.runEstimation(
             algorithmConfiguration,
             NodeSimilarityStreamConfig::of,
+            configuration -> estimationMode().nodeSimilarity(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<SimilarityWriteResult> nodeSimilarityWrite(
+        String graphNameAsString,
+        Map<String, Object> rawConfiguration
+    ) {
+        var resultBuilder = new NodeSimilarityResultBuilderForWriteMode();
+
+        var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("similarityDistribution");
+
+        return writeModeAlgorithmRunner.runWriteModeAlgorithm(
+            graphNameAsString,
+            rawConfiguration,
+            NodeSimilarityWriteConfig::of,
+            (graphName, configuration, __) -> writeMode().nodeSimilarity(
+                graphName,
+                configuration,
+                resultBuilder,
+                shouldComputeSimilarityDistribution
+            ),
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> nodeSimilarityWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationModeRunner.runEstimation(
+            algorithmConfiguration,
+            NodeSimilarityWriteConfig::of,
             configuration -> estimationMode().nodeSimilarity(
                 configuration,
                 graphNameOrConfiguration

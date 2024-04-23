@@ -19,6 +19,10 @@
  */
 package org.neo4j.gds.procedures.algorithms.similarity;
 
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
+import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
+
+import java.util.Collections;
 import java.util.Map;
 
 public class SimilarityWriteResult {
@@ -51,5 +55,37 @@ public class SimilarityWriteResult {
         this.relationshipsWritten = relationshipsWritten;
         this.similarityDistribution = similarityDistribution;
         this.configuration = configuration;
+    }
+
+    static SimilarityWriteResult emptyFrom(AlgorithmProcessingTimings timings, Map<String, Object> configurationMap) {
+        return new SimilarityWriteResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.postProcessingMillis,
+            0,
+            0,
+            0,
+            Collections.emptyMap(),
+            configurationMap
+        );
+    }
+
+    static SimilarityWriteResult from(
+        AlgorithmProcessingTimings timings,
+        RelationshipsWritten relationshipsWritten,
+        Map<String, Object> similarityDistribution,
+        long nodesCompared,
+        Map<String, Object> configurationMap
+    ) {
+        return new SimilarityWriteResult(
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            timings.postProcessingMillis,
+            0,
+            nodesCompared,
+            relationshipsWritten.value,
+            similarityDistribution,
+            configurationMap
+        );
     }
 }

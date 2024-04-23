@@ -29,12 +29,15 @@ import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnWriteConfig;
 import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.knn.KnnWriteConfig;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteConfig;
 
 import java.util.Map;
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.FILTERED_KNN;
 import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.KNN;
+import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.NODE_SIMILARITY;
 
 public class SimilarityAlgorithmsWriteModeBusinessFacade {
     private final SimilarityAlgorithmsEstimationModeBusinessFacade estimationFacade;
@@ -95,6 +98,29 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
             KNN,
             () -> estimationFacade.knn(configuration),
             graph -> similarityAlgorithms.knn(graph, configuration),
+            Optional.of(writeStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT nodeSimilarity(
+        GraphName graphName,
+        NodeSimilarityWriteConfig configuration,
+        ResultBuilder<NodeSimilarityWriteConfig, NodeSimilarityResult, RESULT, Pair<RelationshipsWritten, Map<String, Object>>> resultBuilder,
+        boolean shouldComputeSimilarityDistribution
+    ) {
+        var writeStep = NodeSimilarityWriteStep.create(
+            writeRelationshipService,
+            configuration,
+            shouldComputeSimilarityDistribution
+        );
+
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            NODE_SIMILARITY,
+            () -> estimationFacade.nodeSimilarity(configuration),
+            graph -> similarityAlgorithms.nodeSimilarity(graph, configuration),
             Optional.of(writeStep),
             resultBuilder
         );
