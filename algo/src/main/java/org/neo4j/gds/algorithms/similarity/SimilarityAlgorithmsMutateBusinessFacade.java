@@ -28,7 +28,6 @@ import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.config.MutateRelationshipPropertyConfig;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityMutateConfig;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
 import java.util.function.Function;
@@ -47,29 +46,6 @@ public class SimilarityAlgorithmsMutateBusinessFacade {
     ) {
         this.similarityAlgorithmsFacade = similarityAlgorithmsFacade;
         this.mutateRelationshipService = mutateRelationshipService;
-    }
-
-    public RelationshipMutateResult nodeSimilarity(
-        String graphName,
-        NodeSimilarityMutateConfig configuration,
-        boolean computeSimilarityDistribution
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> similarityAlgorithmsFacade.nodeSimilarity(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        return mutate(
-            algorithmResult,
-            configuration,
-            NodeSimilarityResult::graphResult,
-            NODE_SIMILARITY_SPECIFIC_FIELDS_SUPPLIER,
-            intermediateResult.computeMilliseconds,
-            () -> SimilaritySpecificFieldsWithDistribution.EMPTY,
-            computeSimilarityDistribution
-        );
-
     }
 
     public RelationshipMutateResult<SimilaritySpecificFieldsWithDistribution> filteredNodeSimilarity(

@@ -28,6 +28,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.config.MutateRelationshipPropertyConfig;
+import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 
 import java.util.Map;
@@ -58,6 +59,24 @@ class SimilarityMutation {
             similarityResultStream
         );
 
+        return execute(
+            graph,
+            graphStore,
+            mutateRelationshipPropertyConfiguration,
+            mutateRelationshipConfiguration,
+            similarityGraphResult,
+            shouldComputeSimilarityDistribution
+        );
+    }
+
+    Pair<RelationshipsWritten, Map<String, Object>> execute(
+        Graph graph,
+        GraphStore graphStore,
+        MutateRelationshipPropertyConfig mutateRelationshipPropertyConfiguration,
+        MutateRelationshipConfig mutateRelationshipConfiguration,
+        SimilarityGraphResult similarityGraphResult,
+        boolean shouldComputeSimilarityDistribution
+    ) {
         var similaritySingleTypeRelationshipsHandler = new SimilaritySingleTypeRelationshipsHandler(
             graph,
             () -> similarityGraphResult,

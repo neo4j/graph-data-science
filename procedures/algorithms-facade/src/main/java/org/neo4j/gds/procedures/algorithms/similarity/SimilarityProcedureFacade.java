@@ -46,6 +46,7 @@ public final class SimilarityProcedureFacade {
     private final ProcedureReturnColumns procedureReturnColumns;
     private final FilteredKnnMutateStub filteredKnnMutateStub;
     private final KnnMutateStub knnMutateStub;
+    private final NodeSimilarityMutateStub nodeSimilarityMutateStub;
     private final ApplicationsFacade applicationsFacade;
     private final EstimationModeRunner estimationModeRunner;
     private final StreamModeAlgorithmRunner streamModeAlgorithmRunner;
@@ -56,6 +57,7 @@ public final class SimilarityProcedureFacade {
         ProcedureReturnColumns procedureReturnColumns,
         FilteredKnnMutateStub filteredKnnMutateStub,
         KnnMutateStub knnMutateStub,
+        NodeSimilarityMutateStub nodeSimilarityMutateStub,
         ApplicationsFacade applicationsFacade,
         EstimationModeRunner estimationModeRunner,
         StreamModeAlgorithmRunner streamModeAlgorithmRunner,
@@ -65,6 +67,7 @@ public final class SimilarityProcedureFacade {
         this.procedureReturnColumns = procedureReturnColumns;
         this.filteredKnnMutateStub = filteredKnnMutateStub;
         this.knnMutateStub = knnMutateStub;
+        this.nodeSimilarityMutateStub = nodeSimilarityMutateStub;
         this.applicationsFacade = applicationsFacade;
         this.estimationModeRunner = estimationModeRunner;
         this.streamModeAlgorithmRunner = streamModeAlgorithmRunner;
@@ -83,11 +86,17 @@ public final class SimilarityProcedureFacade {
     ) {
         var filteredKnnMutateStub = new FilteredKnnMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
         var knnMutateStub = new KnnMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
+        var nodeSimilarityMutateStub = new NodeSimilarityMutateStub(
+            genericStub,
+            applicationsFacade,
+            procedureReturnColumns
+        );
 
         return new SimilarityProcedureFacade(
             procedureReturnColumns,
             filteredKnnMutateStub,
             knnMutateStub,
+            nodeSimilarityMutateStub,
             applicationsFacade,
             estimationModeRunner,
             streamModeAlgorithmRunner,
@@ -295,6 +304,10 @@ public final class SimilarityProcedureFacade {
         );
 
         return Stream.of(result);
+    }
+
+    public NodeSimilarityMutateStub nodeSimilarityMutateStub() {
+        return nodeSimilarityMutateStub;
     }
 
     private SimilarityAlgorithmsEstimationModeBusinessFacade estimationMode() {

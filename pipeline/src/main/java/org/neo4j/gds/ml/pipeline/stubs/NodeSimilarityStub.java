@@ -17,13 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.similarity;
+package org.neo4j.gds.ml.pipeline.stubs;
 
-/**
- * We need human-readable labels for e.g. progress tracking
- */
-interface AlgorithmLabels {
-    String FILTERED_KNN = "Filtered K-Nearest Neighbours";
-    String KNN = "K-Nearest Neighbours";
-    String NODE_SIMILARITY = "Node Similarity";
+import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.similarity.SimilarityMutateResult;
+import org.neo4j.gds.procedures.algorithms.stubs.MutateStub;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
+
+public class NodeSimilarityStub extends AbstractStub<NodeSimilarityMutateConfig, SimilarityMutateResult> {
+    protected MutateStub<NodeSimilarityMutateConfig, SimilarityMutateResult> stub(AlgorithmsProcedureFacade facade) {
+        return facade.similarity().nodeSimilarityMutateStub();
+    }
 }
