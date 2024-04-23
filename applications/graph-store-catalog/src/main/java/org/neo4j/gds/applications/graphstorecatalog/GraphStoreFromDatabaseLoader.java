@@ -22,6 +22,7 @@ package org.neo4j.gds.applications.graphstorecatalog;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.GraphStoreFactory;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphLoader;
@@ -53,6 +54,13 @@ public class GraphStoreFromDatabaseLoader implements GraphStoreCreator {
     @Override
     public GraphStore graphStore() {
         return this.graphStoreFactory.build();
+    }
+
+    @Override
+    public ResultStore resultStore() {
+        throw new UnsupportedOperationException(
+            "The ResultStore is created when a graph store is stored in the catalog. " +
+                "It is not available at this stage.");
     }
 
     @Override

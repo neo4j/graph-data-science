@@ -25,6 +25,7 @@ import org.neo4j.gds.GraphAlgorithmFactory;
 import org.neo4j.gds.GraphStoreAlgorithmFactory;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
@@ -86,12 +87,14 @@ public class ProcedureExecutor<
 
         GraphStore graphStore;
         Graph graph;
+        ResultStore resultStore;
 
         try (ProgressTimer timer = ProgressTimer.start(builder::preProcessingMillis)) {
             var graphProjectConfig = graphCreation.graphProjectConfig();
             var validator = executorSpec.validator(algoSpec.validationConfig(executionContext));
             validator.validateConfigsBeforeLoad(graphProjectConfig, config);
             graphStore = graphCreation.graphStore();
+            resultStore = graphCreation.resultStore();
             validator.validateConfigWithGraphStore(graphStore, graphProjectConfig, config);
             graph = graphCreation.createGraph(graphStore);
         }
@@ -101,6 +104,7 @@ public class ProcedureExecutor<
                 .isGraphEmpty(true)
                 .graph(graph)
                 .graphStore(graphStore)
+                .resultStore(resultStore)
                 .config(config)
                 .computeMillis(0)
                 .result(Optional.empty())
@@ -119,6 +123,7 @@ public class ProcedureExecutor<
         var computationResult = builder
             .graph(graph)
             .graphStore(graphStore)
+            .resultStore(resultStore)
             .algorithm(algo)
             .result(result)
             .config(config)
