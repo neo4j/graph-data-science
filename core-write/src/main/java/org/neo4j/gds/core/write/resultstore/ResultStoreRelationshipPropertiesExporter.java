@@ -19,16 +19,29 @@
  */
 package org.neo4j.gds.core.write.resultstore;
 
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.core.write.RelationshipPropertiesExporter;
 
 import java.util.List;
 
 public class ResultStoreRelationshipPropertiesExporter implements RelationshipPropertiesExporter {
 
-    ResultStoreRelationshipPropertiesExporter() {}
+    private final GraphStore graphStore;
+    private final ResultStore resultStore;
+
+    ResultStoreRelationshipPropertiesExporter(
+        GraphStore graphStore,
+        ResultStore resultStore
+    ) {
+        this.graphStore = graphStore;
+        this.resultStore = resultStore;
+    }
 
     @Override
     public void write(String relationshipType, List<String> propertyKeys) {
+        var relationshipIterator = graphStore.getCompositeRelationshipIterator(RelationshipType.of(relationshipType), propertyKeys);
         // Multiple relationship properties are not result of any algorithm and are always
         // fetched from the graph store directly. Therefore, no action is needed here.
     }

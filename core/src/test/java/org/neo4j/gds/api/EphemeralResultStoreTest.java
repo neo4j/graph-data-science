@@ -287,4 +287,35 @@ class EphemeralResultStoreTest {
 
         assertThat(resultStore.hasRelationshipStream("Type", List.of("foo"))).isFalse();
     }
+
+    @Test
+    void shouldStoreRelationshipIterator() {
+        var resultStore = new EphemeralResultStore();
+
+        var relationshipIterator = mock(CompositeRelationshipIterator.class);
+        var toOriginalId = mock(LongUnaryOperator.class);
+
+        resultStore.addRelationshipIterator("Type", List.of("foo", "bar"), relationshipIterator, toOriginalId);
+
+        var relationshipIteratorEntry = resultStore.getRelationshipIterator("Type", List.of("foo", "bar"));
+        assertThat(relationshipIteratorEntry.relationshipIterator()).isEqualTo(relationshipIterator);
+        assertThat(relationshipIteratorEntry.toOriginalId()).isEqualTo(toOriginalId);
+    }
+
+    @Test
+    void shouldRemoveRelationshipIterator() {
+        var resultStore = new EphemeralResultStore();
+
+        var relationshipIterator = mock(CompositeRelationshipIterator.class);
+        var toOriginalId = mock(LongUnaryOperator.class);
+
+        resultStore.addRelationshipIterator("Type", List.of("foo", "bar"), relationshipIterator, toOriginalId);
+
+        assertThat(resultStore.getRelationshipIterator("Type", List.of("foo", "bar"))).isNotNull();
+
+        resultStore.removeRelationshipIterator("Type", List.of("foo", "bar"));
+
+        assertThat(resultStore.getRelationshipIterator("Type", List.of("foo", "bar"))).isNull();
+
+    }
 }

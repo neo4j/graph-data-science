@@ -46,6 +46,7 @@ public class EphemeralResultStore implements ResultStore {
     private final Cache<String, NodeLabelEntry> nodeIdsByLabel;
     private final Cache<RelationshipKey, RelationshipEntry> relationships;
     private final Cache<RelationshipKey, RelationshipStreamEntry> relationshipStreams;
+    private final Map<RelationshipKey, RelationshipIteratorEntry> relationshipIterators;
 
     public EphemeralResultStore() {
         var singleThreadScheduler = ExecutorServiceUtil.createSingleThreadScheduler("GDS-ResultStore");
@@ -53,6 +54,7 @@ public class EphemeralResultStore implements ResultStore {
         this.nodeIdsByLabel = createCache(singleThreadScheduler);
         this.relationships = createCache(singleThreadScheduler);
         this.relationshipStreams = createCache(singleThreadScheduler);
+        this.relationshipIterators = new HashMap<>();
     }
 
     @Override
@@ -147,6 +149,29 @@ public class EphemeralResultStore implements ResultStore {
     @Override
     public void removeRelationship(String relationshipType, String propertyKey) {
         this.relationships.invalidate(new RelationshipKey(relationshipType, List.of(propertyKey)));
+    }
+
+    @Override
+    public void addRelationshipIterator(
+        String relationshipType,
+        List<String> propertyKeys,
+        CompositeRelationshipIterator relationshipIterator,
+        LongUnaryOperator toOriginalId
+    ) {
+        this.relationshipIterators.put(
+            new RelationshipKey(relationshipType, propertyKeys),
+            new RelationshipIteratorEntry(relationshipIterator, toOriginalId)
+        );
+    }
+
+    @Override
+    public RelationshipIteratorEntry getRelationshipIterator(String relationshipType, List<String> propertyKeys) {
+        return this.relationshipIterators.get(new RelationshipKey(relationshipType, propertyKeys));
+    }
+
+    @Override
+    public void removeRelationshipIterator(String relationshipType, List<String> propertyKeys) {
+        this.relationshipIterators.remove(new RelationshipKey(relationshipType, propertyKeys));
     }
 
     @Override

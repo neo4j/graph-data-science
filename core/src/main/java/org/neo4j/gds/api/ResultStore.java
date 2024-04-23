@@ -130,6 +130,34 @@ public interface ResultStore {
     void removeRelationshipStream(String relationshipType, List<String> propertyKeys);
 
     /**
+     * Stores a composite relationship iterator in this store.
+     * Composite relationship iterators store multiple properties
+     * for a given adjacency cursor.
+     */
+    void addRelationshipIterator(
+        String relationshipType,
+        List<String> propertyKeys,
+        CompositeRelationshipIterator relationshipIterator,
+        LongUnaryOperator toOriginalId
+    );
+
+    /**
+     * Retrieves a relationship iterator representing the given relationship type and property keys.
+     */
+    RelationshipIteratorEntry getRelationshipIterator(
+        String relationshipType,
+        List<String> propertyKeys
+    );
+
+    /**
+     * Removes a relationship iterator from this store based on the relationship type and property keys.
+     */
+    void removeRelationshipIterator(
+        String relationshipType,
+        List<String> propertyKeys
+    );
+
+    /**
      * Checks if this store has a relationship of the given type.
      * Does not include relationship streams.
      */
@@ -152,6 +180,8 @@ public interface ResultStore {
     record RelationshipEntry(Graph graph, LongUnaryOperator toOriginalId) {}
 
     record RelationshipStreamEntry(Stream<ExportedRelationship> relationshipStream, List<ValueType> propertyTypes, LongUnaryOperator toOriginalId) {}
+
+    record RelationshipIteratorEntry(CompositeRelationshipIterator relationshipIterator, LongUnaryOperator toOriginalId) {}
 
     ResultStore EMPTY = new EmptyResultStore();
 }
