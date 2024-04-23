@@ -49,6 +49,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static java.util.stream.Collectors.toMap;
 import static org.neo4j.gds.Orientation.NATURAL;
 import static org.neo4j.gds.Orientation.UNDIRECTED;
 
@@ -172,7 +173,8 @@ public final class GraphImporter {
             this.config.asProcedureResultConfigurationField()
                 .entrySet()
                 .stream()
-                .filter(e -> e.getValue() != null),
+                .filter(e -> e.getValue() != null)
+                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue)),
             this.query
         );
     }
