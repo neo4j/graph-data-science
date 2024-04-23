@@ -165,15 +165,21 @@ public interface ResultStore {
 
     /**
      * Checks if this store has a relationship of the given type and property keys.
-     * Does not include relationship streams.
+     * Does not include other kinds of stored relationships.
      */
     boolean hasRelationship(String relationshipType, List<String> propertyKeys);
 
     /**
      * Checks if this store has a relationship stream of the given type and properties.
-     * Does not include non-stream relationships.
+     * Does not include other kinds of stored relationships.
      */
     boolean hasRelationshipStream(String relationshipType, List<String> propertyKeys);
+
+    /**
+     * Checks if this store has a relationship iterator of the given type and properties.
+     * Does not include other kinds of stored relationships.
+     */
+    boolean hasRelationshipIterator(String relationshipType, List<String> propertyKeys);
 
     record NodeLabelEntry(long nodeCount, LongUnaryOperator toOriginalId) {}
 

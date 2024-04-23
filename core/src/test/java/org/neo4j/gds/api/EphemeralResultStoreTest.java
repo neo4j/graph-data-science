@@ -300,6 +300,7 @@ class EphemeralResultStoreTest {
         var relationshipIteratorEntry = resultStore.getRelationshipIterator("Type", List.of("foo", "bar"));
         assertThat(relationshipIteratorEntry.relationshipIterator()).isEqualTo(relationshipIterator);
         assertThat(relationshipIteratorEntry.toOriginalId()).isEqualTo(toOriginalId);
+        assertThat(resultStore.hasRelationshipIterator("Type", List.of("foo", "bar"))).isTrue();
     }
 
     @Test
@@ -311,11 +312,11 @@ class EphemeralResultStoreTest {
 
         resultStore.addRelationshipIterator("Type", List.of("foo", "bar"), relationshipIterator, toOriginalId);
 
-        assertThat(resultStore.getRelationshipIterator("Type", List.of("foo", "bar"))).isNotNull();
+        assertThat(resultStore.hasRelationshipIterator("Type", List.of("foo", "bar"))).isTrue();
 
         resultStore.removeRelationshipIterator("Type", List.of("foo", "bar"));
 
-        assertThat(resultStore.getRelationshipIterator("Type", List.of("foo", "bar"))).isNull();
+        assertThat(resultStore.hasRelationshipIterator("Type", List.of("foo", "bar"))).isFalse();
 
     }
 }

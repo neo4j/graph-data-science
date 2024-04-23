@@ -205,6 +205,11 @@ public class EphemeralResultStore implements ResultStore {
         }
     }
 
+    @Override
+    public boolean hasRelationshipIterator(String relationshipType, List<String> propertyKeys) {
+        return this.relationshipIterators.containsKey(new RelationshipKey(relationshipType, propertyKeys));
+    }
+
     private record NodeKey(List<String> nodeLabels, String propertyKey) {}
 
     private record RelationshipKey(String relationshipType, Collection<String> propertyKeys) {}
