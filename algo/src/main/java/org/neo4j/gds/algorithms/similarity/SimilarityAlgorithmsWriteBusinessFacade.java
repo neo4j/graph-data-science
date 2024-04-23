@@ -109,7 +109,7 @@ public class SimilarityAlgorithmsWriteBusinessFacade {
 
 
             var similarityDistributionBuilder = SimilaritySummaryBuilder.of(shouldComputeSimilarityDistribution);
-            var resultStore = configuration.resolveResultStore(graphStore.resultStore());
+            var resultStore = configuration.resolveResultStore(algorithmResult.resultStore());
             var writeResult = writeRelationshipService.write(
                 writeRelationshipType,
                 writeProperty,

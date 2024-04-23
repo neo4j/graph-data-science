@@ -19,14 +19,15 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
+import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.metrics.ExecutionMetric;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
@@ -64,13 +65,13 @@ class DefaultAlgorithmProcessingTemplateTest {
         var configuration = new ExampleConfiguration();
         var graph = mock(Graph.class);
         var graphStore = mock(GraphStore.class);
-        when(graphStoreCatalogService.getGraphWithGraphStore(
+        when(graphStoreCatalogService.getGraphResources(
             graphName,
             configuration,
             Optional.empty(),
             user,
             databaseId
-        )).thenReturn(Pair.of(graph, graphStore));
+        )).thenReturn(new GraphResources(graphStore, graph, ResultStore.EMPTY));
 
         // We need it to not be null :shrug:
         when(algorithmMetricsService.create("Duckstra")).thenReturn(mock(ExecutionMetric.class));
@@ -140,13 +141,13 @@ class DefaultAlgorithmProcessingTemplateTest {
         var configuration = new ExampleConfiguration();
         var graph = mock(Graph.class);
         var graphStore = mock(GraphStore.class);
-        when(graphStoreCatalogService.getGraphWithGraphStore(
+        when(graphStoreCatalogService.getGraphResources(
             graphName,
             configuration,
             Optional.empty(),
             user,
             databaseId
-        )).thenReturn(Pair.of(graph, graphStore));
+        )).thenReturn(new GraphResources(graphStore, graph, ResultStore.EMPTY));
 
         var pathFindingResult = mock(ExampleResult.class);
         var resultBuilder = new ResultBuilder<ExampleConfiguration, ExampleResult, String, Long>() {
@@ -181,7 +182,7 @@ class DefaultAlgorithmProcessingTemplateTest {
             public Long execute(
                 Graph graph,
                 GraphStore graphStore,
-                ExampleResult resultFromAlgorithm
+                ResultStore resultStore, ExampleResult resultFromAlgorithm
             ) {
                 return 42L;
             }
@@ -210,13 +211,13 @@ class DefaultAlgorithmProcessingTemplateTest {
             null
         ) {
             @Override
-            <CONFIGURATION extends AlgoBaseConfig> Pair<Graph, GraphStore> graphLoadAndValidationWithTiming(
+            <CONFIGURATION extends AlgoBaseConfig> GraphResources graphLoadAndValidationWithTiming(
                 AlgorithmProcessingTimingsBuilder timingsBuilder,
                 GraphName graphName,
                 CONFIGURATION configuration
             ) {
                 timingsBuilder.withPreProcessingMillis(23);
-                return Pair.of(mock(Graph.class), null);
+                return new GraphResources(null, mock(Graph.class), null);
             }
 
             @Override
@@ -236,10 +237,11 @@ class DefaultAlgorithmProcessingTemplateTest {
                 AlgorithmProcessingTimingsBuilder timingsBuilder,
                 Graph graph,
                 GraphStore graphStore,
+                ResultStore resultStore,
                 RESULT_FROM_ALGORITHM resultFromAlgorithm
             ) {
                 timingsBuilder.withPostProcessingMillis(87);
-                return mutateOrWriteStep.orElseThrow().execute(graph, graphStore, resultFromAlgorithm);
+                return mutateOrWriteStep.orElseThrow().execute(graph, graphStore, resultStore, resultFromAlgorithm);
             }
         };
 
@@ -268,7 +270,7 @@ class DefaultAlgorithmProcessingTemplateTest {
             null,
             null,
             null,
-            Optional.of((graph, graphStore, unused) -> 6573L),
+            Optional.of((graph, graphStore, resultStore, unused) -> 6573L),
             resultBuilder
         );
 

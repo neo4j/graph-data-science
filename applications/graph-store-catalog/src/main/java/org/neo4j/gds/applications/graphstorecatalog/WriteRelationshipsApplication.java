@@ -53,6 +53,7 @@ public class WriteRelationshipsApplication {
         TerminationFlag terminationFlag,
         UserLogRegistryFactory userLogRegistryFactory,
         GraphStore graphStore,
+        ResultStore resultStore,
         GraphName graphName,
         GraphWriteRelationshipConfig configuration
     ) {
@@ -83,7 +84,7 @@ public class WriteRelationshipsApplication {
                     progressTracker,
                     configuration.typedConcurrency(),
                     configuration.arrowConnectionInfo(),
-                    configuration.resolveResultStore(graphStore.resultStore()),
+                    configuration.resolveResultStore(resultStore),
                     graphStore,
                     relationshipType,
                     configuration.relationshipProperty()

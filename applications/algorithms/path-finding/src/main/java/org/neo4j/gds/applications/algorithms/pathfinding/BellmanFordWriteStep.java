@@ -24,6 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ImmutableExportedRelationship;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -62,6 +63,7 @@ class BellmanFordWriteStep implements MutateOrWriteStep<BellmanFordResult, Relat
     public RelationshipsWritten execute(
         Graph graph,
         GraphStore graphStore,
+        ResultStore resultStore,
         BellmanFordResult result
     ) {
         var writeRelationshipType = configuration.writeRelationshipType();
@@ -98,7 +100,7 @@ class BellmanFordWriteStep implements MutateOrWriteStep<BellmanFordResult, Relat
                 configuration.arrowConnectionInfo(),
                 graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
             )
-            .withResultStore(configuration.resolveResultStore(graphStore.resultStore()))
+            .withResultStore(configuration.resolveResultStore(resultStore))
             .build();
 
         // effect

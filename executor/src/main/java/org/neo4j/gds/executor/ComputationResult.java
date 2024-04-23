@@ -25,6 +25,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 
 import java.util.Optional;
@@ -47,6 +48,8 @@ public interface ComputationResult<A extends Algorithm<ALGO_RESULT>, ALGO_RESULT
     Graph graph();
 
     GraphStore graphStore();
+
+    ResultStore resultStore();
 
     CONFIG config();
 

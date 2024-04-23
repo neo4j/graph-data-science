@@ -25,6 +25,7 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.similarity.specificfields.SimilaritySpecificFieldsWithDistribution;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -62,7 +63,7 @@ class SimilarityAlgorithmsWriteBusinessFacadeTest {
     void statsWithoutAlgorithmResult() {
 
         var configurationMock = mock(NodeSimilarityWriteConfig.class);
-        var algorithmResult = AlgorithmComputationResult.<Long>withoutAlgorithmResult(graph, graphStore);
+        var algorithmResult = AlgorithmComputationResult.<Long>withoutAlgorithmResult(graph, graphStore, ResultStore.EMPTY);
 
         var businessFacade = new SimilarityAlgorithmsWriteBusinessFacade(null,null);
 
@@ -101,7 +102,7 @@ class SimilarityAlgorithmsWriteBusinessFacadeTest {
 
         var similarityResultStream = Pair.of(1,Stream.of(new SimilarityResult(0,1,1), new SimilarityResult(0,2,0.25) ));
 
-        var algorithmResult = AlgorithmComputationResult.of(similarityResultStream,graph,graphStore);
+        var algorithmResult = AlgorithmComputationResult.of(similarityResultStream, graph, graphStore, ResultStore.EMPTY);
 
         var writeRelationshipService = mock(WriteRelationshipService.class);
 

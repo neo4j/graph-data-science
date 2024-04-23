@@ -22,7 +22,6 @@ package org.neo4j.gds.algorithms.centrality;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyResult;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
@@ -31,6 +30,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.config.ArrowConnectionInfo;
@@ -57,7 +57,7 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
         var configurationMock = mock(BetweennessCentralityWriteConfig.class);
         var graph = mock(Graph.class);
         var graphStore = mock(GraphStore.class);
-        var algorithmResult = AlgorithmComputationResult.<Long>withoutAlgorithmResult(graph, graphStore);
+        var algorithmResult = AlgorithmComputationResult.<Long>withoutAlgorithmResult(graph, graphStore, ResultStore.EMPTY);
 
         var nodePropertyServiceMock = mock(WriteNodePropertyService.class);
 
@@ -105,7 +105,8 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
         var algorithmResultMock = AlgorithmComputationResult.of(
             result,
             graph,
-            graphStore
+            graphStore,
+            ResultStore.EMPTY
         );
 
         when(graph.nodeCount()).thenReturn(4L);
@@ -174,7 +175,8 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
         var algorithmResultMock = AlgorithmComputationResult.of(
             result,
             graph,
-            graphStore
+            graphStore,
+            ResultStore.EMPTY
         );
 
         when(graph.nodeCount()).thenReturn(4l);
@@ -245,7 +247,8 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
                 AlgorithmComputationResult.of(
                     pageRankResultMock,
                     mock(Graph.class),
-                    mock(GraphStore.class)
+                    mock(GraphStore.class),
+                    ResultStore.EMPTY
                 )
             );
 
@@ -278,7 +281,8 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
                 AlgorithmComputationResult.of(
                     pageRankResultMock,
                     mock(Graph.class),
-                    mock(GraphStore.class)
+                    mock(GraphStore.class),
+                    ResultStore.EMPTY
                 )
             );
 

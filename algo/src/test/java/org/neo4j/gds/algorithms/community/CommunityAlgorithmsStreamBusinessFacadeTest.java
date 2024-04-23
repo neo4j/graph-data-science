@@ -23,10 +23,10 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
@@ -94,7 +94,7 @@ class CommunityAlgorithmsStreamBusinessFacadeTest {
             var graphStoreCatalogServiceMock = mock(GraphStoreCatalogService.class);
             doReturn(Pair.of(graph, graphStore))
                 .when(graphStoreCatalogServiceMock)
-                .getGraphWithGraphStore(any(), any(), any(), any(), any());
+                .getGraphResources(any(), any(), any(), any(), any());
 
             var config = mock(WccBaseConfig.class);
             when(config.concurrency()).thenReturn(4);
@@ -142,7 +142,7 @@ class CommunityAlgorithmsStreamBusinessFacadeTest {
             when(graphMock.isEmpty()).thenReturn(true);
             doReturn(Pair.of(graphMock, mock(GraphStore.class)))
                 .when(graphStoreCatalogServiceMock)
-                .getGraphWithGraphStore(any(), any(), any(), any(), any());
+                .getGraphResources(any(), any(), any(), any(), any());
             var algorithmsBusinessFacade = new CommunityAlgorithmsStreamBusinessFacade(
                 new CommunityAlgorithmsFacade(
                     new AlgorithmRunner(

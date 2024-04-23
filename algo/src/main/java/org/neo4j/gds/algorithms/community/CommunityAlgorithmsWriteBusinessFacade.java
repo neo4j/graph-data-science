@@ -117,7 +117,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             configuration.typedWriteConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(algorithmResult.resultStore())
         );
 
     }
@@ -144,7 +144,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             configuration.typedWriteConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(algorithmResult.resultStore())
         );
 
     }
@@ -182,7 +182,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             configuration.typedWriteConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(algorithmResult.resultStore())
         );
 
     }
@@ -216,7 +216,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             configuration.typedWriteConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(algorithmResult.resultStore())
         );
 
     }
@@ -265,7 +265,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             configuration.typedWriteConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(algorithmResult.resultStore())
         );
     }
 
@@ -307,7 +307,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             configuration.typedWriteConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(algorithmResult.resultStore())
         );
     }
 
@@ -359,7 +359,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             configuration.typedWriteConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(algorithmResult.resultStore())
         );
     }
 
@@ -397,7 +397,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             configuration.typedWriteConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(algorithmResult.resultStore())
         );
     }
 
@@ -438,7 +438,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             config.typedWriteConcurrency(),
             config.writeProperty(),
             config.arrowConnectionInfo(),
-            config.resolveResultStore(algorithmResult.graphStore().resultStore())
+            config.resolveResultStore(algorithmResult.resultStore())
         );
     }
 
@@ -484,7 +484,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             configuration.typedWriteConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(algorithmResult.resultStore())
         );
     }
 
@@ -510,7 +510,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             config.typedWriteConcurrency(),
             config.writeProperty(),
             config.arrowConnectionInfo(),
-            config.resolveResultStore(algorithmResult.graphStore().resultStore())
+            config.resolveResultStore(algorithmResult.resultStore())
         );
     }
 
@@ -539,7 +539,7 @@ public class CommunityAlgorithmsWriteBusinessFacade {
             config.typedWriteConcurrency(),
             config.writeProperty(),
             config.arrowConnectionInfo(),
-            config.resolveResultStore(algorithmResult.graphStore().resultStore())
+            config.resolveResultStore(algorithmResult.resultStore())
         );
     }
 

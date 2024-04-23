@@ -24,6 +24,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ImmutableExportedRelationship;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -71,6 +72,7 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
     public RelationshipsWritten execute(
         Graph graph,
         GraphStore graphStore,
+        ResultStore resultStore,
         PathFindingResult result
     ) {
         var writeNodeIds = configuration.writeNodeIds();
@@ -100,12 +102,12 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
                 requestScopedDependencies.getTaskRegistryFactory()
             );
 
-            var resultStore = configuration.resolveResultStore(graphStore.resultStore());
+            var maybeResultStore = configuration.resolveResultStore(resultStore);
             // When we are writing to the result store, the path finding result stream is not consumed
             // inside the current transaction. This causes the stream to immediately return an empty stream
             // as the termination flag, which is bound to the current transaction is set to true. We therefore
             // need to collect the stream and trigger an eager computation.
-            var maybeCollectedStream = resultStore
+            var maybeCollectedStream = maybeResultStore
                 .map(__ -> relationshipStream.toList().stream())
                 .orElse(relationshipStream);
 
@@ -116,7 +118,7 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
                     configuration.arrowConnectionInfo(),
                     graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                 )
-                .withResultStore(resultStore)
+                .withResultStore(maybeResultStore)
                 .withIdMappingOperator(graph::toOriginalNodeId)
                 .withProgressTracker(progressTracker)
                 .withRelationships(maybeCollectedStream)

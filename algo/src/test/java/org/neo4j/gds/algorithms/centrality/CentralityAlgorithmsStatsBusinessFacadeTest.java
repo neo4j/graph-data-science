@@ -25,6 +25,7 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
@@ -59,7 +60,7 @@ class CentralityAlgorithmsStatsBusinessFacadeTest {
     void statsWithoutAlgorithmResult() {
 
         var configurationMock = mock(AlgoBaseConfig.class);
-        var algorithmResult = AlgorithmComputationResult.<Long>withoutAlgorithmResult(graph, graphStore);
+        var algorithmResult = AlgorithmComputationResult.<Long>withoutAlgorithmResult(graph, graphStore, ResultStore.EMPTY);
 
 
         var businessFacade = new CentralityAlgorithmsStatsBusinessFacade(null);
@@ -93,7 +94,8 @@ class CentralityAlgorithmsStatsBusinessFacadeTest {
         var algorithmResultMock = AlgorithmComputationResult.of(
             result,
             graph,
-            graphStore
+            graphStore,
+            ResultStore.EMPTY
         );
 
         var statsResult = businessFacade.statsResult(
@@ -126,7 +128,8 @@ class CentralityAlgorithmsStatsBusinessFacadeTest {
         var algorithmResultMock = AlgorithmComputationResult.of(
             result,
             graph,
-            graphStore
+            graphStore,
+            ResultStore.EMPTY
         );
 
         var statsResult = businessFacade.statsResult(

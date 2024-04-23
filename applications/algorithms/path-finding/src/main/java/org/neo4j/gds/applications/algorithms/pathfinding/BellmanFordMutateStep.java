@@ -23,6 +23,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -42,7 +43,7 @@ class BellmanFordMutateStep implements MutateOrWriteStep<BellmanFordResult, Rela
     public RelationshipsWritten execute(
         Graph graph,
         GraphStore graphStore,
-        BellmanFordResult result
+        ResultStore resultStore, BellmanFordResult result
     ) {
         var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
 

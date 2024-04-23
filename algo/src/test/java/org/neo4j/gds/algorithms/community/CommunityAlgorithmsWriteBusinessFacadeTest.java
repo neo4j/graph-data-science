@@ -26,6 +26,7 @@ package org.neo4j.gds.algorithms.community;
     import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
     import org.neo4j.gds.api.Graph;
     import org.neo4j.gds.api.GraphStore;
+    import org.neo4j.gds.api.ResultStore;
     import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
     import org.neo4j.gds.collections.ha.HugeLongArray;
     import org.neo4j.gds.config.AlgoBaseConfig;
@@ -50,7 +51,7 @@ package org.neo4j.gds.algorithms.community;
         var configurationMock = mock(WccWriteConfig.class);
         var graph=mock(Graph.class);
         var graphStore = mock(GraphStore.class);
-        var algorithmResult = AlgorithmComputationResult.<Long>withoutAlgorithmResult(graph, graphStore);
+        var algorithmResult = AlgorithmComputationResult.<Long>withoutAlgorithmResult(graph, graphStore, ResultStore.EMPTY);
 
         var nodePropertyServiceMock = mock(WriteNodePropertyService.class);
 
@@ -98,7 +99,8 @@ package org.neo4j.gds.algorithms.community;
             var algorithmResultMock = AlgorithmComputationResult.of(
                 algoResult,
                 graph,
-                graphStore
+                graphStore,
+                ResultStore.EMPTY
             );
 
             when(graph.nodeCount()).thenReturn(4l);
@@ -167,7 +169,8 @@ package org.neo4j.gds.algorithms.community;
             var algorithmResultMock = AlgorithmComputationResult.of(
                 algoResult,
                 graph,
-                graphStore
+                graphStore,
+                ResultStore.EMPTY
             );
 
             when(graph.nodeCount()).thenReturn(4l);

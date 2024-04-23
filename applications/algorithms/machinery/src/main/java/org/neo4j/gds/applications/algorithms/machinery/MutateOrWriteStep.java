@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 
 public interface MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADATA> {
     /**
@@ -31,6 +32,7 @@ public interface MutateOrWriteStep<RESULT_FROM_ALGORITHM, MUTATE_OR_WRITE_METADA
     MUTATE_OR_WRITE_METADATA execute(
         Graph graph,
         GraphStore graphStore,
+        ResultStore resultStore,
         RESULT_FROM_ALGORITHM result
     );
 }

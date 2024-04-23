@@ -19,12 +19,13 @@
  */
 package org.neo4j.gds.applications.algorithms.machinery;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
+import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -71,14 +72,15 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         // as we progress through the steps we gather some metadata
         var timingsBuilder = new AlgorithmProcessingTimingsBuilder();
 
-        Pair<Graph, GraphStore> graphWithGraphStore = graphLoadAndValidationWithTiming(
+        var graphResources = graphLoadAndValidationWithTiming(
             timingsBuilder,
             graphName,
             configuration
         );
 
-        var graph = graphWithGraphStore.getLeft();
-        var graphStore = graphWithGraphStore.getRight();
+        var graph = graphResources.graph();
+        var graphStore = graphResources.graphStore();
+        var resultStore = graphResources.resultStore();
 
         if (graph.isEmpty()) return resultBuilder.build(
             graph,
@@ -105,6 +107,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             timingsBuilder,
             graph,
             graphStore,
+            resultStore,
             result
         );
 
@@ -132,7 +135,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
      *     We can add that when needed as more instrumentation.</li>
      * </ul>
      */
-    <CONFIGURATION extends AlgoBaseConfig> Pair<Graph, GraphStore> graphLoadAndValidationWithTiming(
+    <CONFIGURATION extends AlgoBaseConfig> GraphResources graphLoadAndValidationWithTiming(
         AlgorithmProcessingTimingsBuilder timingsBuilder,
         GraphName graphName,
         CONFIGURATION configuration
@@ -141,7 +144,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             // tee up the graph we want to work on
             var relationshipProperty = extractRelationshipProperty(configuration);
 
-            var graphWithGraphStore = graphStoreCatalogService.getGraphWithGraphStore(
+            var graphResources = graphStoreCatalogService.getGraphResources(
                 graphName,
                 configuration,
                 relationshipProperty,
@@ -151,7 +154,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
 
             // ValidationConfiguration post-load stuff would go here
 
-            return graphWithGraphStore;
+            return graphResources;
         }
     }
 
@@ -202,12 +205,13 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         AlgorithmProcessingTimingsBuilder timingsBuilder,
         Graph graph,
         GraphStore graphStore,
+        ResultStore resultStore,
         RESULT_FROM_ALGORITHM result
     ) {
         if (mutateOrWriteStep.isEmpty()) return null;
 
         try (ProgressTimer ignored = ProgressTimer.start(timingsBuilder::withPostProcessingMillis)) {
-            return mutateOrWriteStep.get().execute(graph, graphStore, result);
+            return mutateOrWriteStep.get().execute(graph, graphStore, resultStore, result);
         }
     }
 }

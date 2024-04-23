@@ -23,6 +23,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.write.RelationshipPropertiesExporterBuilder;
@@ -43,6 +44,7 @@ public class WriteRelationshipPropertiesApplication {
         RelationshipPropertiesExporterBuilder relationshipPropertiesExporterBuilder,
         TerminationFlag terminationFlag,
         GraphStore graphStore,
+        ResultStore resultStore,
         GraphName graphName,
         String relationshipType,
         List<String> relationshipProperties,
@@ -60,7 +62,7 @@ public class WriteRelationshipPropertiesApplication {
                 configuration.arrowConnectionInfo(),
                 graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
             )
-            .withResultStore(configuration.resolveResultStore(graphStore.resultStore()))
+            .withResultStore(configuration.resolveResultStore(resultStore))
             .withRelationshipCount(relationshipCount)
             .build();
 

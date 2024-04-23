@@ -23,6 +23,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
@@ -39,7 +40,7 @@ class SpanningTreeMutateStep implements MutateOrWriteStep<SpanningTree, Relation
     public RelationshipsWritten execute(
         Graph graph,
         GraphStore graphStore,
-        SpanningTree result
+        ResultStore resultStore, SpanningTree result
     ) {
         var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
         var relationshipsBuilder = GraphFactory

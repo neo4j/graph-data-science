@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
+import org.neo4j.gds.api.EphemeralResultStore;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.User;
@@ -85,7 +86,7 @@ public final class GraphSamplingApplication {
                 cypherMap
             );
 
-            graphStoreCatalogService.set(rwrProcConfig, sampledGraphStore);
+            graphStoreCatalogService.set(rwrProcConfig, sampledGraphStore, new EphemeralResultStore());
 
             var projectMillis = progressTimer.stop().getDuration();
 

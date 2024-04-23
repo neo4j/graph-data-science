@@ -53,6 +53,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -79,8 +80,8 @@ import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.GraphDataScienceProceduresBuilder;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationParser;
+import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -187,7 +188,8 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
 
         GraphStoreCatalog.set(
             allNodesAndRelationshipsProjectConfig(testGraphName),
-            initialGraphStore
+            initialGraphStore,
+            ResultStore.EMPTY
         );
 
         var mutateQuery = GdsCypher
@@ -313,7 +315,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
         RelationshipProjections.ALL.projections().forEach((relationshipType, projection) ->
             storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(relationshipType.name(), projection));
         GraphLoader loader = storeLoaderBuilder.build();
-        GraphStoreCatalog.set(loader.projectConfig(), loader.graphStore());
+        GraphStoreCatalog.set(loader.projectConfig(), loader.graphStore(), ResultStore.EMPTY);
         var logMock = mock(org.neo4j.gds.logging.Log.class);
         when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
 
@@ -425,7 +427,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
             .graphStore();
 
         var graphProjectConfig = allNodesAndRelationshipsProjectConfig(TEST_GRAPH_NAME);
-        GraphStoreCatalog.set(graphProjectConfig, graphStore);
+        GraphStoreCatalog.set(graphProjectConfig, graphStore, ResultStore.EMPTY);
 
         Map<String, Object> config = Map.of(
             "nodeLabels", Collections.singletonList("A"),
@@ -591,7 +593,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     .relationshipProjections(RelationshipProjections.ALL)
                     .build();
                 var graphStore = graphLoader(graphProjectConfig).graphStore();
-                GraphStoreCatalog.set(graphProjectConfig, graphStore);
+                GraphStoreCatalog.set(graphProjectConfig, graphStore, ResultStore.EMPTY);
                 methods.forEach(method -> {
                     Map<String, Object> config = Map.of("mutateProperty", MUTATE_PROPERTY);
                     try {
@@ -609,7 +611,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
     private String ensureGraphExists() {
         String loadedGraphName = "loadGraph";
         GraphProjectConfig graphProjectConfig = allNodesAndRelationshipsProjectConfig(loadedGraphName);
-        GraphStoreCatalog.set(graphProjectConfig, graphLoader(graphProjectConfig).graphStore());
+        GraphStoreCatalog.set(graphProjectConfig, graphLoader(graphProjectConfig).graphStore(), ResultStore.EMPTY);
         return loadedGraphName;
     }
 

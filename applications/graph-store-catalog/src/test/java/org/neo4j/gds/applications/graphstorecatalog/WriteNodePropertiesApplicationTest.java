@@ -32,12 +32,12 @@ import org.mockito.Captor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
-import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
 import org.neo4j.gds.core.write.NodeProperty;
@@ -47,6 +47,7 @@ import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.List;
 import java.util.Map;
@@ -97,10 +98,11 @@ class WriteNodePropertiesApplicationTest {
 
     @BeforeEach
     void setUp() {
-        GraphStoreCatalog.set(GraphProjectConfig.emptyWithName("user", "g"), graphStore);
+        GraphStoreCatalog.set(GraphProjectConfig.emptyWithName("user", "g"), graphStore, ResultStore.EMPTY);
         GraphStoreCatalog.set(
             GraphProjectConfig.emptyWithName("user", "propertiesSubsetGraph"),
-            propertiesSubsetGraphStore
+            propertiesSubsetGraphStore,
+            ResultStore.EMPTY
         );
     }
 
@@ -120,6 +122,7 @@ class WriteNodePropertiesApplicationTest {
         when(nodePropertyExporterMock.propertiesWritten()).thenReturn(8L, 11L);
         var writeResult = nodePropertiesWriter.write(
             graphStore,
+            ResultStore.EMPTY,
             exporterBuilderMock,
             EmptyTaskRegistryFactory.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
@@ -164,6 +167,7 @@ class WriteNodePropertiesApplicationTest {
         when(nodePropertyExporterMock.propertiesWritten()).thenReturn(11L);
         var writeResult = nodePropertiesWriter.write(
             propertiesSubsetGraphStore,
+            ResultStore.EMPTY,
             exporterBuilderMock,
             EmptyTaskRegistryFactory.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
@@ -201,6 +205,7 @@ class WriteNodePropertiesApplicationTest {
         when(exporterBuilderMock.build()).thenReturn(nodePropertyExporterMock);
         var writeResult = nodePropertiesWriter.write(
             graphStore,
+            ResultStore.EMPTY,
             exporterBuilderMock,
             EmptyTaskRegistryFactory.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
@@ -237,6 +242,7 @@ class WriteNodePropertiesApplicationTest {
         when(exporterBuilderMock.build()).thenReturn(nodePropertyExporterMock);
         var writeResult = nodePropertiesWriter.write(
             graphStore,
+            ResultStore.EMPTY,
             exporterBuilderMock,
             EmptyTaskRegistryFactory.INSTANCE,
             TerminationFlag.RUNNING_TRUE,
@@ -270,6 +276,7 @@ class WriteNodePropertiesApplicationTest {
         when(exporterBuilderMock.build()).thenReturn(nodePropertyExporterMock);
         var writeResult = nodePropertiesWriter.write(
             graphStore,
+            ResultStore.EMPTY,
             exporterBuilderMock,
             EmptyTaskRegistryFactory.INSTANCE,
             TerminationFlag.RUNNING_TRUE,

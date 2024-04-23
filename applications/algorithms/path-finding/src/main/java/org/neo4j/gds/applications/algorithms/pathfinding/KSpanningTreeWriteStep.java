@@ -19,11 +19,12 @@
  */
 package org.neo4j.gds.applications.algorithms.pathfinding;
 
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
@@ -51,10 +52,10 @@ class KSpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree, Void> {
     public Void execute(
         Graph graph,
         GraphStore graphStore,
+        ResultStore resultStore,
         SpanningTree spanningTree
     ) {
         var properties = new SpanningTreeBackedNodePropertyValues(spanningTree, graph.nodeCount());
-        var resultStore = configuration.resolveResultStore(graphStore.resultStore());
 
         var progressTracker = new TaskProgressTracker(
             NodePropertyExporter.baseTask(K_SPANNING_TREE, graph.nodeCount()),
@@ -71,7 +72,7 @@ class KSpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree, Void> {
                 configuration.arrowConnectionInfo(),
                 graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
             )
-            .withResultStore(resultStore)
+            .withResultStore(configuration.resolveResultStore(resultStore))
             .build();
 
         // effect

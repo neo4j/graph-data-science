@@ -22,6 +22,7 @@ package org.neo4j.gds.applications.graphstorecatalog;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.beta.filter.NodesFilter;
 import org.neo4j.gds.beta.filter.expression.Expression;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -44,6 +45,7 @@ public class WriteNodeLabelApplication {
         NodeLabelExporterBuilder nodeLabelExporterBuilder,
         TerminationFlag terminationFlag,
         GraphStore graphStore,
+        ResultStore resultStore,
         GraphName graphName,
         String nodeLabel,
         WriteLabelConfig configuration,
@@ -63,7 +65,6 @@ public class WriteNodeLabelApplication {
                 ProgressTracker.NULL_TRACKER
             );
 
-            var resultStore = configuration.resolveResultStore(graphStore.resultStore());
             var nodeLabelExporter = nodeLabelExporterBuilder
                 .withIdMap(filteredNodes.idMap())
                 .withTerminationFlag(terminationFlag)
@@ -71,7 +72,7 @@ public class WriteNodeLabelApplication {
                     configuration.arrowConnectionInfo(),
                     graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                 )
-                .withResultStore(resultStore)
+                .withResultStore(configuration.resolveResultStore(resultStore))
                 .parallel(DefaultPool.INSTANCE, configuration.typedWriteConcurrency())
                 .build();
 

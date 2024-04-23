@@ -20,6 +20,7 @@
 package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.EphemeralResultStore;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.PropertyProducer;
@@ -66,7 +67,8 @@ public class GenerateGraphApplication {
     }
 
     private GraphGenerationStats generateGraph(
-        DatabaseId databaseId, String name,
+        DatabaseId databaseId,
+        String name,
         long averageDegree,
         RandomGraphGeneratorConfig config
     ) {
@@ -91,7 +93,7 @@ public class GenerateGraphApplication {
             stats.nodes = graphStore.nodeCount();
             stats.relationships = graphStore.relationshipCount();
 
-            graphStoreCatalogService.set(config, graphStore);
+            graphStoreCatalogService.set(config, graphStore, new EphemeralResultStore());
         }
 
         return stats;

@@ -83,7 +83,7 @@ public class CentralityAlgorithmsWriteBusinessFacade {
             configuration.typedWriteConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(intermediateResult.algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(intermediateResult.algorithmResult.resultStore())
         );
     }
 
@@ -106,7 +106,7 @@ public class CentralityAlgorithmsWriteBusinessFacade {
             configuration.typedWriteConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(intermediateResult.algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(intermediateResult.algorithmResult.resultStore())
         );
     }
 
@@ -129,7 +129,7 @@ public class CentralityAlgorithmsWriteBusinessFacade {
             configuration.typedWriteConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(intermediateResult.algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(intermediateResult.algorithmResult.resultStore())
         );
     }
 
@@ -200,7 +200,7 @@ public class CentralityAlgorithmsWriteBusinessFacade {
                 configuration.writeProperty(),
                 "PageRankWrite",
                 configuration.arrowConnectionInfo(),
-                configuration.resolveResultStore(graphStore.resultStore())
+                configuration.resolveResultStore(algorithmResult.resultStore())
             );
 
             var pageRankDistribution = PageRankDistributionComputer.computeDistribution(
@@ -245,7 +245,7 @@ public class CentralityAlgorithmsWriteBusinessFacade {
             configuration.typedWriteConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(intermediateResult.algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(intermediateResult.algorithmResult.resultStore())
         );
     }
 
@@ -276,7 +276,7 @@ public class CentralityAlgorithmsWriteBusinessFacade {
             configuration.typedWriteConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(algorithmResult.resultStore())
         );
 
     }
@@ -308,7 +308,7 @@ public class CentralityAlgorithmsWriteBusinessFacade {
                     configuration.writeProperty(),
                     "CELFWrite",
                     configuration.arrowConnectionInfo(),
-                    configuration.resolveResultStore(algorithmResult.graphStore().resultStore())
+                    configuration.resolveResultStore(algorithmResult.resultStore())
                 );
                 writeResultBuilder.writeMillis(writeResult.writeMilliseconds());
                 writeResultBuilder.nodePropertiesWritten(writeResult.nodePropertiesWritten());

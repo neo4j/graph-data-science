@@ -19,9 +19,11 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
+import org.neo4j.gds.api.EphemeralResultStore;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.GraphStoreFactory;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphLoader;
@@ -53,6 +55,11 @@ public class GraphStoreFromDatabaseLoader implements GraphStoreCreator {
     @Override
     public GraphStore graphStore() {
         return this.graphStoreFactory.build();
+    }
+
+    @Override
+    public ResultStore resultStore() {
+        return new EphemeralResultStore();
     }
 
     @Override

@@ -189,7 +189,7 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
                 config.arrowConnectionInfo().isPresent()
             );
 
-            var resultStore = config.resolveResultStore(computationResult.graphStore().resultStore());
+            var resultStore = config.resolveResultStore(computationResult.resultStore());
             var exporter = executionContext
                 .nodePropertyExporterBuilder()
                 .withIdMap(graph)

@@ -35,6 +35,7 @@ import org.neo4j.gds.TestProcedureRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.compat.TestLog;
@@ -650,7 +651,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
                 .username(username)
                 .build();
 
-            GraphStoreCatalog.set(graphConfig, graphStore);
+            GraphStoreCatalog.set(graphConfig, graphStore, ResultStore.EMPTY);
         }
 
         @Test

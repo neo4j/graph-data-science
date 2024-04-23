@@ -21,11 +21,12 @@ package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
+import org.neo4j.gds.api.EphemeralResultStore;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.beta.filter.GraphFilterResult;
 import org.neo4j.gds.beta.filter.GraphStoreFilterService;
 import org.neo4j.gds.config.GraphProjectFromGraphConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.beta.filter.GraphFilterResult;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -151,7 +152,7 @@ public class SubGraphProjectApplication {
             progressTracker
         );
 
-        graphStoreCatalogService.set(configuration, graphStore);
+        graphStoreCatalogService.set(configuration, graphStore, new EphemeralResultStore());
 
         return Pair.of(graphStore.nodeCount(), graphStore.relationshipCount());
     }

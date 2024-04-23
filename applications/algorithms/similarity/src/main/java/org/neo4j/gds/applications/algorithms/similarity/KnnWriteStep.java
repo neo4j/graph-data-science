@@ -23,6 +23,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.similarity.knn.KnnResult;
@@ -65,6 +66,7 @@ final class KnnWriteStep implements MutateOrWriteStep<KnnResult, Pair<Relationsh
     public Pair<RelationshipsWritten, Map<String, Object>> execute(
         Graph graph,
         GraphStore graphStore,
+        ResultStore resultStore,
         KnnResult result
     ) {
         return similarityWrite.execute(

@@ -750,8 +750,9 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
             rawConfiguration
         );
 
-        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
-        var graphStore = graphStoreWithConfig.graphStore();
+        var catalogEntry = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
+        var graphStore = catalogEntry.graphStore();
+        var resultStore = catalogEntry.resultStore();
         var nodeLabels = configuration.nodeLabels();
         var nodeLabelIdentifiers = configuration.nodeLabelIdentifiers(graphStore);
         var nodeProperties = configuration.nodeProperties().stream()
@@ -767,6 +768,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
 
         return writeNodePropertiesApplication.write(
             graphStore,
+            resultStore,
             nodePropertyExporterBuilder,
             taskRegistryFactory,
             terminationFlag,
@@ -790,8 +792,9 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         var graphName = graphNameValidationService.validate(graphNameAsString);
 
         // why graphstore first here?
-        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
-        var graphStore = graphStoreWithConfig.graphStore();
+        var catalogEntry = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
+        var graphStore = catalogEntry.graphStore();
+        var resultStore = catalogEntry.resultStore();
         graphStoreValidationService.ensureRelationshipPropertiesMatchRelationshipType(
             graphStore,
             relationshipType,
@@ -805,6 +808,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
             relationshipPropertiesExporterBuilder,
             terminationFlag,
             graphStore,
+            resultStore,
             graphName,
             relationshipType,
             relationshipProperties,
@@ -826,8 +830,9 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
 
         var configuration = WriteLabelConfig.of(rawConfiguration);
 
-        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
-        var graphStore = graphStoreWithConfig.graphStore();
+        var catalogEntry = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
+        var graphStore = catalogEntry.graphStore();
+        var resultStore = catalogEntry.resultStore();
 
         var nodeFilter = NodeFilterParser.parseAndValidate(graphStore, configuration.nodeFilter());
 
@@ -835,6 +840,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
             nodeLabelExporterBuilder,
             terminationFlag,
             graphStore,
+            resultStore,
             graphName,
             nodeLabel,
             configuration,
@@ -863,8 +869,9 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
             rawConfiguration
         );
 
-        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
-        var graphStore = graphStoreWithConfig.graphStore();
+        var catalogEntry = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), graphName);
+        var graphStore = catalogEntry.graphStore();
+        var resultStore = catalogEntry.resultStore();
         graphStoreValidationService.ensurePossibleRelationshipPropertyMatchesRelationshipType(
             graphStore,
             configuration.relationshipType(),
@@ -877,6 +884,7 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
             terminationFlag,
             userLogRegistryFactory,
             graphStore,
+            resultStore,
             graphName,
             configuration
         );
@@ -973,9 +981,9 @@ public class DefaultCatalogBusinessFacade implements CatalogBusinessFacade {
         var graphName = ensureGraphNameValidAndUnknown(user, databaseId, graphNameAsString);
         var originGraphName = GraphName.parse(originGraphNameAsString);
 
-        var graphStoreWithConfig = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), originGraphName);
-        var graphStore = graphStoreWithConfig.graphStore();
-        var graphProjectConfig = graphStoreWithConfig.config();
+        var catalogEntry = graphStoreCatalogService.get(CatalogRequest.of(user, databaseId), originGraphName);
+        var graphStore = catalogEntry.graphStore();
+        var graphProjectConfig = catalogEntry.config();
 
         var samplingMetric = projectionMetricsService.createRandomWakSampling(samplerType.name());
         try (samplingMetric) {

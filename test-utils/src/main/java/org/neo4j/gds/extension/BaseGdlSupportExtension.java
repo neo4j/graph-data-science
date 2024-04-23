@@ -27,9 +27,11 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.CSRGraph;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.EphemeralResultStore;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.PropertyState;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.CSRGraphStore;
@@ -145,9 +147,10 @@ public abstract class BaseGdlSupportExtension {
         CSRGraph graph = graphStore.getUnion();
         IdFunction idFunction = gdlFactory::nodeId;
         TestGraph testGraph = new TestGraph(graph, idFunction, graphName);
+        ResultStore resultStore = new EphemeralResultStore();
 
         if (gdlGraphSetup.addToCatalog()) {
-            GraphStoreCatalog.set(graphProjectConfig, graphStore);
+            GraphStoreCatalog.set(graphProjectConfig, graphStore, resultStore);
         }
 
         context.getRequiredTestInstances().getAllInstances().forEach(testInstance -> {
@@ -155,6 +158,7 @@ public abstract class BaseGdlSupportExtension {
             injectInstance(testInstance, graphNamePrefix, graph, CSRGraph.class, "Graph");
             injectInstance(testInstance, graphNamePrefix, testGraph, TestGraph.class, "Graph");
             injectInstance(testInstance, graphNamePrefix, graphStore, GraphStore.class, "GraphStore");
+            injectInstance(testInstance, graphNamePrefix, resultStore, ResultStore.class, "ResultStore");
             injectInstance(testInstance, graphNamePrefix, idFunction, IdFunction.class, "IdFunction");
             injectInstance(testInstance, graphNamePrefix, dimensions, GraphDimensions.class, "GraphDimensions");
         });

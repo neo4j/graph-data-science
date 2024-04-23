@@ -107,12 +107,12 @@ public class AlgorithmEstimationTemplate {
         GraphName graphName,
         CONFIGURATION configuration
     ) {
-        var graphStore = graphStoreCatalogService.getGraphStore(
+        var graphStore = graphStoreCatalogService.getGraphStoreCatalogEntry(
             graphName,
             configuration,
             requestScopedDependencies.getUser(),
             requestScopedDependencies.getDatabaseId()
-        );
+        ).graphStore();
 
         return GraphDimensionsComputer.of(graphStore, configuration);
     }

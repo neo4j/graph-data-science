@@ -50,6 +50,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.GraphSchema;
@@ -187,7 +188,8 @@ class WccMutateProcTest extends BaseProcTest {
 
         GraphStoreCatalog.set(
             withNameAndRelationshipProjections(testGraphName, RelationshipProjections.ALL),
-            initialGraphStore
+            initialGraphStore,
+            ResultStore.EMPTY
         );
 
         var mutateQuery = GdsCypher
@@ -225,7 +227,8 @@ class WccMutateProcTest extends BaseProcTest {
 
         GraphStoreCatalog.set(
             withNameAndRelationshipProjections(GRAPH_NAME, RelationshipProjections.ALL),
-            initialGraphStore
+            initialGraphStore,
+            ResultStore.EMPTY
         );
 
         String query = GdsCypher
@@ -343,7 +346,7 @@ class WccMutateProcTest extends BaseProcTest {
         RelationshipProjections.ALL.projections().forEach((relationshipType, projection) ->
             storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(relationshipType.name(), projection));
         GraphLoader loader = storeLoaderBuilder.build();
-        GraphStoreCatalog.set(loader.projectConfig(), loader.graphStore());
+        GraphStoreCatalog.set(loader.projectConfig(), loader.graphStore(), ResultStore.EMPTY);
 
         var logMock = mock(org.neo4j.gds.logging.Log.class);
         when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
@@ -458,7 +461,7 @@ class WccMutateProcTest extends BaseProcTest {
             graphName,
             relationshipProjections
         );
-        GraphStoreCatalog.set(graphProjectConfig, graphStore);
+        GraphStoreCatalog.set(graphProjectConfig, graphStore, ResultStore.EMPTY);
 
         var filterConfig = Map.<String, Object>of(
             "nodeLabels",
@@ -621,7 +624,7 @@ class WccMutateProcTest extends BaseProcTest {
                     )
                     .relationshipProjections(RelationshipProjections.ALL)
                     .build();
-                GraphStoreCatalog.set(graphProjectConfig, graphLoader(graphProjectConfig).graphStore());
+                GraphStoreCatalog.set(graphProjectConfig, graphLoader(graphProjectConfig).graphStore(), ResultStore.EMPTY);
                 methods.forEach(method -> {
                     Map<String, Object> configMap = Map.of("mutateProperty", MUTATE_PROPERTY);
                     try {
@@ -641,7 +644,7 @@ class WccMutateProcTest extends BaseProcTest {
             GRAPH_NAME,
             RelationshipProjections.ALL
         );
-        GraphStoreCatalog.set(graphProjectConfig, graphLoader(graphProjectConfig).graphStore());
+        GraphStoreCatalog.set(graphProjectConfig, graphLoader(graphProjectConfig).graphStore(), ResultStore.EMPTY);
         return GRAPH_NAME;
     }
 

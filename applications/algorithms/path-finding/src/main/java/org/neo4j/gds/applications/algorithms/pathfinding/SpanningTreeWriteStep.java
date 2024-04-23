@@ -22,6 +22,7 @@ package org.neo4j.gds.applications.algorithms.pathfinding;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
@@ -53,6 +54,7 @@ class SpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree, Relations
     public RelationshipsWritten execute(
         Graph graph,
         GraphStore graphStore,
+        ResultStore resultStore,
         SpanningTree result
     ) {
         var spanningGraph = new SpanningGraph(graph, result);
@@ -73,7 +75,7 @@ class SpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree, Relations
                 configuration.arrowConnectionInfo(),
                 graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
             )
-            .withResultStore(configuration.resolveResultStore(graphStore.resultStore()))
+            .withResultStore(configuration.resolveResultStore(resultStore))
             .build();
 
         // effect

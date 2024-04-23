@@ -17,17 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.graphstorecatalog;
+package org.neo4j.gds.core.loading;
 
+import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.config.GraphProjectConfig;
-import org.neo4j.gds.core.GraphDimensions;
 
-public interface GraphStoreLoader {
-    GraphProjectConfig graphProjectConfig();
-
-    GraphStore graphStore();
-    ResultStore resultStore();
-    GraphDimensions graphDimensions();
+public record GraphResources(GraphStore graphStore, Graph graph, ResultStore resultStore) {
 }

@@ -26,6 +26,7 @@ import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.DatabaseInfo.DatabaseLocation;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.GraphProjectConfig;
 
@@ -60,7 +61,7 @@ class GraphStoreCatalogServiceTest {
                 DatabaseLocation.LOCAL
             )
         );
-        GraphStoreCatalog.set(configuration, graphStore); // shorthand for project
+        GraphStoreCatalog.set(configuration, graphStore, ResultStore.EMPTY); // shorthand for project
         var service = new GraphStoreCatalogService();
 
         assertTrue(

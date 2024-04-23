@@ -74,7 +74,7 @@ public class NodeEmbeddingsAlgorithmsWriteBusinessFacade {
             configuration.typedWriteConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(intermediateResult.algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(intermediateResult.algorithmResult.resultStore())
         );
     }
 
@@ -98,7 +98,7 @@ public class NodeEmbeddingsAlgorithmsWriteBusinessFacade {
             configuration.typedWriteConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(intermediateResult.algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(intermediateResult.algorithmResult.resultStore())
         );
     }
 
@@ -123,7 +123,7 @@ public class NodeEmbeddingsAlgorithmsWriteBusinessFacade {
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
 
-            configuration.resolveResultStore(intermediateResult.algorithmResult.graphStore().resultStore())
+            configuration.resolveResultStore(intermediateResult.algorithmResult.resultStore())
         );
     }
 

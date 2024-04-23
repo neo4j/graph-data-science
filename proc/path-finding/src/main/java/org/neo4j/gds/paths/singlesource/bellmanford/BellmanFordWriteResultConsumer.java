@@ -119,7 +119,7 @@ public class BellmanFordWriteResultConsumer implements
                         config.arrowConnectionInfo(),
                         computationResult.graphStore().databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                     )
-                    .withResultStore(config.resolveResultStore(computationResult.graphStore().resultStore()))
+                    .withResultStore(config.resolveResultStore(computationResult.resultStore()))
                     .build();
 
                 try (ProgressTimer ignored = ProgressTimer.start(resultBuilder::withWriteMillis)) {

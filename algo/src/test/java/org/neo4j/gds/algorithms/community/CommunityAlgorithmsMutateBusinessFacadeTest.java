@@ -25,6 +25,7 @@ import org.neo4j.gds.algorithms.community.specificfields.StandardCommunityStatis
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValuesAdapter;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
@@ -62,7 +63,7 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
     void mutateWithoutAlgorithmResult() {
 
         var configurationMock = mock(MutateNodePropertyConfig.class);
-        var algorithmResult = AlgorithmComputationResult.<Long>withoutAlgorithmResult(graph, graphStore);
+        var algorithmResult = AlgorithmComputationResult.<Long>withoutAlgorithmResult(graph, graphStore, ResultStore.EMPTY);
 
         var nodePropertyServiceMock = mock(MutateNodePropertyService.class);
 
@@ -104,7 +105,8 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
         var algorithmResultMock = AlgorithmComputationResult.of(
             result,
             graph,
-            graphStore
+            graphStore,
+            ResultStore.EMPTY
         );
 
         var statisticsComputationInstructionsMock = mock(StatisticsComputationInstructions.class);
@@ -161,7 +163,8 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
         var algorithmResultMock = AlgorithmComputationResult.of(
             result,
             graph,
-            graphStore
+            graphStore,
+            ResultStore.EMPTY
         );
 
         NodePropertyValuesMapper<HugeLongArray, MutateNodePropertyConfig> nodePropertyValuesMapper =

@@ -19,12 +19,11 @@
  */
 package org.neo4j.gds.core.loading;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
@@ -69,14 +68,15 @@ public class GraphStoreCatalogService {
         return GraphStoreCatalog.get(catalogRequest, graphName.getValue());
     }
 
-    public Pair<Graph, GraphStore> getGraphWithGraphStore(
+    public GraphResources getGraphResources(
         GraphName graphName,
         AlgoBaseConfig config,
         Optional<String> relationshipProperty,
         User user,
         DatabaseId databaseId
     ) {
-        var graphStore = getGraphStore(graphName, config, user, databaseId);
+        var graphStoreCatalogEntry = getGraphStoreCatalogEntry(graphName, config, user, databaseId);
+        var graphStore = graphStoreCatalogEntry.graphStore();
         // TODO: Maybe validation of the graph store, where do this happen? Is this the right place?
 
         var nodeLabels = config.nodeLabelsFilter();
@@ -97,17 +97,16 @@ public class GraphStoreCatalogService {
         config.graphStoreValidation(graphStore, nodeLabels, relationshipTypes);
 
         var graph = graphStore.getGraph(nodeLabels, relationshipTypes, relationshipProperty);
-        return Pair.of(graph, graphStore);
+        return new GraphResources(graphStore, graph, graphStoreCatalogEntry.resultStore());
     }
 
     /**
      * @deprecated Push RequestScopedDependencies down and use it instead of database id + user parameters
      */
     @Deprecated
-    public GraphStore getGraphStore(GraphName graphName, AlgoBaseConfig config, User user, DatabaseId databaseId) {
+    public GraphStoreCatalogEntry getGraphStoreCatalogEntry(GraphName graphName, AlgoBaseConfig config, User user, DatabaseId databaseId) {
         var catalogRequest = CatalogRequest.of(user, databaseId, config.usernameOverride());
-        var graphStoreWithConfig = get(catalogRequest, graphName);
-        return graphStoreWithConfig.graphStore();
+        return get(catalogRequest, graphName);
     }
 
     /**
@@ -176,7 +175,7 @@ public class GraphStoreCatalogService {
         return GraphStoreCatalog.getGraphStores(user.getUsername());
     }
 
-    public void set(GraphProjectConfig configuration, GraphStore graphStore) {
-        GraphStoreCatalog.set(configuration, graphStore);
+    public void set(GraphProjectConfig configuration, GraphStore graphStore, ResultStore resultStore) {
+        GraphStoreCatalog.set(configuration, graphStore, resultStore);
     }
 }

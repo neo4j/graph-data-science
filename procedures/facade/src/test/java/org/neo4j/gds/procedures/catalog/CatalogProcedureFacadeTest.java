@@ -333,11 +333,6 @@ class CatalogProcedureFacadeTest {
         }
 
         @Override
-        public ResultStore resultStore() {
-            throw new UnsupportedOperationException("TODO");
-        }
-
-        @Override
         public Capabilities capabilities() {
             throw new UnsupportedOperationException("TODO");
         }
