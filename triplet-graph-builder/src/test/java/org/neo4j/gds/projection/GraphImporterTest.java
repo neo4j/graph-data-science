@@ -19,7 +19,7 @@
  */
 package org.neo4j.gds.projection;
 
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
@@ -41,10 +41,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.TestSupport.assertGraphEquals;
 import static org.neo4j.gds.TestSupport.fromGdl;
 
-class GraphBuilderTest {
+class GraphImporterTest {
 
-    @AfterAll
-    static void tearDown() {
+    @AfterEach
+    void tearDown() {
         GraphStoreCatalog.removeAllLoadedGraphs();
     }
 
