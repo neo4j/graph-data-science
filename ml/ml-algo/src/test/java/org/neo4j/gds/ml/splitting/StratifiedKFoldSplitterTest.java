@@ -27,6 +27,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.collections.LongMultiSet;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 
 import java.util.Arrays;
@@ -126,7 +127,7 @@ class StratifiedKFoldSplitterTest {
     @Test
     void minAndMaxEstimationsAreTheSame() {
         var estimation = StratifiedKFoldSplitter.memoryEstimationForNodeSet(5, 0.1)
-            .estimate(GraphDimensions.of(1000), 1)
+            .estimate(GraphDimensions.of(1000), new Concurrency(1))
             .memoryUsage();
         assertThat(estimation.min).isEqualTo(estimation.max);
     }
@@ -144,7 +145,7 @@ class StratifiedKFoldSplitterTest {
     void memoryEstimationShouldScaleWithNumberOfFolds(long nodeCount, int k, double trainFraction, long expectedMemory) {
         var dimensions = GraphDimensions.of(nodeCount);
         var actualEstimation = StratifiedKFoldSplitter.memoryEstimationForNodeSet(k, trainFraction)
-            .estimate(dimensions, 4)
+            .estimate(dimensions, new Concurrency(4))
             .memoryUsage();
 
         assertMemoryRange(actualEstimation, expectedMemory);

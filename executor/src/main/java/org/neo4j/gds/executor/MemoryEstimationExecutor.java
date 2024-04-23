@@ -148,7 +148,7 @@ public class MemoryEstimationExecutor<
         maybeGraphEstimation.ifPresent(graphMemoryEstimation -> estimationBuilder.add("graph", graphMemoryEstimation));
         estimationBuilder.add("algorithm", algorithmFactory.memoryEstimation(config));
 
-        MemoryTree memoryTree = estimationBuilder.build().estimate(extendedDimension, config.concurrency());
+        MemoryTree memoryTree = estimationBuilder.build().estimate(extendedDimension, config.typedConcurrency());
 
         return new MemoryTreeWithDimensions(memoryTree, dimensions);
     }

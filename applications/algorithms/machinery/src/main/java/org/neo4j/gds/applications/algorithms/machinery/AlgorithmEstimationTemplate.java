@@ -128,7 +128,7 @@ public class AlgorithmEstimationTemplate {
             .add("algorithm", memoryEstimation)
             .build();
 
-        var memoryTree = rootEstimation.estimate(graphDimensions, concurrency.value());
+        var memoryTree = rootEstimation.estimate(graphDimensions, concurrency);
 
         return new MemoryEstimateResult(new MemoryTreeWithDimensions(memoryTree, graphDimensions));
     }

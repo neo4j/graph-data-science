@@ -501,7 +501,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
 
             var actualRange = LinkPredictionTrainPipelineExecutor
                 .estimate(ImmutableExecutionContext.EMPTY, pipeline, config)
-                .estimate(graphDimensions, config.concurrency())
+                .estimate(graphDimensions, config.typedConcurrency())
                 .memoryUsage();
 
             assertMemoryRange(actualRange, expectedRange);

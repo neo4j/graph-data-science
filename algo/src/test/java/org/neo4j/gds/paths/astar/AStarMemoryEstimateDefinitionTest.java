@@ -23,6 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.stream.Stream;
 
@@ -42,7 +43,7 @@ class AStarMemoryEstimateDefinitionTest {
 
         var memoryEstimation=new AStarMemoryEstimateDefinition();
         MemoryEstimationAssert.assertThat(memoryEstimation.memoryEstimation())
-            .memoryRange(nodeCount,1)
+            .memoryRange(nodeCount, new Concurrency(1))
             .hasSameMinAndMaxEqualTo(expectedBytes);
     }
 

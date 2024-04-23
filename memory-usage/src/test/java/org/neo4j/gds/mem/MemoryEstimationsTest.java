@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.List;
 
@@ -40,7 +41,7 @@ class MemoryEstimationsTest {
         assertTrue(empty.components().isEmpty());
         Assertions.assertEquals(
                 MemoryRange.empty(),
-                empty.estimate(DIMENSIONS_100_NODES, 4).memoryUsage());
+                empty.estimate(DIMENSIONS_100_NODES, new Concurrency(4)).memoryUsage());
     }
 
     @Test
@@ -56,10 +57,11 @@ class MemoryEstimationsTest {
                 .endField()
                 .build();
         MemoryEstimation memoryEstimation4 = MemoryEstimations.of(Foo.class);
-        assertEquals(MemoryRange.of(40L), memoryEstimation1.estimate(DIMENSIONS_100_NODES, 4).memoryUsage());
-        assertEquals(MemoryRange.of(40L), memoryEstimation2.estimate(DIMENSIONS_100_NODES, 4).memoryUsage());
-        assertEquals(MemoryRange.of(40L), memoryEstimation3.estimate(DIMENSIONS_100_NODES, 4).memoryUsage());
-        assertEquals(MemoryRange.of(40L), memoryEstimation4.estimate(DIMENSIONS_100_NODES, 4).memoryUsage());
+        var concurrency = new Concurrency(4);
+        assertEquals(MemoryRange.of(40L), memoryEstimation1.estimate(DIMENSIONS_100_NODES, concurrency).memoryUsage());
+        assertEquals(MemoryRange.of(40L), memoryEstimation2.estimate(DIMENSIONS_100_NODES, concurrency).memoryUsage());
+        assertEquals(MemoryRange.of(40L), memoryEstimation3.estimate(DIMENSIONS_100_NODES, concurrency).memoryUsage());
+        assertEquals(MemoryRange.of(40L), memoryEstimation4.estimate(DIMENSIONS_100_NODES, concurrency).memoryUsage());
     }
 
     @Test
@@ -69,7 +71,7 @@ class MemoryEstimationsTest {
                 .fixed("baz", MemoryRange.of(19))
                 .build();
 
-        assertEquals(MemoryRange.of(42L), memoryEstimation.estimate(DIMENSIONS_100_NODES, 4).memoryUsage());
+        assertEquals(MemoryRange.of(42L), memoryEstimation.estimate(DIMENSIONS_100_NODES, new Concurrency(4)).memoryUsage());
     }
 
     @Test
@@ -79,7 +81,7 @@ class MemoryEstimationsTest {
                 .add(MemoryEstimations.of(Foo.class))
                 .build();
 
-        assertEquals(MemoryRange.of(80L), memoryEstimation.estimate(DIMENSIONS_100_NODES, 4).memoryUsage());
+        assertEquals(MemoryRange.of(80L), memoryEstimation.estimate(DIMENSIONS_100_NODES, new Concurrency(4)).memoryUsage());
     }
 
     @Test
@@ -92,7 +94,7 @@ class MemoryEstimationsTest {
 
         assertEquals(
                 MemoryRange.of(100 * (42 + 40 + 23)),
-                memoryEstimation.estimate(DIMENSIONS_100_NODES, 4).memoryUsage());
+                memoryEstimation.estimate(DIMENSIONS_100_NODES, new Concurrency(4)).memoryUsage());
     }
 
     @Test
@@ -102,7 +104,7 @@ class MemoryEstimationsTest {
                 .perThread("bar", MemoryEstimations.of(Foo.class))
                 .build();
 
-        assertEquals(MemoryRange.of(4 * (42 + 40)), memoryEstimation.estimate(DIMENSIONS_100_NODES, 4).memoryUsage());
+        assertEquals(MemoryRange.of(4 * (42 + 40)), memoryEstimation.estimate(DIMENSIONS_100_NODES, new Concurrency(4)).memoryUsage());
     }
 
     @Test
@@ -114,7 +116,7 @@ class MemoryEstimationsTest {
 
         assertEquals(
                 MemoryRange.of(100 * 42 + 100 * 23),
-                memoryEstimation.estimate(DIMENSIONS_100_NODES, 4).memoryUsage());
+                memoryEstimation.estimate(DIMENSIONS_100_NODES, new Concurrency(4)).memoryUsage());
     }
 
     @Test
@@ -122,12 +124,12 @@ class MemoryEstimationsTest {
         final MemoryEstimation memoryEstimation = MemoryEstimations.setup(
                 "foo",
                 (dimensions, concurrency) -> MemoryEstimations.builder()
-                        .fixed("foo", dimensions.nodeCount() * concurrency)
+                        .fixed("foo", dimensions.nodeCount() * concurrency.value())
                         .build());
 
         assertEquals(
                 MemoryRange.of(100 * 4),
-                memoryEstimation.estimate(DIMENSIONS_100_NODES, 4).memoryUsage());
+                memoryEstimation.estimate(DIMENSIONS_100_NODES, new Concurrency(4)).memoryUsage());
     }
 
     @Test
@@ -140,7 +142,7 @@ class MemoryEstimationsTest {
 
         assertEquals(
                 MemoryRange.of(100 * 100),
-                memoryEstimation.estimate(DIMENSIONS_100_NODES, 4).memoryUsage());
+                memoryEstimation.estimate(DIMENSIONS_100_NODES, new Concurrency(4)).memoryUsage());
     }
 
     @Test
@@ -153,8 +155,8 @@ class MemoryEstimationsTest {
             )
             .build();
 
-        assertThat(biggestMemoryUser(maxEstimator.estimate(GraphDimensions.of(1000), 1))).isEqualTo("node storer");
-        assertThat(biggestMemoryUser(maxEstimator.estimate(GraphDimensions.of(1), 16))).isEqualTo("paralleliser");
+        assertThat(biggestMemoryUser(maxEstimator.estimate(GraphDimensions.of(1000), new Concurrency(1)))).isEqualTo("node storer");
+        assertThat(biggestMemoryUser(maxEstimator.estimate(GraphDimensions.of(1), new Concurrency(16)))).isEqualTo("paralleliser");
     }
 
     private String biggestMemoryUser(MemoryTree maxEstimate) {

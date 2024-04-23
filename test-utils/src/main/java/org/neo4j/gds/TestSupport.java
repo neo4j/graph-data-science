@@ -37,6 +37,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.canonization.CanonicalAdjacencyMatrix;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryRange;
@@ -301,7 +302,7 @@ public final class TestSupport {
     public static void assertMemoryEstimation(
         Supplier<MemoryEstimation> actualMemoryEstimation,
         long nodeCount,
-        int concurrency,
+        Concurrency concurrency,
         MemoryRange expected
     ) {
         assertMemoryEstimation(actualMemoryEstimation, nodeCount, 0, concurrency, expected);
@@ -311,7 +312,7 @@ public final class TestSupport {
         Supplier<MemoryEstimation> actualMemoryEstimation,
         long nodeCount,
         long relationshipCount,
-        int concurrency,
+        Concurrency concurrency,
         MemoryRange expected
     ) {
         assertMemoryEstimation(
@@ -325,7 +326,7 @@ public final class TestSupport {
     public static void assertMemoryEstimation(
         MemoryEstimation memoryEstimation,
         GraphDimensions graphDimensions,
-        int concurrency,
+        Concurrency concurrency,
         MemoryRange expected
     ) {
         MemoryRange actual = memoryEstimation.estimate(graphDimensions, concurrency).memoryUsage();

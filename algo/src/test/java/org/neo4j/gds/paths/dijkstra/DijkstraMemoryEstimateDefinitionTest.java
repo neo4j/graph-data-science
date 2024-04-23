@@ -24,6 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.stream.Stream;
 
@@ -53,7 +54,7 @@ class DijkstraMemoryEstimateDefinitionTest {
             .memoryEstimation();
 
         MemoryEstimationAssert.assertThat(actualMemoryEstimation)
-            .memoryRange(nodeCount, 1)
+            .memoryRange(nodeCount, new Concurrency(1))
             .hasSameMinAndMaxEqualTo(expectedBytes);
     }
 
@@ -66,7 +67,7 @@ class DijkstraMemoryEstimateDefinitionTest {
             .memoryEstimation();
 
         MemoryEstimationAssert.assertThat(actualMemoryEstimation)
-            .memoryRange(1_000, 1)
+            .memoryRange(1_000, new Concurrency(1))
             .hasSameMinAndMaxEqualTo(40_616 + 168);
     }
 

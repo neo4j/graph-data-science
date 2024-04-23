@@ -86,7 +86,7 @@ public final class AdjacencyBuffer {
                 .getOrDefault(relationshipType, dimensions.relCountUpperBound());
             long relCount = undirected ? relCountForType * 2 : relCountForType;
             long avgDegree = (nodeCount > 0) ? ceilDiv(relCount, nodeCount) : 0L;
-            return memoryEstimation(avgDegree, nodeCount, propertyCount, new Concurrency(concurrency));
+            return memoryEstimation(avgDegree, nodeCount, propertyCount, concurrency);
         });
     }
 

@@ -23,6 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.stream.Stream;
 
@@ -54,7 +55,7 @@ class YensMemoryEstimateDefinitionTest {
             .memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryRange(nodeCount,concurrency)
+            .memoryRange(nodeCount, new Concurrency(concurrency))
             .hasSameMinAndMaxEqualTo(expectedBytes);
     }
 

@@ -76,12 +76,12 @@ public class KnnMemoryEstimateDefinition implements MemoryEstimateDefinition {
                         "initial-random-neighbors (per thread)",
                         KnnFactory
                             .initialSamplerMemoryEstimation(parameters.samplerType(), k.value)
-                            .times(concurrency)
+                            .times(concurrency.value())
                     )
                     .fixed(
                         "sampled-random-neighbors (per thread)",
                         MemoryRange.of(
-                            sizeOfIntArray(sizeOfOpenHashContainer(k.sampledValue)) * concurrency
+                            sizeOfIntArray(sizeOfOpenHashContainer(k.sampledValue)) * concurrency.value()
                         )
                     )
                     .build();

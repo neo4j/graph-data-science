@@ -21,6 +21,7 @@ package org.neo4j.gds.kcore;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,7 +30,7 @@ class KCoreDecompositionTaskTest {
     @Test
     void memoryEstimation() {
         var memoryUsage = KCoreDecompositionTask.memoryEstimation()
-            .estimate(GraphDimensions.of(100), 4)
+            .estimate(GraphDimensions.of(100), new Concurrency(4))
             .memoryUsage();
 
         assertThat(memoryUsage.min).isEqualTo(936L);

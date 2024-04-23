@@ -53,7 +53,7 @@ public class BfsMemoryEstimateDefinition implements MemoryEstimateDefinition {
             //need to be added at the exact same step to force such memory usage in an extremely convoluted way
             var maximumTotalSizeOfAggregatedLocalNodes = Math.min(
                 dimensions.relCountUpperBound(),
-                concurrency * (dimensions.nodeCount() - 1)
+                concurrency.value() * (dimensions.nodeCount() - 1)
             );
 
             var upperBound = Estimate.sizeOfLongArrayList(maximumTotalSizeOfAggregatedLocalNodes + dimensions.nodeCount() / 64);

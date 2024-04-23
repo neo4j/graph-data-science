@@ -20,6 +20,7 @@
 package org.neo4j.gds.mem;
 
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 /**
  * A calculation of an object that has resources residing in memory.
@@ -32,6 +33,6 @@ public interface MemoryResident {
      */
     MemoryRange estimateMemoryUsage(
             GraphDimensions dimensions,
-            int concurrency
+            Concurrency concurrency
     );
 }

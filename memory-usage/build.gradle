@@ -35,6 +35,7 @@ dependencies {
 
     implementation(
         project(':annotations'),
+        project(':concurrency'),
         [group: 'com.carrotsearch', name: 'hppc', version: ver.'hppc'],
         [group: 'org.openjdk.jol', name: 'jol-core', version: ver.'jol'],
     )

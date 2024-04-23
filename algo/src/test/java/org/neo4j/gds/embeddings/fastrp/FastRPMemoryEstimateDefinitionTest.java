@@ -22,6 +22,7 @@ package org.neo4j.gds.embeddings.fastrp;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.List;
 
@@ -49,7 +50,7 @@ class FastRPMemoryEstimateDefinitionTest {
         var fastRPMemoryEstimation = new FastRPMemoryEstimateDefinition(params).memoryEstimation();
 
         assertThat(fastRPMemoryEstimation)
-            .memoryRange(nodeCount, concurrency)
+            .memoryRange(nodeCount, new Concurrency(concurrency))
             .hasSameMinAndMaxEqualTo(expectedMemory);
     }
 

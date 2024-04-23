@@ -53,7 +53,7 @@ public class DefaultMemoryGuard implements MemoryGuard {
 
             var graphDimensions = GraphDimensions.of(graph.nodeCount(), graph.relationshipCount());
 
-            var memoryTree = memoryEstimation.estimate(graphDimensions, configuration.concurrency());
+            var memoryTree = memoryEstimation.estimate(graphDimensions, configuration.typedConcurrency());
 
             var memoryRange = memoryTree.memoryUsage();
 

@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
 
@@ -40,8 +41,9 @@ class NodeSimilarityMemoryEstimateDefinitionTest {
             .build();
 
         var estimateParams = new NodeSimilarityEstimateParameters(topK, 0, false, false, true);
+        var concurrency = new Concurrency(1);
         var actual = new NodeSimilarityMemoryEstimateDefinition(estimateParams).memoryEstimation()
-            .estimate(dimensions, 1).memoryUsage();
+            .estimate(dimensions, concurrency).memoryUsage();
 
         long nodeFilterRangeMin = 125_016L;
         long nodeFilterRangeMax = 125_016L;
@@ -63,7 +65,7 @@ class NodeSimilarityMemoryEstimateDefinitionTest {
 
 
         builder.fixed("topK map", MemoryRange.of(expectedTopKMemory));
-        var expected = builder.build().estimate(dimensions, 1).memoryUsage();
+        var expected = builder.build().estimate(dimensions, concurrency).memoryUsage();
 
         SoftAssertions softAssertions = new SoftAssertions();
         softAssertions.assertThat(actual.max).isEqualTo(expected.max);
@@ -81,8 +83,9 @@ class NodeSimilarityMemoryEstimateDefinitionTest {
             .build();
 
         var estimateParams = new NodeSimilarityEstimateParameters(topK, 100, false, false, true);
+        var concurrency = new Concurrency(1);
         var actual = new NodeSimilarityMemoryEstimateDefinition(estimateParams).memoryEstimation()
-            .estimate(dimensions, 1).memoryUsage();
+            .estimate(dimensions, concurrency).memoryUsage();
 
         long nodeFilterRangeMin = 125_016L;
         long nodeFilterRangeMax = 125_016L;
@@ -109,7 +112,7 @@ class NodeSimilarityMemoryEstimateDefinitionTest {
 
         builder.fixed("topK map", MemoryRange.of(expectedTopKMemory));
 
-        var expected = builder.build().estimate(dimensions, 1).memoryUsage();
+        var expected = builder.build().estimate(dimensions, concurrency).memoryUsage();
 
         SoftAssertions softAssertions = new SoftAssertions();
         softAssertions.assertThat(actual.max).isEqualTo(expected.max);
@@ -130,8 +133,9 @@ class NodeSimilarityMemoryEstimateDefinitionTest {
             false, false, true
         );
 
+        var concurrency = new Concurrency(1);
         var actual = new NodeSimilarityMemoryEstimateDefinition(estimateParams).memoryEstimation()
-            .estimate(dimensions, 1).memoryUsage();
+            .estimate(dimensions, concurrency).memoryUsage();
 
         SoftAssertions softAssertions = new SoftAssertions();
         softAssertions.assertThat(actual.min).isEqualTo(570592);
@@ -150,8 +154,9 @@ class NodeSimilarityMemoryEstimateDefinitionTest {
 
 
         var estimateParams = new NodeSimilarityEstimateParameters(10, 0, true, !componentPropertySet, true);
+        var concurrency = new Concurrency(1);
         var actual = new NodeSimilarityMemoryEstimateDefinition(estimateParams).memoryEstimation()
-            .estimate(dimensions, 1).memoryUsage();
+            .estimate(dimensions, concurrency).memoryUsage();
 
 
         long nodeFilterRangeMin = 125_016L;
@@ -178,7 +183,7 @@ class NodeSimilarityMemoryEstimateDefinitionTest {
 
         builder.fixed("topK map", MemoryRange.of(248_000_016L));
 
-        var expected = builder.build().estimate(dimensions, 1).memoryUsage();
+        var expected = builder.build().estimate(dimensions, concurrency).memoryUsage();
 
         SoftAssertions softAssertions = new SoftAssertions();
         softAssertions.assertThat(actual.max).isEqualTo(expected.max);

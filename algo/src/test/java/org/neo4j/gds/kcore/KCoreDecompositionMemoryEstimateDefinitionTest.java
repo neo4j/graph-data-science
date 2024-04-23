@@ -23,6 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.stream.Stream;
 
@@ -48,7 +49,7 @@ class KCoreDecompositionMemoryEstimateDefinitionTest {
         var memoryEstimation = factory.memoryEstimation(config);
 
         MemoryEstimationAssert.assertThat(memoryEstimation).
-            memoryRange(100,concurrency)
+            memoryRange(100, new Concurrency(concurrency))
             .hasSameMinAndMaxEqualTo(expectedMemoryEstimation);
 
     }

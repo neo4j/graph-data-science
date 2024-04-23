@@ -24,6 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.stream.Stream;
 
@@ -47,7 +48,7 @@ class PageRankMemoryEstimateDefinitionTest {
         var memoryEstimation = new PageRankMemoryEstimateDefinition().memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryRange(nodeCount, relationshipCount, concurrency)
+            .memoryRange(nodeCount, relationshipCount, new Concurrency(concurrency))
             .hasMin(expectedMinBytes)
             .hasMax(expectedMaxBytes);
     }
@@ -60,7 +61,7 @@ class PageRankMemoryEstimateDefinitionTest {
         var memoryEstimation = new PageRankMemoryEstimateDefinition().memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryRange(nodeCount, relationshipCount, 4)
+            .memoryRange(nodeCount, relationshipCount, new Concurrency(4))
             .hasMin(241_286_621_640L)
             .hasMax(241_286_621_640L);
     }

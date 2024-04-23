@@ -107,7 +107,7 @@ class SplitRelationshipsTest {
 
         MemoryTree actualEstimate = new SplitRelationshipsEstimateDefinition(config.toMemoryEstimateParameters())
             .memoryEstimation()
-            .estimate(graphDimensions, config.concurrency());
+            .estimate(graphDimensions, config.typedConcurrency());
 
         assertMemoryRange(actualEstimate.memoryUsage(), MemoryRange.of(160_000, 208_000));
     }
@@ -149,7 +149,7 @@ class SplitRelationshipsTest {
 
         MemoryTree actualEstimate = new SplitRelationshipsEstimateDefinition(config.toMemoryEstimateParameters())
             .memoryEstimation()
-            .estimate(graphDimensions, config.concurrency());
+            .estimate(graphDimensions, config.typedConcurrency());
 
         assertMemoryRange(actualEstimate.memoryUsage(), expectedMemory);
     }
@@ -168,13 +168,13 @@ class SplitRelationshipsTest {
         var graphDimensions = GraphDimensions.of(1, 10_000);
         MemoryTree actualEstimate = new SplitRelationshipsEstimateDefinition(config.toMemoryEstimateParameters())
             .memoryEstimation()
-            .estimate(graphDimensions, config.concurrency());
+            .estimate(graphDimensions, config.typedConcurrency());
         assertMemoryRange(actualEstimate.memoryUsage(), MemoryRange.of(160_000, 208_000));
 
         graphDimensions = GraphDimensions.of(100_000, 10_000);
         actualEstimate = new SplitRelationshipsEstimateDefinition(config.toMemoryEstimateParameters())
             .memoryEstimation()
-            .estimate(graphDimensions, config.concurrency());
+            .estimate(graphDimensions, config.typedConcurrency());
         assertMemoryRange(actualEstimate.memoryUsage(), MemoryRange.of(160_000, 208_000));
     }
 
@@ -192,14 +192,14 @@ class SplitRelationshipsTest {
         var config = configBuilder.negativeSamplingRatio(1.0).build();
         MemoryTree actualEstimate = new SplitRelationshipsEstimateDefinition(config.toMemoryEstimateParameters())
             .memoryEstimation()
-            .estimate(graphDimensions, config.concurrency());
+            .estimate(graphDimensions, config.typedConcurrency());
 
         assertMemoryRange(actualEstimate.memoryUsage(), MemoryRange.of(160_000, 208_000));
 
         config = configBuilder.negativeSamplingRatio(2.0).build();
         actualEstimate = new SplitRelationshipsEstimateDefinition(config.toMemoryEstimateParameters())
             .memoryEstimation()
-            .estimate(graphDimensions, config.concurrency());
+            .estimate(graphDimensions, config.typedConcurrency());
 
         assertMemoryRange(actualEstimate.memoryUsage(), MemoryRange.of(184_000, 256_000));
     }
@@ -218,13 +218,13 @@ class SplitRelationshipsTest {
         var config = configBuilder.holdoutFraction(0.3).build();
         MemoryTree actualEstimate = new SplitRelationshipsEstimateDefinition(config.toMemoryEstimateParameters())
             .memoryEstimation()
-            .estimate(graphDimensions, config.concurrency());
+            .estimate(graphDimensions, config.typedConcurrency());
         assertMemoryRange(actualEstimate.memoryUsage(), MemoryRange.of(160_000, 208_000));
 
         config = configBuilder.holdoutFraction(0.1).build();
         actualEstimate = new SplitRelationshipsEstimateDefinition(config.toMemoryEstimateParameters())
             .memoryEstimation()
-            .estimate(graphDimensions, config.concurrency());
+            .estimate(graphDimensions, config.typedConcurrency());
 
         assertMemoryRange(actualEstimate.memoryUsage(), MemoryRange.of(160_000, 176_000));
     }

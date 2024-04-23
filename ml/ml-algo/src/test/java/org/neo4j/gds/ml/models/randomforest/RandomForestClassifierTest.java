@@ -296,7 +296,7 @@ class RandomForestClassifierTest {
         long numberOfTrainingSamples,
         int numberOfClasses,
         int featureDimension,
-        int concurrency,
+        int concurrencyValue,
         int numTrees,
         double maxFeaturesRatio,
         double numberOfSamplesRatio,
@@ -315,6 +315,7 @@ class RandomForestClassifierTest {
             MemoryRange.of(featureDimension),
             config
         );
+        var concurrency = new Concurrency(concurrencyValue);
         // Does not depend on node count, only indirectly so with the size of the training set.
         var estimation = estimator.estimate(GraphDimensions.of(10), concurrency).memoryUsage();
 
@@ -350,7 +351,7 @@ class RandomForestClassifierTest {
             config
         );
         // Does not depend on node count, only indirectly so with the size of the training set.
-        var estimation = estimator.estimate(GraphDimensions.of(10), 4).memoryUsage();
+        var estimation = estimator.estimate(GraphDimensions.of(10), new Concurrency(4)).memoryUsage();
 
         assertMemoryRange(estimation, expectedMin, expectedMax);
     }

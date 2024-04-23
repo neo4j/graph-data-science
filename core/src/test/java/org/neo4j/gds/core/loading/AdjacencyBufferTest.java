@@ -52,6 +52,6 @@ class AdjacencyBufferTest {
             .nodeCount(nodeCount)
             .build();
 
-        return AdjacencyBuffer.memoryEstimation(avgDegree, nodeCount, propertyCount, concurrency).estimate(dimensions, concurrency.value());
+        return AdjacencyBuffer.memoryEstimation(avgDegree, nodeCount, propertyCount, concurrency).estimate(dimensions, concurrency);
     }
 }

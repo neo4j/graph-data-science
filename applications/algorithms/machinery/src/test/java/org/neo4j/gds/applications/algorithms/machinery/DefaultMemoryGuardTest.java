@@ -22,6 +22,7 @@ package org.neo4j.gds.applications.algorithms.machinery;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.mem.MemoryTree;
@@ -50,7 +51,8 @@ class DefaultMemoryGuardTest {
         when(graph.relationshipCount()).thenReturn(87L);
         var memoryEstimation = mock(MemoryEstimation.class);
         var memoryTree = mock(MemoryTree.class);
-        when(memoryEstimation.estimate(GraphDimensions.of(23L, 87L), 7)).thenReturn(memoryTree);
+        var concurrency = new Concurrency(7);
+        when(memoryEstimation.estimate(GraphDimensions.of(23L, 87L), concurrency)).thenReturn(memoryTree);
         when(memoryTree.memoryUsage()).thenReturn(MemoryRange.of(13, 19));
 
         // there is enough memory available
@@ -71,7 +73,8 @@ class DefaultMemoryGuardTest {
         when(graph.relationshipCount()).thenReturn(87L);
         var memoryEstimation = mock(MemoryEstimation.class);
         var memoryTree = mock(MemoryTree.class);
-        when(memoryEstimation.estimate(GraphDimensions.of(23, 87), 7)).thenReturn(memoryTree);
+        var concurrency = new Concurrency(7);
+        when(memoryEstimation.estimate(GraphDimensions.of(23, 87), concurrency)).thenReturn(memoryTree);
         when(memoryTree.memoryUsage()).thenReturn(MemoryRange.of(117, 243));
 
         // uh oh
@@ -98,7 +101,8 @@ class DefaultMemoryGuardTest {
         when(graph.relationshipCount()).thenReturn(87L);
         var memoryEstimation = mock(MemoryEstimation.class);
         var memoryTree = mock(MemoryTree.class);
-        when(memoryEstimation.estimate(GraphDimensions.of(23, 87), 7)).thenReturn(memoryTree);
+        var concurrency = new Concurrency(7);
+        when(memoryEstimation.estimate(GraphDimensions.of(23, 87), concurrency)).thenReturn(memoryTree);
         when(memoryTree.memoryUsage()).thenReturn(MemoryRange.of(117, 243));
 
         // uh oh

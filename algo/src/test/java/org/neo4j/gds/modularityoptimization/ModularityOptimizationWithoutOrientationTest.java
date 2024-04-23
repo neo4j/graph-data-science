@@ -212,7 +212,8 @@ class ModularityOptimizationWithoutOrientationTest {
 
     @ParameterizedTest
     @MethodSource("memoryEstimationTuples")
-    void testMemoryEstimation(int concurrency, long min, long max) {
+    void testMemoryEstimation(int concurrencyValue, long min, long max) {
+        var concurrency = new Concurrency(concurrencyValue);
         GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(100_000L).build();
         MemoryTree memoryTree = MemoryEstimations.builder(ModularityOptimization.class)
             .perNode("currentCommunities", HugeLongArray::memoryEstimation)

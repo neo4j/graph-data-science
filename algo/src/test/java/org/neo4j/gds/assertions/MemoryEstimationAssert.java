@@ -21,6 +21,7 @@ package org.neo4j.gds.assertions;
 
 import org.assertj.core.api.AbstractAssert;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryEstimation;
 
 public final class MemoryEstimationAssert extends AbstractAssert<MemoryEstimationAssert, MemoryEstimation> {
@@ -47,26 +48,26 @@ public final class MemoryEstimationAssert extends AbstractAssert<MemoryEstimatio
         return this;
     }
 
-    public MemoryRangeAssert memoryRange(GraphDimensions graphDimensions, int concurrency) {
+    public MemoryRangeAssert memoryRange(GraphDimensions graphDimensions, Concurrency concurrency) {
         isNotNull();
         var memoryRange = actual.estimate(graphDimensions, concurrency).memoryUsage();
         return MemoryRangeAssert.assertThat(memoryRange);
     }
 
-    public MemoryRangeAssert memoryRange(long nodeCount, long relationshipCount, int concurrency) {
+    public MemoryRangeAssert memoryRange(long nodeCount, long relationshipCount, Concurrency concurrency) {
         return memoryRange(GraphDimensions.of(nodeCount, relationshipCount), concurrency);
     }
 
-    public MemoryRangeAssert memoryRange(long nodeCount, int concurrency) {
+    public MemoryRangeAssert memoryRange(long nodeCount, Concurrency concurrency) {
         return memoryRange(nodeCount, 0, concurrency);
     }
 
     public MemoryRangeAssert memoryRange(long nodeCount) {
-        return memoryRange(nodeCount, 0, 1);
+        return memoryRange(nodeCount, 0, new Concurrency(1));
     }
 
 
-    public MemoryTreeAssert memoryTree(GraphDimensions graphDimensions, int concurrency) {
+    public MemoryTreeAssert memoryTree(GraphDimensions graphDimensions, Concurrency concurrency) {
         isNotNull();
         var memoryTree = actual.estimate(graphDimensions, concurrency);
         return MemoryTreeAssert.assertThat(memoryTree);

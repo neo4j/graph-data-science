@@ -191,13 +191,14 @@ class RandomForestRegressorTest {
         int maxDepth,
         long numberOfTrainingSamples,
         int featureDimension,
-        int concurrency,
+        int concurrencyValue,
         int numTrees,
         double maxFeaturesRatio,
         double numberOfSamplesRatio,
         long expectedMin,
         long expectedMax
     ) {
+        var concurrency = new Concurrency(concurrencyValue);
         var config = RandomForestRegressorTrainerConfigImpl.builder()
             .maxDepth(maxDepth)
             .numberOfDecisionTrees(numTrees)
@@ -244,7 +245,7 @@ class RandomForestRegressorTest {
             config
         );
         // Does not depend on node count, only indirectly so with the size of the training set.
-        var estimation = estimator.estimate(GraphDimensions.of(10), 4).memoryUsage();
+        var estimation = estimator.estimate(GraphDimensions.of(10), new Concurrency(4)).memoryUsage();
 
         assertMemoryRange(estimation, expectedMin, expectedMax);
     }

@@ -42,7 +42,7 @@ public class KCoreDecompositionMemoryEstimateDefinition implements MemoryEstimat
                 (long) Math.ceil(graphDimensions.nodeCount() * KCoreDecomposition.REBUILD_CONSTANT)
             );
             var rebuildTask = RebuildTask.memoryEstimation(resizedNodeCount);
-            var totalRebuildTasks = rebuildTask * concurrency;
+            var totalRebuildTasks = rebuildTask * concurrency.value();
             var rebuildArray = HugeIntArray.memoryEstimation(resizedNodeCount);
             return MemoryRange.of(totalRebuildTasks + rebuildArray);
 

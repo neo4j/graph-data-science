@@ -245,7 +245,7 @@ public class GraphStoreExportProc extends BaseProc {
                 var dimensions = GraphDimensions.of(graphStore.nodeCount(), graphStore.relationshipCount());
                 var memoryTree = CsvExportEstimation
                     .estimate(graphStore, exportConfig.samplingFactor())
-                    .estimate(dimensions, 1);
+                    .estimate(dimensions, new Concurrency(1));
                 return new MemoryTreeWithDimensions(memoryTree, dimensions);
             }
         );

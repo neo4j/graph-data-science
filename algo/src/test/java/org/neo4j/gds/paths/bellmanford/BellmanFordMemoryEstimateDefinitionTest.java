@@ -23,6 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.stream.Stream;
 
@@ -35,7 +36,7 @@ class BellmanFordMemoryEstimateDefinitionTest {
         var memoryEstimation = new BellmanFordMemoryEstimateDefinition(trackNegativeCycles).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryRange(10, 23, 4)
+            .memoryRange(10, 23, new Concurrency(4))
             .hasSameMinAndMaxEqualTo(expectedBytes);
     }
 

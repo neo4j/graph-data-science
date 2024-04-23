@@ -77,7 +77,7 @@ public class ExhaustiveLinkPrediction extends LinkPrediction {
             .add("Priority queue", BoundedLongLongPriorityQueue.memoryEstimation(config.topN().orElseThrow()))
             .perGraphDimension("Predict links operation", (dim, threads) -> MemoryRange.of(
                 Estimate.sizeOfDoubleArray(linkFeatureDimension) + Estimate.sizeOfLongHashSet(dim.averageDegree())
-            ).times(threads))
+            ).times(threads.value()))
             .build();
     }
 

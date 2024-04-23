@@ -81,7 +81,7 @@ class NodeClassificationTrainMemoryEstimateDefinitionTest {
             () -> memoryEstimation,
             9,
             7,
-            config.concurrency(),
+            config.typedConcurrency(),
             memoryRange
         );
     }

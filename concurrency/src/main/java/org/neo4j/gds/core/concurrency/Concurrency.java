@@ -19,6 +19,8 @@
  */
 package org.neo4j.gds.core.concurrency;
 
+import java.util.Objects;
+
 public class Concurrency {
     private final int value;
 
@@ -35,5 +37,18 @@ public class Concurrency {
 
     public long squared() {
         return (long) value * value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Concurrency that = (Concurrency) o;
+        return value == that.value;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(value);
     }
 }

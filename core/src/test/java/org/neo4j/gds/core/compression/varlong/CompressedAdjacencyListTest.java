@@ -25,6 +25,7 @@ import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.mem.MemoryTree;
 import org.neo4j.gds.mem.BitUtil;
@@ -46,7 +47,7 @@ class CompressedAdjacencyListTest {
             .relCountUpperBound(100)
             .build();
 
-        MemoryTree memRec = CompressedAdjacencyList.adjacencyListEstimation(false).estimate(dimensions, 1);
+        MemoryTree memRec = CompressedAdjacencyList.adjacencyListEstimation(false).estimate(dimensions, new Concurrency(1));
 
         long classSize = 32;
         long bestCaseAdjacencySize = 500;
@@ -79,7 +80,7 @@ class CompressedAdjacencyListTest {
             .relCountUpperBound(100_000_000_000L)
             .build();
 
-        MemoryTree memRec = CompressedAdjacencyList.adjacencyListEstimation(false).estimate(dimensions, 1);
+        MemoryTree memRec = CompressedAdjacencyList.adjacencyListEstimation(false).estimate(dimensions, new Concurrency(1));
 
         long classSize = 32;
         long bestCaseAdjacencySize = 100_100_000_000L;

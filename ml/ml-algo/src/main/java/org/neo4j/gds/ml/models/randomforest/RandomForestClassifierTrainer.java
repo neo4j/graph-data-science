@@ -128,7 +128,7 @@ public class RandomForestClassifierTrainer implements ClassifierTrainer {
                             maxNumberOfBaggedFeatures,
                             config.numberOfSamplesRatio()
                         )
-                    ).times(concurrency)
+                    ).times(concurrency.value())
             )
             .build();
     }
