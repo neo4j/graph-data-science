@@ -77,7 +77,7 @@ final class KnnWriteStep implements MutateOrWriteStep<KnnResult, Pair<Relationsh
             configuration,
             configuration,
             shouldComputeSimilarityDistribution,
-            configuration.resolveResultStore(graphStore.resultStore()),
+            configuration.resolveResultStore(resultStore),
             result.streamSimilarityResult(),
             KNN
         );
