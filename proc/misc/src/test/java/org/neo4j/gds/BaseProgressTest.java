@@ -20,6 +20,7 @@
 package org.neo4j.gds;
 
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.core.utils.progress.ProgressFeatureSettings;
 import org.neo4j.gds.core.utils.progress.TaskRegistryExtension;
@@ -67,7 +68,7 @@ public abstract class BaseProgressTest extends BaseTest {
             if (withConcurrency) {
                 task.setMaxConcurrency(REQUESTED_CPU_CORES);
             }
-            var taskProgressTracker = new TaskProgressTracker(task, Neo4jProxy.testLog(), 1, taskRegistryFactory);
+            var taskProgressTracker = new TaskProgressTracker(task, Neo4jProxy.testLog(), new Concurrency(1), taskRegistryFactory);
             taskProgressTracker.beginSubTask();
             taskProgressTracker.beginSubTask();
             taskProgressTracker.logProgress(1);

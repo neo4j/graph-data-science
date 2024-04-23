@@ -157,7 +157,7 @@ class PregelTest {
 
         var task = Pregel.progressTask(graph, config, computation.getClass().getSimpleName());
         var log = Neo4jProxy.testLog();
-        var progressTracker = new TestProgressTracker(task, log, config.concurrency(), EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TestProgressTracker(task, log, config.typedConcurrency(), EmptyTaskRegistryFactory.INSTANCE);
 
         Pregel.create(
             graph,
@@ -217,7 +217,7 @@ class PregelTest {
         var progressTracker = new TaskProgressTracker(
             task,
             Neo4jProxy.testLog(),
-            config.concurrency(),
+            config.typedConcurrency(),
             jobId -> new TaskRegistry("", taskStore, jobId)
         );
 

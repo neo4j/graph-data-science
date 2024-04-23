@@ -22,6 +22,7 @@ dependencies {
     }
 
     implementation project(':annotations')
+    implementation project(':concurrency')
     implementation project(':core-utils')
     implementation project(':memory-usage')
     implementation project(':neo4j-kernel-adapter')
@@ -38,6 +39,5 @@ dependencies {
     testAnnotationProcessor project(':config-generator')
     testAnnotationProcessor group: 'org.immutables', name: 'value', version: ver.'immutables'
 
-    testImplementation project(':core') // TODO remove this once RunWithConcurrency is out of core
     testImplementation project(':test-utils')
 }

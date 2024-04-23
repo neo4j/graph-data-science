@@ -151,7 +151,7 @@ class CELFOnConnectedGraphTest {
 
         var progressTask = factory.progressTask(graph, config);
         var log = Neo4jProxy.testLog();
-        var progressTracker = new TaskProgressTracker(progressTask, log, 4, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TaskProgressTracker(progressTask, log, new Concurrency(4), EmptyTaskRegistryFactory.INSTANCE);
 
         factory
             .build(graph, config, progressTracker)

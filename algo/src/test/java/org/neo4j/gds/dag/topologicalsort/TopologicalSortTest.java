@@ -402,7 +402,7 @@ class TopologicalSortTest {
         var testTracker = new TestProgressTracker(
             progressTask,
             log,
-            BASIC_CONFIG.concurrency(),
+            BASIC_CONFIG.typedConcurrency(),
             EmptyTaskRegistryFactory.INSTANCE
         );
 

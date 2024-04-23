@@ -171,14 +171,15 @@ class BetweennessCentralityTest {
 
     @Test
     void testShouldLogProgress() {
-        var parameters = new BetweennessCentralityParameters(new Concurrency(4), Optional.of(2L), Optional.empty(), false);
+        Concurrency concurrency = new Concurrency(4);
+        var parameters = new BetweennessCentralityParameters(concurrency, Optional.of(2L), Optional.empty(), false);
         var factory = new BetweennessCentralityFactory<>();
         var log = Neo4jProxy.testLog();
         var testGraph = fromGdl(DIAMOND, "diamond");
         var progressTracker = new TestProgressTracker(
             factory.progressTask(testGraph, parameters.samplingSize()),
             log,
-            4,
+            concurrency,
             EmptyTaskRegistryFactory.INSTANCE
         );
         factory.build(testGraph, parameters, progressTracker).compute();
@@ -196,14 +197,15 @@ class BetweennessCentralityTest {
 
     @Test
     void testShouldLogProgressNoSampling() {
-        var parameters = new BetweennessCentralityParameters(new Concurrency(4), Optional.empty(), Optional.empty(), false);
+        var concurrency = new Concurrency(4);
+        var parameters = new BetweennessCentralityParameters(concurrency, Optional.empty(), Optional.empty(), false);
         var factory = new BetweennessCentralityFactory<>();
         var log = Neo4jProxy.testLog();
         var testGraph = fromGdl(DIAMOND, "diamond");
         var progressTracker = new TestProgressTracker(
             factory.progressTask(testGraph, parameters.samplingSize()),
             log,
-            4,
+            concurrency,
             EmptyTaskRegistryFactory.INSTANCE
         );
         factory.build(testGraph, parameters, progressTracker).compute();

@@ -35,6 +35,7 @@ import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -185,7 +186,7 @@ final class DeltaSteppingTest {
 
             var progressTask = new DeltaSteppingFactory().progressTask(graph, config);
             var testLog = Neo4jProxy.testLog();
-            var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
+            var progressTracker = new TestProgressTracker(progressTask, testLog, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
 
             DeltaStepping.of(graph, config, DefaultPool.INSTANCE, progressTracker)
                 .compute()

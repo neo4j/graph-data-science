@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.applications.graphstorecatalog;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -50,7 +51,7 @@ class ProgressTrackerFactory {
         return new TaskProgressTracker(
             task,
             (org.neo4j.logging.Log) log.getNeo4jLog(),
-            1,
+            new Concurrency(1),
             new JobId(),
             taskRegistryFactory,
             userLogRegistryFactory

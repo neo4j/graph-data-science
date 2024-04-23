@@ -21,6 +21,7 @@ package org.neo4j.gds;
 
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.PerDatabaseTaskStore;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -53,7 +54,7 @@ public class InspectableTestProgressTracker extends TaskProgressTracker {
         super(
             baseTask,
             log,
-            1,
+            new Concurrency(1),
             jobId,
             TaskRegistryFactory.local(userName, taskStore),
             EmptyUserLogRegistryFactory.INSTANCE

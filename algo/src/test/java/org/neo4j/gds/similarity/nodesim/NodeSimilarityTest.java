@@ -808,9 +808,9 @@ final class NodeSimilarityTest {
 
     @ParameterizedTest(name = "topK = {0}, concurrency = {1}")
     @MethodSource("topKAndConcurrencies")
-    void shouldLogMessages(int topK, int concurrency) {
+    void shouldLogMessages(int topK, int concurrencyValue) {
         var graph = naturalGraph;
-
+        var concurrency = new Concurrency(concurrencyValue);
         var factory = new NodeSimilarityFactory<>();
         var progressLog = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(
@@ -833,7 +833,7 @@ final class NodeSimilarityTest {
         var nodeSimilarity = new NodeSimilarity(
             graph,
             parameters,
-            new Concurrency(concurrency),
+            concurrency,
             DefaultPool.INSTANCE,
             progressTracker
         );
@@ -882,10 +882,11 @@ final class NodeSimilarityTest {
 
     @ParameterizedTest(name = "concurrency = {0}")
     @ValueSource(ints = {1, 2})
-    void shouldLogProgress(int concurrency) {
+    void shouldLogProgress(int concurrencyValue) {
         var graph = naturalGraph;
         var progressTask = new NodeSimilarityFactory<>().progressTask(graph, false);
         var log = Neo4jProxy.testLog();
+        var concurrency = new Concurrency(concurrencyValue);
         var progressTracker = new TestProgressTracker(
             progressTask,
             log,
@@ -907,7 +908,7 @@ final class NodeSimilarityTest {
         new NodeSimilarity(
             graph,
             parameters,
-            new Concurrency(concurrency),
+            concurrency,
             DefaultPool.INSTANCE,
             progressTracker
         ).compute().streamResult().count();
@@ -943,18 +944,19 @@ final class NodeSimilarityTest {
             null
         );
         var progressTask = new NodeSimilarityFactory<>().progressTask(graph, true);
+        var concurrency = new Concurrency(4);
         var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(
             progressTask,
             log,
-            4,
+            concurrency,
             EmptyTaskRegistryFactory.INSTANCE
         );
 
         new NodeSimilarity(
             graph,
             parameters,
-            new Concurrency(4),
+            concurrency,
             DefaultPool.INSTANCE,
             progressTracker
         ).compute().streamResult().count();

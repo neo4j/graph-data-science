@@ -27,6 +27,7 @@ import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -147,7 +148,7 @@ class KmeansTest {
         var centers = result.centers();
 
         var averageDistance = result.averageDistanceToCentroid();
-        
+
 
         assertThat(communities.get(0)).isEqualTo(communities.get(1));
         assertThat(communities.get(2)).isEqualTo(communities.get(3));
@@ -369,7 +370,7 @@ class KmeansTest {
         var progressTracker = new TestProgressTracker(
             factory.progressTask(graph, kmeansConfig),
             log,
-            4,
+            new Concurrency(4),
             EmptyTaskRegistryFactory.INSTANCE
         );
 
@@ -412,7 +413,7 @@ class KmeansTest {
         var progressTracker = new TestProgressTracker(
             factory.progressTask(graph, kmeansConfig),
             log,
-            4,
+            new Concurrency(4),
             EmptyTaskRegistryFactory.INSTANCE
         );
 
@@ -472,7 +473,7 @@ class KmeansTest {
         var progressTracker = new TestProgressTracker(
             factory.progressTask(graph, kmeansConfig),
             log,
-            4,
+            new Concurrency(4),
             EmptyTaskRegistryFactory.INSTANCE
         );
 

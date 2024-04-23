@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils;
 
+import org.neo4j.gds.core.concurrency.RenamesCurrentThread;
 import org.neo4j.gds.transaction.TransactionContext;
 import org.neo4j.gds.utils.StatementApi;
 

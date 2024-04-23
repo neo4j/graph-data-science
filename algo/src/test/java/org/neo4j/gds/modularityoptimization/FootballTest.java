@@ -80,7 +80,7 @@ class FootballTest {
     @ParameterizedTest
     @ValueSource(ints = {1, 2, 3})
     void test(int iterations) {
-        var pmo = compute(graph, iterations, null, 3, 2);
+        var pmo = compute(graph, iterations, null, new Concurrency(3), 2);
         double modularity1 = pmo.modularity();
         HugeLongArray communities = HugeLongArray.newArray(graph.nodeCount());
         graph.forEachNode(nodeId -> {
@@ -97,7 +97,7 @@ class FootballTest {
         Graph graph,
         int maxIterations,
         NodePropertyValues properties,
-        int concurrency,
+        Concurrency concurrency,
         int minBatchSize
     ) {
         return compute(graph, maxIterations, properties, concurrency, minBatchSize, Neo4jProxy.testLog());
@@ -108,7 +108,7 @@ class FootballTest {
         Graph graph,
         int maxIterations,
         NodePropertyValues properties,
-        int concurrency,
+        Concurrency concurrency,
         int minBatchSize,
         Log log
     ) {
@@ -120,7 +120,7 @@ class FootballTest {
             maxIterations,
             TOLERANCE_DEFAULT,
             properties,
-            new Concurrency(concurrency),
+            concurrency,
             minBatchSize,
             DefaultPool.INSTANCE,
             progressTracker

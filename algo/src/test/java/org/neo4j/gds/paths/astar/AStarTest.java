@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.extension.GdlExtension;
@@ -131,7 +132,7 @@ class AStarTest {
 
         var progressTask = new AStarFactory<>().progressTask(graph, config);
         var log = Neo4jProxy.testLog();
-        var progressTracker = new TestProgressTracker(progressTask, log, 1, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TestProgressTracker(progressTask, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
 
         AStar.sourceTarget(graph, config, progressTracker)
             .compute()

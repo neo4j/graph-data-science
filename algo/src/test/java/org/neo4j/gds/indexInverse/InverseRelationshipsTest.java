@@ -133,7 +133,7 @@ class InverseRelationshipsTest {
 
         var factory = new InverseRelationshipsAlgorithmFactory();
         var task = factory.progressTask(graphStore.nodeCount(), parameters.internalRelationshipTypes(graphStore));
-        var progressTracker = new TestProgressTracker(task, log, parameters.concurrency().value(), EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TestProgressTracker(task, log, parameters.concurrency(), EmptyTaskRegistryFactory.INSTANCE);
         factory.build(graphStore, parameters, progressTracker).compute();
 
         assertThat(log.getMessages(INFO))

@@ -197,7 +197,7 @@ class WccTest {
         var progressTracker = new TestProgressTracker(
             factory.progressTask(graph),
             log,
-            parameters.concurrency().value(),
+            parameters.concurrency(),
             EmptyTaskRegistryFactory.INSTANCE
         );
         var wcc = factory.build(graph, parameters, progressTracker);

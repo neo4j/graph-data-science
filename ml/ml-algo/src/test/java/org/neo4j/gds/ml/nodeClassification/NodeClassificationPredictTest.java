@@ -211,10 +211,11 @@ class NodeClassificationPredictTest {
             .build();
 
         var log = Neo4jProxy.testLog();
+        var concurrency = new Concurrency(1);
         var progressTracker = new TaskProgressTracker(
             NodeClassificationPredict.progressTask(graph.nodeCount()),
             log,
-            1,
+            concurrency,
             new JobId(),
             EmptyTaskRegistryFactory.INSTANCE,
             EmptyUserLogRegistryFactory.INSTANCE
@@ -224,7 +225,7 @@ class NodeClassificationPredictTest {
             ClassifierFactory.create(modelData),
             FeaturesFactory.extractLazyFeatures(graph, featureProperties),
             100,
-            new Concurrency(1),
+            concurrency,
             false,
             progressTracker,
             TerminationFlag.RUNNING_TRUE

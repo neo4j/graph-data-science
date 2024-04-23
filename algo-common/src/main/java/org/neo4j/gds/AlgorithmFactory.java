@@ -80,7 +80,7 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
             progressTracker = new TaskProgressTracker(
                 progressTask,
                 log,
-                configuration.concurrency(),
+                configuration.typedConcurrency(),
                 configuration.jobId(),
                 taskRegistryFactory,
                 userLogRegistryFactory
@@ -89,7 +89,7 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
             progressTracker = new TaskTreeProgressTracker(
                 progressTask,
                 log,
-                configuration.concurrency(),
+                configuration.typedConcurrency(),
                 configuration.jobId(),
                 taskRegistryFactory,
                 userLogRegistryFactory

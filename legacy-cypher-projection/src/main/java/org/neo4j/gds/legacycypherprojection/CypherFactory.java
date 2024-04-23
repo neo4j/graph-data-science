@@ -211,7 +211,7 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
             return new TaskProgressTracker(
                 task,
                 loadingContext.log(),
-                graphProjectConfig.readConcurrency(),
+                graphProjectConfig.typedReadConcurrency(),
                 graphProjectConfig.jobId(),
                 loadingContext.taskRegistryFactory(),
                 EmptyUserLogRegistryFactory.INSTANCE
@@ -221,7 +221,7 @@ public final class CypherFactory extends CSRGraphStoreFactory<GraphProjectFromCy
         return new TaskTreeProgressTracker(
             task,
             loadingContext.log(),
-            graphProjectConfig.readConcurrency(),
+            graphProjectConfig.typedReadConcurrency(),
             graphProjectConfig.jobId(),
             loadingContext.taskRegistryFactory(),
             EmptyUserLogRegistryFactory.INSTANCE

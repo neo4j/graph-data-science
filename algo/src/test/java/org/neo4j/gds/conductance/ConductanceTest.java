@@ -151,7 +151,7 @@ final class ConductanceTest {
         var progressTracker = new TaskProgressTracker(
             progressTask,
             log,
-            parameters.concurrency().value(),
+            parameters.concurrency(),
             EmptyTaskRegistryFactory.INSTANCE
         );
 

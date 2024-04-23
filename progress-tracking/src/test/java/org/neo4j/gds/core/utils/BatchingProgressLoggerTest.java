@@ -56,11 +56,12 @@ class BatchingProgressLoggerTest {
         var log = Neo4jProxy.testLog();
         var taskVolume = 42;
         var batchSize = 8;
+        var concurrency = new Concurrency(1);
         var logger = new BatchingProgressLogger(
             log,
             Tasks.leaf("foo", taskVolume),
             batchSize,
-            /* concurrency */0
+            concurrency
         );
 
         for (int i = 0; i < taskVolume; i++) {
@@ -88,11 +89,12 @@ class BatchingProgressLoggerTest {
         var taskVolume = 1337;
         var progressStep = 5;
         var batchSize = 16;
+        var concurrency = new Concurrency(1);
         var logger = new BatchingProgressLogger(
             log,
             Tasks.leaf("foo", taskVolume),
             batchSize,
-            /* concurrency */1
+            concurrency
         );
 
         for (int i = 0; i < taskVolume; i += progressStep) {
@@ -119,7 +121,7 @@ class BatchingProgressLoggerTest {
 
     @Test
     void shouldLogEveryPercentageOnlyOnce() {
-        var loggedPercentages = performLogging(400, 4);
+        var loggedPercentages = performLogging(400, new Concurrency(4));
         var expected = loggedPercentages.stream().distinct().collect(Collectors.toList());
 
         assertEquals(expected.size(), loggedPercentages.size());
@@ -127,7 +129,7 @@ class BatchingProgressLoggerTest {
 
     @Test
     void shouldLogPercentagesSequentially() {
-        var loggedPercentages = performLogging(400, 4);
+        var loggedPercentages = performLogging(400, new Concurrency(4));
         var expected = loggedPercentages.stream().sorted().collect(Collectors.toList());
 
         assertEquals(expected, loggedPercentages);
@@ -135,7 +137,7 @@ class BatchingProgressLoggerTest {
 
     @Test
     void shouldLogEveryPercentageUnderHeavyContention() {
-        var loggedPercentages = performLogging(20, 4);
+        var loggedPercentages = performLogging(20, new Concurrency(4));
         var expected = IntStream.rangeClosed(1, 20).map(p -> p * 5).boxed().collect(Collectors.toList());
 
         assertEquals(expected, loggedPercentages);
@@ -143,7 +145,7 @@ class BatchingProgressLoggerTest {
 
     @Test
     void shouldLogAfterResetWhereACallCountHigherThanBatchSizeIsLeftBehind() {
-        var concurrency = 1;
+        var concurrency = new Concurrency(1);
         var taskVolume = 1337;
 
         TestLog log = Neo4jProxy.testLog();
@@ -163,7 +165,8 @@ class BatchingProgressLoggerTest {
     @Test
     void log100Percent() {
         TestLog log = Neo4jProxy.testLog();
-        var testProgressLogger = new BatchingProgressLogger(log, Tasks.leaf("Test"), 1);
+        var concurrency = new Concurrency(1);
+        var testProgressLogger = new BatchingProgressLogger(log, Tasks.leaf("Test"), concurrency);
         testProgressLogger.reset(1337);
         testProgressLogger.logFinishPercentage();
         assertThat(log.getMessages(TestLog.INFO))
@@ -174,7 +177,8 @@ class BatchingProgressLoggerTest {
     @Test
     void shouldLog100OnlyOnce() {
         TestLog log = Neo4jProxy.testLog();
-        var testProgressLogger = new BatchingProgressLogger(log, Tasks.leaf("Test"), 1);
+        var concurrency = new Concurrency(1);
+        var testProgressLogger = new BatchingProgressLogger(log, Tasks.leaf("Test"), concurrency);
         testProgressLogger.reset(1);
         testProgressLogger.logProgress(1);
         testProgressLogger.logFinishPercentage();
@@ -186,7 +190,8 @@ class BatchingProgressLoggerTest {
     @Test
     void shouldNotExceed100Percent() {
         TestLog log = Neo4jProxy.testLog();
-        var testProgressLogger = new BatchingProgressLogger(log, Tasks.leaf("Test"), 1);
+        var concurrency = new Concurrency(1);
+        var testProgressLogger = new BatchingProgressLogger(log, Tasks.leaf("Test"), concurrency);
         testProgressLogger.reset(1);
         testProgressLogger.logProgress(1); // reaches 100 %
         testProgressLogger.logProgress(1); // exceeds 100 %
@@ -200,7 +205,7 @@ class BatchingProgressLoggerTest {
         var logger = new BatchingProgressLogger(
             Neo4jProxy.testLog(),
             Tasks.leaf("foo", 42),
-            1
+            new Concurrency(1)
         );
 
         logger.release();
@@ -218,15 +223,15 @@ class BatchingProgressLoggerTest {
         assertThatThrownBy(threadLocal::get).isInstanceOf(NullPointerException.class);
     }
 
-    private static List<Integer> performLogging(long taskVolume, int concurrency) {
+    private static List<Integer> performLogging(long taskVolume, Concurrency concurrency) {
         TestLog log = Neo4jProxy.testLog();
         var logger = new BatchingProgressLogger(log, Tasks.leaf("Test", taskVolume), concurrency);
         logger.reset(taskVolume);
 
-        var batchSize = (int) BitUtil.ceilDiv(taskVolume, concurrency);
+        var batchSize = (int) BitUtil.ceilDiv(taskVolume, concurrency.value());
 
         var tasks = IntStream
-            .range(0, concurrency)
+            .range(0, concurrency.value())
             .mapToObj(i -> (Runnable) () ->
                 IntStream.range(0, batchSize).forEach(ignore -> {
                     LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(1));
@@ -235,7 +240,7 @@ class BatchingProgressLoggerTest {
             .collect(Collectors.toList());
 
         RunWithConcurrency.builder()
-            .concurrency(new Concurrency(4))
+            .concurrency(concurrency)
             .tasks(tasks)
             .run();
 

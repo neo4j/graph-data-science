@@ -30,6 +30,7 @@ import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -252,7 +253,7 @@ class ScalePropertiesTest {
         var progressTracker = new TestProgressTracker(
             factory.progressTask(graph, config),
             testLog,
-            1,
+            new Concurrency(1),
             EmptyTaskRegistryFactory.INSTANCE
         );
 
@@ -286,5 +287,5 @@ class ScalePropertiesTest {
                 "ScaleProperties :: Finished"
             );
     }
-    
+
 }

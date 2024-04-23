@@ -34,6 +34,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.IdFunction;
@@ -245,7 +246,7 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
         var progressTracker = new TaskProgressTracker(
             RelationshipStreamExporter.baseTask("OpName"),
             log,
-            1,
+            new Concurrency(1),
             EmptyTaskRegistryFactory.INSTANCE
         );
 

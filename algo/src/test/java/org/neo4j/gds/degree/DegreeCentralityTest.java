@@ -158,7 +158,7 @@ final class DegreeCentralityTest {
 
         var progressTask = DegreeCentralityFactory.degreeCentralityProgressTask(graph);
         var log = Neo4jProxy.testLog();
-        var progressTracker = new TestProgressTracker(progressTask, log, 1, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TestProgressTracker(progressTask, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
         var degreeCentrality = new DegreeCentrality(
             graph,
             DefaultPool.INSTANCE,

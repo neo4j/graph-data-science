@@ -114,7 +114,7 @@ class ModularityOptimizationWithoutOrientationTest {
     void testUnweighted() {
         var graph = unweightedGraph();
 
-        var pmo = compute(graph, 3, null, 1, 10_000);
+        var pmo = compute(graph, 3, null, new Concurrency(1), 10_000);
 
         assertEquals(0.12244, pmo.modularity(), 0.001);
         CommunityHelper.assertCommunities(
@@ -127,7 +127,7 @@ class ModularityOptimizationWithoutOrientationTest {
 
     @Test
     void testWeighted() {
-        var pmo = compute(graph, 3, null, 3, 2);
+        var pmo = compute(graph, 3, null, new Concurrency(3), 2);
 
         assertEquals(0.4985, pmo.modularity(), 0.001);
         CommunityHelper.assertCommunities(
@@ -145,7 +145,7 @@ class ModularityOptimizationWithoutOrientationTest {
         var pmo = compute(
             graph,
             10, graph.nodeProperties("seed2"),
-            1,
+            new Concurrency(1),
             100
         );
 
@@ -171,7 +171,7 @@ class ModularityOptimizationWithoutOrientationTest {
         var pmo = compute(
             graph,
             10, graph.nodeProperties("seed1"),
-            1,
+            new Concurrency(1),
             100
         );
 
@@ -194,7 +194,7 @@ class ModularityOptimizationWithoutOrientationTest {
     void testLogging() {
         var log = Neo4jProxy.testLog();
 
-        compute(graph, K1COLORING_MAX_ITERATIONS, null, 3, 2, log);
+        compute(graph, K1COLORING_MAX_ITERATIONS, null, new Concurrency(3), 2, log);
 
         assertThat(log.getMessages(INFO))
             .extracting(Extractors.removingThreadId())
@@ -256,7 +256,7 @@ class ModularityOptimizationWithoutOrientationTest {
         Graph graph,
         int maxIterations,
         NodePropertyValues properties,
-        int concurrency,
+        Concurrency concurrency,
         int minBatchSize
     ) {
         return compute(graph, maxIterations, properties, concurrency, minBatchSize, Neo4jProxy.testLog());
@@ -267,7 +267,7 @@ class ModularityOptimizationWithoutOrientationTest {
         Graph graph,
         int maxIterations,
         NodePropertyValues properties,
-        int concurrency,
+        Concurrency concurrency,
         int minBatchSize,
         Log log
     ) {
@@ -279,7 +279,7 @@ class ModularityOptimizationWithoutOrientationTest {
             maxIterations,
             TOLERANCE_DEFAULT,
             properties,
-            new Concurrency(concurrency),
+            concurrency,
             minBatchSize,
             DefaultPool.INSTANCE,
             progressTracker

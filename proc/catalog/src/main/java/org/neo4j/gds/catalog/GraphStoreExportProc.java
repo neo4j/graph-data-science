@@ -87,7 +87,7 @@ public class GraphStoreExportProc extends BaseProc {
                 var progressTracker = new TaskProgressTracker(
                     ProgressTrackerExecutionMonitor.progressTask(graphStore),
                     executionContext().log(),
-                    exportConfig.writeConcurrency(),
+                    exportConfig.typedWriteConcurrency(),
                     exportConfig.jobId(),
                     executionContext().taskRegistryFactory(),
                     executionContext().userLogRegistryFactory()

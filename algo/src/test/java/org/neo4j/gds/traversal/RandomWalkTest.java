@@ -506,7 +506,7 @@ class RandomWalkTest {
             var pt = new TestProgressTracker(
                 fact.progressTask(graph, config),
                 log,
-                config.concurrency(),
+                config.typedConcurrency(),
                 TaskRegistryFactory.local("rw", taskStore)
             );
 
@@ -557,7 +557,7 @@ class RandomWalkTest {
             var pt = new TestProgressTracker(
                 fact.progressTask(weightedGraph, config),
                 log,
-                config.concurrency(),
+                config.typedConcurrency(),
                 TaskRegistryFactory.local("rw", taskStore)
             );
 
@@ -602,7 +602,7 @@ class RandomWalkTest {
                     config
                 ),
                 Neo4jProxy.testLog(),
-                4,
+                new Concurrency(4),
                 TaskRegistryFactory.local("rw", taskStore)
             );
 

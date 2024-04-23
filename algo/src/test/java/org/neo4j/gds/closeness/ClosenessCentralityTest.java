@@ -112,7 +112,7 @@ class ClosenessCentralityTest {
     void shouldLogProgress() {
         var progressTask = new ClosenessCentralityAlgorithmFactory<>().progressTask(graph.nodeCount());
         var testLog = Neo4jProxy.testLog();
-        var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TestProgressTracker(progressTask, testLog, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
 
         var algo = new ClosenessCentrality(
             graph,
