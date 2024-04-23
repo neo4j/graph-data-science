@@ -203,7 +203,7 @@ class ProcedureSyntaxAutoChecker extends Postprocessor {
 
     private static Stream<Field> resultFieldsFromClassFields(Class<?> resultClass) {
         return Arrays
-            .stream(resultClass.getFields())
+            .stream(resultClass.isRecord() ? resultClass.getDeclaredFields() : resultClass.getFields())
             .filter(ProcedureSyntaxAutoChecker::includeFieldInResult);
     }
 
