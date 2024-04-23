@@ -53,7 +53,7 @@ public final class CSRGraphStoreUtil {
         DatabaseId databaseId,
         HugeGraph graph,
         Optional<String> relationshipPropertyKey,
-        int concurrency
+        Concurrency concurrency
     ) {
         relationshipPropertyKey.ifPresent(property -> {
 
@@ -118,7 +118,7 @@ public final class CSRGraphStoreUtil {
             .nodes(ImmutableNodes.of(schema.nodeSchema(), graph.idMap(), nodeProperties))
             .relationshipImportResult(relationshipImportResult)
             .graphProperties(GraphPropertyStore.empty())
-            .concurrency(new Concurrency(concurrency))
+            .concurrency(concurrency)
             .build();
     }
 

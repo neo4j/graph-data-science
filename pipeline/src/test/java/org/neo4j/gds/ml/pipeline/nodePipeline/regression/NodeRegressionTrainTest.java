@@ -30,6 +30,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.generator.PropertyProducer;
 import org.neo4j.gds.beta.generator.RandomGraphGenerator;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -393,7 +394,7 @@ class NodeRegressionTrainTest {
             DatabaseId.random(),
             infinityGraph,
             Optional.empty(),
-            4
+            new Concurrency(4)
         );
 
         var config = NodeRegressionPipelineTrainConfigImpl.builder()

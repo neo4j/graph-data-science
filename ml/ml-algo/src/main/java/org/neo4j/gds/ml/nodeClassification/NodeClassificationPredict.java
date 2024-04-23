@@ -125,7 +125,7 @@ public class NodeClassificationPredict {
             (dim, threads) ->
                 ClassifierFactory.runtimeOverheadMemoryEstimation(
                     method,
-                    (int) Math.min(dim.nodeCount(), BatchQueue.computeBatchSize(dim.nodeCount(), minBatchSize, threads)),
+                    (int) Math.min(dim.nodeCount(), BatchQueue.computeBatchSize(dim.nodeCount(), minBatchSize, new Concurrency(threads))),
                     classCount,
                     featureCount,
                     isReduced

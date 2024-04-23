@@ -127,7 +127,7 @@ public abstract class GraphStoreExporter {
             graphStore.capabilities(),
             graphProperties,
             batchSize,
-            concurrency.value(),
+            concurrency,
             idMappingType()
         );
 

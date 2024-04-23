@@ -46,10 +46,10 @@ public abstract class BatchQueue {
         this.currentBatch = 0;
     }
 
-    public static int computeBatchSize(long totalSize, int minBatchSize, int concurrency) {
+    public static int computeBatchSize(long totalSize, int minBatchSize, Concurrency concurrency) {
         return Math.toIntExact(Math.min(
             Integer.MAX_VALUE,
-            ParallelUtil.adjustedBatchSize(totalSize, new Concurrency(concurrency), minBatchSize)
+            ParallelUtil.adjustedBatchSize(totalSize, concurrency, minBatchSize)
         ));
     }
 
@@ -57,7 +57,7 @@ public abstract class BatchQueue {
         return consecutive(totalSize, DEFAULT_BATCH_SIZE);
     }
 
-    public static BatchQueue consecutive(long totalSize, int minBatchSize, int concurrency) {
+    public static BatchQueue consecutive(long totalSize, int minBatchSize, Concurrency concurrency) {
         return consecutive(totalSize, computeBatchSize(totalSize, minBatchSize, concurrency));
     }
 

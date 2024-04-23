@@ -33,6 +33,7 @@ import org.neo4j.gds.beta.generator.RandomGraphGeneratorBuilder;
 import org.neo4j.gds.beta.generator.RelationshipDistribution;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.CSRGraphStoreUtil;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfig;
 import org.neo4j.gds.projection.GraphProjectFromStoreConfigImpl;
@@ -105,7 +106,7 @@ final class GraphInfoTest {
             DatabaseId.of("test"),
             graph,
             Optional.empty(),
-            1
+            new Concurrency(1)
         );
 
         return constructor.apply(storeConfig, graphStore);
