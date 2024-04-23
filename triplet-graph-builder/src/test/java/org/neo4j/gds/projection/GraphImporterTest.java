@@ -62,7 +62,7 @@ class GraphImporterTest {
         for (int i = 0; i < 2; i++) {
             importer.update(
                 i,
-                i+1,
+                i + 1,
                 null,
                 null,
                 NodeLabelTokens.empty(),
@@ -101,11 +101,11 @@ class GraphImporterTest {
         for (int i = 0; i < 2; i++) {
             importer.update(
                 i,
-                i+1,
+                i + 1,
                 null,
                 null,
-                NodeLabelTokens.ofStrings("Label"+i),
-                NodeLabelTokens.ofStrings("Label"+(i +1)),
+                NodeLabelTokens.ofStrings("Label" + i),
+                NodeLabelTokens.ofStrings("Label" + (i + 1)),
                 RelationshipType.ALL_RELATIONSHIPS,
                 null
             );
@@ -138,9 +138,9 @@ class GraphImporterTest {
         for (int i = 0; i < 2; i++) {
             importer.update(
                 i,
-                i+1,
+                i + 1,
                 PropertyValues.of(Map.of("prop", Values.longValue(i))),
-                PropertyValues.of(Map.of("prop", Values.longValue(i+1))),
+                PropertyValues.of(Map.of("prop", Values.longValue(i + 1))),
                 NodeLabelTokens.empty(),
                 NodeLabelTokens.empty(),
                 RelationshipType.ALL_RELATIONSHIPS,
@@ -174,15 +174,15 @@ class GraphImporterTest {
         );
 
         for (int i = 0; i < 2; i++) {
-            var j = i+1;
+            var j = i + 1;
 
             importer.update(
                 i,
-                i+1,
+                i + 1,
                 PropertyValues.of(Map.of("prop" + i, Values.longValue(i))),
                 PropertyValues.of(Map.of("prop" + j, Values.longValue(j))),
-                NodeLabelTokens.ofStrings("Label"+i),
-                NodeLabelTokens.ofStrings("Label"+(j)),
+                NodeLabelTokens.ofStrings("Label" + i),
+                NodeLabelTokens.ofStrings("Label" + (j)),
                 RelationshipType.ALL_RELATIONSHIPS,
                 null
             );
@@ -215,12 +215,12 @@ class GraphImporterTest {
         for (int i = 0; i < 2; i++) {
             importer.update(
                 i,
-                i+1,
+                i + 1,
                 null,
                 null,
                 NodeLabelTokens.empty(),
                 NodeLabelTokens.empty(),
-                RelationshipType.of("REL"+i),
+                RelationshipType.of("REL" + i),
                 null
             );
         }
@@ -254,12 +254,12 @@ class GraphImporterTest {
         for (int i = 0; i < 2; i++) {
             importer.update(
                 i,
-                i+1,
+                i + 1,
                 null,
                 null,
                 NodeLabelTokens.empty(),
                 NodeLabelTokens.empty(),
-                RelationshipType.of("REL"+i),
+                RelationshipType.of("REL" + i),
                 PropertyValues.of(Map.of("prop" + i, Values.longValue(i)))
             );
         }

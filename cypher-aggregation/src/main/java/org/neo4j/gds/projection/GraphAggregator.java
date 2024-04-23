@@ -274,6 +274,7 @@ abstract class GraphAggregator implements CompatUserAggregator {
             .databaseId(this.databaseId)
             .databaseLocation(DatabaseLocation.LOCAL)
             .build();
+
         this.result = importer.result(
             databaseInfo,
             this.progressTimer,

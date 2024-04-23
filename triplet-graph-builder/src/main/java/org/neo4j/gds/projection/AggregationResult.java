@@ -19,8 +19,11 @@
  */
 package org.neo4j.gds.projection;
 
+import org.neo4j.gds.annotation.GenerateBuilder;
+
 import java.util.Map;
 
+@GenerateBuilder
 public record AggregationResult(
     String graphName,
     long nodeCount,

@@ -141,9 +141,9 @@ public final class GraphImporter {
     ) {
         var graphName = config.graphName();
 
-        // in case something else has written something with the same graph name
-        // validate again before doing the heavier graph building
-//        validateGraphName(config.graphName(), config.username(), databaseInfo.databaseId());
+        if (GraphStoreCatalog.exists(config.username(), databaseInfo.databaseId(), graphName)) {
+            throw new IllegalArgumentException("Graph " + graphName + " already exists");
+        }
 
         this.idMapBuilder.prepareForFlush();
 
@@ -165,18 +165,18 @@ public final class GraphImporter {
 
         var projectMillis = timer.stop().getDuration();
 
-        return new AggregationResult(
-            graphName,
-            graphStore.nodeCount(),
-            graphStore.relationshipCount(),
-            projectMillis,
-            this.config.asProcedureResultConfigurationField()
+        return AggregationResultBuilder.builder()
+            .graphName(graphName)
+            .nodeCount(graphStore.nodeCount())
+            .relationshipCount(graphStore.relationshipCount())
+            .projectMillis(projectMillis)
+            .configuration(this.config.asProcedureResultConfigurationField()
                 .entrySet()
                 .stream()
                 .filter(e -> e.getValue() != null)
-                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue)),
-            this.query
-        );
+                .collect(toMap(Map.Entry::getKey, Map.Entry::getValue)))
+            .query(this.query)
+            .build();
     }
 
     private RelationshipsBuilder newRelImporter(RelationshipType relType, @Nullable PropertyValues properties) {
