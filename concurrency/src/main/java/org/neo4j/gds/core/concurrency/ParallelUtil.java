@@ -20,11 +20,7 @@
 package org.neo4j.gds.core.concurrency;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.core.utils.partition.Partition;
-import org.neo4j.gds.core.utils.partition.PartitionConsumer;
-import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.utils.CloseableThreadLocal;
 import org.neo4j.gds.utils.ExceptionUtil;
 
 import java.util.ArrayList;
@@ -54,7 +50,6 @@ import java.util.function.LongConsumer;
 import java.util.function.Supplier;
 import java.util.stream.BaseStream;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -115,25 +110,6 @@ public final class ParallelUtil {
     }
 
     /**
-     * This method is useful, when |partitions| is greatly larger than concurrency as we only create a single consumer per thread.
-     * Compared to parallelForEachNode, thread local state does not need to be resolved for each node but only per partition.
-     */
-    public static <P extends Partition> void parallelPartitionsConsume(
-        RunWithConcurrency.Builder runnerBuilder,
-        Stream<P> partitions,
-        Supplier<PartitionConsumer<P>> taskSupplier
-    ) {
-        try (
-            var localConsumer = CloseableThreadLocal.withInitial(taskSupplier)
-        ) {
-            var taskStream = partitions.map(partition -> (Runnable) () -> localConsumer.get().consume(partition));
-            runnerBuilder.tasks(taskStream);
-            runnerBuilder.run();
-        }
-
-    }
-
-    /**
      * @return the number of threads required to compute elementCount with the given batchSize
      */
     public static int threadCount(final int batchSize, final int elementCount) {
@@ -147,7 +123,7 @@ public final class ParallelUtil {
         if (batchSize >= elementCount) {
             return 1;
         }
-        return BitUtil.ceilDiv(elementCount, batchSize);
+        return ceilDiv(elementCount, batchSize);
     }
 
     /**
@@ -187,11 +163,30 @@ public final class ParallelUtil {
         if (batchSize <= 0L) {
             batchSize = 1L;
         }
-        batchSize = BitUtil.nextHighestPowerOfTwo(batchSize);
+        batchSize = nextHighestPowerOfTwo(batchSize);
         while (((nodeCount + batchSize + 1L) / batchSize) > (long) Integer.MAX_VALUE) {
             batchSize = batchSize << 1;
         }
         return batchSize;
+    }
+
+    private static long ceilDiv(long dividend, long divisor) {
+        return 1L + (-1L + dividend) / divisor;
+    }
+
+    /**
+     * returns the next highest power of two, or the current value if it's already a power of two or zero
+     */
+    private static long nextHighestPowerOfTwo(long v) {
+        v--;
+        v |= v >> 1L;
+        v |= v >> 2L;
+        v |= v >> 4L;
+        v |= v >> 8L;
+        v |= v >> 16L;
+        v |= v >> 32L;
+        v++;
+        return v;
     }
 
     public static boolean canRunInParallel(@Nullable ExecutorService executor) {

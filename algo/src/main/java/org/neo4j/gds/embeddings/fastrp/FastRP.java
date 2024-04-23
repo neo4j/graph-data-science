@@ -35,6 +35,7 @@ import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.ml.core.features.FeatureConsumer;
 import org.neo4j.gds.ml.core.features.FeatureExtraction;
 import org.neo4j.gds.ml.core.features.FeatureExtractor;
+import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.util.Arrays;
 import java.util.List;
@@ -42,6 +43,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.addInPlace;
 import static org.neo4j.gds.ml.core.tensor.operations.FloatVectorOperations.addWeightedInPlace;
@@ -198,7 +200,7 @@ public class FastRP extends Algorithm<FastRPResult> {
                 firstIteration
             );
 
-            ParallelUtil.parallelPartitionsConsume(
+            parallelPartitionsConsume(
                 RunWithConcurrency.builder().executor(DefaultPool.INSTANCE).concurrency(concurrency),
                 partitions.stream(),
                 taskSupplier
@@ -208,6 +210,23 @@ public class FastRP extends Algorithm<FastRPResult> {
         }
         progressTracker.endSubTask();
     }
+
+    /**
+     * This method is useful, when |partitions| is greatly larger than concurrency as we only create a single consumer per thread.
+     * Compared to parallelForEachNode, thread local state does not need to be resolved for each node but only per partition.
+     */
+    public static <P extends Partition> void parallelPartitionsConsume(
+        RunWithConcurrency.Builder runnerBuilder,
+        Stream<P> partitions,
+        Supplier<PartitionConsumer<P>> taskSupplier
+    ) {
+        try (var localConsumer = CloseableThreadLocal.withInitial(taskSupplier)) {
+            var taskStream = partitions.map(partition -> (Runnable) () -> localConsumer.get().consume(partition));
+            runnerBuilder.tasks(taskStream);
+            runnerBuilder.run();
+        }
+    }
+
 
     @TestOnly
     HugeObjectArray<float[]> currentEmbedding(int iteration) {

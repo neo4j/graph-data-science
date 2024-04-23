@@ -35,6 +35,9 @@ project(':collections-generator').projectDir = file('collections-generator')
 include('collections-memory-estimation')
 project(':collections-memory-estimation').projectDir = file('collections-memory-estimation')
 
+include('concurrency')
+project(':concurrency').projectDir = file('concurrency')
+
 include('concurrency-validation-api')
 project(':concurrency-validation-api').projectDir = file('concurrency-validation-api')
 
