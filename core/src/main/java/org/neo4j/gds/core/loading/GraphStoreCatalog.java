@@ -23,8 +23,8 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.api.EphemeralResultStore;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.utils.ExceptionUtil;
@@ -173,7 +173,7 @@ public final class GraphStoreCatalog {
         return get(CatalogRequest.of(username, databaseName), graphName);
     }
 
-    public static void set(GraphProjectConfig config, GraphStore graphStore, ResultStore resultStore) {
+    public static void set(GraphProjectConfig config, GraphStore graphStore) {
         userCatalogs.compute(config.username(), (user, userCatalog) -> {
             if (userCatalog == null) {
                 userCatalog = new UserCatalog();
@@ -181,8 +181,7 @@ public final class GraphStoreCatalog {
             userCatalog.set(
                 UserCatalog.UserCatalogKey.of(graphStore.databaseInfo().databaseId(), config.graphName()),
                 config,
-                graphStore,
-                resultStore
+                graphStore
             );
             return userCatalog;
         });
@@ -312,14 +311,13 @@ public final class GraphStoreCatalog {
         private void set(
             UserCatalogKey userCatalogKey,
             GraphProjectConfig config,
-            GraphStore graphStore,
-            ResultStore resultStore
+            GraphStore graphStore
         ) {
             if (config.graphName() == null || graphStore == null) {
                 throw new IllegalArgumentException("Both name and graph store must be not null");
             }
 
-            GraphStoreCatalogEntry graphStoreCatalogEntry = new GraphStoreCatalogEntry(graphStore, config, resultStore);
+            GraphStoreCatalogEntry graphStoreCatalogEntry = new GraphStoreCatalogEntry(graphStore, config, new EphemeralResultStore());
 
             if (graphsByName.containsKey(userCatalogKey)) {
                 throw new IllegalStateException(

@@ -23,7 +23,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
@@ -175,7 +174,7 @@ public class GraphStoreCatalogService {
         return GraphStoreCatalog.getGraphStores(user.getUsername());
     }
 
-    public void set(GraphProjectConfig configuration, GraphStore graphStore, ResultStore resultStore) {
-        GraphStoreCatalog.set(configuration, graphStore, resultStore);
+    public void set(GraphProjectConfig configuration, GraphStore graphStore) {
+        GraphStoreCatalog.set(configuration, graphStore);
     }
 }

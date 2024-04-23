@@ -20,7 +20,6 @@
 package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 
@@ -28,6 +27,6 @@ public interface GraphStoreLoader {
     GraphProjectConfig graphProjectConfig();
 
     GraphStore graphStore();
-    ResultStore resultStore();
+
     GraphDimensions graphDimensions();
 }

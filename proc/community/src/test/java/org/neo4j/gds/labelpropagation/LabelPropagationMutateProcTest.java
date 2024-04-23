@@ -53,7 +53,6 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -188,8 +187,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
 
         GraphStoreCatalog.set(
             allNodesAndRelationshipsProjectConfig(testGraphName),
-            initialGraphStore,
-            ResultStore.EMPTY
+            initialGraphStore
         );
 
         var mutateQuery = GdsCypher
@@ -315,7 +313,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
         RelationshipProjections.ALL.projections().forEach((relationshipType, projection) ->
             storeLoaderBuilder.putRelationshipProjectionsWithIdentifier(relationshipType.name(), projection));
         GraphLoader loader = storeLoaderBuilder.build();
-        GraphStoreCatalog.set(loader.projectConfig(), loader.graphStore(), ResultStore.EMPTY);
+        GraphStoreCatalog.set(loader.projectConfig(), loader.graphStore());
         var logMock = mock(org.neo4j.gds.logging.Log.class);
         when(logMock.getNeo4jLog()).thenReturn(Neo4jProxy.testLog());
 
@@ -427,7 +425,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
             .graphStore();
 
         var graphProjectConfig = allNodesAndRelationshipsProjectConfig(TEST_GRAPH_NAME);
-        GraphStoreCatalog.set(graphProjectConfig, graphStore, ResultStore.EMPTY);
+        GraphStoreCatalog.set(graphProjectConfig, graphStore);
 
         Map<String, Object> config = Map.of(
             "nodeLabels", Collections.singletonList("A"),
@@ -593,7 +591,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
                     .relationshipProjections(RelationshipProjections.ALL)
                     .build();
                 var graphStore = graphLoader(graphProjectConfig).graphStore();
-                GraphStoreCatalog.set(graphProjectConfig, graphStore, ResultStore.EMPTY);
+                GraphStoreCatalog.set(graphProjectConfig, graphStore);
                 methods.forEach(method -> {
                     Map<String, Object> config = Map.of("mutateProperty", MUTATE_PROPERTY);
                     try {
@@ -611,7 +609,7 @@ public class LabelPropagationMutateProcTest extends BaseProcTest {
     private String ensureGraphExists() {
         String loadedGraphName = "loadGraph";
         GraphProjectConfig graphProjectConfig = allNodesAndRelationshipsProjectConfig(loadedGraphName);
-        GraphStoreCatalog.set(graphProjectConfig, graphLoader(graphProjectConfig).graphStore(), ResultStore.EMPTY);
+        GraphStoreCatalog.set(graphProjectConfig, graphLoader(graphProjectConfig).graphStore());
         return loadedGraphName;
     }
 

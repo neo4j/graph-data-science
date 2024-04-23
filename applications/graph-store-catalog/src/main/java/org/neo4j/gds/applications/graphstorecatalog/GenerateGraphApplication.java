@@ -20,7 +20,6 @@
 package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.neo4j.gds.api.DatabaseId;
-import org.neo4j.gds.api.EphemeralResultStore;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.beta.generator.PropertyProducer;
@@ -93,7 +92,7 @@ public class GenerateGraphApplication {
             stats.nodes = graphStore.nodeCount();
             stats.relationships = graphStore.relationshipCount();
 
-            graphStoreCatalogService.set(config, graphStore, new EphemeralResultStore());
+            graphStoreCatalogService.set(config, graphStore);
         }
 
         return stats;

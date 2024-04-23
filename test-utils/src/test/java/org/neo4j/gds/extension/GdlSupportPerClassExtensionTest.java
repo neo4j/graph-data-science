@@ -22,7 +22,6 @@ package org.neo4j.gds.extension;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 
@@ -40,7 +39,7 @@ class GdlSupportPerClassExtensionTest {
     @BeforeAll
     void setUp() {
         var graphProjectConfig = GraphProjectConfig.emptyWithName("", "graph");
-        GraphStoreCatalog.set(graphProjectConfig, graphStore, ResultStore.EMPTY);
+        GraphStoreCatalog.set(graphProjectConfig, graphStore);
     }
 
     @Test

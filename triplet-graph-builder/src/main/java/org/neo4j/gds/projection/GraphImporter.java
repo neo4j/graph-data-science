@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseInfo;
 import org.neo4j.gds.api.DefaultValue;
-import org.neo4j.gds.api.EphemeralResultStore;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.compress.AdjacencyCompressor;
 import org.neo4j.gds.api.schema.ImmutableMutableGraphSchema;
@@ -163,7 +162,7 @@ public final class GraphImporter {
 
         var graphStore = graphStoreBuilder.schema(this.graphSchemaBuilder.build()).build();
 
-        GraphStoreCatalog.set(this.config, graphStore, new EphemeralResultStore());
+        GraphStoreCatalog.set(this.config, graphStore);
 
         var projectMillis = timer.stop().getDuration();
 

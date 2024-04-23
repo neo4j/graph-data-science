@@ -21,7 +21,6 @@ package org.neo4j.gds.applications.graphstorecatalog;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
-import org.neo4j.gds.api.EphemeralResultStore;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.beta.filter.GraphFilterResult;
 import org.neo4j.gds.beta.filter.GraphStoreFilterService;
@@ -152,7 +151,7 @@ public class SubGraphProjectApplication {
             progressTracker
         );
 
-        graphStoreCatalogService.set(configuration, graphStore, new EphemeralResultStore());
+        graphStoreCatalogService.set(configuration, graphStore);
 
         return Pair.of(graphStore.nodeCount(), graphStore.relationshipCount());
     }

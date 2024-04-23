@@ -42,7 +42,6 @@ import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.ImmutableGraphLoaderContext;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.catalog.GraphProjectProc;
@@ -256,7 +255,7 @@ class WccStatsProcTest extends BaseProcTest {
                     .relationshipProjections(RelationshipProjections.ALL)
                     .build();
                 var graphStore = graphLoader(graphProjectConfig).graphStore();
-                GraphStoreCatalog.set(graphProjectConfig, graphStore, ResultStore.EMPTY);
+                GraphStoreCatalog.set(graphProjectConfig, graphStore);
                 methods.forEach(method -> {
                     try {
                         Stream<?> result = (Stream<?>) method.invoke(proc, graphName, Map.of());

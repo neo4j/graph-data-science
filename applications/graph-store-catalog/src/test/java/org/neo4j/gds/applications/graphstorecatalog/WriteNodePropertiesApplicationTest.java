@@ -98,11 +98,10 @@ class WriteNodePropertiesApplicationTest {
 
     @BeforeEach
     void setUp() {
-        GraphStoreCatalog.set(GraphProjectConfig.emptyWithName("user", "g"), graphStore, ResultStore.EMPTY);
+        GraphStoreCatalog.set(GraphProjectConfig.emptyWithName("user", "g"), graphStore);
         GraphStoreCatalog.set(
             GraphProjectConfig.emptyWithName("user", "propertiesSubsetGraph"),
-            propertiesSubsetGraphStore,
-            ResultStore.EMPTY
+            propertiesSubsetGraphStore
         );
     }
 

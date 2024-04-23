@@ -34,7 +34,6 @@ import org.neo4j.gds.PropertyMapping;
 import org.neo4j.gds.RelationshipProjection;
 import org.neo4j.gds.RelationshipProjections;
 import org.neo4j.gds.StoreLoaderWithConfigBuilder;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.extension.Neo4jGraph;
@@ -193,7 +192,7 @@ class GraphSageMutateProcTest extends BaseProcTest {
             .graphProjectConfig(config)
             .build()
             .graphStore();
-        GraphStoreCatalog.set(config, graphStore, ResultStore.EMPTY);
+        GraphStoreCatalog.set(config, graphStore);
 
         String query = GdsCypher.call(config.graphName())
             .algo("gds.beta.graphSage")

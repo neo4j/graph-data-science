@@ -27,7 +27,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
@@ -91,7 +90,7 @@ class GraphSamplingApplicationTest {
 
     @BeforeEach
     void setUp() {
-        GraphStoreCatalog.set(GraphProjectConfig.emptyWithName("user", "graph"), graphStore, ResultStore.EMPTY);
+        GraphStoreCatalog.set(GraphProjectConfig.emptyWithName("user", "graph"), graphStore);
     }
 
     @AfterEach

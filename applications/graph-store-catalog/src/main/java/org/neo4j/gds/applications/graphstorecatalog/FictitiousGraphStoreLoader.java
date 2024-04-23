@@ -22,7 +22,6 @@ package org.neo4j.gds.applications.graphstorecatalog;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
@@ -87,14 +86,6 @@ public class FictitiousGraphStoreLoader implements GraphStoreCreator {
     public GraphStore graphStore() {
         throw new UnsupportedOperationException(formatWithLocale(
             "%s does not support creating a graph store",
-            this.getClass().getSimpleName()
-        ));
-    }
-
-    @Override
-    public ResultStore resultStore() {
-        throw new UnsupportedOperationException(formatWithLocale(
-            "%s does not support creating a result store",
             this.getClass().getSimpleName()
         ));
     }

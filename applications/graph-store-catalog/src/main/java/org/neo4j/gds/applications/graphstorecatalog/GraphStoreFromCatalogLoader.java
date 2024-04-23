@@ -24,7 +24,6 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.BaseConfig;
 import org.neo4j.gds.config.ElementTypeValidator;
@@ -49,7 +48,6 @@ public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
 
     private final AlgoBaseConfig config;
     private final GraphStore graphStore;
-    private final ResultStore resultStore;
     private final GraphProjectConfig graphProjectConfig;
 
     public GraphStoreFromCatalogLoader(
@@ -62,7 +60,6 @@ public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
         this.config = config;
         var catalogEntry = graphStoreFromCatalog(graphName, config, username, databaseId, isGdsAdmin);
         this.graphStore = catalogEntry.graphStore();
-        this.resultStore = catalogEntry.resultStore();
         this.graphProjectConfig = catalogEntry.config();
     }
 
@@ -74,11 +71,6 @@ public final class GraphStoreFromCatalogLoader implements GraphStoreLoader {
     @Override
     public GraphStore graphStore() {
         return this.graphStore;
-    }
-
-    @Override
-    public ResultStore resultStore() {
-        return this.resultStore;
     }
 
     @Override

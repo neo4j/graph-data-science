@@ -27,7 +27,6 @@ import org.neo4j.gds.api.AlgorithmMetaDataSetter;
 import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
-import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
@@ -67,7 +66,7 @@ class ProcedureExecutorTest {
 
     @BeforeEach
     void setUp() {
-        GraphStoreCatalog.set(GraphProjectConfig.emptyWithName("", "graph"), graphStore, ResultStore.EMPTY);
+        GraphStoreCatalog.set(GraphProjectConfig.emptyWithName("", "graph"), graphStore);
     }
 
     @AfterEach

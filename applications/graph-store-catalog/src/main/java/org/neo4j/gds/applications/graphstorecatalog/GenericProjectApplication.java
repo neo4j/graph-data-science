@@ -146,13 +146,12 @@ public class GenericProjectApplication<RESULT extends GraphProjectResult, CONFIG
                 graphLoaderContext
             );
             var graphStore = graphStoreCreator.graphStore();
-            var resultStore = graphStoreCreator.resultStore();
 
             resultBuilder
                 .withNodeCount(graphStore.nodeCount())
                 .withRelationshipCount(graphStore.relationshipCount());
 
-            graphStoreCatalogService.set(configuration, graphStore, resultStore);
+            graphStoreCatalogService.set(configuration, graphStore);
         }
 
         return resultBuilder.build();

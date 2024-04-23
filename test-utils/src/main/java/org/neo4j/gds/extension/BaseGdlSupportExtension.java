@@ -36,6 +36,7 @@ import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.loading.CSRGraphStore;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
+import org.neo4j.gds.core.loading.ImmutableCatalogRequest;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
 
@@ -147,10 +148,16 @@ public abstract class BaseGdlSupportExtension {
         CSRGraph graph = graphStore.getUnion();
         IdFunction idFunction = gdlFactory::nodeId;
         TestGraph testGraph = new TestGraph(graph, idFunction, graphName);
-        ResultStore resultStore = new EphemeralResultStore();
 
+        ResultStore resultStore;
         if (gdlGraphSetup.addToCatalog()) {
-            GraphStoreCatalog.set(graphProjectConfig, graphStore, resultStore);
+            GraphStoreCatalog.set(graphProjectConfig, graphStore);
+            resultStore = GraphStoreCatalog.get(ImmutableCatalogRequest.of(
+                graphProjectConfig.username(),
+                graphStore.databaseInfo().databaseId()
+            ), graphName).resultStore();
+        } else {
+            resultStore = new EphemeralResultStore();
         }
 
         context.getRequiredTestInstances().getAllInstances().forEach(testInstance -> {
