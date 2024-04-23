@@ -23,7 +23,6 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfig;
 
 public class SimilarityAlgorithmsStreamBusinessFacade {
 
@@ -31,15 +30,6 @@ public class SimilarityAlgorithmsStreamBusinessFacade {
 
     public SimilarityAlgorithmsStreamBusinessFacade(SimilarityAlgorithmsFacade similarityAlgorithmsFacade) {
         this.similarityAlgorithmsFacade = similarityAlgorithmsFacade;
-    }
-
-    public StreamComputationResult<NodeSimilarityResult> nodeSimilarity(
-        String graphName,
-        NodeSimilarityStreamConfig config
-    ) {
-        var result = similarityAlgorithmsFacade.nodeSimilarity(graphName, config);
-
-        return createStreamComputationResult(result);
     }
 
     public StreamComputationResult<NodeSimilarityResult> filteredNodeSimilarity(

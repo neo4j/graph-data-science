@@ -38,6 +38,7 @@ import org.neo4j.gds.similarity.filteredknn.FilteredKnnWriteConfig;
 import org.neo4j.gds.similarity.knn.KnnStatsConfig;
 import org.neo4j.gds.similarity.knn.KnnStreamConfig;
 import org.neo4j.gds.similarity.knn.KnnWriteConfig;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfig;
 
 import java.util.Map;
 import java.util.stream.Stream;
@@ -308,6 +309,34 @@ public final class SimilarityProcedureFacade {
 
     public NodeSimilarityMutateStub nodeSimilarityMutateStub() {
         return nodeSimilarityMutateStub;
+    }
+
+    public Stream<SimilarityResult> nodeSimilarityStream(String graphName, Map<String, Object> configuration) {
+        var resultBuilder = new NodeSimilarityResultBuilderForStreamMode();
+
+        return streamModeAlgorithmRunner.runStreamModeAlgorithm(
+            graphName,
+            configuration,
+            NodeSimilarityStreamConfig::of,
+            resultBuilder,
+            streamMode()::nodeSimilarity
+        );
+    }
+
+    public Stream<MemoryEstimateResult> nodeSimilarityStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationModeRunner.runEstimation(
+            algorithmConfiguration,
+            NodeSimilarityStreamConfig::of,
+            configuration -> estimationMode().nodeSimilarity(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
     }
 
     private SimilarityAlgorithmsEstimationModeBusinessFacade estimationMode() {

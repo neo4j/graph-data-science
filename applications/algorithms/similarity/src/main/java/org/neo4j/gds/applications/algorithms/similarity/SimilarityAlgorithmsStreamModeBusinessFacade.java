@@ -26,11 +26,14 @@ import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnStreamConfig;
 import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.knn.KnnStreamConfig;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
+import org.neo4j.gds.similarity.nodesim.NodeSimilarityStreamConfig;
 
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.FILTERED_KNN;
 import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.KNN;
+import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.NODE_SIMILARITY;
 
 public class SimilarityAlgorithmsStreamModeBusinessFacade {
     private final SimilarityAlgorithmsEstimationModeBusinessFacade estimationFacade;
@@ -74,6 +77,22 @@ public class SimilarityAlgorithmsStreamModeBusinessFacade {
             FILTERED_KNN,
             () -> estimationFacade.filteredKnn(configuration),
             graph -> similarityAlgorithms.filteredKnn(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT nodeSimilarity(
+        GraphName graphName,
+        NodeSimilarityStreamConfig configuration,
+        ResultBuilder<NodeSimilarityStreamConfig, NodeSimilarityResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            NODE_SIMILARITY,
+            () -> estimationFacade.nodeSimilarity(configuration),
+            graph -> similarityAlgorithms.nodeSimilarity(graph, configuration),
             Optional.empty(),
             resultBuilder
         );
