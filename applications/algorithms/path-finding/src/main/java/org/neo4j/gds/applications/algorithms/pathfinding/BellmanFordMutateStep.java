@@ -43,7 +43,8 @@ class BellmanFordMutateStep implements MutateOrWriteStep<BellmanFordResult, Rela
     public RelationshipsWritten execute(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore, BellmanFordResult result
+        ResultStore resultStore,
+        BellmanFordResult result
     ) {
         var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
 

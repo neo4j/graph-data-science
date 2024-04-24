@@ -182,7 +182,8 @@ class DefaultAlgorithmProcessingTemplateTest {
             public Long execute(
                 Graph graph,
                 GraphStore graphStore,
-                ResultStore resultStore, ExampleResult resultFromAlgorithm
+                ResultStore resultStore,
+                ExampleResult resultFromAlgorithm
             ) {
                 return 42L;
             }
