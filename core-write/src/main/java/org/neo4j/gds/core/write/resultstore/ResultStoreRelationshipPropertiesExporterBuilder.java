@@ -26,6 +26,7 @@ public class ResultStoreRelationshipPropertiesExporterBuilder extends Relationsh
 
     @Override
     public RelationshipPropertiesExporter build() {
-        return new ResultStoreRelationshipPropertiesExporter(graphStore, graphStore.resultStore(), toOriginalId);
+        var resultStore = this.resultStore.orElseThrow(() -> new IllegalStateException("A result store must be present"));
+        return new ResultStoreRelationshipPropertiesExporter(graphStore, resultStore, toOriginalId);
     }
 }
