@@ -66,7 +66,7 @@ public abstract class BaseProgressTest extends BaseTest {
                 task.setEstimatedMemoryRangeInBytes(MEMORY_ESTIMATION_RANGE);
             }
             if (withConcurrency) {
-                task.setMaxConcurrency(REQUESTED_CPU_CORES);
+                task.setMaxConcurrency(new Concurrency(REQUESTED_CPU_CORES));
             }
             var taskProgressTracker = new TaskProgressTracker(task, Neo4jProxy.testLog(), new Concurrency(1), taskRegistryFactory);
             taskProgressTracker.beginSubTask();
