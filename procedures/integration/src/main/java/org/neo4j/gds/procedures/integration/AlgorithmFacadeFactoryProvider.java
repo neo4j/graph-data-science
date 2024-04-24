@@ -129,7 +129,6 @@ class AlgorithmFacadeFactoryProvider {
             returnColumns,
             mutateNodePropertyService,
             writeNodePropertyService,
-            mutateRelationshipService,
             writeRelationshipService,
             algorithmRunner,
             algorithmEstimator,

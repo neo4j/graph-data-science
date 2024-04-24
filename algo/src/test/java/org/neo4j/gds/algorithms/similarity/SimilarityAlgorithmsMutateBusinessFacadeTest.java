@@ -70,7 +70,7 @@ class SimilarityAlgorithmsMutateBusinessFacadeTest {
 
         var mutateRelationshipService = mock(MutateRelationshipService.class);
 
-        var businessFacade = new SimilarityAlgorithmsMutateBusinessFacade(null, mutateRelationshipService);
+        var businessFacade = new SimilarityAlgorithmsMutateBusinessFacade(mutateRelationshipService);
 
         var mutateResult = businessFacade.mutate(
             algorithmResult,
@@ -115,7 +115,7 @@ class SimilarityAlgorithmsMutateBusinessFacadeTest {
         when(configurationMock.mutateProperty()).thenReturn("foo");
         when(configurationMock.mutateRelationshipType()).thenReturn("bar");
 
-        var businessFacade = new SimilarityAlgorithmsMutateBusinessFacade(null, mutateRelationshipService);
+        var businessFacade = new SimilarityAlgorithmsMutateBusinessFacade(mutateRelationshipService);
 
         var mutateResult = businessFacade.mutate(
             algorithmResult,
@@ -164,7 +164,7 @@ class SimilarityAlgorithmsMutateBusinessFacadeTest {
         when(configurationMock.mutateProperty()).thenReturn("bar");
         when(configurationMock.mutateRelationshipType()).thenReturn("foo");
 
-        var businessFacade = new SimilarityAlgorithmsMutateBusinessFacade(null, mutateRelationshipService);
+        var businessFacade = new SimilarityAlgorithmsMutateBusinessFacade(mutateRelationshipService);
 
 
         var mutateResult = businessFacade.mutate(

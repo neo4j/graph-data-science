@@ -27,6 +27,7 @@ import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnMutateConfig;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityMutateConfig;
 import org.neo4j.gds.similarity.knn.KnnMutateConfig;
 import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
@@ -36,6 +37,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.FILTERED_KNN;
+import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.FILTERED_NODE_SIMILARITY;
 import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.KNN;
 import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.NODE_SIMILARITY;
 
@@ -70,6 +72,29 @@ public class SimilarityAlgorithmsMutateModeBusinessFacade {
             FILTERED_KNN,
             () -> estimationFacade.filteredKnn(configuration),
             graph -> similarityAlgorithms.filteredKnn(graph, configuration),
+            Optional.of(mutateStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT filteredNodeSimilarity(
+        GraphName graphName,
+        FilteredNodeSimilarityMutateConfig configuration,
+        ResultBuilder<FilteredNodeSimilarityMutateConfig, NodeSimilarityResult, RESULT, Pair<RelationshipsWritten, Map<String, Object>>> resultBuilder,
+        boolean shouldComputeSimilarityDistribution
+    ) {
+        var mutateStep = FilteredNodeSimilarityMutateStep.create(
+            log,
+            configuration,
+            shouldComputeSimilarityDistribution
+        );
+
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            FILTERED_NODE_SIMILARITY,
+            () -> estimationFacade.filteredNodeSimilarity(configuration),
+            graph -> similarityAlgorithms.filteredNodeSimilarity(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
         );

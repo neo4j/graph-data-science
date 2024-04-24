@@ -27,6 +27,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnn;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnBaseConfig;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityMutateConfig;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.similarity.knn.ImmutableKnnContext;
 import org.neo4j.gds.similarity.knn.Knn;
@@ -43,6 +44,7 @@ import org.neo4j.gds.wcc.WccAlgorithmFactory;
 
 import java.util.List;
 
+import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.FILTERED_NODE_SIMILARITY;
 import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.KNN;
 import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.NODE_SIMILARITY;
 
@@ -68,6 +70,31 @@ public class SimilarityAlgorithms {
         var filteredKnn = selectAlgorithmConfiguration(graph, configuration, knnContext);
 
         return filteredKnn.compute();
+    }
+
+    NodeSimilarityResult filteredNodeSimilarity(Graph graph, FilteredNodeSimilarityMutateConfig configuration) {
+        var sourceNodeFilter = configuration.sourceNodeFilter().toNodeFilter(graph);
+        var targetNodeFilter = configuration.targetNodeFilter().toNodeFilter(graph);
+
+        var task = Tasks.task(
+            FILTERED_NODE_SIMILARITY,
+            filteredNodeSimilarityProgressTask(graph, configuration.useComponents().computeComponents()),
+            Tasks.leaf("compare node pairs")
+        );
+
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, task);
+
+        var algorithm = new NodeSimilarity(
+            graph,
+            configuration.toParameters(),
+            configuration.typedConcurrency(),
+            DefaultPool.INSTANCE,
+            progressTracker,
+            sourceNodeFilter,
+            targetNodeFilter
+        );
+
+        return algorithm.compute();
     }
 
     KnnResult knn(Graph graph, KnnBaseConfig configuration) {
@@ -133,6 +160,17 @@ public class SimilarityAlgorithms {
         );
 
         return algorithm.compute();
+    }
+
+    private Task filteredNodeSimilarityProgressTask(Graph graph, boolean runWcc) {
+        if (runWcc) {
+            return Tasks.task(
+                "prepare",
+                new WccAlgorithmFactory<>().progressTask(graph),
+                Tasks.leaf("initialize", graph.relationshipCount())
+            );
+        }
+        return Tasks.leaf("prepare", graph.relationshipCount());
     }
 
     private static FilteredKnn selectAlgorithmConfiguration(

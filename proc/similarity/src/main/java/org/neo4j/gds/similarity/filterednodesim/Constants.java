@@ -17,14 +17,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.applications.algorithms.similarity;
+package org.neo4j.gds.similarity.filterednodesim;
 
-/**
- * We need human-readable labels for e.g. progress tracking
- */
-interface AlgorithmLabels {
-    String FILTERED_KNN = "Filtered K-Nearest Neighbours";
-    String FILTERED_NODE_SIMILARITY = "Filtered Node Similarity";
-    String KNN = "K-Nearest Neighbours";
-    String NODE_SIMILARITY = "Node Similarity";
+class Constants {
+    static final String FILTERED_NODE_SIMILARITY_DESCRIPTION =
+        "The Filtered Node Similarity algorithm compares a set of nodes based on the nodes they are connected to. " +
+            "Two nodes are considered similar if they share many of the same neighbors. " +
+            "The algorithm computes pair-wise similarities based on Jaccard or Overlap metrics. " +
+            "The filtered variant supports limiting which nodes to compare via source and target node filters.";
 }

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.similarity.filterednodesim;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityMutateResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
@@ -33,21 +32,20 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
-import static org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamProc.DESCRIPTION;
+import static org.neo4j.gds.similarity.filterednodesim.Constants.FILTERED_NODE_SIMILARITY_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class FilteredNodeSimilarityMutateProc  extends BaseProc {
-
+public class FilteredNodeSimilarityMutateProc {
     @Context
     public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.nodeSimilarity.filtered.mutate", mode = READ)
-    @Description(DESCRIPTION)
+    @Description(FILTERED_NODE_SIMILARITY_DESCRIPTION)
     public Stream<SimilarityMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.similarity().filteredNodeSimilarityMutate(graphName, configuration);
+        return facade.similarity().theOtherFacade().filteredNodeSimilarityMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(name = "gds.nodeSimilarity.filtered.mutate.estimate", mode = READ)
@@ -56,21 +54,19 @@ public class FilteredNodeSimilarityMutateProc  extends BaseProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.similarity().filteredNodeSimilarityEstimateMutate(graphNameOrConfiguration, algoConfiguration);
+        return facade.similarity().theOtherFacade().filteredNodeSimilarityMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Deprecated(forRemoval = true)
     @Internal
     @Procedure(name = "gds.alpha.nodeSimilarity.filtered.mutate", mode = READ, deprecatedBy = "gds.nodeSimilarity.filtered.mutate")
-    @Description(DESCRIPTION)
+    @Description(FILTERED_NODE_SIMILARITY_DESCRIPTION)
     public Stream<SimilarityMutateResult> mutateAlpha(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.alpha.nodeSimilarity.filtered.mutate");
-        executionContext()
+        facade.deprecatedProcedures().called("gds.alpha.nodeSimilarity.filtered.mutate");
+        facade
             .log()
             .warn("Procedure `gds.alpha.nodeSimilarity.filtered.mutate` has been deprecated, please use `gds.nodeSimilarity.filtered.mutate`.");
 
@@ -80,15 +76,13 @@ public class FilteredNodeSimilarityMutateProc  extends BaseProc {
     @Deprecated(forRemoval = true)
     @Internal
     @Procedure(name = "gds.alpha.nodeSimilarity.filtered.mutate.estimate", mode = READ, deprecatedBy = "gds.nodeSimilarity.filtered.mutate.estimate")
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateAlpha(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.alpha.nodeSimilarity.filtered.mutate.estimate");
-        executionContext()
+        facade.deprecatedProcedures().called("gds.alpha.nodeSimilarity.filtered.mutate.estimate");
+        facade
             .log()
             .warn("Procedure `gds.alpha.nodeSimilarity.filtered.mutate.estimate` has been deprecated, please use `gds.nodeSimilarity.filtered.mutate.estimate`.");
 

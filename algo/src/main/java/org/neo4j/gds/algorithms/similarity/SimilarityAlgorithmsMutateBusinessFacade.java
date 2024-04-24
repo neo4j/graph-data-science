@@ -21,53 +21,22 @@ package org.neo4j.gds.algorithms.similarity;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.RelationshipMutateResult;
-import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.algorithms.similarity.specificfields.SimilaritySpecificFields;
-import org.neo4j.gds.algorithms.similarity.specificfields.SimilaritySpecificFieldsWithDistribution;
 import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.config.MutateRelationshipPropertyConfig;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
-import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityMutateConfig;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static org.neo4j.gds.algorithms.similarity.SimilarityResultCompanion.NODE_SIMILARITY_SPECIFIC_FIELDS_SUPPLIER;
-
 public class SimilarityAlgorithmsMutateBusinessFacade {
 
-    private final SimilarityAlgorithmsFacade similarityAlgorithmsFacade;
     private final MutateRelationshipService mutateRelationshipService;
 
     public SimilarityAlgorithmsMutateBusinessFacade(
-        SimilarityAlgorithmsFacade similarityAlgorithmsFacade,
         MutateRelationshipService mutateRelationshipService
     ) {
-        this.similarityAlgorithmsFacade = similarityAlgorithmsFacade;
         this.mutateRelationshipService = mutateRelationshipService;
-    }
-
-    public RelationshipMutateResult<SimilaritySpecificFieldsWithDistribution> filteredNodeSimilarity(
-        String graphName,
-        FilteredNodeSimilarityMutateConfig configuration,
-        boolean computeSimilarityDistribution
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = AlgorithmRunner.runWithTiming(
-            () -> similarityAlgorithmsFacade.filteredNodeSimilarity(graphName, configuration)
-        );
-        var algorithmResult = intermediateResult.algorithmResult;
-
-        return mutate(
-            algorithmResult,
-            configuration,
-            NodeSimilarityResult::graphResult,
-            NODE_SIMILARITY_SPECIFIC_FIELDS_SUPPLIER,
-            intermediateResult.computeMilliseconds,
-            () -> SimilaritySpecificFieldsWithDistribution.EMPTY,
-            computeSimilarityDistribution
-        );
     }
 
     <RESULT, ASF extends SimilaritySpecificFields, CONFIG extends MutateRelationshipConfig & MutateRelationshipPropertyConfig> RelationshipMutateResult<ASF> mutate(

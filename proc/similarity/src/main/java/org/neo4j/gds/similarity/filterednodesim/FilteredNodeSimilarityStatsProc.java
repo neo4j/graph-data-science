@@ -19,10 +19,9 @@
  */
 package org.neo4j.gds.similarity.filterednodesim;
 
-import org.neo4j.gds.BaseProc;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityStatsResult;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -33,20 +32,19 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
-import static org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamProc.DESCRIPTION;
+import static org.neo4j.gds.similarity.filterednodesim.Constants.FILTERED_NODE_SIMILARITY_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class FilteredNodeSimilarityStatsProc extends BaseProc {
-
+public class FilteredNodeSimilarityStatsProc {
     @Context
     public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.nodeSimilarity.filtered.stats", mode = READ)
-    @Description(DESCRIPTION)
+    @Description(FILTERED_NODE_SIMILARITY_DESCRIPTION)
     public Stream<SimilarityStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ){
+    ) {
         return facade.similarity().filteredNodeSimilarityStats(graphName, configuration);
     }
 
@@ -62,15 +60,13 @@ public class FilteredNodeSimilarityStatsProc extends BaseProc {
     @Deprecated(forRemoval = true)
     @Internal
     @Procedure(value = "gds.alpha.nodeSimilarity.filtered.stats", mode = READ, deprecatedBy = "gds.nodeSimilarity.filtered.stats")
-    @Description(DESCRIPTION)
+    @Description(FILTERED_NODE_SIMILARITY_DESCRIPTION)
     public Stream<SimilarityStatsResult> statsAlpha(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
-    ){
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.alpha.nodeSimilarity.filtered.stats");
-        executionContext()
+    ) {
+        facade.deprecatedProcedures().called("gds.alpha.nodeSimilarity.filtered.stats");
+        facade
             .log()
             .warn("Procedure `gds.alpha.nodeSimilarity.filtered.stats` has been deprecated, please use `gds.nodeSimilarity.filtered.stats`.");
 
@@ -80,15 +76,13 @@ public class FilteredNodeSimilarityStatsProc extends BaseProc {
     @Deprecated(forRemoval = true)
     @Internal
     @Procedure(value = "gds.alpha.nodeSimilarity.filtered.stats.estimate", mode = READ, deprecatedBy = "gds.nodeSimilarity.filtered.stats.estimate")
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimateAlpha(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        executionContext()
-            .metricsFacade()
-            .deprecatedProcedures().called("gds.alpha.nodeSimilarity.filtered.stats.estimate");
-        executionContext()
+        facade.deprecatedProcedures().called("gds.alpha.nodeSimilarity.filtered.stats.estimate");
+        facade
             .log()
             .warn("Procedure `gds.alpha.nodeSimilarity.filtered.stats.estimate` has been deprecated, please use `gds.nodeSimilarity.filtered.stats.estimate`.");
 

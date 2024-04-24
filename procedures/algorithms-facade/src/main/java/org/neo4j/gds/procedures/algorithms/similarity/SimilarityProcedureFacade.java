@@ -48,6 +48,7 @@ import java.util.stream.Stream;
 public final class SimilarityProcedureFacade {
     private final ProcedureReturnColumns procedureReturnColumns;
     private final FilteredKnnMutateStub filteredKnnMutateStub;
+    private final FilteredNodeSimilarityMutateStub filteredNodeSimilarityMutateStub;
     private final KnnMutateStub knnMutateStub;
     private final NodeSimilarityMutateStub nodeSimilarityMutateStub;
     private final ApplicationsFacade applicationsFacade;
@@ -59,6 +60,7 @@ public final class SimilarityProcedureFacade {
     private SimilarityProcedureFacade(
         ProcedureReturnColumns procedureReturnColumns,
         FilteredKnnMutateStub filteredKnnMutateStub,
+        FilteredNodeSimilarityMutateStub filteredNodeSimilarityMutateStub,
         KnnMutateStub knnMutateStub,
         NodeSimilarityMutateStub nodeSimilarityMutateStub,
         ApplicationsFacade applicationsFacade,
@@ -69,6 +71,7 @@ public final class SimilarityProcedureFacade {
     ) {
         this.procedureReturnColumns = procedureReturnColumns;
         this.filteredKnnMutateStub = filteredKnnMutateStub;
+        this.filteredNodeSimilarityMutateStub = filteredNodeSimilarityMutateStub;
         this.knnMutateStub = knnMutateStub;
         this.nodeSimilarityMutateStub = nodeSimilarityMutateStub;
         this.applicationsFacade = applicationsFacade;
@@ -88,6 +91,11 @@ public final class SimilarityProcedureFacade {
         WriteModeAlgorithmRunner writeModeAlgorithmRunner
     ) {
         var filteredKnnMutateStub = new FilteredKnnMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
+        var filteredNodeSimilarityMutateStub = new FilteredNodeSimilarityMutateStub(
+            genericStub,
+            applicationsFacade,
+            procedureReturnColumns
+        );
         var knnMutateStub = new KnnMutateStub(genericStub, applicationsFacade, procedureReturnColumns);
         var nodeSimilarityMutateStub = new NodeSimilarityMutateStub(
             genericStub,
@@ -98,6 +106,7 @@ public final class SimilarityProcedureFacade {
         return new SimilarityProcedureFacade(
             procedureReturnColumns,
             filteredKnnMutateStub,
+            filteredNodeSimilarityMutateStub,
             knnMutateStub,
             nodeSimilarityMutateStub,
             applicationsFacade,
@@ -202,6 +211,10 @@ public final class SimilarityProcedureFacade {
         );
 
         return Stream.of(result);
+    }
+
+    public FilteredNodeSimilarityMutateStub filteredNodeSimilarityMutateStub() {
+        return filteredNodeSimilarityMutateStub;
     }
 
     public KnnMutateStub knnMutateStub() {

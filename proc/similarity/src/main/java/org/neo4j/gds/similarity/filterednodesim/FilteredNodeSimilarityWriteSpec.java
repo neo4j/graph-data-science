@@ -32,12 +32,12 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamProc.DESCRIPTION;
+import static org.neo4j.gds.similarity.filterednodesim.Constants.FILTERED_NODE_SIMILARITY_DESCRIPTION;
 
 @GdsCallable(
     name = "gds.nodeSimilarity.filtered.write",
     aliases = {"gds.alpha.nodeSimilarity.filtered.write"},
-    description = DESCRIPTION,
+    description = FILTERED_NODE_SIMILARITY_DESCRIPTION,
     executionMode = ExecutionMode.WRITE_RELATIONSHIP)
 public class FilteredNodeSimilarityWriteSpec implements
     AlgorithmSpec<NodeSimilarity, NodeSimilarityResult, FilteredNodeSimilarityWriteConfig, Stream<SimilarityWriteResult>, FilteredNodeSimilarityFactory<FilteredNodeSimilarityWriteConfig>> {

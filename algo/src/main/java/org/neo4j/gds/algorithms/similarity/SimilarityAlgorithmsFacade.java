@@ -23,8 +23,6 @@ import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityBaseConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityFactory;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityBaseConfig;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityFactory;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
 public class SimilarityAlgorithmsFacade {
@@ -33,18 +31,6 @@ public class SimilarityAlgorithmsFacade {
 
     public SimilarityAlgorithmsFacade(AlgorithmRunner algorithmRunner) {
         this.algorithmRunner = algorithmRunner;
-    }
-
-    AlgorithmComputationResult<NodeSimilarityResult> nodeSimilarity(
-        String graphName,
-        NodeSimilarityBaseConfig config
-    ) {
-        return algorithmRunner.run(
-            graphName,
-            config,
-            config.relationshipWeightProperty(),
-            new NodeSimilarityFactory<>()
-        );
     }
 
     AlgorithmComputationResult<NodeSimilarityResult> filteredNodeSimilarity(

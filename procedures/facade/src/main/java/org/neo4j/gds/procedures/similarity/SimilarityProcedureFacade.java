@@ -20,18 +20,15 @@
 package org.neo4j.gds.procedures.similarity;
 
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsEstimateBusinessFacade;
-import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsMutateBusinessFacade;
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStatsBusinessFacade;
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
-import org.neo4j.gds.procedures.algorithms.similarity.SimilarityMutateResult;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityStatsResult;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityWriteResult;
-import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.similarity.SimilarityResult;
-import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityMutateConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityWriteConfig;
@@ -47,7 +44,6 @@ public class SimilarityProcedureFacade {
     private final ConfigurationCreator configurationCreator;
     private final ProcedureReturnColumns procedureReturnColumns;
     private final SimilarityAlgorithmsEstimateBusinessFacade estimateBusinessFacade;
-    private final SimilarityAlgorithmsMutateBusinessFacade mutateBusinessFacade;
     private final SimilarityAlgorithmsStatsBusinessFacade statsBusinessFacade;
     private final SimilarityAlgorithmsStreamBusinessFacade streamBusinessFacade;
     private final SimilarityAlgorithmsWriteBusinessFacade writeBusinessFacade;
@@ -62,7 +58,6 @@ public class SimilarityProcedureFacade {
         ConfigurationCreator configurationCreator,
         ProcedureReturnColumns procedureReturnColumns,
         SimilarityAlgorithmsEstimateBusinessFacade estimateBusinessFacade,
-        SimilarityAlgorithmsMutateBusinessFacade mutateBusinessFacade,
         SimilarityAlgorithmsStatsBusinessFacade statsBusinessFacade,
         SimilarityAlgorithmsStreamBusinessFacade streamBusinessFacade,
         SimilarityAlgorithmsWriteBusinessFacade writeBusinessFacade,
@@ -71,7 +66,6 @@ public class SimilarityProcedureFacade {
         this.configurationCreator = configurationCreator;
         this.procedureReturnColumns = procedureReturnColumns;
         this.estimateBusinessFacade = estimateBusinessFacade;
-        this.mutateBusinessFacade = mutateBusinessFacade;
         this.statsBusinessFacade = statsBusinessFacade;
         this.streamBusinessFacade = streamBusinessFacade;
         this.writeBusinessFacade = writeBusinessFacade;
@@ -109,21 +103,6 @@ public class SimilarityProcedureFacade {
         return Stream.of(NodeSimilarityComputationResultTransformer.toStatsResult(computationResult, statsConfig));
     }
 
-    public Stream<SimilarityMutateResult> filteredNodeSimilarityMutate(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var mutateConfig = configurationCreator.createConfiguration(configuration, FilteredNodeSimilarityMutateConfig::of);
-
-        var computationResult = mutateBusinessFacade.filteredNodeSimilarity(
-            graphName,
-            mutateConfig,
-            procedureReturnColumns.contains("similarityDistribution")
-        );
-
-        return Stream.of(NodeSimilarityComputationResultTransformer.toMutateResult(computationResult));
-    }
-
     public Stream<SimilarityWriteResult> filteredNodeSimilarityWrite(
         String graphName,
         Map<String, Object> configuration
@@ -154,14 +133,6 @@ public class SimilarityProcedureFacade {
     ) {
         var config = configurationCreator.createConfiguration(algoConfiguration, FilteredNodeSimilarityStatsConfig::of);
         return Stream.of(estimateBusinessFacade.filteredNodeSimilarity(graphNameOrConfiguration, config));
-    }
-
-    public Stream<MemoryEstimateResult> filteredNodeSimilarityEstimateMutate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> algoConfiguration
-    ) {
-        var config = configurationCreator.createConfiguration(algoConfiguration, FilteredNodeSimilarityMutateConfig::of);
-        return Stream.of(estimateBusinessFacade.nodeSimilarity(graphNameOrConfiguration, config));
     }
 
     public Stream<MemoryEstimateResult> filteredNodeSimilarityEstimateWrite(

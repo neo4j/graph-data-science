@@ -48,10 +48,8 @@ import org.neo4j.gds.algorithms.misc.MiscAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmsFacade;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
-import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsFacade;
-import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsMutateBusinessFacade;
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStatsBusinessFacade;
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsWriteBusinessFacade;
@@ -80,7 +78,6 @@ class AlgorithmFacadeFactory {
     private final ProcedureCallContextReturnColumns returnColumns;
     private final MutateNodePropertyService mutateNodePropertyService;
     private final WriteNodePropertyService writeNodePropertyService;
-    private final MutateRelationshipService mutateRelationshipService;
     private final WriteRelationshipService writeRelationshipService;
     private final AlgorithmEstimator algorithmEstimator;
     private final AlgorithmRunner algorithmRunner;
@@ -98,7 +95,6 @@ class AlgorithmFacadeFactory {
         ProcedureCallContextReturnColumns returnColumns,
         MutateNodePropertyService mutateNodePropertyService,
         WriteNodePropertyService writeNodePropertyService,
-        MutateRelationshipService mutateRelationshipService,
         WriteRelationshipService writeRelationshipService,
         AlgorithmRunner algorithmRunner,
         AlgorithmEstimator algorithmEstimator,
@@ -115,7 +111,6 @@ class AlgorithmFacadeFactory {
         this.returnColumns = returnColumns;
         this.mutateNodePropertyService = mutateNodePropertyService;
         this.writeNodePropertyService = writeNodePropertyService;
-        this.mutateRelationshipService = mutateRelationshipService;
         this.writeRelationshipService = writeRelationshipService;
         this.algorithmRunner = algorithmRunner;
         this.algorithmEstimator = algorithmEstimator;
@@ -193,10 +188,6 @@ class AlgorithmFacadeFactory {
 
         // mode-specific facades
         var estimateBusinessFacade = new SimilarityAlgorithmsEstimateBusinessFacade(algorithmEstimator);
-        var mutateBusinessFacade = new SimilarityAlgorithmsMutateBusinessFacade(
-            similarityAlgorithmsFacade,
-            mutateRelationshipService
-        );
         var statsBusinessFacade = new SimilarityAlgorithmsStatsBusinessFacade(similarityAlgorithmsFacade);
         var streamBusinessFacade = new SimilarityAlgorithmsStreamBusinessFacade(similarityAlgorithmsFacade);
         var writeBusinessFacade = new SimilarityAlgorithmsWriteBusinessFacade(
@@ -219,7 +210,6 @@ class AlgorithmFacadeFactory {
             configurationCreator,
             returnColumns,
             estimateBusinessFacade,
-            mutateBusinessFacade,
             statsBusinessFacade,
             streamBusinessFacade,
             writeBusinessFacade,

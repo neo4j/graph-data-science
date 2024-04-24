@@ -32,9 +32,9 @@ import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamProc.DESCRIPTION;
+import static org.neo4j.gds.similarity.filterednodesim.Constants.FILTERED_NODE_SIMILARITY_DESCRIPTION;
 
-@GdsCallable(name = "gds.nodeSimilarity.filtered.stats", aliases = {"gds.alpha.nodeSimilarity.filtered.stats"}, description = DESCRIPTION, executionMode = ExecutionMode.STATS)
+@GdsCallable(name = "gds.nodeSimilarity.filtered.stats", aliases = {"gds.alpha.nodeSimilarity.filtered.stats"}, description = FILTERED_NODE_SIMILARITY_DESCRIPTION, executionMode = ExecutionMode.STATS)
 public class FilteredNodeSimilarityStatsSpec implements AlgorithmSpec<
     NodeSimilarity,
     NodeSimilarityResult,
