@@ -39,6 +39,7 @@ import org.neo4j.gds.catalog.GraphProjectProc;
 import org.neo4j.gds.catalog.GraphStreamNodePropertiesProc;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -828,7 +829,7 @@ final class LinkPredictionTrainPipelineExecutorTest {
             String graphName,
             Collection<NodeLabel> nodeLabels,
             Collection<RelationshipType> relTypes,
-            int trainConcurrency,
+            Concurrency trainConcurrency,
             Stub stub
         ) {
             assertThat(nodeLabels).containsExactlyInAnyOrderElementsOf(

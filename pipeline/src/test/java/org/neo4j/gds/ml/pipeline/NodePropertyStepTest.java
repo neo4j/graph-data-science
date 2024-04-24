@@ -92,7 +92,7 @@ class NodePropertyStepTest extends BaseProcTest {
                 GRAPH_NAME,
                 List.of(NodeLabel.ALL_NODES),
                 List.of(RelationshipType.ALL_RELATIONSHIPS),
-                4,
+                new Concurrency(4),
                 null
             )
         );

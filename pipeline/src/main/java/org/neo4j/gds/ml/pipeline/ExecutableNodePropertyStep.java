@@ -24,6 +24,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.config.ElementTypeValidator;
 import org.neo4j.gds.config.ToMapConvertible;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.executor.ExecutionContext;
@@ -46,7 +47,7 @@ public interface ExecutableNodePropertyStep extends ToMapConvertible {
         String graphName,
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relTypes,
-        int trainConcurrency,
+        Concurrency trainConcurrency,
         Stub stub
     );
 

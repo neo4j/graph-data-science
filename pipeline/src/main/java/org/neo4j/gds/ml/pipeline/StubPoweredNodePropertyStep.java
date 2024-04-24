@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.pipeline;
 import org.neo4j.gds.ElementIdentifier;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
@@ -65,7 +66,7 @@ class StubPoweredNodePropertyStep implements ExecutableNodePropertyStep {
         String graphName,
         Collection<NodeLabel> nodeLabels,
         Collection<RelationshipType> relTypes,
-        int trainConcurrency,
+        Concurrency trainConcurrency,
         Stub stub
     ) {
         var configCopy = new HashMap<>(configuration);
@@ -73,7 +74,7 @@ class StubPoweredNodePropertyStep implements ExecutableNodePropertyStep {
         var relTypeStrings = relTypes.stream().map(ElementIdentifier::name).collect(Collectors.toList());
         configCopy.put("nodeLabels", nodeLabelStrings);
         configCopy.put("relationshipTypes", relTypeStrings);
-        configCopy.putIfAbsent("concurrency", trainConcurrency);
+        configCopy.putIfAbsent("concurrency", trainConcurrency.value());
 
         stub.execute(executionContext.algorithmsProcedureFacade(), graphName, configCopy);
     }
