@@ -23,6 +23,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.logging.Log;
@@ -65,6 +66,7 @@ final class FilteredNodeSimilarityMutateStep implements MutateOrWriteStep<NodeSi
     public Pair<RelationshipsWritten, Map<String, Object>> execute(
         Graph graph,
         GraphStore graphStore,
+        ResultStore resultStore,
         NodeSimilarityResult result
     ) {
         return similarityMutation.execute(
