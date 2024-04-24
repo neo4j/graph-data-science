@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
@@ -69,7 +70,7 @@ class PregelCompanionTest {
         PregelCompanion.ensureInverseIndexesExist(
             graphStore,
             relTypes,
-            4,
+            new Concurrency(4),
             NullLog.getInstance(),
             TaskRegistryFactory.empty()
         );

@@ -30,6 +30,7 @@ import org.neo4j.gds.beta.pregel.PregelConfig;
 import org.neo4j.gds.beta.pregel.PregelResult;
 import org.neo4j.gds.beta.pregel.PregelSchema;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.write.NodeProperty;
 import org.neo4j.gds.executor.ComputationResult;
@@ -62,7 +63,7 @@ public final class PregelCompanion {
                     ),
                     (graphStore, graphProjectConfig, config) -> ensureInverseIndexesExist(graphStore,
                         config.internalRelationshipTypes(graphStore),
-                        config.concurrency(),
+                        config.typedConcurrency(),
                         log,
                         taskRegistryFactory
                     )
@@ -74,7 +75,7 @@ public final class PregelCompanion {
     static void ensureInverseIndexesExist(
         GraphStore graphStore,
         Collection<RelationshipType> relationshipTypes,
-        int concurrency,
+        Concurrency concurrency,
         Log log,
         TaskRegistryFactory taskRegistryFactory
     ) {
@@ -90,7 +91,7 @@ public final class PregelCompanion {
 
         var inverseConfig = InverseRelationshipsConfigImpl
             .builder()
-            .concurrency(concurrency)
+            .concurrency(concurrency.value())
             .relationshipTypes(relationshipTypesWithoutIndex)
             .build();
 
