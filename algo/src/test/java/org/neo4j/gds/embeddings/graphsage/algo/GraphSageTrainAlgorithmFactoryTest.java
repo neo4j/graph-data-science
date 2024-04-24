@@ -92,7 +92,7 @@ class GraphSageTrainAlgorithmFactoryTest {
     ) {
         var parameters = config.toMemoryEstimateParameters();
         var nodeCount = graphDimensions.nodeCount();
-        var concurrency = config.typedConcurrency();
+        var concurrency = config.concurrency();
         var layerConfigs = parameters.layerConfigs();
         var weightsPerLabel = MemoryRange.empty();
 

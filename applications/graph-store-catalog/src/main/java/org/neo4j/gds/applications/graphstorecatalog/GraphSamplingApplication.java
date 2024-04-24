@@ -64,7 +64,7 @@ public final class GraphSamplingApplication {
             var progressTracker = new TaskProgressTracker(
                 GraphSampleConstructor.progressTask(graphStore, samplerAlgorithm),
                 (org.neo4j.logging.Log) log.getNeo4jLog(),
-                samplerConfig.typedConcurrency(),
+                samplerConfig.concurrency(),
                 samplerConfig.jobId(),
                 taskRegistryFactory,
                 userLogRegistryFactory

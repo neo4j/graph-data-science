@@ -452,7 +452,7 @@ class LinkPredictionPredictPipelineExecutorTest {
             () -> LinkPredictionPredictPipelineExecutor.estimate(new OpenModelCatalog(), pipeline, config, modelData, null),
             graphStore.nodeCount(),
             graphStore.relationshipCount(),
-            config.typedConcurrency(),
+            config.concurrency(),
             MemoryRange.of(433)
         );
     }
@@ -481,7 +481,7 @@ class LinkPredictionPredictPipelineExecutorTest {
             () -> LinkPredictionPredictPipelineExecutor.estimate(new OpenModelCatalog(), pipeline, config, modelData, null),
             graphStore.nodeCount(),
             graphStore.relationshipCount(),
-            config.typedConcurrency(),
+            config.concurrency(),
             MemoryRange.of(489)
         );
     }

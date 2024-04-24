@@ -149,6 +149,6 @@ class WriteConfigTest {
     }
 
     @Configuration
-    interface TestWriteConfig extends WriteConfig {
+    interface TestWriteConfig extends ConcurrencyConfig, WriteConfig {
     }
 }

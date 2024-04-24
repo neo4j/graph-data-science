@@ -113,7 +113,7 @@ final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromStoreConf
             return new TaskProgressTracker(
                 task,
                 loadingContext.log(),
-                graphProjectConfig.typedReadConcurrency(),
+                graphProjectConfig.readConcurrency(),
                 graphProjectConfig.jobId(),
                 loadingContext.taskRegistryFactory(),
                 EmptyUserLogRegistryFactory.INSTANCE
@@ -123,7 +123,7 @@ final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromStoreConf
         return new TaskTreeProgressTracker(
             task,
             loadingContext.log(),
-            graphProjectConfig.typedReadConcurrency(),
+            graphProjectConfig.readConcurrency(),
             graphProjectConfig.jobId(),
             loadingContext.taskRegistryFactory(),
             EmptyUserLogRegistryFactory.INSTANCE
@@ -134,7 +134,7 @@ final class NativeFactory extends CSRGraphStoreFactory<GraphProjectFromStoreConf
     public CSRGraphStore build() {
         validate(dimensions, storeConfig);
 
-        var concurrency = graphProjectConfig.typedReadConcurrency();
+        var concurrency = graphProjectConfig.readConcurrency();
         try {
             progressTracker.beginSubTask();
             Nodes nodes = loadNodes(concurrency);

@@ -98,7 +98,7 @@ class CommunityAlgorithmsMutateBusinessFacadeTest {
 
         var configMock = mock(MutateNodePropertyConfig.class);
         when(configMock.mutateProperty()).thenReturn("bugger-off");
-        when(configMock.typedConcurrency()).thenReturn(new Concurrency(4));
+        when(configMock.concurrency()).thenReturn(new Concurrency(4));
 
         var result = HugeLongArray.newArray(graph.nodeCount());
         result.setAll(graph::toOriginalNodeId);

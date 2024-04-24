@@ -70,7 +70,7 @@ public interface HashGNNConfig extends AlgoBaseConfig, FeaturePropertiesConfig, 
     @Configuration.Ignore
     default HashGNNParameters toParameters() {
         return new HashGNNParameters(
-            typedConcurrency(),
+            concurrency(),
             iterations(),
             embeddingDensity(),
             neighborInfluence(),

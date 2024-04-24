@@ -45,7 +45,7 @@ abstract class LouvainResultBuilder<PROC_RESULT> extends AbstractCommunityResult
     ) {
         LouvainResultBuilder<LouvainMutateResult> procResultBuilder = new LouvainMutateResultBuilder(
             executionContext.returnColumns(),
-            computeResult.config().typedConcurrency()
+            computeResult.config().concurrency()
         );
         computeResult.result().ifPresent(result -> {
             procResultBuilder
@@ -64,7 +64,7 @@ abstract class LouvainResultBuilder<PROC_RESULT> extends AbstractCommunityResult
     ) {
         LouvainResultBuilder<LouvainWriteResult> procResultBuilder = new LouvainWriteResultsBuilder(
             executionContext.returnColumns(),
-            computeResult.config().typedConcurrency()
+            computeResult.config().concurrency()
         );
         computeResult.result().ifPresent(result -> {
             procResultBuilder

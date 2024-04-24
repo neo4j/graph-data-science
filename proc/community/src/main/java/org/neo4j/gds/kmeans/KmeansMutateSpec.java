@@ -82,7 +82,7 @@ public class KmeansMutateSpec implements AlgorithmSpec<Kmeans, KmeansResult, Kme
         var returnColumns = executionContext.returnColumns();
         var builder = new KmeansMutateResult.Builder(
             returnColumns,
-            computationResult.config().typedConcurrency()
+            computationResult.config().concurrency()
         );
 
         computationResult.result().ifPresent(result -> {

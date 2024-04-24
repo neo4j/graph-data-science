@@ -32,7 +32,7 @@ public final class RandomWalkCompanion {
         if (config.hasRelationshipWeightProperty()) {
             var totalWeights = HugeAtomicDoubleArray.of(
                 nodeCount,
-                ParallelDoublePageCreator.passThrough(config.typedConcurrency())
+                ParallelDoublePageCreator.passThrough(config.concurrency())
             );
             totalWeights.setAll(TOTAL_WEIGHT_MISSING);
             return Optional.of(totalWeights);

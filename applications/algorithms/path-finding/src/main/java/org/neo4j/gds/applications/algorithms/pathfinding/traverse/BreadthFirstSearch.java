@@ -60,7 +60,7 @@ public class BreadthFirstSearch {
             mappedStartNodeId,
             exitFunction,
             aggregatorFunction,
-            configuration.typedConcurrency(),
+            configuration.concurrency(),
             progressTracker,
             configuration.maxDepth()
         );

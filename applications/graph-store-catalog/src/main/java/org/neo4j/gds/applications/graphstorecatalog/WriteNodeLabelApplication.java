@@ -59,7 +59,7 @@ public class WriteNodeLabelApplication {
             var filteredNodes = NodesFilter.filterNodes(
                 graphStore,
                 nodeFilter,
-                configuration.typedConcurrency(),
+                configuration.concurrency(),
                 Map.of(),
                 DefaultPool.INSTANCE,
                 ProgressTracker.NULL_TRACKER
@@ -73,7 +73,7 @@ public class WriteNodeLabelApplication {
                     graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                 )
                 .withResultStore(configuration.resolveResultStore(resultStore))
-                .parallel(DefaultPool.INSTANCE, configuration.typedWriteConcurrency())
+                .parallel(DefaultPool.INSTANCE, configuration.concurrency())
                 .build();
 
             try {

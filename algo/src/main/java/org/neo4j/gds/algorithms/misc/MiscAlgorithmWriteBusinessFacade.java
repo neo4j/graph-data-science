@@ -58,7 +58,7 @@ public class MiscAlgorithmWriteBusinessFacade {
                     algorithmResult.graph(),
                     algorithmResult.graphStore(),
                     nodeProperties,
-                    configuration.typedWriteConcurrency(),
+                    configuration.writeConcurrency(),
                     configuration.writeProperty(),
                     "CELFWrite",
                     configuration.arrowConnectionInfo(),

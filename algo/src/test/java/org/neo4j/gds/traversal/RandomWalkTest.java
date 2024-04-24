@@ -506,7 +506,7 @@ class RandomWalkTest {
             var pt = new TestProgressTracker(
                 fact.progressTask(graph, config),
                 log,
-                config.typedConcurrency(),
+                config.concurrency(),
                 TaskRegistryFactory.local("rw", taskStore)
             );
 
@@ -557,7 +557,7 @@ class RandomWalkTest {
             var pt = new TestProgressTracker(
                 fact.progressTask(weightedGraph, config),
                 log,
-                config.typedConcurrency(),
+                config.concurrency(),
                 TaskRegistryFactory.local("rw", taskStore)
             );
 

@@ -184,7 +184,7 @@ abstract class GraphAggregator implements CompatUserAggregator {
             (configMap instanceof MapValue) ? (MapValue) configMap : MapValue.EMPTY
         );
 
-        var idMapBuilder = idMapBuilder(config.typedReadConcurrency());
+        var idMapBuilder = idMapBuilder(config.readConcurrency());
 
         return new GraphImporter(
             config,

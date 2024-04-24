@@ -75,7 +75,7 @@ public class BetaClosenessCentralityMutateSpec implements AlgorithmSpec<Closenes
     ) {
         var builder = new BetaClosenessCentralityMutateResult.Builder(
             executionContext.returnColumns(),
-            computationResult.config().typedConcurrency()
+            computationResult.config().concurrency()
         );
 
         builder.withMutateProperty(computationResult.config().mutateProperty());

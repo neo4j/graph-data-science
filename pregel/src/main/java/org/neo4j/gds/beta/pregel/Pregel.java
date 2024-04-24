@@ -84,7 +84,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
             graph,
             config,
             computation,
-            NodeValue.of(computation.schema(config), graph.nodeCount(), config.typedConcurrency()),
+            NodeValue.of(computation.schema(config), graph.nodeCount(), config.concurrency()),
             executor,
             progressTracker
         );
@@ -165,7 +165,7 @@ public final class Pregel<CONFIG extends PregelConfig> {
             .messenger(messenger)
             .voteBits(HugeAtomicBitSet.create(graph.nodeCount()))
             .executorService(config.useForkJoin()
-                ? ExecutorServiceUtil.createForkJoinPool(config.typedConcurrency())
+                ? ExecutorServiceUtil.createForkJoinPool(config.concurrency())
                 : executor)
             .progressTracker(progressTracker)
             .build();

@@ -108,7 +108,7 @@ class WeightedDagLongestPathTest {
             var testTracker = new TestProgressTracker(
                 progressTask,
                 log,
-                CONFIG.typedConcurrency(),
+                CONFIG.concurrency(),
                 EmptyTaskRegistryFactory.INSTANCE
             );
 

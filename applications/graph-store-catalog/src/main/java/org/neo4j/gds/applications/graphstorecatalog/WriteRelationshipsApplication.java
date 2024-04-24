@@ -82,7 +82,7 @@ public class WriteRelationshipsApplication {
                     relationshipExporterBuilder,
                     terminationFlag,
                     progressTracker,
-                    configuration.typedConcurrency(),
+                    configuration.concurrency(),
                     configuration.arrowConnectionInfo(),
                     configuration.resolveResultStore(resultStore),
                     graphStore,

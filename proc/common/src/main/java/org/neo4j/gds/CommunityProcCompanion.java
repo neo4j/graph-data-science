@@ -71,7 +71,7 @@ public final class CommunityProcCompanion {
             var finalResult = result;
             return ((CommunitySizeConfig) config)
                 .minCommunitySize()
-                .map(size -> applySizeFilter(finalResult, size, config.typedConcurrency()))
+                .map(size -> applySizeFilter(finalResult, size, config.concurrency()))
                 .orElse(result);
         }
         return result;

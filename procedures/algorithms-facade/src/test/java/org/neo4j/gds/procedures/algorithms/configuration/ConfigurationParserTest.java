@@ -133,7 +133,7 @@ class ConfigurationParserTest {
         );
         BiFunction<String, CypherMapWrapper, WccStreamConfig> configCreator = (__, cypherMapWrapper) -> WccStreamConfig.of(
             cypherMapWrapper);
-        assertThat(configurationParser.produceConfig(Map.of(), configCreator, "foo").typedConcurrency()).isEqualTo(new Concurrency(3));
+        assertThat(configurationParser.produceConfig(Map.of(), configCreator, "foo").concurrency()).isEqualTo(new Concurrency(3));
 
     }
 
@@ -173,7 +173,7 @@ class ConfigurationParserTest {
         );
         BiFunction<String, CypherMapWrapper, WccStreamConfig> configCreator = (__, cypherMapWrapper) -> WccStreamConfig.of(
             cypherMapWrapper);
-        assertThat(configurationParser.produceConfig(Map.of(), configCreator, "bogus").typedConcurrency()).isEqualTo(new Concurrency(1));
+        assertThat(configurationParser.produceConfig(Map.of(), configCreator, "bogus").concurrency()).isEqualTo(new Concurrency(1));
 
     }
 

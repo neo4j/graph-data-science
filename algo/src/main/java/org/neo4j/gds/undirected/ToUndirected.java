@@ -63,7 +63,7 @@ public class ToUndirected extends Algorithm<SingleTypeRelationships> {
         this.graphStore = graphStore;
         this.config = config;
         this.executorService = executorService;
-        this.concurrency = config.typedConcurrency();
+        this.concurrency = config.concurrency();
     }
 
     @Override

@@ -94,7 +94,7 @@ public class StreamNodePropertiesApplication {
         var progressTracker = new TaskProgressTracker(
             task,
             (org.neo4j.logging.Log) log.getNeo4jLog(),
-            configuration.typedConcurrency(),
+            configuration.concurrency(),
             new JobId(),
             taskRegistryFactory,
             userLogRegistryFactory

@@ -70,7 +70,7 @@ class TopologicalSortTest {
         TopologicalSort ts = new TopologicalSort(
             basicGraph,
             ProgressTracker.NULL_TRACKER,
-            CONFIG.typedConcurrency(),
+            CONFIG.concurrency(),
             CONFIG.computeMaxDistanceFromSource()
         );
         TopologicalSortResult result = ts.compute();
@@ -118,7 +118,7 @@ class TopologicalSortTest {
         TopologicalSort ts = new TopologicalSort(
             allCycleGraph,
             ProgressTracker.NULL_TRACKER,
-            BASIC_CONFIG.typedConcurrency(),
+            BASIC_CONFIG.concurrency(),
             BASIC_CONFIG.computeMaxDistanceFromSource()
         );
         TopologicalSortResult result = ts.compute();
@@ -132,7 +132,7 @@ class TopologicalSortTest {
         TopologicalSort ts = new TopologicalSort(
             allCycleGraph,
             ProgressTracker.NULL_TRACKER,
-            BASIC_CONFIG.typedConcurrency(),
+            BASIC_CONFIG.concurrency(),
             BASIC_CONFIG.computeMaxDistanceFromSource()
         );
         TopologicalSortResult result = ts.compute();
@@ -157,7 +157,7 @@ class TopologicalSortTest {
     void ShouldExcludeSelfLoops() {
         TopologicalSort ts = new TopologicalSort(selfLoopGraph,
             ProgressTracker.NULL_TRACKER,
-            CONFIG.typedConcurrency(),
+            CONFIG.concurrency(),
             CONFIG.computeMaxDistanceFromSource()
         );
         TopologicalSortResult result = ts.compute();
@@ -240,7 +240,7 @@ class TopologicalSortTest {
         long nodeCount = lastGraph.nodeCount();
         TopologicalSort ts = new TopologicalSort(lastGraph,
             ProgressTracker.NULL_TRACKER,
-            CONFIG.typedConcurrency(),
+            CONFIG.concurrency(),
             CONFIG.computeMaxDistanceFromSource()
         );
         TopologicalSortResult result = ts.compute();
@@ -329,7 +329,7 @@ class TopologicalSortTest {
     void shouldNotIncludeCycles() {
         TopologicalSort ts = new TopologicalSort(cyclesGraph,
             ProgressTracker.NULL_TRACKER,
-            CONFIG.typedConcurrency(),
+            CONFIG.concurrency(),
             CONFIG.computeMaxDistanceFromSource()
         );
         TopologicalSortResult result = ts.compute();
@@ -371,7 +371,7 @@ class TopologicalSortTest {
 
         TopologicalSort ts = new TopologicalSort(graph,
             ProgressTracker.NULL_TRACKER,
-            BASIC_CONFIG.typedConcurrency(),
+            BASIC_CONFIG.concurrency(),
             BASIC_CONFIG.computeMaxDistanceFromSource()
         );
         TopologicalSortResult result = ts.compute();
@@ -402,7 +402,7 @@ class TopologicalSortTest {
         var testTracker = new TestProgressTracker(
             progressTask,
             log,
-            BASIC_CONFIG.typedConcurrency(),
+            BASIC_CONFIG.concurrency(),
             EmptyTaskRegistryFactory.INSTANCE
         );
 

@@ -50,7 +50,7 @@ public class ProcedureMemoryEstimation<
 
         GraphDimensions extendedDimension = algorithmFactory.estimatedGraphDimensionTransformer(graphDimensions, config);
 
-        MemoryTree memoryTree = estimationBuilder.build().estimate(extendedDimension, config.typedConcurrency());
+        MemoryTree memoryTree = estimationBuilder.build().estimate(extendedDimension, config.concurrency());
         return new MemoryTreeWithDimensions(memoryTree, graphDimensions);
     }
 }

@@ -56,7 +56,7 @@ final class SccComputationResultTransformer {
                 configuration.consecutiveIds(),
                 NodePropertyValuesAdapter.adapt(sccResult),
                 Optional.empty(),
-                configuration.typedConcurrency()
+                configuration.concurrency()
             );
             return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
                 .filter(nodePropertyValues::hasValue)

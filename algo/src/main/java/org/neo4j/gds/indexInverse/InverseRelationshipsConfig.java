@@ -76,7 +76,7 @@ public interface InverseRelationshipsConfig extends AlgoBaseConfig {
 
     @Configuration.Ignore
     default InverseRelationshipsParameters toParameters() {
-        return new InverseRelationshipsParameters(typedConcurrency(), relationshipTypes());
+        return new InverseRelationshipsParameters(concurrency(), relationshipTypes());
     }
 
     @Configuration.GraphStoreValidationCheck

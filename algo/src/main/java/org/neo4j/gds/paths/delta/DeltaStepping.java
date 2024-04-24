@@ -75,7 +75,7 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
             graph,
             graph.toMappedNodeId(config.sourceNode()),
             config.delta(),
-            config.typedConcurrency(),
+            config.concurrency(),
             true,
             executorService,
             progressTracker

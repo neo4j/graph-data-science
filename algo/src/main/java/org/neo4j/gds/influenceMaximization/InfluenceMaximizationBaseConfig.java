@@ -44,7 +44,7 @@ public interface InfluenceMaximizationBaseConfig extends AlgoBaseConfig, RandomS
             seedSetSize(),
             propagationProbability(),
             monteCarloSimulations(),
-            typedConcurrency(),
+            concurrency(),
             randomSeed().orElse(0L),
             CELFAlgorithmFactory.DEFAULT_BATCH_SIZE
         );

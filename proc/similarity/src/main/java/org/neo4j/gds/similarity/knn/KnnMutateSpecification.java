@@ -89,7 +89,7 @@ public class KnnMutateSpecification implements AlgorithmSpec<Knn, KnnResult, Knn
                         similarityGraphResult = computeToGraph(
                             computationResult.graph(),
                             computationResult.graph().nodeCount(),
-                            config.typedConcurrency(),
+                            config.concurrency(),
                             Objects.requireNonNull(result),
                             knn.executorService()
                         );

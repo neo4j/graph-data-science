@@ -160,7 +160,7 @@ class YensTest {
         var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
 
-        Yens.sourceTarget(graph, config, config.typedConcurrency(), progressTracker)
+        Yens.sourceTarget(graph, config, config.concurrency(), progressTracker)
             .compute()
             .pathSet();
 
@@ -198,7 +198,7 @@ class YensTest {
         var log = Neo4jProxy.testLog();
         var progressTracker = new TestProgressTracker(progressTask, log, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
 
-        Yens.sourceTarget(graph, config, config.typedConcurrency(), progressTracker)
+        Yens.sourceTarget(graph, config, config.concurrency(), progressTracker)
             .compute()
             .pathSet();
 
@@ -241,7 +241,7 @@ class YensTest {
             .build();
 
         var actualPathResults = Yens
-            .sourceTarget(graph, config, config.typedConcurrency(), ProgressTracker.NULL_TRACKER)
+            .sourceTarget(graph, config, config.concurrency(), ProgressTracker.NULL_TRACKER)
             .compute()
             .pathSet();
 

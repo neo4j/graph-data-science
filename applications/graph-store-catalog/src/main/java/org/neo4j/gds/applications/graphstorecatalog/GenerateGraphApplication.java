@@ -86,7 +86,7 @@ public class GenerateGraphApplication {
                 databaseId,
                 graph,
                 relationshipProperty,
-                config.typedReadConcurrency()
+                config.readConcurrency()
             );
 
             stats.nodes = graphStore.nodeCount();

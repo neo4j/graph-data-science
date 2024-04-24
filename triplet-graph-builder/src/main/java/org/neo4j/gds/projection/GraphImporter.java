@@ -152,7 +152,7 @@ public final class GraphImporter {
             : this.writeMode;
 
         var graphStoreBuilder = new GraphStoreBuilder()
-            .concurrency(this.config.typedReadConcurrency())
+            .concurrency(this.config.readConcurrency())
             .capabilities(ImmutableStaticCapabilities.of(writeMode))
             .databaseInfo(databaseInfo);
 
@@ -196,7 +196,7 @@ public final class GraphImporter {
             .orientation(orientation)
             .aggregation(Aggregation.NONE)
             .indexInverse(indexInverse)
-            .concurrency(this.config.typedReadConcurrency());
+            .concurrency(this.config.readConcurrency());
 
         if (properties != null) {
             for (String propertyKey : properties.propertyKeys()) {

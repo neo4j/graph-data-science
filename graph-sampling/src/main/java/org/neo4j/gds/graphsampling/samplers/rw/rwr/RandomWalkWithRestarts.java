@@ -56,7 +56,7 @@ public class RandomWalkWithRestarts implements RandomWalkBasedNodesSampler {
 
     public RandomWalkWithRestarts(RandomWalkWithRestartsConfig config) {
         this.config = config;
-        this.concurrency = config.typedConcurrency();
+        this.concurrency = config.concurrency();
         this.walkerProducer = WalkerProducer.RWRWalkerProducer();
     }
 

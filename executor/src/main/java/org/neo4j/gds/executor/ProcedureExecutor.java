@@ -115,7 +115,7 @@ public class ProcedureExecutor<
 
         ALGO algo = newAlgorithm(graph, graphStore, config);
 
-        algo.getProgressTracker().setEstimatedResourceFootprint(memoryEstimationInBytes, config.typedConcurrency());
+        algo.getProgressTracker().setEstimatedResourceFootprint(memoryEstimationInBytes, config.concurrency());
 
 
         ALGO_RESULT result = executeAlgorithm(builder, algo, executionContext.metricsFacade().algorithmMetrics());

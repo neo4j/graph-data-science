@@ -81,7 +81,7 @@ public interface KGEPredictBaseConfig extends AlgoBaseConfig {
     @Configuration.Ignore
     default KGEPredictParameters toParameters() {
         return new KGEPredictParameters(
-            typedConcurrency(),
+            concurrency(),
             sourceNodeFilter(),
             targetNodeFilter(),
             relationshipTypesFilter(),

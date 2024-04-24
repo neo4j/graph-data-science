@@ -33,14 +33,14 @@ class ConcurrencyConfigTest {
     void lowConcurrency() {
         var concurrencyConfig = CypherMapWrapper.empty().withNumber("concurrency", 2);
         var algoConfig = TestConcurrencyConfig.of(concurrencyConfig);
-        assertThat(algoConfig.typedConcurrency()).isEqualTo(new Concurrency(2));
+        assertThat(algoConfig.concurrency()).isEqualTo(new Concurrency(2));
     }
 
     @Test
     void lowWriteConcurrency() {
         var concurrencyConfig = CypherMapWrapper.empty().withNumber("writeConcurrency", 2);
         var algoConfig = TestConcurrencyConfig.of(concurrencyConfig);
-        assertThat(algoConfig.typedWriteConcurrency()).isEqualTo(new Concurrency(2));
+        assertThat(algoConfig.writeConcurrency()).isEqualTo(new Concurrency(2));
     }
 
     @Test
@@ -67,5 +67,4 @@ class ConcurrencyConfigTest {
             return new TestConcurrencyConfigImpl(map);
         }
     }
-
 }

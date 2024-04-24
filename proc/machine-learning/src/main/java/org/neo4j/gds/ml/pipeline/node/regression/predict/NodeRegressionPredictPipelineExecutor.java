@@ -93,7 +93,7 @@ public class NodeRegressionPredictPipelineExecutor extends PredictPipelineExecut
         return new NodeRegressionPredict(
             regressor,
             features,
-            config.typedConcurrency(),
+            config.concurrency(),
             progressTracker,
             terminationFlag
         ).compute();

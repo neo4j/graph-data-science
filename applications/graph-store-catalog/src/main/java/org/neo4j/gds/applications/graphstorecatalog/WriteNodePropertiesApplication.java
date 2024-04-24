@@ -72,7 +72,7 @@ public class WriteNodePropertiesApplication {
         var progressTracker = new TaskProgressTracker(
             task,
             (org.neo4j.logging.Log) log.getNeo4jLog(),
-            configuration.typedWriteConcurrency(),
+            configuration.writeConcurrency(),
             new JobId(),
             taskRegistryFactory,
             userLogRegistryFactory
@@ -134,7 +134,7 @@ public class WriteNodePropertiesApplication {
                 var exporter = nodePropertyExporterBuilder
                     .withIdMap(subGraph)
                     .withTerminationFlag(terminationFlag)
-                    .parallel(DefaultPool.INSTANCE, config.typedWriteConcurrency())
+                    .parallel(DefaultPool.INSTANCE, config.writeConcurrency())
                     .withProgressTracker(progressTracker)
                     .withArrowConnectionInfo(
                         config.arrowConnectionInfo(),

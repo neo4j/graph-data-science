@@ -126,7 +126,7 @@ public class GraphProjectMemoryUsageService {
 
         var memoryTree = graphStoreCreator
             .estimateMemoryUsageDuringLoading()
-            .estimate(graphDimensions, config.typedReadConcurrency());
+            .estimate(graphDimensions, config.readConcurrency());
 
         return new MemoryTreeWithDimensions(memoryTree, graphDimensions);
     }

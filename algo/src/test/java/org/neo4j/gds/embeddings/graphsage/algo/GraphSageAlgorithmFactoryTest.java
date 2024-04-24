@@ -250,7 +250,7 @@ class GraphSageAlgorithmFactoryTest {
             aggregatorMemories.stream()
         ).reduce(MemoryRange.empty(), MemoryRange::add);
 
-        var concurrency = gsConfig.typedConcurrency();
+        var concurrency = gsConfig.concurrency();
         var evaluateLossMemory = lossFunctionMemory.times(concurrency.value());
 
         var expectedMemory = evaluateLossMemory

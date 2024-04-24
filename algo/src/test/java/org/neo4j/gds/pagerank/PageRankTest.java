@@ -182,7 +182,7 @@ class PageRankTest {
             var progressTracker = new TestProgressTracker(
                 progressTask,
                 log,
-                config.typedConcurrency(),
+                config.concurrency(),
                 EmptyTaskRegistryFactory.INSTANCE
             );
 

@@ -65,7 +65,7 @@ public class GraphSampleConstructor {
         ProgressTracker progressTracker
     ) {
         this.config = config;
-        this.concurrency = config.typedConcurrency();
+        this.concurrency = config.concurrency();
         this.inputGraphStore = inputGraphStore;
         this.nodesSampler = nodesSampler;
         this.progressTracker = progressTracker;
@@ -88,7 +88,7 @@ public class GraphSampleConstructor {
         var nodePropertyStore = NodesFilter.filterNodeProperties(
             inputGraphStore,
             idMap,
-            config.typedConcurrency(),
+            config.concurrency(),
             progressTracker
         );
 
@@ -109,7 +109,7 @@ public class GraphSampleConstructor {
             relTypeFilterExpression,
             inputGraphStore.nodes(),
             idMap,
-            config.typedConcurrency(),
+            config.concurrency(),
             Map.of(),
             DefaultPool.INSTANCE,
             progressTracker

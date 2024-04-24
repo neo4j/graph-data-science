@@ -281,7 +281,7 @@ class ExhaustiveLinkPredictionTest {
 
         var actualEstimate = ExhaustiveLinkPrediction
             .estimate(config, 100)
-            .estimate(GraphDimensions.of(100, 1000), config.typedConcurrency());
+            .estimate(GraphDimensions.of(100, 1000), config.concurrency());
 
         assertMemoryRange(actualEstimate.memoryUsage(), expectedEstimation);
     }
@@ -301,7 +301,7 @@ class ExhaustiveLinkPredictionTest {
 
         var actualEstimate = ExhaustiveLinkPrediction
             .estimate(config, linkFeatureDimension)
-            .estimate(GraphDimensions.of(100, 1000), config.typedConcurrency());
+            .estimate(GraphDimensions.of(100, 1000), config.concurrency());
 
         assertMemoryRange(actualEstimate.memoryUsage(), expectedEstimation);
     }

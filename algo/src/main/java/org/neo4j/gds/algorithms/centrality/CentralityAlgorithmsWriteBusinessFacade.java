@@ -80,7 +80,7 @@ public class CentralityAlgorithmsWriteBusinessFacade {
             shouldComputeCentralityDistribution,
             intermediateResult.computeMilliseconds,
             "BetweennessCentralityWrite",
-            configuration.typedWriteConcurrency(),
+            configuration.writeConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
             configuration.resolveResultStore(intermediateResult.algorithmResult.resultStore())
@@ -103,7 +103,7 @@ public class CentralityAlgorithmsWriteBusinessFacade {
             shouldComputeCentralityDistribution,
             intermediateResult.computeMilliseconds,
             "DegreeCentralityWrite",
-            configuration.typedWriteConcurrency(),
+            configuration.writeConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
             configuration.resolveResultStore(intermediateResult.algorithmResult.resultStore())
@@ -126,7 +126,7 @@ public class CentralityAlgorithmsWriteBusinessFacade {
             shouldComputeCentralityDistribution,
             intermediateResult.computeMilliseconds,
             "ClosenessCentralityWrite",
-            configuration.typedWriteConcurrency(),
+            configuration.writeConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
             configuration.resolveResultStore(intermediateResult.algorithmResult.resultStore())
@@ -196,7 +196,7 @@ public class CentralityAlgorithmsWriteBusinessFacade {
                 algorithmResult.graph(),
                 graphStore,
                 nodePropertyValues,
-                configuration.typedWriteConcurrency(),
+                configuration.writeConcurrency(),
                 configuration.writeProperty(),
                 "PageRankWrite",
                 configuration.arrowConnectionInfo(),
@@ -242,7 +242,7 @@ public class CentralityAlgorithmsWriteBusinessFacade {
             shouldComputeCentralityDistribution,
             intermediateResult.computeMilliseconds,
             "HarmonicCentralityWrite",
-            configuration.typedWriteConcurrency(),
+            configuration.writeConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
             configuration.resolveResultStore(intermediateResult.algorithmResult.resultStore())
@@ -273,7 +273,7 @@ public class CentralityAlgorithmsWriteBusinessFacade {
             intermediateResult.computeMilliseconds,
             () -> AlphaHarmonicSpecificFields.EMPTY,
             "HarmonicCentralityWrite",
-            configuration.typedWriteConcurrency(),
+            configuration.writeConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
             configuration.resolveResultStore(algorithmResult.resultStore())
@@ -304,7 +304,7 @@ public class CentralityAlgorithmsWriteBusinessFacade {
                     algorithmResult.graph(),
                     algorithmResult.graphStore(),
                     nodeProperties,
-                    configuration.typedWriteConcurrency(),
+                    configuration.writeConcurrency(),
                     configuration.writeProperty(),
                     "CELFWrite",
                     configuration.arrowConnectionInfo(),
@@ -396,7 +396,7 @@ public class CentralityAlgorithmsWriteBusinessFacade {
                 algorithmResult.graph().nodeCount(),
                 centralityFunctionSupplier.centralityFunction(result),
                 DefaultPool.INSTANCE,
-                configuration.typedConcurrency(),
+                configuration.concurrency(),
                 shouldComputeCentralityDistribution
             );
 

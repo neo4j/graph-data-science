@@ -42,6 +42,6 @@ public interface WccBaseConfig extends AlgoBaseConfig, SeedConfig, ConsecutiveId
 
     @Configuration.Ignore
     default WccParameters toParameters() {
-        return new WccParameters(threshold(), Optional.ofNullable(seedProperty()), typedConcurrency());
+        return new WccParameters(threshold(), Optional.ofNullable(seedProperty()), concurrency());
     }
 }

@@ -57,7 +57,7 @@ public class BfsAlgorithmFactory<CONFIG extends BfsBaseConfig> extends GraphAlgo
             mappedStartNodeId,
             exitFunction,
             aggregatorFunction,
-            configuration.typedConcurrency(),
+            configuration.concurrency(),
             progressTracker,
             configuration.maxDepth()
         );

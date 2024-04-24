@@ -49,8 +49,8 @@ public class ReducingMessenger implements Messenger<ReducingMessenger.SingleMess
         this.config = config;
         this.reducer = reducer;
 
-        this.receiveArray = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(config.typedConcurrency()));
-        this.sendArray = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(config.typedConcurrency()));
+        this.receiveArray = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(config.concurrency()));
+        this.sendArray = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(config.concurrency()));
     }
 
     static MemoryEstimation memoryEstimation() {
@@ -67,7 +67,7 @@ public class ReducingMessenger implements Messenger<ReducingMessenger.SingleMess
         this.receiveArray = sendArray;
         this.sendArray = tmp;
 
-        var concurrency = config.typedConcurrency();
+        var concurrency = config.concurrency();
         ParallelUtil.parallelForEachNode(
             graph.nodeCount(),
             concurrency,

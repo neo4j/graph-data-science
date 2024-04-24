@@ -145,7 +145,7 @@ public final class GraphStoreFilter {
             var filteredNodes = NodesFilter.filterNodes(
                 graphStore,
                 expressions.nodeExpression(),
-                config.typedReadConcurrency(),
+                config.readConcurrency(),
                 config.parameters(),
                 executorService,
                 progressTracker
@@ -156,7 +156,7 @@ public final class GraphStoreFilter {
                 expressions.relationshipExpression(),
                 inputNodes,
                 filteredNodes.idMap(),
-                config.typedReadConcurrency(),
+                config.readConcurrency(),
                 config.parameters(),
                 executorService,
                 progressTracker
@@ -173,7 +173,7 @@ public final class GraphStoreFilter {
                         .of(filteredSchema.nodeSchema(), filteredNodes.idMap(), filteredNodes.propertyStores())
                 )
                 .relationshipImportResult(RelationshipImportResult.of(filteredRelationships))
-                .concurrency(config.typedReadConcurrency())
+                .concurrency(config.readConcurrency())
                 .build();
         } finally {
             progressTracker.endSubTask();

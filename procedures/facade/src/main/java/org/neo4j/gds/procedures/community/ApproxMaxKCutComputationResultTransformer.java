@@ -48,7 +48,7 @@ final class ApproxMaxKCutComputationResultTransformer {
                 false,
                 NodePropertyValuesAdapter.adapt(approxMaxKCutResult.candidateSolution()),
                 config.minCommunitySize(),
-                config.typedConcurrency()
+                config.concurrency()
             );
             return LongStream.range(IdMap.START_NODE_ID, graph.nodeCount())
                 .filter(nodeProperties::hasValue)

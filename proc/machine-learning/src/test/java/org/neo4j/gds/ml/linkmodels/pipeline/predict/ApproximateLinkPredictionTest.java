@@ -331,7 +331,7 @@ class ApproximateLinkPredictionTest {
 
         var actualEstimate = ApproximateLinkPrediction
             .estimate(config)
-            .estimate(GraphDimensions.of(100, 1000), config.typedConcurrency());
+            .estimate(GraphDimensions.of(100, 1000), config.concurrency());
 
         assertThat(actualEstimate.memoryUsage().toString()).isEqualTo("[24 KiB ... 43 KiB]");
     }

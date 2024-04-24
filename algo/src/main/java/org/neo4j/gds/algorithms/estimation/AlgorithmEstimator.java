@@ -97,7 +97,7 @@ public class AlgorithmEstimator {
         var memoryTree = estimationBuilder
             .add("algorithm", memoryEstimateDefinition.memoryEstimation())
             .build()
-            .estimate(dimensions, config.typedConcurrency());
+            .estimate(dimensions, config.concurrency());
 
         return new MemoryEstimateResult(new MemoryTreeWithDimensions(memoryTree, dimensions));
     }

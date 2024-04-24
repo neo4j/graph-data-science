@@ -63,7 +63,7 @@ public final class PregelCompanion {
                     ),
                     (graphStore, graphProjectConfig, config) -> ensureInverseIndexesExist(graphStore,
                         config.internalRelationshipTypes(graphStore),
-                        config.typedConcurrency(),
+                        config.concurrency(),
                         log,
                         taskRegistryFactory
                     )

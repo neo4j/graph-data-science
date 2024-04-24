@@ -402,7 +402,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             () -> memoryEstimation,
             graphStore.getGraph(NodeLabel.of("N")).nodeCount(),
             graphStore.relationshipCount(),
-            config.typedConcurrency(),
+            config.concurrency(),
             MemoryRange.of(824)
         );
 
@@ -452,7 +452,7 @@ class NodeClassificationPredictPipelineExecutorTest extends BaseProcTest {
             () -> NodeClassificationPredictPipelineExecutor.estimate(model, config, new OpenModelCatalog(), null),
             graphStore.getGraph(NodeLabel.of("N")).nodeCount(),
             graphStore.relationshipCount(),
-            config.typedConcurrency(),
+            config.concurrency(),
             MemoryRange.of(352)
         );
     }

@@ -30,7 +30,6 @@ import org.neo4j.gds.api.DefaultValue;
 import org.neo4j.gds.api.GraphLoaderContext;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.core.Aggregation;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.RelationshipImportResult;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
 import org.neo4j.gds.core.loading.construction.RelationshipsBuilder;
@@ -160,7 +159,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipImportResu
             return GraphFactory.initRelationshipsBuilder()
                 .nodes(idMap)
                 .relationshipType(relationshipType)
-                .concurrency(cypherConfig.typedReadConcurrency())
+                .concurrency(cypherConfig.readConcurrency())
                 .propertyConfigs(propertyConfigs)
                 .orientation(Orientation.NATURAL)
                 .skipDanglingRelationships(!cypherConfig.validateRelationships())

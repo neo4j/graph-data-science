@@ -55,7 +55,7 @@ class SimilarityMutation {
         var similarityGraphResult = SimilarityResultCompanion.computeToGraph(
             graph,
             graph.nodeCount(),
-            mutateRelationshipPropertyConfiguration.typedConcurrency(),
+            mutateRelationshipPropertyConfiguration.concurrency(),
             similarityResultStream
         );
 

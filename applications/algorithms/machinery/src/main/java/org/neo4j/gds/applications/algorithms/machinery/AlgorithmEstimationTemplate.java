@@ -80,7 +80,7 @@ public class AlgorithmEstimationTemplate {
                 estimationBuilder,
                 memoryEstimation,
                 graphMemoryEstimation.dimensions(),
-                configuration.typedConcurrency()
+                configuration.concurrency()
             );
         }
 
@@ -89,7 +89,7 @@ public class AlgorithmEstimationTemplate {
 
             var graphDimensions = dimensionsFromActualGraph(graphName, configuration);
 
-            return estimate(estimationBuilder, memoryEstimation, graphDimensions, configuration.typedConcurrency());
+            return estimate(estimationBuilder, memoryEstimation, graphDimensions, configuration.concurrency());
         }
 
         throw new IllegalArgumentException(formatWithLocale(

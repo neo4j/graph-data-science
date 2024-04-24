@@ -303,7 +303,7 @@ public class CentralityAlgorithmsMutateBusinessFacade {
                 algorithmResult.graph().nodeCount(),
                 centralityFunctionSupplier.centralityFunction(result),
                 DefaultPool.INSTANCE,
-                configuration.typedConcurrency(),
+                configuration.concurrency(),
                 shouldComputeCentralityDistribution
             );
 

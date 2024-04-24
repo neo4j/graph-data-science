@@ -136,7 +136,7 @@ public interface SplitRelationshipsBaseConfig extends AlgoBaseConfig, RandomSeed
     @Configuration.Ignore
     default SplitRelationshipsParameters toParameters() {
         return new SplitRelationshipsParameters(
-            typedConcurrency(),
+            concurrency(),
             holdoutRelationshipType(),
             remainingRelationshipType(),
             holdoutFraction(),

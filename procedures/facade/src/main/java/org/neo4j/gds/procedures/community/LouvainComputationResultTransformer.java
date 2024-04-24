@@ -52,7 +52,7 @@ final class LouvainComputationResultTransformer {
                 configuration.consecutiveIds(),
                 NodePropertyValuesAdapter.adapt(louvainResult.dendrogramManager().getCurrent()),
                 configuration.minCommunitySize(),
-                configuration.typedConcurrency()
+                configuration.concurrency()
             );
 
             var includeIntermediateCommunities = configuration.includeIntermediateCommunities();

@@ -114,7 +114,7 @@ public final class EigenvectorComputation implements PregelComputation<PageRankC
 
     @Override
     public boolean masterCompute(MasterComputeContext<PageRankConfig> context) {
-        var concurrency = context.config().typedConcurrency();
+        var concurrency = context.config().concurrency();
 
         var properties = new DoubleNodePropertyValues() {
             @Override

@@ -71,7 +71,7 @@ public class NodeEmbeddingsAlgorithmsWriteBusinessFacade {
             intermediateResult.computeMilliseconds,
             () -> Node2VecSpecificFields.EMPTY,
             "Node2VecWrite",
-            configuration.typedWriteConcurrency(),
+            configuration.writeConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
             configuration.resolveResultStore(intermediateResult.algorithmResult.resultStore())
@@ -95,7 +95,7 @@ public class NodeEmbeddingsAlgorithmsWriteBusinessFacade {
             intermediateResult.computeMilliseconds,
             () -> 0l,
             "GraphSageWrite",
-            configuration.typedWriteConcurrency(),
+            configuration.writeConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
             configuration.resolveResultStore(intermediateResult.algorithmResult.resultStore())
@@ -119,7 +119,7 @@ public class NodeEmbeddingsAlgorithmsWriteBusinessFacade {
             intermediateResult.computeMilliseconds,
             () -> 0L,
             "FastRPWrite",
-            configuration.typedWriteConcurrency(),
+            configuration.writeConcurrency(),
             configuration.writeProperty(),
             configuration.arrowConnectionInfo(),
 

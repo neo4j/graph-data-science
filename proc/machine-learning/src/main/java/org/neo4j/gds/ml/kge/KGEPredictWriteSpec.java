@@ -80,7 +80,7 @@ public class KGEPredictWriteSpec implements
                         AlgorithmSpecProgressTrackerProvider.createProgressTracker(
                             name(),
                             graph.nodeCount(),
-                            config.typedWriteConcurrency(),
+                            config.writeConcurrency(),
                             executionContext
                         )
                     )

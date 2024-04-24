@@ -167,7 +167,7 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
     void writeWithStatistics() {
 
         var configurationMock = mock(BetweennessCentralityWriteConfig.class);
-        when(configurationMock.typedConcurrency()).thenReturn(new Concurrency(4));
+        when(configurationMock.concurrency()).thenReturn(new Concurrency(4));
         var graph = mock(Graph.class);
         var graphStore = mock(GraphStore.class);
 
@@ -269,7 +269,7 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
     void pageRankShouldHaveRealDistributionWhenScalerIsNotLog() {
         var pageRankConfigMock = mock(PageRankWriteConfig.class);
         when(pageRankConfigMock.scaler()).thenReturn(ScalerFactory.parse("none"));
-        when(pageRankConfigMock.typedConcurrency()).thenReturn(new Concurrency(4));
+        when(pageRankConfigMock.concurrency()).thenReturn(new Concurrency(4));
 
         var centralityAlgorithmsFacadeMock = mock(CentralityAlgorithmsFacade.class);
         var pageRankResultMock = mock(PageRankResult.class);

@@ -55,7 +55,7 @@ class LinkPredictionPipelineMutateResultConsumer extends MutateComputationResult
         var graph = graphStore.getGraph(labelFilter);
 
         var config = computationResult.config();
-        var concurrency = config.typedConcurrency();
+        var concurrency = config.concurrency();
         var mutateRelationshipType = RelationshipType.of(config.mutateRelationshipType());
 
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()

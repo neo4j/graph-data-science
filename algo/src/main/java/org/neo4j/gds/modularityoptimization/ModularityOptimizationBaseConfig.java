@@ -54,6 +54,6 @@ public interface ModularityOptimizationBaseConfig extends
 
     @Configuration.Ignore
     default ModularityOptimizationParameters toParameters() {
-        return new ModularityOptimizationParameters(typedConcurrency(), maxIterations(), batchSize(), tolerance());
+        return new ModularityOptimizationParameters(concurrency(), maxIterations(), batchSize(), tolerance());
     }
 }

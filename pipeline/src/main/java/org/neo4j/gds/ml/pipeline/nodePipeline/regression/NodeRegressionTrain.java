@@ -128,7 +128,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         pipeline.splitConfig().validateMinNumNodesInSplitSets(nodesGraph);
 
         return new NodeRegressionTrain(
-            config.typedConcurrency(),
+            config.concurrency(),
             pipeline,
             config,
             nodeFeatureProducer,
@@ -169,7 +169,7 @@ public final class NodeRegressionTrain implements PipelineTrainer<NodeRegression
         progressTracker.beginSubTask();
         var splitConfig = pipeline.splitConfig();
         var splits = new NodeSplitter(
-            trainConfig.typedConcurrency(),
+            trainConfig.concurrency(),
             nodeIdMap.nodeCount(),
             progressTracker,
             nodeIdMap::toOriginalNodeId,

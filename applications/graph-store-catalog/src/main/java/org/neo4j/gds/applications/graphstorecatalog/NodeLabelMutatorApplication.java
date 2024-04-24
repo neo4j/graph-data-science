@@ -46,7 +46,7 @@ public class NodeLabelMutatorApplication {
             var filteredNodes = NodesFilter.filterNodes(
                 graphStore,
                 nodeFilter,
-                configuration.typedConcurrency(),
+                configuration.concurrency(),
                 Map.of(),
                 DefaultPool.INSTANCE,
                 ProgressTracker.NULL_TRACKER

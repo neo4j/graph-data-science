@@ -67,7 +67,7 @@ public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
         this.graph = graph;
         this.config = config;
         this.executor = executor;
-        this.concurrency = config.typedConcurrency();
+        this.concurrency = config.concurrency();
     }
 
     @Override

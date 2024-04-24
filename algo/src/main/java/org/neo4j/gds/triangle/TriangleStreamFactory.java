@@ -38,6 +38,6 @@ public class TriangleStreamFactory extends GraphAlgorithmFactory<TriangleStream,
 
     @Override
     public TriangleStream build(Graph graph, TriangleCountBaseConfig configuration, ProgressTracker progressTracker) {
-        return build(graph, configuration.typedConcurrency(), progressTracker);
+        return build(graph, configuration.concurrency(), progressTracker);
     }
 }

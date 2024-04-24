@@ -130,7 +130,7 @@ public class PathFindingAlgorithms {
             graph.toMappedNodeId(configuration.sourceNode()),
             configuration.trackNegativeCycles(),
             configuration.trackPaths(),
-            configuration.typedConcurrency()
+            configuration.concurrency()
         );
 
         return algorithm.compute();
@@ -207,7 +207,7 @@ public class PathFindingAlgorithms {
         var algorithm = new DagLongestPath(
             graph,
             progressTracker,
-            configuration.typedConcurrency()
+            configuration.concurrency()
         );
 
         return algorithm.compute();
@@ -223,7 +223,7 @@ public class PathFindingAlgorithms {
 
         var algorithm = RandomWalk.create(
             graph,
-            configuration.typedConcurrency(),
+            configuration.concurrency(),
             configuration.walkParameters(),
             configuration.sourceNodes(),
             configuration.walkBufferSize(),
@@ -289,7 +289,7 @@ public class PathFindingAlgorithms {
         var yens = Yens.sourceTarget(
             graph,
             configuration,
-            configuration.typedConcurrency(),
+            configuration.concurrency(),
             progressTracker,
             requestScopedDependencies.getTerminationFlag()
         );
@@ -372,7 +372,7 @@ public class PathFindingAlgorithms {
         var algorithm = new TopologicalSort(
             graph,
             progressTracker,
-            configuration.typedConcurrency(),
+            configuration.concurrency(),
             configuration.computeMaxDistanceFromSource()
         );
 
@@ -384,12 +384,12 @@ public class PathFindingAlgorithms {
             return new WeightedAllShortestPaths(
                 graph,
                 DefaultPool.INSTANCE,
-                configuration.typedConcurrency()
+                configuration.concurrency()
             );
         } else {
             return new MSBFSAllShortestPaths(
                 graph,
-                configuration.typedConcurrency(),
+                configuration.concurrency(),
                 DefaultPool.INSTANCE
             );
         }

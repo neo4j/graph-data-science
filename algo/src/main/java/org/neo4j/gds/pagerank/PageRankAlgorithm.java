@@ -83,7 +83,7 @@ public class PageRankAlgorithm extends Algorithm<PageRankResult> {
 
     private void scaleScores(HugeDoubleArray scores) {
         var scalerFactory = config.scaler();
-        var concurrency = config.typedConcurrency();
+        var concurrency = config.concurrency();
 
         // Eigenvector produces L2NORM-scaled results by default.
         if (scalerFactory.type().equals(NoneScaler.TYPE) || (scalerFactory.type().equals(L2Norm.TYPE) && mode == PageRankAlgorithmFactory.Mode.EIGENVECTOR)) {

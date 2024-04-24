@@ -60,7 +60,7 @@ class KSpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree, Void> {
         var progressTracker = new TaskProgressTracker(
             NodePropertyExporter.baseTask(K_SPANNING_TREE, graph.nodeCount()),
             (org.neo4j.logging.Log) log.getNeo4jLog(),
-            configuration.typedWriteConcurrency(),
+            configuration.writeConcurrency(),
             requestScopedDependencies.getTaskRegistryFactory()
         );
 

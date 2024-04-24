@@ -38,7 +38,7 @@ public class HarmonicCentralityAlgorithmFactory<CONFIG extends HarmonicCentralit
     ) {
         return new HarmonicCentrality(
             graph,
-            configuration.typedConcurrency(),
+            configuration.concurrency(),
             DefaultPool.INSTANCE,
             progressTracker
         );

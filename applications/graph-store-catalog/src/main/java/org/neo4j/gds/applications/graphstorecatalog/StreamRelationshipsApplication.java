@@ -36,7 +36,7 @@ public class StreamRelationshipsApplication {
 
         return ParallelUtil.parallelStream(
             LongStream.range(0, graphStore.nodeCount()),
-            configuration.typedConcurrency(),
+            configuration.concurrency(),
             nodeStream -> nodeStream
                 .boxed()
                 .flatMap(nodeId -> relationshipTypesAndGraphs.stream().flatMap(graphAndRelationshipType -> {

@@ -58,7 +58,7 @@ public class CommonNeighbourAwareRandomWalk implements RandomWalkBasedNodesSampl
 
     public CommonNeighbourAwareRandomWalk(CommonNeighbourAwareRandomWalkConfig config) {
         this.config = config;
-        this.concurrency = config.typedConcurrency();
+        this.concurrency = config.concurrency();
         this.walkerProducer = WalkerProducer.CNARWWalkerProducer();
     }
 
@@ -123,7 +123,7 @@ public class CommonNeighbourAwareRandomWalk implements RandomWalkBasedNodesSampl
             // Three 8-bytes-element structures of size nodeCount * samplingRatio
             // Two 8-bytes-element structures of size nodeCount
             // Used for every thread
-            return (long) (config.typedConcurrency().value() * nodeCount * (config.samplingRatio() * 3L * 8L + 2L * 8L));
+            return (long) (config.concurrency().value() * nodeCount * (config.samplingRatio() * 3L * 8L + 2L * 8L));
         });
         builder.perNode("startNodesUsed", nodeCount -> (long) (nodeCount * config.samplingRatio() * 8L));
         return builder.build();

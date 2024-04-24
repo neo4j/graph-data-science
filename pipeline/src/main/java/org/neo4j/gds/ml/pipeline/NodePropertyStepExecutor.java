@@ -154,7 +154,7 @@ public class NodePropertyStepExecutor<PIPELINE_CONFIG extends AlgoBaseConfig & G
                 config.graphName(),
                 featureInputNodeLabels,
                 featureInputRelationshipTypes,
-                config.typedConcurrency(),
+                config.concurrency(),
                 stub
             );
             progressTracker.endSubTask();

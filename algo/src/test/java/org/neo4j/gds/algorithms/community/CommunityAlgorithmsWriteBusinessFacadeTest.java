@@ -159,7 +159,7 @@ package org.neo4j.gds.algorithms.community;
         void writeWithCommunityStatistics() {
 
             var configurationMock = mock(WccWriteConfig.class);
-            when(configurationMock.typedConcurrency()).thenReturn(new Concurrency(4));
+            when(configurationMock.concurrency()).thenReturn(new Concurrency(4));
             var graph = mock(Graph.class);
             var graphStore = mock(GraphStore.class);
 

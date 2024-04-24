@@ -65,7 +65,7 @@ public class FilteredNodeSimilarityFactory<CONFIG extends FilteredNodeSimilarity
         return build(
             graph,
             configuration.toParameters(),
-            configuration.typedConcurrency(),
+            configuration.concurrency(),
             sourceNodeFilter,
             targetNodeFilter,
             progressTracker

@@ -129,7 +129,7 @@ public final class GraphProjectConfigBuilders {
             .relationshipProjections(rp)
             .nodeProperties(ImmutablePropertyMappings.of(nodeProperties))
             .relationshipProperties(relationshipPropertyMappings)
-            .readConcurrency(concurrency.orElse(ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY).value())
+            .readConcurrency(concurrency.orElse(ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY))
             // TODO: should be able to just not set readConcurrency
             .jobId(jobId.orElse(new JobId()))
             .validateRelationships(validateRelationships.orElse(false))
@@ -157,7 +157,7 @@ public final class GraphProjectConfigBuilders {
             .graphName(graphName.orElse(""))
             .nodeQuery(nodeQuery.orElse(ALL_NODES_QUERY))
             .relationshipQuery(relationshipQuery.orElse(ALL_RELATIONSHIPS_QUERY))
-            .readConcurrency(concurrency.orElse(ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY).value())
+            .readConcurrency(concurrency.orElse(ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY))
             .validateRelationships(validateRelationships.orElse(true))
             .parameters(parameters.orElse(Collections.emptyMap()))
             .jobId(jobId.orElse(new JobId()))

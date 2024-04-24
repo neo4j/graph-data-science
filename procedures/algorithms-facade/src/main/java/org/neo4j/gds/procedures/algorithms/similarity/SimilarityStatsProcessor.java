@@ -37,7 +37,7 @@ class SimilarityStatsProcessor {
         return SimilarityResultCompanion.computeToGraph(
             graph,
             graph.nodeCount(),
-            configuration.typedConcurrency(),
+            configuration.concurrency(),
             similarityResultStream
         );
     }
@@ -51,7 +51,7 @@ class SimilarityStatsProcessor {
         var similarityGraphResult = SimilarityResultCompanion.computeToGraph(
             graph,
             graph.nodeCount(),
-            concurrencyConfiguration.typedConcurrency(),
+            concurrencyConfiguration.concurrency(),
             similarityResultStream
         );
 

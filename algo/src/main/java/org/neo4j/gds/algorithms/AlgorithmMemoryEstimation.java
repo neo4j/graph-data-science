@@ -49,7 +49,7 @@ public class AlgorithmMemoryEstimation<ALGO extends Algorithm<?>, CONFIG extends
         // this is a bit tricky, only used in ML Pipelines case but I am a bit reluctant to remove it yet...
         var extendedDimension = algorithmFactory.estimatedGraphDimensionTransformer(graphDimensions, config);
 
-        var memoryTree = estimationBuilder.build().estimate(extendedDimension, config.typedConcurrency());
+        var memoryTree = estimationBuilder.build().estimate(extendedDimension, config.concurrency());
         return new MemoryTreeWithDimensions(memoryTree, graphDimensions);
     }
 }

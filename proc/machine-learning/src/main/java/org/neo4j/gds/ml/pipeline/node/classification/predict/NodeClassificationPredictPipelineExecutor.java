@@ -144,7 +144,7 @@ public class NodeClassificationPredictPipelineExecutor extends PredictPipelineEx
             ClassifierFactory.create(modelData),
             features,
             MIN_BATCH_SIZE,
-            config.typedConcurrency(),
+            config.concurrency(),
             config.includePredictedProbabilities(),
             progressTracker,
             terminationFlag

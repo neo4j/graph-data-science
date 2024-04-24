@@ -43,7 +43,7 @@ class EstimateCommonNeighbourAwareRandomWalkApplication {
 
         var memoryTree = CommonNeighbourAwareRandomWalk
             .memoryEstimation(configuration)
-            .estimate(loader.graphDimensions(), configuration.typedConcurrency());
+            .estimate(loader.graphDimensions(), configuration.concurrency());
 
         var memoryTreeWithDimensions = new MemoryTreeWithDimensions(memoryTree, loader.graphDimensions());
 
