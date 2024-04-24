@@ -32,6 +32,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.PropertyState;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.loading.CSRGraphStore;
@@ -176,6 +177,7 @@ class MutatePropertyComputationResultConsumerTest {
             .result(algorithm.compute())
             .graph(graph)
             .graphStore(graphStore)
+            .resultStore(ResultStore.EMPTY)
             .preProcessingMillis(0)
             .computeMillis(0)
             .build();

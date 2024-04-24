@@ -25,6 +25,7 @@ import org.neo4j.gds.api.CloseableResourceRegistry;
 import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.properties.nodes.LongNodePropertyValues;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
@@ -40,8 +41,8 @@ import org.neo4j.gds.executor.ImmutableExecutionContext;
 import org.neo4j.gds.gdl.GdlFactory;
 import org.neo4j.gds.gdl.GdlGraphs;
 import org.neo4j.gds.gdl.ImmutableGraphProjectFromGdlConfig;
-import org.neo4j.gds.termination.TerminationMonitor;
 import org.neo4j.gds.metrics.MetricsFacade;
+import org.neo4j.gds.termination.TerminationMonitor;
 import org.neo4j.gds.test.TestAlgoResultBuilder;
 import org.neo4j.gds.test.TestAlgorithm;
 import org.neo4j.gds.test.TestAlgorithmResult;
@@ -101,6 +102,7 @@ class WriteProcCancellationTest extends BaseTest {
 
             var computationResult = ImmutableComputationResult.<TestAlgorithm, TestAlgorithmResult, TestWriteConfig>builder()
                 .graphStore(graphStore)
+                .resultStore(ResultStore.EMPTY)
                 .graph(graphStore.getUnion())
                 .config(TestWriteConfig.of(CypherMapWrapper.create(Map.of("writeProperty", "writeProp"))))
                 .algorithm(algorithm)

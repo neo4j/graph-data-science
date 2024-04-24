@@ -19,16 +19,17 @@
  */
 package org.neo4j.gds.algorithms.community;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.EmptyUserLogRegistryFactory;
@@ -92,7 +93,7 @@ class CommunityAlgorithmsStreamBusinessFacadeTest {
         void wcc() {
             // given
             var graphStoreCatalogServiceMock = mock(GraphStoreCatalogService.class);
-            doReturn(Pair.of(graph, graphStore))
+            doReturn(new GraphResources(graphStore, graph, ResultStore.EMPTY))
                 .when(graphStoreCatalogServiceMock)
                 .getGraphResources(any(), any(), any(), any(), any());
 
@@ -140,7 +141,7 @@ class CommunityAlgorithmsStreamBusinessFacadeTest {
             var graphStoreCatalogServiceMock = mock(GraphStoreCatalogService.class);
             var graphMock = mock(Graph.class);
             when(graphMock.isEmpty()).thenReturn(true);
-            doReturn(Pair.of(graphMock, mock(GraphStore.class)))
+            doReturn(new GraphResources(mock(GraphStore.class), graphMock, ResultStore.EMPTY))
                 .when(graphStoreCatalogServiceMock)
                 .getGraphResources(any(), any(), any(), any(), any());
             var algorithmsBusinessFacade = new CommunityAlgorithmsStreamBusinessFacade(

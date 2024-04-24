@@ -30,6 +30,7 @@ import org.neo4j.gds.api.GraphStoreAdapter;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.PropertyState;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.properties.nodes.EmptyLongNodePropertyValues;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
@@ -173,6 +174,7 @@ class WriteNodePropertiesComputationResultConsumerTest extends BaseTest {
             .result(algorithm.compute())
             .graph(graph)
             .graphStore(graphStore)
+            .resultStore(ResultStore.EMPTY)
             .preProcessingMillis(0)
             .computeMillis(0)
             .build();
