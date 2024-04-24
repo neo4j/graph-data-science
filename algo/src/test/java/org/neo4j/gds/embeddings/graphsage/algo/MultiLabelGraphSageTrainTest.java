@@ -167,7 +167,7 @@ class MultiLabelGraphSageTrainTest {
 
         GraphSageTrainConfig trainConfig = model.trainConfig();
         assertNotNull(trainConfig);
-        assertEquals(1, trainConfig.concurrency());
+        assertEquals(1, trainConfig.typedConcurrency().value());
         assertEquals(List.of("numEmployees", "numIngredients", "rating", "numPurchases", "embedding"), trainConfig.featureProperties());
         assertEquals("MEAN", Aggregator.AggregatorType.toString(trainConfig.aggregator()));
         assertEquals("SIGMOID", ActivationFunction.toString(trainConfig.activationFunction()));

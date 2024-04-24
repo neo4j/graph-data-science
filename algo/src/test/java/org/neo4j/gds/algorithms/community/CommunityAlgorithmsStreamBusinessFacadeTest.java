@@ -99,7 +99,6 @@ class CommunityAlgorithmsStreamBusinessFacadeTest {
 
             var concurrency = new Concurrency(4);
             var config = mock(WccBaseConfig.class);
-            when(config.concurrency()).thenReturn(concurrency.value());
             when(config.typedConcurrency()).thenReturn(concurrency);
             when(config.toParameters()).thenReturn(new WccParameters(0D, concurrency));
             var logMock = mock(Log.class);

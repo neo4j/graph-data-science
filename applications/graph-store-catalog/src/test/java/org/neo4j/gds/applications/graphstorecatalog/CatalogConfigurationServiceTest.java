@@ -31,6 +31,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.api.User;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -68,7 +69,7 @@ class CatalogConfigurationServiceTest {
             NodeLabel.of("some label"), NodeProjection.of("some label")
         ));
         assertThat(configuration.logProgress()).isEqualTo(true);
-        assertThat(configuration.readConcurrency()).isEqualTo(4);
+        assertThat(configuration.typedReadConcurrency()).isEqualTo(new Concurrency(4));
         assertThat(configuration.relationshipCount()).isEqualTo(-1);
         assertThat(configuration.relationshipProjections().projections()).containsExactlyInAnyOrderEntriesOf(Map.of(
             RelationshipType.of("some relationship type"),
@@ -115,7 +116,7 @@ class CatalogConfigurationServiceTest {
         assertThat(configuration.nodeCount()).isEqualTo(-1);
         assertThat(configuration.nodeQuery()).isEqualTo("some node query");
         assertThat(configuration.logProgress()).isEqualTo(true);
-        assertThat(configuration.readConcurrency()).isEqualTo(4);
+        assertThat(configuration.typedReadConcurrency()).isEqualTo(new Concurrency(4));
         assertThat(configuration.relationshipCount()).isEqualTo(-1);
         assertThat(configuration.relationshipQuery()).isEqualTo("some relationship query");
         assertThat(configuration.username()).isEqualTo("some user");

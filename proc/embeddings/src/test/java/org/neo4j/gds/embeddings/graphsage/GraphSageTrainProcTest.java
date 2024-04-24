@@ -173,7 +173,7 @@ class GraphSageTrainProcTest extends BaseProcTest {
 
         GraphSageTrainConfig trainConfig = model.trainConfig();
         assertThat(trainConfig).isNotNull();
-        assertThat(trainConfig.concurrency()).isEqualTo(1);
+        assertThat(trainConfig.typedConcurrency().value()).isEqualTo(1);
         assertThat(trainConfig.featureProperties()).containsExactly("age", "birth_year", "death_year");
         assertThat(trainConfig.aggregator()).isEqualTo(Aggregator.AggregatorType.MEAN);
         assertThat(trainConfig.activationFunction()).isEqualTo(ActivationFunction.SIGMOID);

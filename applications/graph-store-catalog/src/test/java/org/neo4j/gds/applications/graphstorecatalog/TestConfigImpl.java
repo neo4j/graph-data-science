@@ -82,7 +82,7 @@ public final class TestConfigImpl implements MemoryUsageValidatorTest.TestConfig
             errors.add(e);
         }
         try {
-            this.concurrency = config.getInt("concurrency", MemoryUsageValidatorTest.TestConfig.super.concurrency());
+            this.concurrency = config.getInt("concurrency", MemoryUsageValidatorTest.TestConfig.super.typedConcurrency().value());
         } catch (IllegalArgumentException e) {
             errors.add(e);
         }
@@ -173,7 +173,7 @@ public final class TestConfigImpl implements MemoryUsageValidatorTest.TestConfig
         usernameOverride().ifPresent(username -> map.put("username", username));
         map.put("sudo", sudo());
         map.put("logProgress", logProgress());
-        map.put("concurrency", concurrency());
+        map.put("concurrency", typedConcurrency().value());
         map.put("jobId", org.neo4j.gds.core.utils.progress.JobId.asString(jobId()));
         return map;
     }
@@ -206,7 +206,7 @@ public final class TestConfigImpl implements MemoryUsageValidatorTest.TestConfig
             builder.usernameOverride(baseConfig.usernameOverride());
             builder.sudo(baseConfig.sudo());
             builder.logProgress(baseConfig.logProgress());
-            builder.concurrency(baseConfig.concurrency());
+            builder.concurrency(baseConfig.typedConcurrency().value());
             builder.jobId(baseConfig.jobId());
             return builder;
         }

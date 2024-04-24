@@ -160,7 +160,7 @@ class CypherRelationshipLoader extends CypherRecordLoader<RelationshipImportResu
             return GraphFactory.initRelationshipsBuilder()
                 .nodes(idMap)
                 .relationshipType(relationshipType)
-                .concurrency(new Concurrency(cypherConfig.readConcurrency()))
+                .concurrency(cypherConfig.typedReadConcurrency())
                 .propertyConfigs(propertyConfigs)
                 .orientation(Orientation.NATURAL)
                 .skipDanglingRelationships(!cypherConfig.validateRelationships())

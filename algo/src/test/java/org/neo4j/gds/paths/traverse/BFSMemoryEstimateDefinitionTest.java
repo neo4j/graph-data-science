@@ -25,9 +25,6 @@ import org.neo4j.gds.assertions.MemoryEstimationAssert;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.concurrency.Concurrency;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 class BFSMemoryEstimateDefinitionTest {
 
     @ParameterizedTest
@@ -46,11 +43,7 @@ class BFSMemoryEstimateDefinitionTest {
         long expectedMin,
         long expectedMax
     ) {
-
         var dimensions = GraphDimensions.builder().nodeCount(nodeCount).relCountUpperBound(relationshipCount).build();
-
-        var config = mock(BfsBaseConfig.class);
-        when(config.concurrency()).thenReturn(concurrency);
 
         var memoryEstimation = new BfsMemoryEstimateDefinition();
 

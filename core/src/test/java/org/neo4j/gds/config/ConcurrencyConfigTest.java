@@ -22,6 +22,7 @@ package org.neo4j.gds.config;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -32,14 +33,14 @@ class ConcurrencyConfigTest {
     void lowConcurrency() {
         var concurrencyConfig = CypherMapWrapper.empty().withNumber("concurrency", 2);
         var algoConfig = TestConcurrencyConfig.of(concurrencyConfig);
-        assertThat(algoConfig.concurrency()).isEqualTo(2);
+        assertThat(algoConfig.typedConcurrency()).isEqualTo(new Concurrency(2));
     }
 
     @Test
     void lowWriteConcurrency() {
         var concurrencyConfig = CypherMapWrapper.empty().withNumber("writeConcurrency", 2);
         var algoConfig = TestConcurrencyConfig.of(concurrencyConfig);
-        assertThat(algoConfig.writeConcurrency()).isEqualTo(2);
+        assertThat(algoConfig.typedWriteConcurrency()).isEqualTo(new Concurrency(2));
     }
 
     @Test

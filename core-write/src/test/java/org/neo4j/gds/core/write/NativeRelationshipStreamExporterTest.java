@@ -195,11 +195,12 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
 
     @ParameterizedTest
     @ValueSource(ints = {1,2,4})
-    void exportExceedsBufferSize(int concurrency) {
+    void exportExceedsBufferSize(int concurrencyValue) {
         int nodeCount = 4;
         var batchSize = 10;
+        var concurrency = new Concurrency(concurrencyValue);
         // enforce writing non-full buffer
-        var relationshipCount = batchSize * concurrency + 5;
+        var relationshipCount = batchSize * concurrency.value() + 5;
 
         var rand = new Random();
 

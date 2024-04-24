@@ -27,10 +27,11 @@ public interface SingleThreadedRandomSeedConfig extends ConcurrencyConfig, Rando
     @Configuration.Check
     default void validate() {
         randomSeed().ifPresent(unused -> {
-            if (concurrency() > 1) {
+            var concurrency = typedConcurrency().value();
+            if (concurrency > 1) {
                 throw new IllegalArgumentException(formatWithLocale(
                     "Configuration parameter 'randomSeed' may only be set if parameter 'concurrency' is equal to 1, but got %d.",
-                    concurrency()
+                    concurrency
                 ));
             }
         });
