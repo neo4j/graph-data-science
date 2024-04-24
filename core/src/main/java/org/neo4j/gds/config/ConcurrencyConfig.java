@@ -45,11 +45,9 @@ public interface ConcurrencyConfig {
         if (userInput instanceof Concurrency) return (Concurrency) userInput;
         if (userInput instanceof Integer) return new Concurrency((Integer) userInput);
         if (userInput instanceof Long) return new Concurrency(Math.toIntExact((Long) userInput));
+        var type = null == userInput ? "null" : userInput.getClass().getSimpleName();
         throw new IllegalArgumentException(
-            formatWithLocale(
-                "Unsupported Concurrency input of type %s",
-                userInput.getClass().getSimpleName()
-            )
+            formatWithLocale("Unsupported Concurrency input of type %s", type)
         );
     }
 

@@ -23,7 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.core.StringIdentifierValidations;
 
-public interface WriteRelationshipConfig extends WriteConfig {
+public interface WriteRelationshipConfig extends ConcurrencyConfig, WriteConfig {
 
     String WRITE_RELATIONSHIP_TYPE_KEY = "writeRelationshipType";
 
