@@ -94,7 +94,8 @@ final class Neo4jDatabaseNodePropertyWriter {
                 writeMode,
                 nodePropertySchema,
                 nodeProperties,
-                arrowConnectionInfo.isPresent()
+                arrowConnectionInfo.isPresent(),
+                resultStore.isPresent()
             );
 
             var exporter = nodePropertyExporterBuilder
@@ -139,9 +140,10 @@ final class Neo4jDatabaseNodePropertyWriter {
         Capabilities.WriteMode writeMode,
         Map<String, PropertySchema> propertySchemas,
         Collection<NodeProperty> nodeProperties,
-        boolean hasArrowConnectionInfo
+        boolean hasArrowConnectionInfo,
+        boolean useResultStore
     ) {
-        if (writeMode == Capabilities.WriteMode.REMOTE && !hasArrowConnectionInfo) {
+        if (writeMode == Capabilities.WriteMode.REMOTE && !(hasArrowConnectionInfo || useResultStore)) {
             throw new IllegalArgumentException("Missing arrow connection information");
         }
         if (writeMode == Capabilities.WriteMode.LOCAL && hasArrowConnectionInfo) {
