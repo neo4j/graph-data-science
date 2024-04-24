@@ -20,31 +20,12 @@
 package org.neo4j.gds.procedures.similarity;
 
 import org.neo4j.gds.algorithms.RelationshipWriteResult;
-import org.neo4j.gds.algorithms.StatsResult;
 import org.neo4j.gds.algorithms.similarity.specificfields.SimilaritySpecificFieldsWithDistribution;
-import org.neo4j.gds.procedures.algorithms.similarity.SimilarityStatsResult;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityWriteResult;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
 
 
 final class NodeSimilarityComputationResultTransformer {
     private NodeSimilarityComputationResultTransformer() {}
-
-    static SimilarityStatsResult toStatsResult(
-        StatsResult<SimilaritySpecificFieldsWithDistribution> statsResult,
-        NodeSimilarityStatsConfig config
-    ) {
-
-        return new SimilarityStatsResult(
-            statsResult.preProcessingMillis(),
-            statsResult.computeMillis(),
-            statsResult.postProcessingMillis(),
-            statsResult.algorithmSpecificFields().nodesCompared(),
-            statsResult.algorithmSpecificFields().relationshipsWritten(),
-            statsResult.algorithmSpecificFields().similarityDistribution(),
-            config.toMap()
-        );
-    }
 
     static SimilarityWriteResult toWriteResult(
         RelationshipWriteResult<SimilaritySpecificFieldsWithDistribution> writeResult

@@ -35,6 +35,7 @@ import org.neo4j.gds.similarity.SimilarityResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnStatsConfig;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnStreamConfig;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnWriteConfig;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamConfig;
 import org.neo4j.gds.similarity.knn.KnnStatsConfig;
 import org.neo4j.gds.similarity.knn.KnnStreamConfig;
@@ -216,6 +217,38 @@ public final class SimilarityProcedureFacade {
 
     public FilteredNodeSimilarityMutateStub filteredNodeSimilarityMutateStub() {
         return filteredNodeSimilarityMutateStub;
+    }
+
+    public Stream<SimilarityStatsResult> filteredNodeSimilarityStats(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("similarityDistribution");
+        var resultBuilder = new FilteredNodeSimilarityResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
+
+        return statsModeAlgorithmRunner.runStatsModeAlgorithm(
+            graphName,
+            configuration,
+            FilteredNodeSimilarityStatsConfig::of,
+            resultBuilder,
+            statsMode()::filteredNodeSimilarity
+        );
+    }
+
+    public Stream<MemoryEstimateResult> filteredNodeSimilarityStatsEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationModeRunner.runEstimation(
+            algorithmConfiguration,
+            FilteredNodeSimilarityStatsConfig::of,
+            configuration -> estimationMode().filteredNodeSimilarity(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
     }
 
     public Stream<SimilarityResult> filteredNodeSimilarityStream(String graphName, Map<String, Object> configuration) {

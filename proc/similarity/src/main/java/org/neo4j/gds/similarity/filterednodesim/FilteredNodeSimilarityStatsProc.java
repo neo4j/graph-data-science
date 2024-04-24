@@ -45,7 +45,7 @@ public class FilteredNodeSimilarityStatsProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.similarity().filteredNodeSimilarityStats(graphName, configuration);
+        return facade.similarity().theOtherFacade().filteredNodeSimilarityStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.nodeSimilarity.filtered.stats.estimate", mode = READ)
@@ -54,7 +54,7 @@ public class FilteredNodeSimilarityStatsProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.similarity().filteredNodeSimilarityEstimateStats(graphNameOrConfiguration, algoConfiguration);
+        return facade.similarity().theOtherFacade().filteredNodeSimilarityStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Deprecated(forRemoval = true)

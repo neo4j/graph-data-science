@@ -23,18 +23,18 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class NodeSimilarityResultBuilderForStatsMode implements ResultBuilder<NodeSimilarityStatsConfig, NodeSimilarityResult, Stream<SimilarityStatsResult>, Void> {
+class FilteredNodeSimilarityResultBuilderForStatsMode implements ResultBuilder<FilteredNodeSimilarityStatsConfig, NodeSimilarityResult, Stream<SimilarityStatsResult>, Void> {
     private final GenericNodeSimilarityResultBuilder genericNodeSimilarityResultBuilder = new GenericNodeSimilarityResultBuilder();
 
     private final boolean shouldComputeSimilarityDistribution;
 
-    NodeSimilarityResultBuilderForStatsMode(boolean shouldComputeSimilarityDistribution) {
+    FilteredNodeSimilarityResultBuilderForStatsMode(boolean shouldComputeSimilarityDistribution) {
         this.shouldComputeSimilarityDistribution = shouldComputeSimilarityDistribution;
     }
 
@@ -42,7 +42,7 @@ class NodeSimilarityResultBuilderForStatsMode implements ResultBuilder<NodeSimil
     public Stream<SimilarityStatsResult> build(
         Graph graph,
         GraphStore graphStore,
-        NodeSimilarityStatsConfig configuration,
+        FilteredNodeSimilarityStatsConfig configuration,
         Optional<NodeSimilarityResult> result,
         AlgorithmProcessingTimings timings,
         Optional<Void> unused
