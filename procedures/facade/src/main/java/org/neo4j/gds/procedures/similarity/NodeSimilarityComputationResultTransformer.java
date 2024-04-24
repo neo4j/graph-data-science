@@ -20,33 +20,15 @@
 package org.neo4j.gds.procedures.similarity;
 
 import org.neo4j.gds.algorithms.RelationshipWriteResult;
-import org.neo4j.gds.algorithms.similarity.specificfields.SimilaritySpecificFieldsWithDistribution;
 import org.neo4j.gds.algorithms.StatsResult;
-import org.neo4j.gds.algorithms.StreamComputationResult;
+import org.neo4j.gds.algorithms.similarity.specificfields.SimilaritySpecificFieldsWithDistribution;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityStatsResult;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityWriteResult;
-import org.neo4j.gds.similarity.SimilarityResult;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
 
-import java.util.stream.Stream;
 
 final class NodeSimilarityComputationResultTransformer {
     private NodeSimilarityComputationResultTransformer() {}
-
-    static Stream<SimilarityResult> toStreamResult(
-        StreamComputationResult<NodeSimilarityResult> computationResult
-    ) {
-        return computationResult.result().map(result -> {
-            var graph = computationResult.graph();
-            return result.streamResult()
-                .map(similarityResult -> {
-                    similarityResult.node1 = graph.toOriginalNodeId(similarityResult.node1);
-                    similarityResult.node2 = graph.toOriginalNodeId(similarityResult.node2);
-                    return similarityResult;
-                });
-        }).orElseGet(Stream::empty);
-    }
 
     static SimilarityStatsResult toStatsResult(
         StatsResult<SimilaritySpecificFieldsWithDistribution> statsResult,

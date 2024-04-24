@@ -27,7 +27,7 @@ import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnn;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnBaseConfig;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
-import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityMutateConfig;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityBaseConfig;
 import org.neo4j.gds.similarity.filtering.NodeFilter;
 import org.neo4j.gds.similarity.knn.ImmutableKnnContext;
 import org.neo4j.gds.similarity.knn.Knn;
@@ -72,7 +72,7 @@ public class SimilarityAlgorithms {
         return filteredKnn.compute();
     }
 
-    NodeSimilarityResult filteredNodeSimilarity(Graph graph, FilteredNodeSimilarityMutateConfig configuration) {
+    NodeSimilarityResult filteredNodeSimilarity(Graph graph, FilteredNodeSimilarityBaseConfig configuration) {
         var sourceNodeFilter = configuration.sourceNodeFilter().toNodeFilter(graph);
         var targetNodeFilter = configuration.targetNodeFilter().toNodeFilter(graph);
 

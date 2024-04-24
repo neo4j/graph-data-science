@@ -51,7 +51,6 @@ import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStatsBusinessFacade;
-import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
@@ -189,7 +188,6 @@ class AlgorithmFacadeFactory {
         // mode-specific facades
         var estimateBusinessFacade = new SimilarityAlgorithmsEstimateBusinessFacade(algorithmEstimator);
         var statsBusinessFacade = new SimilarityAlgorithmsStatsBusinessFacade(similarityAlgorithmsFacade);
-        var streamBusinessFacade = new SimilarityAlgorithmsStreamBusinessFacade(similarityAlgorithmsFacade);
         var writeBusinessFacade = new SimilarityAlgorithmsWriteBusinessFacade(
             similarityAlgorithmsFacade,
             writeRelationshipService
@@ -211,7 +209,6 @@ class AlgorithmFacadeFactory {
             returnColumns,
             estimateBusinessFacade,
             statsBusinessFacade,
-            streamBusinessFacade,
             writeBusinessFacade,
             theOtherFacade
         );

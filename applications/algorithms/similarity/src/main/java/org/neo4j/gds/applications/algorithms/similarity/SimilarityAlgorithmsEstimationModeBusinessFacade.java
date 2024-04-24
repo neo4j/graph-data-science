@@ -52,8 +52,21 @@ public class SimilarityAlgorithmsEstimationModeBusinessFacade {
         );
     }
 
-    public MemoryEstimation filteredNodeSimilarity(FilteredNodeSimilarityBaseConfig configuration) {
+    public MemoryEstimation filteredNodeSimilarity(NodeSimilarityBaseConfig configuration) {
         return new FilteredNodeSimilarityMemoryEstimateDefinition(configuration.toParameters()).memoryEstimation();
+    }
+
+    public MemoryEstimateResult filteredNodeSimilarity(
+        FilteredNodeSimilarityBaseConfig configuration,
+        Object graphNameOrConfiguration
+    ) {
+        var memoryEstimation = filteredNodeSimilarity(configuration);
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
     }
 
     public MemoryEstimation knn(KnnBaseConfig knnMutateConfig) {
