@@ -44,7 +44,7 @@ public class BellmanFordStatsProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().bellmanFordStats(graphName, configuration);
+        return facade.algorithms().pathFinding().bellmanFordStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.bellmanFord.stats.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class BellmanFordStatsProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.pathFinding().bellmanFordStatsEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().pathFinding().bellmanFordStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

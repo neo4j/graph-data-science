@@ -44,7 +44,7 @@ public class BellmanFordMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().bellmanFordMutateStub().execute(graphName, configuration);
+        return facade.algorithms().pathFinding().bellmanFordMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(value = "gds.bellmanFord.mutate.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class BellmanFordMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.pathFinding().bellmanFordMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().pathFinding().bellmanFordMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

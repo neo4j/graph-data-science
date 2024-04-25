@@ -45,7 +45,7 @@ public class SpanningTreeStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().spanningTreeStream(graphName, configuration);
+        return facade.algorithms().pathFinding().spanningTreeStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.spanningTree.stream" + ".estimate", mode = READ)
@@ -54,7 +54,7 @@ public class SpanningTreeStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().spanningTreeStreamEstimate(graphName, configuration);
+        return facade.algorithms().pathFinding().spanningTreeStreamEstimate(graphName, configuration);
     }
 
     @Procedure(value = "gds.beta.spanningTree.stream", mode = READ, deprecatedBy = "gds.spanningTree.stream")

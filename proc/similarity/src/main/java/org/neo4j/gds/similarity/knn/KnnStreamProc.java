@@ -44,7 +44,7 @@ public class KnnStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.similarity().knnStream(graphName, configuration);
+        return facade.algorithms().similarity().knnStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.knn.stream.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class KnnStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.similarity().knnStreamEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().similarity().knnStreamEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

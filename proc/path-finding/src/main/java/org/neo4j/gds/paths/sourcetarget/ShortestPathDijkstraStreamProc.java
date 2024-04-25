@@ -44,7 +44,7 @@ public class ShortestPathDijkstraStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().singlePairShortestPathDijkstraStream(graphName, configuration);
+        return facade.algorithms().pathFinding().singlePairShortestPathDijkstraStream(graphName, configuration);
     }
 
     @Procedure(name = "gds.shortestPath.dijkstra.stream.estimate", mode = READ)
@@ -53,7 +53,7 @@ public class ShortestPathDijkstraStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.pathFinding().singlePairShortestPathDijkstraStreamEstimate(
+        return facade.algorithms().pathFinding().singlePairShortestPathDijkstraStreamEstimate(
             graphNameOrConfiguration,
             algoConfiguration
         );

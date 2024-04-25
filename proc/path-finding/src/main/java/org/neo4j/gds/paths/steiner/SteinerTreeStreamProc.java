@@ -45,7 +45,7 @@ public class SteinerTreeStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().steinerTreeStream(graphName, configuration);
+        return facade.algorithms().pathFinding().steinerTreeStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.steinerTree.stream.estimate", mode = READ)
@@ -54,7 +54,7 @@ public class SteinerTreeStreamProc {
         @Name(value = "graphName") Object graphNameOrConfiguration,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().steinerTreeStreamEstimate(graphNameOrConfiguration, configuration);
+        return facade.algorithms().pathFinding().steinerTreeStreamEstimate(graphNameOrConfiguration, configuration);
     }
 
     @Deprecated

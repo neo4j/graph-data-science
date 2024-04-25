@@ -44,7 +44,7 @@ public class DfsMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().depthFirstSearchMutateStub().execute(graphName, configuration);
+        return facade.algorithms().pathFinding().depthFirstSearchMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(name = "gds.dfs.mutate.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class DfsMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.pathFinding().depthFirstSearchMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().pathFinding().depthFirstSearchMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

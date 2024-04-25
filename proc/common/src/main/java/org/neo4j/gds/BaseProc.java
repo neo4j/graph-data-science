@@ -153,7 +153,7 @@ public abstract class BaseProc {
                 .nodeLookup(new TransactionNodeLookup(transaction))
                 .isGdsAdmin(transactionContext().isGdsAdmin())
                 .metricsFacade(metricsFacade)
-                .algorithmsProcedureFacade(graphDataScienceProcedures.algorithmsProcedureFacade())
+                .algorithmsProcedureFacade(graphDataScienceProcedures.algorithms())
                 .build();
     }
 

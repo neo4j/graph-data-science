@@ -44,7 +44,7 @@ public class RandomWalkStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().randomWalkStream(graphName, configuration);
+        return facade.algorithms().pathFinding().randomWalkStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.randomWalk.stream.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class RandomWalkStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.pathFinding().randomWalkStreamEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().pathFinding().randomWalkStreamEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

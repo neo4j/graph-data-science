@@ -45,7 +45,7 @@ public class SteinerTreeMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().steinerTreeMutateStub().execute(graphName, configuration);
+        return facade.algorithms().pathFinding().steinerTreeMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(value = "gds.steinerTree.mutate.estimate", mode = READ)
@@ -54,7 +54,7 @@ public class SteinerTreeMutateProc {
         @Name(value = "graphName") Object graphNameOrConfiguration,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().steinerTreeMutateStub().estimate(graphNameOrConfiguration, configuration);
+        return facade.algorithms().pathFinding().steinerTreeMutateStub().estimate(graphNameOrConfiguration, configuration);
     }
 
     @Deprecated

@@ -44,7 +44,7 @@ public class DfsStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().depthFirstSearchStream(graphName, configuration);
+        return facade.algorithms().pathFinding().depthFirstSearchStream(graphName, configuration);
     }
 
     @Procedure(name = "gds.dfs.stream.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class DfsStreamProc {
         @Name(value = "graphName") Object graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().depthFirstSearchStreamEstimate(graphName, configuration);
+        return facade.algorithms().pathFinding().depthFirstSearchStreamEstimate(graphName, configuration);
     }
 }

@@ -44,7 +44,7 @@ public class NodeSimilarityStatsProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.similarity().nodeSimilarityStats(graphName, configuration);
+        return facade.algorithms().similarity().nodeSimilarityStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.nodeSimilarity.stats.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class NodeSimilarityStatsProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.similarity().nodeSimilarityStatsEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().similarity().nodeSimilarityStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

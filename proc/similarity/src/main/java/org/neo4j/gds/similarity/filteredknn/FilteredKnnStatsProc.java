@@ -45,7 +45,7 @@ public final class FilteredKnnStatsProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.similarity().filteredKnnStats(graphName, configuration);
+        return facade.algorithms().similarity().filteredKnnStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.knn.filtered.stats.estimate", mode = READ)
@@ -54,7 +54,7 @@ public final class FilteredKnnStatsProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.similarity().filteredKnnStatsEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().similarity().filteredKnnStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(name = "gds.alpha.knn.filtered.stats", mode = READ, deprecatedBy = "gds.knn.filtered.stats")

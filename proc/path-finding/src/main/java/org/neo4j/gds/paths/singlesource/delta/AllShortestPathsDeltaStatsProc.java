@@ -44,7 +44,7 @@ public class AllShortestPathsDeltaStatsProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().deltaSteppingStats(graphName, configuration);
+        return facade.algorithms().pathFinding().deltaSteppingStats(graphName, configuration);
     }
 
     @Procedure(name = "gds.allShortestPaths.delta.stats.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class AllShortestPathsDeltaStatsProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.pathFinding().deltaSteppingStatsEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().pathFinding().deltaSteppingStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

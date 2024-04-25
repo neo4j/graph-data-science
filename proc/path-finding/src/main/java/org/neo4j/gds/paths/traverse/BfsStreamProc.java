@@ -44,7 +44,7 @@ public class BfsStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().breadthFirstSearchStream(graphName, configuration);
+        return facade.algorithms().pathFinding().breadthFirstSearchStream(graphName, configuration);
     }
 
     @Procedure(name = "gds.bfs.stream.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class BfsStreamProc {
         @Name(value = "graphName") Object graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().breadthFirstSearchStreamEstimate(graphName, configuration);
+        return facade.algorithms().pathFinding().breadthFirstSearchStreamEstimate(graphName, configuration);
     }
 }

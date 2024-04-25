@@ -44,7 +44,7 @@ public class ShortestPathYensStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().singlePairShortestPathYensStream(graphName, configuration);
+        return facade.algorithms().pathFinding().singlePairShortestPathYensStream(graphName, configuration);
     }
 
     @Procedure(name = "gds.shortestPath.yens.stream.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class ShortestPathYensStreamProc {
         @Name(value = "graphName") Object graphName,
         @Name(value = "configuration") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().singlePairShortestPathYensStreamEstimate(graphName, configuration);
+        return facade.algorithms().pathFinding().singlePairShortestPathYensStreamEstimate(graphName, configuration);
     }
 }

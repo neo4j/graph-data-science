@@ -44,7 +44,7 @@ public class NodeSimilarityMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.similarity().nodeSimilarityMutateStub().execute(graphName, configuration);
+        return facade.algorithms().similarity().nodeSimilarityMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(value = "gds.nodeSimilarity.mutate.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class NodeSimilarityMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.similarity().nodeSimilarityMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().similarity().nodeSimilarityMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

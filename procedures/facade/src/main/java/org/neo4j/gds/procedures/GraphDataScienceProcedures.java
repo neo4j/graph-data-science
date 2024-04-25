@@ -22,8 +22,6 @@ package org.neo4j.gds.procedures;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
-import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
 import org.neo4j.gds.procedures.catalog.CatalogProcedureFacade;
 import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
@@ -73,6 +71,10 @@ public class GraphDataScienceProcedures {
         return log;
     }
 
+    public AlgorithmsProcedureFacade algorithms() {
+        return algorithmsProcedureFacade;
+    }
+
     public CatalogProcedureFacade catalog() {
         return catalogProcedureFacade;
     }
@@ -93,26 +95,11 @@ public class GraphDataScienceProcedures {
         return nodeEmbeddingsProcedureFacade;
     }
 
-    public PathFindingProcedureFacade pathFinding() {
-        return algorithmsProcedureFacade.pathFinding();
-    }
-
     public PipelinesProcedureFacade pipelines() {
         return pipelinesProcedureFacade;
     }
 
-    public SimilarityProcedureFacade similarity() {
-        return algorithmsProcedureFacade.similarity();
-    }
-
     public DeprecatedProceduresMetricService deprecatedProcedures() {
         return deprecatedProceduresMetricService;
-    }
-
-    /**
-     * This exists for reasons of dependency injection; business logic should not use it.
-     */
-    public AlgorithmsProcedureFacade algorithmsProcedureFacade() {
-        return algorithmsProcedureFacade;
     }
 }

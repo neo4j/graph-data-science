@@ -42,6 +42,6 @@ public class DagLongestPathStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().longestPathStream(graphName, configuration);
+        return facade.algorithms().pathFinding().longestPathStream(graphName, configuration);
     }
 }

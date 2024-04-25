@@ -44,7 +44,7 @@ public class KnnMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.similarity().knnMutateStub().execute(graphName, configuration);
+        return facade.algorithms().similarity().knnMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(value = "gds.knn.mutate.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class KnnMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.similarity().knnMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().similarity().knnMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

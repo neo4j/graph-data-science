@@ -43,7 +43,7 @@ public class AllShortestPathsStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().allShortestPathStream(graphName, configuration);
+        return facade.algorithms().pathFinding().allShortestPathStream(graphName, configuration);
     }
 
     @Procedure(name = "gds.alpha.allShortestPaths.stream", mode = READ, deprecatedBy = "gds.allShortestPaths.stream")

@@ -44,7 +44,7 @@ public class BellmanFordStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().bellmanFordStream(graphName, configuration);
+        return facade.algorithms().pathFinding().bellmanFordStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.bellmanFord.stream.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class BellmanFordStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.pathFinding().bellmanFordStreamEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().pathFinding().bellmanFordStreamEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

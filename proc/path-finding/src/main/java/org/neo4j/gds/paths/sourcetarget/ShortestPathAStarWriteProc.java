@@ -45,7 +45,7 @@ public class ShortestPathAStarWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().singlePairShortestPathAStarWrite(graphName, configuration);
+        return facade.algorithms().pathFinding().singlePairShortestPathAStarWrite(graphName, configuration);
     }
 
     @Procedure(name = "gds.shortestPath.astar.write.estimate", mode = READ)
@@ -54,7 +54,7 @@ public class ShortestPathAStarWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.pathFinding().singlePairShortestPathAStarWriteEstimate(
+        return facade.algorithms().pathFinding().singlePairShortestPathAStarWriteEstimate(
             graphNameOrConfiguration,
             algoConfiguration
         );

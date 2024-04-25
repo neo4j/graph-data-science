@@ -44,7 +44,7 @@ public class BfsStatsProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().breadthFirstSearchStats(graphName, configuration);
+        return facade.algorithms().pathFinding().breadthFirstSearchStats(graphName, configuration);
     }
 
     @Procedure(name = "gds.bfs.stats.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class BfsStatsProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.pathFinding().breadthFirstSearchStatsEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().pathFinding().breadthFirstSearchStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

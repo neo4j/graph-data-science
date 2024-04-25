@@ -46,7 +46,7 @@ public class SpanningTreeWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().spanningTreeWrite(graphName, configuration);
+        return facade.algorithms().pathFinding().spanningTreeWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.spanningTree.write" + ".estimate", mode = READ)
@@ -55,7 +55,7 @@ public class SpanningTreeWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().spanningTreeWriteEstimate(graphName, configuration);
+        return facade.algorithms().pathFinding().spanningTreeWriteEstimate(graphName, configuration);
     }
 
     @Procedure(value = "gds.beta.spanningTree.write", mode = WRITE, deprecatedBy = "gds.spanningTree.write")

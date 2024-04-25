@@ -45,7 +45,7 @@ public class AllShortestPathsDijkstraWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().singleSourceShortestPathDijkstraWrite(graphName, configuration);
+        return facade.algorithms().pathFinding().singleSourceShortestPathDijkstraWrite(graphName, configuration);
     }
 
     @Procedure(name = "gds.allShortestPaths.dijkstra.write.estimate", mode = READ)
@@ -54,7 +54,7 @@ public class AllShortestPathsDijkstraWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.pathFinding().singleSourceShortestPathDijkstraWriteEstimate(
+        return facade.algorithms().pathFinding().singleSourceShortestPathDijkstraWriteEstimate(
             graphNameOrConfiguration,
             algoConfiguration
         );

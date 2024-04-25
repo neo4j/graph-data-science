@@ -45,7 +45,7 @@ public class SpanningTreeMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().spanningTreeMutateStub().execute(graphName, configuration);
+        return facade.algorithms().pathFinding().spanningTreeMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(value = "gds.spanningTree.mutate" + ".estimate", mode = READ)
@@ -54,7 +54,7 @@ public class SpanningTreeMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphName,
         @Name(value = "algoConfiguration") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().spanningTreeMutateStub().estimate(graphName, configuration);
+        return facade.algorithms().pathFinding().spanningTreeMutateStub().estimate(graphName, configuration);
     }
 
     @Procedure(value = "gds.beta.spanningTree.mutate", mode = READ, deprecatedBy = "gds.spanningTree.mutate")

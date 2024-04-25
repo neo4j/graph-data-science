@@ -44,7 +44,7 @@ public class ShortestPathAStarStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().singlePairShortestPathAStarStream(graphName, configuration);
+        return facade.algorithms().pathFinding().singlePairShortestPathAStarStream(graphName, configuration);
     }
 
     @Procedure(name = "gds.shortestPath.astar.stream.estimate", mode = READ)
@@ -53,7 +53,7 @@ public class ShortestPathAStarStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.pathFinding().singlePairShortestPathAStarStreamEstimate(
+        return facade.algorithms().pathFinding().singlePairShortestPathAStarStreamEstimate(
             graphNameOrConfiguration,
             algoConfiguration
         );

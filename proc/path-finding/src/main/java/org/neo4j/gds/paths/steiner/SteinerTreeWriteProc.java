@@ -46,7 +46,7 @@ public class SteinerTreeWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().steinerTreeWrite(graphName, configuration);
+        return facade.algorithms().pathFinding().steinerTreeWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.steinerTree.write.estimate", mode = READ)
@@ -55,7 +55,7 @@ public class SteinerTreeWriteProc {
         @Name(value = "graphName") Object graphNameOrConfiguration,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.pathFinding().steinerTreeWriteEstimate(graphNameOrConfiguration, configuration);
+        return facade.algorithms().pathFinding().steinerTreeWriteEstimate(graphNameOrConfiguration, configuration);
     }
 
 
