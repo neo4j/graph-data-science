@@ -35,6 +35,7 @@ import static org.neo4j.gds.collections.PageUtil.pageIndex;
  * for efficient access to the compressed target lists of nodes without decompressing them.
  *
  * <pre>
+ * degrees          = [ 1,  4,  2,  2]
  * offsets          = [42,  0, 31, 22]
  * forward_indexes  = [ 3,  0,  2,  1]
  * sorted_offsets   = [ 0, 22, 31, 42]
@@ -68,8 +69,12 @@ public final class CompressedSlicedAdjacencyList {
     private final HugeIntArray degrees;
     // Offsets sorted in ascending order.
     private final HugeLongArray sortedOffsets;
-    // Node ids sorted in offset order.
+    // TODO: id map?
+    // Node id to sort order.
+    private final HugeLongArray sortedIndexes;
+    // Sort order to node id
     private final HugeLongArray forwardIndexes;
+    private long nodeCount;
 
     public static CompressedSlicedAdjacencyList of(CompressedAdjacencyList compressedAdjacencyList, int concurrency) {
         byte[][] compressedPages = compressedAdjacencyList.pages;
@@ -85,10 +90,24 @@ public final class CompressedSlicedAdjacencyList {
         HugeMergeSort.sort(sortedOffsets, concurrency, sortedIndexes);
         // 2. sort the indexes (node ids) according to offset order O(nlog(n))
         fillWithIndex(sortedIndexes);
-        HugeSerialIndirectMergeSort.sort(sortedIndexes, sortedIndexes.size(), offsets::get, forwardIndexes);
-        buildForwardIndex(sortedIndexes, forwardIndexes);
+        HugeSerialIndirectMergeSort.sort(sortedIndexes, sortedIndexes.size(), node -> {
+            long offset = offsets.get(node);
+            // 0-degree nodes have offset set to 0.
+            // We need to make sure that if node id 0 has a degree > 0, it ends
+            // up at the end of all 0-degree nodes in the sort order. This allows
+            // for less complexity in the endOffset computation.
+            return offset + degrees.get(node) > 0 ? 1 : 0;
+        }, forwardIndexes);
+        forwardIndexes = buildForwardIndex(sortedIndexes, forwardIndexes, degrees);
 
-        return new CompressedSlicedAdjacencyList(compressedPages, degrees, offsets, sortedOffsets, forwardIndexes);
+        return new CompressedSlicedAdjacencyList(
+            compressedPages,
+            degrees,
+            offsets,
+            sortedOffsets,
+            sortedIndexes,
+            forwardIndexes
+        );
     }
 
     private CompressedSlicedAdjacencyList(
@@ -96,13 +115,16 @@ public final class CompressedSlicedAdjacencyList {
         HugeIntArray degrees,
         HugeLongArray offsets,
         HugeLongArray sortedOffsets,
+        HugeLongArray sortedIndexes,
         HugeLongArray forwardIndexes
     ) {
         this.compressedPages = compressedPages;
         this.degrees = degrees;
         this.offsets = offsets;
         this.sortedOffsets = sortedOffsets;
+        this.sortedIndexes = sortedIndexes;
         this.forwardIndexes = forwardIndexes;
+        this.nodeCount = offsets.size();
     }
 
     /**
@@ -125,10 +147,16 @@ public final class CompressedSlicedAdjacencyList {
         if (startOffset == ZERO_DEGREE) {
             return false;
         }
-        byte[] page = this.compressedPages[pageIndex(startOffset, BumpAllocator.PAGE_SHIFT)];
+        int startPageIndex = pageIndex(startOffset, BumpAllocator.PAGE_SHIFT);
+        byte[] page = this.compressedPages[startPageIndex];
         int startIndexInPage = indexInPage(startOffset, BumpAllocator.PAGE_MASK);
         long endOffset = endOffset(nodeId);
         int endIndexInPage = indexInPage(endOffset, BumpAllocator.PAGE_MASK);
+        if (endIndexInPage == 0) {
+            // Next offset starts on next page, we need to set the slice to
+            // end at the end of the page to also cover oversize pages.
+            endIndexInPage = page.length;
+        }
 
         slice.page = page;
         slice.offset = startIndexInPage;
@@ -158,23 +186,18 @@ public final class CompressedSlicedAdjacencyList {
         if (this.degrees.get(nodeId) == 0) {
             return ZERO_DEGREE;
         }
+        // position of node id in sorted offsets
         long fromIndex = this.forwardIndexes.get(nodeId);
-        long toIndex = fromIndex;
+        long toIndex = fromIndex + 1;
 
-        // skip 0-degree nodes
-        long size = this.offsets.size();
-        do {
-            toIndex++;
-        } while (toIndex < size && this.degrees.get(toIndex) == 0);
-
-        if (toIndex >= size) {
+        if (toIndex >= this.nodeCount) {
             // fromIndex refers to the last offset on the last page.
             // We do not know the length of that slice, so we need
             // to search its end.
             return findEndOfSlice(fromIndex);
         }
 
-        return sortedOffsets.get(toIndex);
+        return this.sortedOffsets.get(toIndex);
     }
 
     private long findEndOfSlice(long fromIndex) {
@@ -210,7 +233,11 @@ public final class CompressedSlicedAdjacencyList {
     }
 
     // TODO parallelize
-    private static void buildForwardIndex(HugeLongArray sortedIndexes, HugeLongArray forwardIndexes) {
+    private static HugeLongArray buildForwardIndex(
+        HugeLongArray sortedIndexes,
+        HugeLongArray forwardIndexes,
+        HugeIntArray degrees
+    ) {
         var cursor = sortedIndexes.initCursor(sortedIndexes.newCursor());
         while (cursor.next()) {
             long[] offsetArray = cursor.array;
@@ -218,8 +245,14 @@ public final class CompressedSlicedAdjacencyList {
             long base = cursor.base;
 
             for (int i = cursor.offset; i < limit; i++) {
-                forwardIndexes.set(offsetArray[i], base + i);
+                long node = offsetArray[i];
+                long forwardIndex = base + i;
+                if (degrees.get(node) == 0) {
+                    forwardIndex = -forwardIndex - 1;
+                }
+                forwardIndexes.set(offsetArray[i], forwardIndex);
             }
         }
+        return forwardIndexes;
     }
 }

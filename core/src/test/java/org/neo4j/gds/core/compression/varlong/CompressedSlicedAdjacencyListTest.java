@@ -33,6 +33,7 @@ import org.neo4j.gds.extension.TestGraph;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.core.compression.varlong.CompressedSlicedAdjacencyList.ZERO_DEGREE;
 
 @GdlExtension
 class CompressedSlicedAdjacencyListTest {
@@ -45,10 +46,25 @@ class CompressedSlicedAdjacencyListTest {
         "(c)-->(d)" +
         "(d)-->(a)";
 
+    @GdlGraph(graphNamePrefix = "gap")
+    public static final String GAP_GRAPH = "(a)" +
+        "(b)" +
+        "(c)" +
+        "(d)" +
+        "(e)" +
+        "(a)-->(c)" +
+        "(a)-->(d)" +
+        "(d)-->(e)";
+
     @Inject
     private TestGraph graph;
 
+    @Inject
+    private TestGraph gapGraph;
+
     private CompressedSlicedAdjacencyList csal;
+
+    private CompressedSlicedAdjacencyList gapCsal;
 
     @BeforeEach
     void setup() {
@@ -56,6 +72,33 @@ class CompressedSlicedAdjacencyListTest {
             .get(RelationshipType.ALL_RELATIONSHIPS)
             .adjacencyList();
         this.csal = CompressedSlicedAdjacencyList.of(cal, 1);
+        var gapCal = (CompressedAdjacencyList) this.gapGraph.relationshipTopologies()
+            .get(RelationshipType.ALL_RELATIONSHIPS)
+            .adjacencyList();
+        this.gapCsal = CompressedSlicedAdjacencyList.of(gapCal, 1);
+    }
+
+    @Test
+    void gapDegrees() {
+        assertThat(gapCsal.degree(gapGraph.toMappedNodeId("a"))).isEqualTo(2);
+        assertThat(gapCsal.degree(gapGraph.toMappedNodeId("b"))).isEqualTo(0);
+        assertThat(gapCsal.degree(gapGraph.toMappedNodeId("c"))).isEqualTo(0);
+        assertThat(gapCsal.degree(gapGraph.toMappedNodeId("d"))).isEqualTo(1);
+        assertThat(gapCsal.degree(gapGraph.toMappedNodeId("e"))).isEqualTo(0);
+    }
+
+    @Test
+    void gapOffsets() {
+        assertThat(gapCsal.startOffset(gapGraph.toMappedNodeId("a"))).isEqualTo(0);
+        assertThat(gapCsal.endOffset(gapGraph.toMappedNodeId("a"))).isEqualTo(2);
+        assertThat(gapCsal.startOffset(gapGraph.toMappedNodeId("b"))).isEqualTo(ZERO_DEGREE);
+        assertThat(gapCsal.endOffset(gapGraph.toMappedNodeId("b"))).isEqualTo(ZERO_DEGREE);
+        assertThat(gapCsal.startOffset(gapGraph.toMappedNodeId("c"))).isEqualTo(ZERO_DEGREE);
+        assertThat(gapCsal.endOffset(gapGraph.toMappedNodeId("c"))).isEqualTo(ZERO_DEGREE);
+        assertThat(gapCsal.startOffset(gapGraph.toMappedNodeId("d"))).isEqualTo(2);
+        assertThat(gapCsal.endOffset(gapGraph.toMappedNodeId("d"))).isEqualTo(5);
+        assertThat(gapCsal.startOffset(gapGraph.toMappedNodeId("e"))).isEqualTo(ZERO_DEGREE);
+        assertThat(gapCsal.endOffset(gapGraph.toMappedNodeId("e"))).isEqualTo(ZERO_DEGREE);
     }
 
     @Test
@@ -68,8 +111,8 @@ class CompressedSlicedAdjacencyListTest {
 
     @Test
     void offsets() {
-        assertThat(csal.startOffset(graph.toMappedNodeId("a"))).isEqualTo(CompressedSlicedAdjacencyList.ZERO_DEGREE);
-        assertThat(csal.endOffset(graph.toMappedNodeId("a"))).isEqualTo(CompressedSlicedAdjacencyList.ZERO_DEGREE);
+        assertThat(csal.startOffset(graph.toMappedNodeId("a"))).isEqualTo(ZERO_DEGREE);
+        assertThat(csal.endOffset(graph.toMappedNodeId("a"))).isEqualTo(ZERO_DEGREE);
         assertThat(csal.startOffset(graph.toMappedNodeId("b"))).isEqualTo(0);
         assertThat(csal.endOffset(graph.toMappedNodeId("b"))).isEqualTo(2);
         assertThat(csal.startOffset(graph.toMappedNodeId("c"))).isEqualTo(2);
@@ -90,7 +133,9 @@ class CompressedSlicedAdjacencyListTest {
     void initPageSlice(String expected) {
         String[] vars = expected.split(",");
         long sourceNode = graph.toMappedNodeId(vars[0]);
-        long[] expectedTargets = IntStream.range(1, vars.length).mapToLong(i -> graph.toMappedNodeId(vars[i])).toArray();
+        long[] expectedTargets = IntStream.range(1, vars.length)
+            .mapToLong(i -> graph.toMappedNodeId(vars[i]))
+            .toArray();
 
         var pageSlice = new CompressedSlicedAdjacencyList.PageSlice();
         var success = csal.initPageSlice(sourceNode, pageSlice);
