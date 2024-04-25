@@ -37,6 +37,7 @@ import org.neo4j.gds.similarity.filteredknn.FilteredKnnStreamConfig;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnWriteConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStatsConfig;
 import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityStreamConfig;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityWriteConfig;
 import org.neo4j.gds.similarity.knn.KnnStatsConfig;
 import org.neo4j.gds.similarity.knn.KnnStreamConfig;
 import org.neo4j.gds.similarity.knn.KnnWriteConfig;
@@ -270,6 +271,44 @@ public final class SimilarityProcedureFacade {
         var result = estimationModeRunner.runEstimation(
             algorithmConfiguration,
             FilteredNodeSimilarityStreamConfig::of,
+            configuration -> estimationMode().filteredNodeSimilarity(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
+    public Stream<SimilarityWriteResult> filteredNodeSimilarityWrite(
+        String graphNameAsString,
+        Map<String, Object> rawConfiguration
+    ) {
+        var resultBuilder = new FilteredNodeSimilarityResultBuilderForWriteMode();
+
+        var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("similarityDistribution");
+
+        return writeModeAlgorithmRunner.runWriteModeAlgorithm(
+            graphNameAsString,
+            rawConfiguration,
+            FilteredNodeSimilarityWriteConfig::of,
+            (graphName, configuration, __) -> writeMode().filteredNodeSimilarity(
+                graphName,
+                configuration,
+                resultBuilder,
+                shouldComputeSimilarityDistribution
+            ),
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> filteredNodeSimilarityWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationModeRunner.runEstimation(
+            algorithmConfiguration,
+            FilteredNodeSimilarityWriteConfig::of,
             configuration -> estimationMode().filteredNodeSimilarity(
                 configuration,
                 graphNameOrConfiguration

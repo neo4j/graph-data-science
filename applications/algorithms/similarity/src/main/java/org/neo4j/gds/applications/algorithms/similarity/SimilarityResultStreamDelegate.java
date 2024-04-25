@@ -17,47 +17,34 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.algorithms.similarity;
+package org.neo4j.gds.applications.algorithms.similarity;
 
-import org.neo4j.gds.algorithms.similarity.specificfields.SimilaritySpecificFieldsWithDistribution;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.similarity.SimilarityGraphBuilder;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityResult;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.termination.TerminationFlag;
 
 import java.util.stream.Stream;
 
-public final class SimilarityResultCompanion {
-
-    public static SimilarityGraphResult computeToGraph(
+/**
+ * "Delegate" because really we should mint a microtype and place this behaviour in it
+ */
+public class SimilarityResultStreamDelegate {
+    public SimilarityGraphResult computeSimilarityGraph(
         Graph graph,
-        long nodeCount,
         Concurrency concurrency,
         Stream<SimilarityResult> similarityResultStream
     ) {
-
-        Graph similarityGraph = new SimilarityGraphBuilder(
+        var similarityGraph = new SimilarityGraphBuilder(
             graph,
             concurrency,
             DefaultPool.INSTANCE,
             TerminationFlag.RUNNING_TRUE
         ).build(similarityResultStream);
 
-        return new SimilarityGraphResult(similarityGraph, nodeCount, false);
+        return new SimilarityGraphResult(similarityGraph, graph.nodeCount(), false);
     }
-
-    static SpecificFieldsWithSimilarityStatisticsSupplier<NodeSimilarityResult, SimilaritySpecificFieldsWithDistribution> NODE_SIMILARITY_SPECIFIC_FIELDS_SUPPLIER = ((result, similarityDistribution) -> {
-        var graphResult = result.graphResult();
-        return new SimilaritySpecificFieldsWithDistribution(
-            graphResult.comparedNodes(),
-            graphResult.similarityGraph().relationshipCount(),
-            similarityDistribution
-        );
-    });
-
-    private SimilarityResultCompanion() {}
 }

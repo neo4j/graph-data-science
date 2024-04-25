@@ -27,7 +27,6 @@ import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
-import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -83,8 +82,7 @@ class AlgorithmFacadeFactoryProvider {
         GraphDatabaseService graphDatabaseService,
         DatabaseGraphStoreEstimationService databaseGraphStoreEstimationService,
         ApplicationsFacade applicationsFacade,
-        GenericStub genericStub,
-        WriteRelationshipService writeRelationshipService
+        GenericStub genericStub
     ) {
         /*
          * GDS services derived from Procedure Context.
@@ -129,7 +127,6 @@ class AlgorithmFacadeFactoryProvider {
             returnColumns,
             mutateNodePropertyService,
             writeNodePropertyService,
-            writeRelationshipService,
             algorithmRunner,
             algorithmEstimator,
             modelCatalogServiceProvider.createService(graphDatabaseService, log),

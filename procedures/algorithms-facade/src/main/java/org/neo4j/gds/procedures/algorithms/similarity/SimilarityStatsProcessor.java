@@ -19,8 +19,8 @@
  */
 package org.neo4j.gds.procedures.algorithms.similarity;
 
-import org.neo4j.gds.algorithms.similarity.SimilarityResultCompanion;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.applications.algorithms.similarity.SimilarityResultStreamDelegate;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.result.SimilarityStatistics;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
@@ -30,17 +30,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 class SimilarityStatsProcessor {
-    SimilarityGraphResult computeSimilarityGraph(
-        Graph graph, ConcurrencyConfig configuration,
-        Stream<SimilarityResult> similarityResultStream
-    ) {
-        return SimilarityResultCompanion.computeToGraph(
-            graph,
-            graph.nodeCount(),
-            configuration.concurrency(),
-            similarityResultStream
-        );
-    }
+    final SimilarityResultStreamDelegate similarityResultStreamDelegate = new SimilarityResultStreamDelegate();
 
     Map<String, Object> computeSimilarityDistribution(
         Graph graph,
@@ -48,9 +38,8 @@ class SimilarityStatsProcessor {
         Stream<SimilarityResult> similarityResultStream,
         boolean shouldComputeSimilarityDistribution
     ) {
-        var similarityGraphResult = SimilarityResultCompanion.computeToGraph(
+        var similarityGraphResult = similarityResultStreamDelegate.computeSimilarityGraph(
             graph,
-            graph.nodeCount(),
             concurrencyConfiguration.concurrency(),
             similarityResultStream
         );

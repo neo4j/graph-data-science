@@ -19,39 +19,39 @@
  */
 package org.neo4j.gds.procedures.algorithms.similarity;
 
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
+import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class NodeSimilarityResultBuilderForStatsMode implements ResultBuilder<NodeSimilarityStatsConfig, NodeSimilarityResult, Stream<SimilarityStatsResult>, Void> {
-    private final GenericNodeSimilarityResultBuilderForStatsMode genericResultBuilder = new GenericNodeSimilarityResultBuilderForStatsMode();
-
-    private final boolean shouldComputeSimilarityDistribution;
-
-    NodeSimilarityResultBuilderForStatsMode(boolean shouldComputeSimilarityDistribution) {
-        this.shouldComputeSimilarityDistribution = shouldComputeSimilarityDistribution;
-    }
-
-    @Override
-    public Stream<SimilarityStatsResult> build(
-        Graph graph,
-        GraphStore graphStore,
-        NodeSimilarityStatsConfig configuration,
+class GenericNodeSimilarityResultBuilderForWriteMode {
+    Stream<SimilarityWriteResult> build(
+        Map<String, Object> configurationMap,
         Optional<NodeSimilarityResult> result,
         AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        Optional<Pair<RelationshipsWritten, Map<String, Object>>> metadata
     ) {
-        return genericResultBuilder.build(
-            configuration.toMap(),
-            result,
-            timings,
-            shouldComputeSimilarityDistribution
+        if (result.isEmpty()) return Stream.of(
+            SimilarityWriteResult.emptyFrom(
+                timings,
+                configurationMap
+            )
         );
+
+        var nodeSimilarityResult = result.get();
+
+        var nodeSimilarityWriteResult = SimilarityWriteResult.from(
+            timings,
+            metadata.orElseThrow().getLeft(),
+            metadata.orElseThrow().getRight(),
+            nodeSimilarityResult.graphResult().comparedNodes(),
+            configurationMap
+        );
+
+        return Stream.of(nodeSimilarityWriteResult);
     }
 }

@@ -23,13 +23,13 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
 import org.neo4j.gds.procedures.catalog.CatalogProcedureFacade;
 import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.embeddings.NodeEmbeddingsProcedureFacade;
 import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
-import org.neo4j.gds.procedures.similarity.SimilarityProcedureFacade;
 
 /**
  * I have been postponing this. It is _mainly_ helpful for tests. Just some code structure convenience.
@@ -102,14 +102,10 @@ public class GraphDataScienceProceduresBuilder {
         return this;
     }
 
-    /**
-     * @deprecated A little hack until the similarity facade has been properly strangled
-     */
-    @Deprecated
     public GraphDataScienceProcedures build() {
         var algorithmsProcedureFacade = new AlgorithmsProcedureFacade(
             pathFindingProcedureFacade,
-            similarityProcedureFacade == null ? null : similarityProcedureFacade.theOtherFacade()
+            similarityProcedureFacade
         );
 
         return new GraphDataScienceProcedures(
@@ -121,7 +117,6 @@ public class GraphDataScienceProceduresBuilder {
             miscAlgorithmsProcedureFacade,
             nodeEmbeddingsProcedureFacade,
             pipelinesProcedureFacade,
-            similarityProcedureFacade,
             deprecatedProceduresMetricService
         );
     }

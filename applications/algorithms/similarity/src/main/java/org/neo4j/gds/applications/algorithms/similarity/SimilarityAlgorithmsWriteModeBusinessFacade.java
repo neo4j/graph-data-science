@@ -27,6 +27,7 @@ import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnWriteConfig;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityWriteConfig;
 import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.knn.KnnWriteConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
@@ -36,6 +37,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.FILTERED_KNN;
+import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.FILTERED_NODE_SIMILARITY;
 import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.KNN;
 import static org.neo4j.gds.applications.algorithms.similarity.AlgorithmLabels.NODE_SIMILARITY;
 
@@ -75,6 +77,29 @@ public class SimilarityAlgorithmsWriteModeBusinessFacade {
             FILTERED_KNN,
             () -> estimationFacade.filteredKnn(configuration),
             graph -> similarityAlgorithms.filteredKnn(graph, configuration),
+            Optional.of(writeStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT filteredNodeSimilarity(
+        GraphName graphName,
+        FilteredNodeSimilarityWriteConfig configuration,
+        ResultBuilder<FilteredNodeSimilarityWriteConfig, NodeSimilarityResult, RESULT, Pair<RelationshipsWritten, Map<String, Object>>> resultBuilder,
+        boolean shouldComputeSimilarityDistribution
+    ) {
+        var writeStep = FilteredNodeSimilarityWriteStep.create(
+            writeRelationshipService,
+            configuration,
+            shouldComputeSimilarityDistribution
+        );
+
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            FILTERED_NODE_SIMILARITY,
+            () -> estimationFacade.filteredNodeSimilarity(configuration),
+            graph -> similarityAlgorithms.filteredNodeSimilarity(graph, configuration),
             Optional.of(writeStep),
             resultBuilder
         );

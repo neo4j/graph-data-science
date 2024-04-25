@@ -55,7 +55,7 @@ public class FilteredNodeSimilarityWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.similarity().filteredNodeSimilarityEstimateWrite(graphNameOrConfiguration, algoConfiguration);
+        return facade.similarity().filteredNodeSimilarityWriteEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Deprecated(forRemoval = true)

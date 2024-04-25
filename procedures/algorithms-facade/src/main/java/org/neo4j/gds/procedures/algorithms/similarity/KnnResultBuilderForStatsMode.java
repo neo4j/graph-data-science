@@ -23,6 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.similarity.SimilarityResultStreamDelegate;
 import org.neo4j.gds.similarity.knn.KnnResult;
 import org.neo4j.gds.similarity.knn.KnnStatsConfig;
 
@@ -30,6 +31,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 class KnnResultBuilderForStatsMode implements ResultBuilder<KnnStatsConfig, KnnResult, Stream<KnnStatsResult>, Void> {
+    private final SimilarityResultStreamDelegate similarityResultStreamDelegate = new SimilarityResultStreamDelegate();
     private final SimilarityStatsProcessor similarityStatsProcessor = new SimilarityStatsProcessor();
 
     private final boolean shouldComputeSimilarityDistribution;
@@ -56,9 +58,9 @@ class KnnResultBuilderForStatsMode implements ResultBuilder<KnnStatsConfig, KnnR
 
         var knnResult = result.get();
 
-        var similarityGraphResult = similarityStatsProcessor.computeSimilarityGraph(
+        var similarityGraphResult = similarityResultStreamDelegate.computeSimilarityGraph(
             graph,
-            configuration,
+            configuration.concurrency(),
             knnResult.streamSimilarityResult()
         );
         var communityStatistics = similarityStatsProcessor.computeCommunityStatistics(

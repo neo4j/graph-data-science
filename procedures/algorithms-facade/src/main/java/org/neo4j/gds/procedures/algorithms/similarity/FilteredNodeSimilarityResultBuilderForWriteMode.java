@@ -19,39 +19,36 @@
  */
 package org.neo4j.gds.procedures.algorithms.similarity;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
+import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
+import org.neo4j.gds.similarity.filterednodesim.FilteredNodeSimilarityWriteConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
-import org.neo4j.gds.similarity.nodesim.NodeSimilarityStatsConfig;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class NodeSimilarityResultBuilderForStatsMode implements ResultBuilder<NodeSimilarityStatsConfig, NodeSimilarityResult, Stream<SimilarityStatsResult>, Void> {
-    private final GenericNodeSimilarityResultBuilderForStatsMode genericResultBuilder = new GenericNodeSimilarityResultBuilderForStatsMode();
-
-    private final boolean shouldComputeSimilarityDistribution;
-
-    NodeSimilarityResultBuilderForStatsMode(boolean shouldComputeSimilarityDistribution) {
-        this.shouldComputeSimilarityDistribution = shouldComputeSimilarityDistribution;
-    }
+class FilteredNodeSimilarityResultBuilderForWriteMode implements ResultBuilder<FilteredNodeSimilarityWriteConfig, NodeSimilarityResult, Stream<SimilarityWriteResult>, Pair<RelationshipsWritten, Map<String, Object>>> {
+    private final GenericNodeSimilarityResultBuilderForWriteMode genericResultBuilder = new GenericNodeSimilarityResultBuilderForWriteMode();
 
     @Override
-    public Stream<SimilarityStatsResult> build(
+    public Stream<SimilarityWriteResult> build(
         Graph graph,
         GraphStore graphStore,
-        NodeSimilarityStatsConfig configuration,
+        FilteredNodeSimilarityWriteConfig configuration,
         Optional<NodeSimilarityResult> result,
         AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        Optional<Pair<RelationshipsWritten, Map<String, Object>>> metadata
     ) {
         return genericResultBuilder.build(
             configuration.toMap(),
             result,
             timings,
-            shouldComputeSimilarityDistribution
+            metadata
         );
     }
 }

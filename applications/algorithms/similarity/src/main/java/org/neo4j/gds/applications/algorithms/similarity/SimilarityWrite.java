@@ -20,7 +20,6 @@
 package org.neo4j.gds.applications.algorithms.similarity;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.neo4j.gds.algorithms.similarity.SimilarityResultCompanion;
 import org.neo4j.gds.algorithms.similarity.SimilaritySummaryBuilder;
 import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.api.Graph;
@@ -39,6 +38,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 class SimilarityWrite {
+    private final SimilarityResultStreamDelegate similarityResultStreamDelegate = new SimilarityResultStreamDelegate();
+
     private final WriteRelationshipService writeRelationshipService;
 
     SimilarityWrite(WriteRelationshipService writeRelationshipService) {
@@ -57,9 +58,8 @@ class SimilarityWrite {
         Stream<SimilarityResult> similarityResultStream,
         String taskName
     ) {
-        var similarityGraphResult = SimilarityResultCompanion.computeToGraph(
+        var similarityGraphResult = similarityResultStreamDelegate.computeSimilarityGraph(
             graph,
-            graph.nodeCount(),
             concurrencyConfiguration.concurrency(),
             similarityResultStream
         );

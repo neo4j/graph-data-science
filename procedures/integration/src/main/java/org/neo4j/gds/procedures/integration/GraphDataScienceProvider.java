@@ -210,8 +210,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             graphDatabaseService,
             databaseGraphStoreEstimationService,
             applicationsFacade,
-            genericStub,
-            writeRelationshipService
+            genericStub
         );
         var centralityProcedureFacade = algorithmFacadeFactory.createCentralityProcedureFacade();
         var communityProcedureFacade = algorithmFacadeFactory.createCommunityProcedureFacade();

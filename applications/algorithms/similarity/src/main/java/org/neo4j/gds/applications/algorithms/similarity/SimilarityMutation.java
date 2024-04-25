@@ -21,7 +21,6 @@ package org.neo4j.gds.applications.algorithms.similarity;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
-import org.neo4j.gds.algorithms.similarity.SimilarityResultCompanion;
 import org.neo4j.gds.algorithms.similarity.SimilaritySingleTypeRelationshipsHandler;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
@@ -38,6 +37,8 @@ import java.util.stream.Stream;
  * Similarity mutations are all the same
  */
 class SimilarityMutation {
+    private final SimilarityResultStreamDelegate similarityResultStreamDelegate = new SimilarityResultStreamDelegate();
+
     private final MutateRelationshipService mutateRelationshipService;
 
     SimilarityMutation(MutateRelationshipService mutateRelationshipService) {
@@ -52,9 +53,8 @@ class SimilarityMutation {
         Stream<SimilarityResult> similarityResultStream,
         boolean shouldComputeSimilarityDistribution
     ) {
-        var similarityGraphResult = SimilarityResultCompanion.computeToGraph(
+        var similarityGraphResult = similarityResultStreamDelegate.computeSimilarityGraph(
             graph,
-            graph.nodeCount(),
             mutateRelationshipPropertyConfiguration.concurrency(),
             similarityResultStream
         );

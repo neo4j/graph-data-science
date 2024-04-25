@@ -45,7 +45,7 @@ public class KnnWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.similarity().theOtherFacade().knnWrite(graphName, configuration);
+        return facade.similarity().knnWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.knn.write.estimate", mode = READ)
@@ -54,6 +54,6 @@ public class KnnWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.similarity().theOtherFacade().knnWriteEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.similarity().knnWriteEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

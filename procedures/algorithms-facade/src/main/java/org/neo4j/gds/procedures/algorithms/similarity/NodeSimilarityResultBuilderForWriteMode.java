@@ -33,6 +33,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 class NodeSimilarityResultBuilderForWriteMode implements ResultBuilder<NodeSimilarityWriteConfig, NodeSimilarityResult, Stream<SimilarityWriteResult>, Pair<RelationshipsWritten, Map<String, Object>>> {
+    private GenericNodeSimilarityResultBuilderForWriteMode genericResultBuilder = new GenericNodeSimilarityResultBuilderForWriteMode();
+
     @Override
     public Stream<SimilarityWriteResult> build(
         Graph graph,
@@ -42,25 +44,11 @@ class NodeSimilarityResultBuilderForWriteMode implements ResultBuilder<NodeSimil
         AlgorithmProcessingTimings timings,
         Optional<Pair<RelationshipsWritten, Map<String, Object>>> metadata
     ) {
-        var configurationMap = configuration.toMap();
-
-        if (result.isEmpty()) return Stream.of(
-            SimilarityWriteResult.emptyFrom(
-                timings,
-                configurationMap
-            )
-        );
-
-        var nodeSimilarityResult = result.get();
-
-        var knnWriteResult = SimilarityWriteResult.from(
+        return genericResultBuilder.build(
+            configuration.toMap(),
+            result,
             timings,
-            metadata.orElseThrow().getLeft(),
-            metadata.orElseThrow().getRight(),
-            nodeSimilarityResult.graphResult().comparedNodes(),
-            configurationMap
+            metadata
         );
-
-        return Stream.of(knnWriteResult);
     }
 }

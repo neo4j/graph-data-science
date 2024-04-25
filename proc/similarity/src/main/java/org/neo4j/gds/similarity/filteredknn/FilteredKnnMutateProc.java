@@ -45,7 +45,7 @@ public class FilteredKnnMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.similarity().theOtherFacade().filteredKnnMutateStub().execute(graphName, configuration);
+        return facade.similarity().filteredKnnMutateStub().execute(graphName, configuration);
     }
 
     @Procedure(value = "gds.knn.filtered.mutate.estimate", mode = READ)
@@ -54,10 +54,7 @@ public class FilteredKnnMutateProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.similarity().theOtherFacade().filteredKnnMutateStub().estimate(
-            graphNameOrConfiguration,
-            algoConfiguration
-        );
+        return facade.similarity().filteredKnnMutateStub().estimate(graphNameOrConfiguration, algoConfiguration);
     }
 
     @Procedure(name = "gds.alpha.knn.filtered.mutate", mode = READ, deprecatedBy = "gds.knn.filtered.mutate")

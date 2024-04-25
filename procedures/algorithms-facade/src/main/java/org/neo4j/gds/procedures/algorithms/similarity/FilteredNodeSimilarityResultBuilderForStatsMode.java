@@ -30,7 +30,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 class FilteredNodeSimilarityResultBuilderForStatsMode implements ResultBuilder<FilteredNodeSimilarityStatsConfig, NodeSimilarityResult, Stream<SimilarityStatsResult>, Void> {
-    private final GenericNodeSimilarityResultBuilder genericNodeSimilarityResultBuilder = new GenericNodeSimilarityResultBuilder();
+    private final GenericNodeSimilarityResultBuilderForStatsMode genericResultBuilder = new GenericNodeSimilarityResultBuilderForStatsMode();
 
     private final boolean shouldComputeSimilarityDistribution;
 
@@ -47,7 +47,7 @@ class FilteredNodeSimilarityResultBuilderForStatsMode implements ResultBuilder<F
         AlgorithmProcessingTimings timings,
         Optional<Void> unused
     ) {
-        return genericNodeSimilarityResultBuilder.build(
+        return genericResultBuilder.build(
             configuration.toMap(),
             result,
             timings,

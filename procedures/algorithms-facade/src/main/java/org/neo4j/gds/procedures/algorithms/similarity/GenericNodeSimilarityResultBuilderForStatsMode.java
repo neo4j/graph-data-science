@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class GenericNodeSimilarityResultBuilder {
+class GenericNodeSimilarityResultBuilderForStatsMode {
     private final SimilarityStatsProcessor similarityStatsProcessor = new SimilarityStatsProcessor();
 
     Stream<SimilarityStatsResult> build(

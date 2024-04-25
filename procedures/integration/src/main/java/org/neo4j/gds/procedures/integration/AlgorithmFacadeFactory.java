@@ -48,10 +48,6 @@ import org.neo4j.gds.algorithms.misc.MiscAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.misc.MiscAlgorithmsFacade;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
-import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsEstimateBusinessFacade;
-import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsFacade;
-import org.neo4j.gds.algorithms.similarity.SimilarityAlgorithmsWriteBusinessFacade;
-import org.neo4j.gds.algorithms.similarity.WriteRelationshipService;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
 import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.applications.ApplicationsFacade;
@@ -62,12 +58,12 @@ import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.runners.StatsModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.runners.WriteModeAlgorithmRunner;
+import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.embeddings.NodeEmbeddingsProcedureFacade;
 import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
-import org.neo4j.gds.procedures.similarity.SimilarityProcedureFacade;
 
 class AlgorithmFacadeFactory {
     // Request scoped parameters
@@ -76,7 +72,6 @@ class AlgorithmFacadeFactory {
     private final ProcedureCallContextReturnColumns returnColumns;
     private final MutateNodePropertyService mutateNodePropertyService;
     private final WriteNodePropertyService writeNodePropertyService;
-    private final WriteRelationshipService writeRelationshipService;
     private final AlgorithmEstimator algorithmEstimator;
     private final AlgorithmRunner algorithmRunner;
     private final ModelCatalogService modelCatalogService;
@@ -93,7 +88,6 @@ class AlgorithmFacadeFactory {
         ProcedureCallContextReturnColumns returnColumns,
         MutateNodePropertyService mutateNodePropertyService,
         WriteNodePropertyService writeNodePropertyService,
-        WriteRelationshipService writeRelationshipService,
         AlgorithmRunner algorithmRunner,
         AlgorithmEstimator algorithmEstimator,
         ModelCatalogService modelCatalogService,
@@ -109,7 +103,6 @@ class AlgorithmFacadeFactory {
         this.returnColumns = returnColumns;
         this.mutateNodePropertyService = mutateNodePropertyService;
         this.writeNodePropertyService = writeNodePropertyService;
-        this.writeRelationshipService = writeRelationshipService;
         this.algorithmRunner = algorithmRunner;
         this.algorithmEstimator = algorithmEstimator;
         this.modelCatalogService = modelCatalogService;
@@ -181,18 +174,7 @@ class AlgorithmFacadeFactory {
     }
 
     SimilarityProcedureFacade createSimilarityProcedureFacade() {
-        // algorithms facade
-        var similarityAlgorithmsFacade = new SimilarityAlgorithmsFacade(algorithmRunner);
-
-        // mode-specific facades
-        var estimateBusinessFacade = new SimilarityAlgorithmsEstimateBusinessFacade(algorithmEstimator);
-        var writeBusinessFacade = new SimilarityAlgorithmsWriteBusinessFacade(
-            similarityAlgorithmsFacade,
-            writeRelationshipService
-        );
-
-        // procedure facade
-        var theOtherFacade = org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade.create(
+        return SimilarityProcedureFacade.create(
             applicationsFacade,
             genericStub,
             returnColumns,
@@ -200,14 +182,6 @@ class AlgorithmFacadeFactory {
             streamModeAlgorithmRunner,
             statsModeAlgorithmRunner,
             writeModeAlgorithmRunner
-        );
-
-        return new SimilarityProcedureFacade(
-            configurationCreator,
-            returnColumns,
-            estimateBusinessFacade,
-            writeBusinessFacade,
-            theOtherFacade
         );
     }
 

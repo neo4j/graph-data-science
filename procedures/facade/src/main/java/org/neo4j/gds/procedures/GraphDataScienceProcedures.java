@@ -23,13 +23,13 @@ import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
 import org.neo4j.gds.procedures.catalog.CatalogProcedureFacade;
 import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.embeddings.NodeEmbeddingsProcedureFacade;
 import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
 import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
-import org.neo4j.gds.procedures.similarity.SimilarityProcedureFacade;
 
 public class GraphDataScienceProcedures {
     private final Log log;
@@ -41,7 +41,6 @@ public class GraphDataScienceProcedures {
     private final MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade;
     private final NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade;
     private final PipelinesProcedureFacade pipelinesProcedureFacade;
-    private final SimilarityProcedureFacade similarityProcedureFacade;
 
     private final DeprecatedProceduresMetricService deprecatedProceduresMetricService;
 
@@ -57,7 +56,6 @@ public class GraphDataScienceProcedures {
         MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade,
         NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade,
         PipelinesProcedureFacade pipelinesProcedureFacade,
-        SimilarityProcedureFacade similarityProcedureFacade,
         DeprecatedProceduresMetricService deprecatedProceduresMetricService
     ) {
         this.log = log;
@@ -68,7 +66,6 @@ public class GraphDataScienceProcedures {
         this.miscAlgorithmsProcedureFacade = miscAlgorithmsProcedureFacade;
         this.nodeEmbeddingsProcedureFacade = nodeEmbeddingsProcedureFacade;
         this.pipelinesProcedureFacade = pipelinesProcedureFacade;
-        this.similarityProcedureFacade = similarityProcedureFacade;
         this.deprecatedProceduresMetricService = deprecatedProceduresMetricService;
     }
 
@@ -105,7 +102,7 @@ public class GraphDataScienceProcedures {
     }
 
     public SimilarityProcedureFacade similarity() {
-        return similarityProcedureFacade;
+        return algorithmsProcedureFacade.similarity();
     }
 
     public DeprecatedProceduresMetricService deprecatedProcedures() {
