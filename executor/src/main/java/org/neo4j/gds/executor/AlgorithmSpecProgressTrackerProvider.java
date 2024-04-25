@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.executor;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.NodePropertyExporter;
@@ -30,7 +31,7 @@ public final class AlgorithmSpecProgressTrackerProvider {
     public static ProgressTracker createProgressTracker(
         String taskName,
         long taskVolume,
-        int writeConcurrency,
+        Concurrency writeConcurrency,
         ExecutionContext executionContext
     ) {
         return new TaskProgressTracker(

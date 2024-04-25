@@ -63,7 +63,7 @@ public final class L1Norm extends ScalarScaler {
                 ExecutorService executor
             ) {
                 var tasks = PartitionUtils.rangePartition(
-                    concurrency.value(),
+                    concurrency,
                     nodeCount,
                     partition -> new ComputeAbsoluteSum(partition, properties, progressTracker),
                     Optional.empty()

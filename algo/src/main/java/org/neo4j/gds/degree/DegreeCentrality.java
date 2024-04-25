@@ -166,7 +166,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
         var degrees = HugeDoubleArray.newArray(graph.nodeCount());
         var tasks = PartitionUtils.degreePartition(
             graph,
-            concurrency.value(),
+            concurrency,
             partition -> taskFunction.apply(partition, degrees),
             Optional.of(minBatchSize)
         );
@@ -182,7 +182,7 @@ public class DegreeCentrality extends Algorithm<DegreeCentralityResult> {
         var degrees = HugeAtomicDoubleArray.of(graph.nodeCount(), ParallelDoublePageCreator.passThrough(concurrency));
         var tasks = PartitionUtils.degreePartition(
             graph,
-            concurrency.value(),
+            concurrency,
             partition -> taskFunction.apply(partition, degrees),
             Optional.of(minBatchSize)
         );

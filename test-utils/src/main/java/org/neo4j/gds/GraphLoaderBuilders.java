@@ -29,6 +29,7 @@ import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
 import org.neo4j.gds.core.ImmutableGraphLoader;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -75,7 +76,7 @@ public final class GraphLoaderBuilders {
         Map<String, RelationshipProjection> relationshipProjectionsWithIdentifier,
         List<PropertyMapping> nodeProperties,
         List<PropertyMapping> relationshipProperties,
-        Optional<Integer> concurrency,
+        Optional<Concurrency> concurrency,
         Optional<JobId> jobId,
         Optional<Orientation> globalOrientation,
         Optional<Aggregation> globalAggregation,
@@ -152,7 +153,7 @@ public final class GraphLoaderBuilders {
         Optional<String> graphName,
         Optional<String> nodeQuery,
         Optional<String> relationshipQuery,
-        Optional<Integer> concurrency,
+        Optional<Concurrency> concurrency,
         Optional<JobId> jobId,
         Optional<Boolean> validateRelationships,
         Optional<Map<String, Object>> parameters

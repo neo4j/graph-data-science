@@ -27,6 +27,7 @@ import org.neo4j.gds.api.properties.nodes.NodeProperty;
 import org.neo4j.gds.api.properties.nodes.NodePropertyStore;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.core.loading.ImmutableNodes;
@@ -63,7 +64,7 @@ public final class NodesBuilder {
     public static final long UNKNOWN_MAX_ID = -1L;
 
     private final long maxOriginalId;
-    private final int concurrency;
+    private final Concurrency concurrency;
 
     private final IdMapBuilder idMapBuilder;
     private final Function<String, PropertyState> propertyStates;
@@ -79,7 +80,7 @@ public final class NodesBuilder {
     NodesBuilder(
         long maxOriginalId,
         long maxIntermediateId,
-        int concurrency,
+        Concurrency concurrency,
         NodesBuilderContext nodesBuilderContext,
         IdMapBuilder idMapBuilder,
         boolean hasLabelInformation,

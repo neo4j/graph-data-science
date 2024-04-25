@@ -119,8 +119,8 @@ public final class SteinerBasedDeltaStepping extends Algorithm<PathFindingResult
                 return MemoryRange.of(lowerBound, Math.max(lowerBound, upperBound));
             })
             .rangePerGraphDimension("local bins", (dimensions, concurrency) -> {
-                var lowerBound = HugeLongArray.memoryEstimation(dimensions.nodeCount() / concurrency);
-                var upperBound = HugeLongArray.memoryEstimation(concurrency * dimensions.nodeCount());
+                var lowerBound = HugeLongArray.memoryEstimation(dimensions.nodeCount() / concurrency.value());
+                var upperBound = HugeLongArray.memoryEstimation(concurrency.value() * dimensions.nodeCount());
 
                 return MemoryRange.of(lowerBound, Math.max(lowerBound, upperBound));
             });

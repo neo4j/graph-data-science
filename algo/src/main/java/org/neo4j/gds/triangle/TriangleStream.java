@@ -24,6 +24,7 @@ import org.neo4j.gds.Algorithm;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.IntersectionConsumer;
 import org.neo4j.gds.api.RelationshipIntersect;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -56,7 +57,7 @@ public final class TriangleStream extends Algorithm<Stream<TriangleStream.Result
     private final RelationshipIntersectConfig intersectConfig;
     private final ExecutorService executorService;
     private final AtomicInteger queue;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private final int nodeCount;
     private final AtomicInteger runningThreads;
     private final BlockingQueue<Result> resultQueue;
@@ -64,7 +65,7 @@ public final class TriangleStream extends Algorithm<Stream<TriangleStream.Result
     public static TriangleStream create(
         Graph graph,
         ExecutorService executorService,
-        int concurrency
+        Concurrency concurrency
     ) {
         var factory = RelationshipIntersectFactoryLocator
             .lookup(graph)
@@ -78,7 +79,7 @@ public final class TriangleStream extends Algorithm<Stream<TriangleStream.Result
         Graph graph,
         RelationshipIntersectFactory intersectFactory,
         ExecutorService executorService,
-        int concurrency
+        Concurrency concurrency
     ) {
         super(ProgressTracker.NULL_TRACKER);
         this.graph = graph;
@@ -87,7 +88,7 @@ public final class TriangleStream extends Algorithm<Stream<TriangleStream.Result
         this.executorService = executorService;
         this.concurrency = concurrency;
         this.nodeCount = Math.toIntExact(graph.nodeCount());
-        this.resultQueue = new ArrayBlockingQueue<>(concurrency << 10);
+        this.resultQueue = new ArrayBlockingQueue<>(concurrency.value() << 10);
         this.runningThreads = new AtomicInteger();
         this.queue = new AtomicInteger();
     }

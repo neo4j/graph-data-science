@@ -21,6 +21,7 @@ package org.neo4j.gds.mem;
 
 import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,12 +41,12 @@ public final class MemoryEstimations {
 
     @FunctionalInterface
     public interface MemoryRangeModifier {
-        MemoryRange modify(MemoryRange range, GraphDimensions dimensions, int concurrency);
+        MemoryRange modify(MemoryRange range, GraphDimensions dimensions, Concurrency concurrency);
     }
 
     @FunctionalInterface
     public interface MemoryEstimationSetup {
-        MemoryEstimation setup(GraphDimensions dimensions, int concurrency);
+        MemoryEstimation setup(GraphDimensions dimensions, Concurrency concurrency);
     }
 
     public static MemoryEstimation empty() {
@@ -451,7 +452,7 @@ public final class MemoryEstimations {
          */
         public Builder perGraphDimension(
             final String description,
-            final BiFunction<GraphDimensions, Integer, MemoryRange> fn
+            final BiFunction<GraphDimensions, Concurrency, MemoryRange> fn
         ) {
             components.add(new LeafEstimation(
                 description,
@@ -472,7 +473,7 @@ public final class MemoryEstimations {
          */
         public Builder rangePerGraphDimension(
             final String description,
-            final BiFunction<GraphDimensions, Integer, MemoryRange> fn
+            final BiFunction<GraphDimensions, Concurrency, MemoryRange> fn
         ) {
             components.add(new LeafEstimation(
                 description,
@@ -493,7 +494,7 @@ public final class MemoryEstimations {
         public Builder perThread(final String description, final long bytes) {
             components.add(new LeafEstimation(
                     description,
-                    (dimensions, concurrency) -> MemoryRange.of(concurrency * bytes)));
+                    (dimensions, concurrency) -> MemoryRange.of(concurrency.value() * bytes)));
             return this;
         }
 
@@ -510,7 +511,7 @@ public final class MemoryEstimations {
         public Builder perThread(final String description, final IntToLongFunction fn) {
             components.add(new LeafEstimation(
                     description,
-                    (dimensions, concurrency) -> MemoryRange.of(fn.applyAsLong(concurrency))));
+                    (dimensions, concurrency) -> MemoryRange.of(fn.applyAsLong(concurrency.value()))));
             return this;
         }
 
@@ -527,7 +528,7 @@ public final class MemoryEstimations {
             components.add(new AndThenEstimation(
                     description,
                     estimation,
-                    (mem, dim, concurrency) -> mem.times(concurrency)));
+                    (mem, dim, concurrency) -> mem.times(concurrency.value())));
             return this;
         }
 
@@ -543,7 +544,7 @@ public final class MemoryEstimations {
         public Builder perThread(final String description, final MemoryRange range) {
             components.add(new LeafEstimation(
                 description,
-                (dim, threads) -> range.times(threads)
+                (dim, threads) -> range.times(threads.value())
             ));
             return this;
         }
@@ -580,7 +581,7 @@ public final class MemoryEstimations {
         }
 
         @Override
-        public MemoryTree estimate(final GraphDimensions dimensions, final int concurrency) {
+        public MemoryTree estimate(final GraphDimensions dimensions, final Concurrency concurrency) {
             return MemoryTree.empty();
         }
     };
@@ -617,7 +618,7 @@ final class LeafEstimation extends BaseEstimation {
     }
 
     @Override
-    public MemoryTree estimate(final GraphDimensions dimensions, final int concurrency) {
+    public MemoryTree estimate(final GraphDimensions dimensions, final Concurrency concurrency) {
         MemoryRange memoryRange = resident.estimateMemoryUsage(dimensions, concurrency);
         return new LeafTree(description(), memoryRange);
     }
@@ -633,7 +634,7 @@ final class SetupEstimation extends BaseEstimation {
     }
 
     @Override
-    public MemoryTree estimate(final GraphDimensions dimensions, final int concurrency) {
+    public MemoryTree estimate(final GraphDimensions dimensions, final Concurrency concurrency) {
         MemoryEstimation estimation = setup.setup(dimensions, concurrency);
         return estimation.estimate(dimensions, concurrency);
     }
@@ -660,7 +661,7 @@ final class AndThenEstimation extends BaseEstimation {
     }
 
     @Override
-    public MemoryTree estimate(final GraphDimensions dimensions, final int concurrency) {
+    public MemoryTree estimate(final GraphDimensions dimensions, final Concurrency concurrency) {
         MemoryTree memoryTree = delegate.estimate(dimensions, concurrency);
         return new AndThenTree(description(), memoryTree, range -> andThen.modify(range, dimensions, concurrency));
     }
@@ -682,7 +683,7 @@ final class CompositeEstimation extends BaseEstimation {
     }
 
     @Override
-    public MemoryTree estimate(final GraphDimensions dimensions, final int concurrency) {
+    public MemoryTree estimate(final GraphDimensions dimensions, final Concurrency concurrency) {
         List<MemoryTree> newComponent = components.stream()
                 .map(e -> e.estimate(dimensions, concurrency))
                 .collect(Collectors.toList());
@@ -704,7 +705,7 @@ final class DelegateEstimation extends BaseEstimation {
     }
 
     @Override
-    public MemoryTree estimate(final GraphDimensions dimensions, final int concurrency) {
+    public MemoryTree estimate(final GraphDimensions dimensions, final Concurrency concurrency) {
         return new DelegateTree(delegate.estimate(dimensions, concurrency), description());
     }
 }
@@ -726,7 +727,7 @@ final class MaxEstimation extends BaseEstimation {
     }
 
     @Override
-    public MemoryTree estimate(GraphDimensions dimensions, int concurrency) {
+    public MemoryTree estimate(GraphDimensions dimensions, Concurrency concurrency) {
         return new CompositeMaxTree(
             description(),
             components

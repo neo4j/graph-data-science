@@ -111,7 +111,7 @@ public final class IntersectingTriangleCount extends Algorithm<TriangleCountResu
         globalTriangleCounter.reset();
         // create tasks
         final Collection<? extends Runnable> tasks = ParallelUtil.tasks(
-            concurrency.value(),
+            concurrency,
             () -> new IntersectTask(intersectFactory.load(graph, intersectConfig))
         );
         // run

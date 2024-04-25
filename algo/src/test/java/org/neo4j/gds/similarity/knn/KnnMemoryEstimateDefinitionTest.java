@@ -27,6 +27,7 @@ import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.mem.MemoryTree;
 import org.neo4j.gds.mem.Estimate;
@@ -53,13 +54,11 @@ class KnnMemoryEstimateDefinitionTest {
     @ParameterizedTest
     @MethodSource("smallParameters")
     void memoryEstimationWithNodeProperty(long nodeCount, KnnSampler.SamplerType initialSampler) {
-
-
         var parameters = new KnnMemoryEstimationParametersBuilder(0.5, 10, initialSampler);
-
         var estimation = new KnnMemoryEstimateDefinition(parameters).memoryEstimation();
         GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
-        MemoryTree estimate = estimation.estimate(dimensions, 1);
+        var concurrency = new Concurrency(1);
+        MemoryTree estimate = estimation.estimate(dimensions, concurrency);
         MemoryRange actual = estimate.memoryUsage();
 
         assertEstimation(
@@ -84,10 +83,10 @@ class KnnMemoryEstimateDefinitionTest {
     @MethodSource("largeParameters")
     void memoryEstimationLargePagesWithProperty(long nodeCount, KnnSampler.SamplerType initialSampler) {
         var parameters = new KnnMemoryEstimationParametersBuilder(0.5, 10, initialSampler);
-
         var estimation = new KnnMemoryEstimateDefinition(parameters).memoryEstimation();
         GraphDimensions dimensions = ImmutableGraphDimensions.builder().nodeCount(nodeCount).build();
-        MemoryTree estimate = estimation.estimate(dimensions, 1);
+        var concurrency = new Concurrency(1);
+        MemoryTree estimate = estimation.estimate(dimensions, concurrency);
         MemoryRange actual = estimate.memoryUsage();
 
         assertEstimation(nodeCount, parameters.build(nodeCount).k(), initialSampler, actual);

@@ -205,7 +205,7 @@ public class LinkPredictionPredictPipelineExecutor extends PredictPipelineExecut
                 graph,
                 sourceNodeFilter,
                 targetNodeFilter,
-                config.typedConcurrency(),
+                config.concurrency(),
                 config.topN().orElseThrow(),
                 config.thresholdOrDefault(),
                 progressTracker,

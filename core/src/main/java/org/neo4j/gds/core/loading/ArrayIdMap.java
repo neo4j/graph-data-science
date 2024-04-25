@@ -24,13 +24,14 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.FilteredIdMap;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.LabeledIdMap;
+import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.collections.hsa.HugeSparseCollections;
 import org.neo4j.gds.collections.hsa.HugeSparseLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.mem.Estimate;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
 import org.neo4j.gds.mem.MemoryRange;
-import org.neo4j.gds.collections.ha.HugeLongArray;
-import org.neo4j.gds.mem.Estimate;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -125,7 +126,7 @@ public class ArrayIdMap extends LabeledIdMap {
     }
 
     @Override
-    public Optional<FilteredIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, int concurrency) {
+    public Optional<FilteredIdMap> withFilteredLabels(Collection<NodeLabel> nodeLabels, Concurrency concurrency) {
         labelInformation.validateNodeLabelFilter(nodeLabels);
 
         if (labelInformation.isEmpty()) {

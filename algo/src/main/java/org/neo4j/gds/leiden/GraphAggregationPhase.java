@@ -132,7 +132,7 @@ class GraphAggregationPhase {
     Graph run() {
         var nodesBuilder = GraphFactory.initNodesBuilder()
             .maxOriginalId(maxCommunityId)
-            .concurrency(this.concurrency.value())
+            .concurrency(this.concurrency)
             .build();
 
         terminationFlag.assertRunning();
@@ -166,7 +166,7 @@ class GraphAggregationPhase {
         LongToIntFunction customDegree = x -> workingGraph.degree(sortedNodesByCommunity.get(x));
         var relationshipCreators = PartitionUtils.customDegreePartitionWithBatchSize(
             workingGraph,
-            concurrency.value(),
+            concurrency,
             customDegree,
             partition ->
                 new RelationshipCreator(

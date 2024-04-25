@@ -101,7 +101,7 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
         var closeness = HugeDoubleArray.newArray(nodeCount);
 
         var tasks = PartitionUtils.rangePartition(
-            concurrency.value(),
+            concurrency,
             nodeCount,
             partition -> (Runnable) () -> {
                 partition.consume(nodeId -> closeness.set(nodeId, centralityComputer.centrality(

@@ -64,7 +64,7 @@ public final class Center extends ScalarScaler {
                 ExecutorService executor
             ) {
                 var tasks = PartitionUtils.rangePartition(
-                    concurrency.value(),
+                    concurrency,
                     nodeCount,
                     partition -> new ComputeSum(partition, properties, progressTracker),
                     Optional.empty()

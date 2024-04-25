@@ -91,7 +91,7 @@ public class K1ColoringMutateSpecification implements AlgorithmSpec<K1Coloring, 
         return K1ColoringSpecificationHelper.resultBuilder(
             new K1ColoringMutateResultBuilder(
                 executionContext.returnColumns(),
-                computationResult.config().typedConcurrency()
+                computationResult.config().concurrency()
             ), computationResult,
             executionContext.returnColumns()
         );

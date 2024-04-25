@@ -34,7 +34,7 @@ public class ModularityCalculatorFactory<CONFIG extends ModularityBaseConfig> ex
         return ModularityCalculator.create(
             graph,
             graph.nodeProperties(configuration.communityProperty())::longValue,
-            configuration.typedConcurrency()
+            configuration.concurrency()
         );
     }
 

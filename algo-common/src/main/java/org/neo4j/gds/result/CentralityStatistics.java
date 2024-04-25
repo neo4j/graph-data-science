@@ -51,7 +51,7 @@ public final class CentralityStatistics {
             }
         } else {
             var tasks = PartitionUtils.rangePartition(
-                concurrency.value(),
+                concurrency,
                 nodeCount,
                 partition -> new RecordTask(partition, centralityFunction),
                 Optional.empty()

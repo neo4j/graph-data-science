@@ -33,6 +33,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.mem.MemoryTree;
 import org.neo4j.gds.embeddings.graphsage.Aggregator;
@@ -309,7 +310,7 @@ class GraphSageTrainAlgorithmFactoryTest {
         ).reduce(MemoryRange.empty(), MemoryRange::add)
             .add(featureFunctionMemory);
 
-        var evaluateLossMemory = lossFunctionMemory.times(concurrency);
+        var evaluateLossMemory = lossFunctionMemory.times(concurrency.value());
 
         // adam optimizer
         //  copy of weight for every layer
@@ -365,7 +366,7 @@ class GraphSageTrainAlgorithmFactoryTest {
                 .add(MemoryRange.of(updateAdamMemory));
 
         var trainOnEpoch = trainOnBatchMemory
-            .times(concurrency)
+            .times(concurrency.value())
             .add(MemoryRange.of(initialAdamMemory));
 
         var trainMemory =
@@ -406,7 +407,7 @@ class GraphSageTrainAlgorithmFactoryTest {
 
         var actualEstimation = new GraphSageTrainAlgorithmFactory()
             .memoryEstimation(config)
-            .estimate(GraphDimensions.of(1337), 42);
+            .estimate(GraphDimensions.of(1337), new Concurrency(42));
 
         var expectedTreeStructure = Stream.<IntObjectPair<String>>builder()
             .add(pair(0, "GraphSageTrain"))

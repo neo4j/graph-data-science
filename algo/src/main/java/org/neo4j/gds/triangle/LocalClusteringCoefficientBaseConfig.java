@@ -81,6 +81,6 @@ public interface LocalClusteringCoefficientBaseConfig extends AlgoBaseConfig, Se
 
     @Configuration.Ignore
     default LocalClusteringCoefficientParameters toParameters() {
-        return new LocalClusteringCoefficientParameters(typedConcurrency(), Long.MAX_VALUE, seedProperty());
+        return new LocalClusteringCoefficientParameters(concurrency(), Long.MAX_VALUE, seedProperty());
     }
 }

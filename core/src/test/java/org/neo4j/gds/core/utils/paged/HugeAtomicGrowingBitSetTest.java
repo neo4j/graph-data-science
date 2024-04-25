@@ -22,6 +22,7 @@ package org.neo4j.gds.core.utils.paged;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.utils.partition.PartitionUtils;
@@ -131,7 +132,7 @@ class HugeAtomicGrowingBitSetTest {
     @ParameterizedTest
     @MethodSource("bitsets")
     void testSetParallel(HugeAtomicGrowingBitSet bitSet) {
-        int concurrency = 8;
+        var concurrency = new Concurrency(8);
         int nodeCount = 1_000_000;
 
         List<Runnable> tasks = PartitionUtils.rangePartition(concurrency, nodeCount, (partition) -> () -> {

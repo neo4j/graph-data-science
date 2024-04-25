@@ -67,7 +67,7 @@ public final class CommunityStatistics {
             // execution.
             var batchSize = ParallelUtil.adjustedBatchSize(
                 nodeCount,
-                concurrency.value(),
+                concurrency,
                 ParallelUtil.DEFAULT_BATCH_SIZE,
                 // 10 is just a magic number that has been proven
                 // to perform well in benchmarking.
@@ -109,7 +109,7 @@ public final class CommunityStatistics {
         var capacity = communitySizes.capacity();
 
         var tasks = PartitionUtils.rangePartition(
-            concurrency.value(),
+            concurrency,
             capacity,
             partition -> new CountTask(communitySizes, partition),
             Optional.empty()
@@ -213,7 +213,7 @@ public final class CommunityStatistics {
             var capacity = communitySizes.capacity();
 
             var tasks = PartitionUtils.rangePartition(
-                concurrency.value(),
+                concurrency,
                 capacity,
                 partition -> new CountAndRecordTask(communitySizes, partition),
                 Optional.empty()

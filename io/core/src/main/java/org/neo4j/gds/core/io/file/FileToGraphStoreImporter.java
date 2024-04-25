@@ -85,7 +85,7 @@ public abstract class FileToGraphStoreImporter {
         this.importPath = importPath;
         this.graphSchemaBuilder = ImmutableMutableGraphSchema.builder();
         this.graphStoreBuilder = new GraphStoreBuilder()
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .capabilities(ImmutableStaticCapabilities.of(WriteMode.LOCAL));
         this.log = log;
         this.taskRegistryFactory = taskRegistryFactory;
@@ -159,7 +159,7 @@ public abstract class FileToGraphStoreImporter {
             importTasks
         );
 
-        return new TaskProgressTracker(task, log, concurrency.value(), taskRegistryFactory);
+        return new TaskProgressTracker(task, log, concurrency, taskRegistryFactory);
     }
 
     private Nodes importNodes(FileInput fileInput) {
@@ -178,7 +178,7 @@ public abstract class FileToGraphStoreImporter {
 
         NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder(nodeSchema)
             .maxOriginalId(fileInput.graphInfo().maxOriginalId())
-            .concurrency(concurrency.value())
+            .concurrency(concurrency)
             .nodeCount(fileInput.graphInfo().nodeCount())
             .deduplicateIds(false)
             .idMapBuilderType(fileInput.graphInfo().idMapBuilderType())
@@ -188,7 +188,7 @@ public abstract class FileToGraphStoreImporter {
 
         var nodesIterator = fileInput.nodes(Collector.EMPTY).iterator();
         Collection<Runnable> tasks = ParallelUtil.tasks(
-            concurrency.value(),
+            concurrency,
             (index) -> new ElementImportRunner<>(nodeVisitorBuilder.build(), nodesIterator, progressTracker)
         );
 
@@ -219,7 +219,7 @@ public abstract class FileToGraphStoreImporter {
 
         var relationshipsIterator = fileInput.relationships(Collector.EMPTY).iterator();
         Collection<Runnable> tasks = ParallelUtil.tasks(
-            concurrency.value(),
+            concurrency,
             (
                 index
             ) -> new ElementImportRunner<>(relationshipVisitorBuilder.build(), relationshipsIterator, progressTracker)
@@ -247,7 +247,7 @@ public abstract class FileToGraphStoreImporter {
             var graphPropertiesIterator = fileInput.graphProperties().iterator();
 
             var tasks = ParallelUtil.tasks(
-                concurrency.value(),
+                concurrency,
                 (index) -> new ElementImportRunner<>(
                     graphStoreGraphPropertyVisitor,
                     graphPropertiesIterator,

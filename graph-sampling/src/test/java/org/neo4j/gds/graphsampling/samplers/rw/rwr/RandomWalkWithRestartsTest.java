@@ -191,7 +191,7 @@ class RandomWalkWithRestartsTest {
         // this may be due to the fastest thread picking a new startnode before the other threads finish and therefore the
         // other threads have less time to find the improbable node x2
         assertThat(casesPassed / validCases).isCloseTo(
-            Math.pow(200.0 / 202, 51.0 * config.concurrency() / 2),
+            Math.pow(200.0 / 202, 51.0 * config.concurrency().value() / 2),
             Offset.offset(0.33)
         );
     }

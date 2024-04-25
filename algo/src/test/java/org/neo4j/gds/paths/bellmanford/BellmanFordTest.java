@@ -237,7 +237,7 @@ class BellmanFordTest {
 
         var progressTask = new BellmanFordAlgorithmFactory<>().progressTask(graph, config);
         var testLog = Neo4jProxy.testLog();
-        var progressTracker = new TestProgressTracker(progressTask, testLog, 1, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TestProgressTracker(progressTask, testLog, new Concurrency(1), EmptyTaskRegistryFactory.INSTANCE);
 
         new BellmanFordAlgorithmFactory<>().build(graph, config, progressTracker)
             .compute()

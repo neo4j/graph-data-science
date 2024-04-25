@@ -22,6 +22,7 @@ package org.neo4j.gds.leiden;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 class LeidenMemoryEstimateDefinitionTest {
 
@@ -36,9 +37,9 @@ class LeidenMemoryEstimateDefinitionTest {
             false,
             3
         )).memoryEstimation();
-        
+
         MemoryEstimationAssert.assertThat(estimate)
-            .memoryRange(10_1000,100_000,concurrency)
+            .memoryRange(10_1000,100_000, new Concurrency(concurrency))
             .hasMin(expectedMin)
             .hasMax(expectedMax);
     }

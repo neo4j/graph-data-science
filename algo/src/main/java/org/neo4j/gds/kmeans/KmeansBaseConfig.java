@@ -105,7 +105,7 @@ public interface KmeansBaseConfig extends AlgoBaseConfig, IterationsConfig, Rand
             deltaThreshold(),
             numberOfRestarts(),
             computeSilhouette(),
-            typedConcurrency(),
+            concurrency(),
             nodeProperty(),
             initialSampler(),
             seedCentroids(),

@@ -78,7 +78,7 @@ public class LocalSearch {
 
         this.degreePartition = PartitionUtils.degreePartition(
             graph,
-            concurrency.value(),
+            concurrency,
             partition -> partition,
             Optional.of(minBatchSize)
         );

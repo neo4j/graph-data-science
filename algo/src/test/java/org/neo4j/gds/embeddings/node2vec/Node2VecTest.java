@@ -162,11 +162,12 @@ class Node2VecTest {
             embeddingDimension,
             EmbeddingInitializer.NORMALIZED
         );
+        var concurrency = new Concurrency(4);
         var log = Neo4jProxy.testLog();
-        var progressTracker = new TestProgressTracker(progressTask, log, 4, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TestProgressTracker(progressTask, log, concurrency, EmptyTaskRegistryFactory.INSTANCE);
         new Node2Vec(
             currentGraph,
-            new Concurrency(4),
+            concurrency,
             NO_SOURCE_NODES,
             NO_RANDOM_SEED,
             1000,

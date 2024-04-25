@@ -166,7 +166,7 @@ public class InverseRelationships extends Algorithm<Map<RelationshipType, Single
 
         return PartitionUtils.degreePartition(
             graphStore.getGraph(fromRelationshipType),
-            concurrency.value(),
+            concurrency,
             taskCreator,
             Optional.empty()
         );

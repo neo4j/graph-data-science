@@ -30,6 +30,7 @@ import org.neo4j.gds.beta.filter.RelationshipsFilter;
 import org.neo4j.gds.beta.filter.expression.EvaluationContext;
 import org.neo4j.gds.beta.filter.expression.Expression;
 import org.neo4j.gds.config.GraphSampleAlgoConfig;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.core.loading.GraphStoreBuilder;
@@ -52,6 +53,7 @@ import java.util.stream.Collectors;
 
 public class GraphSampleConstructor {
     private final GraphSampleAlgoConfig config;
+    private final Concurrency concurrency;
     private final GraphStore inputGraphStore;
     private final NodesSampler nodesSampler;
     private final ProgressTracker progressTracker;
@@ -63,6 +65,7 @@ public class GraphSampleConstructor {
         ProgressTracker progressTracker
     ) {
         this.config = config;
+        this.concurrency = config.concurrency();
         this.inputGraphStore = inputGraphStore;
         this.nodesSampler = nodesSampler;
         this.progressTracker = progressTracker;
@@ -85,7 +88,7 @@ public class GraphSampleConstructor {
         var nodePropertyStore = NodesFilter.filterNodeProperties(
             inputGraphStore,
             idMap,
-            config.typedConcurrency(),
+            config.concurrency(),
             progressTracker
         );
 
@@ -106,7 +109,7 @@ public class GraphSampleConstructor {
             relTypeFilterExpression,
             inputGraphStore.nodes(),
             idMap,
-            config.typedConcurrency(),
+            config.concurrency(),
             Map.of(),
             DefaultPool.INSTANCE,
             progressTracker
@@ -126,7 +129,7 @@ public class GraphSampleConstructor {
             .schema(filteredSchema)
             .nodes(ImmutableNodes.of(filteredSchema.nodeSchema(), idMap, nodePropertyStore))
             .relationshipImportResult(relationshipImportResult)
-            .concurrency(config.concurrency())
+            .concurrency(concurrency)
             .build();
 
         progressTracker.endSubTask("Construct graph");
@@ -142,14 +145,14 @@ public class GraphSampleConstructor {
 
         boolean hasLabelInformation = !inputGraphStore.nodeLabels().isEmpty();
         var nodesBuilder = GraphFactory.initNodesBuilder()
-            .concurrency(config.concurrency())
+            .concurrency(concurrency)
             .maxOriginalId(inputGraph.highestOriginalId())
             .hasProperties(false)
             .hasLabelInformation(hasLabelInformation)
             .deduplicateIds(false)
             .build();
         var tasks = PartitionUtils.rangePartition(
-            config.concurrency(),
+            concurrency,
             inputGraph.nodeCount(),
             partition -> new IdMapSampleTask(
                 nodesBuilder,
@@ -162,7 +165,7 @@ public class GraphSampleConstructor {
             Optional.empty()
         );
         RunWithConcurrency.builder()
-            .concurrency(config.typedConcurrency())
+            .concurrency(concurrency)
             .tasks(tasks)
             .run();
         var idMap = nodesBuilder.build().idMap();

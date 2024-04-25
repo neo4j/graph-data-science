@@ -32,7 +32,7 @@ import java.util.function.LongUnaryOperator;
 
 public abstract class RelationshipExporterBuilder {
 
-    public static final int DEFAULT_WRITE_CONCURRENCY = 1;
+    public static final Concurrency TYPED_DEFAULT_WRITE_CONCURRENCY = new Concurrency(1);
 
     protected LongUnaryOperator toOriginalId;
     protected TerminationFlag terminationFlag;

@@ -52,7 +52,7 @@ class KGEMutateResultConsumer extends MutateComputationResultConsumer<TopKMapCom
         var graph = graphStore.getGraph();
 
         var config = computationResult.config();
-        var concurrency = config.typedConcurrency();
+        var concurrency = config.concurrency();
         var mutateRelationshipType = RelationshipType.of(config.mutateRelationshipType());
 
         var relationshipsBuilder = GraphFactory.initRelationshipsBuilder()

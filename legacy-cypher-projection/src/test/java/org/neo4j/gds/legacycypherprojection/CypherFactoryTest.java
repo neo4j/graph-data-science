@@ -38,6 +38,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.GraphLoader;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryTree;
@@ -540,7 +541,7 @@ class CypherFactoryTest extends BaseTest {
 
         CypherFactory factory = (CypherFactory) loader.graphStoreFactory();
         MemoryEstimation memoryEstimation = factory.estimateMemoryUsageDuringLoading();
-        MemoryTree estimate = memoryEstimation.estimate(factory.estimationDimensions(), 4);
+        MemoryTree estimate = memoryEstimation.estimate(factory.estimationDimensions(), new Concurrency(4));
 
         assertEquals(min, estimate.memoryUsage().min);
         assertEquals(max, estimate.memoryUsage().max);

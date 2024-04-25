@@ -104,7 +104,7 @@ public class Conductance extends Algorithm<ConductanceResult> {
 
         var tasks = PartitionUtils.degreePartition(
             graph,
-            concurrency.value(),
+            concurrency,
             partition -> new CountRelationships(graph.concurrentCopy(), partition),
             Optional.of(minBatchSize)
         );
@@ -152,7 +152,7 @@ public class Conductance extends Algorithm<ConductanceResult> {
             maxCommunityId
         );
 
-        var tasks = ParallelUtil.tasks(concurrency.value(), index -> () -> {
+        var tasks = ParallelUtil.tasks(concurrency, index -> () -> {
             final long startOffset = index * communitiesPerBatch;
             final long endOffset = index == concurrency.value() - 1
                 ? startOffset + communitiesPerBatch + communitiesRemainder
@@ -210,7 +210,7 @@ public class Conductance extends Algorithm<ConductanceResult> {
         var internalCounts = relCounts.internalCounts();
         var externalCounts = relCounts.externalCounts();
 
-        var tasks = ParallelUtil.tasks(concurrency.value(), index -> () -> {
+        var tasks = ParallelUtil.tasks(concurrency, index -> () -> {
             final long startOffset = index * communitiesPerBatch;
             final long endOffset = index == concurrency.value() - 1
                 ? startOffset + communitiesPerBatch + communitiesRemainder

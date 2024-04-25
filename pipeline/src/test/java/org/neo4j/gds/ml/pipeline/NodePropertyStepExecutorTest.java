@@ -29,6 +29,7 @@ import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphNameConfig;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.model.OpenModelCatalog;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
@@ -265,7 +266,7 @@ class NodePropertyStepExecutorTest {
             List.of()
         );
 
-        assertThat(actualEstimation.estimate(dimensions, 4).memoryUsage()).isEqualTo(MemoryRange.of(1337));
+        assertThat(actualEstimation.estimate(dimensions, new Concurrency(4)).memoryUsage()).isEqualTo(MemoryRange.of(1337));
     }
 
     private static class NodePropertyStepExecutorTestConfig implements AlgoBaseConfig, GraphNameConfig {

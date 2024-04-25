@@ -176,7 +176,7 @@ public final class Kmeans extends Algorithm<KmeansResult> {
         currentCommunities.setAll(v -> UNASSIGNED);
 
         var tasks = PartitionUtils.rangePartition(
-            concurrency.value(),
+            concurrency,
             nodeCount,
             partition -> KmeansTask.createTask(
                 parameters.samplerType(),
@@ -337,7 +337,7 @@ public final class Kmeans extends Algorithm<KmeansResult> {
         progressTracker.beginSubTask();
         this.silhouette = HugeDoubleArray.newArray(nodeCount);
         var tasks = PartitionUtils.rangePartition(
-            concurrency.value(),
+            concurrency,
             nodeCount,
             partition -> SilhouetteTask.createTask(
                 nodePropertyValues,

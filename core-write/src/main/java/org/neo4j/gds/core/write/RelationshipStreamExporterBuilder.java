@@ -23,6 +23,7 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.api.ExportedRelationship;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.ArrowConnectionInfo;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -39,7 +40,7 @@ public abstract class RelationshipStreamExporterBuilder {
     protected TerminationFlag terminationFlag;
     protected ProgressTracker progressTracker = ProgressTracker.NULL_TRACKER;
     protected long relationshipCount = -1L;
-    protected int concurrency = Runtime.getRuntime().availableProcessors();
+    protected Concurrency concurrency = new Concurrency(Runtime.getRuntime().availableProcessors());
     protected Optional<ArrowConnectionInfo> arrowConnectionInfo;
     protected Optional<String> remoteDatabaseName; // coupled with arrowConnectionInfo, but should not appear in external API
     protected Optional<ResultStore> resultStore;
@@ -92,7 +93,7 @@ public abstract class RelationshipStreamExporterBuilder {
         return this;
     }
 
-    public RelationshipStreamExporterBuilder withConcurrency(int concurrency) {
+    public RelationshipStreamExporterBuilder withConcurrency(Concurrency concurrency) {
         this.concurrency = concurrency;
         return this;
     }

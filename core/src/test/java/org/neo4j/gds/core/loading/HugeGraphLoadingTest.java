@@ -39,6 +39,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.Aggregation;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.graphdb.Label;
 import org.neo4j.graphdb.Node;
@@ -305,7 +306,7 @@ final class HugeGraphLoadingTest extends BaseTest {
         var graphStore = new StoreLoaderBuilder()
             .addNodeLabel(labelA.name())
             .addNodeLabel(labelB.name())
-            .concurrency(concurrency)
+            .concurrency(new Concurrency(concurrency))
             .databaseService(db)
             .build()
             .graphStore();
@@ -364,7 +365,7 @@ final class HugeGraphLoadingTest extends BaseTest {
             .databaseService(db)
             .addRelationshipProperty(PropertyMapping.of("p1", "weight", 1.0))
             .addRelationshipProperty(PropertyMapping.of("p2", "weight", 1.0))
-            .concurrency(4)
+            .concurrency(new Concurrency(4))
             .build()
             .graph();
 
@@ -398,7 +399,7 @@ final class HugeGraphLoadingTest extends BaseTest {
         var graph = new StoreLoaderBuilder()
             .databaseService(db)
             .addNodeLabel(label.name())
-            .concurrency(concurrency)
+            .concurrency(new Concurrency(concurrency))
             .build()
             .graph();
 
@@ -433,7 +434,7 @@ final class HugeGraphLoadingTest extends BaseTest {
             .databaseService(db)
             .addNodeLabel(labelA.name())
             .addNodeLabel(labelB.name())
-            .concurrency(concurrency)
+            .concurrency(new Concurrency(concurrency))
             .build()
             .graph();
 

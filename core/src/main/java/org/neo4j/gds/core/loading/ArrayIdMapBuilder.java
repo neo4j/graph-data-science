@@ -22,6 +22,7 @@ package org.neo4j.gds.core.loading;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.collections.cursor.HugeCursor;
 import org.neo4j.gds.collections.ha.HugeLongArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.utils.CloseableThreadLocal;
 
 import java.util.concurrent.atomic.AtomicLong;
@@ -67,7 +68,7 @@ public final class ArrayIdMapBuilder implements IdMapBuilder {
     public IdMap build(
         LabelInformation.Builder labelInformationBuilder,
         long highestNodeId,
-        int concurrency
+        Concurrency concurrency
     ) {
         adders.close();
         long nodeCount = this.size();

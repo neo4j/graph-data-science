@@ -105,7 +105,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Gra
             .forEach(mappedSourceNodes::add);
 
         if (mode == ARTICLE_RANK) {
-            double avgDegree = averageDegree(graph, configuration.typedConcurrency());
+            double avgDegree = averageDegree(graph, configuration.concurrency());
             computation = new ArticleRankComputation(configuration, mappedSourceNodes, degreeFunction, avgDegree);
         } else if (mode == EIGENVECTOR) {
             // Degrees are generally not respected in eigenvector centrality.
@@ -145,7 +145,7 @@ public class PageRankAlgorithmFactory<CONFIG extends PageRankConfig> extends Gra
         var degreeCentrality = new DegreeCentrality(
             graph,
             DefaultPool.INSTANCE,
-            configuration.typedConcurrency(),
+            configuration.concurrency(),
             Orientation.NATURAL,
             configuration.hasRelationshipWeightProperty(),
             10_000,

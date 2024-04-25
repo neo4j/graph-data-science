@@ -106,7 +106,7 @@ public class RandomForestRegressorTrainer implements RegressorTrainer {
                             maxNumberOfBaggedFeatures,
                             config.numberOfSamplesRatio()
                         )
-                    ).times(concurrency)
+                    ).times(concurrency.value())
             )
             .build();
     }

@@ -29,6 +29,7 @@ import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CSRGraphStoreFactory;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryTree;
 
@@ -57,7 +58,7 @@ class NativeFactoryTest {
         );
 
 
-        var estimate = memoryEstimation.get().estimate(dimensions, 1);
+        var estimate = memoryEstimation.get().estimate(dimensions, new Concurrency(1));
         assertEquals(expectedMinUsage, estimate.memoryUsage().min);
         assertEquals(expectedMaxUsage, estimate.memoryUsage().max);
     }
@@ -84,7 +85,7 @@ class NativeFactoryTest {
 
         MemoryTree estimate = CSRGraphStoreFactory
             .getMemoryEstimation(nodeProjections, relationshipProjections, true)
-            .estimate(dimensions, 1);
+            .estimate(dimensions, new Concurrency(1));
 
         assertEquals(6_828_526_776L, estimate.memoryUsage().min);
         assertEquals(7_633_833_144L, estimate.memoryUsage().max);
@@ -113,7 +114,7 @@ class NativeFactoryTest {
 
         MemoryTree estimate = CSRGraphStoreFactory
             .getMemoryEstimation(nodeProjections, relationshipProjections, true)
-            .estimate(dimensions, 1);
+            .estimate(dimensions, new Concurrency(1));
 
         assertEquals(12_056_534_400L, estimate.memoryUsage().min);
         assertEquals(13_667_147_136L, estimate.memoryUsage().max);
@@ -136,7 +137,7 @@ class NativeFactoryTest {
 
         MemoryTree estimate = CSRGraphStoreFactory
             .getMemoryEstimation(nodeProjections, relationshipProjections, true)
-            .estimate(dimensions, 1);
+            .estimate(dimensions, new Concurrency(1));
 
         assertEquals(12_056_534_400L, estimate.memoryUsage().min);
         assertEquals(13_667_147_136L, estimate.memoryUsage().max);

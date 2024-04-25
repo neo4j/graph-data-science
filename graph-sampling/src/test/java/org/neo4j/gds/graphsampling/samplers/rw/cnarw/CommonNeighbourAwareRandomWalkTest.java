@@ -26,6 +26,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.core.utils.paged.HugeAtomicBitSet;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
@@ -515,18 +516,19 @@ class CommonNeighbourAwareRandomWalkTest {
             .samplingRatio(0.5)
             .build();
 
+        var concurrency = new Concurrency(1);
         MemoryRange mem1k = CommonNeighbourAwareRandomWalk.memoryEstimation(config).estimate(
             GraphDimensions.of(1000),
-            -1
+            concurrency
         ).memoryUsage();
 
         MemoryRange mem10k = CommonNeighbourAwareRandomWalk.memoryEstimation(config).estimate(
             GraphDimensions.of(10000),
-            -1
+            concurrency
         ).memoryUsage();
 
-        assertMemoryRange(mem1k, 116_224L);
-        assertMemoryRange(mem10k, 1_161_352L);
+        assertMemoryRange(mem1k, 116_232L);
+        assertMemoryRange(mem10k, 1_161_360L);
 
         assertMemoryRangeIsClose(mem10k, mem1k.times(10), Percentage.withPercentage(1));
     }
@@ -537,24 +539,25 @@ class CommonNeighbourAwareRandomWalkTest {
         var config05 = CommonNeighbourAwareRandomWalkConfigImpl.builder().samplingRatio(0.5).build();
         var config09 = CommonNeighbourAwareRandomWalkConfigImpl.builder().samplingRatio(0.9).build();
 
+        var concurrency = new Concurrency(1);
         MemoryRange mem01 = CommonNeighbourAwareRandomWalk.memoryEstimation(config01).estimate(
             GraphDimensions.of(10000),
-            -1
+            concurrency
         ).memoryUsage();
 
         MemoryRange mem05 = CommonNeighbourAwareRandomWalk.memoryEstimation(config05).estimate(
             GraphDimensions.of(10000),
-            -1
+            concurrency
         ).memoryUsage();
 
         MemoryRange mem09 = CommonNeighbourAwareRandomWalk.memoryEstimation(config09).estimate(
             GraphDimensions.of(10000),
-            -1
+            concurrency
         ).memoryUsage();
 
-        assertMemoryRange(mem01, 745_352L);
-        assertMemoryRange(mem05, 1_161_352L);
-        assertMemoryRange(mem09, 1_577_352);
+        assertMemoryRange(mem01, 745_360L);
+        assertMemoryRange(mem05, 1_161_360L);
+        assertMemoryRange(mem09, 1_577_360L);
 
         MemoryRange delta = mem05.elementWiseSubtract(mem01);
         MemoryRange twoDelta = mem09.elementWiseSubtract(mem01);
@@ -571,8 +574,8 @@ class CommonNeighbourAwareRandomWalkTest {
         assertMemoryEstimation(
             CommonNeighbourAwareRandomWalk.memoryEstimation(config),
             GraphDimensions.of(1000),
-            -1,
-            MemoryRange.of(132_224L)
+            new Concurrency(1),
+            MemoryRange.of(132_232L)
         );
     }
 
@@ -592,25 +595,26 @@ class CommonNeighbourAwareRandomWalkTest {
             .samplingRatio(0.5)
             .startNodes(LongStream.range(0, 5000).boxed().collect(Collectors.toList()))
             .build();
+        var concurrency = new Concurrency(1);
 
         MemoryRange mem1k = CommonNeighbourAwareRandomWalk.memoryEstimation(config1k).estimate(
             GraphDimensions.of(10000),
-            -1
+            concurrency
         ).memoryUsage();
 
         MemoryRange mem3k = CommonNeighbourAwareRandomWalk.memoryEstimation(config3k).estimate(
             GraphDimensions.of(10000),
-            -1
+            concurrency
         ).memoryUsage();
 
         MemoryRange mem5k = CommonNeighbourAwareRandomWalk.memoryEstimation(config5k).estimate(
             GraphDimensions.of(10000),
-            -1
+            concurrency
         ).memoryUsage();
 
-        assertMemoryRange(mem1k, 1_177_352L);
-        assertMemoryRange(mem3k, 1_209_352L);
-        assertMemoryRange(mem5k, 1_241_352L);
+        assertMemoryRange(mem1k, 1_177_360L);
+        assertMemoryRange(mem3k, 1_209_360L);
+        assertMemoryRange(mem5k, 1_241_360L);
 
         MemoryRange delta = mem3k.elementWiseSubtract(mem1k);
         MemoryRange twoDelta = mem5k.elementWiseSubtract(mem1k);
@@ -627,8 +631,8 @@ class CommonNeighbourAwareRandomWalkTest {
         assertMemoryEstimation(
             CommonNeighbourAwareRandomWalk.memoryEstimation(config),
             GraphDimensions.of(1000),
-            -1,
-            MemoryRange.of(32_224L)
+            new Concurrency(1),
+            MemoryRange.of(32_232L)
         );
     }
 
@@ -642,8 +646,8 @@ class CommonNeighbourAwareRandomWalkTest {
         assertMemoryEstimation(
             CommonNeighbourAwareRandomWalk.memoryEstimation(config),
             GraphDimensions.of(1000),
-            -1,
-            MemoryRange.of(124_264L)
+            new Concurrency(1),
+            MemoryRange.of(124_272L)
         );
     }
 }

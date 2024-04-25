@@ -300,7 +300,7 @@ class LeidenTest {
         var progressTracker = new TestProgressTracker(
             factory.progressTask(graph, config),
             log,
-            4,
+            new Concurrency(4),
             EmptyTaskRegistryFactory.INSTANCE
         );
         factory.build(graph, config, progressTracker).compute();

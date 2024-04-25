@@ -310,7 +310,7 @@ public class Leiden extends Algorithm<LeidenResult> {
         var volumeAdder = new DoubleAdder();
         if (rootGraph.hasRelationshipProperty()) {
             List<InitVolumeTask> tasks = PartitionUtils.rangePartition(
-                concurrency.value(),
+                concurrency,
                 rootGraph.nodeCount(),
                 partition -> new InitVolumeTask(
                     rootGraph.concurrentCopy(),

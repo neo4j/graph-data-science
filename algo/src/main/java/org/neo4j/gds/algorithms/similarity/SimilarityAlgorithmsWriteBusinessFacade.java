@@ -117,7 +117,7 @@ public class SimilarityAlgorithmsWriteBusinessFacade {
                 graphStore,
                 rootIdMap,
                 taskName,
-                configuration.typedWriteConcurrency(),
+                configuration.writeConcurrency(),
                 arrowConnectionInfo,
                 resultStore,
                 similarityDistributionBuilder.similarityConsumer()

@@ -52,6 +52,6 @@ public class YensFactory<CONFIG extends ShortestPathYensBaseConfig> extends Grap
         CONFIG configuration,
         ProgressTracker progressTracker
     ) {
-        return Yens.sourceTarget(graph, configuration, configuration.typedConcurrency(), progressTracker);
+        return Yens.sourceTarget(graph, configuration, configuration.concurrency(), progressTracker);
     }
 }

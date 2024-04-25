@@ -21,6 +21,7 @@ package org.neo4j.gds.betweenness;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import static org.neo4j.gds.assertions.MemoryEstimationAssert.assertThat;
 
@@ -35,7 +36,7 @@ class BetweennessCentralityMemoryEstimateDefinitionTest {
     void testMemoryEstimation(int concurrency, long expectedBytes) {
         var memoryEstimation = new BetweennessCentralityMemoryEstimateDefinition(false).memoryEstimation();
         assertThat(memoryEstimation)
-            .memoryRange(100_000L, concurrency)
+            .memoryRange(100_000L, new Concurrency(concurrency))
             .hasSameMinAndMaxEqualTo(expectedBytes);
     }
 
@@ -48,7 +49,7 @@ class BetweennessCentralityMemoryEstimateDefinitionTest {
     void testMemoryEstimationWithRelationshipWeight(int concurrency, long expectedBytes) {
         var memoryEstimation = new BetweennessCentralityMemoryEstimateDefinition(true).memoryEstimation();
         assertThat(memoryEstimation)
-            .memoryRange(100_000L, concurrency)
+            .memoryRange(100_000L, new Concurrency(concurrency))
             .hasSameMinAndMaxEqualTo(expectedBytes);
     }
 }

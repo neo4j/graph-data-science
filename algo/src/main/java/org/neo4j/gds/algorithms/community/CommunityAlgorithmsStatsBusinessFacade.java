@@ -405,7 +405,7 @@ public class CommunityAlgorithmsStatsBusinessFacade {
                 algorithmResult.graph().nodeCount(),
                 communityFunctionSupplier.communityFunction(result),
                 DefaultPool.INSTANCE,
-                configuration.typedConcurrency(),
+                configuration.concurrency(),
                 statisticsComputationInstructions
             );
 

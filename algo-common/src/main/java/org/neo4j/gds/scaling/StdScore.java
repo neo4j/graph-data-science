@@ -67,7 +67,7 @@ public final class StdScore extends ScalarScaler {
                 ExecutorService executor
             ) {
                 var tasks = PartitionUtils.rangePartition(
-                    concurrency.value(),
+                    concurrency,
                     nodeCount,
                     partition -> new ComputeSumAndSquaredSum(partition, properties, progressTracker),
                     Optional.empty()

@@ -31,6 +31,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.mem.MemoryTree;
@@ -481,7 +482,7 @@ class LinkPredictionTrainTest {
                 pipeline.numberOfModelSelectionTrials()
             ),
             log,
-            1,
+            new Concurrency(1),
             EmptyTaskRegistryFactory.INSTANCE
         );
 
@@ -579,7 +580,7 @@ class LinkPredictionTrainTest {
                 pipeline.numberOfModelSelectionTrials()
             ),
             log,
-            1,
+            new Concurrency(1),
             EmptyTaskRegistryFactory.INSTANCE
         );
 
@@ -645,7 +646,7 @@ class LinkPredictionTrainTest {
                 pipeline.numberOfModelSelectionTrials()
             ),
             log,
-            1,
+            new Concurrency(1),
             EmptyTaskRegistryFactory.INSTANCE
         );
 

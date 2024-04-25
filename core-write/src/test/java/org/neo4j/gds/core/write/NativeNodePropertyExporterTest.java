@@ -166,7 +166,7 @@ class NativeNodePropertyExporterTest extends BaseTest {
         var progressTracker = new TaskProgressTracker(
             NodePropertyExporter.baseTask("AlgoNameGoesHere", graph.nodeCount()),
             log,
-            writeConcurrency.value(),
+            writeConcurrency,
             EmptyTaskRegistryFactory.INSTANCE
         );
         var exporterBuilder = NativeNodePropertyExporter

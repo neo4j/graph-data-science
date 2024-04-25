@@ -23,6 +23,7 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.GraphProjectConfig;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.mem.MemoryEstimations;
@@ -121,7 +122,7 @@ public class AlgorithmEstimationTemplate {
         MemoryEstimations.Builder estimationBuilder,
         MemoryEstimation memoryEstimation,
         GraphDimensions graphDimensions,
-        int concurrency
+        Concurrency concurrency
     ) {
         var rootEstimation = estimationBuilder
             .add("algorithm", memoryEstimation)

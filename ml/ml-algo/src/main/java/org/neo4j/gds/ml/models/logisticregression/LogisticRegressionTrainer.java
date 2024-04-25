@@ -63,7 +63,7 @@ public final class LogisticRegressionTrainer implements ClassifierTrainer {
                 "computation graph",
                 (graphDimensions, concurrency) -> {
                     long actualTrainSetSize = numberOfTrainingExamples.applyAsLong(graphDimensions.nodeCount());
-                    int numberOfConcurrentComputationGraphs = (int) Math.min(concurrency, Math.ceil((double) actualTrainSetSize / batchSize));
+                    int numberOfConcurrentComputationGraphs = (int) Math.min(concurrency.value(), Math.ceil((double) actualTrainSetSize / batchSize));
                     return featureDimension.apply(dim ->
                         sizeInBytesOfComputationGraph(
                             isReduced,

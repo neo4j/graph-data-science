@@ -73,7 +73,7 @@ public final class OutOfBagError implements Metric {
         var totalMistakes = new LongAdder();
         var totalOutOfAnyBagVectors = new LongAdder();
 
-        var tasks = PartitionUtils.rangePartition(concurrency.value(), trainSet.size(), partition ->
+        var tasks = PartitionUtils.rangePartition(concurrency, trainSet.size(), partition ->
                 accumulationTask(
                     partition,
                     numberOfClasses,

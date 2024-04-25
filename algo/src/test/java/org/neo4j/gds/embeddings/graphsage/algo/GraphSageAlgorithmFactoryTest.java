@@ -31,6 +31,7 @@ import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.collections.ha.HugeObjectArray;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.model.InjectModelCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -250,7 +251,7 @@ class GraphSageAlgorithmFactoryTest {
         ).reduce(MemoryRange.empty(), MemoryRange::add);
 
         var concurrency = gsConfig.concurrency();
-        var evaluateLossMemory = lossFunctionMemory.times(concurrency);
+        var evaluateLossMemory = lossFunctionMemory.times(concurrency.value());
 
         var expectedMemory = evaluateLossMemory
             .add(MemoryRange.of(initialFeaturesMemory))
@@ -295,7 +296,7 @@ class GraphSageAlgorithmFactoryTest {
 
         var actualEstimation = new GraphSageAlgorithmFactory<>(modelCatalog)
             .memoryEstimation(gsConfig)
-            .estimate(GraphDimensions.of(1337), 42);
+            .estimate(GraphDimensions.of(1337), new Concurrency(42));
 
         assertThat(flatten(actualEstimation)).containsExactly(
             pair(0, "GraphSage"),
@@ -346,7 +347,7 @@ class GraphSageAlgorithmFactoryTest {
 
         var actualEstimation = new GraphSageAlgorithmFactory<>(modelCatalog)
             .memoryEstimation(gsConfig)
-            .estimate(GraphDimensions.of(1337), 42);
+            .estimate(GraphDimensions.of(1337), new Concurrency(42));
 
         assertThat(flatten(actualEstimation)).containsExactly(
             pair(0, "GraphSage"),
@@ -552,7 +553,7 @@ class GraphSageAlgorithmFactoryTest {
             .build();
 
         var actualTree = new GraphSageAlgorithmFactory<>(modelCatalog)
-            .memoryEstimation(config).estimate(GraphDimensions.of(10000), 4);
+            .memoryEstimation(config).estimate(GraphDimensions.of(10000), new Concurrency(4));
 
         MemoryRange actual = actualTree.memoryUsage();
 

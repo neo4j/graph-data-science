@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.partition;
 
 import com.carrotsearch.hppc.AbstractIterator;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.BitUtil;
 
 import java.util.Spliterator;
@@ -37,10 +38,10 @@ public abstract class LazyDegreePartitionIterator extends AbstractIterator<Degre
     static LazyDegreePartitionIterator of(
         long nodeCount,
         long relationshipCount,
-        int concurrency,
+        Concurrency concurrency,
         PartitionUtils.DegreeFunction degrees
     ) {
-        long numRelationshipsInPartition = BitUtil.ceilDiv(relationshipCount, concurrency * DIVISION_FACTOR);
+        long numRelationshipsInPartition = BitUtil.ceilDiv(relationshipCount, concurrency.value() * DIVISION_FACTOR);
 
         return new MultiDegreePartitionIterator(nodeCount, numRelationshipsInPartition, degrees);
     }

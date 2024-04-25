@@ -24,7 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.compat.GraphDatabaseApiProxy;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.core.Username;
-import org.neo4j.gds.core.utils.RenamesCurrentThread;
+import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.concurrency.RenamesCurrentThread;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
@@ -156,7 +157,7 @@ class ListProgressProcTest extends BaseProgressTest {
             var taskRegistry = taskRegistryFactory.newInstance(new JobId());
             this.taskRegistryFactory = jobId -> new NonReleasingTaskRegistry(taskRegistry);
 
-            var taskProgressTracker = new TaskProgressTracker(task, Neo4jProxy.testLog(), 1, taskRegistryFactory);
+            var taskProgressTracker = new TaskProgressTracker(task, Neo4jProxy.testLog(), new Concurrency(1), taskRegistryFactory);
             taskProgressTracker.beginSubTask();
 
             taskProgressTracker.beginSubTask();

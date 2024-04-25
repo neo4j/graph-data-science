@@ -116,7 +116,7 @@ class SimilarityGraphBuilderTest {
     @Test
     void testConstructFromFilteredGraph() {
         NodesBuilder nodesBuilder = GraphFactory.initNodesBuilder()
-            .concurrency(4)
+            .concurrency(new Concurrency(4))
             .hasLabelInformation(true)
             .maxOriginalId(3)
             .build();
@@ -127,7 +127,7 @@ class SimilarityGraphBuilderTest {
         nodesBuilder.addNode(3, NodeLabel.of("B"));
 
         var inputMapping = nodesBuilder.build().idMap();
-        var filteredIdMap = inputMapping.withFilteredLabels(NodeLabel.listOf("B"), 4).get();
+        var filteredIdMap = inputMapping.withFilteredLabels(NodeLabel.listOf("B"), new Concurrency(4)).get();
 
         SimilarityGraphBuilder similarityGraphBuilder = new SimilarityGraphBuilder(
             filteredIdMap,

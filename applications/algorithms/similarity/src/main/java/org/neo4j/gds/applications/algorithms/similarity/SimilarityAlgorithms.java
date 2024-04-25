@@ -87,7 +87,7 @@ public class SimilarityAlgorithms {
         var algorithm = new NodeSimilarity(
             graph,
             configuration.toParameters(),
-            configuration.typedConcurrency(),
+            configuration.concurrency(),
             DefaultPool.INSTANCE,
             progressTracker,
             sourceNodeFilter,
@@ -152,7 +152,7 @@ public class SimilarityAlgorithms {
         var algorithm = new NodeSimilarity(
             graph,
             configuration.toParameters(),
-            configuration.typedConcurrency(),
+            configuration.concurrency(),
             DefaultPool.INSTANCE,
             progressTracker,
             NodeFilter.ALLOW_EVERYTHING,

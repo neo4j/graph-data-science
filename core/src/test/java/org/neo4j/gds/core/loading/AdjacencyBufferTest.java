@@ -22,6 +22,7 @@ package org.neo4j.gds.core.loading;
 import org.assertj.core.data.Percentage;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryTree;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,9 +31,9 @@ class AdjacencyBufferTest {
 
     @Test
     void memoryEstimationShouldGrowLinearlyWithNodeCount() {
-        var estimationWith1Property = estimate(10_000_000, 10, 1, 4);
-        var estimationWith2Property = estimate(100_000_000, 10, 1, 4);
-        var estimationWith3Property = estimate(1_000_000_000, 10, 1, 4);
+        var estimationWith1Property = estimate(10_000_000, 10, 1, new Concurrency(4));
+        var estimationWith2Property = estimate(100_000_000, 10, 1, new Concurrency(4));
+        var estimationWith3Property = estimate(1_000_000_000, 10, 1, new Concurrency(4));
 
         var min1 = estimationWith1Property.memoryUsage().min;
         var min2 = estimationWith2Property.memoryUsage().min;
@@ -45,7 +46,7 @@ class AdjacencyBufferTest {
         assertThat((double) max1 / max2).isCloseTo((double) max2 / max3, Percentage.withPercentage(20));
     }
 
-    private MemoryTree estimate(long nodeCount, long avgDegree, int propertyCount, int concurrency) {
+    private MemoryTree estimate(long nodeCount, long avgDegree, int propertyCount, Concurrency concurrency) {
         var dimensions = ImmutableGraphDimensions
             .builder()
             .nodeCount(nodeCount)

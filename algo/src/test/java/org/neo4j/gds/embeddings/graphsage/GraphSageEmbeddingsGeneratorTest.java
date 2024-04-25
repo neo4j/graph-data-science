@@ -128,7 +128,7 @@ class GraphSageEmbeddingsGeneratorTest {
         var embeddingsGenerator = new GraphSageEmbeddingsGenerator(
             model.data().layers(),
             config.batchSize(),
-            config.typedConcurrency(),
+            config.concurrency(),
             model.data().featureFunction(),
             model.trainConfig().randomSeed(),
             DefaultPool.INSTANCE,
@@ -184,7 +184,7 @@ class GraphSageEmbeddingsGeneratorTest {
         var embeddingsGenerator = new GraphSageEmbeddingsGenerator(
             model.data().layers(),
             config.batchSize(),
-            config.typedConcurrency(),
+            config.concurrency(),
             model.data().featureFunction(),
             model.trainConfig().randomSeed(),
             DefaultPool.INSTANCE,

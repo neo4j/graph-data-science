@@ -63,7 +63,7 @@ public class WriteRelationshipsApplication {
         var progressTracker = new TaskProgressTracker(
             RelationshipExporter.baseTask("Graph", relationshipCount),
             (org.neo4j.logging.Log) log.getNeo4jLog(),
-            RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY,
+            RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY,
             configuration.jobId(),
             taskRegistryFactory,
             userLogRegistryFactory
@@ -82,7 +82,7 @@ public class WriteRelationshipsApplication {
                     relationshipExporterBuilder,
                     terminationFlag,
                     progressTracker,
-                    configuration.typedConcurrency(),
+                    configuration.concurrency(),
                     configuration.arrowConnectionInfo(),
                     configuration.resolveResultStore(resultStore),
                     graphStore,

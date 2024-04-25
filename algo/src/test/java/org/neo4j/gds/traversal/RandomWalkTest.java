@@ -602,7 +602,7 @@ class RandomWalkTest {
                     config
                 ),
                 Neo4jProxy.testLog(),
-                4,
+                new Concurrency(4),
                 TaskRegistryFactory.local("rw", taskStore)
             );
 

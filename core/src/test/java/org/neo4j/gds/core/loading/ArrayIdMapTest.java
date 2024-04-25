@@ -25,6 +25,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryRange;
 import org.neo4j.gds.mem.MemoryTree;
 
@@ -44,11 +45,12 @@ class ArrayIdMapTest {
             .nodeCount(0)
             .highestPossibleNodeCount(0)
             .build();
-        MemoryTree memRec = ArrayIdMap.memoryEstimation().estimate(dimensions, 1);
+        var concurrency = new Concurrency(1);
+        MemoryTree memRec = ArrayIdMap.memoryEstimation().estimate(dimensions, concurrency);
         assertEquals(MemoryRange.of(48L + 40L + 40L), memRec.memoryUsage());
 
         dimensions = ImmutableGraphDimensions.builder().nodeCount(100L).highestPossibleNodeCount(100L).build();
-        memRec = ArrayIdMap.memoryEstimation().estimate(dimensions, 1);
+        memRec = ArrayIdMap.memoryEstimation().estimate(dimensions, concurrency);
         assertEquals(MemoryRange.of(48L + 840L + 32832L), memRec.memoryUsage());
 
         dimensions = ImmutableGraphDimensions
@@ -56,7 +58,7 @@ class ArrayIdMapTest {
             .nodeCount(1L)
             .highestPossibleNodeCount(100_000_000_000L)
             .build();
-        memRec = ArrayIdMap.memoryEstimation().estimate(dimensions, 1);
+        memRec = ArrayIdMap.memoryEstimation().estimate(dimensions, concurrency);
         assertEquals(MemoryRange.of(48L + 48L + 97_689_080L), memRec.memoryUsage());
 
         dimensions = ImmutableGraphDimensions
@@ -64,7 +66,7 @@ class ArrayIdMapTest {
             .nodeCount(10_000_000L)
             .highestPossibleNodeCount(100_000_000_000L)
             .build();
-        memRec = ArrayIdMap.memoryEstimation().estimate(dimensions, 1);
+        memRec = ArrayIdMap.memoryEstimation().estimate(dimensions, concurrency);
         assertEquals(
             MemoryRange.of(48L + 80_000_040L + 177_714_824L, 48L + 80_000_040L + 327_937_656_296L),
             memRec.memoryUsage()
@@ -75,7 +77,7 @@ class ArrayIdMapTest {
             .nodeCount(100_000_000L)
             .highestPossibleNodeCount(100_000_000_000L)
             .build();
-        memRec = ArrayIdMap.memoryEstimation().estimate(dimensions, 1);
+        memRec = ArrayIdMap.memoryEstimation().estimate(dimensions, concurrency);
         assertEquals(
             MemoryRange.of(48L + 800_000_040L + 898_077_656L, 48L + 800_000_040L + 800_488_297_688L),
             memRec.memoryUsage()
@@ -87,13 +89,13 @@ class ArrayIdMapTest {
 
         dimensions = ImmutableGraphDimensions.builder().nodeCount(100L).highestPossibleNodeCount(100L)
             .tokenNodeLabelMapping(labelTokenNodeLabelMappings).build();
-        memRec = ArrayIdMap.memoryEstimation().estimate(dimensions, 1);
+        memRec = ArrayIdMap.memoryEstimation().estimate(dimensions, concurrency);
         assertEquals(MemoryRange.of(48L + 840L + 32832L + 56L), memRec.memoryUsage());
 
         labelTokenNodeLabelMappings.put(2, Arrays.asList(NodeLabel.of("A"), NodeLabel.of("B")));
         dimensions = ImmutableGraphDimensions.builder().nodeCount(100L).highestPossibleNodeCount(100L)
             .tokenNodeLabelMapping(labelTokenNodeLabelMappings).build();
-        memRec = ArrayIdMap.memoryEstimation().estimate(dimensions, 1);
+        memRec = ArrayIdMap.memoryEstimation().estimate(dimensions, concurrency);
         assertEquals(MemoryRange.of(48L + 840L + 32832L + 112L), memRec.memoryUsage());
     }
 
@@ -108,7 +110,7 @@ class ArrayIdMapTest {
             length,
             emptyLabelInformationBuilder,
             highestNeoId,
-            1
+            new Concurrency(1)
         );
 
         assertThat(hugeIdMap.highestOriginalId()).isEqualTo(highestNeoId);

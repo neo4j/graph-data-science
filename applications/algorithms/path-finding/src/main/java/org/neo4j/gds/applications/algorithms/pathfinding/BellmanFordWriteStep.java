@@ -29,6 +29,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.logging.Log;
@@ -87,7 +88,7 @@ class BellmanFordWriteStep implements MutateOrWriteStep<BellmanFordResult, Relat
         var progressTracker = new TaskProgressTracker(
             RelationshipStreamExporter.baseTask("Write shortest Paths"),
             (org.neo4j.logging.Log) log.getNeo4jLog(),
-            1,
+            new Concurrency(1),
             requestScopedDependencies.getTaskRegistryFactory()
         );
 

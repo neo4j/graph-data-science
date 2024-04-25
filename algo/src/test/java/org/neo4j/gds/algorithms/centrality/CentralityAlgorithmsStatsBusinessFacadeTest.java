@@ -121,7 +121,7 @@ class CentralityAlgorithmsStatsBusinessFacadeTest {
         var businessFacade = new CentralityAlgorithmsStatsBusinessFacade(null);
 
         var configMock = mock(MutateNodePropertyConfig.class);
-        when(configMock.typedConcurrency()).thenReturn(new Concurrency(4));
+        when(configMock.concurrency()).thenReturn(new Concurrency(4));
 
 
         var result = HugeDoubleArray.of(0.1, 0.2, 0.3, 0.4);

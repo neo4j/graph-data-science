@@ -37,20 +37,17 @@ public interface WriteConfig extends ConcurrencyConfig {
 
     @Value.Default
     @Configuration.Key(WRITE_CONCURRENCY_KEY)
-    default int writeConcurrency() {
+    @Configuration.ConvertWith(method = "org.neo4j.gds.config.ConcurrencyConfig#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.config.ConcurrencyConfig#render")
+    default Concurrency writeConcurrency() {
         return concurrency();
-    }
-
-    @Configuration.Ignore
-    default Concurrency typedWriteConcurrency() {
-        return new Concurrency(writeConcurrency());
     }
 
     @Configuration.Check
     default void validateWriteConcurrency() {
         ConcurrencyValidatorService
             .validator()
-            .validate(writeConcurrency(), WRITE_CONCURRENCY_KEY, ConcurrencyConfig.CONCURRENCY_LIMITATION);
+            .validate(writeConcurrency().value(), WRITE_CONCURRENCY_KEY, ConcurrencyConfig.CONCURRENCY_LIMITATION);
     }
 
     /**

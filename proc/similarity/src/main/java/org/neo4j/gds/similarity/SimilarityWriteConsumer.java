@@ -103,7 +103,7 @@ public class SimilarityWriteConsumer<ALGO extends Algorithm<ALGO_RESULT>, ALGO_R
                         var progressTracker = new TaskProgressTracker(
                             RelationshipExporter.baseTask(name, similarityGraph.relationshipCount()),
                             executionContext.log(),
-                            RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY,
+                            RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY,
                             executionContext.taskRegistryFactory()
                         );
                         var relationshipExporterBuilder = Optional

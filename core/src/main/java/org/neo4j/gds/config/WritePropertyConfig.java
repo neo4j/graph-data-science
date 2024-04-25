@@ -25,7 +25,7 @@ import org.neo4j.gds.annotation.Configuration;
 import static org.neo4j.gds.core.StringIdentifierValidations.emptyToNull;
 import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteCharacter;
 
-public interface WritePropertyConfig extends WriteConfig {
+public interface WritePropertyConfig extends ConcurrencyConfig, WriteConfig {
 
     String WRITE_PROPERTY_KEY = "writeProperty";
 

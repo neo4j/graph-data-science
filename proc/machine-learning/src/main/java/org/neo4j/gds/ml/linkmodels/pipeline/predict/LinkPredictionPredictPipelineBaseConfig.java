@@ -180,7 +180,7 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
         var knnBuilder = KnnBaseConfigImpl.builder()
             .sampleRate(sampleRate())
             .nodeProperties(List.of(new KnnNodePropertySpec("NotUsedInLP")))
-            .concurrency(concurrency());
+            .concurrency(concurrency().value());
 
         topK().ifPresent(knnBuilder::topK);
         deltaThreshold().ifPresent(knnBuilder::deltaThreshold);
@@ -192,7 +192,7 @@ public interface LinkPredictionPredictPipelineBaseConfig extends
         var knnUserConfigAbomination = knnBuilder.build();
 
         return KnnParametersSansNodeCount.create(
-            knnUserConfigAbomination.typedConcurrency(),
+            knnUserConfigAbomination.concurrency(),
             knnUserConfigAbomination.maxIterations(),
             knnUserConfigAbomination.similarityCutoff(),
             knnUserConfigAbomination.deltaThreshold(),

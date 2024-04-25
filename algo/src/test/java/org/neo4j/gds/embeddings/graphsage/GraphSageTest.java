@@ -121,7 +121,7 @@ class GraphSageTest {
             DatabaseId.random(),
             randomGraph,
             Optional.of("weight"),
-            4
+            new Concurrency(4)
         );
 
         features = HugeObjectArray.newArray(double[].class, nodeCount);

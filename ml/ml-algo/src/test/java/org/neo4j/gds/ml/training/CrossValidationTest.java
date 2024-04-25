@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.TestProgressTracker;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
@@ -51,7 +52,7 @@ class CrossValidationTest {
         TestProgressTracker progressTracker = new TestProgressTracker(
             Tasks.task("test", CrossValidation.progressTasks(3, 2, 4)),
             log,
-            3,
+            new Concurrency(3),
             EmptyTaskRegistryFactory.INSTANCE
         );
 

@@ -24,6 +24,7 @@ import com.carrotsearch.hppc.LongSet;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.collections.haa.HugeAtomicDoubleArray;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
 import org.neo4j.gds.mem.MemoryEstimation;
@@ -52,11 +53,12 @@ public class CommonNeighbourAwareRandomWalk implements RandomWalkBasedNodesSampl
     private static final double QUALITY_THRESHOLD_BASE = 0.05;
 
     private final CommonNeighbourAwareRandomWalkConfig config;
+    private final Concurrency concurrency;
     private final WalkerProducer walkerProducer;
 
     public CommonNeighbourAwareRandomWalk(CommonNeighbourAwareRandomWalkConfig config) {
-
         this.config = config;
+        this.concurrency = config.concurrency();
         this.walkerProducer = WalkerProducer.CNARWWalkerProducer();
     }
 
@@ -70,7 +72,7 @@ public class CommonNeighbourAwareRandomWalk implements RandomWalkBasedNodesSampl
             inputGraph,
             progressTracker,
             config.nodeLabelStratification(),
-            config.typedConcurrency(),
+            concurrency,
             config.samplingRatio()
         );
 
@@ -82,11 +84,11 @@ public class CommonNeighbourAwareRandomWalk implements RandomWalkBasedNodesSampl
         var initialStartQualities = InitialStartQualities.init(inputGraph, rng, config.startNodes());
         Optional<HugeAtomicDoubleArray> totalWeights = initializeTotalWeights(config, inputGraph.nodeCount());
 
-        var tasks = ParallelUtil.tasks(config.concurrency(), () ->
+        var tasks = ParallelUtil.tasks(concurrency, () ->
             walkerProducer.getWalker(
                 seenNodes,
                 totalWeights,
-                QUALITY_THRESHOLD_BASE / (config.concurrency() * config.concurrency()),
+                QUALITY_THRESHOLD_BASE / concurrency.squared(),
                 new WalkQualities(initialStartQualities),
                 rng.split(),
                 inputGraph.concurrentCopy(),
@@ -96,7 +98,7 @@ public class CommonNeighbourAwareRandomWalk implements RandomWalkBasedNodesSampl
         );
 
         RunWithConcurrency.builder()
-            .concurrency(config.typedConcurrency())
+            .concurrency(concurrency)
             .tasks(tasks)
             .run();
 
@@ -121,7 +123,7 @@ public class CommonNeighbourAwareRandomWalk implements RandomWalkBasedNodesSampl
             // Three 8-bytes-element structures of size nodeCount * samplingRatio
             // Two 8-bytes-element structures of size nodeCount
             // Used for every thread
-            return (long) (config.concurrency() * nodeCount * (config.samplingRatio() * 3L * 8L + 2L * 8L));
+            return (long) (config.concurrency().value() * nodeCount * (config.samplingRatio() * 3L * 8L + 2L * 8L));
         });
         builder.perNode("startNodesUsed", nodeCount -> (long) (nodeCount * config.samplingRatio() * 8L));
         return builder.build();

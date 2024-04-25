@@ -77,7 +77,7 @@ public class PageRankMutateSpec implements AlgorithmSpec<PageRankAlgorithm, Page
     ) {
         var builder = new PageRankMutateResult.Builder(
             executionContext.returnColumns(),
-            computationResult.config().typedConcurrency()
+            computationResult.config().concurrency()
         );
 
         computationResult.result().ifPresent(result -> {

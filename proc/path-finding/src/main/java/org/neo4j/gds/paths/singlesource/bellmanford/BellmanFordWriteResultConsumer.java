@@ -23,6 +23,7 @@ import org.neo4j.gds.api.DatabaseId;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.ImmutableExportedRelationship;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.ProgressTimer;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
@@ -103,7 +104,7 @@ public class BellmanFordWriteResultConsumer implements
             var progressTracker = new TaskProgressTracker(
                 RelationshipStreamExporter.baseTask("Write shortest Paths"),
                 executionContext.log(),
-                1,
+                new Concurrency(1),
                 executionContext.taskRegistryFactory()
             );
 

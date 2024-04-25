@@ -42,7 +42,7 @@ public class LongNodePropertiesBuilderTest {
 
         var builder = LongNodePropertiesBuilder.of(
             defaultValue,
-            ConcurrencyConfig.DEFAULT_CONCURRENCY
+            ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY
         );
 
         for (int i = 0; i < nodeCount; i++) {

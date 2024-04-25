@@ -21,6 +21,7 @@ package org.neo4j.gds.applications.algorithms.machinery;
 
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.RelationshipWeightConfig;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.Optional;
 
@@ -36,7 +37,7 @@ class ExampleConfiguration implements AlgoBaseConfig, RelationshipWeightConfig {
     }
 
     @Override
-    public int concurrency() {
-        return 7;
+    public Concurrency concurrency() {
+        return new Concurrency(7);
     }
 }

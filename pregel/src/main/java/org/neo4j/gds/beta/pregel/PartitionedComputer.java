@@ -111,7 +111,7 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
         switch (config.partitioning()) {
             case RANGE:
                 return PartitionUtils.rangePartition(
-                    concurrency.value(),
+                    concurrency,
                     graph.nodeCount(),
                     partitionFunction,
                     Optional.empty()
@@ -119,7 +119,7 @@ public class PartitionedComputer<CONFIG extends PregelConfig> extends PregelComp
             case DEGREE:
                 return PartitionUtils.degreePartition(
                     graph,
-                    concurrency.value(),
+                    concurrency,
                     partitionFunction::apply,
                     Optional.empty()
                 );

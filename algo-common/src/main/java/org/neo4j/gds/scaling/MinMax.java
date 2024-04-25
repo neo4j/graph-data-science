@@ -62,7 +62,7 @@ public final class MinMax extends ScalarScaler {
                 ExecutorService executor
             ) {
                 var tasks = PartitionUtils.rangePartition(
-                    concurrency.value(),
+                    concurrency,
                     nodeCount,
                     partition -> new ComputeMaxMin(partition, properties, progressTracker),
                     Optional.empty()

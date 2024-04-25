@@ -340,7 +340,7 @@ class LouvainTest {
             RelationshipType.listOf("TYPE_OUT"),
             Optional.empty()
         );
-        var concurrency = 4;
+        var concurrency = new Concurrency(4);
         var maxIterations = 10;
         var maxLevels = 10;
         var progressTask = new LouvainAlgorithmFactory<>().progressTask(graph, maxIterations, maxLevels);
@@ -349,7 +349,7 @@ class LouvainTest {
 
         var louvain = new Louvain(
             graph,
-            new Concurrency(concurrency),
+            concurrency,
             maxIterations,
             TOLERANCE_DEFAULT,
             maxLevels,

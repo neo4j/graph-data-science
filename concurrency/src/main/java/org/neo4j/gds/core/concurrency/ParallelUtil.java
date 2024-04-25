@@ -20,11 +20,7 @@
 package org.neo4j.gds.core.concurrency;
 
 import org.jetbrains.annotations.Nullable;
-import org.neo4j.gds.core.utils.partition.Partition;
-import org.neo4j.gds.core.utils.partition.PartitionConsumer;
-import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.termination.TerminationFlag;
-import org.neo4j.gds.utils.CloseableThreadLocal;
 import org.neo4j.gds.utils.ExceptionUtil;
 
 import java.util.ArrayList;
@@ -54,7 +50,6 @@ import java.util.function.LongConsumer;
 import java.util.function.Supplier;
 import java.util.stream.BaseStream;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
@@ -115,25 +110,6 @@ public final class ParallelUtil {
     }
 
     /**
-     * This method is useful, when |partitions| is greatly larger than concurrency as we only create a single consumer per thread.
-     * Compared to parallelForEachNode, thread local state does not need to be resolved for each node but only per partition.
-     */
-    public static <P extends Partition> void parallelPartitionsConsume(
-        RunWithConcurrency.Builder runnerBuilder,
-        Stream<P> partitions,
-        Supplier<PartitionConsumer<P>> taskSupplier
-    ) {
-        try (
-            var localConsumer = CloseableThreadLocal.withInitial(taskSupplier)
-        ) {
-            var taskStream = partitions.map(partition -> (Runnable) () -> localConsumer.get().consume(partition));
-            runnerBuilder.tasks(taskStream);
-            runnerBuilder.run();
-        }
-
-    }
-
-    /**
      * @return the number of threads required to compute elementCount with the given batchSize
      */
     public static int threadCount(final int batchSize, final int elementCount) {
@@ -147,62 +123,30 @@ public final class ParallelUtil {
         if (batchSize >= elementCount) {
             return 1;
         }
-        return BitUtil.ceilDiv(elementCount, batchSize);
+        return ceilDiv(elementCount, batchSize);
     }
 
     /**
      * @return a batch size, so that {@code nodeCount} is equally divided by {@code concurrency}
      *     but no smaller than {@code minBatchSize}.
-     */
-    public static int adjustedBatchSize(
-        final int nodeCount,
-        int concurrency,
-        final int minBatchSize
-    ) {
-        if (concurrency <= 0) {
-            concurrency = nodeCount;
-        }
-        int targetBatchSize = threadCount(concurrency, nodeCount);
-        return Math.max(minBatchSize, targetBatchSize);
-    }
-
-    /**
-     * @return a batch size, so that {@code nodeCount} is equally divided by {@code concurrency}
-     *     but no smaller than {@link #DEFAULT_BATCH_SIZE}.
-     * @see #adjustedBatchSize(int, int, int)
-     */
-    public static int adjustedBatchSize(
-        final int nodeCount,
-        final int concurrency
-    ) {
-        return adjustedBatchSize(nodeCount, concurrency, DEFAULT_BATCH_SIZE);
-    }
-
-    /**
-     * @return a batch size, so that {@code nodeCount} is equally divided by {@code concurrency}
-     *     but no smaller than {@code minBatchSize}.
-     * @see #adjustedBatchSize(int, int, int)
      */
     public static long adjustedBatchSize(
         final long nodeCount,
-        int concurrency,
+        Concurrency concurrency,
         final long minBatchSize
     ) {
-        if (concurrency <= 0) {
-            concurrency = (int) Math.min(nodeCount, Integer.MAX_VALUE);
-        }
-        long targetBatchSize = threadCount(concurrency, nodeCount);
+        long targetBatchSize = threadCount(concurrency.value(), nodeCount);
         return Math.max(minBatchSize, targetBatchSize);
     }
 
     /**
      * @return a batch size, so that {@code nodeCount} is equally divided by {@code concurrency}
      *     but no smaller than {@code minBatchSize} and no larger than {@code maxBatchSize}.
-     * @see #adjustedBatchSize(long, int, long)
+     * @see #adjustedBatchSize(long, Concurrency, long)
      */
     public static long adjustedBatchSize(
         final long nodeCount,
-        final int concurrency,
+        final Concurrency concurrency,
         final long minBatchSize,
         final long maxBatchSize
     ) {
@@ -219,11 +163,30 @@ public final class ParallelUtil {
         if (batchSize <= 0L) {
             batchSize = 1L;
         }
-        batchSize = BitUtil.nextHighestPowerOfTwo(batchSize);
+        batchSize = nextHighestPowerOfTwo(batchSize);
         while (((nodeCount + batchSize + 1L) / batchSize) > (long) Integer.MAX_VALUE) {
             batchSize = batchSize << 1;
         }
         return batchSize;
+    }
+
+    private static long ceilDiv(long dividend, long divisor) {
+        return 1L + (-1L + dividend) / divisor;
+    }
+
+    /**
+     * returns the next highest power of two, or the current value if it's already a power of two or zero
+     */
+    private static long nextHighestPowerOfTwo(long v) {
+        v--;
+        v |= v >> 1L;
+        v |= v >> 2L;
+        v |= v >> 4L;
+        v |= v >> 8L;
+        v |= v >> 16L;
+        v |= v >> 32L;
+        v++;
+        return v;
     }
 
     public static boolean canRunInParallel(@Nullable ExecutorService executor) {
@@ -231,20 +194,20 @@ public final class ParallelUtil {
     }
 
     public static void readParallel(
-        final int concurrency,
+        final Concurrency concurrency,
         final long size,
         final ExecutorService executor,
         final BiLongConsumer task
     ) {
 
-        long batchSize = threadCount(concurrency, size);
-        if (!canRunInParallel(executor) || concurrency == 1) {
+        long batchSize = threadCount(concurrency.value(), size);
+        if (!canRunInParallel(executor) || concurrency.value() == 1) {
             for (long start = 0L; start < size; start += batchSize) {
                 long end = Math.min(size, start + batchSize);
                 task.apply(start, end);
             }
         } else {
-            Collection<Runnable> threads = new ArrayList<>(concurrency);
+            Collection<Runnable> threads = new ArrayList<>(concurrency.value());
             for (long start = 0L; start < size; start += batchSize) {
                 long end = Math.min(size, start + batchSize);
                 final long finalStart = start;
@@ -255,22 +218,22 @@ public final class ParallelUtil {
     }
 
     public static Collection<Runnable> tasks(
-        final int concurrency,
+        final Concurrency concurrency,
         final Supplier<? extends Runnable> newTask
     ) {
         final Collection<Runnable> tasks = new ArrayList<>();
-        for (int i = 0; i < concurrency; i++) {
+        for (int i = 0; i < concurrency.value(); i++) {
             tasks.add(newTask.get());
         }
         return tasks;
     }
 
     public static Collection<Runnable> tasks(
-        final int concurrency,
+        final Concurrency concurrency,
         final IntFunction<? extends Runnable> newTask
     ) {
         final Collection<Runnable> tasks = new ArrayList<>();
-        for (int i = 0; i < concurrency; i++) {
+        for (int i = 0; i < concurrency.value(); i++) {
             tasks.add(newTask.apply(i));
         }
         return tasks;
@@ -338,7 +301,7 @@ public final class ParallelUtil {
 
     static void runWithConcurrency(RunWithConcurrency params) {
         runWithConcurrency(
-            params.concurrency().value(),
+            params.concurrency(),
             params.tasks(),
             params.forceUsageOfExecutor(),
             params.waitNanos(),
@@ -351,7 +314,7 @@ public final class ParallelUtil {
 
     // only called from an existing Params object, rely on its validation
     private static void runWithConcurrency(
-        int concurrency,
+        Concurrency concurrency,
         Iterator<? extends Runnable> tasks,
         boolean forceUsageOfExecutor,
         long waitNanos,
@@ -361,7 +324,7 @@ public final class ParallelUtil {
         @Nullable ExecutorService executor
     ) {
         // Params validation ensures that `forceUsageOfExecutor==true && canRunInParallel(executor)==false` cannot happen
-        if (!canRunInParallel(executor) || (concurrency <= 1 && !forceUsageOfExecutor)) {
+        if (!canRunInParallel(executor) || (concurrency.value() == 1 && !forceUsageOfExecutor)) { // concurrency.value() == 1 could be a method Concurrency#singleThreaded or something
             while (tasks.hasNext()) {
                 Runnable task = tasks.next();
                 terminationFlag.assertRunning();
@@ -370,8 +333,7 @@ public final class ParallelUtil {
             return;
         }
 
-        CompletionService completionService =
-            new CompletionService(executor, concurrency);
+        CompletionService completionService = new CompletionService(executor, concurrency);
 
         PushbackIterator<Runnable> ts =
             new PushbackIterator<>(tasks);
@@ -380,9 +342,9 @@ public final class ParallelUtil {
         // generally assumes that tasks.size is notably larger than concurrency
         try {
             //noinspection StatementWithEmptyBody - add first concurrency tasks
-            for (int i = concurrency; i-- > 0
-                                      && terminationFlag.running()
-                                      && completionService.trySubmit(ts); )
+            for (int i = concurrency.value(); i-- > 0
+                                              && terminationFlag.running()
+                                              && completionService.trySubmit(ts); )
                 ;
 
             terminationFlag.assertRunning();
@@ -510,7 +472,7 @@ public final class ParallelUtil {
             }
         }
 
-        CompletionService(final ExecutorService executor, final int targetConcurrency) {
+        CompletionService(final ExecutorService executor, final Concurrency targetConcurrency) {
             if (!canRunInParallel(executor)) {
                 throw new IllegalArgumentException(
                     "executor already terminated or not usable");
@@ -518,7 +480,7 @@ public final class ParallelUtil {
             if (executor instanceof ThreadPoolExecutor) {
                 pool = (ThreadPoolExecutor) executor;
                 availableConcurrency = pool.getCorePoolSize();
-                int capacity = Math.max(targetConcurrency, availableConcurrency) + 1;
+                int capacity = Math.max(targetConcurrency.value(), availableConcurrency) + 1;
                 completionQueue = new ArrayBlockingQueue<>(capacity);
             } else {
                 pool = null;

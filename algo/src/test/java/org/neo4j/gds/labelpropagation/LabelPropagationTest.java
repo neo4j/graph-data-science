@@ -218,7 +218,7 @@ class LabelPropagationTest {
         var testTracker = new TestProgressTracker(
             progressTask,
             log,
-            DEFAULT_PARAMETERS.concurrency().value(),
+            DEFAULT_PARAMETERS.concurrency(),
             EmptyTaskRegistryFactory.INSTANCE
         );
 

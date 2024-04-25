@@ -197,7 +197,7 @@ class NativeRelationshipExporterTest extends BaseTest {
         // with a rel exporter
         var log = Neo4jProxy.testLog();
         var task = Tasks.leaf("WriteRelationships", graph.relationshipCount());
-        var progressTracker = new TaskProgressTracker(task, log, RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TaskProgressTracker(task, log, RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY, EmptyTaskRegistryFactory.INSTANCE);
 
         var exporter = NativeRelationshipExporter
             .builder(TestSupport.fullAccessTransaction(db), graph, TerminationFlag.RUNNING_TRUE)

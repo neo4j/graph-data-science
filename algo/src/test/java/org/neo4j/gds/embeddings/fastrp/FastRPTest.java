@@ -541,7 +541,7 @@ class FastRPTest {
             List.of(RelationshipType.of("REL")),
             Optional.empty()
         );
-        var concurrency = 4;
+        var concurrency = new Concurrency(4);
         var minBatchSize = 10_000;
 
         var parameters = new FastRPParameters(
@@ -558,12 +558,12 @@ class FastRPTest {
 
         var progressTask = factory.progressTask(graph, parameters.nodeSelfInfluence(), parameters.iterationWeights().size());
         var log = Neo4jProxy.testLog();
-        var progressTracker = new TaskProgressTracker(progressTask, log, 4, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TaskProgressTracker(progressTask, log, concurrency, EmptyTaskRegistryFactory.INSTANCE);
 
         new FastRP(
             graph,
             parameters,
-            new Concurrency(concurrency),
+            concurrency,
             minBatchSize,
             List.of(),
             progressTracker,

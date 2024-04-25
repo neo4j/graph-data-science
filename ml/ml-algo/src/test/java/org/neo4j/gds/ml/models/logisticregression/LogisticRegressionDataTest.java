@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryRange;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,17 +34,18 @@ class LogisticRegressionDataTest {
     @Test
     void shouldEstimateMemory() {
         var dimensions = GraphDimensions.of(0);
+        var concurrency = new Concurrency(1);
         var _04_05 = LogisticRegressionData.memoryEstimation(false, 4, MemoryRange.of(5))
-            .estimate(dimensions, 1)
+            .estimate(dimensions, concurrency)
             .memoryUsage();
         var _04_10 = LogisticRegressionData.memoryEstimation(false, 4, MemoryRange.of(10))
-            .estimate(dimensions, 1)
+            .estimate(dimensions, concurrency)
             .memoryUsage();
         var _08_05 = LogisticRegressionData.memoryEstimation(false, 8, MemoryRange.of(5))
-            .estimate(dimensions, 1)
+            .estimate(dimensions, concurrency)
             .memoryUsage();
         var _08_10 = LogisticRegressionData.memoryEstimation(false, 8, MemoryRange.of(10))
-            .estimate(dimensions, 1)
+            .estimate(dimensions, concurrency)
             .memoryUsage();
 
         // LocalIdMap is backed by 3 arrays with each have a base estimation of 16
@@ -56,10 +58,10 @@ class LogisticRegressionDataTest {
         assertThat(_08_10.max).isEqualTo(2 * _04_10.max - overheadForOneNLRData);
 
         var _04_20 = LogisticRegressionData.memoryEstimation(false, 4, MemoryRange.of(20))
-            .estimate(dimensions, 1)
+            .estimate(dimensions, concurrency)
             .memoryUsage();
         var _04_30 = LogisticRegressionData.memoryEstimation(false, 4, MemoryRange.of(30))
-            .estimate(dimensions, 1)
+            .estimate(dimensions, concurrency)
             .memoryUsage();
 
         // scaling number of features scales only the weights component
@@ -87,7 +89,7 @@ class LogisticRegressionDataTest {
         var dimensions = GraphDimensions.of(1000L, relCount);
         var memoryEstimation = LogisticRegressionData
             .memoryEstimation(true, 2, estimatedFeatureCount)
-            .estimate(dimensions, 5000);
+            .estimate(dimensions, new Concurrency(5000));
 
         assertMemoryRange(memoryEstimation.memoryUsage(), minEstimation, maxEstimation);
     }

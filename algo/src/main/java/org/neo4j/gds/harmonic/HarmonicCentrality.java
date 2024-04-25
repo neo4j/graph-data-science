@@ -72,7 +72,7 @@ public class HarmonicCentrality extends Algorithm<HarmonicResult> {
         ).run(concurrency, executorService);
 
         var tasks = PartitionUtils.rangePartition(
-            concurrency.value(),
+            concurrency,
             nodeCount,
             partition -> (Runnable) () -> partition.consume(nodeId -> inverseFarness.update(nodeId, currentValue -> currentValue / (double) (nodeCount - 1))),
             Optional.empty()

@@ -87,7 +87,7 @@ public final class EmbeddingUtils {
 
         var tasks = PartitionUtils.degreePartition(
             graph,
-            concurrency.value(),
+            concurrency,
             partition -> new RelationshipValidator(graph, partition, validator, errorDetails),
             Optional.empty()
         );

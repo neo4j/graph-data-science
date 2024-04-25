@@ -134,7 +134,7 @@ public class WriteNodePropertiesApplication {
                 var exporter = nodePropertyExporterBuilder
                     .withIdMap(subGraph)
                     .withTerminationFlag(terminationFlag)
-                    .parallel(DefaultPool.INSTANCE, config.typedWriteConcurrency())
+                    .parallel(DefaultPool.INSTANCE, config.writeConcurrency())
                     .withProgressTracker(progressTracker)
                     .withArrowConnectionInfo(
                         config.arrowConnectionInfo(),

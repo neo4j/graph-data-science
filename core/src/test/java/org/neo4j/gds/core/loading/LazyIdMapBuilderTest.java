@@ -22,6 +22,7 @@ package org.neo4j.gds.core.loading;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.PropertyState;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
@@ -37,7 +38,7 @@ class LazyIdMapBuilderTest {
 
     @Test
     void parallelAddDuplicateNodes() {
-        int concurrency = 8;
+        var concurrency = new Concurrency(8);
         long idCount = 100_000;
         var rng = new Random(42);
 

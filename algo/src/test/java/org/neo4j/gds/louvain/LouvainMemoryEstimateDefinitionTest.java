@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.mem.MemoryTree;
 
 import java.util.stream.Stream;
@@ -60,12 +61,13 @@ class LouvainMemoryEstimateDefinitionTest {
     @ParameterizedTest
     @MethodSource("memoryEstimationTuples")
     void testMemoryEstimation(
-        int concurrency,
+        int concurrencyValue,
         int levels,
         boolean includeIntermediateCommunities,
         long expectedMinBytes,
         long expectedMaxBytes
     ) {
+        var concurrency = new Concurrency(concurrencyValue);
         var nodeCount = 100_000L;
         var relCount = 500_000L;
 
@@ -105,14 +107,10 @@ class LouvainMemoryEstimateDefinitionTest {
 
         var memoryEstimation = new LouvainMemoryEstimateDefinition(estimationParameters).memoryEstimation();
 
-        MemoryTree memoryTree = memoryEstimation
-            .estimate(dimensionsWithoutProperties, 1);
-
-        MemoryTree memoryTreeOneProperty = memoryEstimation
-            .estimate(dimensionsWithOneProperty, 1);
-
-        MemoryTree memoryTreeTwoProperties =  memoryEstimation
-            .estimate(dimensionsWithTwoProperties, 1);
+        var concurrency = new Concurrency(1);
+        MemoryTree memoryTree = memoryEstimation.estimate(dimensionsWithoutProperties, concurrency);
+        MemoryTree memoryTreeOneProperty = memoryEstimation.estimate(dimensionsWithOneProperty, concurrency);
+        MemoryTree memoryTreeTwoProperties =  memoryEstimation.estimate(dimensionsWithTwoProperties, concurrency);
 
         assertEquals(memoryTree.memoryUsage(), memoryTreeOneProperty.memoryUsage());
         assertEquals(memoryTreeOneProperty.memoryUsage(), memoryTreeTwoProperties.memoryUsage());

@@ -24,6 +24,7 @@ import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.TestSupport;
 import org.neo4j.gds.api.DatabaseId;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.huge.HugeGraph;
 
 import java.util.Optional;
@@ -57,7 +58,7 @@ class CSRGraphStoreUtilTest {
             DatabaseId.of("dummy"),
             (HugeGraph) graph,
             Optional.of("prop1"),
-            1
+            new Concurrency(1)
         );
 
         assertThat(convertedGraphStore.schema()).isEqualTo(graphStore.schema());
@@ -79,7 +80,7 @@ class CSRGraphStoreUtilTest {
             DatabaseId.of("dummy"),
             (HugeGraph) gdlGraph,
             Optional.empty(),
-            1
+            new Concurrency(1)
         );
 
         assertThat(convertedGraphStore.schema()).isEqualTo(gdlGraphStore.schema());
@@ -95,7 +96,7 @@ class CSRGraphStoreUtilTest {
                 DatabaseId.of("dummy"),
                 (HugeGraph) graph.innerGraph(),
                 Optional.of("prop1"),
-                1
+                new Concurrency(1)
             );
         })
             .hasMessage("Expected relationship property 'prop1', but graph has none.");

@@ -277,7 +277,7 @@ class LocalClusteringCoefficientTest {
 
         var progressTask = factory.progressTask(graph, seedProperty);
         var log = Neo4jProxy.testLog();
-        var progressTracker = new TaskProgressTracker(progressTask, log, 4, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TaskProgressTracker(progressTask, log, new Concurrency(4), EmptyTaskRegistryFactory.INSTANCE);
 
         new LocalClusteringCoefficient(graph, new Concurrency(4), Long.MAX_VALUE, seedProperty, progressTracker).compute();
 

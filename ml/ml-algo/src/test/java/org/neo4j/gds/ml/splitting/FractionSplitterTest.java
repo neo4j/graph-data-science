@@ -22,6 +22,7 @@ package org.neo4j.gds.ml.splitting;
 import org.assertj.core.data.Offset;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.ReadOnlyHugeLongArray;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -57,17 +58,18 @@ class FractionSplitterTest {
 
     @Test
     void splittingNodesDifferentlyShouldNotAffectMemoryEstimation() {
+        var concurrency = new Concurrency(1);
         assertThat(
             FractionSplitter.estimate(0.1)
-                .estimate(GraphDimensions.of(1000), 1)
+                .estimate(GraphDimensions.of(1000), concurrency)
                 .memoryUsage()
         ).isEqualTo(
             FractionSplitter.estimate(0.9)
-                .estimate(GraphDimensions.of(1000), 1)
+                .estimate(GraphDimensions.of(1000), concurrency)
                 .memoryUsage()
         ).isEqualTo(
             FractionSplitter.estimate(0.45)
-                .estimate(GraphDimensions.of(1000), 1)
+                .estimate(GraphDimensions.of(1000), concurrency)
                 .memoryUsage()
         );
     }
@@ -75,7 +77,7 @@ class FractionSplitterTest {
     @Test
     void minAndMaxEstimationShouldBeTheSame() {
         var range = FractionSplitter.estimate(0.1)
-            .estimate(GraphDimensions.of(1000), 1)
+            .estimate(GraphDimensions.of(1000), new Concurrency(1))
             .memoryUsage();
         assertThat(range.min).isEqualTo(range.max);
     }
@@ -85,11 +87,11 @@ class FractionSplitterTest {
         var dimensions = GraphDimensions.of(1000);
         var estimator = FractionSplitter.estimate(0.1);
         assertThat(
-            estimator.estimate(dimensions, 1).memoryUsage()
+            estimator.estimate(dimensions, new Concurrency(1)).memoryUsage()
         ).isEqualTo(
-            estimator.estimate(dimensions, 4).memoryUsage()
+            estimator.estimate(dimensions, new Concurrency(4)).memoryUsage()
         ).isEqualTo(
-            estimator.estimate(dimensions, 16).memoryUsage()
+            estimator.estimate(dimensions, new Concurrency(16)).memoryUsage()
         );
     }
 
@@ -98,25 +100,26 @@ class FractionSplitterTest {
         var baseNodeCount = 1000;
         var trainFraction = 0.1;
         var estimator = FractionSplitter.estimate(trainFraction);
+        var concurrency = new Concurrency(1);
         var estimation = estimator
-            .estimate(GraphDimensions.of(baseNodeCount), 1)
+            .estimate(GraphDimensions.of(baseNodeCount), concurrency)
             .memoryUsage();
         var tolerance = 100L;
 
         // our test assumes max == min. we could inline the test that proves this, but coupled tests smell and checking is cheap
         assertThat(estimation.max).isEqualTo(
-            estimator.estimate(GraphDimensions.of(baseNodeCount), 1).memoryUsage().min
+            estimator.estimate(GraphDimensions.of(baseNodeCount), concurrency).memoryUsage().min
         );
 
         assertThat(estimation.max)
             .isCloseTo(
                 FractionSplitter.estimate(trainFraction)
-                    .estimate(GraphDimensions.of(baseNodeCount * 10), 1)
+                    .estimate(GraphDimensions.of(baseNodeCount * 10), concurrency)
                     .memoryUsage().max / 10, // should be ten times
                 Offset.offset(tolerance)     // with some give
             ).isCloseTo(
                 FractionSplitter.estimate(trainFraction)
-                    .estimate(GraphDimensions.of(baseNodeCount * 100), 1)
+                    .estimate(GraphDimensions.of(baseNodeCount * 100), concurrency)
                     .memoryUsage().max / 100, // should be a hundred times
                 Offset.offset(tolerance)      // with some give
         );

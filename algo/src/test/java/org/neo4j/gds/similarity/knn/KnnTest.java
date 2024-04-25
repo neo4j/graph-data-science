@@ -496,7 +496,7 @@ class KnnTest {
 
         var progressTask = KnnFactory.knnTaskTree(graph.nodeCount(), maxIterations);
         var log = Neo4jProxy.testLog();
-        var progressTracker = new TaskProgressTracker(progressTask, log, 4, EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TaskProgressTracker(progressTask, log, new Concurrency(4), EmptyTaskRegistryFactory.INSTANCE);
 
         var similarityFunction = new SimilarityFunction(SimilarityComputer.ofProperty(graph, new KnnNodePropertySpec("knn")));
         var k = K.create(1, graph.nodeCount(), 0.5, 0.001);

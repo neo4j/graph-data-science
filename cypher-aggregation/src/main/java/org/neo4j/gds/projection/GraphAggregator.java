@@ -29,6 +29,7 @@ import org.neo4j.gds.api.ImmutableDatabaseInfo;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.compat.CompatUserAggregator;
 import org.neo4j.gds.core.ConfigKeyValidation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.Capabilities.WriteMode;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.loading.LazyIdMapBuilder;
@@ -195,7 +196,7 @@ abstract class GraphAggregator implements CompatUserAggregator {
         );
     }
 
-    private static LazyIdMapBuilder idMapBuilder(int readConcurrency) {
+    private static LazyIdMapBuilder idMapBuilder(Concurrency readConcurrency) {
         return new LazyIdMapBuilder(readConcurrency, true, true, PropertyState.PERSISTENT);
     }
 

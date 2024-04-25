@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.utils.progress.tasks;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.warnings.UserLogRegistryFactory;
@@ -29,7 +30,7 @@ public final class TaskTreeProgressTracker extends TaskProgressTracker {
     public TaskTreeProgressTracker(
         Task baseTask,
         Log log,
-        int concurrency,
+        Concurrency concurrency,
         JobId jobId,
         TaskRegistryFactory taskRegistryFactory,
         UserLogRegistryFactory userLogRegistryFactory

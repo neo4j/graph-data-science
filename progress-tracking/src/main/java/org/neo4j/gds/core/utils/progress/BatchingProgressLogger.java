@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.utils.progress;
 
 import org.apache.commons.lang3.mutable.MutableLong;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 import org.neo4j.gds.mem.BitUtil;
 import org.neo4j.gds.utils.CloseableThreadLocal;
@@ -35,7 +36,7 @@ public class BatchingProgressLogger implements ProgressLogger {
     public static final long MAXIMUM_LOG_INTERVAL = (long) Math.pow(2, 13);
 
     private final Log log;
-    private final int concurrency;
+    private final Concurrency concurrency;
     private long taskVolume;
     private long batchSize;
     private String taskName;
@@ -44,24 +45,24 @@ public class BatchingProgressLogger implements ProgressLogger {
 
     private int globalPercentage;
 
-    private static long calculateBatchSize(Task task, int concurrency) {
+    private static long calculateBatchSize(Task task, Concurrency concurrency) {
         return calculateBatchSize(Math.max(1L, task.getProgress().volume()), concurrency);
     }
 
-    private static long calculateBatchSize(long taskVolume, int concurrency) {
+    private static long calculateBatchSize(long taskVolume, Concurrency concurrency) {
         // target 100 logs per full run (every 1 percent)
         var batchSize = taskVolume / 100;
         // split batchSize into thread-local chunks
-        batchSize /= concurrency;
+        batchSize /= concurrency.value();
         // batchSize needs to be a power of two
         return Math.max(1, BitUtil.nextHighestPowerOfTwo(batchSize));
     }
 
-    public BatchingProgressLogger(Log log, Task task, int concurrency) {
+    public BatchingProgressLogger(Log log, Task task, Concurrency concurrency) {
         this(log, task, calculateBatchSize(task, concurrency), concurrency);
     }
 
-    public BatchingProgressLogger(Log log, Task task, long batchSize, int concurrency) {
+    public BatchingProgressLogger(Log log, Task task, long batchSize, Concurrency concurrency) {
         this.log = log;
         this.taskVolume = task.getProgress().volume();
         this.batchSize = batchSize;

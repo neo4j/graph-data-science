@@ -25,6 +25,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
 import org.neo4j.gds.core.GraphDimensions;
 import org.neo4j.gds.core.ImmutableGraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 class LocalClusteringCoefficientMemoryEstimateDefinitionTest {
 
@@ -40,7 +41,7 @@ class LocalClusteringCoefficientMemoryEstimateDefinitionTest {
         long expected = 80 + hugeDoubleArray + triangleCountEstimate;
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryRange(graphDimensions, 1)
+            .memoryRange(graphDimensions, new Concurrency(1))
             .hasSameMinAndMaxEqualTo(expected);
     }
 
@@ -55,7 +56,7 @@ class LocalClusteringCoefficientMemoryEstimateDefinitionTest {
         long expected = 64 + hugeDoubleArray;
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryRange(graphDimensions, 1)
+            .memoryRange(graphDimensions, new Concurrency(1))
             .hasSameMinAndMaxEqualTo(expected);
     }
 
@@ -72,7 +73,7 @@ class LocalClusteringCoefficientMemoryEstimateDefinitionTest {
         long expected = 80 + hugeDoubleArray + triangleCountEstimate;
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryRange(graphDimensions, 1)
+            .memoryRange(graphDimensions, new Concurrency(1))
             .hasSameMinAndMaxEqualTo(expected);
     }
 
@@ -85,9 +86,9 @@ class LocalClusteringCoefficientMemoryEstimateDefinitionTest {
 
         long hugeDoubleArray = 24 + sizeOfHugeArray;
         long expected = 64 + hugeDoubleArray;
-        
+
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryRange(graphDimensions, 1)
+            .memoryRange(graphDimensions, new Concurrency(1))
             .hasSameMinAndMaxEqualTo(expected);
     }
 }

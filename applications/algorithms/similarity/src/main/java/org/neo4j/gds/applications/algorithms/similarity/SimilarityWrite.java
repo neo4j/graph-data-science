@@ -60,7 +60,7 @@ class SimilarityWrite {
         var similarityGraphResult = SimilarityResultCompanion.computeToGraph(
             graph,
             graph.nodeCount(),
-            concurrencyConfiguration.typedConcurrency(),
+            concurrencyConfiguration.concurrency(),
             similarityResultStream
         );
 
@@ -101,7 +101,7 @@ class SimilarityWrite {
             graphStore,
             rootIdMap,
             taskName,
-            writeConfiguration.typedWriteConcurrency(),
+            writeConfiguration.writeConcurrency(),
             writeConfiguration.arrowConnectionInfo(),
             resultStore,
             similarityDistributionBuilder.similarityConsumer()

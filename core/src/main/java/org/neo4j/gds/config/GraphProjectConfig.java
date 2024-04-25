@@ -72,13 +72,10 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
     String graphName();
 
     @Configuration.Key(READ_CONCURRENCY_KEY)
-    default int readConcurrency() {
-        return ConcurrencyConfig.DEFAULT_CONCURRENCY;
-    }
-
-    @Configuration.Ignore
-    default Concurrency typedReadConcurrency() {
-        return new Concurrency(readConcurrency());
+    @Configuration.ConvertWith(method = "org.neo4j.gds.config.ConcurrencyConfig#parse")
+    @Configuration.ToMapValue("org.neo4j.gds.config.ConcurrencyConfig#render")
+    default Concurrency readConcurrency() {
+        return ConcurrencyConfig.TYPED_DEFAULT_CONCURRENCY;
     }
 
     @Configuration.Key(NODE_COUNT_KEY)
@@ -116,7 +113,7 @@ public interface GraphProjectConfig extends BaseConfig, JobIdConfig {
     default void validateReadConcurrency() {
         ConcurrencyValidatorService
             .validator()
-            .validate(readConcurrency(), READ_CONCURRENCY_KEY, ConcurrencyConfig.CONCURRENCY_LIMITATION);
+            .validate(readConcurrency().value(), READ_CONCURRENCY_KEY, ConcurrencyConfig.CONCURRENCY_LIMITATION);
     }
 
     static @Nullable String validateName(String input) {

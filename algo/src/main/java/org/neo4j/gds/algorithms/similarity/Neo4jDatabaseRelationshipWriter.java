@@ -61,7 +61,7 @@ public final class Neo4jDatabaseRelationshipWriter {
             var progressTracker = new TaskProgressTracker(
                 RelationshipExporter.baseTask(taskName, graph.relationshipCount()),
                 (org.neo4j.logging.Log) log.getNeo4jLog(),
-                RelationshipExporterBuilder.DEFAULT_WRITE_CONCURRENCY,
+                RelationshipExporterBuilder.TYPED_DEFAULT_WRITE_CONCURRENCY,
                 taskRegistryFactory
             );
 

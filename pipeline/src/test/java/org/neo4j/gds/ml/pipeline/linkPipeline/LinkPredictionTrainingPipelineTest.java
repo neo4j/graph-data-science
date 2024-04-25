@@ -31,6 +31,7 @@ import org.neo4j.gds.api.NodeLookup;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.compat.Neo4jProxy;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.core.model.OpenModelCatalog;
@@ -315,7 +316,7 @@ class LinkPredictionTrainingPipelineTest {
             String graphName,
             Collection<NodeLabel> nodeLabels,
             Collection<RelationshipType> relTypes,
-            int trainConcurrency,
+            Concurrency trainConcurrency,
             Stub stub
         ) {
 

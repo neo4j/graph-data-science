@@ -21,6 +21,7 @@ package org.neo4j.gds.paths.traverse;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import static org.mockito.Mockito.mock;
 
@@ -34,7 +35,7 @@ class DFSMemoryEstimateDefinitionTest {
         var memoryEstimation = new DfsMemoryEstimateDefinition();
 
         MemoryEstimationAssert.assertThat(memoryEstimation.memoryEstimation())
-            .memoryRange(10_000, 1)
+            .memoryRange(10_000, new Concurrency(1))
             .hasSameMinAndMaxEqualTo(321440);
     }
 }

@@ -27,6 +27,7 @@ import org.neo4j.gds.Orientation;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.schema.GraphSchema;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.GraphStoreCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -541,7 +542,7 @@ class LinkPredictionPredictPipelineExecutorTest {
             String graphName,
             Collection<NodeLabel> nodeLabels,
             Collection<RelationshipType> relTypes,
-            int trainConcurrency,
+            Concurrency trainConcurrency,
             Stub stub
         ) {
             assertThat(nodeLabels).containsExactlyInAnyOrderElementsOf(graphStoreFilter.nodePropertyStepsBaseLabels());
@@ -624,7 +625,7 @@ class LinkPredictionPredictPipelineExecutorTest {
             String graphName,
             Collection<NodeLabel> nodeLabels,
             Collection<RelationshipType> relTypes,
-            int trainConcurrency,
+            Concurrency trainConcurrency,
             Stub stub
         ) {
             graphStore.addNodeProperty(

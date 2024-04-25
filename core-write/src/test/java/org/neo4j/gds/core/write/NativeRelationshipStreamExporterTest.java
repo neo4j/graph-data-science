@@ -34,6 +34,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.gds.compat.TestLog;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.progress.EmptyTaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.extension.IdFunction;
@@ -194,11 +195,12 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
 
     @ParameterizedTest
     @ValueSource(ints = {1,2,4})
-    void exportExceedsBufferSize(int concurrency) {
+    void exportExceedsBufferSize(int concurrencyValue) {
         int nodeCount = 4;
         var batchSize = 10;
+        var concurrency = new Concurrency(concurrencyValue);
         // enforce writing non-full buffer
-        var relationshipCount = batchSize * concurrency + 5;
+        var relationshipCount = batchSize * concurrency.value() + 5;
 
         var rand = new Random();
 
@@ -245,7 +247,7 @@ class NativeRelationshipStreamExporterTest extends BaseTest {
         var progressTracker = new TaskProgressTracker(
             RelationshipStreamExporter.baseTask("OpName"),
             log,
-            1,
+            new Concurrency(1),
             EmptyTaskRegistryFactory.INSTANCE
         );
 

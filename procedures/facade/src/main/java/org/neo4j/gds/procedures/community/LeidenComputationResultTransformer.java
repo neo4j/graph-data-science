@@ -51,7 +51,7 @@ final class LeidenComputationResultTransformer {
                 configuration.consecutiveIds(),
                 NodePropertyValuesAdapter.adapt(leidenResult.dendrogramManager().getCurrent()),
                 configuration.minCommunitySize(),
-                configuration.typedConcurrency()
+                configuration.concurrency()
             );
             var includeIntermediateCommunities = configuration.includeIntermediateCommunities();
 

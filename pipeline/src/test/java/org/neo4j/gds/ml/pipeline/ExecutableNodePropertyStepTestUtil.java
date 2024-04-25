@@ -24,6 +24,7 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.model.ModelCatalog;
 import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.exceptions.MemoryEstimationNotImplementedException;
@@ -83,7 +84,7 @@ public class ExecutableNodePropertyStepTestUtil {
             String graphName,
             Collection<NodeLabel> nodeLabels,
             Collection<RelationshipType> relTypes,
-            int trainConcurrency,
+            Concurrency trainConcurrency,
             Stub stub
         ) {
             var featureInputNodeLabels = featureInputNodeLabels(graphStore, nodeLabels);
@@ -177,7 +178,7 @@ public class ExecutableNodePropertyStepTestUtil {
             String graphName,
             Collection<NodeLabel> nodeLabels,
             Collection<RelationshipType> relTypes,
-            int trainConcurrency,
+            Concurrency trainConcurrency,
             Stub stub
         ) {
             graphStore.addNodeProperty(
@@ -221,7 +222,7 @@ public class ExecutableNodePropertyStepTestUtil {
             String graphName,
             Collection<NodeLabel> nodeLabels,
             Collection<RelationshipType> relTypes,
-            int trainConcurrency,
+            Concurrency trainConcurrency,
             Stub stub
         ) {
             throw new NotImplementedException();
@@ -285,7 +286,7 @@ public class ExecutableNodePropertyStepTestUtil {
             String graphName,
             Collection<NodeLabel> nodeLabels,
             Collection<RelationshipType> relTypes,
-            int trainConcurrency,
+            Concurrency trainConcurrency,
             Stub stub
         ) {
             throw new PipelineExecutionTestExecuteNodeStepFailure();

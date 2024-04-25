@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.collections.LongMultiSet;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.ml.core.subgraph.LocalIdMap;
 import org.neo4j.gds.ml.metrics.EvaluationScores;
 import org.neo4j.gds.ml.metrics.Metric;
@@ -286,9 +287,10 @@ class TrainingStatisticsTest {
     @Test
     void shouldEstimateTheSameRegardlessOfNodeCount() {
         var estimator = TrainingStatistics.memoryEstimationStatsMap(2, 5);
-        var oneThousandNodes = estimator.estimate(GraphDimensions.of(1_000), 1).memoryUsage();
-        var oneMillionNodes = estimator.estimate(GraphDimensions.of(1_000_000), 1).memoryUsage();
-        var oneBillionNodes = estimator.estimate(GraphDimensions.of(1_000_000_000), 1).memoryUsage();
+        var concurrency = new Concurrency(1);
+        var oneThousandNodes = estimator.estimate(GraphDimensions.of(1_000), concurrency).memoryUsage();
+        var oneMillionNodes = estimator.estimate(GraphDimensions.of(1_000_000), concurrency).memoryUsage();
+        var oneBillionNodes = estimator.estimate(GraphDimensions.of(1_000_000_000), concurrency).memoryUsage();
         assertThat(oneThousandNodes).isEqualTo(oneMillionNodes).isEqualTo(oneBillionNodes);
     }
 
@@ -297,10 +299,11 @@ class TrainingStatisticsTest {
         var overheadForOneStatsMap = sizeOfInstance(ArrayList.class);
         var dimensions = GraphDimensions.of(1000);
 
-        var _1_05 = TrainingStatistics.memoryEstimationStatsMap(1, 5).estimate(dimensions, 1).memoryUsage();
-        var _4_05 = TrainingStatistics.memoryEstimationStatsMap(4, 5).estimate(dimensions, 1).memoryUsage();
-        var _1_10 = TrainingStatistics.memoryEstimationStatsMap(1, 10).estimate(dimensions, 1).memoryUsage();
-        var _4_10 = TrainingStatistics.memoryEstimationStatsMap(4, 10).estimate(dimensions, 1).memoryUsage();
+        var concurrency = new Concurrency(1);
+        var _1_05 = TrainingStatistics.memoryEstimationStatsMap(1, 5).estimate(dimensions, concurrency).memoryUsage();
+        var _4_05 = TrainingStatistics.memoryEstimationStatsMap(4, 5).estimate(dimensions, concurrency).memoryUsage();
+        var _1_10 = TrainingStatistics.memoryEstimationStatsMap(1, 10).estimate(dimensions, concurrency).memoryUsage();
+        var _4_10 = TrainingStatistics.memoryEstimationStatsMap(4, 10).estimate(dimensions, concurrency).memoryUsage();
 
         assertThat(_4_05.max).isEqualTo(4 * _1_05.max - 3 * overheadForOneStatsMap);
         assertThat(_4_10.max).isEqualTo(4 * _1_10.max - 3 * overheadForOneStatsMap);

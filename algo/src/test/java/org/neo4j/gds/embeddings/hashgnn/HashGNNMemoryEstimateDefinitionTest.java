@@ -71,7 +71,7 @@ class HashGNNMemoryEstimateDefinitionTest {
         var memoryEstimation = new HashGNNMemoryEstimateDefinition(params).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryRange(nodeCount,relationshipCount,concurrency)
+            .memoryRange(nodeCount,relationshipCount,new Concurrency(concurrency))
             .hasMin(expectedMinMemory)
             .hasMax(expectedMaxMemory);
 
@@ -90,7 +90,7 @@ class HashGNNMemoryEstimateDefinitionTest {
         var memoryEstimation = new HashGNNMemoryEstimateDefinition(params).memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryRange(10_000,20_000,8)
+            .memoryRange(10_000,20_000,new Concurrency(8))
             .hasSameMinAndMaxEqualTo(12_404_072);
     }
 
@@ -99,10 +99,10 @@ class HashGNNMemoryEstimateDefinitionTest {
         var inputDimension = 1000;
         var inputRatio = 0.1;
         var graphDims = GraphDimensions.of((long) 1e6);
-        var concurrency = 4;
+        var concurrency = new Concurrency(4);
 
         var bigParameters = new HashGNNParameters(
-            new Concurrency(concurrency),
+            concurrency,
             3,
             100,
             1,
@@ -119,7 +119,7 @@ class HashGNNMemoryEstimateDefinitionTest {
             .memoryUsage();
 
         var smallParameters = new HashGNNParameters(
-            new Concurrency(concurrency),
+            concurrency,
             3,
             100,
             1,

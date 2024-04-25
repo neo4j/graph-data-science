@@ -20,6 +20,7 @@
 package org.neo4j.gds.mem;
 
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -45,5 +46,5 @@ public interface MemoryEstimation {
         return MemoryEstimations.andThen(this, memoryRange -> memoryRange.times(factor));
     }
 
-    MemoryTree estimate(GraphDimensions dimensions, int concurrency);
+    MemoryTree estimate(GraphDimensions dimensions, Concurrency concurrency);
 }

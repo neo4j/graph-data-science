@@ -184,7 +184,7 @@ class K1ColoringTest {
 
         var progressTask = new K1ColoringAlgorithmFactory<>().progressTask(graph, config);
         var log = Neo4jProxy.testLog();
-        var progressTracker = new TestProgressTracker(progressTask, log, concurrency.value(), EmptyTaskRegistryFactory.INSTANCE);
+        var progressTracker = new TestProgressTracker(progressTask, log, concurrency, EmptyTaskRegistryFactory.INSTANCE);
 
         var k1Coloring = new K1Coloring(
             graph,

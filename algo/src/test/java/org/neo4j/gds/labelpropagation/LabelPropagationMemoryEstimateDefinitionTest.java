@@ -24,6 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.neo4j.gds.assertions.MemoryEstimationAssert;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import java.util.stream.Stream;
 
@@ -43,7 +44,7 @@ class LabelPropagationMemoryEstimateDefinitionTest {
     void shouldComputeMemoryEstimation(int concurrency, long expectedMinBytes, long expectedMaxBytes) {
         var memoryEstimation = new LabelPropagationMemoryEstimateDefinition().memoryEstimation();
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryRange(100_000L, concurrency)
+            .memoryRange(100_000L, new Concurrency(concurrency))
             .hasMin(expectedMinBytes)
             .hasMax(expectedMaxBytes);
     }
@@ -54,7 +55,7 @@ class LabelPropagationMemoryEstimateDefinitionTest {
         var memoryEstimation = new LabelPropagationMemoryEstimateDefinition().memoryEstimation();
 
         MemoryEstimationAssert.assertThat(memoryEstimation)
-            .memoryRange(largeNodeCount, 1)
+            .memoryRange(largeNodeCount, new Concurrency(1))
             .max()
             .isPositive();
     }

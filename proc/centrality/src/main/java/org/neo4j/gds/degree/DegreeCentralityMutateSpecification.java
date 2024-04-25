@@ -69,7 +69,7 @@ public class DegreeCentralityMutateSpecification implements AlgorithmSpec<Degree
     ) {
         var builder = new CentralityMutateResult.Builder(
             executionContext.returnColumns(),
-            computationResult.config().typedConcurrency()
+            computationResult.config().concurrency()
         );
 
         computationResult.result()

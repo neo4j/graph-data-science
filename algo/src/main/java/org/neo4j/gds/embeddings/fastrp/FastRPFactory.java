@@ -69,7 +69,7 @@ public class FastRPFactory<CONFIG extends FastRPBaseConfig> extends GraphAlgorit
         return build(
             graph,
             configuration.toParameters(),
-            configuration.typedConcurrency(),
+            configuration.concurrency(),
             10_000,
             configuration.randomSeed(),
             progressTracker

@@ -336,10 +336,11 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
         var steinerTreeAlgorithmFactory = new SteinerTreeAlgorithmFactory<>();
         var log = Neo4jProxy.testLog();
         var baseTask = steinerTreeAlgorithmFactory.progressTask(graph, targetNodes.size(), false);
+        var concurrency = new Concurrency(4);
         var progressTracker = new TestProgressTracker(
             baseTask,
             log,
-            4,
+            concurrency,
             EmptyTaskRegistryFactory.INSTANCE
         );
 
@@ -348,7 +349,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             graph.toMappedNodeId(sourceId),
             targetNodes.stream().map(graph::safeToMappedNodeId).collect(Collectors.toList()),
             2.0,
-            new Concurrency(4),
+            concurrency,
             false,
             DefaultPool.INSTANCE,
             progressTracker
@@ -380,10 +381,11 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
         var steinerTreeAlgorithmFactory = new SteinerTreeAlgorithmFactory<>();
         var log = Neo4jProxy.testLog();
         Task baseTask = steinerTreeAlgorithmFactory.progressTask(graph, targetNodes.size(), applyRerouting);
+        var concurrency = new Concurrency(4);
         var progressTracker = new TestProgressTracker(
             baseTask,
             log,
-            4,
+            concurrency,
             EmptyTaskRegistryFactory.INSTANCE
         );
 
@@ -392,7 +394,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             graph.toMappedNodeId(sourceId),
             targetNodes.stream().map(graph::safeToMappedNodeId).collect(Collectors.toList()),
             2.0,
-            new Concurrency(4),
+            concurrency,
             applyRerouting,
             DefaultPool.INSTANCE,
             progressTracker
@@ -429,11 +431,12 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
 
         var steinerTreeAlgorithmFactory = new SteinerTreeAlgorithmFactory<>();
         var log = Neo4jProxy.testLog();
+        var concurrency = new Concurrency(4);
         Task baseTask = steinerTreeAlgorithmFactory.progressTask(invGraph, targetNodes.size(), applyRerouting);
         var progressTracker = new TestProgressTracker(
             baseTask,
             log,
-            4,
+            concurrency,
             EmptyTaskRegistryFactory.INSTANCE
         );
 
@@ -442,7 +445,7 @@ class ShortestPathsSteinerAlgorithmReroutingTest {
             invGraph.toMappedNodeId(sourceId),
             targetNodes.stream().map(invGraph::safeToMappedNodeId).collect(Collectors.toList()),
             2.0,
-            new Concurrency(4),
+            concurrency,
             applyRerouting,
             DefaultPool.INSTANCE,
             progressTracker

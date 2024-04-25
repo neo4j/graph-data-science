@@ -48,7 +48,7 @@ class CELFMemoryEstimateDefinitionTest {
         var memoryEstimation = new CELFMemoryEstimateDefinition(parameters).memoryEstimation();
 
         assertThat(memoryEstimation)
-            .memoryRange(42, 1337, concurrency)
+            .memoryRange(42, 1337, parameters.concurrency())
             .hasSameMinAndMaxEqualTo(expectedMemory);
     }
 

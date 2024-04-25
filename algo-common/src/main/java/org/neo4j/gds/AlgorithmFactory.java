@@ -122,7 +122,7 @@ public interface AlgorithmFactory<G, ALGO extends Algorithm<?>, CONFIG extends A
      *
      * @return memory estimation
      * @see org.neo4j.gds.mem.MemoryEstimations
-     * @see org.neo4j.gds.mem.MemoryEstimation#estimate(org.neo4j.gds.core.GraphDimensions, int)
+     * @see org.neo4j.gds.mem.MemoryEstimation#estimate(org.neo4j.gds.core.GraphDimensions, org.neo4j.gds.core.concurrency.Concurrency)
      */
     default MemoryEstimation memoryEstimation(CONFIG configuration) {
         throw new MemoryEstimationNotImplementedException();

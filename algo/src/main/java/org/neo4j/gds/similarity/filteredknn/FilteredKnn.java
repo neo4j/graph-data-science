@@ -85,7 +85,7 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
             targetNodeFilter,
             optionalSimilarityFunction,
             config.similarityCutoff(),
-            config.typedConcurrency()
+            config.concurrency()
         );
         var similarityFunction = optionalSimilarityFunction.orElse(new SimilarityFunction(SimilarityComputer.ofProperties(
             graph,
@@ -97,7 +97,7 @@ public class FilteredKnn extends Algorithm<FilteredKnnResult> {
             context.progressTracker(),
             context.executor(),
             config.k(graph.nodeCount()),
-            config.typedConcurrency(),
+            config.concurrency(),
             1_000,
             config.maxIterations(),
             config.similarityCutoff(),

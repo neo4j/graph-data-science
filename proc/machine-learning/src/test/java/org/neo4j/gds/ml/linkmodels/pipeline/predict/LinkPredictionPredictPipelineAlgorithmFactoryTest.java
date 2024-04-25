@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.schema.GraphSchema;
 import org.neo4j.gds.core.CypherMapWrapper;
 import org.neo4j.gds.core.GraphDimensions;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.model.InjectModelCatalog;
 import org.neo4j.gds.core.model.Model;
 import org.neo4j.gds.core.model.ModelCatalog;
@@ -69,7 +70,7 @@ class LinkPredictionPredictPipelineAlgorithmFactoryTest {
         );
         var estimate = factory
             .memoryEstimation(config)
-            .estimate(GraphDimensions.of(10), 4);
+            .estimate(GraphDimensions.of(10), new Concurrency(4));
 
         assertThat(estimate.memoryUsage().toString()).isEqualTo("548 Bytes");
     }

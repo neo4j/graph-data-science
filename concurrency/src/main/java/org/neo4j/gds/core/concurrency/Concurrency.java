@@ -19,9 +19,36 @@
  */
 package org.neo4j.gds.core.concurrency;
 
-public record Concurrency(int value) {
-    public Concurrency {
-        if (value < 1)
+import java.util.Objects;
+
+public class Concurrency {
+    private final int value;
+
+    public Concurrency(int value) {
+        if (value < 1) {
             throw new IllegalArgumentException("Valid values for Concurrency are int[1..], Value provided was `" + value + "`.");
+        }
+        this.value = value;
+    }
+
+    public int value() {
+        return value;
+    }
+
+    public long squared() {
+        return (long) value * value;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Concurrency that = (Concurrency) o;
+        return value == that.value;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(value);
     }
 }

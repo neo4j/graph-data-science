@@ -41,6 +41,7 @@ dependencies {
             project(':graph-projection-api'),
             project(':graph-dimensions'),
             project(':collections'),
+            project(':concurrency'),
 
             [group: 'org.agrona',              name: 'agrona',                   version: ver.'agrona'],
             [group: 'org.apache.commons',      name: 'commons-text',             version: ver.'commons-text'],

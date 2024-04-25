@@ -67,7 +67,7 @@ public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
         this.graph = graph;
         this.config = config;
         this.executor = executor;
-        this.concurrency = config.typedConcurrency();
+        this.concurrency = config.concurrency();
     }
 
     @Override
@@ -106,7 +106,7 @@ public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
 
     private void initializeArrays(HugeObjectArray<double[]> scaledProperties, int propertyCount) {
         var tasks = PartitionUtils.rangePartition(
-            concurrency.value(),
+            concurrency,
             graph.nodeCount(),
             (partition) -> (Runnable) () -> partition.consume((nodeId) -> scaledProperties.set(
                 nodeId,
@@ -124,7 +124,7 @@ public class ScaleProperties extends Algorithm<ScalePropertiesResult> {
     private void scaleProperty(HugeObjectArray<double[]> scaledProperties, Scaler scaler, int index) {
         var strategy = selectPropertyScalerStrategy(scaledProperties, scaler, index);
         var tasks = PartitionUtils.rangePartition(
-            concurrency.value(),
+            concurrency,
             graph.nodeCount(),
             partition -> (Runnable) () -> {
                 partition.consume(strategy);

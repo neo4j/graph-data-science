@@ -21,6 +21,7 @@ package org.neo4j.gds.degree;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.neo4j.gds.core.concurrency.Concurrency;
 
 import static org.neo4j.gds.assertions.MemoryEstimationAssert.assertThat;
 
@@ -35,7 +36,7 @@ class DegreeCentralityAlgorithmEstimateDefinitionTest {
     void testMemoryEstimation(long nodeCount, long expectedMemory) {
         var memoryEstimation = new DegreeCentralityAlgorithmEstimateDefinition(false).memoryEstimation();
         assertThat(memoryEstimation)
-            .memoryRange(nodeCount, 4)
+            .memoryRange(nodeCount, new Concurrency(4))
             .hasSameMinAndMaxEqualTo(expectedMemory);
     }
 
@@ -48,7 +49,7 @@ class DegreeCentralityAlgorithmEstimateDefinitionTest {
     void shouldGiveTheSameEstimationRegardlessOfTheConcurrency(long nodeCount, int concurrency, long expectedMemory) {
         var memoryEstimation = new DegreeCentralityAlgorithmEstimateDefinition(false).memoryEstimation();
         assertThat(memoryEstimation)
-            .memoryRange(nodeCount, concurrency)
+            .memoryRange(nodeCount, new Concurrency(concurrency))
             .hasSameMinAndMaxEqualTo(expectedMemory);
     }
 
@@ -61,7 +62,7 @@ class DegreeCentralityAlgorithmEstimateDefinitionTest {
     void testMemoryEstimationWithRelationshipWeight(long nodeCount, long expectedMemory) {
         var memoryEstimation = new DegreeCentralityAlgorithmEstimateDefinition(true).memoryEstimation();
         assertThat(memoryEstimation)
-            .memoryRange(nodeCount, 4)
+            .memoryRange(nodeCount, new Concurrency(4))
             .hasSameMinAndMaxEqualTo(expectedMemory);
     }
 
@@ -74,7 +75,7 @@ class DegreeCentralityAlgorithmEstimateDefinitionTest {
     void shouldGiveTheSameEstimationRegardlessOfTheConcurrencyWeighted(long nodeCount, int concurrency, long expectedMemory) {
         var memoryEstimation = new DegreeCentralityAlgorithmEstimateDefinition(true).memoryEstimation();
         assertThat(memoryEstimation)
-            .memoryRange(nodeCount, concurrency)
+            .memoryRange(nodeCount, new Concurrency(concurrency))
             .hasSameMinAndMaxEqualTo(expectedMemory);
     }
 }

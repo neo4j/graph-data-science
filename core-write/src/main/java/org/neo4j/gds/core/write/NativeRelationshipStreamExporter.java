@@ -22,6 +22,7 @@ package org.neo4j.gds.core.write;
 import org.neo4j.gds.api.ExportedRelationship;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
@@ -67,7 +68,7 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
         LongUnaryOperator toOriginalId,
         Stream<ExportedRelationship> relationships,
         int batchSize,
-        int concurrency,
+        Concurrency concurrency,
         TerminationFlag terminationFlag,
         ProgressTracker progressTracker
     ) {
@@ -75,7 +76,7 @@ public final class NativeRelationshipStreamExporter extends StatementApi impleme
         this.toOriginalId = toOriginalId;
         this.relationships = relationships.sequential();
         this.batchSize = batchSize;
-        this.concurrency = concurrency;
+        this.concurrency = concurrency.value();
         this.terminationFlag = terminationFlag;
         this.progressTracker = progressTracker;
     }

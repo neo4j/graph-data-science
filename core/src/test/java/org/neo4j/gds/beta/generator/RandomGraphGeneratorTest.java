@@ -36,6 +36,7 @@ import org.neo4j.gds.canonization.CanonicalAdjacencyMatrix;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig;
 import org.neo4j.gds.config.RandomGraphGeneratorConfig.AllowSelfLoops;
 import org.neo4j.gds.core.Aggregation;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.huge.HugeGraph;
 import org.neo4j.gds.core.loading.construction.NodeLabelTokens;
 
@@ -513,7 +514,7 @@ class RandomGraphGeneratorTest {
         assertThat(graph.availableNodeLabels()).containsExactlyInAnyOrder(NodeLabel.of("LABEL1"),
             NodeLabel.of("LABEL2")
         );
-        var filteredIdMap = graph.withFilteredLabels(List.of(NodeLabel.of("LABEL1")), 4).get();
+        var filteredIdMap = graph.withFilteredLabels(List.of(NodeLabel.of("LABEL1")), new Concurrency(4)).get();
         assertThat(filteredIdMap.nodeCount()).isEqualTo(50);
     }
 

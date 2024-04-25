@@ -26,6 +26,7 @@ import org.neo4j.gds.configuration.DefaultsConfiguration;
 import org.neo4j.gds.configuration.LimitFactory;
 import org.neo4j.gds.configuration.LimitsConfiguration;
 import org.neo4j.gds.core.CypherMapWrapper;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.wcc.WccStreamConfig;
 
 import java.util.Collections;
@@ -132,7 +133,7 @@ class ConfigurationParserTest {
         );
         BiFunction<String, CypherMapWrapper, WccStreamConfig> configCreator = (__, cypherMapWrapper) -> WccStreamConfig.of(
             cypherMapWrapper);
-        assertThat(configurationParser.produceConfig(Map.of(), configCreator, "foo").concurrency()).isEqualTo(3);
+        assertThat(configurationParser.produceConfig(Map.of(), configCreator, "foo").concurrency()).isEqualTo(new Concurrency(3));
 
     }
 
@@ -172,7 +173,7 @@ class ConfigurationParserTest {
         );
         BiFunction<String, CypherMapWrapper, WccStreamConfig> configCreator = (__, cypherMapWrapper) -> WccStreamConfig.of(
             cypherMapWrapper);
-        assertThat(configurationParser.produceConfig(Map.of(), configCreator, "bogus").concurrency()).isEqualTo(1);
+        assertThat(configurationParser.produceConfig(Map.of(), configCreator, "bogus").concurrency()).isEqualTo(new Concurrency(1));
 
     }
 

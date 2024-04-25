@@ -74,7 +74,7 @@ public class HarmonicCentralityMutateSpec implements AlgorithmSpec<HarmonicCentr
     ) {
         var builder = new CentralityMutateResult.Builder(
             executionContext.returnColumns(),
-            computationResult.config().typedConcurrency()
+            computationResult.config().concurrency()
         );
 
         computationResult.result()

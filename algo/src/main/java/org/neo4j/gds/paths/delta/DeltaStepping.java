@@ -75,7 +75,7 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
             graph,
             graph.toMappedNodeId(config.sourceNode()),
             config.delta(),
-            config.typedConcurrency(),
+            config.concurrency(),
             true,
             executorService,
             progressTracker
@@ -314,7 +314,7 @@ public final class DeltaStepping extends Algorithm<PathFindingResult> {
         var pathIndex = new AtomicLong(0L);
 
         var partitions = PartitionUtils.rangePartition(
-            concurrency.value(),
+            concurrency,
             predecessors.size(),
             partition -> partition,
             Optional.empty()

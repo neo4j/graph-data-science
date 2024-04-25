@@ -182,7 +182,7 @@ public interface GraphSageTrainConfig extends
     @Configuration.Ignore
     default GraphSageTrainParameters toParameters() {
         return new GraphSageTrainParameters(
-            typedConcurrency(),
+            concurrency(),
             batchSize(),
             maxIterations(),
             searchDepth(),

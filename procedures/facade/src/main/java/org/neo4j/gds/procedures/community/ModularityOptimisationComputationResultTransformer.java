@@ -53,7 +53,7 @@ final class ModularityOptimisationComputationResultTransformer {
                     config.consecutiveIds(),
                     result.asNodeProperties(),
                     config.minCommunitySize(),
-                    config.typedConcurrency()
+                    config.concurrency()
                 );
                 return LongStream
                     .range(IdMap.START_NODE_ID, graph.nodeCount())

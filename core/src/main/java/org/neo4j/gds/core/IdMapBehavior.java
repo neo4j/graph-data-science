@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.IdMapBuilder;
 import org.neo4j.gds.mem.MemoryEstimation;
 
@@ -26,7 +27,7 @@ import java.util.Optional;
 
 public interface IdMapBehavior {
     IdMapBuilder create(
-        int concurrency,
+        Concurrency concurrency,
         Optional<Long> maxOriginalId,
         Optional<Long> nodeCount
     );
@@ -35,13 +36,13 @@ public interface IdMapBehavior {
      * Attempts to create an IdMapBuilder identified by the given id.
      * <p>
      * If the id is not recognized, we fall back to the default behavior
-     * using {@link #create(int, Optional, Optional)}.
+     * using {@link #create(org.neo4j.gds.core.concurrency.Concurrency, Optional, Optional)}.
      *
      * @param id the id of the IdMapBuilder to create
      */
     IdMapBuilder create(
         String id,
-        int concurrency,
+        Concurrency concurrency,
         Optional<Long> maxOriginalId,
         Optional<Long> nodeCount
     );

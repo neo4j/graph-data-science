@@ -188,7 +188,7 @@ public class LinkPredictionRelationshipSampler {
             targetNodes,
             selectedRelType,
             remainingRelType,
-            trainConfig.typedConcurrency()
+            trainConfig.concurrency()
         );
 
         var splitResult = splitter.splitPositiveExamples(

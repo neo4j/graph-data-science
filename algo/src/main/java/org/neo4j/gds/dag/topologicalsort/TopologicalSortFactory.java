@@ -33,7 +33,7 @@ public class TopologicalSortFactory<CONFIG extends TopologicalSortBaseConfig> ex
         return new TopologicalSort(
             graph,
             progressTracker,
-            configuration.typedConcurrency(),
+            configuration.concurrency(),
             configuration.computeMaxDistanceFromSource()
         );
     }

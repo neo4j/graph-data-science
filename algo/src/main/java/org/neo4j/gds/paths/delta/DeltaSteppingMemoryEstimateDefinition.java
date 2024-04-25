@@ -50,11 +50,11 @@ public class DeltaSteppingMemoryEstimateDefinition implements MemoryEstimateDefi
                 // Assuming that each node is visited by at most one thread, it is stored in at most
                 // one thread-local bucket, hence the best case is dividing all the nodes across
                 // thread-local buckets.
-                var lowerBound = HugeLongArray.memoryEstimation(dimensions.nodeCount() / concurrency);
+                var lowerBound = HugeLongArray.memoryEstimation(dimensions.nodeCount() / concurrency.value());
 
                 // The worst case is again the fully-connected graph where we would replicate all nodes in
                 // thread-local buckets in a single iteration.
-                var upperBound = HugeLongArray.memoryEstimation(concurrency * dimensions.nodeCount());
+                var upperBound = HugeLongArray.memoryEstimation(concurrency.value() * dimensions.nodeCount());
 
                 return MemoryRange.of(lowerBound, Math.max(lowerBound, upperBound));
             })
