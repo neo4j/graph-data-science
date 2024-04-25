@@ -25,6 +25,7 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.core.write.RelationshipPropertiesExporter;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.LongUnaryOperator;
 
 public class ResultStoreRelationshipPropertiesExporter implements RelationshipPropertiesExporter {
@@ -45,7 +46,16 @@ public class ResultStoreRelationshipPropertiesExporter implements RelationshipPr
 
     @Override
     public void write(String relationshipType, List<String> propertyKeys) {
-        var relationshipIterator = graphStore.getCompositeRelationshipIterator(RelationshipType.of(relationshipType), propertyKeys);
-        resultStore.addRelationshipIterator(relationshipType, propertyKeys, relationshipIterator, toOriginalId);
+        if (propertyKeys.isEmpty()) {
+            var graph = graphStore.getGraph(RelationshipType.of(relationshipType));
+            resultStore.addRelationship(relationshipType, graph, graph::toOriginalNodeId);
+        } else if (propertyKeys.size() == 1) {
+            var propertyKey = propertyKeys.get(0);
+            var graph = graphStore.getGraph(RelationshipType.of(relationshipType), Optional.of(propertyKey));
+            resultStore.addRelationship(relationshipType, propertyKey, graph, graph::toOriginalNodeId);
+        } else {
+            var relationshipIterator = graphStore.getCompositeRelationshipIterator(RelationshipType.of(relationshipType), propertyKeys);
+            resultStore.addRelationshipIterator(relationshipType, propertyKeys, relationshipIterator, toOriginalId);
+        }
     }
 }
