@@ -20,6 +20,7 @@
 package org.neo4j.gds.ml.pipeline;
 
 import org.neo4j.gds.ml.pipeline.stubs.BellmanFordStub;
+import org.neo4j.gds.ml.pipeline.stubs.BetweennessCentralityStub;
 import org.neo4j.gds.ml.pipeline.stubs.BreadthFirstSearchStub;
 import org.neo4j.gds.ml.pipeline.stubs.DepthFirstSearchStub;
 import org.neo4j.gds.ml.pipeline.stubs.FilteredKnnStub;
@@ -79,6 +80,7 @@ final class NodePropertyStepFactoryUsingStubs {
         supportedProcedures.put(CanonicalProcedureName.parse("gds.allshortestpaths.delta.mutate"), new SingleSourceShortestPathDeltaStub());
         supportedProcedures.put(CanonicalProcedureName.parse("gds.allshortestpaths.dijkstra.mutate"), new SingleSourceShortestPathDijkstraStub());
         supportedProcedures.put(CanonicalProcedureName.parse("gds.bellmanford.mutate"), new BellmanFordStub());
+        supportedProcedures.put(CanonicalProcedureName.parse("gds.betweenness.mutate"), new BetweennessCentralityStub());
         supportedProcedures.put(CanonicalProcedureName.parse("gds.bfs.mutate"), new BreadthFirstSearchStub());
         supportedProcedures.put(CanonicalProcedureName.parse("gds.dfs.mutate"), new DepthFirstSearchStub());
         supportedProcedures.put(CanonicalProcedureName.parse("gds.knn.mutate"), new KnnStub());
