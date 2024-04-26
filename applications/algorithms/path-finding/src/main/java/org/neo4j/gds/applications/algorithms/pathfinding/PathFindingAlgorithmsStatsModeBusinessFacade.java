@@ -69,7 +69,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
             graphName,
             configuration,
             BELLMAN_FORD,
-            () -> estimationFacade.bellmanFordEstimation(configuration),
+            () -> estimationFacade.bellmanFord(configuration),
             graph -> pathFindingAlgorithms.bellmanFord(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -85,7 +85,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
             graphName,
             configuration,
             BFS,
-            estimationFacade::breadthFirstSearchEstimation,
+            estimationFacade::breadthFirstSearch,
             graph -> pathFindingAlgorithms.breadthFirstSearch(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -101,7 +101,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
             graphName,
             configuration,
             DELTA_STEPPING,
-            estimationFacade::deltaSteppingEstimation,
+            estimationFacade::deltaStepping,
             graph -> pathFindingAlgorithms.deltaStepping(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -117,7 +117,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
             graphName,
             configuration,
             RANDOM_WALK,
-            () -> estimationFacade.randomWalkEstimation(configuration),
+            () -> estimationFacade.randomWalk(configuration),
             graph -> pathFindingAlgorithms.randomWalk(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -133,7 +133,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
             graphName,
             configuration,
             SPANNING_TREE,
-            estimationFacade::spanningTreeEstimation,
+            estimationFacade::spanningTree,
             graph -> pathFindingAlgorithms.spanningTree(graph, configuration),
             Optional.empty(),
             resultBuilder
@@ -149,7 +149,7 @@ public class PathFindingAlgorithmsStatsModeBusinessFacade {
             graphName,
             configuration,
             STEINER,
-            () -> estimationFacade.steinerTreeEstimation(configuration),
+            () -> estimationFacade.steinerTree(configuration),
             graph -> pathFindingAlgorithms.steinerTree(graph, configuration),
             Optional.empty(),
             resultBuilder

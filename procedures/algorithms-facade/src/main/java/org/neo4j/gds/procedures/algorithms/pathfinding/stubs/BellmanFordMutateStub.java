@@ -59,7 +59,7 @@ public class BellmanFordMutateStub implements MutateStub<BellmanFordMutateConfig
             username,
             configuration,
             BellmanFordMutateConfig::of,
-            estimationMode()::bellmanFordEstimation
+            estimationMode()::bellmanFord
         );
     }
 
@@ -69,7 +69,7 @@ public class BellmanFordMutateStub implements MutateStub<BellmanFordMutateConfig
             graphName,
             configuration,
             BellmanFordMutateConfig::of,
-            estimationMode()::bellmanFordEstimation
+            estimationMode()::bellmanFord
         );
     }
 

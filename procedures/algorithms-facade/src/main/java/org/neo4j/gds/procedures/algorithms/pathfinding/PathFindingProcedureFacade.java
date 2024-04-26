@@ -54,7 +54,6 @@ import org.neo4j.gds.paths.traverse.DfsStreamConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensStreamConfig;
 import org.neo4j.gds.paths.yens.config.ShortestPathYensWriteConfig;
 import org.neo4j.gds.procedures.algorithms.AlgorithmHandle;
-import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.BellmanFordMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.BreadthFirstSearchMutateStub;
 import org.neo4j.gds.procedures.algorithms.pathfinding.stubs.DeltaSteppingMutateStub;
@@ -96,7 +95,6 @@ import java.util.stream.Stream;
  */
 public final class PathFindingProcedureFacade {
     // request scoped services
-    private final ConfigurationCreator configurationCreator;
     private final NodeLookup nodeLookup;
     private final ProcedureReturnColumns procedureReturnColumns;
 
@@ -122,7 +120,6 @@ public final class PathFindingProcedureFacade {
     private final WriteModeAlgorithmRunner writeModeAlgorithmRunner;
 
     private PathFindingProcedureFacade(
-        ConfigurationCreator configurationCreator,
         NodeLookup nodeLookup,
         ProcedureReturnColumns procedureReturnColumns,
         ApplicationsFacade applicationsFacade,
@@ -141,7 +138,6 @@ public final class PathFindingProcedureFacade {
         StatsModeAlgorithmRunner statsModeAlgorithmRunner,
         WriteModeAlgorithmRunner writeModeAlgorithmRunner
     ) {
-        this.configurationCreator = configurationCreator;
         this.nodeLookup = nodeLookup;
         this.procedureReturnColumns = procedureReturnColumns;
 
@@ -168,7 +164,6 @@ public final class PathFindingProcedureFacade {
      * Encapsulating some of the boring structure stuff
      */
     public static PathFindingProcedureFacade create(
-        ConfigurationCreator configurationCreator,
         NodeLookup nodeLookup,
         ProcedureReturnColumns procedureReturnColumns,
         ApplicationsFacade applicationsFacade,
@@ -229,7 +224,6 @@ public final class PathFindingProcedureFacade {
         );
 
         return new PathFindingProcedureFacade(
-            configurationCreator,
             nodeLookup,
             procedureReturnColumns,
             applicationsFacade,

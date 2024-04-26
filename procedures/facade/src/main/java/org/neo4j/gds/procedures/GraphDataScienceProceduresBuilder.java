@@ -22,10 +22,10 @@ package org.neo4j.gds.procedures;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.metrics.procedures.DeprecatedProceduresMetricService;
 import org.neo4j.gds.procedures.algorithms.AlgorithmsProcedureFacade;
+import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
 import org.neo4j.gds.procedures.catalog.CatalogProcedureFacade;
-import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.embeddings.NodeEmbeddingsProcedureFacade;
 import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
@@ -39,8 +39,9 @@ import org.neo4j.gds.procedures.pipelines.PipelinesProcedureFacade;
  */
 public class GraphDataScienceProceduresBuilder {
     private final Log log;
-    private CatalogProcedureFacade catalogProcedureFacade;
     private CentralityProcedureFacade centralityProcedureFacade;
+    private CatalogProcedureFacade catalogProcedureFacade;
+    private org.neo4j.gds.procedures.centrality.CentralityProcedureFacade oldCentralityProcedureFacade;
     private CommunityProcedureFacade communityProcedureFacade;
     private MiscAlgorithmsProcedureFacade miscAlgorithmsProcedureFacade;
     private NodeEmbeddingsProcedureFacade nodeEmbeddingsProcedureFacade;
@@ -60,6 +61,11 @@ public class GraphDataScienceProceduresBuilder {
 
     public GraphDataScienceProceduresBuilder with(CentralityProcedureFacade centralityProcedureFacade) {
         this.centralityProcedureFacade = centralityProcedureFacade;
+        return this;
+    }
+
+    public GraphDataScienceProceduresBuilder with(org.neo4j.gds.procedures.centrality.CentralityProcedureFacade oldCentralityProcedureFacade) {
+        this.oldCentralityProcedureFacade = oldCentralityProcedureFacade;
         return this;
     }
 
@@ -104,6 +110,7 @@ public class GraphDataScienceProceduresBuilder {
 
     public GraphDataScienceProcedures build() {
         var algorithmsProcedureFacade = new AlgorithmsProcedureFacade(
+            centralityProcedureFacade,
             pathFindingProcedureFacade,
             similarityProcedureFacade
         );
@@ -112,7 +119,7 @@ public class GraphDataScienceProceduresBuilder {
             log,
             algorithmsProcedureFacade,
             catalogProcedureFacade,
-            centralityProcedureFacade,
+            oldCentralityProcedureFacade,
             communityProcedureFacade,
             miscAlgorithmsProcedureFacade,
             nodeEmbeddingsProcedureFacade,

@@ -17,17 +17,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.centrality;
+package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 
+import java.util.Collections;
 import java.util.Map;
 
 public final class CentralityMutateResult extends CentralityStatsResult {
-
     public final long nodePropertiesWritten;
     public final long mutateMillis;
 
@@ -37,7 +37,7 @@ public final class CentralityMutateResult extends CentralityStatsResult {
         long computeMillis,
         long postProcessingMillis,
         long mutateMillis,
-        @Nullable Map<String, Object> centralityDistribution,
+        Map<String, Object> centralityDistribution,
 
         Map<String, Object> config
     ) {
@@ -53,7 +53,6 @@ public final class CentralityMutateResult extends CentralityStatsResult {
     }
 
     public static final class Builder extends AbstractCentralityResultBuilder<CentralityMutateResult> {
-
         public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
             super(returnColumns, concurrency);
         }
@@ -70,5 +69,20 @@ public final class CentralityMutateResult extends CentralityStatsResult {
                 config.toMap()
             );
         }
+    }
+
+    public static CentralityMutateResult emptyFrom(
+        AlgorithmProcessingTimings timings,
+        Map<String, Object> configurationMap
+    ) {
+        return new CentralityMutateResult(
+            0,
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            0,
+            timings.preProcessingMillis,
+            Collections.emptyMap(),
+            configurationMap
+        );
     }
 }

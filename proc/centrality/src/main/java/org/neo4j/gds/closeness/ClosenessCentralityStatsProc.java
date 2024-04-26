@@ -20,7 +20,7 @@
 package org.neo4j.gds.closeness;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.centrality.CentralityStatsResult;
+import org.neo4j.gds.procedures.algorithms.centrality.CentralityStatsResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;

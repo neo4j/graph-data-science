@@ -7,6 +7,7 @@ group = 'org.neo4j.gds'
 dependencies {
     implementation project(":algo")
     implementation project(":algorithms-machinery")
+    implementation project(":centrality-algorithms")
     implementation project(":core")
     implementation project(":core-write")
     implementation project(":graph-store-catalog-applications")

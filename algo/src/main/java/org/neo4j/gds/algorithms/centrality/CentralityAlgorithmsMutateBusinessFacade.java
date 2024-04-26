@@ -28,7 +28,6 @@ import org.neo4j.gds.algorithms.centrality.specificfields.PageRankSpecificFields
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmResultWithTiming;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
-import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
 import org.neo4j.gds.core.concurrency.DefaultPool;
@@ -55,24 +54,6 @@ public class CentralityAlgorithmsMutateBusinessFacade {
     ) {
         this.centralityAlgorithmsFacade = centralityAlgorithmsFacade;
         this.mutateNodePropertyService = mutateNodePropertyService;
-    }
-
-    public NodePropertyMutateResult<DefaultCentralitySpecificFields> betweennessCentrality(
-        String graphName,
-        BetweennessCentralityMutateConfig configuration,
-        boolean shouldComputeCentralityDistribution
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
-            () -> centralityAlgorithmsFacade.betweennessCentrality(graphName, configuration)
-        );
-
-        return mutateNodeProperty(
-            intermediateResult.algorithmResult,
-            configuration,
-            shouldComputeCentralityDistribution,
-            intermediateResult.computeMilliseconds
-        );
     }
 
     public NodePropertyMutateResult<DefaultCentralitySpecificFields> degreeCentrality(

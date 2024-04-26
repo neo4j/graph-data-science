@@ -218,7 +218,6 @@ class AlgorithmFacadeFactory {
 
     PathFindingProcedureFacade createPathFindingProcedureFacade() {
         return PathFindingProcedureFacade.create(
-            configurationCreator,
             nodeLookup,
             returnColumns,
             applicationsFacade,

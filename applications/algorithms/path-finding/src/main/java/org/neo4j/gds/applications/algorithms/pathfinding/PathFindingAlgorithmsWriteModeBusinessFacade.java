@@ -100,7 +100,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             graphName,
             configuration,
             BELLMAN_FORD,
-            () -> estimationFacade.bellmanFordEstimation(configuration),
+            () -> estimationFacade.bellmanFord(configuration),
             graph -> pathFindingAlgorithms.bellmanFord(graph, configuration),
             writeStep,
             resultBuilder
@@ -116,7 +116,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             graphName,
             configuration,
             DELTA_STEPPING,
-            estimationFacade::deltaSteppingEstimation,
+            estimationFacade::deltaStepping,
             graph -> pathFindingAlgorithms.deltaStepping(graph, configuration),
             resultBuilder
         );
@@ -137,7 +137,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             graphName,
             configuration,
             K_SPANNING_TREE,
-            estimationFacade::kSpanningTreeEstimation,
+            estimationFacade::kSpanningTree,
             graph -> pathFindingAlgorithms.kSpanningTree(graph, configuration),
             writeStep,
             resultBuilder
@@ -153,7 +153,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             graphName,
             configuration,
             A_STAR,
-            estimationFacade::singlePairShortestPathAStarEstimation,
+            estimationFacade::singlePairShortestPathAStar,
             graph -> pathFindingAlgorithms.singlePairShortestPathAStar(graph, configuration),
             resultBuilder
         );
@@ -168,7 +168,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             graphName,
             configuration,
             DIJKSTRA,
-            () -> estimationFacade.singlePairShortestPathDijkstraEstimation(configuration),
+            () -> estimationFacade.singlePairShortestPathDijkstra(configuration),
             graph -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
             resultBuilder
         );
@@ -183,7 +183,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             graphName,
             configuration,
             YENS,
-            () -> estimationFacade.singlePairShortestPathYensEstimation(configuration),
+            () -> estimationFacade.singlePairShortestPathYens(configuration),
             graph -> pathFindingAlgorithms.singlePairShortestPathYens(graph, configuration),
             resultBuilder
         );
@@ -198,7 +198,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             graphName,
             configuration,
             DIJKSTRA,
-            () -> estimationFacade.singleSourceShortestPathDijkstraEstimation(configuration),
+            () -> estimationFacade.singleSourceShortestPathDijkstra(configuration),
             graph -> pathFindingAlgorithms.singleSourceShortestPathDijkstra(graph, configuration),
             resultBuilder
         );
@@ -219,7 +219,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             graphName,
             configuration,
             SPANNING_TREE,
-            estimationFacade::spanningTreeEstimation,
+            estimationFacade::spanningTree,
             graph -> pathFindingAlgorithms.spanningTree(graph, configuration),
             writeStep,
             resultBuilder
@@ -237,7 +237,7 @@ public class PathFindingAlgorithmsWriteModeBusinessFacade {
             graphName,
             configuration,
             STEINER,
-            () -> estimationFacade.steinerTreeEstimation(configuration),
+            () -> estimationFacade.steinerTree(configuration),
             graph -> pathFindingAlgorithms.steinerTree(graph, configuration),
             writeStep,
             resultBuilder

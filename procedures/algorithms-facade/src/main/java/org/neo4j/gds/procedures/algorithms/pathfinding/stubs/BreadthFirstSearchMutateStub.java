@@ -59,7 +59,7 @@ public class BreadthFirstSearchMutateStub implements MutateStub<BfsMutateConfig,
             username,
             configuration,
             BfsMutateConfig::of,
-            __ -> estimationMode().breadthFirstSearchEstimation()
+            __ -> estimationMode().breadthFirstSearch()
         );
     }
 
@@ -69,7 +69,7 @@ public class BreadthFirstSearchMutateStub implements MutateStub<BfsMutateConfig,
             graphName,
             configuration,
             BfsMutateConfig::of,
-            __ -> estimationMode().breadthFirstSearchEstimation()
+            __ -> estimationMode().breadthFirstSearch()
         );
     }
 

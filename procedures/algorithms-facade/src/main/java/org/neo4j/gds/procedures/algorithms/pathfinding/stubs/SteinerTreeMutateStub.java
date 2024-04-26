@@ -59,7 +59,7 @@ public class SteinerTreeMutateStub implements MutateStub<SteinerTreeMutateConfig
             username,
             configuration,
             SteinerTreeMutateConfig::of,
-            estimationMode()::steinerTreeEstimation
+            estimationMode()::steinerTree
         );
     }
 
@@ -69,7 +69,7 @@ public class SteinerTreeMutateStub implements MutateStub<SteinerTreeMutateConfig
             graphName,
             configuration,
             SteinerTreeMutateConfig::of,
-            estimationMode()::steinerTreeEstimation
+            estimationMode()::steinerTree
         );
     }
 

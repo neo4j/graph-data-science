@@ -57,17 +57,17 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         this.algorithmEstimationTemplate = algorithmEstimationTemplate;
     }
 
-    MemoryEstimation allShortestPathsEstimation() {
+    MemoryEstimation allShortestPaths() {
         throw new MemoryEstimationNotImplementedException();
     }
 
     public MemoryEstimateResult bellmanFord(BellmanFordBaseConfig configuration, Object graphNameOrConfiguration) {
-        var memoryEstimation = bellmanFordEstimation(configuration);
+        var memoryEstimation = bellmanFord(configuration);
 
         return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
     }
 
-    public MemoryEstimation bellmanFordEstimation(BellmanFordBaseConfig configuration) {
+    public MemoryEstimation bellmanFord(BellmanFordBaseConfig configuration) {
         return new BellmanFordMemoryEstimateDefinition(configuration.trackNegativeCycles()).memoryEstimation();
     }
 
@@ -75,12 +75,12 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         BfsBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        var memoryEstimation = breadthFirstSearchEstimation();
+        var memoryEstimation = breadthFirstSearch();
 
         return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
     }
 
-    public MemoryEstimation breadthFirstSearchEstimation() {
+    public MemoryEstimation breadthFirstSearch() {
         return new BfsMemoryEstimateDefinition().memoryEstimation();
     }
 
@@ -88,12 +88,12 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         AllShortestPathsDeltaBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        var memoryEstimation = deltaSteppingEstimation();
+        var memoryEstimation = deltaStepping();
 
         return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
     }
 
-    public MemoryEstimation deltaSteppingEstimation() {
+    public MemoryEstimation deltaStepping() {
         return new DeltaSteppingMemoryEstimateDefinition().memoryEstimation();
     }
 
@@ -101,20 +101,20 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         DfsBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        var memoryEstimation = depthFirstSearchEstimation();
+        var memoryEstimation = depthFirstSearch();
 
         return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
     }
 
-    public MemoryEstimation depthFirstSearchEstimation() {
+    public MemoryEstimation depthFirstSearch() {
         return new DfsMemoryEstimateDefinition().memoryEstimation();
     }
 
-    MemoryEstimation kSpanningTreeEstimation() {
+    MemoryEstimation kSpanningTree() {
         throw new MemoryEstimationNotImplementedException();
     }
 
-    MemoryEstimation longestPathEstimation() {
+    MemoryEstimation longestPath() {
         throw new MemoryEstimationNotImplementedException();
     }
 
@@ -122,12 +122,12 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         RandomWalkBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        var memoryEstimation = randomWalkEstimation(configuration);
+        var memoryEstimation = randomWalk(configuration);
 
         return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
     }
 
-    MemoryEstimation randomWalkEstimation(RandomWalkBaseConfig configuration) {
+    MemoryEstimation randomWalk(RandomWalkBaseConfig configuration) {
         return new RandomWalkMemoryEstimateDefinition(configuration.toMemoryEstimateParameters()).memoryEstimation();
     }
 
@@ -135,12 +135,12 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         ShortestPathAStarBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        var memoryEstimation = singlePairShortestPathAStarEstimation();
+        var memoryEstimation = singlePairShortestPathAStar();
 
         return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
     }
 
-    public MemoryEstimation singlePairShortestPathAStarEstimation() {
+    public MemoryEstimation singlePairShortestPathAStar() {
         return new AStarMemoryEstimateDefinition().memoryEstimation();
     }
 
@@ -148,12 +148,12 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         DijkstraSourceTargetsBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        var memoryEstimation = singlePairShortestPathDijkstraEstimation(configuration);
+        var memoryEstimation = singlePairShortestPathDijkstra(configuration);
 
         return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
     }
 
-    public MemoryEstimation singlePairShortestPathDijkstraEstimation(DijkstraBaseConfig dijkstraBaseConfig) {
+    public MemoryEstimation singlePairShortestPathDijkstra(DijkstraBaseConfig dijkstraBaseConfig) {
         var memoryEstimateParameters = dijkstraBaseConfig.toMemoryEstimateParameters();
 
         var memoryEstimateDefinition = new DijkstraMemoryEstimateDefinition(memoryEstimateParameters);
@@ -165,12 +165,12 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         ShortestPathYensBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        var memoryEstimation = singlePairShortestPathYensEstimation(configuration);
+        var memoryEstimation = singlePairShortestPathYens(configuration);
 
         return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
     }
 
-    public MemoryEstimation singlePairShortestPathYensEstimation(ShortestPathYensBaseConfig configuration) {
+    public MemoryEstimation singlePairShortestPathYens(ShortestPathYensBaseConfig configuration) {
         var memoryEstimateDefinition = new YensMemoryEstimateDefinition(configuration.k());
 
         return memoryEstimateDefinition.memoryEstimation();
@@ -180,12 +180,12 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         DijkstraBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        var memoryEstimation = singleSourceShortestPathDijkstraEstimation(configuration);
+        var memoryEstimation = singleSourceShortestPathDijkstra(configuration);
 
         return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
     }
 
-    public MemoryEstimation singleSourceShortestPathDijkstraEstimation(DijkstraBaseConfig configuration) {
+    public MemoryEstimation singleSourceShortestPathDijkstra(DijkstraBaseConfig configuration) {
         var memoryEstimateDefinition = new DijkstraMemoryEstimateDefinition(configuration.toMemoryEstimateParameters());
 
         return memoryEstimateDefinition.memoryEstimation();
@@ -195,12 +195,12 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         SpanningTreeBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        var memoryEstimation = spanningTreeEstimation();
+        var memoryEstimation = spanningTree();
 
         return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
     }
 
-    public MemoryEstimation spanningTreeEstimation() {
+    public MemoryEstimation spanningTree() {
         return new SpanningTreeMemoryEstimateDefinition().memoryEstimation();
     }
 
@@ -208,16 +208,16 @@ public class PathFindingAlgorithmsEstimationModeBusinessFacade {
         SteinerTreeBaseConfig configuration,
         Object graphNameOrConfiguration
     ) {
-        var memoryEstimation = steinerTreeEstimation(configuration);
+        var memoryEstimation = steinerTree(configuration);
 
         return runEstimation(configuration, graphNameOrConfiguration, memoryEstimation);
     }
 
-    public MemoryEstimation steinerTreeEstimation(SteinerTreeBaseConfig configuration) {
+    public MemoryEstimation steinerTree(SteinerTreeBaseConfig configuration) {
         return new SteinerTreeMemoryEstimateDefinition(configuration.applyRerouting()).memoryEstimation();
     }
 
-    MemoryEstimation topologicalSortEstimation() {
+    MemoryEstimation topologicalSort() {
         throw new MemoryEstimationNotImplementedException();
     }
 

@@ -42,15 +42,18 @@ import java.util.function.Function;
  */
 public final class ApplicationsFacade {
     private final CatalogBusinessFacade catalogBusinessFacade;
+    private final CentralityApplications centralityApplications;
     private final PathFindingApplications pathFindingApplications;
     private final SimilarityApplications similarityApplications;
 
     ApplicationsFacade(
         CatalogBusinessFacade catalogBusinessFacade,
+        CentralityApplications centralityApplications,
         PathFindingApplications pathFindingApplications,
         SimilarityApplications similarityApplications
     ) {
         this.catalogBusinessFacade = catalogBusinessFacade;
+        this.centralityApplications = centralityApplications;
         this.pathFindingApplications = pathFindingApplications;
         this.similarityApplications = similarityApplications;
     }
@@ -77,6 +80,12 @@ public final class ApplicationsFacade {
 
         var progressTrackerCreator = new ProgressTrackerCreator(log, requestScopedDependencies);
 
+        var centralityApplications = CentralityApplications.create(
+            log,
+            algorithmProcessingTemplate,
+            progressTrackerCreator
+        );
+
         var pathFindingApplications = PathFindingApplications.create(
             log,
             requestScopedDependencies,
@@ -95,6 +104,7 @@ public final class ApplicationsFacade {
 
         return new ApplicationsFacadeBuilder()
             .with(catalogBusinessFacade)
+            .with(centralityApplications)
             .with(pathFindingApplications)
             .with(similarityApplications)
             .build();
@@ -119,6 +129,10 @@ public final class ApplicationsFacade {
 
     public CatalogBusinessFacade catalog() {
         return catalogBusinessFacade;
+    }
+
+    public CentralityApplications centrality() {
+        return centralityApplications;
     }
 
     public PathFindingApplications pathFinding() {

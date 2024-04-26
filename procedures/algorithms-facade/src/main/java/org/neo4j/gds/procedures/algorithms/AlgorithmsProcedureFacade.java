@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.procedures.algorithms;
 
+import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
 
@@ -27,15 +28,22 @@ import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
  * I assume you can't pipeline a pipeline...
  */
 public class AlgorithmsProcedureFacade {
+    private final CentralityProcedureFacade centralityProcedureFacade;
     private final PathFindingProcedureFacade pathFindingProcedureFacade;
     private final SimilarityProcedureFacade similarityProcedureFacade;
 
     public AlgorithmsProcedureFacade(
+        CentralityProcedureFacade centralityProcedureFacade,
         PathFindingProcedureFacade pathFindingProcedureFacade,
         SimilarityProcedureFacade similarityProcedureFacade
     ) {
+        this.centralityProcedureFacade = centralityProcedureFacade;
         this.pathFindingProcedureFacade = pathFindingProcedureFacade;
         this.similarityProcedureFacade = similarityProcedureFacade;
+    }
+
+    public CentralityProcedureFacade centrality() {
+        return centralityProcedureFacade;
     }
 
     public PathFindingProcedureFacade pathFinding() {

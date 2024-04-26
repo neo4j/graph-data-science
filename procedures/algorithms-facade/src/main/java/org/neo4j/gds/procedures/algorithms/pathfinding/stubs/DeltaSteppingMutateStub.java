@@ -60,7 +60,7 @@ public class DeltaSteppingMutateStub implements MutateStub<AllShortestPathsDelta
             username,
             configuration,
             AllShortestPathsDeltaMutateConfig::of,
-            __ -> estimationMode().deltaSteppingEstimation()
+            __ -> estimationMode().deltaStepping()
         );
     }
 
@@ -70,7 +70,7 @@ public class DeltaSteppingMutateStub implements MutateStub<AllShortestPathsDelta
             graphName,
             rawConfiguration,
             AllShortestPathsDeltaMutateConfig::of,
-            __ -> estimationMode().deltaSteppingEstimation()
+            __ -> estimationMode().deltaStepping()
         );
     }
 

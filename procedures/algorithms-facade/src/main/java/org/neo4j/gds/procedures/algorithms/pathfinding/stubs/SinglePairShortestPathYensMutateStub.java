@@ -60,7 +60,7 @@ public class SinglePairShortestPathYensMutateStub implements MutateStub<Shortest
             username,
             configuration,
             ShortestPathYensMutateConfig::of,
-            estimationMode()::singlePairShortestPathYensEstimation
+            estimationMode()::singlePairShortestPathYens
         );
     }
 
@@ -70,7 +70,7 @@ public class SinglePairShortestPathYensMutateStub implements MutateStub<Shortest
             graphName,
             configuration,
             ShortestPathYensMutateConfig::of,
-            estimationMode()::singlePairShortestPathYensEstimation
+            estimationMode()::singlePairShortestPathYens
         );
     }
 

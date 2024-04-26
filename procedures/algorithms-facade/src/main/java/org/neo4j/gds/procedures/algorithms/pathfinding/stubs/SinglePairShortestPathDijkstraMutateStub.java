@@ -60,7 +60,7 @@ public class SinglePairShortestPathDijkstraMutateStub implements MutateStub<Shor
             username,
             configuration,
             ShortestPathDijkstraMutateConfig::of,
-            estimationMode()::singlePairShortestPathDijkstraEstimation
+            estimationMode()::singlePairShortestPathDijkstra
         );
     }
 
@@ -70,7 +70,7 @@ public class SinglePairShortestPathDijkstraMutateStub implements MutateStub<Shor
             graphName,
             configuration,
             ShortestPathDijkstraMutateConfig::of,
-            estimationMode()::singlePairShortestPathDijkstraEstimation
+            estimationMode()::singlePairShortestPathDijkstra
         );
     }
 

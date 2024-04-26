@@ -82,7 +82,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             BELLMAN_FORD,
-            () -> estimationFacade.bellmanFordEstimation(configuration),
+            () -> estimationFacade.bellmanFord(configuration),
             graph -> pathFindingAlgorithms.bellmanFord(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
@@ -101,7 +101,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             BFS,
-            estimationFacade::breadthFirstSearchEstimation,
+            estimationFacade::breadthFirstSearch,
             graph -> pathFindingAlgorithms.breadthFirstSearch(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
@@ -119,7 +119,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             DELTA_STEPPING,
-            estimationFacade::deltaSteppingEstimation,
+            estimationFacade::deltaStepping,
             graph -> pathFindingAlgorithms.deltaStepping(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
@@ -138,7 +138,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             DFS,
-            estimationFacade::depthFirstSearchEstimation,
+            estimationFacade::depthFirstSearch,
             graph -> pathFindingAlgorithms.depthFirstSearch(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
@@ -156,7 +156,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             A_STAR,
-            estimationFacade::singlePairShortestPathAStarEstimation,
+            estimationFacade::singlePairShortestPathAStar,
             graph -> pathFindingAlgorithms.singlePairShortestPathAStar(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
@@ -174,7 +174,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             DIJKSTRA,
-            () -> estimationFacade.singlePairShortestPathDijkstraEstimation(configuration),
+            () -> estimationFacade.singlePairShortestPathDijkstra(configuration),
             graph -> pathFindingAlgorithms.singlePairShortestPathDijkstra(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
@@ -192,7 +192,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             YENS,
-            () -> estimationFacade.singlePairShortestPathYensEstimation(configuration),
+            () -> estimationFacade.singlePairShortestPathYens(configuration),
             graph -> pathFindingAlgorithms.singlePairShortestPathYens(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
@@ -210,7 +210,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             DIJKSTRA,
-            () -> estimationFacade.singleSourceShortestPathDijkstraEstimation(configuration),
+            () -> estimationFacade.singleSourceShortestPathDijkstra(configuration),
             graph -> pathFindingAlgorithms.singleSourceShortestPathDijkstra(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
@@ -228,7 +228,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             SPANNING_TREE,
-            estimationFacade::spanningTreeEstimation,
+            estimationFacade::spanningTree,
             graph -> pathFindingAlgorithms.spanningTree(graph, configuration),
             Optional.of(mutateOrWriteStep),
             resultBuilder
@@ -246,7 +246,7 @@ public class PathFindingAlgorithmsMutateModeBusinessFacade {
             graphName,
             configuration,
             STEINER,
-            () -> estimationFacade.steinerTreeEstimation(configuration),
+            () -> estimationFacade.steinerTree(configuration),
             graph -> pathFindingAlgorithms.steinerTree(graph, configuration),
             Optional.of(mutateOrWriteStep),
             resultBuilder

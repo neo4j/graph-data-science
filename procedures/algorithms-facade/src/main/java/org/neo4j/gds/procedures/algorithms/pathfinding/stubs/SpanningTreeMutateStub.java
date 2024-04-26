@@ -59,7 +59,7 @@ public class SpanningTreeMutateStub implements MutateStub<SpanningTreeMutateConf
             username,
             configuration,
             SpanningTreeMutateConfig::of,
-            __ -> estimationMode().spanningTreeEstimation()
+            __ -> estimationMode().spanningTree()
         );
     }
 
@@ -69,7 +69,7 @@ public class SpanningTreeMutateStub implements MutateStub<SpanningTreeMutateConf
             graphName,
             configuration,
             SpanningTreeMutateConfig::of,
-            __ -> estimationMode().spanningTreeEstimation()
+            __ -> estimationMode().spanningTree()
         );
     }
 
