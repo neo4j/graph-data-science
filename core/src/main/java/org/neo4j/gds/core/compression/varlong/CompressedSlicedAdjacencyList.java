@@ -19,6 +19,7 @@
  */
 package org.neo4j.gds.core.compression.varlong;
 
+import org.neo4j.gds.collections.cursor.HugeCursorSupport;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
@@ -35,7 +36,6 @@ import static org.neo4j.gds.collections.PageUtil.pageIndex;
  * for efficient access to the compressed target lists of nodes without decompressing them.
  *
  * <pre>
- * degrees          = [ 1,  4,  2,  2]
  * offsets          = [42,  0, 31, 22]
  * forward_indexes  = [ 3,  0,  2,  1]
  * sorted_offsets   = [ 0, 22, 31, 42]
@@ -69,11 +69,9 @@ public final class CompressedSlicedAdjacencyList {
     private final HugeIntArray degrees;
     // Offsets sorted in ascending order.
     private final HugeLongArray sortedOffsets;
-    // TODO: id map?
-    // Node id to sort order.
-    private final HugeLongArray sortedIndexes;
-    // Sort order to node id
+    // Maps node id to its index in sortedOffsets
     private final HugeLongArray forwardIndexes;
+    // well ..
     private long nodeCount;
 
     public static CompressedSlicedAdjacencyList of(CompressedAdjacencyList compressedAdjacencyList, int concurrency) {
@@ -98,14 +96,14 @@ public final class CompressedSlicedAdjacencyList {
             // for less complexity in the endOffset computation.
             return offset + degrees.get(node) > 0 ? 1 : 0;
         }, forwardIndexes);
-        forwardIndexes = buildForwardIndex(sortedIndexes, forwardIndexes, degrees);
+        // 3. map each node id to its index in the offset order
+        forwardIndexes = buildForwardIndex(sortedIndexes, forwardIndexes);
 
         return new CompressedSlicedAdjacencyList(
             compressedPages,
             degrees,
             offsets,
             sortedOffsets,
-            sortedIndexes,
             forwardIndexes
         );
     }
@@ -115,14 +113,12 @@ public final class CompressedSlicedAdjacencyList {
         HugeIntArray degrees,
         HugeLongArray offsets,
         HugeLongArray sortedOffsets,
-        HugeLongArray sortedIndexes,
         HugeLongArray forwardIndexes
     ) {
         this.compressedPages = compressedPages;
         this.degrees = degrees;
         this.offsets = offsets;
         this.sortedOffsets = sortedOffsets;
-        this.sortedIndexes = sortedIndexes;
         this.forwardIndexes = forwardIndexes;
         this.nodeCount = offsets.size();
     }
@@ -218,7 +214,9 @@ public final class CompressedSlicedAdjacencyList {
         return endOffset + 1;
     }
 
-    // TODO: parallelize
+    /**
+     * Initialize the array with identity values.
+     */
     private static void fillWithIndex(HugeLongArray array) {
         var cursor = array.initCursor(array.newCursor());
         while (cursor.next()) {
@@ -232,11 +230,12 @@ public final class CompressedSlicedAdjacencyList {
         }
     }
 
-    // TODO parallelize
+    /**
+     * Maps node ids to their index in offset sort order.
+     */
     private static HugeLongArray buildForwardIndex(
-        HugeLongArray sortedIndexes,
-        HugeLongArray forwardIndexes,
-        HugeIntArray degrees
+        HugeCursorSupport<long[]> sortedIndexes,
+        HugeLongArray forwardIndexes
     ) {
         var cursor = sortedIndexes.initCursor(sortedIndexes.newCursor());
         while (cursor.next()) {
@@ -245,12 +244,7 @@ public final class CompressedSlicedAdjacencyList {
             long base = cursor.base;
 
             for (int i = cursor.offset; i < limit; i++) {
-                long node = offsetArray[i];
-                long forwardIndex = base + i;
-                if (degrees.get(node) == 0) {
-                    forwardIndex = -forwardIndex - 1;
-                }
-                forwardIndexes.set(offsetArray[i], forwardIndex);
+                forwardIndexes.set(offsetArray[i], base + i);
             }
         }
         return forwardIndexes;
