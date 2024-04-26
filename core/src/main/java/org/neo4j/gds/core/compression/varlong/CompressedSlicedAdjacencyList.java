@@ -23,6 +23,7 @@ import org.neo4j.gds.collections.cursor.HugeCursorSupport;
 import org.neo4j.gds.collections.ha.HugeIntArray;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.compression.common.BumpAllocator;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.paged.HugeMergeSort;
 import org.neo4j.gds.core.utils.paged.HugeSerialIndirectMergeSort;
 
@@ -74,7 +75,7 @@ public final class CompressedSlicedAdjacencyList {
     // well ..
     private long nodeCount;
 
-    public static CompressedSlicedAdjacencyList of(CompressedAdjacencyList compressedAdjacencyList, int concurrency) {
+    public static CompressedSlicedAdjacencyList of(CompressedAdjacencyList compressedAdjacencyList, Concurrency concurrency) {
         byte[][] compressedPages = compressedAdjacencyList.pages;
         HugeLongArray offsets = compressedAdjacencyList.offsets;
         HugeIntArray degrees = compressedAdjacencyList.degrees;

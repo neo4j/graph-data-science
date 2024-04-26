@@ -25,6 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.core.compression.common.VarLongDecoding;
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.extension.GdlExtension;
 import org.neo4j.gds.extension.GdlGraph;
 import org.neo4j.gds.extension.Inject;
@@ -71,11 +72,11 @@ class CompressedSlicedAdjacencyListTest {
         var cal = (CompressedAdjacencyList) this.graph.relationshipTopologies()
             .get(RelationshipType.ALL_RELATIONSHIPS)
             .adjacencyList();
-        this.csal = CompressedSlicedAdjacencyList.of(cal, 1);
+        this.csal = CompressedSlicedAdjacencyList.of(cal, new Concurrency(1));
         var gapCal = (CompressedAdjacencyList) this.gapGraph.relationshipTopologies()
             .get(RelationshipType.ALL_RELATIONSHIPS)
             .adjacencyList();
-        this.gapCsal = CompressedSlicedAdjacencyList.of(gapCal, 1);
+        this.gapCsal = CompressedSlicedAdjacencyList.of(gapCal, new Concurrency(1));
     }
 
     @Test
