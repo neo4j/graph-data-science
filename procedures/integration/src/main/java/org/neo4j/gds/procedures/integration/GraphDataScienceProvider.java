@@ -213,6 +213,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
             genericStub
         );
         var centralityProcedureFacade = algorithmFacadeFactory.createCentralityProcedureFacade();
+        var oldCentralityProcedureFacade = algorithmFacadeFactory.createOldCentralityProcedureFacade();
         var communityProcedureFacade = algorithmFacadeFactory.createCommunityProcedureFacade();
         var miscAlgorithmsProcedureFacade = algorithmFacadeFactory.createMiscellaneousProcedureFacade();
         var nodeEmbeddingsProcedureFacade = algorithmFacadeFactory.createNodeEmbeddingsProcedureFacade();
@@ -224,6 +225,7 @@ public class GraphDataScienceProvider implements ThrowingFunction<Context, Graph
         return new GraphDataScienceProceduresBuilder(log)
             .with(catalogProcedureFacade)
             .with(centralityProcedureFacade)
+            .with(oldCentralityProcedureFacade)
             .with(communityProcedureFacade)
             .with(miscAlgorithmsProcedureFacade)
             .with(nodeEmbeddingsProcedureFacade)

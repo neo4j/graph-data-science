@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.procedures.integration;
 
-import org.neo4j.gds.ProcedureCallContextReturnColumns;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsEstimateBusinessFacade;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsFacade;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsMutateBusinessFacade;
@@ -50,8 +49,10 @@ import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
 import org.neo4j.gds.api.NodeLookup;
+import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.modelcatalogservices.ModelCatalogService;
+import org.neo4j.gds.procedures.algorithms.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.algorithms.pathfinding.PathFindingProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
@@ -60,7 +61,6 @@ import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.runners.WriteModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.similarity.SimilarityProcedureFacade;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
-import org.neo4j.gds.procedures.centrality.CentralityProcedureFacade;
 import org.neo4j.gds.procedures.community.CommunityProcedureFacade;
 import org.neo4j.gds.procedures.embeddings.NodeEmbeddingsProcedureFacade;
 import org.neo4j.gds.procedures.misc.MiscAlgorithmsProcedureFacade;
@@ -69,7 +69,7 @@ class AlgorithmFacadeFactory {
     // Request scoped parameters
     private final ConfigurationCreator configurationCreator;
     private final NodeLookup nodeLookup;
-    private final ProcedureCallContextReturnColumns returnColumns;
+    private final ProcedureReturnColumns procedureReturnColumns;
     private final MutateNodePropertyService mutateNodePropertyService;
     private final WriteNodePropertyService writeNodePropertyService;
     private final AlgorithmEstimator algorithmEstimator;
@@ -85,7 +85,7 @@ class AlgorithmFacadeFactory {
     AlgorithmFacadeFactory(
         ConfigurationCreator configurationCreator,
         NodeLookup nodeLookup,
-        ProcedureCallContextReturnColumns returnColumns,
+        ProcedureReturnColumns procedureReturnColumns,
         MutateNodePropertyService mutateNodePropertyService,
         WriteNodePropertyService writeNodePropertyService,
         AlgorithmRunner algorithmRunner,
@@ -100,7 +100,7 @@ class AlgorithmFacadeFactory {
     ) {
         this.configurationCreator = configurationCreator;
         this.nodeLookup = nodeLookup;
-        this.returnColumns = returnColumns;
+        this.procedureReturnColumns = procedureReturnColumns;
         this.mutateNodePropertyService = mutateNodePropertyService;
         this.writeNodePropertyService = writeNodePropertyService;
         this.algorithmRunner = algorithmRunner;
@@ -115,6 +115,10 @@ class AlgorithmFacadeFactory {
     }
 
     CentralityProcedureFacade createCentralityProcedureFacade() {
+        return CentralityProcedureFacade.create(genericStub, applicationsFacade, procedureReturnColumns);
+    }
+
+    org.neo4j.gds.procedures.centrality.CentralityProcedureFacade createOldCentralityProcedureFacade() {
 
         // algorithm facade
         var centralityAlgorithmsFacade = new CentralityAlgorithmsFacade(algorithmRunner);
@@ -133,9 +137,9 @@ class AlgorithmFacadeFactory {
         );
 
         // procedure facade
-        return new CentralityProcedureFacade(
+        return new org.neo4j.gds.procedures.centrality.CentralityProcedureFacade(
             configurationCreator,
-            returnColumns,
+            procedureReturnColumns,
             estimateBusinessFacade,
             mutateBusinessFacade,
             statsBusinessFacade,
@@ -164,7 +168,7 @@ class AlgorithmFacadeFactory {
         // procedure facade
         return new CommunityProcedureFacade(
             configurationCreator,
-            returnColumns,
+            procedureReturnColumns,
             estimateBusinessFacade,
             mutateBusinessFacade,
             statsBusinessFacade,
@@ -177,7 +181,7 @@ class AlgorithmFacadeFactory {
         return SimilarityProcedureFacade.create(
             applicationsFacade,
             genericStub,
-            returnColumns,
+            procedureReturnColumns,
             estimationModeRunner,
             streamModeAlgorithmRunner,
             statsModeAlgorithmRunner,
@@ -207,7 +211,7 @@ class AlgorithmFacadeFactory {
         // procedure facade
         return new MiscAlgorithmsProcedureFacade(
             configurationCreator,
-            returnColumns,
+            procedureReturnColumns,
             estimateBusinessFacade,
             mutateBusinessFacade,
             statsBusinessFacade,
@@ -219,7 +223,7 @@ class AlgorithmFacadeFactory {
     PathFindingProcedureFacade createPathFindingProcedureFacade() {
         return PathFindingProcedureFacade.create(
             nodeLookup,
-            returnColumns,
+            procedureReturnColumns,
             applicationsFacade,
             genericStub,
             estimationModeRunner,
@@ -262,7 +266,7 @@ class AlgorithmFacadeFactory {
         // procedure facade
         return new NodeEmbeddingsProcedureFacade(
             configurationCreator,
-            returnColumns,
+            procedureReturnColumns,
             estimateBusinessFacade,
             mutateBusinessFacade,
             statsBusinessFacade,

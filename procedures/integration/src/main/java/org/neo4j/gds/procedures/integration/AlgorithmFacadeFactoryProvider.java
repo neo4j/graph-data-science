@@ -26,7 +26,6 @@ import org.neo4j.gds.algorithms.AlgorithmMemoryValidationService;
 import org.neo4j.gds.algorithms.estimation.AlgorithmEstimator;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
-import org.neo4j.gds.algorithms.similarity.MutateRelationshipService;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
 import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
@@ -92,9 +91,8 @@ class AlgorithmFacadeFactoryProvider {
          */
         var algorithmMemoryValidationService = new AlgorithmMemoryValidationService(log, useMaxMemoryEstimation);
         var mutateNodePropertyService = new MutateNodePropertyService(log);
-        var mutateRelationshipService = new MutateRelationshipService(log);
         var nodeLookup = new TransactionNodeLookup(kernelTransaction);
-        var returnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
+        var procedureReturnColumns = new ProcedureCallContextReturnColumns(context.procedureCallContext());
 
         // Second layer
         var writeNodePropertyService = new WriteNodePropertyService(log, requestScopedDependencies);
@@ -124,7 +122,7 @@ class AlgorithmFacadeFactoryProvider {
         return new AlgorithmFacadeFactory(
             configurationCreator,
             nodeLookup,
-            returnColumns,
+            procedureReturnColumns,
             mutateNodePropertyService,
             writeNodePropertyService,
             algorithmRunner,
