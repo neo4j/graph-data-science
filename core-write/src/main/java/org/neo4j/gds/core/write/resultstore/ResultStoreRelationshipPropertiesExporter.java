@@ -19,17 +19,43 @@
  */
 package org.neo4j.gds.core.write.resultstore;
 
+import org.neo4j.gds.RelationshipType;
+import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.core.write.RelationshipPropertiesExporter;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.function.LongUnaryOperator;
 
 public class ResultStoreRelationshipPropertiesExporter implements RelationshipPropertiesExporter {
 
-    ResultStoreRelationshipPropertiesExporter() {}
+    private final GraphStore graphStore;
+    private final ResultStore resultStore;
+    private final LongUnaryOperator toOriginalId;
+
+    ResultStoreRelationshipPropertiesExporter(
+        GraphStore graphStore,
+        ResultStore resultStore,
+        LongUnaryOperator toOriginalId
+    ) {
+        this.graphStore = graphStore;
+        this.resultStore = resultStore;
+        this.toOriginalId = toOriginalId;
+    }
 
     @Override
     public void write(String relationshipType, List<String> propertyKeys) {
-        // Multiple relationship properties are not result of any algorithm and are always
-        // fetched from the graph store directly. Therefore, no action is needed here.
+        if (propertyKeys.isEmpty()) {
+            var graph = graphStore.getGraph(RelationshipType.of(relationshipType));
+            resultStore.addRelationship(relationshipType, graph, graph::toOriginalNodeId);
+        } else if (propertyKeys.size() == 1) {
+            var propertyKey = propertyKeys.get(0);
+            var graph = graphStore.getGraph(RelationshipType.of(relationshipType), Optional.of(propertyKey));
+            resultStore.addRelationship(relationshipType, propertyKey, graph, graph::toOriginalNodeId);
+        } else {
+            var relationshipIterator = graphStore.getCompositeRelationshipIterator(RelationshipType.of(relationshipType), propertyKeys);
+            resultStore.addRelationshipIterator(relationshipType, propertyKeys, relationshipIterator, toOriginalId);
+        }
     }
 }

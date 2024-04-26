@@ -287,4 +287,53 @@ class EphemeralResultStoreTest {
 
         assertThat(resultStore.hasRelationshipStream("Type", List.of("foo"))).isFalse();
     }
+
+    @Test
+    void shouldStoreRelationshipIterator() {
+        var resultStore = new EphemeralResultStore();
+
+        var relationshipIterator = mock(CompositeRelationshipIterator.class);
+        var toOriginalId = mock(LongUnaryOperator.class);
+
+        resultStore.addRelationshipIterator("Type", List.of("foo", "bar"), relationshipIterator, toOriginalId);
+
+        var relationshipIteratorEntry = resultStore.getRelationshipIterator("Type", List.of("foo", "bar"));
+        assertThat(relationshipIteratorEntry.relationshipIterator()).isEqualTo(relationshipIterator);
+        assertThat(relationshipIteratorEntry.toOriginalId()).isEqualTo(toOriginalId);
+        assertThat(resultStore.hasRelationshipIterator("Type", List.of("foo", "bar"))).isTrue();
+    }
+
+    @Test
+    void shouldRemoveRelationshipIterator() {
+        var resultStore = new EphemeralResultStore();
+
+        var relationshipIterator = mock(CompositeRelationshipIterator.class);
+        var toOriginalId = mock(LongUnaryOperator.class);
+
+        resultStore.addRelationshipIterator("Type", List.of("foo", "bar"), relationshipIterator, toOriginalId);
+
+        assertThat(resultStore.hasRelationshipIterator("Type", List.of("foo", "bar"))).isTrue();
+
+        resultStore.removeRelationshipIterator("Type", List.of("foo", "bar"));
+
+        assertThat(resultStore.hasRelationshipIterator("Type", List.of("foo", "bar"))).isFalse();
+    }
+
+    @Test
+    void shouldEvictIteratorBasedRelationshipsAfter10Minutes() throws InterruptedException {
+        var resultStore = new EphemeralResultStore();
+
+        var relationshipIterator = mock(CompositeRelationshipIterator.class);
+        var toOriginalId = mock(LongUnaryOperator.class);
+
+        resultStore.addRelationshipIterator("Type", List.of("foo"), relationshipIterator, toOriginalId);
+
+        assertThat(resultStore.hasRelationshipIterator("Type", List.of("foo"))).isTrue();
+
+        clock.forward(EphemeralResultStore.CACHE_EVICTION_DURATION.plusMinutes(1));
+        // make some room for the cache eviction thread to trigger a cleanup
+        Thread.sleep(100);
+
+        assertThat(resultStore.hasRelationshipIterator("Type", List.of("foo"))).isFalse();
+    }
 }

@@ -119,6 +119,31 @@ public class EmptyResultStore implements ResultStore {
     }
 
     @Override
+    public void addRelationshipIterator(
+        String relationshipType,
+        List<String> propertyKeys,
+        CompositeRelationshipIterator relationshipIterator,
+        LongUnaryOperator toOriginalId
+    ) {
+        
+    }
+
+    @Override
+    public RelationshipIteratorEntry getRelationshipIterator(String relationshipType, List<String> propertyKeys) {
+        return null;
+    }
+
+    @Override
+    public void removeRelationshipIterator(String relationshipType, List<String> propertyKeys) {
+
+    }
+
+    @Override
+    public boolean hasRelationshipIterator(String relationshipType, List<String> propertyKeys) {
+        return false;
+    }
+
+    @Override
     public boolean hasRelationship(String relationshipType) {
         return false;
     }

@@ -46,6 +46,7 @@ public class EphemeralResultStore implements ResultStore {
     private final Cache<String, NodeLabelEntry> nodeIdsByLabel;
     private final Cache<RelationshipKey, RelationshipEntry> relationships;
     private final Cache<RelationshipKey, RelationshipStreamEntry> relationshipStreams;
+    private final Cache<RelationshipKey, RelationshipIteratorEntry> relationshipIterators;
 
     public EphemeralResultStore() {
         var singleThreadScheduler = ExecutorServiceUtil.createSingleThreadScheduler("GDS-ResultStore");
@@ -53,6 +54,7 @@ public class EphemeralResultStore implements ResultStore {
         this.nodeIdsByLabel = createCache(singleThreadScheduler);
         this.relationships = createCache(singleThreadScheduler);
         this.relationshipStreams = createCache(singleThreadScheduler);
+        this.relationshipIterators = createCache(singleThreadScheduler);
     }
 
     @Override
@@ -150,6 +152,29 @@ public class EphemeralResultStore implements ResultStore {
     }
 
     @Override
+    public void addRelationshipIterator(
+        String relationshipType,
+        List<String> propertyKeys,
+        CompositeRelationshipIterator relationshipIterator,
+        LongUnaryOperator toOriginalId
+    ) {
+        this.relationshipIterators.put(
+            new RelationshipKey(relationshipType, propertyKeys),
+            new RelationshipIteratorEntry(relationshipIterator, toOriginalId)
+        );
+    }
+
+    @Override
+    public RelationshipIteratorEntry getRelationshipIterator(String relationshipType, List<String> propertyKeys) {
+        return this.relationshipIterators.getIfPresent(new RelationshipKey(relationshipType, propertyKeys));
+    }
+
+    @Override
+    public void removeRelationshipIterator(String relationshipType, List<String> propertyKeys) {
+        this.relationshipIterators.invalidate(new RelationshipKey(relationshipType, propertyKeys));
+    }
+
+    @Override
     public boolean hasRelationship(String relationshipType) {
         return hasRelationship(relationshipType, NO_PROPERTIES_LIST);
     }
@@ -164,6 +189,11 @@ public class EphemeralResultStore implements ResultStore {
         return this.relationshipStreams.getIfPresent(new RelationshipKey(relationshipType, propertyKeys)) != null;
     }
 
+    @Override
+    public boolean hasRelationshipIterator(String relationshipType, List<String> propertyKeys) {
+        return this.relationshipIterators.getIfPresent(new RelationshipKey(relationshipType, propertyKeys)) != null;
+    }
+
     private static <K, V> Cache<K, V> createCache(ScheduledExecutorService singleThreadScheduler) {
         return Caffeine.newBuilder()
             .expireAfterAccess(CACHE_EVICTION_DURATION)
@@ -172,12 +202,12 @@ public class EphemeralResultStore implements ResultStore {
             .scheduler(Scheduler.forScheduledExecutorService(singleThreadScheduler))
             .build();
     }
-
     private static class ClockServiceWrappingTicker implements Ticker {
         @Override
         public long read() {
             return ClockService.clock().millis() * 1000000;
         }
+
     }
 
     private record NodeKey(List<String> nodeLabels, String propertyKey) {}
