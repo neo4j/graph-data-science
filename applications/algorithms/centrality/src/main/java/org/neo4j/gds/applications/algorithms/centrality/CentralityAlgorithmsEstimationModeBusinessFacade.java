@@ -19,12 +19,33 @@
  */
 package org.neo4j.gds.applications.algorithms.centrality;
 
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.betweenness.BetweennessCentralityBaseConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityMemoryEstimateDefinition;
-import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.mem.MemoryEstimation;
 
 public class CentralityAlgorithmsEstimationModeBusinessFacade {
-    public MemoryEstimation betweennessCentrality(RelationshipWeightConfig configuration) {
+    private final AlgorithmEstimationTemplate algorithmEstimationTemplate;
+
+    public CentralityAlgorithmsEstimationModeBusinessFacade(AlgorithmEstimationTemplate algorithmEstimationTemplate) {
+        this.algorithmEstimationTemplate = algorithmEstimationTemplate;
+    }
+
+    public MemoryEstimation betweennessCentrality(BetweennessCentralityBaseConfig configuration) {
         return new BetweennessCentralityMemoryEstimateDefinition(configuration.hasRelationshipWeightProperty()).memoryEstimation();
+    }
+
+    public MemoryEstimateResult betweennessCentrality(
+        BetweennessCentralityBaseConfig configuration,
+        Object graphNameOrConfiguration
+    ) {
+        var memoryEstimation = betweennessCentrality(configuration);
+
+        return algorithmEstimationTemplate.estimate(
+            configuration,
+            graphNameOrConfiguration,
+            memoryEstimation
+        );
     }
 }

@@ -82,6 +82,7 @@ public final class ApplicationsFacade {
 
         var centralityApplications = CentralityApplications.create(
             log,
+            algorithmEstimationTemplate,
             algorithmProcessingTemplate,
             progressTrackerCreator
         );

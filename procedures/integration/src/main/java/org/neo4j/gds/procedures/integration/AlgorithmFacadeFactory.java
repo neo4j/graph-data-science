@@ -115,7 +115,13 @@ class AlgorithmFacadeFactory {
     }
 
     CentralityProcedureFacade createCentralityProcedureFacade() {
-        return CentralityProcedureFacade.create(genericStub, applicationsFacade, procedureReturnColumns);
+        return CentralityProcedureFacade.create(
+            genericStub,
+            applicationsFacade,
+            procedureReturnColumns,
+            estimationModeRunner,
+            streamModeAlgorithmRunner
+        );
     }
 
     org.neo4j.gds.procedures.centrality.CentralityProcedureFacade createOldCentralityProcedureFacade() {

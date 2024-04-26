@@ -26,7 +26,6 @@ import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsStreamBusinessFac
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
-import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
@@ -51,6 +50,7 @@ import org.neo4j.gds.pagerank.PageRankStreamConfig;
 import org.neo4j.gds.pagerank.PageRankWriteConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityMutateResult;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityStatsResult;
+import org.neo4j.gds.procedures.algorithms.centrality.CentralityStreamResult;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.centrality.alphaharmonic.AlphaHarmonicStreamResult;
 import org.neo4j.gds.procedures.centrality.alphaharmonic.AlphaHarmonicWriteResult;
@@ -98,23 +98,6 @@ public class CentralityProcedureFacade {
         this.estimateBusinessFacade = estimateBusinessFacade;
     }
 
-    public Stream<CentralityStreamResult> betweenessCentralityStream(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfigurationForStream(
-            configuration,
-            BetweennessCentralityStreamConfig::of
-        );
-
-        var computationResult = streamBusinessFacade.betweennessCentrality(
-            graphName,
-            config
-        );
-
-        return DefaultCentralityComputationalResultTransformer.toStreamResult(computationResult);
-    }
-
     public Stream<CentralityStatsResult> betweenessCentralityStats(
         String graphName,
         Map<String, Object> configuration
@@ -146,18 +129,6 @@ public class CentralityProcedureFacade {
         );
 
         return Stream.of(DefaultCentralityComputationalResultTransformer.toWriteResult(computationResult));
-    }
-
-
-
-    public Stream<MemoryEstimateResult> betweenessCentralityStreamEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, BetweennessCentralityStreamConfig::of);
-
-        return Stream.of(estimateBusinessFacade.betweennessCentrality(graphNameOrConfiguration, config));
-
     }
 
     public Stream<MemoryEstimateResult> betweenessCentralityStatsEstimate(

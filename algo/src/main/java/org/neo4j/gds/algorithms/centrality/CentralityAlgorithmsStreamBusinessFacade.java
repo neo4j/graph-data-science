@@ -21,8 +21,6 @@ package org.neo4j.gds.algorithms.centrality;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
-import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.closeness.ClosenessCentralityStreamConfig;
 import org.neo4j.gds.degree.DegreeCentralityResult;
@@ -40,19 +38,6 @@ public class CentralityAlgorithmsStreamBusinessFacade {
 
     public CentralityAlgorithmsStreamBusinessFacade(CentralityAlgorithmsFacade centralityAlgorithmsFacade) {
         this.centralityAlgorithmsFacade = centralityAlgorithmsFacade;
-    }
-
-    public StreamComputationResult<BetwennessCentralityResult> betweennessCentrality(
-        String graphName,
-        BetweennessCentralityStreamConfig config
-    ) {
-
-        var result = centralityAlgorithmsFacade.betweennessCentrality(
-            graphName,
-            config
-        );
-
-        return createStreamComputationResult(result);
     }
 
     public StreamComputationResult<DegreeCentralityResult> degreeCentrality(

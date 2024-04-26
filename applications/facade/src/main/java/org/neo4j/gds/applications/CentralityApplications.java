@@ -23,7 +23,9 @@ import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithms;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsMutateModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.centrality.MutateNodeProperty;
+import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
 import org.neo4j.gds.logging.Log;
@@ -31,32 +33,37 @@ import org.neo4j.gds.logging.Log;
 public final class CentralityApplications {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimation;
     private final CentralityAlgorithmsMutateModeBusinessFacade mutation;
+    private final CentralityAlgorithmsStreamModeBusinessFacade streaming;
 
     private CentralityApplications(
         CentralityAlgorithmsEstimationModeBusinessFacade estimation,
-        CentralityAlgorithmsMutateModeBusinessFacade mutation
+        CentralityAlgorithmsMutateModeBusinessFacade mutation,
+        CentralityAlgorithmsStreamModeBusinessFacade streaming
     ) {
         this.estimation = estimation;
         this.mutation = mutation;
+        this.streaming = streaming;
     }
 
     static CentralityApplications create(
         Log log,
-        AlgorithmProcessingTemplate template,
+        AlgorithmEstimationTemplate estimationTemplate,
+        AlgorithmProcessingTemplate processingTemplate,
         ProgressTrackerCreator progressTrackerCreator
     ) {
-        var estimation = new CentralityAlgorithmsEstimationModeBusinessFacade();
+        var estimation = new CentralityAlgorithmsEstimationModeBusinessFacade(estimationTemplate);
         var algorithms = new CentralityAlgorithms(progressTrackerCreator);
         var mutateNodePropertyService = new MutateNodePropertyService(log);
         var mutateNodeProperty = new MutateNodeProperty(mutateNodePropertyService);
         var mutation = new CentralityAlgorithmsMutateModeBusinessFacade(
             estimation,
             algorithms,
-            template,
+            processingTemplate,
             mutateNodeProperty
         );
+        var streaming = new CentralityAlgorithmsStreamModeBusinessFacade(estimation, algorithms, processingTemplate);
 
-        return new CentralityApplications(estimation, mutation);
+        return new CentralityApplications(estimation, mutation, streaming);
     }
 
     public CentralityAlgorithmsEstimationModeBusinessFacade estimate() {
@@ -65,5 +72,9 @@ public final class CentralityApplications {
 
     public CentralityAlgorithmsMutateModeBusinessFacade mutate() {
         return mutation;
+    }
+
+    public CentralityAlgorithmsStreamModeBusinessFacade stream() {
+        return streaming;
     }
 }

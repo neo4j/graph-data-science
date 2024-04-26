@@ -21,20 +21,42 @@ package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.applications.ApplicationsFacade;
+import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsEstimationModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsStreamModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetweennessCentralityMutateStub;
+import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
+import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
+
+import java.util.Map;
+import java.util.stream.Stream;
 
 public final class CentralityProcedureFacade {
     private final BetweennessCentralityMutateStub betweennessCentralityMutateStub;
+    private final ApplicationsFacade applicationsFacade;
+    private final EstimationModeRunner estimationModeRunner;
+    private final StreamModeAlgorithmRunner streamModeRunner;
 
-    private CentralityProcedureFacade(BetweennessCentralityMutateStub betweennessCentralityMutateStub) {
+    private CentralityProcedureFacade(
+        BetweennessCentralityMutateStub betweennessCentralityMutateStub,
+        ApplicationsFacade applicationsFacade,
+        EstimationModeRunner estimationModeRunner,
+        StreamModeAlgorithmRunner streamModeRunner
+    ) {
         this.betweennessCentralityMutateStub = betweennessCentralityMutateStub;
+        this.applicationsFacade = applicationsFacade;
+        this.estimationModeRunner = estimationModeRunner;
+        this.streamModeRunner = streamModeRunner;
     }
 
     public static CentralityProcedureFacade create(
         GenericStub genericStub,
         ApplicationsFacade applicationsFacade,
-        ProcedureReturnColumns procedureReturnColumns
+        ProcedureReturnColumns procedureReturnColumns,
+        EstimationModeRunner estimationModeRunner,
+        StreamModeAlgorithmRunner streamModeAlgorithmRunner
     ) {
         var betweennessCentralityMutateStub = new BetweennessCentralityMutateStub(
             genericStub,
@@ -42,10 +64,54 @@ public final class CentralityProcedureFacade {
             procedureReturnColumns
         );
 
-        return new CentralityProcedureFacade(betweennessCentralityMutateStub);
+        return new CentralityProcedureFacade(
+            betweennessCentralityMutateStub,
+            applicationsFacade,
+            estimationModeRunner,
+            streamModeAlgorithmRunner
+        );
     }
 
     public BetweennessCentralityMutateStub betweennessCentralityMutateStub() {
         return betweennessCentralityMutateStub;
+    }
+
+    public Stream<CentralityStreamResult> betweennessCentralityStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new BetweennessCentralityResultBuilderForStreamMode();
+
+        return streamModeRunner.runStreamModeAlgorithm(
+            graphName,
+            configuration,
+            BetweennessCentralityStreamConfig::of,
+            resultBuilder,
+            streamMode()::betweennessCentrality
+        );
+    }
+
+    public Stream<MemoryEstimateResult> betweennessCentralityStreamEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationModeRunner.runEstimation(
+            algorithmConfiguration,
+            BetweennessCentralityStreamConfig::of,
+            configuration -> estimationMode().betweennessCentrality(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
+    private CentralityAlgorithmsEstimationModeBusinessFacade estimationMode() {
+        return applicationsFacade.centrality().estimate();
+    }
+
+    private CentralityAlgorithmsStreamModeBusinessFacade streamMode() {
+        return applicationsFacade.centrality().stream();
     }
 }

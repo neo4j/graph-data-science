@@ -29,6 +29,7 @@ import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityMutateResult;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityStatsResult;
+import org.neo4j.gds.procedures.algorithms.centrality.CentralityStreamResult;
 
 import java.util.stream.LongStream;
 import java.util.stream.Stream;

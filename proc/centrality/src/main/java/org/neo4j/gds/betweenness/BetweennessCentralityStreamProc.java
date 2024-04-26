@@ -20,7 +20,7 @@
 package org.neo4j.gds.betweenness;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.centrality.CentralityStreamResult;
+import org.neo4j.gds.procedures.algorithms.centrality.CentralityStreamResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
@@ -44,7 +44,7 @@ public class BetweennessCentralityStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.centrality().betweenessCentralityStream(graphName, configuration);
+        return facade.algorithms().centrality().betweennessCentralityStream(graphName, configuration);
     }
 
     @Procedure(value = "gds.betweenness.stream.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class BetweennessCentralityStreamProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.centrality().betweenessCentralityStreamEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().centrality().betweennessCentralityStreamEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }
