@@ -34,6 +34,7 @@ import org.neo4j.gds.extension.TestGraph;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.neo4j.gds.core.compression.common.BumpAllocator.PAGE_SIZE;
 import static org.neo4j.gds.core.compression.varlong.CompressedSlicedAdjacencyList.ZERO_DEGREE;
 
 @GdlExtension
@@ -97,7 +98,7 @@ class CompressedSlicedAdjacencyListTest {
         assertThat(gapCsal.startOffset(gapGraph.toMappedNodeId("c"))).isEqualTo(ZERO_DEGREE);
         assertThat(gapCsal.endOffset(gapGraph.toMappedNodeId("c"))).isEqualTo(ZERO_DEGREE);
         assertThat(gapCsal.startOffset(gapGraph.toMappedNodeId("d"))).isEqualTo(2);
-        assertThat(gapCsal.endOffset(gapGraph.toMappedNodeId("d"))).isEqualTo(5);
+        assertThat(gapCsal.endOffset(gapGraph.toMappedNodeId("d"))).isEqualTo(PAGE_SIZE);
         assertThat(gapCsal.startOffset(gapGraph.toMappedNodeId("e"))).isEqualTo(ZERO_DEGREE);
         assertThat(gapCsal.endOffset(gapGraph.toMappedNodeId("e"))).isEqualTo(ZERO_DEGREE);
     }
@@ -119,7 +120,7 @@ class CompressedSlicedAdjacencyListTest {
         assertThat(csal.startOffset(graph.toMappedNodeId("c"))).isEqualTo(2);
         assertThat(csal.endOffset(graph.toMappedNodeId("c"))).isEqualTo(4);
         assertThat(csal.startOffset(graph.toMappedNodeId("d"))).isEqualTo(4);
-        assertThat(csal.endOffset(graph.toMappedNodeId("d"))).isEqualTo(5);
+        assertThat(csal.endOffset(graph.toMappedNodeId("d"))).isEqualTo(PAGE_SIZE);
     }
 
     @Test

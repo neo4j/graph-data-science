@@ -31,6 +31,9 @@ import java.util.Arrays;
 
 import static org.neo4j.gds.collections.PageUtil.indexInPage;
 import static org.neo4j.gds.collections.PageUtil.pageIndex;
+import static org.neo4j.gds.core.compression.common.BumpAllocator.PAGE_MASK;
+import static org.neo4j.gds.core.compression.common.BumpAllocator.PAGE_SHIFT;
+import static org.neo4j.gds.core.compression.common.BumpAllocator.PAGE_SIZE;
 
 /**
  * A representation of a {@link org.neo4j.gds.core.compression.varlong.CompressedAdjacencyList} that allows
@@ -75,7 +78,10 @@ public final class CompressedSlicedAdjacencyList {
     // well ..
     private long nodeCount;
 
-    public static CompressedSlicedAdjacencyList of(CompressedAdjacencyList compressedAdjacencyList, Concurrency concurrency) {
+    public static CompressedSlicedAdjacencyList of(
+        CompressedAdjacencyList compressedAdjacencyList,
+        Concurrency concurrency
+    ) {
         byte[][] compressedPages = compressedAdjacencyList.pages;
         HugeLongArray offsets = compressedAdjacencyList.offsets;
         HugeIntArray degrees = compressedAdjacencyList.degrees;
@@ -95,7 +101,7 @@ public final class CompressedSlicedAdjacencyList {
             // We need to make sure that if node id 0 has a degree > 0, it ends
             // up at the end of all 0-degree nodes in the sort order. This allows
             // for less complexity in the endOffset computation.
-            return offset + degrees.get(node) > 0 ? 1 : 0;
+            return offset + (degrees.get(node) > 0 ? 1 : 0);
         }, forwardIndexes);
         // 3. map each node id to its index in the offset order
         forwardIndexes = buildForwardIndex(sortedIndexes, forwardIndexes);
@@ -144,15 +150,21 @@ public final class CompressedSlicedAdjacencyList {
         if (startOffset == ZERO_DEGREE) {
             return false;
         }
-        int startPageIndex = pageIndex(startOffset, BumpAllocator.PAGE_SHIFT);
+        int startPageIndex = pageIndex(startOffset, PAGE_SHIFT);
         byte[] page = this.compressedPages[startPageIndex];
-        int startIndexInPage = indexInPage(startOffset, BumpAllocator.PAGE_MASK);
+        int startIndexInPage = indexInPage(startOffset, PAGE_MASK);
         long endOffset = endOffset(nodeId);
-        int endIndexInPage = indexInPage(endOffset, BumpAllocator.PAGE_MASK);
+        int endIndexInPage = indexInPage(endOffset, PAGE_MASK);
+
         if (endIndexInPage == 0) {
-            // Next offset starts on next page, we need to set the slice to
-            // end at the end of the page to also cover oversize pages.
-            endIndexInPage = page.length;
+            // We are at a node that is the last node on the page.
+            if (page.length == PAGE_SIZE) {
+                // a regular page
+                endIndexInPage = findEndIndexInPage(page, startIndexInPage);
+            } else {
+                // an oversize page
+                endIndexInPage = page.length;
+            }
         }
 
         slice.page = page;
@@ -188,31 +200,24 @@ public final class CompressedSlicedAdjacencyList {
         long toIndex = fromIndex + 1;
 
         if (toIndex >= this.nodeCount) {
-            // fromIndex refers to the last offset on the last page.
-            // We do not know the length of that slice, so we need
-            // to search its end.
-            return findEndOfSlice(fromIndex);
+            // indicate that we reached the last page
+            return BumpAllocator.PAGE_SIZE;
         }
 
         return this.sortedOffsets.get(toIndex);
     }
 
-    private long findEndOfSlice(long fromIndex) {
-        int pageIndex = pageIndex(this.offsets.get(fromIndex), BumpAllocator.PAGE_SHIFT);
-        int indexInPage = indexInPage(this.offsets.get(fromIndex), BumpAllocator.PAGE_MASK);
-        byte[] page = this.compressedPages[pageIndex];
-
-        long endOffset = sortedOffsets.get(fromIndex);
-        for (; indexInPage < page.length - 1; indexInPage++, endOffset++) {
+    private int findEndIndexInPage(byte[] page, int indexInPage) {
+        for (; indexInPage < page.length - 2; indexInPage++) {
             // During compression, we mark the last byte of a var long by
             // setting the HSB to 1 and end up with a negative value.
             // If that value is followed by 0, we know that we have reached
             // the end of the slice.
-            if (page[indexInPage] < 0 && page[indexInPage + 1] == 0) {
-                return endOffset + 1;
+            if (page[indexInPage] < 0 && page[indexInPage + 1] == 0 && page[indexInPage + 2] == 0) {
+                return indexInPage + 1;
             }
         }
-        return endOffset + 1;
+        return indexInPage + 2;
     }
 
     /**
