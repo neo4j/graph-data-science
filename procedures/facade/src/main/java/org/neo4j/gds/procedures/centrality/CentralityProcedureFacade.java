@@ -25,7 +25,6 @@ import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsStatsBusinessFaca
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
@@ -98,24 +97,6 @@ public class CentralityProcedureFacade {
         this.estimateBusinessFacade = estimateBusinessFacade;
     }
 
-    public Stream<CentralityStatsResult> betweenessCentralityStats(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(
-            configuration,
-            BetweennessCentralityStatsConfig::of
-        );
-
-        var computationResult = statsBusinessFacade.betweennessCentrality(
-            graphName,
-            config,
-            procedureReturnColumns.contains("centralityDistribution")
-        );
-
-        return Stream.of(DefaultCentralityComputationalResultTransformer.toStatsResult(computationResult, config));
-    }
-
     public Stream<CentralityWriteResult> betweenessCentralityWrite(
         String graphName,
         Map<String, Object> configuration
@@ -129,16 +110,6 @@ public class CentralityProcedureFacade {
         );
 
         return Stream.of(DefaultCentralityComputationalResultTransformer.toWriteResult(computationResult));
-    }
-
-    public Stream<MemoryEstimateResult> betweenessCentralityStatsEstimate(
-        Object graphNameOrConfiguration,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, BetweennessCentralityStatsConfig::of);
-
-        return Stream.of(estimateBusinessFacade.betweennessCentrality(graphNameOrConfiguration, config));
-
     }
 
     public Stream<MemoryEstimateResult> betweenessCentralityWriteEstimate(

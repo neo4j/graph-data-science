@@ -120,6 +120,7 @@ class AlgorithmFacadeFactory {
             applicationsFacade,
             procedureReturnColumns,
             estimationModeRunner,
+            statsModeAlgorithmRunner,
             streamModeAlgorithmRunner
         );
     }

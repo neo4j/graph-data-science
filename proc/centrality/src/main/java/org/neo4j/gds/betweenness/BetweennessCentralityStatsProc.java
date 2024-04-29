@@ -44,7 +44,7 @@ public class BetweennessCentralityStatsProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.centrality().betweenessCentralityStats(graphName, configuration);
+        return facade.algorithms().centrality().betweennessCentralityStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.betweenness.stats.estimate", mode = READ)
@@ -53,6 +53,6 @@ public class BetweennessCentralityStatsProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.centrality().betweenessCentralityStatsEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().centrality().betweennessCentralityStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

@@ -23,6 +23,7 @@ import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithms;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsMutateModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsStreamModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.centrality.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
@@ -33,15 +34,18 @@ import org.neo4j.gds.logging.Log;
 public final class CentralityApplications {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimation;
     private final CentralityAlgorithmsMutateModeBusinessFacade mutation;
+    private CentralityAlgorithmsStatsModeBusinessFacade stats;
     private final CentralityAlgorithmsStreamModeBusinessFacade streaming;
 
     private CentralityApplications(
         CentralityAlgorithmsEstimationModeBusinessFacade estimation,
         CentralityAlgorithmsMutateModeBusinessFacade mutation,
+        CentralityAlgorithmsStatsModeBusinessFacade stats,
         CentralityAlgorithmsStreamModeBusinessFacade streaming
     ) {
         this.estimation = estimation;
         this.mutation = mutation;
+        this.stats = stats;
         this.streaming = streaming;
     }
 
@@ -61,9 +65,10 @@ public final class CentralityApplications {
             processingTemplate,
             mutateNodeProperty
         );
+        var stats = new CentralityAlgorithmsStatsModeBusinessFacade(estimation, algorithms, processingTemplate);
         var streaming = new CentralityAlgorithmsStreamModeBusinessFacade(estimation, algorithms, processingTemplate);
 
-        return new CentralityApplications(estimation, mutation, streaming);
+        return new CentralityApplications(estimation, mutation, stats, streaming);
     }
 
     public CentralityAlgorithmsEstimationModeBusinessFacade estimate() {
@@ -72,6 +77,10 @@ public final class CentralityApplications {
 
     public CentralityAlgorithmsMutateModeBusinessFacade mutate() {
         return mutation;
+    }
+
+    public CentralityAlgorithmsStatsModeBusinessFacade stats() {
+        return stats;
     }
 
     public CentralityAlgorithmsStreamModeBusinessFacade stream() {
