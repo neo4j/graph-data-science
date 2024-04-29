@@ -45,7 +45,7 @@ class BellmanFordResultBuilderForWriteMode implements ResultBuilder<BellmanFordW
 
         builder.withPreProcessingMillis(timings.preProcessingMillis);
         builder.withComputeMillis(timings.computeMillis);
-        builder.withWriteMillis(timings.postProcessingMillis);
+        builder.withWriteMillis(timings.mutateOrWriteMillis);
 
         metadata.ifPresent(rw -> builder.withRelationshipsWritten(rw.value));
 

@@ -24,13 +24,16 @@ import org.neo4j.gds.applications.ApplicationsFacade;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsEstimationModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsStreamModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
+import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetweennessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.runners.EstimationModeRunner;
 import org.neo4j.gds.procedures.algorithms.runners.StatsModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.runners.StreamModeAlgorithmRunner;
+import org.neo4j.gds.procedures.algorithms.runners.WriteModeAlgorithmRunner;
 import org.neo4j.gds.procedures.algorithms.stubs.GenericStub;
 
 import java.util.Map;
@@ -43,6 +46,7 @@ public final class CentralityProcedureFacade {
     private final EstimationModeRunner estimationModeRunner;
     private final StatsModeAlgorithmRunner statsModeRunner;
     private final StreamModeAlgorithmRunner streamModeRunner;
+    private final WriteModeAlgorithmRunner writeModeRunner;
 
     private CentralityProcedureFacade(
         ProcedureReturnColumns procedureReturnColumns,
@@ -50,7 +54,8 @@ public final class CentralityProcedureFacade {
         ApplicationsFacade applicationsFacade,
         EstimationModeRunner estimationModeRunner,
         StatsModeAlgorithmRunner statsModeRunner,
-        StreamModeAlgorithmRunner streamModeRunner
+        StreamModeAlgorithmRunner streamModeRunner,
+        WriteModeAlgorithmRunner writeModeRunner
     ) {
         this.procedureReturnColumns = procedureReturnColumns;
         this.betweennessCentralityMutateStub = betweennessCentralityMutateStub;
@@ -58,6 +63,7 @@ public final class CentralityProcedureFacade {
         this.estimationModeRunner = estimationModeRunner;
         this.statsModeRunner = statsModeRunner;
         this.streamModeRunner = streamModeRunner;
+        this.writeModeRunner = writeModeRunner;
     }
 
     public static CentralityProcedureFacade create(
@@ -66,7 +72,8 @@ public final class CentralityProcedureFacade {
         ProcedureReturnColumns procedureReturnColumns,
         EstimationModeRunner estimationModeRunner,
         StatsModeAlgorithmRunner statsModeRunner,
-        StreamModeAlgorithmRunner streamModeRunner
+        StreamModeAlgorithmRunner streamModeRunner,
+        WriteModeAlgorithmRunner writeModeRunner
     ) {
         var betweennessCentralityMutateStub = new BetweennessCentralityMutateStub(
             genericStub,
@@ -80,7 +87,8 @@ public final class CentralityProcedureFacade {
             applicationsFacade,
             estimationModeRunner,
             statsModeRunner,
-            streamModeRunner
+            streamModeRunner,
+            writeModeRunner
         );
     }
 
@@ -151,6 +159,38 @@ public final class CentralityProcedureFacade {
         return Stream.of(result);
     }
 
+    public Stream<CentralityWriteResult> betweennessCentralityWrite(
+        String graphNameAsString,
+        Map<String, Object> rawConfiguration
+    ) {
+        var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
+        var resultBuilder = new BetweennessCentralityResultBuilderForWriteMode(shouldComputeCentralityDistribution);
+
+        return writeModeRunner.runWriteModeAlgorithm(
+            graphNameAsString,
+            rawConfiguration,
+            BetweennessCentralityWriteConfig::of,
+            writeMode()::betweennessCentrality,
+            resultBuilder
+        );
+    }
+
+    public Stream<MemoryEstimateResult> betweennessCentralityWriteEstimate(
+        Object graphNameOrConfiguration,
+        Map<String, Object> algorithmConfiguration
+    ) {
+        var result = estimationModeRunner.runEstimation(
+            algorithmConfiguration,
+            BetweennessCentralityWriteConfig::of,
+            configuration -> estimationMode().betweennessCentrality(
+                configuration,
+                graphNameOrConfiguration
+            )
+        );
+
+        return Stream.of(result);
+    }
+
     private CentralityAlgorithmsEstimationModeBusinessFacade estimationMode() {
         return applicationsFacade.centrality().estimate();
     }
@@ -161,5 +201,9 @@ public final class CentralityProcedureFacade {
 
     private CentralityAlgorithmsStreamModeBusinessFacade streamMode() {
         return applicationsFacade.centrality().stream();
+    }
+
+    private CentralityAlgorithmsWriteModeBusinessFacade writeMode() {
+        return applicationsFacade.centrality().write();
     }
 }

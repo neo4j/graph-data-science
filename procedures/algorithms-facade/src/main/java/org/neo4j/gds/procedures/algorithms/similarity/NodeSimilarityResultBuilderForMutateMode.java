@@ -46,7 +46,7 @@ class NodeSimilarityResultBuilderForMutateMode implements ResultBuilder<NodeSimi
         return result.map(nodeSimilarityResult -> new SimilarityMutateResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.postProcessingMillis,
+            timings.mutateOrWriteMillis,
             0,
             nodeSimilarityResult.graphResult().comparedNodes(),
             metadata.orElseThrow().getLeft().value,

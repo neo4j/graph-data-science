@@ -19,23 +19,22 @@
  */
 package org.neo4j.gds.applications.algorithms.centrality;
 
+import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
-import org.neo4j.gds.betweenness.BetwennessCentralityResult;
+import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
 
-class BetweennessCentralityMutateStep implements MutateOrWriteStep<BetwennessCentralityResult, NodePropertiesWritten> {
-    private final MutateNodeProperty mutateNodeProperty;
-    private final BetweennessCentralityMutateConfig configuration;
+import static org.neo4j.gds.applications.algorithms.centrality.AlgorithmLabels.BETWEENNESS_CENTRALITY;
 
-    BetweennessCentralityMutateStep(
-        MutateNodeProperty mutateNodeProperty,
-        BetweennessCentralityMutateConfig configuration
-    ) {
-        this.mutateNodeProperty = mutateNodeProperty;
+class BetweennessCentralityWriteStep implements MutateOrWriteStep<CentralityAlgorithmResult, NodePropertiesWritten> {
+    private final WriteToDatabase writeToDatabase;
+    private final BetweennessCentralityWriteConfig configuration;
+
+    BetweennessCentralityWriteStep(WriteToDatabase writeToDatabase, BetweennessCentralityWriteConfig configuration) {
+        this.writeToDatabase = writeToDatabase;
         this.configuration = configuration;
     }
 
@@ -44,13 +43,16 @@ class BetweennessCentralityMutateStep implements MutateOrWriteStep<BetwennessCen
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        BetwennessCentralityResult result
+        CentralityAlgorithmResult result
     ) {
-        return mutateNodeProperty.mutateNodeProperties(
+        return writeToDatabase.perform(
             graph,
             graphStore,
+            resultStore,
             configuration,
-            result.nodePropertyValues()
+            configuration,
+            BETWEENNESS_CENTRALITY,
+            result
         );
     }
 }

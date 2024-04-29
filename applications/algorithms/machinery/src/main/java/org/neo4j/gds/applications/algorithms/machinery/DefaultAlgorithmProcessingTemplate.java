@@ -210,7 +210,7 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
     ) {
         if (mutateOrWriteStep.isEmpty()) return null;
 
-        try (ProgressTimer ignored = ProgressTimer.start(timingsBuilder::withPostProcessingMillis)) {
+        try (ProgressTimer ignored = ProgressTimer.start(timingsBuilder::withMutateOrWriteMillis)) {
             return mutateOrWriteStep.get().execute(graph, graphStore, resultStore, result);
         }
     }

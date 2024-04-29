@@ -92,7 +92,7 @@ class DefaultAlgorithmProcessingTemplateTest {
                 Optional<Void> metadata
             ) {
                 // we skip timings when no side effects requested
-                assertThat(timings.postProcessingMillis).isEqualTo(-1);
+                assertThat(timings.mutateOrWriteMillis).isEqualTo(-1);
 
                 return Stream.of(
                     "Huey",
@@ -241,7 +241,7 @@ class DefaultAlgorithmProcessingTemplateTest {
                 ResultStore resultStore,
                 RESULT_FROM_ALGORITHM resultFromAlgorithm
             ) {
-                timingsBuilder.withPostProcessingMillis(87);
+                timingsBuilder.withMutateOrWriteMillis(87);
                 return mutateOrWriteStep.orElseThrow().execute(graph, graphStore, resultStore, resultFromAlgorithm);
             }
         };
@@ -259,7 +259,7 @@ class DefaultAlgorithmProcessingTemplateTest {
                 return Map.of(
                     "preProcessingMillis", timings.preProcessingMillis,
                     "computeMillis", timings.computeMillis,
-                    "postProcessingMillis", timings.postProcessingMillis,
+                    "postProcessingMillis", timings.mutateOrWriteMillis,
                     "relationshipsWritten", metadata.orElseThrow()
                 );
             }

@@ -19,9 +19,9 @@
  */
 package org.neo4j.gds.betweenness;
 
-import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.centrality.CentralityWriteResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.algorithms.centrality.CentralityWriteResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -45,7 +45,7 @@ public class BetweennessCentralityWriteProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.centrality().betweenessCentralityWrite(graphName, configuration);
+        return facade.algorithms().centrality().betweennessCentralityWrite(graphName, configuration);
     }
 
     @Procedure(value = "gds.betweenness.write.estimate", mode = READ)
@@ -54,6 +54,6 @@ public class BetweennessCentralityWriteProc {
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        return facade.centrality().betweenessCentralityWriteEstimate(graphNameOrConfiguration, algoConfiguration);
+        return facade.algorithms().centrality().betweennessCentralityWriteEstimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

@@ -121,7 +121,8 @@ class AlgorithmFacadeFactory {
             procedureReturnColumns,
             estimationModeRunner,
             statsModeAlgorithmRunner,
-            streamModeAlgorithmRunner
+            streamModeAlgorithmRunner,
+            writeModeAlgorithmRunner
         );
     }
 

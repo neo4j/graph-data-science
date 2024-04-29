@@ -25,32 +25,38 @@ import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsEsti
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsMutateModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsStatsModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsStreamModeBusinessFacade;
+import org.neo4j.gds.applications.algorithms.centrality.CentralityAlgorithmsWriteModeBusinessFacade;
 import org.neo4j.gds.applications.algorithms.centrality.MutateNodeProperty;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmEstimationTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.ProgressTrackerCreator;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.logging.Log;
 
 public final class CentralityApplications {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimation;
     private final CentralityAlgorithmsMutateModeBusinessFacade mutation;
-    private CentralityAlgorithmsStatsModeBusinessFacade stats;
+    private final CentralityAlgorithmsStatsModeBusinessFacade stats;
     private final CentralityAlgorithmsStreamModeBusinessFacade streaming;
+    private final CentralityAlgorithmsWriteModeBusinessFacade writing;
 
     private CentralityApplications(
         CentralityAlgorithmsEstimationModeBusinessFacade estimation,
         CentralityAlgorithmsMutateModeBusinessFacade mutation,
         CentralityAlgorithmsStatsModeBusinessFacade stats,
-        CentralityAlgorithmsStreamModeBusinessFacade streaming
+        CentralityAlgorithmsStreamModeBusinessFacade streaming,
+        CentralityAlgorithmsWriteModeBusinessFacade writing
     ) {
         this.estimation = estimation;
         this.mutation = mutation;
         this.stats = stats;
         this.streaming = streaming;
+        this.writing = writing;
     }
 
     static CentralityApplications create(
         Log log,
+        RequestScopedDependencies requestScopedDependencies,
         AlgorithmEstimationTemplate estimationTemplate,
         AlgorithmProcessingTemplate processingTemplate,
         ProgressTrackerCreator progressTrackerCreator
@@ -67,8 +73,15 @@ public final class CentralityApplications {
         );
         var stats = new CentralityAlgorithmsStatsModeBusinessFacade(estimation, algorithms, processingTemplate);
         var streaming = new CentralityAlgorithmsStreamModeBusinessFacade(estimation, algorithms, processingTemplate);
+        var writing = CentralityAlgorithmsWriteModeBusinessFacade.create(
+            log,
+            requestScopedDependencies,
+            estimation,
+            algorithms,
+            processingTemplate
+        );
 
-        return new CentralityApplications(estimation, mutation, stats, streaming);
+        return new CentralityApplications(estimation, mutation, stats, streaming, writing);
     }
 
     public CentralityAlgorithmsEstimationModeBusinessFacade estimate() {
@@ -85,5 +98,9 @@ public final class CentralityApplications {
 
     public CentralityAlgorithmsStreamModeBusinessFacade stream() {
         return streaming;
+    }
+
+    public CentralityAlgorithmsWriteModeBusinessFacade write() {
+        return writing;
     }
 }

@@ -60,7 +60,7 @@ public class SimilarityMutateResult {
         return new SimilarityMutateResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.postProcessingMillis,
+            timings.mutateOrWriteMillis,
             0,
             0,
             0,

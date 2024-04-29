@@ -31,7 +31,6 @@ import org.neo4j.gds.algorithms.runner.AlgorithmResultWithTiming;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
 import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
 import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.config.ArrowConnectionInfo;
@@ -62,29 +61,6 @@ public class CentralityAlgorithmsWriteBusinessFacade {
     ) {
         this.centralityAlgorithmsFacade = centralityAlgorithmsFacade;
         this.writeNodePropertyService = writeNodePropertyService;
-    }
-
-    public NodePropertyWriteResult<DefaultCentralitySpecificFields> betweennessCentrality(
-        String graphName,
-        BetweennessCentralityWriteConfig configuration,
-        boolean shouldComputeCentralityDistribution
-    ) {
-        // 1. Run the algorithm and time the execution
-        var intermediateResult = runWithTiming(
-            () -> centralityAlgorithmsFacade.betweennessCentrality(graphName, configuration)
-        );
-
-        return writeToDatabase(
-            intermediateResult.algorithmResult,
-            configuration,
-            shouldComputeCentralityDistribution,
-            intermediateResult.computeMilliseconds,
-            "BetweennessCentralityWrite",
-            configuration.writeConcurrency(),
-            configuration.writeProperty(),
-            configuration.arrowConnectionInfo(),
-            configuration.resolveResultStore(intermediateResult.algorithmResult.resultStore())
-        );
     }
 
     public NodePropertyWriteResult<DefaultCentralitySpecificFields> degreeCentrality(

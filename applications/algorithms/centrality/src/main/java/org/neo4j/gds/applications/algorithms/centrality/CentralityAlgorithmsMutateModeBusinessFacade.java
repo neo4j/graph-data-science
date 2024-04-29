@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.applications.algorithms.centrality;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
@@ -27,7 +26,6 @@ import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 
-import java.util.Map;
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.centrality.AlgorithmLabels.BETWEENNESS_CENTRALITY;
@@ -53,13 +51,11 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
     public <RESULT> RESULT betweennessCentrality(
         GraphName graphName,
         BetweennessCentralityMutateConfig configuration,
-        ResultBuilder<BetweennessCentralityMutateConfig, BetwennessCentralityResult, RESULT, Pair<Map<String, Object>, NodePropertiesWritten>> resultBuilder,
-        boolean shouldComputeCentralityDistribution
+        ResultBuilder<BetweennessCentralityMutateConfig, BetwennessCentralityResult, RESULT, NodePropertiesWritten> resultBuilder
     ) {
         var mutateStep = new BetweennessCentralityMutateStep(
             mutateNodeProperty,
-            configuration,
-            shouldComputeCentralityDistribution
+            configuration
         );
 
         return template.processAlgorithm(

@@ -28,11 +28,11 @@ import org.neo4j.gds.result.CentralityStatistics;
 import java.util.Map;
 import java.util.function.LongToDoubleFunction;
 
-class CentralityDistributionComputer {
+public class CentralityDistributionComputer {
     /**
      * @return centrality distribution and the time it took to compute it
      */
-    Pair<Map<String, Object>, Long> compute(
+    public Pair<Map<String, Object>, Long> compute(
         IdMap graph,
         LongToDoubleFunction centralityFunction,
         ConcurrencyConfig configuration,
@@ -46,8 +46,10 @@ class CentralityDistributionComputer {
             shouldComputeCentralityDistribution
         );
 
+        var centralityDistribution = CentralityStatistics.centralitySummary(centralityStatistics.histogram());
+
         return Pair.of(
-            CentralityStatistics.centralitySummary(centralityStatistics.histogram()),
+            centralityDistribution,
             centralityStatistics.computeMilliseconds()
         );
     }

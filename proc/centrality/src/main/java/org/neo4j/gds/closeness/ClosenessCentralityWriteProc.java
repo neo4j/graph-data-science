@@ -20,7 +20,7 @@
 package org.neo4j.gds.closeness;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.centrality.CentralityWriteResult;
+import org.neo4j.gds.procedures.algorithms.centrality.CentralityWriteResult;
 import org.neo4j.gds.procedures.centrality.betacloseness.BetaClosenessCentralityWriteResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;

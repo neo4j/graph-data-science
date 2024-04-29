@@ -45,7 +45,7 @@ class BellmanFordResultBuilderForMutateMode implements ResultBuilder<BellmanFord
 
         resultBuilder.withPreProcessingMillis(timings.preProcessingMillis);
         resultBuilder.withComputeMillis(timings.computeMillis);
-        resultBuilder.withMutateMillis(timings.postProcessingMillis);
+        resultBuilder.withMutateMillis(timings.mutateOrWriteMillis);
 
         metadata.ifPresent(rw -> resultBuilder.withRelationshipsWritten(rw.value));
 

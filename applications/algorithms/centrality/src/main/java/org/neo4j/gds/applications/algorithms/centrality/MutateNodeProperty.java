@@ -19,18 +19,12 @@
  */
 package org.neo4j.gds.applications.algorithms.centrality;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.algorithms.mutateservices.MutateNodePropertyService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.config.MutateNodePropertyConfig;
-import org.neo4j.gds.core.concurrency.DefaultPool;
-import org.neo4j.gds.result.CentralityStatistics;
-
-import java.util.Map;
-import java.util.function.LongToDoubleFunction;
 
 public class MutateNodeProperty {
     private final MutateNodePropertyService mutateNodePropertyService;
@@ -39,26 +33,12 @@ public class MutateNodeProperty {
         this.mutateNodePropertyService = mutateNodePropertyService;
     }
 
-    Pair<Map<String, Object>, NodePropertiesWritten> mutateNodeProperties(
+    NodePropertiesWritten mutateNodeProperties(
         Graph graph,
         GraphStore graphStore,
         MutateNodePropertyConfig configuration,
-        LongToDoubleFunction centralityFunction,
-        boolean shouldComputeCentralityDistribution,
         NodePropertyValues nodePropertyValues
     ) {
-        // Compute result statistics
-        var centralityStatistics = CentralityStatistics.centralityStatistics(
-            graph.nodeCount(),
-            centralityFunction,
-            DefaultPool.INSTANCE,
-            configuration.concurrency(),
-            shouldComputeCentralityDistribution
-        );
-
-        var centralitySummary = CentralityStatistics.centralitySummary(centralityStatistics.histogram());
-
-        // 3. Go and mutate the graph store
         var addNodePropertyResult = mutateNodePropertyService.mutate(
             configuration.mutateProperty(),
             nodePropertyValues,
@@ -67,6 +47,6 @@ public class MutateNodeProperty {
             graphStore
         );
 
-        return Pair.of(centralitySummary, new NodePropertiesWritten(addNodePropertyResult.nodePropertiesAdded()));
+        return new NodePropertiesWritten(addNodePropertyResult.nodePropertiesAdded());
     }
 }

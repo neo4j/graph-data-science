@@ -61,7 +61,7 @@ public class SimilarityWriteResult {
         return new SimilarityWriteResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.postProcessingMillis,
+            timings.mutateOrWriteMillis,
             0,
             0,
             0,
@@ -80,7 +80,7 @@ public class SimilarityWriteResult {
         return new SimilarityWriteResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.postProcessingMillis,
+            timings.mutateOrWriteMillis,
             0,
             nodesCompared,
             relationshipsWritten.value,

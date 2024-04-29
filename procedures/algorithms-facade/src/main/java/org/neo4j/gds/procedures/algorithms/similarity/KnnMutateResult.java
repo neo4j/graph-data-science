@@ -63,7 +63,7 @@ public class KnnMutateResult extends SimilarityMutateResult {
         return new KnnMutateResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.postProcessingMillis,
+            timings.mutateOrWriteMillis,
             0,
             0,
             0,
@@ -88,7 +88,7 @@ public class KnnMutateResult extends SimilarityMutateResult {
         return new KnnMutateResult(
             timings.preProcessingMillis,
             timings.computeMillis,
-            timings.postProcessingMillis,
+            timings.mutateOrWriteMillis,
             0,
             nodesCompared,
             relationshipsWritten.value,

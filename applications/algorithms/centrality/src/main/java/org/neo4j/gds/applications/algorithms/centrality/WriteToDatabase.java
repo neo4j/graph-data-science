@@ -19,38 +19,42 @@
  */
 package org.neo4j.gds.applications.algorithms.centrality;
 
+import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
+import org.neo4j.gds.algorithms.writeservices.WriteNodePropertyService;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
-import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
-import org.neo4j.gds.betweenness.BetwennessCentralityResult;
+import org.neo4j.gds.config.WriteConfig;
+import org.neo4j.gds.config.WritePropertyConfig;
 
-class BetweennessCentralityMutateStep implements MutateOrWriteStep<BetwennessCentralityResult, NodePropertiesWritten> {
-    private final MutateNodeProperty mutateNodeProperty;
-    private final BetweennessCentralityMutateConfig configuration;
+class WriteToDatabase {
+    private final WriteNodePropertyService writeNodePropertyService;
 
-    BetweennessCentralityMutateStep(
-        MutateNodeProperty mutateNodeProperty,
-        BetweennessCentralityMutateConfig configuration
-    ) {
-        this.mutateNodeProperty = mutateNodeProperty;
-        this.configuration = configuration;
+    WriteToDatabase(WriteNodePropertyService writeNodePropertyService) {
+        this.writeNodePropertyService = writeNodePropertyService;
     }
 
-    @Override
-    public NodePropertiesWritten execute(
+    NodePropertiesWritten perform(
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        BetwennessCentralityResult result
+        WriteConfig writeConfiguration,
+        WritePropertyConfig writePropertyConfiguration,
+        String label,
+        CentralityAlgorithmResult result
     ) {
-        return mutateNodeProperty.mutateNodeProperties(
+        var writeNodePropertyResult = writeNodePropertyService.write(
             graph,
             graphStore,
-            configuration,
-            result.nodePropertyValues()
+            result.nodePropertyValues(),
+            writeConfiguration.writeConcurrency(),
+            writePropertyConfiguration.writeProperty(),
+            label,
+            writeConfiguration.arrowConnectionInfo(),
+            writeConfiguration.resolveResultStore(resultStore)
         );
+
+        return new NodePropertiesWritten(writeNodePropertyResult.nodePropertiesWritten());
     }
 }

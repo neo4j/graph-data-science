@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.procedures.algorithms.centrality.stubs;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
@@ -27,12 +26,18 @@ import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
+import org.neo4j.gds.procedures.algorithms.centrality.CentralityDistributionComputer;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityMutateResult;
 
-import java.util.Map;
 import java.util.Optional;
 
-class BetweennessCentralityResultBuilderForMutateMode implements ResultBuilder<BetweennessCentralityMutateConfig, BetwennessCentralityResult, CentralityMutateResult, Pair<Map<String, Object>, NodePropertiesWritten>> {
+class BetweennessCentralityResultBuilderForMutateMode implements ResultBuilder<BetweennessCentralityMutateConfig, BetwennessCentralityResult, CentralityMutateResult, NodePropertiesWritten> {
+    private final boolean shouldComputeCentralityDistribution;
+
+    BetweennessCentralityResultBuilderForMutateMode(boolean shouldComputeCentralityDistribution) {
+        this.shouldComputeCentralityDistribution = shouldComputeCentralityDistribution;
+    }
+
     @Override
     public CentralityMutateResult build(
         Graph graph,
@@ -40,22 +45,28 @@ class BetweennessCentralityResultBuilderForMutateMode implements ResultBuilder<B
         BetweennessCentralityMutateConfig configuration,
         Optional<BetwennessCentralityResult> result,
         AlgorithmProcessingTimings timings,
-        Optional<Pair<Map<String, Object>, NodePropertiesWritten>> metadata
+        Optional<NodePropertiesWritten> metadata
     ) {
         var configurationMap = configuration.toMap();
 
         if (result.isEmpty()) return CentralityMutateResult.emptyFrom(timings, configurationMap);
 
-        // yeah... the presence of the result signifies that mutation happened, that the graph wasn't empty; we happen to not render anything other than the metadata
-        var ignored = result.get();
+        var betwennessCentralityResult = result.get();
+
+        var centralityDistributionAndTiming = new CentralityDistributionComputer().compute(
+            graph,
+            betwennessCentralityResult.centralityScoreProvider(),
+            configuration,
+            shouldComputeCentralityDistribution
+        );
 
         return new CentralityMutateResult(
-            metadata.orElseThrow().getRight().value,
+            metadata.orElseThrow().value,
             timings.preProcessingMillis,
             timings.computeMillis,
-            0,
-            timings.preProcessingMillis,
-            metadata.orElseThrow().getLeft(),
+            centralityDistributionAndTiming.getRight(),
+            timings.mutateOrWriteMillis,
+            centralityDistributionAndTiming.getLeft(),
             configurationMap
         );
     }

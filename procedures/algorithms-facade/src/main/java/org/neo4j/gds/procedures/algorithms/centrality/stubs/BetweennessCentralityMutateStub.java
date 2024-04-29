@@ -79,17 +79,14 @@ public class BetweennessCentralityMutateStub implements MutateStub<BetweennessCe
 
     @Override
     public Stream<CentralityMutateResult> execute(String graphNameAsString, Map<String, Object> rawConfiguration) {
-        var resultBuilder = new BetweennessCentralityResultBuilderForMutateMode();
-
         var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
+        var resultBuilder = new BetweennessCentralityResultBuilderForMutateMode(shouldComputeCentralityDistribution);
 
         return genericStub.execute(
             graphNameAsString,
             rawConfiguration,
             BetweennessCentralityMutateConfig::of,
-            (graphName, configuration, __) -> applicationsFacade.centrality()
-                .mutate()
-                .betweennessCentrality(graphName, configuration, resultBuilder, shouldComputeCentralityDistribution),
+            applicationsFacade.centrality().mutate()::betweennessCentrality,
             resultBuilder
         );
     }
