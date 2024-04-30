@@ -29,7 +29,7 @@ import org.neo4j.gds.procedures.algorithms.centrality.CentralityStreamResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.closeness.ClosenessCentrality.CLOSENESS_DESCRIPTION;
+import static org.neo4j.gds.closeness.Constants.CLOSENESS_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 @GdsCallable(name = "gds.closeness.stream", aliases = {"gds.beta.closeness.stream"}, description = CLOSENESS_DESCRIPTION, executionMode = STREAM)

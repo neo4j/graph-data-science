@@ -17,12 +17,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds;
+package org.neo4j.gds.leiden;
 
-public final class ProcedureConstants {
+final class Constants {
+    static final String LEIDEN_DESCRIPTION =
+        "Leiden is a community detection algorithm, which guarantees that communities are well connected";
 
-    public static final String ESTIMATE_DESCRIPTION = "Returns an estimation of the memory consumption for that procedure.";
-    public static final String STATS_DESCRIPTION = "Executes the algorithm and returns result statistics without writing the result to Neo4j.";
-
-    private ProcedureConstants() {}
+    private Constants() {}
 }

@@ -30,9 +30,9 @@ import org.neo4j.gds.procedures.community.leiden.LeidenStatsResult;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.leiden.LeidenStreamProc.DESCRIPTION;
+import static org.neo4j.gds.leiden.Constants.LEIDEN_DESCRIPTION;
 
-@GdsCallable(name = "gds.leiden.stats", aliases = {"gds.beta.leiden.stats"}, description = DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.leiden.stats", aliases = {"gds.beta.leiden.stats"}, description = LEIDEN_DESCRIPTION, executionMode = STREAM)
 public class LeidenStatsSpec implements AlgorithmSpec<Leiden, LeidenResult, LeidenStatsConfig, Stream<LeidenStatsResult>, LeidenAlgorithmFactory<LeidenStatsConfig>> {
     @Override
     public String name() {

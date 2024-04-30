@@ -20,7 +20,7 @@
 package org.neo4j.gds.harmonic;
 
 public final class HarmonicCentralityCompanion {
-    static final String DESCRIPTION =
+    static final String HARMONIC_CENTRALITY_DESCRIPTION =
         "Harmonic centrality is a way of detecting nodes that are " +
         "able to spread information very efficiently through a graph.";
 

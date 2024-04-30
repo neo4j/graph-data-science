@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 
-@GdsCallable(name = "gds.degree.mutate", description = DegreeCentrality.DEGREE_CENTRALITY_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
+@GdsCallable(name = "gds.degree.mutate", description = Constants.DEGREE_CENTRALITY_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class DegreeCentralityMutateSpecification implements AlgorithmSpec<DegreeCentrality, DegreeCentralityResult, DegreeCentralityMutateConfig, Stream<CentralityMutateResult>, DegreeCentralityFactory<DegreeCentralityMutateConfig>> {
     @Override
     public String name() {

@@ -30,9 +30,9 @@ import org.neo4j.gds.procedures.community.triangle.LocalClusteringCoefficientStr
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.triangle.LocalClusteringCoefficientCompanion.DESCRIPTION;
+import static org.neo4j.gds.triangle.LocalClusteringCoefficientCompanion.LOCAL_CLUSTERING_COEFFICIENT_DESCRIPTION;
 
-@GdsCallable(name = "gds.localClusteringCoefficient.stream", description = DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.localClusteringCoefficient.stream", description = LOCAL_CLUSTERING_COEFFICIENT_DESCRIPTION, executionMode = STREAM)
 public class LocalClusteringCoefficientStreamSpec  implements AlgorithmSpec<LocalClusteringCoefficient, LocalClusteringCoefficientResult,LocalClusteringCoefficientStreamConfig,Stream<LocalClusteringCoefficientStreamResult>,LocalClusteringCoefficientFactory<LocalClusteringCoefficientStreamConfig>> {
     @Override
     public String name() {

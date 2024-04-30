@@ -30,12 +30,12 @@ import org.neo4j.gds.procedures.centrality.celf.CELFStatsResult;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
-import static org.neo4j.gds.influenceMaximization.CELFStreamProc.DESCRIPTION;
+import static org.neo4j.gds.influenceMaximization.Constants.CELF_DESCRIPTION;
 
 @GdsCallable(
     name = "gds.influenceMaximization.celf.stats",
     aliases = {"gds.beta.influenceMaximization.celf.stats"},
-    description = DESCRIPTION,
+    description = CELF_DESCRIPTION,
     executionMode = STATS
 )
 public class CELFStatsSpec implements AlgorithmSpec<CELF, CELFResult, InfluenceMaximizationStatsConfig, Stream<CELFStatsResult>, CELFAlgorithmFactory<InfluenceMaximizationStatsConfig>> {

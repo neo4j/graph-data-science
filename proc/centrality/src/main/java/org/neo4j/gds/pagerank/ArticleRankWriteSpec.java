@@ -23,7 +23,7 @@ import org.neo4j.gds.executor.ExecutionContext;
 import org.neo4j.gds.executor.GdsCallable;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
-import static org.neo4j.gds.procedures.centrality.pagerank.PageRankProcCompanion.ARTICLE_RANK_DESCRIPTION;
+import static org.neo4j.gds.pagerank.Constants.ARTICLE_RANK_DESCRIPTION;
 
 @GdsCallable(name = "gds.articleRank.write", description = ARTICLE_RANK_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class ArticleRankWriteSpec extends  PageRankWriteSpec {

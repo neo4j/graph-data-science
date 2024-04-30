@@ -30,9 +30,9 @@ import org.neo4j.gds.procedures.community.triangleCount.TriangleCountWriteResult
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
-import static org.neo4j.gds.triangle.TriangleCountCompanion.DESCRIPTION;
+import static org.neo4j.gds.triangle.TriangleCountCompanion.TRIANGLE_COUNT_DESCRIPTION;
 
-@GdsCallable(name = "gds.triangleCount.write", description = DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
+@GdsCallable(name = "gds.triangleCount.write", description = TRIANGLE_COUNT_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)
 public class TriangleCountWriteSpec implements AlgorithmSpec<IntersectingTriangleCount, TriangleCountResult, TriangleCountWriteConfig, Stream<TriangleCountWriteResult>, IntersectingTriangleCountFactory<TriangleCountWriteConfig>> {
     @Override
     public String name() {

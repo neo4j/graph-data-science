@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.harmonic;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityWriteResult;
 import org.neo4j.gds.procedures.centrality.alphaharmonic.AlphaHarmonicWriteResult;
@@ -32,16 +31,16 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.harmonic.HarmonicCentralityCompanion.DESCRIPTION;
+import static org.neo4j.gds.harmonic.HarmonicCentralityCompanion.HARMONIC_CENTRALITY_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.WRITE;
 
-public class HarmonicCentralityWriteProc extends BaseProc {
-    
+public class HarmonicCentralityWriteProc {
     @Context
     public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.closeness.harmonic.write", mode = WRITE)
-    @Description(DESCRIPTION)
+    @Description(HARMONIC_CENTRALITY_DESCRIPTION)
     public Stream<CentralityWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -52,21 +51,16 @@ public class HarmonicCentralityWriteProc extends BaseProc {
     @Deprecated(forRemoval = true)
     @Internal
     @Procedure(value = "gds.alpha.closeness.harmonic.write", mode = WRITE, deprecatedBy = "gds.closeness.harmonic.write")
-    @Description(DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<AlphaHarmonicWriteResult> alphaWrite(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        facade
-            .deprecatedProcedures().called("gds.alpha.closeness.harmonic.write");
-
+        facade.deprecatedProcedures().called("gds.alpha.closeness.harmonic.write");
         facade
             .log()
             .warn("Procedure `gds.alpha.closeness.harmonic.write` has been deprecated, please use `gds.closeness.harmonic.write`.");
 
         return facade.centrality().alphaHarmonicCentralityWrite(graphName, configuration);
-
     }
-
-
 }

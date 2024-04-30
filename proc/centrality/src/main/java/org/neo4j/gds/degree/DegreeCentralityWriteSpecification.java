@@ -29,7 +29,7 @@ import org.neo4j.gds.procedures.algorithms.centrality.CentralityWriteResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.degree.DegreeCentrality.DEGREE_CENTRALITY_DESCRIPTION;
+import static org.neo4j.gds.degree.Constants.DEGREE_CENTRALITY_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.WRITE_NODE_PROPERTY;
 
 @GdsCallable(name = "gds.degree.write", description = DEGREE_CENTRALITY_DESCRIPTION, executionMode = WRITE_NODE_PROPERTY)

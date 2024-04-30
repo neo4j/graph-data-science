@@ -17,10 +17,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.triangle;
+package org.neo4j.gds.betweenness;
 
-final class LocalClusteringCoefficientCompanion {
-    static final String LOCAL_CLUSTERING_COEFFICIENT_DESCRIPTION = "The local clustering coefficient is a metric quantifying how connected the neighborhood of a node is.";
-
-    private LocalClusteringCoefficientCompanion() {}
+class Constants {
+    static final String BETWEENNESS_DESCRIPTION = "Betweenness centrality measures the relative information flow that passes through a node.";
 }

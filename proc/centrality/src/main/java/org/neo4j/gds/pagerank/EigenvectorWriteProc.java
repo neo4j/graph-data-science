@@ -19,10 +19,9 @@
  */
 package org.neo4j.gds.pagerank;
 
-import org.neo4j.gds.procedures.GraphDataScienceProcedures;
-import org.neo4j.gds.procedures.centrality.pagerank.PageRankProcCompanion;
-import org.neo4j.gds.procedures.centrality.pagerank.PageRankWriteResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
+import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.centrality.pagerank.PageRankWriteResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Name;
@@ -31,17 +30,17 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.ProcedureConstants.ESTIMATE_DESCRIPTION;
+import static org.neo4j.gds.pagerank.Constants.EIGENVECTOR_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
 public class EigenvectorWriteProc {
-
     @Context
     public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.eigenvector.write", mode = WRITE)
-    @Description(PageRankProcCompanion.EIGENVECTOR_DESCRIPTION)
+    @Description(EIGENVECTOR_DESCRIPTION)
     public Stream<PageRankWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -50,12 +49,11 @@ public class EigenvectorWriteProc {
     }
 
     @Procedure(value = "gds.eigenvector.write.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         return facade.centrality().eigenvectorWriteEstimate(graphNameOrConfiguration, algoConfiguration);
     }
-
 }

@@ -21,7 +21,6 @@ package org.neo4j.gds.procedures;
 
 public final class ProcedureConstants {
     public static final String MEMORY_ESTIMATION_DESCRIPTION = "Returns an estimation of the memory consumption for that procedure.";
-    public static final String STATS_MODE_DESCRIPTION = "Executes the algorithm and returns result statistics without writing the result.";
 
     private ProcedureConstants() {}
 }

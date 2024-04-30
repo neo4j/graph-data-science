@@ -31,17 +31,16 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.BaseProc.ESTIMATE_DESCRIPTION;
-import static org.neo4j.gds.BaseProc.STATS_DESCRIPTION;
+import static org.neo4j.gds.influenceMaximization.Constants.CELF_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class CELFStatsProc {
-
     @Context
     public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.influenceMaximization.celf.stats", mode = READ)
-    @Description(STATS_DESCRIPTION)
+    @Description(CELF_DESCRIPTION)
     public Stream<CELFStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -50,7 +49,7 @@ public class CELFStatsProc {
     }
 
     @Procedure(name = "gds.influenceMaximization.celf.stats.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
@@ -63,16 +62,14 @@ public class CELFStatsProc {
         mode = READ,
         deprecatedBy = "gds.influenceMaximization.celf.stats"
     )
-    @Description(STATS_DESCRIPTION)
+    @Description(CELF_DESCRIPTION)
     @Internal
     @Deprecated
     public Stream<CELFStatsResult> betaStats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        facade
-            .deprecatedProcedures().called("gds.beta.influenceMaximization.celf.stats");
-
+        facade.deprecatedProcedures().called("gds.beta.influenceMaximization.celf.stats");
         facade
             .log()
             .warn(
@@ -86,21 +83,19 @@ public class CELFStatsProc {
         mode = READ,
         deprecatedBy = "gds.influenceMaximization.celf.stats.estimate"
     )
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     @Internal
     @Deprecated
     public Stream<MemoryEstimateResult> betaEstimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        facade
-            .deprecatedProcedures().called("gds.beta.influenceMaximization.celf.stats.estimate");
-
+        facade.deprecatedProcedures().called("gds.beta.influenceMaximization.celf.stats.estimate");
         facade
             .log()
             .warn(
                 "Procedure `gds.beta.influenceMaximization.celf.stats.estimate has been deprecated, please use `gds.influenceMaximization.celf.stats.estimate`.");
+
         return estimate(graphNameOrConfiguration, algoConfiguration);
     }
-
 }

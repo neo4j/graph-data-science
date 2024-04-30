@@ -29,10 +29,9 @@ import org.neo4j.gds.procedures.community.triangleCount.TriangleCountStatsResult
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.BaseProc.STATS_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
 
-@GdsCallable(name = "gds.triangleCount.stats", description = STATS_DESCRIPTION, executionMode = STATS)
+@GdsCallable(name = "gds.triangleCount.stats", description = TriangleCountCompanion.TRIANGLE_COUNT_DESCRIPTION, executionMode = STATS)
 public class TriangleCountStatsSpec implements AlgorithmSpec<IntersectingTriangleCount, TriangleCountResult, TriangleCountStatsConfig, Stream<TriangleCountStatsResult>, IntersectingTriangleCountFactory<TriangleCountStatsConfig>> {
 
     @Override

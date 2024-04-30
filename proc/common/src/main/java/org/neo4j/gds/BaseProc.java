@@ -51,7 +51,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 public abstract class BaseProc {
 
     public static final String ESTIMATE_DESCRIPTION = "Returns an estimation of the memory consumption for that procedure.";
-    public static final String STATS_DESCRIPTION = "Executes the algorithm and returns result statistics without writing the result to Neo4j.";
 
     @Context
     public GraphDatabaseService databaseService;

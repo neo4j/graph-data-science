@@ -30,11 +30,10 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.closeness.ClosenessCentrality.CLOSENESS_DESCRIPTION;
+import static org.neo4j.gds.closeness.Constants.CLOSENESS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class ClosenessCentralityStreamProc {
-
     @Context
     public GraphDataScienceProcedures facade;
 
@@ -55,14 +54,11 @@ public class ClosenessCentralityStreamProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        facade
-            .deprecatedProcedures().called("gds.beta.closeness.stream");
-
+        facade.deprecatedProcedures().called("gds.beta.closeness.stream");
         facade
             .log()
             .warn("Procedure `gds.beta.closeness.stream` has been deprecated, please use `gds.closeness.stream`.");
 
         return stream(graphName, configuration);
     }
-
 }

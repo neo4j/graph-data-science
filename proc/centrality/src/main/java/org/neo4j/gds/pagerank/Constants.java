@@ -17,10 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.triangle;
+package org.neo4j.gds.pagerank;
 
-final class LocalClusteringCoefficientCompanion {
-    static final String LOCAL_CLUSTERING_COEFFICIENT_DESCRIPTION = "The local clustering coefficient is a metric quantifying how connected the neighborhood of a node is.";
-
-    private LocalClusteringCoefficientCompanion() {}
+class Constants {
+    public static final String PAGE_RANK_DESCRIPTION =
+        "Page Rank is an algorithm that measures the transitive influence or connectivity of nodes.";
+    public static final String ARTICLE_RANK_DESCRIPTION =
+        "Article Rank is a variant of the Page Rank algorithm, which " +
+        "measures the transitive influence or connectivity of nodes.";
+    public static final String EIGENVECTOR_DESCRIPTION =
+        "Eigenvector Centrality is an algorithm that measures the transitive influence or connectivity of nodes.";
 }

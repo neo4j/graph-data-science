@@ -31,13 +31,13 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.closeness.ClosenessCentrality.CLOSENESS_DESCRIPTION;
+import static org.neo4j.gds.closeness.Constants.CLOSENESS_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class ClosenessCentralityMutateProc {
-
     @Context
     public GraphDataScienceProcedures facade;
+
     @Procedure(value = "gds.closeness.mutate", mode = READ)
     @Description(CLOSENESS_DESCRIPTION)
     public Stream<CentralityMutateResult> mutate(
@@ -47,7 +47,6 @@ public class ClosenessCentralityMutateProc {
         return facade.centrality().closenessCentralityMutate(graphName, configuration);
     }
 
-
     @Deprecated(forRemoval = true)
     @Internal
     @Procedure(value = "gds.beta.closeness.mutate", mode = READ, deprecatedBy = "gds.closeness.mutate")
@@ -56,17 +55,12 @@ public class ClosenessCentralityMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        facade
-            .deprecatedProcedures().called("gds.beta.closeness.mutate");
-
+        facade.deprecatedProcedures().called("gds.beta.closeness.mutate");
         facade
             .log()
             .warn(
                 "Procedure `gds.beta.closeness.mutate` has been deprecated, please use `gds.closeness.mutate`.");
 
         return facade.centrality().betaClosenessCentralityMutate(graphName, configuration);
-
     }
-
-
 }

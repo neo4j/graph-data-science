@@ -31,16 +31,16 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.BaseProc.ESTIMATE_DESCRIPTION;
-import static org.neo4j.gds.influenceMaximization.CELFStreamProc.DESCRIPTION;
+import static org.neo4j.gds.influenceMaximization.Constants.CELF_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class CELFMutateProc {
-
     @Context
     public GraphDataScienceProcedures facade;
+
     @Procedure(name = "gds.influenceMaximization.celf.mutate", mode = READ)
-    @Description(DESCRIPTION)
+    @Description(CELF_DESCRIPTION)
     public Stream<CELFMutateResult> mutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
@@ -49,7 +49,7 @@ public class CELFMutateProc {
     }
 
     @Procedure(name = "gds.influenceMaximization.celf.mutate.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
@@ -62,20 +62,19 @@ public class CELFMutateProc {
         mode = READ,
         deprecatedBy = "gds.influenceMaximization.celf.mutate"
     )
-    @Description(DESCRIPTION)
+    @Description(CELF_DESCRIPTION)
     @Internal
     @Deprecated
     public Stream<CELFMutateResult> betaMutate(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        facade
-            .deprecatedProcedures().called("gds.beta.influenceMaximization.celf.mutate");
-
+        facade.deprecatedProcedures().called("gds.beta.influenceMaximization.celf.mutate");
         facade
             .log()
             .warn(
                 "Procedure `gds.beta.influenceMaximization.celf.mutate has been deprecated, please use `gds.influenceMaximization.celf.mutate`.");
+
         return mutate(graphName, configuration);
     }
 
@@ -84,20 +83,19 @@ public class CELFMutateProc {
         mode = READ,
         deprecatedBy = "gds.influenceMaximization.celf.mutate.estimate"
     )
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     @Internal
     @Deprecated
     public Stream<MemoryEstimateResult> betaEstimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
-        facade
-            .deprecatedProcedures().called("gds.beta.influenceMaximization.celf.mutate.estimate");
-
+        facade.deprecatedProcedures().called("gds.beta.influenceMaximization.celf.mutate.estimate");
         facade
             .log()
             .warn(
                 "Procedure `gds.beta.influenceMaximization.celf.mutate.estimate has been deprecated, please use `gds.influenceMaximization.celf.mutate.estimate`.");
+
         return estimate(graphNameOrConfiguration, algoConfiguration);
     }
 }

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.degree;
 
-import org.neo4j.gds.BaseProc;
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityStreamResult;
 import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
@@ -31,11 +30,11 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.degree.DegreeCentrality.DEGREE_CENTRALITY_DESCRIPTION;
+import static org.neo4j.gds.degree.Constants.DEGREE_CENTRALITY_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
-public class DegreeCentralityStreamProc extends BaseProc {
-
+public class DegreeCentralityStreamProc {
     @Context
     public GraphDataScienceProcedures facade;
 
@@ -49,7 +48,7 @@ public class DegreeCentralityStreamProc extends BaseProc {
     }
 
     @Procedure(value = "gds.degree.stream.estimate", mode = READ)
-    @Description(DEGREE_CENTRALITY_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration

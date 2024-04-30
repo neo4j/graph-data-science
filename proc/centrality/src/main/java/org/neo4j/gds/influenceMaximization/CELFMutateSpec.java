@@ -37,12 +37,12 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
-import static org.neo4j.gds.influenceMaximization.CELFStreamProc.DESCRIPTION;
+import static org.neo4j.gds.influenceMaximization.Constants.CELF_DESCRIPTION;
 
 @GdsCallable(
     name = "gds.influenceMaximization.celf.mutate",
     aliases = {"gds.beta.influenceMaximization.celf.mutate"},
-    description = DESCRIPTION,
+    description = CELF_DESCRIPTION,
     executionMode = MUTATE_NODE_PROPERTY
 )
 public class CELFMutateSpec implements AlgorithmSpec<CELF, CELFResult, InfluenceMaximizationMutateConfig, Stream<CELFMutateResult>, CELFAlgorithmFactory<InfluenceMaximizationMutateConfig>> {

@@ -29,7 +29,7 @@ import org.neo4j.gds.procedures.algorithms.centrality.CentralityStreamResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.betweenness.BetweennessCentrality.BETWEENNESS_DESCRIPTION;
+import static org.neo4j.gds.betweenness.Constants.BETWEENNESS_DESCRIPTION;
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
 @GdsCallable(name = "gds.betweenness.stream", description = BETWEENNESS_DESCRIPTION, executionMode = STREAM)

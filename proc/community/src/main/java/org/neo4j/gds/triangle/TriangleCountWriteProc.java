@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
-import static org.neo4j.gds.triangle.TriangleCountCompanion.DESCRIPTION;
+import static org.neo4j.gds.triangle.TriangleCountCompanion.TRIANGLE_COUNT_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 import static org.neo4j.procedure.Mode.WRITE;
 
@@ -40,7 +40,7 @@ public class TriangleCountWriteProc {
     public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.triangleCount.write", mode = WRITE)
-    @Description(DESCRIPTION)
+    @Description(TRIANGLE_COUNT_DESCRIPTION)
     public Stream<TriangleCountWriteResult> write(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

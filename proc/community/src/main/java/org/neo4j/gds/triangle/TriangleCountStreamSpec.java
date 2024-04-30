@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
 
-@GdsCallable(name = "gds.triangleCount.stream", description = TriangleCountCompanion.DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.triangleCount.stream", description = TriangleCountCompanion.TRIANGLE_COUNT_DESCRIPTION, executionMode = STREAM)
 public class TriangleCountStreamSpec implements AlgorithmSpec<IntersectingTriangleCount, TriangleCountResult, TriangleCountStreamConfig, Stream<TriangleCountStreamResult>, IntersectingTriangleCountFactory<TriangleCountStreamConfig>> {
     @Override
     public String name() {

@@ -30,9 +30,9 @@ import org.neo4j.gds.procedures.community.louvain.LouvainWriteResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.louvain.LouvainConstants.DESCRIPTION;
+import static org.neo4j.gds.louvain.LouvainConstants.LOUVAIN_DESCRIPTION;
 
-@GdsCallable(name = "gds.louvain.write", description = DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
+@GdsCallable(name = "gds.louvain.write", description = LOUVAIN_DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
 public class LouvainWriteSpec implements AlgorithmSpec<Louvain, LouvainResult, LouvainWriteConfig, Stream<LouvainWriteResult>, LouvainAlgorithmFactory<LouvainWriteConfig>> {
     @Override
     public String name() {

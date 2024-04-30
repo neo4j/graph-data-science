@@ -31,7 +31,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
-import static org.neo4j.gds.procedures.ProcedureConstants.STATS_MODE_DESCRIPTION;
+import static org.neo4j.gds.triangle.LocalClusteringCoefficientCompanion.LOCAL_CLUSTERING_COEFFICIENT_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class LocalClusteringCoefficientStatsProc {
@@ -39,7 +39,7 @@ public class LocalClusteringCoefficientStatsProc {
     public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.localClusteringCoefficient.stats", mode = READ)
-    @Description(STATS_MODE_DESCRIPTION)
+    @Description(LOCAL_CLUSTERING_COEFFICIENT_DESCRIPTION)
     public Stream<LocalClusteringCoefficientStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

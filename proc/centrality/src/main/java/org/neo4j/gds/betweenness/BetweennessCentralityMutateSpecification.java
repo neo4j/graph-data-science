@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.MUTATE_NODE_PROPERTY;
 
-@GdsCallable(name = "gds.betweenness.mutate", description = BetweennessCentrality.BETWEENNESS_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
+@GdsCallable(name = "gds.betweenness.mutate", description = Constants.BETWEENNESS_DESCRIPTION, executionMode = MUTATE_NODE_PROPERTY)
 public class BetweennessCentralityMutateSpecification implements AlgorithmSpec<BetweennessCentrality, BetwennessCentralityResult, BetweennessCentralityMutateConfig, Stream<CentralityMutateResult>, BetweennessCentralityFactory<BetweennessCentralityMutateConfig>> {
     @Override
     public String name() {

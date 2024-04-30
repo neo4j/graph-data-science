@@ -24,7 +24,7 @@ import org.neo4j.gds.executor.GdsCallable;
 import org.neo4j.gds.procedures.algorithms.configuration.NewConfigFunction;
 
 import static org.neo4j.gds.executor.ExecutionMode.STATS;
-import static org.neo4j.gds.procedures.centrality.pagerank.PageRankProcCompanion.EIGENVECTOR_DESCRIPTION;
+import static org.neo4j.gds.pagerank.Constants.EIGENVECTOR_DESCRIPTION;
 
 @GdsCallable(name = "gds.eigenvector.stats", description = EIGENVECTOR_DESCRIPTION, executionMode = STATS)
 public class EigenVectorStatsSpec extends  PageRankStatsSpec {

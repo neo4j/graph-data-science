@@ -17,10 +17,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.triangle;
+package org.neo4j.gds.closeness;
 
-final class LocalClusteringCoefficientCompanion {
-    static final String LOCAL_CLUSTERING_COEFFICIENT_DESCRIPTION = "The local clustering coefficient is a metric quantifying how connected the neighborhood of a node is.";
-
-    private LocalClusteringCoefficientCompanion() {}
+class Constants {
+    public static final String CLOSENESS_DESCRIPTION =
+        "Closeness centrality is a way of detecting nodes that are " +
+        "able to spread information very efficiently through a graph.";
 }

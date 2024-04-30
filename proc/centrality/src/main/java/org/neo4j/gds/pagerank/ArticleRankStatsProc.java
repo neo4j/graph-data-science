@@ -30,33 +30,29 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.ProcedureConstants.ESTIMATE_DESCRIPTION;
-import static org.neo4j.gds.ProcedureConstants.STATS_DESCRIPTION;
+import static org.neo4j.gds.pagerank.Constants.ARTICLE_RANK_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class ArticleRankStatsProc {
-
     @Context
     public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.articleRank.stats", mode = READ)
-    @Description(STATS_DESCRIPTION)
+    @Description(ARTICLE_RANK_DESCRIPTION)
     public Stream<PageRankStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-
         return facade.centrality().articleRankStats(graphName, configuration);
     }
 
     @Procedure(value = "gds.articleRank.stats.estimate", mode = READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         return facade.centrality().articleRankStatsEstimate(graphNameOrConfiguration, algoConfiguration);
     }
-
-
 }

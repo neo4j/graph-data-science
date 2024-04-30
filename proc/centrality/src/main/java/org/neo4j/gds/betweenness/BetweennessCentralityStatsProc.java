@@ -30,8 +30,8 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import static org.neo4j.gds.betweenness.Constants.BETWEENNESS_DESCRIPTION;
 import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
-import static org.neo4j.gds.procedures.ProcedureConstants.STATS_MODE_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class BetweennessCentralityStatsProc {
@@ -39,7 +39,7 @@ public class BetweennessCentralityStatsProc {
     public GraphDataScienceProcedures facade;
 
     @Procedure(value = "gds.betweenness.stats", mode = READ)
-    @Description(STATS_MODE_DESCRIPTION)
+    @Description(BETWEENNESS_DESCRIPTION)
     public Stream<CentralityStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration

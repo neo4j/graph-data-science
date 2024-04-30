@@ -31,11 +31,10 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.ProcedureConstants.ESTIMATE_DESCRIPTION;
 import static org.neo4j.gds.embeddings.graphsage.GraphSageCompanion.GRAPH_SAGE_DESCRIPTION;
+import static org.neo4j.gds.procedures.ProcedureConstants.MEMORY_ESTIMATION_DESCRIPTION;
 
 public class GraphSageWriteProc {
-
     @Context
     public GraphDataScienceProcedures facade;
 
@@ -49,14 +48,11 @@ public class GraphSageWriteProc {
     }
 
     @Procedure(value = "gds.beta.graphSage.write.estimate", mode = Mode.READ)
-    @Description(ESTIMATE_DESCRIPTION)
+    @Description(MEMORY_ESTIMATION_DESCRIPTION)
     public Stream<MemoryEstimateResult> estimate(
         @Name(value = "graphNameOrConfiguration") Object graphNameOrConfiguration,
         @Name(value = "algoConfiguration") Map<String, Object> algoConfiguration
     ) {
         return facade.nodeEmbeddings().graphSage().writeEstimate(graphNameOrConfiguration, algoConfiguration);
-
     }
-
-
 }

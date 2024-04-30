@@ -25,16 +25,6 @@ import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 
 public final class PageRankProcCompanion {
 
-    public static final String PAGE_RANK_DESCRIPTION =
-        "Page Rank is an algorithm that measures the transitive influence or connectivity of nodes.";
-
-    public static final String ARTICLE_RANK_DESCRIPTION =
-        "Article Rank is a variant of the Page Rank algorithm, which " +
-        "measures the transitive influence or connectivity of nodes.";
-
-    public static final String EIGENVECTOR_DESCRIPTION =
-        "Eigenvector Centrality is an algorithm that measures the transitive influence or connectivity of nodes.";
-
     private PageRankProcCompanion() {}
 
 

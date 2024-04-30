@@ -30,10 +30,10 @@ import org.neo4j.gds.procedures.community.leiden.LeidenWriteResult;
 
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.leiden.LeidenStreamProc.DESCRIPTION;
+import static org.neo4j.gds.leiden.Constants.LEIDEN_DESCRIPTION;
 
 
-@GdsCallable(name = "gds.leiden.write", aliases = {"gds.beta.leiden.write"}, description = DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
+@GdsCallable(name = "gds.leiden.write", aliases = {"gds.beta.leiden.write"}, description = LEIDEN_DESCRIPTION, executionMode = ExecutionMode.WRITE_NODE_PROPERTY)
 public class LeidenWriteSpec implements AlgorithmSpec<Leiden, LeidenResult, LeidenWriteConfig, Stream<LeidenWriteResult>, LeidenAlgorithmFactory<LeidenWriteConfig>> {
     @Override
     public String name() {

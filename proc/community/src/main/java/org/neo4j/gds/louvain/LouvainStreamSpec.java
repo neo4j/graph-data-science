@@ -30,9 +30,9 @@ import org.neo4j.gds.procedures.community.louvain.LouvainStreamResult;
 import java.util.stream.Stream;
 
 import static org.neo4j.gds.executor.ExecutionMode.STREAM;
-import static org.neo4j.gds.louvain.LouvainConstants.DESCRIPTION;
+import static org.neo4j.gds.louvain.LouvainConstants.LOUVAIN_DESCRIPTION;
 
-@GdsCallable(name = "gds.louvain.stream", description = DESCRIPTION, executionMode = STREAM)
+@GdsCallable(name = "gds.louvain.stream", description = LOUVAIN_DESCRIPTION, executionMode = STREAM)
 public class LouvainStreamSpec implements AlgorithmSpec<Louvain, LouvainResult, LouvainStreamConfig, Stream<LouvainStreamResult>, LouvainAlgorithmFactory<LouvainStreamConfig>> {
     @Override
     public String name() {

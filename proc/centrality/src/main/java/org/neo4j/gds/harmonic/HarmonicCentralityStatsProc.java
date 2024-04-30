@@ -29,21 +29,19 @@ import org.neo4j.procedure.Procedure;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import static org.neo4j.gds.harmonic.HarmonicCentralityCompanion.DESCRIPTION;
+import static org.neo4j.gds.harmonic.HarmonicCentralityCompanion.HARMONIC_CENTRALITY_DESCRIPTION;
 import static org.neo4j.procedure.Mode.READ;
 
 public class HarmonicCentralityStatsProc {
-
     @Context
     public GraphDataScienceProcedures facade;
 
     @Procedure(name = "gds.closeness.harmonic.stats", mode = READ)
-    @Description(DESCRIPTION)
+    @Description(HARMONIC_CENTRALITY_DESCRIPTION)
     public Stream<CentralityStatsResult> stats(
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
         return facade.centrality().harmonicCentralityStats(graphName, configuration);
     }
-
 }
