@@ -25,6 +25,8 @@ import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
+import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
+import org.neo4j.gds.closeness.ClosenessCentralityResult;
 
 import java.util.Optional;
 
@@ -64,6 +66,27 @@ public class CentralityAlgorithmsMutateModeBusinessFacade {
             BETWEENNESS_CENTRALITY,
             () -> estimation.betweennessCentrality(configuration),
             graph -> algorithms.betweennessCentrality(graph, configuration),
+            Optional.of(mutateStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT closenessCentrality(
+        GraphName graphName,
+        ClosenessCentralityMutateConfig configuration,
+        ResultBuilder<ClosenessCentralityMutateConfig, ClosenessCentralityResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var mutateStep = new ClosenessCentralityMutateStep(
+            mutateNodeProperty,
+            configuration
+        );
+
+        return template.processAlgorithm(
+            graphName,
+            configuration,
+            BETWEENNESS_CENTRALITY,
+            () -> estimation.closenessCentrality(configuration),
+            graph -> algorithms.closenessCentrality(graph, configuration),
             Optional.of(mutateStep),
             resultBuilder
         );

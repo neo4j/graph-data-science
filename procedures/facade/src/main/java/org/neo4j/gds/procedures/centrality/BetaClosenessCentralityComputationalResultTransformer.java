@@ -19,35 +19,14 @@
  */
 package org.neo4j.gds.procedures.centrality;
 
-import org.neo4j.gds.algorithms.NodePropertyMutateResult;
 import org.neo4j.gds.algorithms.NodePropertyWriteResult;
 import org.neo4j.gds.algorithms.centrality.specificfields.DefaultCentralitySpecificFields;
-import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
-import org.neo4j.gds.procedures.centrality.betacloseness.BetaClosenessCentralityMutateResult;
 import org.neo4j.gds.procedures.centrality.betacloseness.BetaClosenessCentralityWriteResult;
 
 final class BetaClosenessCentralityComputationalResultTransformer {
 
     private BetaClosenessCentralityComputationalResultTransformer() {}
-
-
-
-    static BetaClosenessCentralityMutateResult toMutateResult(
-        NodePropertyMutateResult<DefaultCentralitySpecificFields> computationResult,
-        ClosenessCentralityMutateConfig configuration
-    ) {
-        return new BetaClosenessCentralityMutateResult(
-            computationResult.nodePropertiesWritten(),
-            computationResult.preProcessingMillis(),
-            computationResult.computeMillis(),
-            computationResult.postProcessingMillis(),
-            computationResult.mutateMillis(),
-            configuration.mutateProperty(),
-            computationResult.algorithmSpecificFields().centralityDistribution(),
-            computationResult.configuration().toMap()
-        );
-    }
 
     static BetaClosenessCentralityWriteResult toWriteResult(
         NodePropertyWriteResult<DefaultCentralitySpecificFields> computationResult,

@@ -50,7 +50,7 @@ public final class ClosenessCentrality extends Algorithm<ClosenessCentralityResu
     private final HugeAtomicIntArray component;
     private final CentralityComputer centralityComputer;
 
-    ClosenessCentrality(
+    public ClosenessCentrality(
         Graph graph,
         Concurrency concurrency,
         CentralityComputer centralityComputer,

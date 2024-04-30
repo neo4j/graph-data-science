@@ -27,10 +27,16 @@ import org.neo4j.gds.betweenness.BetwennessCentralityResult;
 import org.neo4j.gds.betweenness.ForwardTraverser;
 import org.neo4j.gds.betweenness.FullSelectionStrategy;
 import org.neo4j.gds.betweenness.RandomDegreeSelectionStrategy;
+import org.neo4j.gds.closeness.ClosenessCentrality;
+import org.neo4j.gds.closeness.ClosenessCentralityBaseConfig;
+import org.neo4j.gds.closeness.ClosenessCentralityResult;
+import org.neo4j.gds.closeness.DefaultCentralityComputer;
+import org.neo4j.gds.closeness.WassermanFaustCentralityComputer;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.utils.progress.tasks.Tasks;
 
 import static org.neo4j.gds.applications.algorithms.centrality.AlgorithmLabels.BETWEENNESS_CENTRALITY;
+import static org.neo4j.gds.applications.algorithms.centrality.AlgorithmLabels.CLOSENESS_CENTRALITY;
 
 public class CentralityAlgorithms {
     private final ProgressTrackerCreator progressTrackerCreator;
@@ -62,6 +68,29 @@ public class CentralityAlgorithms {
             traverserFactory,
             DefaultPool.INSTANCE,
             parameters.concurrency(),
+            progressTracker
+        );
+
+        return algorithm.compute();
+    }
+
+    ClosenessCentralityResult closenessCentrality(Graph graph, ClosenessCentralityBaseConfig configuration) {
+        var parameters = configuration.toParameters();
+
+        var centralityComputer = parameters.useWassermanFaust()
+            ? new WassermanFaustCentralityComputer(graph.nodeCount())
+            : new DefaultCentralityComputer();
+        var progressTracker = progressTrackerCreator.createProgressTracker(configuration, Tasks.task(
+            CLOSENESS_CENTRALITY,
+            Tasks.leaf("Farness computation"),
+            Tasks.leaf("Closeness computation", graph.nodeCount())
+        ));
+
+        var algorithm = new ClosenessCentrality(
+            graph,
+            parameters.concurrency(),
+            centralityComputer,
+            DefaultPool.INSTANCE,
             progressTracker
         );
 

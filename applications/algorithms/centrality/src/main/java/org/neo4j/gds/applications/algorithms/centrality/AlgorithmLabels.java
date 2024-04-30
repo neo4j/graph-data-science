@@ -21,4 +21,5 @@ package org.neo4j.gds.applications.algorithms.centrality;
 
 public interface AlgorithmLabels {
     String BETWEENNESS_CENTRALITY = "Betweenness Centrality";
+    String CLOSENESS_CENTRALITY = "Closeness Centrality";
 }

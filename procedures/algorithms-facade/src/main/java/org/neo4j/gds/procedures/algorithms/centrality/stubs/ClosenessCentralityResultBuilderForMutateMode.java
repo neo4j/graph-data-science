@@ -24,18 +24,18 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
-import org.neo4j.gds.betweenness.BetwennessCentralityResult;
+import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
+import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityMutateResult;
 
 import java.util.Optional;
 
-class BetweennessCentralityResultBuilderForMutateMode implements ResultBuilder<BetweennessCentralityMutateConfig, BetwennessCentralityResult, CentralityMutateResult, NodePropertiesWritten> {
+class ClosenessCentralityResultBuilderForMutateMode implements ResultBuilder<ClosenessCentralityMutateConfig, ClosenessCentralityResult, CentralityMutateResult, NodePropertiesWritten> {
     private final GenericCentralityResultBuilderForMutateMode genericResultBuilder = new GenericCentralityResultBuilderForMutateMode();
 
     private final boolean shouldComputeCentralityDistribution;
 
-    BetweennessCentralityResultBuilderForMutateMode(boolean shouldComputeCentralityDistribution) {
+    ClosenessCentralityResultBuilderForMutateMode(boolean shouldComputeCentralityDistribution) {
         this.shouldComputeCentralityDistribution = shouldComputeCentralityDistribution;
     }
 
@@ -43,8 +43,8 @@ class BetweennessCentralityResultBuilderForMutateMode implements ResultBuilder<B
     public CentralityMutateResult build(
         Graph graph,
         GraphStore graphStore,
-        BetweennessCentralityMutateConfig configuration,
-        Optional<BetwennessCentralityResult> result,
+        ClosenessCentralityMutateConfig configuration,
+        Optional<ClosenessCentralityResult> result,
         AlgorithmProcessingTimings timings,
         Optional<NodePropertiesWritten> metadata
     ) {

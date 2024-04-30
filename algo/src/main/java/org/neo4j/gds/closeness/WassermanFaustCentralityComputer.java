@@ -19,11 +19,11 @@
  */
 package org.neo4j.gds.closeness;
 
-class WassermanFaustCentralityComputer implements CentralityComputer {
+public class WassermanFaustCentralityComputer implements CentralityComputer {
 
     private final long nodeCount;
 
-    WassermanFaustCentralityComputer(long nodeCount) {
+    public WassermanFaustCentralityComputer(long nodeCount) {
         this.nodeCount = nodeCount;
     }
 

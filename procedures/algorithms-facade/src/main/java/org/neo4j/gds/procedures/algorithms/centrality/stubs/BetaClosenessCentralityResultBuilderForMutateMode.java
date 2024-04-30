@@ -24,37 +24,48 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
-import org.neo4j.gds.betweenness.BetwennessCentralityResult;
-import org.neo4j.gds.procedures.algorithms.centrality.CentralityMutateResult;
+import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
+import org.neo4j.gds.closeness.ClosenessCentralityResult;
+import org.neo4j.gds.procedures.algorithms.centrality.BetaClosenessCentralityMutateResult;
 
 import java.util.Optional;
 
-class BetweennessCentralityResultBuilderForMutateMode implements ResultBuilder<BetweennessCentralityMutateConfig, BetwennessCentralityResult, CentralityMutateResult, NodePropertiesWritten> {
+class BetaClosenessCentralityResultBuilderForMutateMode implements ResultBuilder<ClosenessCentralityMutateConfig, ClosenessCentralityResult, BetaClosenessCentralityMutateResult, NodePropertiesWritten> {
     private final GenericCentralityResultBuilderForMutateMode genericResultBuilder = new GenericCentralityResultBuilderForMutateMode();
 
     private final boolean shouldComputeCentralityDistribution;
 
-    BetweennessCentralityResultBuilderForMutateMode(boolean shouldComputeCentralityDistribution) {
+    BetaClosenessCentralityResultBuilderForMutateMode(boolean shouldComputeCentralityDistribution) {
         this.shouldComputeCentralityDistribution = shouldComputeCentralityDistribution;
     }
 
     @Override
-    public CentralityMutateResult build(
+    public BetaClosenessCentralityMutateResult build(
         Graph graph,
         GraphStore graphStore,
-        BetweennessCentralityMutateConfig configuration,
-        Optional<BetwennessCentralityResult> result,
+        ClosenessCentralityMutateConfig configuration,
+        Optional<ClosenessCentralityResult> result,
         AlgorithmProcessingTimings timings,
         Optional<NodePropertiesWritten> metadata
     ) {
-        return genericResultBuilder.build(
+        var centralityMutateResult = genericResultBuilder.build(
             graph,
             configuration,
             result,
             timings,
             metadata,
             shouldComputeCentralityDistribution
+        );
+
+        return new BetaClosenessCentralityMutateResult(
+            centralityMutateResult.nodePropertiesWritten,
+            centralityMutateResult.preProcessingMillis,
+            centralityMutateResult.computeMillis,
+            centralityMutateResult.postProcessingMillis,
+            centralityMutateResult.mutateMillis,
+            configuration.mutateProperty(),
+            centralityMutateResult.centralityDistribution,
+            centralityMutateResult.configuration
         );
     }
 }

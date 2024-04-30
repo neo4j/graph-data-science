@@ -20,8 +20,8 @@
 package org.neo4j.gds.closeness;
 
 import org.neo4j.gds.procedures.GraphDataScienceProcedures;
+import org.neo4j.gds.procedures.algorithms.centrality.BetaClosenessCentralityMutateResult;
 import org.neo4j.gds.procedures.algorithms.centrality.CentralityMutateResult;
-import org.neo4j.gds.procedures.centrality.betacloseness.BetaClosenessCentralityMutateResult;
 import org.neo4j.procedure.Context;
 import org.neo4j.procedure.Description;
 import org.neo4j.procedure.Internal;
@@ -44,7 +44,7 @@ public class ClosenessCentralityMutateProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.centrality().closenessCentralityMutate(graphName, configuration);
+        return facade.algorithms().centrality().closenessCentralityMutateStub().execute(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)
@@ -61,6 +61,6 @@ public class ClosenessCentralityMutateProc {
             .warn(
                 "Procedure `gds.beta.closeness.mutate` has been deprecated, please use `gds.closeness.mutate`.");
 
-        return facade.centrality().betaClosenessCentralityMutate(graphName, configuration);
+        return facade.algorithms().centrality().betaClosenessCentralityMutateStub().execute(graphName, configuration);
     }
 }

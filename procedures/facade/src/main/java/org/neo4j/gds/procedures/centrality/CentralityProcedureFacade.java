@@ -25,7 +25,6 @@ import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsStatsBusinessFaca
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.closeness.ClosenessCentralityMutateConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityStreamConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
@@ -53,7 +52,6 @@ import org.neo4j.gds.procedures.algorithms.centrality.CentralityWriteResult;
 import org.neo4j.gds.procedures.algorithms.configuration.ConfigurationCreator;
 import org.neo4j.gds.procedures.centrality.alphaharmonic.AlphaHarmonicStreamResult;
 import org.neo4j.gds.procedures.centrality.alphaharmonic.AlphaHarmonicWriteResult;
-import org.neo4j.gds.procedures.centrality.betacloseness.BetaClosenessCentralityMutateResult;
 import org.neo4j.gds.procedures.centrality.betacloseness.BetaClosenessCentralityWriteResult;
 import org.neo4j.gds.procedures.centrality.celf.CELFMutateResult;
 import org.neo4j.gds.procedures.centrality.celf.CELFStatsResult;
@@ -230,22 +228,6 @@ public class CentralityProcedureFacade {
         return Stream.of(DefaultCentralityComputationalResultTransformer.toStatsResult(computationResult, config));
     }
 
-    public Stream<CentralityMutateResult> closenessCentralityMutate(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, ClosenessCentralityMutateConfig::of);
-
-        var computationResult = mutateBusinessFacade.closenessCentrality(
-            graphName,
-            config,
-            procedureReturnColumns.contains("centralityDistribution")
-        );
-
-        return Stream.of(DefaultCentralityComputationalResultTransformer.toMutateResult(computationResult));
-    }
-
-
     public Stream<CentralityWriteResult> closenessCentralityWrite(
         String graphName,
         Map<String, Object> configuration
@@ -260,25 +242,6 @@ public class CentralityProcedureFacade {
 
         return Stream.of(DefaultCentralityComputationalResultTransformer.toWriteResult(computationResult));
     }
-
-    public Stream<BetaClosenessCentralityMutateResult> betaClosenessCentralityMutate(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, ClosenessCentralityMutateConfig::of);
-
-        var computationResult = mutateBusinessFacade.closenessCentrality(
-            graphName,
-            config,
-            procedureReturnColumns.contains("centralityDistribution")
-        );
-
-        return Stream.of(BetaClosenessCentralityComputationalResultTransformer.toMutateResult(
-            computationResult,
-            config
-        ));
-    }
-
 
     public Stream<BetaClosenessCentralityWriteResult> betaClosenessCentralityWrite(
         String graphName,
