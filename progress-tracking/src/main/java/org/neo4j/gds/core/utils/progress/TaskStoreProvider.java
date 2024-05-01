@@ -20,22 +20,13 @@
 package org.neo4j.gds.core.utils.progress;
 
 import org.neo4j.function.ThrowingFunction;
-import org.neo4j.gds.compat.Neo4jProxy;
 import org.neo4j.internal.kernel.api.exceptions.ProcedureException;
 import org.neo4j.kernel.api.procedure.Context;
 
-class TaskRegistryFactoryProvider implements ThrowingFunction<Context, TaskRegistryFactory, ProcedureException> {
-
-    private final TaskStoreProvider taskStoreProvider;
-
-    TaskRegistryFactoryProvider(TaskStoreProvider taskStoreProvider) {
-
-        this.taskStoreProvider = taskStoreProvider;
-    }
+class TaskStoreProvider implements ThrowingFunction<Context, TaskStore, ProcedureException> {
 
     @Override
-    public TaskRegistryFactory apply(Context context) throws ProcedureException {
-        var username = Neo4jProxy.username(context.securityContext().subject());
-        return new LocalTaskRegistryFactory(username, taskStoreProvider.apply(context));
+    public TaskStore apply(Context context) throws ProcedureException {
+        return TaskStoreHolder.getTaskStore(context.graphDatabaseAPI().databaseName());
     }
 }
