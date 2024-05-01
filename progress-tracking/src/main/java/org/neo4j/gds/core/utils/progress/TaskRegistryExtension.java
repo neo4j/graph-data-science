@@ -54,16 +54,15 @@ public final class TaskRegistryExtension extends ExtensionFactory<TaskRegistryEx
         var registry = dependencies.globalProceduresRegistry();
         var enabled = dependencies.config().get(ProgressFeatureSettings.progress_tracking_enabled);
         String databaseName = dependencies.graphDatabaseService().databaseName();
-        if (enabled) {
-            // Use the centrally managed task stores
-            var taskStore = TaskStoreHolder.getTaskStore(databaseName);
-            var taskRegistryFactoryProvider = new TaskRegistryFactoryProvider(taskStore);
 
-            registry.registerComponent(TaskStore.class, ctx -> taskStore, true);
-            registry.registerComponent(TaskRegistryFactory.class, taskRegistryFactoryProvider, true);
+        if (enabled) {
+            var taskStoreProvider = new TaskStoreProvider();
+            // Use the centrally managed task stores
+            registry.registerComponent(TaskStore.class, taskStoreProvider, true);
+            registry.registerComponent(TaskRegistryFactory.class, new TaskRegistryFactoryProvider(taskStoreProvider), true);
 
             // hey this is just for tests? TaskRegistryExtensionMultiDBTest breaks if it is missing
-            context.dependencySatisfier().satisfyDependency(taskStore);
+            context.dependencySatisfier().satisfyDependency(TaskStoreHolder.getTaskStore(databaseName));
         } else {
             registry.registerComponent(TaskRegistryFactory.class, ctx -> EmptyTaskRegistryFactory.INSTANCE, true);
             registry.registerComponent(TaskStore.class, ctx -> EmptyTaskStore.INSTANCE, true);
@@ -87,7 +86,7 @@ public final class TaskRegistryExtension extends ExtensionFactory<TaskRegistryEx
         };
     }
 
-    interface Dependencies {
+    public interface Dependencies {
         Config config();
 
         LogService logService();
