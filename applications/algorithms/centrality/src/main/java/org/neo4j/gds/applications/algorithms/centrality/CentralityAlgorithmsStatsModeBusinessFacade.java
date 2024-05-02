@@ -24,10 +24,12 @@ import org.neo4j.gds.api.GraphName;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTemplate;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
+import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
 
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.centrality.AlgorithmLabels.BETWEENNESS_CENTRALITY;
+import static org.neo4j.gds.applications.algorithms.centrality.AlgorithmLabels.CLOSENESS_CENTRALITY;
 
 public class CentralityAlgorithmsStatsModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
@@ -55,6 +57,22 @@ public class CentralityAlgorithmsStatsModeBusinessFacade {
             BETWEENNESS_CENTRALITY,
             () -> estimationFacade.betweennessCentrality(configuration),
             graph -> centralityAlgorithms.betweennessCentrality(graph, configuration),
+            Optional.empty(),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT closenessCentrality(
+        GraphName graphName,
+        ClosenessCentralityStatsConfig configuration,
+        ResultBuilder<ClosenessCentralityStatsConfig, CentralityAlgorithmResult, RESULT, Void> resultBuilder
+    ) {
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            CLOSENESS_CENTRALITY,
+            () -> estimationFacade.closenessCentrality(configuration),
+            graph -> centralityAlgorithms.closenessCentrality(graph, configuration),
             Optional.empty(),
             resultBuilder
         );

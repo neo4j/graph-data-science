@@ -29,6 +29,7 @@ import org.neo4j.gds.applications.algorithms.machinery.MemoryEstimateResult;
 import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
+import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetaClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetweennessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.ClosenessCentralityMutateStub;
@@ -217,6 +218,19 @@ public final class CentralityProcedureFacade {
 
     public ClosenessCentralityMutateStub closenessCentralityMutateStub() {
         return closenessCentralityMutateStub;
+    }
+
+    public Stream<CentralityStatsResult> closenessCentralityStats(String graphName, Map<String, Object> configuration) {
+        var shouldComputeSimilarityDistribution = procedureReturnColumns.contains("centralityDistribution");
+        var resultBuilder = new ClosenessCentralityResultBuilderForStatsMode(shouldComputeSimilarityDistribution);
+
+        return statsModeRunner.runStatsModeAlgorithm(
+            graphName,
+            configuration,
+            ClosenessCentralityStatsConfig::of,
+            resultBuilder,
+            statsMode()::closenessCentrality
+        );
     }
 
     private CentralityAlgorithmsEstimationModeBusinessFacade estimationMode() {

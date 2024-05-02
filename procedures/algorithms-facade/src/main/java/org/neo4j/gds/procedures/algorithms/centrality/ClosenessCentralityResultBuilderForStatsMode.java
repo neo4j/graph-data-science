@@ -24,17 +24,17 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
-import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
+import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class BetweennessCentralityResultBuilderForStatsMode implements ResultBuilder<BetweennessCentralityStatsConfig, CentralityAlgorithmResult, Stream<CentralityStatsResult>, Void> {
+class ClosenessCentralityResultBuilderForStatsMode implements ResultBuilder<ClosenessCentralityStatsConfig, CentralityAlgorithmResult, Stream<CentralityStatsResult>, Void> {
     private final GenericCentralityResultBuilderForStatsMode genericResultBuilder = new GenericCentralityResultBuilderForStatsMode();
 
     private final boolean shouldComputeCentralityDistribution;
 
-    BetweennessCentralityResultBuilderForStatsMode(boolean shouldComputeCentralityDistribution) {
+    ClosenessCentralityResultBuilderForStatsMode(boolean shouldComputeCentralityDistribution) {
         this.shouldComputeCentralityDistribution = shouldComputeCentralityDistribution;
     }
 
@@ -42,7 +42,7 @@ class BetweennessCentralityResultBuilderForStatsMode implements ResultBuilder<Be
     public Stream<CentralityStatsResult> build(
         Graph graph,
         GraphStore graphStore,
-        BetweennessCentralityStatsConfig configuration,
+        ClosenessCentralityStatsConfig configuration,
         Optional<CentralityAlgorithmResult> result,
         AlgorithmProcessingTimings timings,
         Optional<Void> unused

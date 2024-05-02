@@ -20,41 +20,42 @@
 package org.neo4j.gds.procedures.algorithms.centrality;
 
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmResult;
-import org.neo4j.gds.api.Graph;
-import org.neo4j.gds.api.GraphStore;
+import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
-import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
-import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
+import org.neo4j.gds.config.ConcurrencyConfig;
+import org.neo4j.gds.config.ToMapConvertible;
 
 import java.util.Optional;
-import java.util.stream.Stream;
 
-class BetweennessCentralityResultBuilderForStatsMode implements ResultBuilder<BetweennessCentralityStatsConfig, CentralityAlgorithmResult, Stream<CentralityStatsResult>, Void> {
-    private final GenericCentralityResultBuilderForStatsMode genericResultBuilder = new GenericCentralityResultBuilderForStatsMode();
+class GenericCentralityResultBuilderForStatsMode {
+    private final CentralityDistributionComputer centralityDistributionComputer = new CentralityDistributionComputer();
 
-    private final boolean shouldComputeCentralityDistribution;
-
-    BetweennessCentralityResultBuilderForStatsMode(boolean shouldComputeCentralityDistribution) {
-        this.shouldComputeCentralityDistribution = shouldComputeCentralityDistribution;
-    }
-
-    @Override
-    public Stream<CentralityStatsResult> build(
-        Graph graph,
-        GraphStore graphStore,
-        BetweennessCentralityStatsConfig configuration,
+    public <CONFIGURATION extends ConcurrencyConfig & ToMapConvertible> CentralityStatsResult build(
+        IdMap idMap,
+        CONFIGURATION configuration,
         Optional<CentralityAlgorithmResult> result,
         AlgorithmProcessingTimings timings,
-        Optional<Void> unused
+        boolean shouldComputeCentralityDistribution
     ) {
-        var centralityStatsResult = genericResultBuilder.build(
-            graph,
+        var configurationMap = configuration.toMap();
+
+        if (result.isEmpty()) return CentralityMutateResult.emptyFrom(timings, configurationMap);
+
+        var centralityAlgorithmResult = result.get();
+
+        var centralityDistributionAndTiming = centralityDistributionComputer.compute(
+            idMap,
+            centralityAlgorithmResult.centralityScoreProvider(),
             configuration,
-            result,
-            timings,
             shouldComputeCentralityDistribution
         );
 
-        return Stream.of(centralityStatsResult);
+        return new CentralityStatsResult(
+            centralityDistributionAndTiming.getLeft(),
+            timings.preProcessingMillis,
+            timings.computeMillis,
+            centralityDistributionAndTiming.getRight(),
+            configuration.toMap()
+        );
     }
 }

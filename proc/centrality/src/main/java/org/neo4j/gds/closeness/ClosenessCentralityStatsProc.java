@@ -43,7 +43,7 @@ public class ClosenessCentralityStatsProc {
         @Name(value = "graphName") String graphName,
         @Name(value = "configuration", defaultValue = "{}") Map<String, Object> configuration
     ) {
-        return facade.centrality().closenessCentralityStats(graphName, configuration);
+        return facade.algorithms().centrality().closenessCentralityStats(graphName, configuration);
     }
 
     @Deprecated(forRemoval = true)

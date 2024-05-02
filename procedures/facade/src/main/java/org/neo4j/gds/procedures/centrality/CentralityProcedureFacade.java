@@ -25,7 +25,6 @@ import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsStatsBusinessFaca
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsStreamBusinessFacade;
 import org.neo4j.gds.algorithms.centrality.CentralityAlgorithmsWriteBusinessFacade;
 import org.neo4j.gds.api.ProcedureReturnColumns;
-import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityStreamConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
 import org.neo4j.gds.degree.DegreeCentralityMutateConfig;
@@ -211,21 +210,6 @@ public class CentralityProcedureFacade {
         );
 
         return DefaultCentralityComputationalResultTransformer.toStreamResult(computationResult);
-    }
-
-    public Stream<CentralityStatsResult> closenessCentralityStats(
-        String graphName,
-        Map<String, Object> configuration
-    ) {
-        var config = configurationCreator.createConfiguration(configuration, ClosenessCentralityStatsConfig::of);
-
-        var computationResult = statsBusinessFacade.closenessCentrality(
-            graphName,
-            config,
-            procedureReturnColumns.contains("centralityDistribution")
-        );
-
-        return Stream.of(DefaultCentralityComputationalResultTransformer.toStatsResult(computationResult, config));
     }
 
     public Stream<CentralityWriteResult> closenessCentralityWrite(
