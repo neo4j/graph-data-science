@@ -143,7 +143,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             tempDir.toString(),
             "",
             true,
-            false,
             RelationshipType.ALL_RELATIONSHIPS,
             new Concurrency(1),
             10_000
@@ -251,7 +250,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             tempDir.toString(),
             "",
             false,
-            false,
             RelationshipType.ALL_RELATIONSHIPS,
             new Concurrency(1),
             10_000
@@ -307,7 +305,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             tempDir.toString(),
             "",
             true,
-            false,
             RelationshipType.ALL_RELATIONSHIPS,
             new Concurrency(2),
             10_000
@@ -386,7 +383,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             tempDir.toString(),
             "",
             false,
-            false,
             RelationshipType.ALL_RELATIONSHIPS,
             new Concurrency(4),
             10_000
@@ -462,7 +458,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             tempDir.toString(),
             "",
             true,
-            false,
             RelationshipType.ALL_RELATIONSHIPS,
             new Concurrency(1),
             10_000
@@ -661,7 +656,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             tempDir.toString(),
             "UserA",
             true,
-            false,
             RelationshipType.ALL_RELATIONSHIPS,
             new Concurrency(1),
             10_000
@@ -691,7 +685,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             tempDir.toString(),
             "",
             true,
-            false,
             RelationshipType.ALL_RELATIONSHIPS,
             new Concurrency(1),
             10_000
@@ -745,7 +738,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             tempDir.toString(),
             "",
             false,
-            false,
             RelationshipType.ALL_RELATIONSHIPS,
             new Concurrency(1),
             10_000
@@ -794,7 +786,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             tempDir.toString(),
             "",
             true,
-            false,
             RelationshipType.ALL_RELATIONSHIPS,
             new Concurrency(1),
             10_000

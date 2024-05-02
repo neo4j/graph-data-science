@@ -28,7 +28,6 @@ public record GraphStoreToFileExporterParameters(
     String exportName,
     String username,
     boolean includeMetaData,
-    boolean useLabelMapping,
     RelationshipType defaultRelationshipType,
     Concurrency concurrency,
     int batchSize

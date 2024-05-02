@@ -177,7 +177,6 @@ public class GraphStoreExportProc extends BaseProc {
             exportConfig.exportName(),
             exportConfig.username(),
             true,
-            exportConfig.useLabelMapping(),
             RelationshipType.of(exportConfig.defaultRelationshipType()),
             exportConfig.typedWriteConcurrency(),
             exportConfig.batchSize()

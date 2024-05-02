@@ -22,9 +22,7 @@ package org.neo4j.gds.core.io.file.csv;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.DatabaseId;
@@ -90,23 +88,14 @@ class CsvToGraphStoreImporterIntegrationTest {
     @TempDir
     Path graphLocation;
 
-    private static Stream<Arguments> concurrencyLabelMappingArgs() {
-        return Stream.of(
-            Arguments.of(1, false),
-            Arguments.of(4, false),
-            Arguments.of(1, true),
-            Arguments.of(4, true)
-        );
-    }
-
     @ParameterizedTest
-    @MethodSource("concurrencyLabelMappingArgs")
-    void shouldImportProperties(int concurrency, boolean useLabelMapping) {
+    @ValueSource(ints = {1, 4})
+    void shouldImportProperties(int concurrency) {
         var graphStore = GdlFactory.of(GRAPH_WITH_PROPERTIES).build();
 
         GraphStoreToCsvExporter.create(
             graphStore,
-            exportParameters(concurrency, useLabelMapping),
+            exportParameters(concurrency),
             graphLocation,
             Optional.empty(),
             TaskRegistryFactory.empty(),
@@ -123,8 +112,8 @@ class CsvToGraphStoreImporterIntegrationTest {
     }
 
     @ParameterizedTest
-    @MethodSource("concurrencyLabelMappingArgs")
-    void shouldImportGraphStoreWithGraphProperties(int concurrency, boolean useLabelMapping) {
+    @ValueSource(ints = {1, 4})
+    void shouldImportGraphStoreWithGraphProperties(int concurrency) {
         var graphStore = GdlFactory.of(GRAPH_WITH_PROPERTIES).build();
 
         addLongGraphProperty(graphStore);
@@ -133,7 +122,7 @@ class CsvToGraphStoreImporterIntegrationTest {
 
         GraphStoreToCsvExporter.create(
             graphStore,
-            exportParameters(concurrency, useLabelMapping),
+            exportParameters(concurrency),
             graphLocation,
             Optional.empty(),
             TaskRegistryFactory.empty(),
@@ -169,7 +158,7 @@ class CsvToGraphStoreImporterIntegrationTest {
 
         GraphStoreToCsvExporter.create(
             graphStore,
-            exportParameters(concurrency, true /* will not work without label mapping */),
+            exportParameters(concurrency),
             graphLocation,
             Optional.empty(),
             TaskRegistryFactory.empty(),
@@ -191,7 +180,7 @@ class CsvToGraphStoreImporterIntegrationTest {
 
         GraphStoreToCsvExporter.create(
             graphStore,
-            exportParameters(4, false),
+            exportParameters(4),
             graphLocation,
             Optional.empty(),
             TaskRegistryFactory.empty(),
@@ -218,7 +207,7 @@ class CsvToGraphStoreImporterIntegrationTest {
 
         GraphStoreToCsvExporter.create(
             graphStoreWithCapabilities,
-            exportParameters(1, false),
+            exportParameters(1),
             graphLocation,
             Optional.empty(),
             TaskRegistryFactory.empty(),
@@ -247,7 +236,7 @@ class CsvToGraphStoreImporterIntegrationTest {
 
         GraphStoreToCsvExporter.create(
             graphStore,
-            exportParameters(1, false),
+            exportParameters(1),
             graphLocation,
             Optional.empty(),
             TaskRegistryFactory.empty(),
@@ -270,7 +259,7 @@ class CsvToGraphStoreImporterIntegrationTest {
 
         GraphStoreToCsvExporter.create(
             graphStore,
-            exportParameters(1, false),
+            exportParameters(1),
             graphLocation,
             Optional.empty(),
             TaskRegistryFactory.empty(),
@@ -284,12 +273,11 @@ class CsvToGraphStoreImporterIntegrationTest {
         assertThat(userGraphStore.graphStore().databaseInfo()).isEqualTo(graphStore.databaseInfo());
     }
 
-    private GraphStoreToFileExporterParameters exportParameters(int concurrency, boolean useLabelMapping) {
+    private GraphStoreToFileExporterParameters exportParameters(int concurrency) {
         return new GraphStoreToFileExporterParameters(
             "my-export",
             "",
             true,
-            useLabelMapping,
             RelationshipType.ALL_RELATIONSHIPS,
             new Concurrency(concurrency),
             10_000
