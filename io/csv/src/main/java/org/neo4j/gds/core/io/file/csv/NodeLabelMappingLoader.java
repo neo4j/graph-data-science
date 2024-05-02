@@ -26,9 +26,11 @@ import com.fasterxml.jackson.dataformat.csv.CsvParser;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Optional;
@@ -49,12 +51,16 @@ public class NodeLabelMappingLoader {
     }
 
     Optional<HashMap<String, String>> load() {
-        var file = labelMappingPath.toFile();
-        if (!file.isFile()) {
+        if (!Files.isRegularFile(this.labelMappingPath, LinkOption.NOFOLLOW_LINKS)) {
             return Optional.empty();
         }
 
-        try(var reader = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))) {
+        try (
+            var reader = new BufferedReader(new InputStreamReader(
+                Files.newInputStream(this.labelMappingPath, LinkOption.NOFOLLOW_LINKS),
+                StandardCharsets.UTF_8
+            ))
+        ) {
             var linesIterator = objectReader.<MappingLine>readValues(reader);
             while(linesIterator.hasNext()) {
                 var mappingLine = linesIterator.next();

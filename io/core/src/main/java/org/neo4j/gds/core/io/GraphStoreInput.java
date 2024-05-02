@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.io;
 
 import org.jetbrains.annotations.Nullable;
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.CompositeRelationshipIterator;
 import org.neo4j.gds.api.IdMap;
@@ -48,7 +49,6 @@ import java.util.ArrayDeque;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.Spliterator;
@@ -220,7 +220,7 @@ public final class GraphStoreInput implements Input {
         return () -> new GraphPropertyIterator(graphProperties.iterator(), concurrency);
     }
 
-    public Optional<NodeLabelMapping> labelMapping() {
+    public IdentifierMapper<NodeLabel> labelMapping() {
         return nodeStore.labelMapping();
     }
 

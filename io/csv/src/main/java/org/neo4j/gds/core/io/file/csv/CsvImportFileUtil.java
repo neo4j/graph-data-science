@@ -36,8 +36,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.neo4j.gds.core.io.file.csv.CsvFileInput.LINE_READER;
+import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 final class CsvImportFileUtil {
 
@@ -86,6 +89,13 @@ final class CsvImportFileUtil {
         }
     }
 
+    public static Map<Path, List<Path>> nodeHeaderToFileMapping(Path csvDirectory, Stream<String> identifiers) {
+        var files = identifiers
+            .map(id -> formatWithLocale("nodes_%s_header.csv", id))
+            .collect(Collectors.toSet());
+        return headerToFileMapping(csvDirectory, p -> getFilesByList(p, files));
+    }
+
     public static Map<Path, List<Path>> nodeHeaderToFileMapping(Path csvDirectory) {
         return headerToFileMapping(csvDirectory, CsvImportFileUtil::getNodeHeaderFiles);
     }
@@ -98,7 +108,7 @@ final class CsvImportFileUtil {
         return headerToFileMapping(csvDirectory, CsvImportFileUtil::getGraphPropertyHeaderFiles);
     }
 
-    public static List<Path> getNodeHeaderFiles(Path csvDirectory) {
+    static List<Path> getNodeHeaderFiles(Path csvDirectory) {
         String nodeFilesPattern = "^nodes(_\\w+)*_header.csv";
         return getFilesByRegex(csvDirectory, nodeFilesPattern);
     }
@@ -140,12 +150,28 @@ final class CsvImportFileUtil {
         }
     }
 
+    private static List<Path> getFilesByList(Path csvDirectory, Collection<String> files) {
+        try (
+            var fileStream = Files.newDirectoryStream(
+                csvDirectory,
+                entry -> files.contains(entry.getFileName().toString())
+            )
+        ) {
+            var paths = new ArrayList<Path>();
+            fileStream.forEach(paths::add);
+            return paths;
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
     static String[] inferNodeLabels(Path headerFile) {
         return inferNodeLabels(headerFile.getFileName().toString());
     }
 
     static String[] inferNodeLabels(String headerFileName) {
-        var nodeLabels = headerFileName.replaceAll("nodes_|_?header.csv", "").split("_");
+        // TODO: we should not need this anymore
+        var nodeLabels = headerFileName.replaceAll("^nodes_|_?header.csv$", "").split("_");
         return noLabelFound(nodeLabels) ? new String[0] : nodeLabels;
     }
 

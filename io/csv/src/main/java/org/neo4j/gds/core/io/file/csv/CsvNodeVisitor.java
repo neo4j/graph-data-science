@@ -24,7 +24,7 @@ import org.jetbrains.annotations.TestOnly;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.schema.NodeSchema;
 import org.neo4j.gds.api.schema.PropertySchema;
-import org.neo4j.gds.core.io.NodeLabelMapping;
+import org.neo4j.gds.core.io.IdentifierMapper;
 import org.neo4j.gds.core.io.file.NodeVisitor;
 
 import java.io.IOException;
@@ -35,7 +35,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
@@ -47,18 +46,17 @@ public class CsvNodeVisitor extends NodeVisitor {
     public static final String ID_COLUMN_NAME = ":ID";
 
     private final Path fileLocation;
-    private final int visitorId;
-    private final Map<String, JacksonFileAppender> csvAppenders;
     private final Set<String> headerFiles;
-
-    private final Optional<NodeLabelMapping> nodeLabelMapping;
+    private final int visitorId;
+    private final IdentifierMapper<NodeLabel> nodeLabelMapping;
+    private final Map<String, JacksonFileAppender> csvAppenders;
 
     CsvNodeVisitor(
         Path fileLocation,
         NodeSchema nodeSchema,
         Set<String> headerFiles,
         int visitorId,
-        Optional<NodeLabelMapping> nodeLabelMapping
+        IdentifierMapper<NodeLabel> nodeLabelMapping
     ) {
         super(nodeSchema);
         this.fileLocation = fileLocation;
@@ -69,8 +67,8 @@ public class CsvNodeVisitor extends NodeVisitor {
     }
 
     @TestOnly
-    public CsvNodeVisitor(Path fileLocation, NodeSchema nodeSchema) {
-        this(fileLocation, nodeSchema, new HashSet<>(), 0, Optional.empty());
+    public CsvNodeVisitor(Path fileLocation, NodeSchema nodeSchema, IdentifierMapper<NodeLabel> nodeLabelMapping) {
+        this(fileLocation, nodeSchema, new HashSet<>(), 0, nodeLabelMapping);
     }
 
     @Override
@@ -176,10 +174,7 @@ public class CsvNodeVisitor extends NodeVisitor {
         var nodeLabelList = currentLabels.isEmpty()
             ? EMPTY_LABELS_LABEL
             : currentLabels.stream()
-                .map(nodeLabelMapping.isPresent()
-                    ? nodeLabelMapping.get()::get
-                    : NodeLabel::of
-                )
+                .map(s -> this.nodeLabelMapping.forIdentifier(s))
                 .collect(Collectors.toSet());
         var propertySchemaForLabels = nodeSchema.filter(nodeLabelList);
         return new ArrayList<>(propertySchemaForLabels.unionProperties().values());

@@ -22,6 +22,7 @@ package org.neo4j.gds.core.io.db;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.io.GraphStoreExporter;
 import org.neo4j.gds.core.io.GraphStoreInput;
+import org.neo4j.gds.core.io.IdentifierMapper;
 import org.neo4j.gds.core.io.NeoNodeProperties;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.graphdb.GraphDatabaseService;
@@ -88,7 +89,7 @@ public final class GraphStoreToDatabaseExporter extends GraphStoreExporter {
         super(
             graphStore,
             neoNodeProperties,
-            Optional.empty(),
+            IdentifierMapper.empty(),
             parameters.defaultRelationshipType(),
             parameters.writeConcurrency(),
             parameters.batchSize()

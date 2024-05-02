@@ -19,11 +19,12 @@
  */
 package org.neo4j.gds.core.io.file.csv;
 
+import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
+import org.neo4j.gds.core.io.IdentifierMapper;
 import org.neo4j.gds.core.io.NeoNodeProperties;
-import org.neo4j.gds.core.io.NodeLabelMapping;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporter;
 import org.neo4j.gds.core.io.file.GraphStoreToFileExporterParameters;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
@@ -61,15 +62,17 @@ public final class GraphStoreToCsvExporter {
                 .forEach(label -> neoNodeSchema.getOrCreateLabel(label).addProperty(key, ValueType.STRING))
             ));
 
-        Optional<NodeLabelMapping> nodeLabelMapping = parameters.useLabelMapping()
-            ? Optional.of(new NodeLabelMapping(graphStore.nodeLabels()))
-            : Optional.empty();
+        var labelMapperBuilder = IdentifierMapper.<NodeLabel>builder("label");
+        for (var nodeLabel : graphStore.nodeLabels()) {
+            labelMapperBuilder.getOrCreateIdentifierFor(nodeLabel);
+        }
+        var labelMapper = labelMapperBuilder.build();
 
         return new GraphStoreToFileExporter(
             graphStore,
             parameters,
             neoNodeProperties,
-            nodeLabelMapping,
+            labelMapper,
             () -> new UserInfoVisitor(exportPath),
             () -> new CsvGraphInfoVisitor(exportPath),
             () -> new CsvNodeSchemaVisitor(exportPath),
@@ -82,7 +85,7 @@ public final class GraphStoreToCsvExporter {
                 nodeSchema.union(neoNodeSchema),
                 headerFiles,
                 index,
-                nodeLabelMapping
+                labelMapper
             ),
             (index) -> new CsvRelationshipVisitor(exportPath, relationshipSchema, headerFiles, index),
             (index) -> new CsvGraphPropertyVisitor(

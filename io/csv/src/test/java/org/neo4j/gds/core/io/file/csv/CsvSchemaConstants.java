@@ -22,20 +22,13 @@ package org.neo4j.gds.core.io.file.csv;
 import java.util.List;
 
 import static org.neo4j.gds.core.io.file.csv.CsvNodeSchemaVisitor.DEFAULT_VALUE_COLUMN_NAME;
-import static org.neo4j.gds.core.io.file.csv.CsvNodeSchemaVisitor.LABEL_COLUMN_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvNodeSchemaVisitor.PROPERTY_KEY_COLUMN_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvNodeSchemaVisitor.STATE_COLUMN_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvNodeSchemaVisitor.VALUE_TYPE_COLUMN_NAME;
 
 final class CsvSchemaConstants {
 
-    public static final List<String> NODE_SCHEMA_COLUMNS = List.of(
-        LABEL_COLUMN_NAME,
-        PROPERTY_KEY_COLUMN_NAME,
-        VALUE_TYPE_COLUMN_NAME,
-        DEFAULT_VALUE_COLUMN_NAME,
-        STATE_COLUMN_NAME
-    );
+    public static final List<String> NODE_SCHEMA_COLUMNS = List.of(CsvNodeSchemaVisitor.NODE_SCHEMA_COLUMNS);
 
     public static final List<String> GRAPH_PROPERTY_SCHEMA_COLUMNS = List.of(
         PROPERTY_KEY_COLUMN_NAME,

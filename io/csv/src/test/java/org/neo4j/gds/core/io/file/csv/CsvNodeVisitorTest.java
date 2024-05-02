@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
+import org.neo4j.gds.core.io.IdentifierMapper;
 
 import java.util.Collections;
 import java.util.List;
@@ -32,9 +33,13 @@ import static org.neo4j.gds.core.io.file.csv.CsvNodeVisitor.ID_COLUMN_NAME;
 
 class CsvNodeVisitorTest extends CsvVisitorTest {
 
+    private IdentifierMapper<NodeLabel> mapper() {
+        return IdentifierMapper.biject(NodeLabel::name, NodeLabel::of);
+    }
+
     @Test
     void visitNodesWithoutLabelsAndProperties() {
-        var nodeVisitor = new CsvNodeVisitor(tempDir, MutableNodeSchema.empty());
+        var nodeVisitor = new CsvNodeVisitor(tempDir, MutableNodeSchema.empty(), mapper());
 
         nodeVisitor.id(0L);
         nodeVisitor.endOfEntity();
@@ -55,12 +60,12 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
 
     @Test
     void visitNodesWithLabels() {
-        var nodeVisitor = new CsvNodeVisitor(tempDir, MutableNodeSchema.empty());
+        var nodeVisitor = new CsvNodeVisitor(tempDir, MutableNodeSchema.empty(), mapper());
 
         nodeVisitor.id(0L);
         nodeVisitor.labels(new String[]{"Foo", "Bar"});
         nodeVisitor.endOfEntity();
-        
+
         nodeVisitor.id(1L);
         nodeVisitor.labels(new String[]{"Baz"});
         nodeVisitor.endOfEntity();
@@ -68,7 +73,7 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
         nodeVisitor.id(2L);
         nodeVisitor.labels(new String[]{"Foo", "Bar"});
         nodeVisitor.endOfEntity();
-        
+
         nodeVisitor.close();
 
         assertCsvFiles(List.of("nodes_Bar_Foo_0.csv", "nodes_Bar_Foo_header.csv", "nodes_Baz_0.csv", "nodes_Baz_header.csv"));
@@ -96,7 +101,7 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
         nodeSchema.getOrCreateLabel(NodeLabel.ALL_NODES)
             .addProperty("foo", ValueType.DOUBLE)
             .addProperty("bar", ValueType.DOUBLE);
-        var nodeVisitor = new CsvNodeVisitor(tempDir, nodeSchema);
+        var nodeVisitor = new CsvNodeVisitor(tempDir, nodeSchema, mapper());
 
         nodeVisitor.id(0L);
         nodeVisitor.property("foo", 42.0);
@@ -144,7 +149,7 @@ class CsvNodeVisitorTest extends CsvVisitorTest {
             .addProperty("isolated", ValueType.DOUBLE)
             .addProperty("isolated_array", ValueType.LONG_ARRAY);
 
-        var nodeVisitor = new CsvNodeVisitor(tempDir, nodeSchema);
+        var nodeVisitor = new CsvNodeVisitor(tempDir, nodeSchema, mapper());
 
         // :A:B
         nodeVisitor.id(0L);

@@ -22,6 +22,7 @@ package org.neo4j.gds.core.io.file.csv;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.neo4j.gds.CsvTestSupport;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
@@ -127,6 +128,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
     @Inject
     private GraphStore noPropertiesGraphStore;
 
+    public static final List<String> LABEL_MAPPINGS_COLUMNS = List.of("index", "label");
     private static final List<String> NODE_COLUMNS = List.of(ID_COLUMN_NAME);
     private static final List<String> RELATIONSHIP_COLUMNS = List.of(START_ID_COLUMN_NAME, END_ID_COLUMN_NAME);
 
@@ -165,12 +167,13 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
         assertCsvFiles(
             List.of(
-                "nodes_A_B_0.csv",
-                "nodes_A_B_header.csv",
-                "nodes_A_C_0.csv",
-                "nodes_A_C_header.csv",
-                "nodes_B_0.csv",
-                "nodes_B_header.csv",
+                "label-mappings.csv",
+                "nodes_label1_label2_0.csv",
+                "nodes_label1_label2_header.csv",
+                "nodes_label1_label3_0.csv",
+                "nodes_label1_label3_header.csv",
+                "nodes_label2_0.csv",
+                "nodes_label2_header.csv",
                 "relationships_REL1_0.csv",
                 "relationships_REL1_header.csv",
                 "relationships_REL2_0.csv",
@@ -178,28 +181,34 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             )
         );
 
-        // Assert nodes
+        // Assert label mappings
+        CsvTestSupport.assertFileContent(tempDir, "label-mappings.csv", """
+                index,label
+                label1,A
+                label2,B
+                label3,C
+                """);
 
-        assertHeaderFile("nodes_A_B_header.csv", NODE_COLUMNS, abSchema);
+        assertHeaderFile("nodes_label1_label2_header.csv", NODE_COLUMNS, abSchema);
         assertDataContent(
-            "nodes_A_B_0.csv",
+            "nodes_label1_label2_0.csv",
             List.of(
                 List.of(stringIdOf("a"), "0", "42", "1;3;3;7"),
                 List.of(stringIdOf("b"), "1", "43", "")
             )
         );
 
-        assertHeaderFile("nodes_A_C_header.csv", NODE_COLUMNS, acSchema);
+        assertHeaderFile("nodes_label1_label3_header.csv", NODE_COLUMNS, acSchema);
         assertDataContent(
-            "nodes_A_C_0.csv",
+            "nodes_label1_label3_0.csv",
             List.of(
                 List.of(stringIdOf("c"), "2", "44", "1;9;8;4")
             )
         );
 
-        assertHeaderFile("nodes_B_header.csv", NODE_COLUMNS, bSchema);
+        assertHeaderFile("nodes_label2_header.csv", NODE_COLUMNS, bSchema);
         assertDataContent(
-            "nodes_B_0.csv",
+            "nodes_label2_0.csv",
             List.of(
                 List.of(stringIdOf("d"), "3", "", "")
             )

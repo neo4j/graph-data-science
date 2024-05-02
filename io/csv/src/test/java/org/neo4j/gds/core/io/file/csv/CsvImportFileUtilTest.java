@@ -69,15 +69,17 @@ class CsvImportFileUtilTest {
 
     @ParameterizedTest
     @MethodSource("nodeFileNames")
-    void shouldConstructNodeHeaderToDataFileMapping(List<String> fileNames) throws IOException {
+    void shouldConstructNodeHeaderToDataFileMapping(Iterable<String> fileNames) throws IOException {
         for (String fileName : fileNames) {
             Files.createFile(tempDir.resolve(fileName));
         }
-        Map<Path, List<Path>> headerToFileMapping = CsvImportFileUtil.nodeHeaderToFileMapping(tempDir);
+        Map<Path, List<Path>> headerToFileMapping = CsvImportFileUtil.nodeHeaderToFileMapping(
+            tempDir,
+            Stream.of("A_B", "A_C", "B", "Person", "House_Property", "")
+        );
         headerToFileMapping.values().forEach(paths -> paths.sort(Comparator.comparing(Path::toString)));
 
         Map<Path, List<Path>> expectedMapping = Map.of(
-            tempDir.resolve("nodes_header.csv"), List.of(tempDir.resolve("nodes_0.csv")),
             tempDir.resolve("nodes_A_B_header.csv"), List.of(tempDir.resolve("nodes_A_B_0.csv"), tempDir.resolve("nodes_A_B_1.csv")),
             tempDir.resolve("nodes_A_C_header.csv"), List.of(tempDir.resolve("nodes_A_C_0.csv"), tempDir.resolve("nodes_A_C_1.csv")),
             tempDir.resolve("nodes_B_header.csv"), List.of(tempDir.resolve("nodes_B_0.csv"), tempDir.resolve("nodes_B_1.csv"), tempDir.resolve("nodes_B_2.csv")),
