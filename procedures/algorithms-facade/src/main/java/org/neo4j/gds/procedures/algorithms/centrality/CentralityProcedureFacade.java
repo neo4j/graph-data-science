@@ -30,6 +30,7 @@ import org.neo4j.gds.betweenness.BetweennessCentralityStatsConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
+import org.neo4j.gds.closeness.ClosenessCentralityStreamConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetaClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetweennessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.ClosenessCentralityMutateStub;
@@ -230,6 +231,21 @@ public final class CentralityProcedureFacade {
             ClosenessCentralityStatsConfig::of,
             resultBuilder,
             statsMode()::closenessCentrality
+        );
+    }
+
+    public Stream<CentralityStreamResult> closenessCentralityStream(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var resultBuilder = new ClosenessCentralityResultBuilderForStreamMode();
+
+        return streamModeRunner.runStreamModeAlgorithm(
+            graphName,
+            configuration,
+            ClosenessCentralityStreamConfig::of,
+            resultBuilder,
+            streamMode()::closenessCentrality
         );
     }
 

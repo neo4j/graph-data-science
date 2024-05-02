@@ -21,8 +21,6 @@ package org.neo4j.gds.algorithms.centrality;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.StreamComputationResult;
-import org.neo4j.gds.closeness.ClosenessCentralityResult;
-import org.neo4j.gds.closeness.ClosenessCentralityStreamConfig;
 import org.neo4j.gds.degree.DegreeCentralityResult;
 import org.neo4j.gds.degree.DegreeCentralityStreamConfig;
 import org.neo4j.gds.harmonic.HarmonicCentralityStreamConfig;
@@ -46,19 +44,6 @@ public class CentralityAlgorithmsStreamBusinessFacade {
     ) {
 
         var result = centralityAlgorithmsFacade.degreeCentrality(
-            graphName,
-            config
-        );
-
-        return createStreamComputationResult(result);
-    }
-
-    public StreamComputationResult<ClosenessCentralityResult> closenessCentrality(
-        String graphName,
-        ClosenessCentralityStreamConfig config
-    ) {
-
-        var result = centralityAlgorithmsFacade.closenessCentrality(
             graphName,
             config
         );
