@@ -31,6 +31,7 @@ import org.neo4j.gds.betweenness.BetweennessCentralityStreamConfig;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityStatsConfig;
 import org.neo4j.gds.closeness.ClosenessCentralityStreamConfig;
+import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetaClosenessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.BetweennessCentralityMutateStub;
 import org.neo4j.gds.procedures.algorithms.centrality.stubs.ClosenessCentralityMutateStub;
@@ -116,6 +117,22 @@ public final class CentralityProcedureFacade {
 
     public BetaClosenessCentralityMutateStub betaClosenessCentralityMutateStub() {
         return betaClosenessCentralityMutateStub;
+    }
+
+    public Stream<BetaClosenessCentralityWriteResult> betaClosenessCentralityWrite(
+        String graphName,
+        Map<String, Object> configuration
+    ) {
+        var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
+        var resultBuilder = new BetaClosenessCentralityResultBuilderForWriteMode(shouldComputeCentralityDistribution);
+
+        return writeModeRunner.runWriteModeAlgorithm(
+            graphName,
+            configuration,
+            ClosenessCentralityWriteConfig::of,
+            writeMode()::closenessCentrality,
+            resultBuilder
+        );
     }
 
     public BetweennessCentralityMutateStub betweennessCentralityMutateStub() {
@@ -246,6 +263,19 @@ public final class CentralityProcedureFacade {
             ClosenessCentralityStreamConfig::of,
             resultBuilder,
             streamMode()::closenessCentrality
+        );
+    }
+
+    public Stream<CentralityWriteResult> closenessCentralityWrite(String graphName, Map<String, Object> configuration) {
+        var shouldComputeCentralityDistribution = procedureReturnColumns.contains("centralityDistribution");
+        var resultBuilder = new ClosenessCentralityResultBuilderForWriteMode(shouldComputeCentralityDistribution);
+
+        return writeModeRunner.runWriteModeAlgorithm(
+            graphName,
+            configuration,
+            ClosenessCentralityWriteConfig::of,
+            writeMode()::closenessCentrality,
+            resultBuilder
         );
     }
 

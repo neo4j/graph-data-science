@@ -17,19 +17,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.neo4j.gds.procedures.centrality.betacloseness;
+package org.neo4j.gds.procedures.algorithms.centrality;
 
-import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.ProcedureReturnColumns;
 import org.neo4j.gds.core.concurrency.Concurrency;
-import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 import org.neo4j.gds.procedures.algorithms.results.StandardWriteResult;
+import org.neo4j.gds.result.AbstractCentralityResultBuilder;
 
 import java.util.Map;
 
-@SuppressWarnings("unused")
 public final class BetaClosenessCentralityWriteResult extends StandardWriteResult {
-
     public final long nodePropertiesWritten;
     public final String writeProperty;
     public final Map<String, Object> centralityDistribution;
@@ -41,7 +38,7 @@ public final class BetaClosenessCentralityWriteResult extends StandardWriteResul
         long postProcessingMillis,
         long writeMillis,
         String writeProperty,
-        @Nullable Map<String, Object> centralityDistribution,
+        Map<String, Object> centralityDistribution,
         Map<String, Object> config
     ) {
         super(preProcessingMillis, computeMillis, postProcessingMillis, writeMillis, config);
@@ -55,11 +52,6 @@ public final class BetaClosenessCentralityWriteResult extends StandardWriteResul
 
         public Builder(ProcedureReturnColumns returnColumns, Concurrency concurrency) {
             super(returnColumns, concurrency);
-        }
-
-        public Builder withWriteProperty(String writeProperty) {
-            this.writeProperty = writeProperty;
-            return this;
         }
 
         @Override

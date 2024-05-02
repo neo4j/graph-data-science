@@ -27,11 +27,13 @@ import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
+import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
 import org.neo4j.gds.logging.Log;
 
 import java.util.Optional;
 
 import static org.neo4j.gds.applications.algorithms.centrality.AlgorithmLabels.BETWEENNESS_CENTRALITY;
+import static org.neo4j.gds.applications.algorithms.centrality.AlgorithmLabels.CLOSENESS_CENTRALITY;
 
 public final class CentralityAlgorithmsWriteModeBusinessFacade {
     private final CentralityAlgorithmsEstimationModeBusinessFacade estimationFacade;
@@ -82,6 +84,24 @@ public final class CentralityAlgorithmsWriteModeBusinessFacade {
             BETWEENNESS_CENTRALITY,
             () -> estimationFacade.betweennessCentrality(configuration),
             graph -> centralityAlgorithms.betweennessCentrality(graph, configuration),
+            Optional.of(writeStep),
+            resultBuilder
+        );
+    }
+
+    public <RESULT> RESULT closenessCentrality(
+        GraphName graphName,
+        ClosenessCentralityWriteConfig configuration,
+        ResultBuilder<ClosenessCentralityWriteConfig, CentralityAlgorithmResult, RESULT, NodePropertiesWritten> resultBuilder
+    ) {
+        var writeStep = new ClosenessCentralityWriteStep(writeToDatabase, configuration);
+
+        return algorithmProcessingTemplate.processAlgorithm(
+            graphName,
+            configuration,
+            CLOSENESS_CENTRALITY,
+            () -> estimationFacade.closenessCentrality(configuration),
+            graph -> centralityAlgorithms.closenessCentrality(graph, configuration),
             Optional.of(writeStep),
             resultBuilder
         );

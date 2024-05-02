@@ -21,9 +21,6 @@ package org.neo4j.gds.algorithms.centrality;
 
 import org.neo4j.gds.algorithms.AlgorithmComputationResult;
 import org.neo4j.gds.algorithms.runner.AlgorithmRunner;
-import org.neo4j.gds.closeness.ClosenessCentralityAlgorithmFactory;
-import org.neo4j.gds.closeness.ClosenessCentralityBaseConfig;
-import org.neo4j.gds.closeness.ClosenessCentralityResult;
 import org.neo4j.gds.degree.DegreeCentralityConfig;
 import org.neo4j.gds.degree.DegreeCentralityFactory;
 import org.neo4j.gds.degree.DegreeCentralityResult;
@@ -57,20 +54,6 @@ public class CentralityAlgorithmsFacade {
             config,
             config.relationshipWeightProperty(),
             new DegreeCentralityFactory<>()
-
-        );
-    }
-
-    AlgorithmComputationResult<ClosenessCentralityResult> closenessCentrality(
-        String graphName,
-        ClosenessCentralityBaseConfig config
-
-    ) {
-        return algorithmRunner.run(
-            graphName,
-            config,
-            Optional.empty(),
-            new ClosenessCentralityAlgorithmFactory<>()
 
         );
     }

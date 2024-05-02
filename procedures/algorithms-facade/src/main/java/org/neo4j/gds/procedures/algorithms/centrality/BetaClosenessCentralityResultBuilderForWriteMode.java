@@ -25,37 +25,48 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.applications.algorithms.machinery.AlgorithmProcessingTimings;
 import org.neo4j.gds.applications.algorithms.machinery.ResultBuilder;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
-import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
+import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
 
 import java.util.Optional;
 import java.util.stream.Stream;
 
-class BetweennessCentralityResultBuilderForWriteMode implements ResultBuilder<BetweennessCentralityWriteConfig, CentralityAlgorithmResult, Stream<CentralityWriteResult>, NodePropertiesWritten> {
+class BetaClosenessCentralityResultBuilderForWriteMode implements ResultBuilder<ClosenessCentralityWriteConfig, CentralityAlgorithmResult, Stream<BetaClosenessCentralityWriteResult>, NodePropertiesWritten> {
     private final GenericCentralityResultBuilderForWriteMode genericResultBuilder = new GenericCentralityResultBuilderForWriteMode();
 
     private final boolean shouldComputeCentralityDistribution;
 
-    BetweennessCentralityResultBuilderForWriteMode(boolean shouldComputeCentralityDistribution) {
+    BetaClosenessCentralityResultBuilderForWriteMode(boolean shouldComputeCentralityDistribution) {
         this.shouldComputeCentralityDistribution = shouldComputeCentralityDistribution;
     }
 
     @Override
-    public Stream<CentralityWriteResult> build(
+    public Stream<BetaClosenessCentralityWriteResult> build(
         Graph graph,
         GraphStore graphStore,
-        BetweennessCentralityWriteConfig configuration,
+        ClosenessCentralityWriteConfig configuration,
         Optional<CentralityAlgorithmResult> result,
         AlgorithmProcessingTimings timings,
         Optional<NodePropertiesWritten> metadata
     ) {
+        var writeResult = genericResultBuilder.build(
+            graph,
+            configuration,
+            result,
+            timings,
+            metadata,
+            shouldComputeCentralityDistribution
+        );
+
         return Stream.of(
-            genericResultBuilder.build(
-                graph,
-                configuration,
-                result,
-                timings,
-                metadata,
-                shouldComputeCentralityDistribution
+            new BetaClosenessCentralityWriteResult(
+                writeResult.nodePropertiesWritten,
+                writeResult.preProcessingMillis,
+                writeResult.computeMillis,
+                writeResult.postProcessingMillis,
+                writeResult.writeMillis,
+                configuration.writeProperty(),
+                writeResult.centralityDistribution,
+                writeResult.configuration
             )
         );
     }
