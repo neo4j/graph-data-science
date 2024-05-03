@@ -23,6 +23,7 @@ import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 import org.neo4j.values.storable.Values;
@@ -44,6 +45,7 @@ public abstract class RelationshipExporterBuilder {
     protected long batchSize = NativeNodePropertyExporter.MIN_BATCH_SIZE;
     protected Optional<String> remoteDatabaseName; // coupled with arrowConnectionInfo, but should not appear in external API
     protected Optional<ResultStore> resultStore;
+    protected JobId jobId;
 
     public abstract RelationshipExporter build();
 
@@ -99,6 +101,11 @@ public abstract class RelationshipExporterBuilder {
 
     public RelationshipExporterBuilder withResultStore(Optional<ResultStore> resultStore) {
         this.resultStore = resultStore;
+        return this;
+    }
+
+    public RelationshipExporterBuilder withJobId(JobId jobId){
+        this.jobId = jobId;
         return this;
     }
 }
