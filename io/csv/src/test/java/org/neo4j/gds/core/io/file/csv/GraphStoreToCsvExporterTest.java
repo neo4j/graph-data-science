@@ -142,7 +142,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         var parameters = new GraphStoreToFileExporterParameters(
             tempDir.toString(),
             "",
-            true,
             RelationshipType.ALL_RELATIONSHIPS,
             new Concurrency(1),
             10_000
@@ -249,7 +248,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         var parameters = new GraphStoreToFileExporterParameters(
             tempDir.toString(),
             "",
-            false,
             RelationshipType.ALL_RELATIONSHIPS,
             new Concurrency(1),
             10_000
@@ -304,7 +302,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         var parameters = new GraphStoreToFileExporterParameters(
             tempDir.toString(),
             "",
-            true,
             RelationshipType.ALL_RELATIONSHIPS,
             new Concurrency(2),
             10_000
@@ -382,7 +379,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         var parameters = new GraphStoreToFileExporterParameters(
             tempDir.toString(),
             "",
-            false,
             RelationshipType.ALL_RELATIONSHIPS,
             new Concurrency(4),
             10_000
@@ -457,7 +453,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         var parameters = new GraphStoreToFileExporterParameters(
             tempDir.toString(),
             "",
-            true,
             RelationshipType.ALL_RELATIONSHIPS,
             new Concurrency(1),
             10_000
@@ -655,7 +650,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         var parameters = new GraphStoreToFileExporterParameters(
             tempDir.toString(),
             "UserA",
-            true,
             RelationshipType.ALL_RELATIONSHIPS,
             new Concurrency(1),
             10_000
@@ -684,7 +678,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         var parameters = new GraphStoreToFileExporterParameters(
             tempDir.toString(),
             "",
-            true,
             RelationshipType.ALL_RELATIONSHIPS,
             new Concurrency(1),
             10_000
@@ -737,7 +730,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         var parameters = new GraphStoreToFileExporterParameters(
             tempDir.toString(),
             "",
-            false,
             RelationshipType.ALL_RELATIONSHIPS,
             new Concurrency(1),
             10_000
@@ -785,7 +777,6 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         var parameters = new GraphStoreToFileExporterParameters(
             tempDir.toString(),
             "",
-            true,
             RelationshipType.ALL_RELATIONSHIPS,
             new Concurrency(1),
             10_000

@@ -176,7 +176,6 @@ public class GraphStoreExportProc extends BaseProc {
         var exportParameters = new GraphStoreToFileExporterParameters(
             exportConfig.exportName(),
             exportConfig.username(),
-            true,
             RelationshipType.of(exportConfig.defaultRelationshipType()),
             exportConfig.typedWriteConcurrency(),
             exportConfig.batchSize()

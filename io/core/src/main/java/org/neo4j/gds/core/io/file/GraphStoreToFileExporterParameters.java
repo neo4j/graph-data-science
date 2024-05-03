@@ -27,7 +27,6 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 public record GraphStoreToFileExporterParameters(
     String exportName,
     String username,
-    boolean includeMetaData,
     RelationshipType defaultRelationshipType,
     Concurrency concurrency,
     int batchSize

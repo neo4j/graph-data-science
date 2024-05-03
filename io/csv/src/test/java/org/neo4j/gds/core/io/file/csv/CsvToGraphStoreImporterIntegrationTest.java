@@ -277,7 +277,6 @@ class CsvToGraphStoreImporterIntegrationTest {
         return new GraphStoreToFileExporterParameters(
             "my-export",
             "",
-            true,
             RelationshipType.ALL_RELATIONSHIPS,
             new Concurrency(concurrency),
             10_000
