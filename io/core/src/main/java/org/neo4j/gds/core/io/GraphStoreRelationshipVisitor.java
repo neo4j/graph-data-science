@@ -48,7 +48,7 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
         Map<String, RelationshipsBuilder> relationshipBuilders,
         List<RelationshipType> inverseIndexedRelationshipTypes
     ) {
-        super(relationshipSchema);
+        super(relationshipSchema, IdentifierMapper.biject(RelationshipType::name, RelationshipType::of));
         this.relationshipBuilderSupplier = relationshipBuilderSupplier;
         this.relationshipBuilders = relationshipBuilders;
         this.inverseIndexedRelationshipTypes = inverseIndexedRelationshipTypes;

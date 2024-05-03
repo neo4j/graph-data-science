@@ -20,16 +20,20 @@
 package org.neo4j.gds.core.io.file.csv;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.PropertyState;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.Direction;
 import org.neo4j.gds.api.schema.MutableRelationshipSchema;
+import org.neo4j.gds.core.io.IdentifierMapper;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.neo4j.gds.core.io.file.csv.CsvRelationshipVisitor.END_ID_COLUMN_NAME;
 import static org.neo4j.gds.core.io.file.csv.CsvRelationshipVisitor.START_ID_COLUMN_NAME;
 
@@ -37,7 +41,7 @@ class CsvRelationshipVisitorTest extends CsvVisitorTest {
 
     @Test
     void visitRelationshipsWithTypes() {
-        var relationshipVisitor = new CsvRelationshipVisitor(tempDir, MutableRelationshipSchema.empty());
+        var relationshipVisitor = new CsvRelationshipVisitor(tempDir, MutableRelationshipSchema.empty(), IdentifierMapper.biject(RelationshipType::name, RelationshipType::of));
 
         relationshipVisitor.startId(0L);
         relationshipVisitor.endId(1L);
@@ -53,7 +57,7 @@ class CsvRelationshipVisitorTest extends CsvVisitorTest {
         relationshipVisitor.endId(0L);
         relationshipVisitor.type("Foo");
         relationshipVisitor.endOfEntity();
-        
+
         relationshipVisitor.close();
 
         assertCsvFiles(List.of("relationships_Foo_0.csv", "relationships_Foo_header.csv", "relationships_Bar_0.csv", "relationships_Bar_header.csv"));
@@ -74,7 +78,7 @@ class CsvRelationshipVisitorTest extends CsvVisitorTest {
             )
         );
     }
-    
+
     @Test
     void visitRelationshipsWithTypesAndProperties() {
         var aType = RelationshipType.of("A");
@@ -89,7 +93,7 @@ class CsvRelationshipVisitorTest extends CsvVisitorTest {
             .addProperty("bar", ValueType.LONG, PropertyState.PERSISTENT)
             .addProperty("baz", ValueType.DOUBLE, PropertyState.PERSISTENT);
 
-        var relationshipVisitor= new CsvRelationshipVisitor(tempDir, relationshipSchema);
+        var relationshipVisitor= new CsvRelationshipVisitor(tempDir, relationshipSchema, IdentifierMapper.biject(RelationshipType::name, RelationshipType::of));
 
         // :A
         relationshipVisitor.startId(0L);
@@ -137,6 +141,29 @@ class CsvRelationshipVisitorTest extends CsvVisitorTest {
             )
         );
 
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"with_underscores__", "āăąåä", "αаאاぁァ", "ćĉċč", "ĺļľŀł"})
+    void shouldMapRelationshipTypes(String relationshipTypeString) {
+        var type = RelationshipType.of(relationshipTypeString);
+        var relationshipSchema = MutableRelationshipSchema.empty();
+        relationshipSchema.getOrCreateRelationshipType(type, Direction.DIRECTED);
+        var relationshipTypeMappingBuilder = IdentifierMapper.<RelationshipType>builder("type");
+        relationshipTypeMappingBuilder.getOrCreateIdentifierFor(type);
+        var relationshipTypeMapping = relationshipTypeMappingBuilder.build();
+        var relationshipVisitor = new CsvRelationshipVisitor(tempDir, relationshipSchema, relationshipTypeMapping);
+
+        relationshipVisitor.startId(0L);
+        relationshipVisitor.endId(1L);
+        relationshipVisitor.type(type.name);
+        relationshipVisitor.endOfEntity();
+        relationshipVisitor.close();
+
+        var expectedFiles = List.of("relationships_type1_0.csv", "relationships_type1_header.csv");
+        for (String expectedFile : expectedFiles) {
+            assertThat(tempDir.toFile()).isDirectoryContaining(file -> file.getName().equals(expectedFile));
+        }
     }
 
     @Override

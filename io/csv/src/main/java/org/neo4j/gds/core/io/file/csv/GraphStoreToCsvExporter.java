@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.io.file.csv;
 
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.schema.MutableNodeSchema;
@@ -67,12 +68,18 @@ public final class GraphStoreToCsvExporter {
             labelMapperBuilder.getOrCreateIdentifierFor(nodeLabel);
         }
         var labelMapper = labelMapperBuilder.build();
+        var relationshipTypeMapperBuilder = IdentifierMapper.<RelationshipType>builder("type");
+        for (var relationshipType : graphStore.relationshipTypes()) {
+            relationshipTypeMapperBuilder.getOrCreateIdentifierFor(relationshipType);
+        }
+        var relationshipTypeMapper = relationshipTypeMapperBuilder.build();
 
         return new GraphStoreToFileExporter(
             graphStore,
             parameters,
             neoNodeProperties,
             labelMapper,
+            relationshipTypeMapper,
             () -> new UserInfoVisitor(exportPath),
             () -> new CsvGraphInfoVisitor(exportPath),
             () -> new CsvNodeSchemaVisitor(exportPath),
@@ -87,7 +94,7 @@ public final class GraphStoreToCsvExporter {
                 index,
                 labelMapper
             ),
-            (index) -> new CsvRelationshipVisitor(exportPath, relationshipSchema, headerFiles, index),
+            (index) -> new CsvRelationshipVisitor(exportPath, relationshipSchema, headerFiles, index, relationshipTypeMapper),
             (index) -> new CsvGraphPropertyVisitor(
                 exportPath,
                 graphStore.schema().graphProperties(),

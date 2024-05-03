@@ -20,8 +20,10 @@
 package org.neo4j.gds.core.io.file.csv;
 
 import org.jetbrains.annotations.TestOnly;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.schema.PropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
+import org.neo4j.gds.core.io.IdentifierMapper;
 import org.neo4j.gds.core.io.file.RelationshipVisitor;
 
 import java.io.IOException;
@@ -48,9 +50,10 @@ public class CsvRelationshipVisitor extends RelationshipVisitor {
         Path fileLocation,
         RelationshipSchema relationshipSchema,
         Set<String> headerFiles,
-        int visitorId
+        int visitorId,
+        IdentifierMapper<RelationshipType> relationshipTypeMapping
     ) {
-        super(relationshipSchema);
+        super(relationshipSchema, relationshipTypeMapping);
         this.fileLocation = fileLocation;
         this.headerFiles = headerFiles;
         this.visitorId = visitorId;
@@ -58,8 +61,12 @@ public class CsvRelationshipVisitor extends RelationshipVisitor {
     }
 
     @TestOnly
-    CsvRelationshipVisitor(Path fileLocation, RelationshipSchema relationshipSchema) {
-        this(fileLocation, relationshipSchema, new HashSet<>(), 0);
+    CsvRelationshipVisitor(
+        Path fileLocation,
+        RelationshipSchema relationshipSchema,
+        IdentifierMapper<RelationshipType> relationshipTypeMapping
+    ) {
+        this(fileLocation, relationshipSchema, new HashSet<>(), 0, relationshipTypeMapping);
     }
 
     @Override

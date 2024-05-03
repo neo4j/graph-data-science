@@ -42,6 +42,7 @@ public abstract class GraphStoreExporter {
     private final RelationshipType defaultRelationshipType;
     protected final Concurrency concurrency;
     private final int batchSize;
+    private final IdentifierMapper<RelationshipType> relationshipTypeMapping;
 
     public enum IdMappingType implements IdMapFunction {
         MAPPED {
@@ -88,6 +89,7 @@ public abstract class GraphStoreExporter {
         GraphStore graphStore,
         Optional<NeoNodeProperties> neoNodeProperties,
         IdentifierMapper<NodeLabel> nodeLabelMapping,
+        IdentifierMapper<RelationshipType> relationshipTypeMapping,
         RelationshipType defaultRelationshipType,
         Concurrency concurrency,
         int batchSize
@@ -100,6 +102,7 @@ public abstract class GraphStoreExporter {
             .map(NeoNodeProperties::neoNodeProperties)
             .orElse(Map.of());
         this.nodeLabelMapping = nodeLabelMapping;
+        this.relationshipTypeMapping = relationshipTypeMapping;
     }
 
     protected abstract void export(GraphStoreInput graphStoreInput);
@@ -113,7 +116,7 @@ public abstract class GraphStoreExporter {
             neoNodeProperties,
             nodeLabelMapping
         );
-        var relationshipStore = RelationshipStore.of(graphStore, defaultRelationshipType);
+        var relationshipStore = RelationshipStore.of(graphStore, defaultRelationshipType, relationshipTypeMapping);
         var graphProperties = graphStore
             .graphPropertyKeys()
             .stream()

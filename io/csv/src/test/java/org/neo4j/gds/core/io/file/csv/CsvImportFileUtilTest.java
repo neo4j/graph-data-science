@@ -101,7 +101,7 @@ class CsvImportFileUtilTest {
             .map(Path::toString)
             .collect(Collectors.toList());
 
-        assertThat(relationshipHeaderFiles).containsExactlyInAnyOrder("relationships_REL_header.csv", "relationships_REL1_header.csv", "relationships_REL2_header.csv");
+        assertThat(relationshipHeaderFiles).containsExactlyInAnyOrder("relationships_type_header.csv", "relationships_type1_header.csv", "relationships_type2_header.csv");
     }
 
     @ParameterizedTest
@@ -114,9 +114,9 @@ class CsvImportFileUtilTest {
         relationshipHeaderToFileMapping.values().forEach(paths -> paths.sort(Comparator.comparing(Path::toString)));
 
         Map<Path, List<Path>> expectedMapping = Map.of(
-            tempDir.resolve("relationships_REL_header.csv"), List.of(tempDir.resolve("relationships_REL_0.csv"), tempDir.resolve("relationships_REL_1.csv")),
-            tempDir.resolve("relationships_REL1_header.csv"), List.of(tempDir.resolve("relationships_REL1_0.csv"), tempDir.resolve("relationships_REL1_1.csv")),
-            tempDir.resolve("relationships_REL2_header.csv"), List.of(tempDir.resolve("relationships_REL2_0.csv"), tempDir.resolve("relationships_REL2_1.csv"), tempDir.resolve("relationships_REL2_2.csv"))
+            tempDir.resolve("relationships_type_header.csv"), List.of(tempDir.resolve("relationships_type_0.csv"), tempDir.resolve("relationships_type_1.csv")),
+            tempDir.resolve("relationships_type1_header.csv"), List.of(tempDir.resolve("relationships_type1_0.csv"), tempDir.resolve("relationships_type1_1.csv")),
+            tempDir.resolve("relationships_type2_header.csv"), List.of(tempDir.resolve("relationships_type2_0.csv"), tempDir.resolve("relationships_type2_1.csv"), tempDir.resolve("relationships_type2_2.csv"))
         );
         assertThat(relationshipHeaderToFileMapping).containsExactlyInAnyOrderEntriesOf(expectedMapping);
     }
@@ -248,16 +248,16 @@ class CsvImportFileUtilTest {
         return Stream.of(
             Arguments.of(
                 List.of(
-                    "relationships_REL_0.csv",
-                    "relationships_REL_1.csv",
-                    "relationships_REL1_0.csv",
-                    "relationships_REL1_1.csv",
-                    "relationships_REL2_0.csv",
-                    "relationships_REL2_1.csv",
-                    "relationships_REL2_2.csv",
-                    "relationships_REL_header.csv",
-                    "relationships_REL1_header.csv",
-                    "relationships_REL2_header.csv"
+                    "relationships_type_0.csv",
+                    "relationships_type_1.csv",
+                    "relationships_type1_0.csv",
+                    "relationships_type1_1.csv",
+                    "relationships_type2_0.csv",
+                    "relationships_type2_1.csv",
+                    "relationships_type2_2.csv",
+                    "relationships_type_header.csv",
+                    "relationships_type1_header.csv",
+                    "relationships_type2_header.csv"
                 )
             )
         );

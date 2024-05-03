@@ -37,19 +37,22 @@ public final class RelationshipStore {
     private final long propertyCount;
 
     final Map<RelationshipType, CompositeRelationshipIterator> relationshipIterators;
+    private final IdentifierMapper<RelationshipType> relationshipTypeMapper;
     private final IdMap idMap;
 
     private RelationshipStore(
         IdMap idMap,
         long relationshipCount,
         long propertyCount,
-        Map<RelationshipType, CompositeRelationshipIterator> relationshipIterators
+        Map<RelationshipType, CompositeRelationshipIterator> relationshipIterators,
+        IdentifierMapper<RelationshipType> relationshipTypeMapper
     ) {
         this.idMap = idMap;
         this.nodeCount = idMap.nodeCount();
         this.relationshipCount = relationshipCount;
         this.propertyCount = propertyCount;
         this.relationshipIterators = relationshipIterators;
+        this.relationshipTypeMapper = relationshipTypeMapper;
     }
 
     long propertyCount() {
@@ -70,11 +73,16 @@ public final class RelationshipStore {
             idMap,
             relationshipCount,
             propertyCount,
-            copyIterators
+            copyIterators,
+            relationshipTypeMapper
         );
     }
 
-    static RelationshipStore of(GraphStore graphStore, RelationshipType defaultRelationshipType) {
+    static RelationshipStore of(
+        GraphStore graphStore,
+        RelationshipType defaultRelationshipType,
+        IdentifierMapper<RelationshipType> relationshipTypeMapping
+    ) {
         Map<RelationshipType, CompositeRelationshipIterator> relationshipIterators = new HashMap<>();
         var propertyCount = new MutableLong(0);
 
@@ -101,7 +109,8 @@ public final class RelationshipStore {
             graphStore.nodes(),
             graphStore.relationshipCount(),
             propertyCount.getValue(),
-            relationshipIterators
+            relationshipIterators,
+            relationshipTypeMapping
         );
     }
 }

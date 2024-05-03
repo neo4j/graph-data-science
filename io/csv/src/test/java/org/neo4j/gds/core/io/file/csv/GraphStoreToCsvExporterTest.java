@@ -172,10 +172,10 @@ class GraphStoreToCsvExporterTest extends CsvTest {
                 "nodes_label1_label3_header.csv",
                 "nodes_label2_0.csv",
                 "nodes_label2_header.csv",
-                "relationships_REL1_0.csv",
-                "relationships_REL1_header.csv",
-                "relationships_REL2_0.csv",
-                "relationships_REL2_header.csv"
+                "relationships_type1_0.csv",
+                "relationships_type1_header.csv",
+                "relationships_type2_0.csv",
+                "relationships_type2_header.csv"
             )
         );
 
@@ -214,9 +214,9 @@ class GraphStoreToCsvExporterTest extends CsvTest {
 
         // assert relationships
 
-        assertHeaderFile("relationships_REL1_header.csv", RELATIONSHIP_COLUMNS, rel1Schema);
+        assertHeaderFile("relationships_type1_header.csv", RELATIONSHIP_COLUMNS, rel1Schema);
         assertDataContent(
-            "relationships_REL1_0.csv",
+            "relationships_type1_0.csv",
             List.of(
                 List.of(stringIdOf("a"), stringIdOf("a"), "0.0", "42.0"),
                 List.of(stringIdOf("a"), stringIdOf("a"), "0.0", "42.0"),
@@ -228,9 +228,9 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             )
         );
 
-        assertHeaderFile("relationships_REL2_header.csv", RELATIONSHIP_COLUMNS, rel2Schema);
+        assertHeaderFile("relationships_type2_header.csv", RELATIONSHIP_COLUMNS, rel2Schema);
         assertDataContent(
-            "relationships_REL2_0.csv",
+            "relationships_type2_0.csv",
             List.of(
                 List.of(stringIdOf("b"), stringIdOf("c"), "3.0", "45.0"),
                 List.of(stringIdOf("c"), stringIdOf("b"), "3.0", "45.0"),
@@ -322,7 +322,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         // Assert headers
         var nodeSchema = concurrentGraphStore.schema().nodeSchema();
         assertHeaderFile("nodes_header.csv", NODE_COLUMNS, nodeSchema.unionProperties());
-        assertHeaderFile("relationships_REL1_header.csv", RELATIONSHIP_COLUMNS, Collections.emptyMap());
+        assertHeaderFile("relationships_type1_header.csv", RELATIONSHIP_COLUMNS, Collections.emptyMap());
 
         // Sometimes we end up with only one file, so we cannot make absolute assumptions about the files created
         var nodeContents = Arrays.stream(
@@ -751,8 +751,8 @@ class GraphStoreToCsvExporterTest extends CsvTest {
             List.of(
                 "nodes_0.csv",
                 "nodes_header.csv",
-                "relationships_REL_0.csv",
-                "relationships_REL_header.csv"
+                "relationships_type1_0.csv",
+                "relationships_type1_header.csv"
             )
         );
 
@@ -765,7 +765,7 @@ class GraphStoreToCsvExporterTest extends CsvTest {
         );
 
         assertDataContent(
-            "relationships_REL_0.csv",
+            "relationships_type1_0.csv",
             List.of(
                 List.of("42", "43")
             )

@@ -20,6 +20,7 @@
 package org.neo4j.gds.core.io.file;
 
 import org.neo4j.gds.NodeLabel;
+import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.core.concurrency.ParallelUtil;
 import org.neo4j.gds.core.concurrency.RunWithConcurrency;
@@ -75,6 +76,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
         GraphStoreToFileExporterParameters parameters,
         Optional<NeoNodeProperties> neoNodeProperties,
         IdentifierMapper<NodeLabel> nodeLabelMapping,
+        IdentifierMapper<RelationshipType> relationshipTypeMapping,
         Supplier<SingleRowVisitor<String>> userInfoVisitorSupplier,
         Supplier<SingleRowVisitor<GraphInfo>> graphInfoVisitorSupplier,
         Supplier<NodeSchemaVisitor> nodeSchemaVisitorSupplier,
@@ -94,6 +96,7 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
             graphStore,
             neoNodeProperties,
             nodeLabelMapping,
+            relationshipTypeMapping,
             parameters.defaultRelationshipType(),
             parameters.concurrency(),
             parameters.batchSize()

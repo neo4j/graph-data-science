@@ -22,6 +22,7 @@ package org.neo4j.gds.core.io.file;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.schema.RelationshipPropertySchema;
 import org.neo4j.gds.api.schema.RelationshipSchema;
+import org.neo4j.gds.core.io.IdentifierMapper;
 import org.neo4j.internal.batchimport.input.Group;
 
 import java.util.List;
@@ -29,14 +30,19 @@ import java.util.List;
 public abstract class RelationshipVisitor extends ElementVisitor<RelationshipPropertySchema> {
 
     private final RelationshipSchema relationshipSchema;
+    private final IdentifierMapper<RelationshipType> relationshipTypeMapping;
 
     private long currentStartNode;
     private long currentEndNode;
     private String relationshipType;
 
-    protected RelationshipVisitor(RelationshipSchema relationshipSchema) {
+    protected RelationshipVisitor(
+        RelationshipSchema relationshipSchema,
+        IdentifierMapper<RelationshipType> relationshipTypeMapping
+    ) {
         super(relationshipSchema.allProperties());
         this.relationshipSchema = relationshipSchema;
+        this.relationshipTypeMapping = relationshipTypeMapping;
         reset();
     }
 
@@ -51,7 +57,7 @@ public abstract class RelationshipVisitor extends ElementVisitor<RelationshipPro
     }
 
     public String relationshipType() {
-        return relationshipType;
+        return relationshipTypeMapping.identifierFor(RelationshipType.of(relationshipType));
     }
 
     // Additional listeners for relationship related data
