@@ -22,6 +22,8 @@ package org.neo4j.gds.core.write.resultstore;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.api.ResultStoreEntry;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.write.RelationshipPropertiesExporter;
 
 import java.util.List;
@@ -30,15 +32,18 @@ import java.util.function.LongUnaryOperator;
 
 public class ResultStoreRelationshipPropertiesExporter implements RelationshipPropertiesExporter {
 
+    private final JobId jobId;
     private final GraphStore graphStore;
     private final ResultStore resultStore;
     private final LongUnaryOperator toOriginalId;
 
     ResultStoreRelationshipPropertiesExporter(
+        JobId jobId,
         GraphStore graphStore,
         ResultStore resultStore,
         LongUnaryOperator toOriginalId
     ) {
+        this.jobId = jobId;
         this.graphStore = graphStore;
         this.resultStore = resultStore;
         this.toOriginalId = toOriginalId;
@@ -49,13 +54,24 @@ public class ResultStoreRelationshipPropertiesExporter implements RelationshipPr
         if (propertyKeys.isEmpty()) {
             var graph = graphStore.getGraph(RelationshipType.of(relationshipType));
             resultStore.addRelationship(relationshipType, graph, graph::toOriginalNodeId);
+            resultStore.add(jobId, new ResultStoreEntry.RelationshipTopology(relationshipType, graph, graph::toOriginalNodeId));
         } else if (propertyKeys.size() == 1) {
             var propertyKey = propertyKeys.get(0);
             var graph = graphStore.getGraph(RelationshipType.of(relationshipType), Optional.of(propertyKey));
             resultStore.addRelationship(relationshipType, propertyKey, graph, graph::toOriginalNodeId);
+            resultStore.add(jobId, new ResultStoreEntry.RelationshipsFromGraph(relationshipType, propertyKey, graph, graph::toOriginalNodeId));
         } else {
             var relationshipIterator = graphStore.getCompositeRelationshipIterator(RelationshipType.of(relationshipType), propertyKeys);
             resultStore.addRelationshipIterator(relationshipType, propertyKeys, relationshipIterator, toOriginalId);
+            resultStore.add(
+                jobId,
+                new ResultStoreEntry.RelationshipIterators(relationshipType,
+                    propertyKeys,
+                    relationshipIterator,
+                    toOriginalId,
+                    graphStore.nodeCount()
+                )
+            );
         }
     }
 }
