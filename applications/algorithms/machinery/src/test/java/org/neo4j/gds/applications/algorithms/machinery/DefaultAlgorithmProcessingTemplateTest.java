@@ -270,7 +270,7 @@ class DefaultAlgorithmProcessingTemplateTest {
 
         var resultMap = algorithmProcessingTemplate.processAlgorithm(
             null,
-            null,
+            new ExampleConfiguration(),
             null,
             null,
             null,
