@@ -181,7 +181,7 @@ class CsvImportFileUtilTest {
         var headerPath = tempDir.resolve("relationships_R_header.csv");
         FileUtils.writeLines(headerPath.toFile(), List.of(":START_ID,:END_ID,foo:long,bar:double"));
 
-        var parsedHeader = CsvImportFileUtil.parseRelationshipHeader(headerPath);
+        var parsedHeader = CsvImportFileUtil.parseRelationshipHeader(headerPath, Functions.identity());
 
         assertThat(parsedHeader.relationshipType()).isEqualTo("R");
         assertThat(parsedHeader.propertyMappings()).containsExactlyInAnyOrder(

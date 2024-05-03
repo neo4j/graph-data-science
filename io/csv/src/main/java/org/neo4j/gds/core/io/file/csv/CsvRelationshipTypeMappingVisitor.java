@@ -32,7 +32,7 @@ import java.util.Map;
 public class CsvRelationshipTypeMappingVisitor  implements SimpleVisitor<Map.Entry<RelationshipType, String>> {
     private static final String LABEL_MAPPING = "index";
     private static final String TYPE_COLUMN_NAME = "type";
-    static final String TYPE_MAPPING_FILE_NAME = "type-mappings.csv";
+    static final String TYPE_MAPPING_FILE_NAME = "type_mappings.csv";
     private final CsvWriter csvWriter;
 
     CsvRelationshipTypeMappingVisitor(Path fileLocation) {

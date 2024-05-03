@@ -65,13 +65,16 @@ final class CsvImportFileUtil {
         }
     }
 
-    public static RelationshipFileHeader parseRelationshipHeader(Path headerFile) {
+    public static RelationshipFileHeader parseRelationshipHeader(Path headerFile, Function<String, String> typeMapping) {
         try (MappingIterator<String[]> iterator = HEADER_FILE_READER.readValues(headerFile.toFile())) {
             var headerLine = iterator.next();
             if (headerLine == null) {
                 throw new UncheckedIOException(new IOException("Header line was null"));
             }
-            return RelationshipFileHeader.of(headerLine, inferRelationshipType(headerFile));
+            return RelationshipFileHeader.of(
+                headerLine,
+                typeMapping.apply(inferRelationshipType(headerFile))
+            );
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
