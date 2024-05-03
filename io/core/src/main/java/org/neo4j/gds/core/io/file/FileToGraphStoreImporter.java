@@ -21,7 +21,6 @@ package org.neo4j.gds.core.io.file;
 
 import org.neo4j.common.Validator;
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipPropertyStore;
@@ -95,6 +94,7 @@ public abstract class FileToGraphStoreImporter {
 
     protected abstract String rootTaskName();
 
+    public record UserGraphStore(String userName, GraphStore graphStore) {}
     public UserGraphStore run() {
         var fileInput = fileInput(importPath);
         this.progressTracker = createProgressTracker(fileInput);
@@ -103,7 +103,7 @@ public abstract class FileToGraphStoreImporter {
             progressTracker.beginSubTask();
             importGraphStore(fileInput);
             graphStoreBuilder.schema(graphSchemaBuilder.build());
-            var userGraphStore = ImmutableUserGraphStore.of(fileInput.userName(), graphStoreBuilder.build());
+            var userGraphStore = new UserGraphStore(fileInput.userName(), graphStoreBuilder.build());
             progressTracker.endSubTask();
 
             return userGraphStore;
@@ -268,21 +268,11 @@ public abstract class FileToGraphStoreImporter {
         }
     }
 
-    @ValueClass
-    public interface UserGraphStore {
-        String userName();
-
-        GraphStore graphStore();
-    }
-
-    @ValueClass
-    public interface RelationshipTopologyAndProperties {
-        Map<RelationshipType, Topology> topologies();
-
-        Map<RelationshipType, RelationshipPropertyStore> properties();
-
-        long importedRelationships();
-    }
+    public record RelationshipTopologyAndProperties(
+        Map<RelationshipType, Topology> topologies,
+        Map<RelationshipType, RelationshipPropertyStore> properties,
+        long importedRelationships
+    ) {}
 
     public static final Validator<Path> DIRECTORY_IS_READABLE = value -> {
         Files.exists(value);

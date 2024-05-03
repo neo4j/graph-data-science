@@ -20,23 +20,19 @@
 package org.neo4j.gds.core.io.file;
 
 import org.jetbrains.annotations.NotNull;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 
-@ValueClass
-public interface HeaderProperty {
-    int position();
-
-    String propertyKey();
-
-    ValueType valueType();
-
-    static HeaderProperty parse(int position, String propertyString) {
+public record HeaderProperty(
+    int position,
+    String propertyKey,
+    ValueType valueType
+) {
+    public static HeaderProperty parse(int position, String propertyString) {
         String[] propertyArgs = propertyString.split(":");
         if (propertyArgs.length != 2 || propertyArgs[0].isEmpty() || propertyArgs[1].isEmpty()) {
             throw wrongHeaderFormatException(propertyString);
         }
-        return ImmutableHeaderProperty.of(position, propertyArgs[0], ValueType.fromCsvName(propertyArgs[1]));
+        return new HeaderProperty(position, propertyArgs[0], ValueType.fromCsvName(propertyArgs[1]));
     }
 
     @NotNull

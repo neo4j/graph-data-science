@@ -20,10 +20,7 @@
 package org.neo4j.gds.core.io;
 
 import org.neo4j.gds.RelationshipType;
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.IdMap;
-import org.neo4j.gds.api.RelationshipPropertyStore;
-import org.neo4j.gds.api.Topology;
 import org.neo4j.gds.api.schema.RelationshipSchema;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.io.file.RelationshipBuilderFromVisitor;
@@ -138,12 +135,5 @@ public class GraphStoreRelationshipVisitor extends RelationshipVisitor {
                 inverseIndexedRelationshipTypes
             );
         }
-    }
-
-    @ValueClass
-    interface RelationshipVisitorResult {
-        Map<RelationshipType, Topology> relationshipTypesWithTopology();
-        Map<RelationshipType, RelationshipPropertyStore> propertyStores();
-        long relationshipCount();
     }
 }

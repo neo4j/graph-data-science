@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.core.io;
 
-import org.neo4j.gds.annotation.ValueClass;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.schema.NodeSchema;
@@ -32,16 +31,12 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@ValueClass
-public interface MetaDataStore {
-    GraphInfo graphInfo();
-
-    NodeSchema nodeSchema();
-
-    RelationshipSchema relationshipSchema();
-
-    Map<String, PropertySchema> graphPropertySchema();
-
+public record MetaDataStore(
+    GraphInfo graphInfo,
+    NodeSchema nodeSchema,
+    RelationshipSchema relationshipSchema,
+    Map<String, PropertySchema> graphPropertySchema
+) {
     static MetaDataStore of(GraphStore graphStore) {
         var relTypeCounts = graphStore.relationshipTypes()
             .stream()
@@ -74,7 +69,7 @@ public interface MetaDataStore {
             .inverseIndexedRelationshipTypes(graphStore.inverseIndexedRelationshipTypes())
             .build();
         var schema = graphStore.schema();
-        return ImmutableMetaDataStore.of(
+        return new MetaDataStore(
             graphInfo,
             schema.nodeSchema(),
             schema.relationshipSchema(),
