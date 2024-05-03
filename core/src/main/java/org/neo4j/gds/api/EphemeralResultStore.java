@@ -23,10 +23,12 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Scheduler;
 import com.github.benmanes.caffeine.cache.Ticker;
+import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
 import org.neo4j.gds.core.concurrency.ExecutorServiceUtil;
 import org.neo4j.gds.core.utils.ClockService;
+import org.neo4j.gds.core.utils.progress.JobId;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -47,6 +49,7 @@ public class EphemeralResultStore implements ResultStore {
     private final Cache<RelationshipKey, RelationshipEntry> relationships;
     private final Cache<RelationshipKey, RelationshipStreamEntry> relationshipStreams;
     private final Cache<RelationshipKey, RelationshipIteratorEntry> relationshipIterators;
+    private final Cache<JobId, ResultStoreEntry> resultEntries;
 
     public EphemeralResultStore() {
         var singleThreadScheduler = ExecutorServiceUtil.createSingleThreadScheduler("GDS-ResultStore");
@@ -55,6 +58,28 @@ public class EphemeralResultStore implements ResultStore {
         this.relationships = createCache(singleThreadScheduler);
         this.relationshipStreams = createCache(singleThreadScheduler);
         this.relationshipIterators = createCache(singleThreadScheduler);
+        this.resultEntries = createCache(singleThreadScheduler);
+    }
+
+    @Override
+    public void add(JobId jobId, ResultStoreEntry entry) {
+        this.resultEntries.put(jobId, entry);
+    }
+
+    @Override
+    @Nullable
+    public ResultStoreEntry get(JobId jobId) {
+        return this.resultEntries.getIfPresent(jobId);
+    }
+
+    @Override
+    public boolean hasEntry(JobId jobId) {
+        return this.resultEntries.getIfPresent(jobId) != null;
+    }
+
+    @Override
+    public void remove(JobId jobId) {
+        this.resultEntries.invalidate(jobId);
     }
 
     @Override

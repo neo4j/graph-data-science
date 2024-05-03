@@ -22,6 +22,7 @@ package org.neo4j.gds.api;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.extension.FakeClockExtension;
 import org.neo4j.gds.extension.Inject;
 import org.neo4j.time.FakeClock;
@@ -38,6 +39,89 @@ class EphemeralResultStoreTest {
 
     @Inject
     FakeClock clock;
+
+    private static final JobId JOB_ID = new JobId("test");
+
+    @Test
+    void shouldStoreEntry() {
+        var resultStore = new EphemeralResultStore();
+
+        var propertyValues = mock(NodePropertyValues.class);
+        var toOriginalId = mock(LongUnaryOperator.class);
+        var nodePropertiesEntry = new ResultStoreEntry.NodeProperties(
+            List.of("A", "B"),
+            List.of("foo"),
+            List.of(propertyValues),
+            toOriginalId
+        );
+        resultStore.add(JOB_ID, nodePropertiesEntry);
+
+        assertThat(resultStore.hasEntry(JOB_ID)).isTrue();
+        assertThat(resultStore.get(JOB_ID)).isEqualTo(nodePropertiesEntry);
+    }
+
+    @Test
+    void shouldNotResolveEntryWhenJobIdDoesNotMatch() {
+        var resultStore = new EphemeralResultStore();
+
+        var propertyValues = mock(NodePropertyValues.class);
+        var toOriginalId = mock(LongUnaryOperator.class);
+        var nodePropertiesEntry = new ResultStoreEntry.NodeProperties(
+            List.of("A", "B"),
+            List.of("foo"),
+            List.of(propertyValues),
+            toOriginalId
+        );
+        resultStore.add(JOB_ID, nodePropertiesEntry);
+
+        assertThat(resultStore.hasEntry(new JobId("foo"))).isFalse();
+        assertThat(resultStore.get(new JobId("foo"))).isNull();
+    }
+
+    @Test
+    void shouldRemoveEntry() {
+        var resultStore = new EphemeralResultStore();
+
+        var propertyValues = mock(NodePropertyValues.class);
+        var toOriginalId = mock(LongUnaryOperator.class);
+        var nodePropertiesEntry = new ResultStoreEntry.NodeProperties(
+            List.of("A", "B"),
+            List.of("foo"),
+            List.of(propertyValues),
+            toOriginalId
+        );
+        resultStore.add(JOB_ID, nodePropertiesEntry);
+
+        assertThat(resultStore.hasEntry(JOB_ID)).isTrue();
+
+        resultStore.remove(JOB_ID);
+
+        assertThat(resultStore.hasEntry(JOB_ID)).isFalse();
+        assertThat(resultStore.get(JOB_ID)).isNull();
+    }
+
+    @Test
+    void shouldEvictEntryAfter10Minutes() throws InterruptedException {
+        var resultStore = new EphemeralResultStore();
+
+        var propertyValues = mock(NodePropertyValues.class);
+        var toOriginalId = mock(LongUnaryOperator.class);
+        var nodePropertiesEntry = new ResultStoreEntry.NodeProperties(
+            List.of("A", "B"),
+            List.of("foo"),
+            List.of(propertyValues),
+            toOriginalId
+        );
+        resultStore.add(JOB_ID, nodePropertiesEntry);
+
+        assertThat(resultStore.hasEntry(JOB_ID)).isTrue();
+
+        clock.forward(EphemeralResultStore.CACHE_EVICTION_DURATION.plusMinutes(1));
+        // make some room for the cache eviction thread to trigger a cleanup
+        Thread.sleep(100);
+
+        assertThat(resultStore.hasEntry(JOB_ID)).isFalse();
+    }
 
     @Test
     void shouldStoreNodeProperty() {

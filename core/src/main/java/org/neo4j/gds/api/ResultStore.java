@@ -21,6 +21,7 @@ package org.neo4j.gds.api;
 
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.utils.progress.JobId;
 
 import java.util.List;
 import java.util.function.LongUnaryOperator;
@@ -33,6 +34,26 @@ import java.util.stream.Stream;
  * remote database.
  */
 public interface ResultStore {
+
+    /**
+     * Stores a shallow entry representing result store data in this store given a {@link org.neo4j.gds.core.utils.progress.JobId}.
+     */
+    void add(JobId jobId, ResultStoreEntry entry);
+
+    /**
+     * Retrieves a {@link org.neo4j.gds.api.ResultStoreEntry} from this store.
+     */
+    ResultStoreEntry get(JobId jobId);
+
+    /**
+     * Checks if this store contains an entry for the given {@link org.neo4j.gds.core.utils.progress.JobId}.
+     */
+    boolean hasEntry(JobId jobId);
+
+    /**
+     * Removes a stored entry based on the given {@link org.neo4j.gds.core.utils.progress.JobId}.
+     */
+    void remove(JobId jobId);
 
     /**
      * Stores node property values under the given property key.

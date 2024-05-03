@@ -21,12 +21,34 @@ package org.neo4j.gds.api;
 
 import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.utils.progress.JobId;
 
 import java.util.List;
 import java.util.function.LongUnaryOperator;
 import java.util.stream.Stream;
 
 public class EmptyResultStore implements ResultStore {
+
+    @Override
+    public void add(JobId jobId, ResultStoreEntry entry) {
+
+    }
+
+    @Override
+    public ResultStoreEntry get(JobId jobId) {
+        return null;
+    }
+
+    @Override
+    public boolean hasEntry(JobId jobId) {
+        return false;
+    }
+
+    @Override
+    public void remove(JobId jobId) {
+
+    }
+
     @Override
     public void addNodePropertyValues(List<String> nodeLabels, String propertyKey, NodePropertyValues propertyValues) {
 
