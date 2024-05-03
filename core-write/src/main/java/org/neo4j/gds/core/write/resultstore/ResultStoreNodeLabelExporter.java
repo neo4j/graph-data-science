@@ -20,17 +20,21 @@
 package org.neo4j.gds.core.write.resultstore;
 
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.api.ResultStoreEntry;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.write.NodeLabelExporter;
 
 import java.util.function.LongUnaryOperator;
 
 public class ResultStoreNodeLabelExporter implements NodeLabelExporter {
 
+    private final JobId jobId;
     private final ResultStore resultStore;
     private final long nodeCount;
     private final LongUnaryOperator toOriginalId;
 
-    ResultStoreNodeLabelExporter(ResultStore resultStore, long nodeCount, LongUnaryOperator toOriginalId) {
+    ResultStoreNodeLabelExporter(JobId jobId, ResultStore resultStore, long nodeCount, LongUnaryOperator toOriginalId) {
+        this.jobId = jobId;
         this.resultStore = resultStore;
         this.nodeCount = nodeCount;
         this.toOriginalId = toOriginalId;
@@ -39,6 +43,7 @@ public class ResultStoreNodeLabelExporter implements NodeLabelExporter {
     @Override
     public void write(String nodeLabel) {
         resultStore.addNodeLabel(nodeLabel, nodeCount, toOriginalId);
+        resultStore.add(jobId, new ResultStoreEntry.NodeLabel(nodeLabel, nodeCount, toOriginalId));
     }
 
     @Override

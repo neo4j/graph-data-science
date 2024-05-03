@@ -24,6 +24,7 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.termination.TerminationFlag;
 
@@ -43,6 +44,7 @@ public abstract class NodeLabelExporterBuilder {
     protected Optional<ArrowConnectionInfo> arrowConnectionInfo = Optional.empty();
     protected Optional<String> databaseName; // coupled with arrowConnectionInfo, but should not appear in external API
     protected Optional<ResultStore> resultStore;
+    protected JobId jobId;
 
     public abstract NodeLabelExporter build();
 
@@ -86,6 +88,11 @@ public abstract class NodeLabelExporterBuilder {
 
     public NodeLabelExporterBuilder withResultStore(Optional<ResultStore> resultStore) {
         this.resultStore = resultStore;
+        return this;
+    }
+
+    public NodeLabelExporterBuilder withJobId(JobId jobId){
+        this.jobId = jobId;
         return this;
     }
 }
