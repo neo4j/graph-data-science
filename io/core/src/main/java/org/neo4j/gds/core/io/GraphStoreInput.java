@@ -224,6 +224,10 @@ public final class GraphStoreInput implements Input {
         return nodeStore.labelMapping();
     }
 
+    public IdentifierMapper<RelationshipType> typeMapping() {
+        return relationshipStore.typeMapping();
+    }
+
     static class GraphPropertyIterator implements InputIterator {
 
         private final Iterator<GraphProperty> graphPropertyIterator;

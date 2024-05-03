@@ -37,7 +37,7 @@ public final class RelationshipStore {
     private final long propertyCount;
 
     final Map<RelationshipType, CompositeRelationshipIterator> relationshipIterators;
-    private final IdentifierMapper<RelationshipType> relationshipTypeMapper;
+    private final IdentifierMapper<RelationshipType> relationshipTypeMapping;
     private final IdMap idMap;
 
     private RelationshipStore(
@@ -45,14 +45,14 @@ public final class RelationshipStore {
         long relationshipCount,
         long propertyCount,
         Map<RelationshipType, CompositeRelationshipIterator> relationshipIterators,
-        IdentifierMapper<RelationshipType> relationshipTypeMapper
+        IdentifierMapper<RelationshipType> relationshipTypeMapping
     ) {
         this.idMap = idMap;
         this.nodeCount = idMap.nodeCount();
         this.relationshipCount = relationshipCount;
         this.propertyCount = propertyCount;
         this.relationshipIterators = relationshipIterators;
-        this.relationshipTypeMapper = relationshipTypeMapper;
+        this.relationshipTypeMapping = relationshipTypeMapping;
     }
 
     long propertyCount() {
@@ -61,6 +61,10 @@ public final class RelationshipStore {
 
     public IdMap idMap() {
         return idMap;
+    }
+
+    IdentifierMapper<RelationshipType> typeMapping() {
+        return this.relationshipTypeMapping;
     }
 
     RelationshipStore concurrentCopy() {
@@ -74,7 +78,7 @@ public final class RelationshipStore {
             relationshipCount,
             propertyCount,
             copyIterators,
-            relationshipTypeMapper
+            relationshipTypeMapping
         );
     }
 
