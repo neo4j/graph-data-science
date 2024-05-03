@@ -577,7 +577,8 @@ public class CommunityAlgorithmsWriteBusinessFacade {
                 writeProperty,
                 procedureName,
                 arrowConnectionInfo,
-                resultStore
+                resultStore,
+                configuration.jobId()
             );
 
             // 4. Compute result statistics
@@ -637,7 +638,8 @@ public class CommunityAlgorithmsWriteBusinessFacade {
                 writeProperty,
                 procedureName,
                 arrowConnectionInfo,
-                resultStore
+                resultStore,
+                configuration.jobId()
             );
 
 

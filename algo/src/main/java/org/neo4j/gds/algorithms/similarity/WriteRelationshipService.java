@@ -19,14 +19,15 @@
  */
 package org.neo4j.gds.algorithms.similarity;
 
-import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.IdMap;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.logging.Log;
 
 import java.util.Optional;
@@ -50,7 +51,8 @@ public class WriteRelationshipService {
         Concurrency concurrency,
         Optional<ArrowConnectionInfo> arrowConnectionInfo,
         Optional<ResultStore> resultStore,
-        RelationshipWithPropertyConsumer relationshipWithPropertyConsumer
+        RelationshipWithPropertyConsumer relationshipWithPropertyConsumer,
+        JobId jobId
     ) {
         return Neo4jDatabaseRelationshipWriter.writeRelationship(
             writeRelationshipType,
@@ -66,7 +68,8 @@ public class WriteRelationshipService {
             concurrency,
             arrowConnectionInfo,
             resultStore,
-            relationshipWithPropertyConsumer
+            relationshipWithPropertyConsumer,
+            jobId
         );
     }
 }

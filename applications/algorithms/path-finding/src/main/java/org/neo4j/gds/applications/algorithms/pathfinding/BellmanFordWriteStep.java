@@ -30,6 +30,7 @@ import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.logging.Log;
@@ -65,7 +66,8 @@ class BellmanFordWriteStep implements MutateOrWriteStep<BellmanFordResult, Relat
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        BellmanFordResult result
+        BellmanFordResult result,
+        JobId jobId
     ) {
         var writeRelationshipType = configuration.writeRelationshipType();
 
@@ -102,6 +104,7 @@ class BellmanFordWriteStep implements MutateOrWriteStep<BellmanFordResult, Relat
                 graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
             )
             .withResultStore(configuration.resolveResultStore(resultStore))
+            .withJobId(configuration.jobId())
             .build();
 
         // effect

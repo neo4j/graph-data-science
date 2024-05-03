@@ -26,6 +26,7 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.closeness.ClosenessCentralityWriteConfig;
+import org.neo4j.gds.core.utils.progress.JobId;
 
 import static org.neo4j.gds.applications.algorithms.centrality.AlgorithmLabels.CLOSENESS_CENTRALITY;
 
@@ -43,7 +44,8 @@ class ClosenessCentralityWriteStep implements MutateOrWriteStep<CentralityAlgori
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        CentralityAlgorithmResult result
+        CentralityAlgorithmResult result,
+        JobId jobId
     ) {
         return writeToDatabase.perform(
             graph,
@@ -52,7 +54,8 @@ class ClosenessCentralityWriteStep implements MutateOrWriteStep<CentralityAlgori
             configuration,
             configuration,
             CLOSENESS_CENTRALITY,
-            result
+            result,
+            jobId
         );
     }
 }

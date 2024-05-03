@@ -89,6 +89,7 @@ public class KGEPredictWriteSpec implements
                         computationResult.graphStore().databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                     )
                     .withResultStore(config.resolveResultStore(computationResult.resultStore()))
+                    .withJobId(config.jobId())
                     .build()
                     .write(config.writeRelationshipType(), config.writeProperty());
             }

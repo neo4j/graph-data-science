@@ -201,6 +201,7 @@ public class WriteNodePropertiesComputationResultConsumer<ALGO extends Algorithm
                     computationResult.graphStore().databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                 )
                 .withResultStore(resultStore)
+                .withJobId(config.jobId())
                 .parallel(DefaultPool.INSTANCE, config.writeConcurrency())
                 .build();
 

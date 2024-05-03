@@ -119,6 +119,7 @@ public class SimilarityWriteConsumer<ALGO extends Algorithm<ALGO_RESULT>, ALGO_R
                                 computationResult.graphStore().databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                             )
                             .withResultStore(config.resolveResultStore(computationResult.resultStore()))
+                            .withJobId(config.jobId())
                             .build();
 
                         if (SimilarityProc.shouldComputeHistogram(executionContext.returnColumns())) {

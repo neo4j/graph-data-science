@@ -29,6 +29,7 @@ import org.neo4j.gds.api.User;
 import org.neo4j.gds.config.AlgoBaseConfig;
 import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.metrics.ExecutionMetric;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 
@@ -183,7 +184,8 @@ class DefaultAlgorithmProcessingTemplateTest {
                 Graph graph,
                 GraphStore graphStore,
                 ResultStore resultStore,
-                ExampleResult resultFromAlgorithm
+                ExampleResult resultFromAlgorithm,
+                JobId jobId
             ) {
                 return 42L;
             }
@@ -239,10 +241,11 @@ class DefaultAlgorithmProcessingTemplateTest {
                 Graph graph,
                 GraphStore graphStore,
                 ResultStore resultStore,
-                RESULT_FROM_ALGORITHM resultFromAlgorithm
+                RESULT_FROM_ALGORITHM resultFromAlgorithm,
+                JobId jobId
             ) {
                 timingsBuilder.withMutateOrWriteMillis(87);
-                return mutateOrWriteStep.orElseThrow().execute(graph, graphStore, resultStore, resultFromAlgorithm);
+                return mutateOrWriteStep.orElseThrow().execute(graph, graphStore, resultStore, resultFromAlgorithm, jobId);
             }
         };
 
@@ -271,7 +274,7 @@ class DefaultAlgorithmProcessingTemplateTest {
             null,
             null,
             null,
-            Optional.of((graph, graphStore, resultStore, unused) -> 6573L),
+            Optional.of((graph, graphStore, resultStore, unused, jobId) -> 6573L),
             resultBuilder
         );
 

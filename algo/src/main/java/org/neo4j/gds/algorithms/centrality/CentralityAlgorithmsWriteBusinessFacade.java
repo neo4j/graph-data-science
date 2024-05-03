@@ -152,7 +152,8 @@ public class CentralityAlgorithmsWriteBusinessFacade {
                 configuration.writeProperty(),
                 "PageRankWrite",
                 configuration.arrowConnectionInfo(),
-                configuration.resolveResultStore(algorithmResult.resultStore())
+                configuration.resolveResultStore(algorithmResult.resultStore()),
+                configuration.jobId()
             );
 
             var pageRankDistribution = PageRankDistributionComputer.computeDistribution(
@@ -260,7 +261,8 @@ public class CentralityAlgorithmsWriteBusinessFacade {
                     configuration.writeProperty(),
                     "CELFWrite",
                     configuration.arrowConnectionInfo(),
-                    configuration.resolveResultStore(algorithmResult.resultStore())
+                    configuration.resolveResultStore(algorithmResult.resultStore()),
+                    configuration.jobId()
                 );
                 writeResultBuilder.writeMillis(writeResult.writeMilliseconds());
                 writeResultBuilder.nodePropertiesWritten(writeResult.nodePropertiesWritten());
@@ -340,7 +342,8 @@ public class CentralityAlgorithmsWriteBusinessFacade {
                 writeProperty,
                 procedureName,
                 arrowConnectionInfo,
-                resultStore
+                resultStore,
+                configuration.jobId()
             );
 
             // Compute result statistics

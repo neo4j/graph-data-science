@@ -141,6 +141,7 @@ public class WriteNodePropertiesApplication {
                         graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                     )
                     .withResultStore(config.resolveResultStore(resultStore))
+                    .withJobId(config.jobId())
                     .build();
 
                 var writeNodeProperties = config.nodeProperties()

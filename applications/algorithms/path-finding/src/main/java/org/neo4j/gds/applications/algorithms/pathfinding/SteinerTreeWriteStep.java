@@ -26,6 +26,7 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.spanningtree.SpanningGraph;
 import org.neo4j.gds.spanningtree.SpanningTree;
@@ -49,7 +50,8 @@ class SteinerTreeWriteStep implements MutateOrWriteStep<SteinerTreeResult, Relat
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        SteinerTreeResult steinerTreeResult
+        SteinerTreeResult steinerTreeResult,
+        JobId jobId
     ) {
         var sourceNodeId = configuration.sourceNode();
 
@@ -73,6 +75,7 @@ class SteinerTreeWriteStep implements MutateOrWriteStep<SteinerTreeResult, Relat
                 graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
             )
             .withResultStore(configuration.resolveResultStore(resultStore))
+            .withJobId(configuration.jobId())
             .build();
 
         relationshipExporter.write(configuration.writeRelationshipType(), configuration.writeProperty());
