@@ -117,18 +117,16 @@ public class GraphStoreToFileExporter extends GraphStoreExporter {
 
     @Override
     protected void export(GraphStoreInput graphStoreInput) {
-        exportUserName();
-        exportGraphInfo(graphStoreInput);
-        exportNodeSchema(graphStoreInput);
-        exportRelationshipSchema(graphStoreInput);
-        exportGraphPropertySchema(graphStoreInput);
-        exportGraphCapabilities(graphStoreInput);
-        exportNodeLabelMapping(graphStoreInput);
-
         var progressTracker = createProgressTracker(graphStoreInput);
-
         try {
-            progressTracker.beginSubTask();
+            progressTracker.beginSubTask("Csv export");
+            exportUserName();
+            exportGraphInfo(graphStoreInput);
+            exportNodeSchema(graphStoreInput);
+            exportRelationshipSchema(graphStoreInput);
+            exportGraphPropertySchema(graphStoreInput);
+            exportGraphCapabilities(graphStoreInput);
+            exportNodeLabelMapping(graphStoreInput);
             exportNodes(graphStoreInput, progressTracker);
             exportRelationships(graphStoreInput, progressTracker);
             exportGraphProperties(graphStoreInput, progressTracker);
