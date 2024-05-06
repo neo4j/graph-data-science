@@ -19,14 +19,23 @@
  */
 package org.neo4j.gds.core.loading.construction;
 
+import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.utils.AutoCloseableThreadLocal;
+import stormpot.Pool;
+import stormpot.Poolable;
+import stormpot.Timeout;
 
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 sealed interface LocalRelationshipsBuilderProvider extends AutoCloseable {
 
     static LocalRelationshipsBuilderProvider threadLocal(Supplier<LocalRelationshipsBuilder> builderSupplier) {
         return new ThreadLocalProvider(builderSupplier);
+    }
+
+    static LocalRelationshipsBuilderProvider pooled(Supplier<LocalRelationshipsBuilder> builderSupplier, Concurrency concurrency) {
+        return PooledProvider.create(builderSupplier, concurrency);
     }
 
     LocalRelationshipsBuilderSlot acquire();
@@ -68,6 +77,67 @@ sealed interface LocalRelationshipsBuilderProvider extends AutoCloseable {
             @Override
             public void close() throws Exception {
                 builder.close();
+            }
+        }
+    }
+
+
+    final class PooledProvider implements LocalRelationshipsBuilderProvider {
+        private final Pool<Slot> pool;
+        private final Timeout timeout = new Timeout(1, TimeUnit.HOURS);
+
+        static LocalRelationshipsBuilderProvider create(Supplier<LocalRelationshipsBuilder> builderSupplier, Concurrency concurrency) {
+            var pool = Pool
+                .fromInline(new Allocator(builderSupplier))
+                .setSize(concurrency.value())
+                .build();
+
+            return new PooledProvider(pool);
+        }
+
+        private PooledProvider(Pool<Slot> pool) {
+            this.pool = pool;
+        }
+
+        @Override
+        public LocalRelationshipsBuilderSlot acquire() {
+            try {
+                return pool.claim(timeout);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public void close() throws Exception {
+            pool.shutdown().await(timeout);
+        }
+
+        private record Slot(stormpot.Slot slot, LocalRelationshipsBuilder builder) implements Poolable, LocalRelationshipsBuilderSlot {
+            @Override
+            public LocalRelationshipsBuilder get() {
+                return builder;
+            }
+
+            @Override
+            public void release() {
+                slot.release(this);
+            }
+        }
+
+        private static class Allocator implements stormpot.Allocator<Slot> {
+            private final Supplier<LocalRelationshipsBuilder> builderSupplier;
+
+            Allocator(Supplier<LocalRelationshipsBuilder> builderSupplier) {this.builderSupplier = builderSupplier;}
+
+            @Override
+            public Slot allocate(stormpot.Slot slot) {
+                return new Slot(slot, builderSupplier.get());
+            }
+
+            @Override
+            public void deallocate(Slot slot) throws Exception {
+                slot.builder.close();
             }
         }
     }
