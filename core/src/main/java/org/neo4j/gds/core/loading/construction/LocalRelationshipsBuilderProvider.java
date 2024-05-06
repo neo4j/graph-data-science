@@ -28,7 +28,7 @@ import stormpot.Timeout;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-sealed interface LocalRelationshipsBuilderProvider extends AutoCloseable {
+abstract class LocalRelationshipsBuilderProvider implements AutoCloseable {
 
     static LocalRelationshipsBuilderProvider threadLocal(Supplier<LocalRelationshipsBuilder> builderSupplier) {
         return new ThreadLocalProvider(builderSupplier);
@@ -38,7 +38,7 @@ sealed interface LocalRelationshipsBuilderProvider extends AutoCloseable {
         return PooledProvider.create(builderSupplier, concurrency);
     }
 
-    LocalRelationshipsBuilderSlot acquire();
+    abstract LocalRelationshipsBuilderSlot acquire();
 
     interface LocalRelationshipsBuilderSlot {
         LocalRelationshipsBuilder get();
@@ -46,7 +46,7 @@ sealed interface LocalRelationshipsBuilderProvider extends AutoCloseable {
         void release();
     }
 
-    final class ThreadLocalProvider implements LocalRelationshipsBuilderProvider {
+    private static final class ThreadLocalProvider extends LocalRelationshipsBuilderProvider {
         private final AutoCloseableThreadLocal<Slot> threadLocal;
 
         private ThreadLocalProvider(Supplier<LocalRelationshipsBuilder> builderSupplier) {
@@ -54,16 +54,16 @@ sealed interface LocalRelationshipsBuilderProvider extends AutoCloseable {
         }
 
         @Override
-        public LocalRelationshipsBuilderSlot acquire() {
+        LocalRelationshipsBuilderSlot acquire() {
             return threadLocal.get();
         }
 
         @Override
-        public void close() throws Exception {
+        public void close() {
             threadLocal.close();
         }
 
-        record Slot(LocalRelationshipsBuilder builder) implements LocalRelationshipsBuilderSlot, AutoCloseable {
+        private record Slot(LocalRelationshipsBuilder builder) implements LocalRelationshipsBuilderSlot, AutoCloseable {
             @Override
             public LocalRelationshipsBuilder get() {
                 return builder;
@@ -81,8 +81,7 @@ sealed interface LocalRelationshipsBuilderProvider extends AutoCloseable {
         }
     }
 
-
-    final class PooledProvider implements LocalRelationshipsBuilderProvider {
+    private static final class PooledProvider extends LocalRelationshipsBuilderProvider {
         private final Pool<Slot> pool;
         private final Timeout timeout = new Timeout(1, TimeUnit.HOURS);
 
@@ -100,7 +99,7 @@ sealed interface LocalRelationshipsBuilderProvider extends AutoCloseable {
         }
 
         @Override
-        public LocalRelationshipsBuilderSlot acquire() {
+        LocalRelationshipsBuilderSlot acquire() {
             try {
                 return pool.claim(timeout);
             } catch (InterruptedException e) {
@@ -125,7 +124,7 @@ sealed interface LocalRelationshipsBuilderProvider extends AutoCloseable {
             }
         }
 
-        private static class Allocator implements stormpot.Allocator<Slot> {
+        private static final class Allocator implements stormpot.Allocator<Slot> {
             private final Supplier<LocalRelationshipsBuilder> builderSupplier;
 
             Allocator(Supplier<LocalRelationshipsBuilder> builderSupplier) {this.builderSupplier = builderSupplier;}
