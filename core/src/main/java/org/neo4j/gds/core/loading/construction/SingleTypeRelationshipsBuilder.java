@@ -125,7 +125,7 @@ abstract class SingleTypeRelationshipsBuilder {
         this.concurrency = concurrency;
     }
 
-    abstract ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder();
+    abstract LocalRelationshipsBuilder threadLocalRelationshipsBuilder();
 
     abstract Collection<AdjacencyBuffer.AdjacencyListBuilderTask> adjacencyListBuilderTasks(
         Optional<AdjacencyCompressor.ValueMapper> mapper,
@@ -241,8 +241,8 @@ abstract class SingleTypeRelationshipsBuilder {
         }
 
         @Override
-        ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder() {
-            return new ThreadLocalRelationshipsBuilder.NonIndexed(importer, bufferSize, propertyConfigs.size());
+        LocalRelationshipsBuilder threadLocalRelationshipsBuilder() {
+            return new LocalRelationshipsBuilder.NonIndexed(importer, bufferSize, propertyConfigs.size());
         }
 
         @Override
@@ -314,10 +314,10 @@ abstract class SingleTypeRelationshipsBuilder {
         }
 
         @Override
-        ThreadLocalRelationshipsBuilder threadLocalRelationshipsBuilder() {
-            return new ThreadLocalRelationshipsBuilder.Indexed(
-                new ThreadLocalRelationshipsBuilder.NonIndexed(forwardImporter, bufferSize, propertyConfigs.size()),
-                new ThreadLocalRelationshipsBuilder.NonIndexed(inverseImporter, bufferSize, propertyConfigs.size())
+        LocalRelationshipsBuilder threadLocalRelationshipsBuilder() {
+            return new LocalRelationshipsBuilder.Indexed(
+                new LocalRelationshipsBuilder.NonIndexed(forwardImporter, bufferSize, propertyConfigs.size()),
+                new LocalRelationshipsBuilder.NonIndexed(inverseImporter, bufferSize, propertyConfigs.size())
             );
         }
 

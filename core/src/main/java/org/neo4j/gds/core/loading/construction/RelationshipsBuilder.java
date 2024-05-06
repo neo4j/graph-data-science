@@ -39,7 +39,7 @@ public class RelationshipsBuilder {
 
     private final PartialIdMap idMap;
     private final SingleTypeRelationshipsBuilder singleTypeRelationshipsBuilder;
-    private final LocalRelationshipsBuilderProvider threadLocalRelationshipsBuilders;
+    private final LocalRelationshipsBuilderProvider localBuilderProvider;
     private final boolean skipDanglingRelationships;
 
     RelationshipsBuilder(
@@ -49,7 +49,7 @@ public class RelationshipsBuilder {
     ) {
         this.singleTypeRelationshipsBuilder = singleTypeRelationshipsBuilder;
         this.idMap = singleTypeRelationshipsBuilder.partialIdMap();
-        this.threadLocalRelationshipsBuilders = LocalRelationshipsBuilderProvider.threadLocal(singleTypeRelationshipsBuilder::threadLocalRelationshipsBuilder);
+        this.localBuilderProvider = LocalRelationshipsBuilderProvider.threadLocal(singleTypeRelationshipsBuilder::threadLocalRelationshipsBuilder);
         this.skipDanglingRelationships = skipDanglingRelationships;
     }
 
@@ -102,7 +102,7 @@ public class RelationshipsBuilder {
         if (validateRelationships(mappedSourceId, mappedTargetId)) {
             LocalRelationshipsBuilderProvider.LocalRelationshipsBuilderSlot threadLocalBuilder = null;
             try {
-                threadLocalBuilder = threadLocalRelationshipsBuilders.acquire();
+                threadLocalBuilder = localBuilderProvider.acquire();
                 threadLocalBuilder.get().addRelationship(mappedSourceId, mappedTargetId);
             } finally {
                 if (threadLocalBuilder != null) {
@@ -119,7 +119,7 @@ public class RelationshipsBuilder {
         if (validateRelationships(mappedSourceId, mappedTargetId)) {
             LocalRelationshipsBuilderProvider.LocalRelationshipsBuilderSlot threadLocalBuilder = null;
             try {
-                threadLocalBuilder = threadLocalRelationshipsBuilders.acquire();
+                threadLocalBuilder = localBuilderProvider.acquire();
                 threadLocalBuilder.get().addRelationship(mappedSourceId, mappedTargetId, relationshipPropertyValue);
             } finally {
                 if (threadLocalBuilder != null) {
@@ -135,7 +135,7 @@ public class RelationshipsBuilder {
         if (validateRelationships(source, target)) {
             LocalRelationshipsBuilderProvider.LocalRelationshipsBuilderSlot threadLocalBuilder = null;
             try {
-                threadLocalBuilder = threadLocalRelationshipsBuilders.acquire();
+                threadLocalBuilder = localBuilderProvider.acquire();
                 threadLocalBuilder.get().addRelationship(source, target, relationshipPropertyValues);
             } finally {
                 if (threadLocalBuilder != null) {
@@ -187,7 +187,7 @@ public class RelationshipsBuilder {
         Optional<LongConsumer> drainCountConsumer
     ) {
         try {
-            this.threadLocalRelationshipsBuilders.close();
+            this.localBuilderProvider.close();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -25,14 +25,14 @@ import java.util.function.Supplier;
 
 sealed interface LocalRelationshipsBuilderProvider extends AutoCloseable {
 
-    static LocalRelationshipsBuilderProvider threadLocal(Supplier<ThreadLocalRelationshipsBuilder> builderSupplier) {
+    static LocalRelationshipsBuilderProvider threadLocal(Supplier<LocalRelationshipsBuilder> builderSupplier) {
         return new ThreadLocalProvider(builderSupplier);
     }
 
     LocalRelationshipsBuilderSlot acquire();
 
     interface LocalRelationshipsBuilderSlot {
-        ThreadLocalRelationshipsBuilder get();
+        LocalRelationshipsBuilder get();
 
         void release();
     }
@@ -40,7 +40,7 @@ sealed interface LocalRelationshipsBuilderProvider extends AutoCloseable {
     final class ThreadLocalProvider implements LocalRelationshipsBuilderProvider {
         private final AutoCloseableThreadLocal<Slot> threadLocal;
 
-        private ThreadLocalProvider(Supplier<ThreadLocalRelationshipsBuilder> builderSupplier) {
+        private ThreadLocalProvider(Supplier<LocalRelationshipsBuilder> builderSupplier) {
             this.threadLocal = AutoCloseableThreadLocal.withInitial(() -> new Slot(builderSupplier.get()));
         }
 
@@ -54,9 +54,9 @@ sealed interface LocalRelationshipsBuilderProvider extends AutoCloseable {
             threadLocal.close();
         }
 
-        record Slot(ThreadLocalRelationshipsBuilder builder) implements LocalRelationshipsBuilderSlot, AutoCloseable {
+        record Slot(LocalRelationshipsBuilder builder) implements LocalRelationshipsBuilderSlot, AutoCloseable {
             @Override
-            public ThreadLocalRelationshipsBuilder get() {
+            public LocalRelationshipsBuilder get() {
                 return builder;
             }
 

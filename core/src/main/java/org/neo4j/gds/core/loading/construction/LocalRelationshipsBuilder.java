@@ -24,7 +24,7 @@ import org.neo4j.gds.core.loading.RelationshipsBatchBufferBuilder;
 import org.neo4j.gds.core.loading.SingleTypeRelationshipImporter;
 import org.neo4j.gds.core.loading.ThreadLocalSingleTypeRelationshipImporter;
 
-abstract class ThreadLocalRelationshipsBuilder implements AutoCloseable {
+abstract class LocalRelationshipsBuilder implements AutoCloseable {
 
     abstract void addRelationship(long source, long target);
 
@@ -32,7 +32,7 @@ abstract class ThreadLocalRelationshipsBuilder implements AutoCloseable {
 
     abstract void addRelationship(long source, long target, double[] relationshipPropertyValues);
 
-    static class NonIndexed extends ThreadLocalRelationshipsBuilder {
+    static class NonIndexed extends LocalRelationshipsBuilder {
 
         private final ThreadLocalSingleTypeRelationshipImporter<Integer> importer;
         private final PropertyReader.Buffered<Integer> bufferedPropertyReader;
@@ -113,7 +113,7 @@ abstract class ThreadLocalRelationshipsBuilder implements AutoCloseable {
         }
     }
 
-    static class Indexed extends ThreadLocalRelationshipsBuilder {
+    static class Indexed extends LocalRelationshipsBuilder {
 
         private final NonIndexed forwardBuilder;
         private final NonIndexed reverseBuilder;
