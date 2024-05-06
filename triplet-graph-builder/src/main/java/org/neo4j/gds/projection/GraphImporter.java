@@ -196,7 +196,8 @@ public final class GraphImporter {
             .orientation(orientation)
             .aggregation(Aggregation.NONE)
             .indexInverse(indexInverse)
-            .concurrency(this.config.readConcurrency());
+            .concurrency(this.config.readConcurrency())
+            .usePooledBuilderProvider(true);
 
         if (properties != null) {
             for (String propertyKey : properties.propertyKeys()) {
