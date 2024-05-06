@@ -319,7 +319,7 @@ public final class GraphFactory {
             singleTypeRelationshipsBuilderBuilder.inverseImporter(inverseImporter);
         }
 
-        return new RelationshipsBuilder(singleTypeRelationshipsBuilderBuilder.build(), skipDangling);
+        return new RelationshipsBuilder(singleTypeRelationshipsBuilderBuilder.build(), skipDangling, finalConcurrency);
     }
 
     /**

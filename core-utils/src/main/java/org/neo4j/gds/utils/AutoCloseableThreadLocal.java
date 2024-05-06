@@ -35,7 +35,7 @@ public final class AutoCloseableThreadLocal<T extends AutoCloseable> implements 
     private final Consumer<? super T> destructor;
     private final Set<T> copies;
 
-    public static <T extends AutoCloseable> AutoCloseableThreadLocal<T> withInitial(CheckedSupplier<T, ?> initial) {
+    public static <T extends AutoCloseable> AutoCloseableThreadLocal<T> withInitial(Supplier<T> initial) {
         return new AutoCloseableThreadLocal<>(initial, Optional.empty());
     }
 
