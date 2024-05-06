@@ -22,6 +22,8 @@ package org.neo4j.gds.compat._520;
 import org.neo4j.internal.recordstorage.InMemoryLogVersionRepository520;
 import org.neo4j.io.pagecache.context.CursorContext;
 import org.neo4j.io.pagecache.context.TransactionIdSnapshot;
+import org.neo4j.kernel.KernelVersion;
+import org.neo4j.kernel.impl.transaction.log.LogPosition;
 import org.neo4j.storageengine.api.ClosedTransactionMetadata;
 import org.neo4j.storageengine.api.ExternalStoreId;
 import org.neo4j.storageengine.api.MetadataProvider;
@@ -55,6 +57,11 @@ public class InMemoryMetaDataProviderImpl implements MetadataProvider {
     }
 
     @Override
+    public void appendBatch(long l, LogPosition logPosition) {
+
+    }
+
+    @Override
     public void setCurrentLogVersion(long version) {
         logVersionRepository.setCurrentLogVersion(version);
     }
@@ -75,32 +82,40 @@ public class InMemoryMetaDataProviderImpl implements MetadataProvider {
     }
 
     @Override
-    public void transactionCommitted(long transactionId, int checksum, long commitTimestamp, long consensusIndex) {
-        transactionIdStore.transactionCommitted(transactionId, checksum, commitTimestamp, consensusIndex);
+    public void transactionCommitted(long transactionId, long appendIndex, KernelVersion kernelVersion, int checksum, long commitTimestamp, long consensusIndex) {
+        transactionIdStore.transactionCommitted(transactionId, appendIndex, kernelVersion, checksum, commitTimestamp, consensusIndex);
     }
 
     @Override
     public void setLastCommittedAndClosedTransactionId(
         long transactionId,
+        long transactionAppendIndex,
+        KernelVersion kernelVersion,
         int checksum,
         long commitTimestamp,
         long consensusIndex,
         long byteOffset,
-        long logVersion
+        long logVersion,
+        long appendIndex
     ) {
         transactionIdStore.setLastCommittedAndClosedTransactionId(
             transactionId,
+            transactionAppendIndex,
+            kernelVersion,
             checksum,
             commitTimestamp,
             consensusIndex,
             byteOffset,
-            logVersion
+            logVersion,
+            appendIndex
         );
     }
 
     @Override
     public void transactionClosed(
         long transactionId,
+        long appendIndex,
+        KernelVersion kernelVersion,
         long logVersion,
         long byteOffset,
         int checksum,
@@ -109,6 +124,8 @@ public class InMemoryMetaDataProviderImpl implements MetadataProvider {
     ) {
         this.transactionIdStore.transactionClosed(
             transactionId,
+            appendIndex,
+            kernelVersion,
             logVersion,
             byteOffset,
             checksum,
@@ -120,6 +137,8 @@ public class InMemoryMetaDataProviderImpl implements MetadataProvider {
     @Override
     public void resetLastClosedTransaction(
         long transactionId,
+        long appendIndex,
+        KernelVersion kernelVersion,
         long logVersion,
         long byteOffset,
         int checksum,
@@ -128,6 +147,8 @@ public class InMemoryMetaDataProviderImpl implements MetadataProvider {
     ) {
         this.transactionIdStore.resetLastClosedTransaction(
             transactionId,
+            appendIndex,
+            kernelVersion,
             logVersion,
             byteOffset,
             checksum,
@@ -197,5 +218,15 @@ public class InMemoryMetaDataProviderImpl implements MetadataProvider {
     @Override
     public void setDatabaseIdUuid(UUID uuid, CursorContext cursorContext) {
         throw new IllegalStateException("Not supported");
+    }
+
+    @Override
+    public long nextAppendIndex() {
+        return 0;
+    }
+
+    @Override
+    public long getLastAppendIndex() {
+        return 0;
     }
 }

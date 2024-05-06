@@ -86,11 +86,6 @@ public abstract class AbstractTransactionIdStore implements TransactionIdStore {
     }
 
     @Override
-    public long getLastCommittedTransactionId() {
-        return this.committedTransactionId.get().transactionId();
-    }
-
-    @Override
     public TransactionId getLastCommittedTransaction() {
         return this.committedTransactionId.get();
     }
