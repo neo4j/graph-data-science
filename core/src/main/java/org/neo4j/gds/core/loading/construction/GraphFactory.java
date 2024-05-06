@@ -222,7 +222,8 @@ public final class GraphFactory {
         Optional<Boolean> skipDanglingRelationships,
         Optional<Concurrency> concurrency,
         Optional<Boolean> indexInverse,
-        Optional<ExecutorService> executorService
+        Optional<ExecutorService> executorService,
+        Optional<Boolean> usePooledBuilderProvider
     ) {
         var loadRelationshipProperties = !propertyConfigs.isEmpty();
 
@@ -319,7 +320,13 @@ public final class GraphFactory {
             singleTypeRelationshipsBuilderBuilder.inverseImporter(inverseImporter);
         }
 
-        return new RelationshipsBuilder(singleTypeRelationshipsBuilderBuilder.build(), skipDangling, finalConcurrency);
+        var singleTypeRelationshipsBuilder = singleTypeRelationshipsBuilderBuilder.build();
+
+        var localBuilderProvider = usePooledBuilderProvider.orElse(false)
+            ? LocalRelationshipsBuilderProvider.pooled(singleTypeRelationshipsBuilder::threadLocalRelationshipsBuilder, finalConcurrency)
+            : LocalRelationshipsBuilderProvider.threadLocal(singleTypeRelationshipsBuilder::threadLocalRelationshipsBuilder);
+
+        return new RelationshipsBuilder(singleTypeRelationshipsBuilder, localBuilderProvider, skipDangling);
     }
 
     /**

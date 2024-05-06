@@ -21,7 +21,6 @@ package org.neo4j.gds.core.loading.construction;
 
 import org.neo4j.gds.api.PartialIdMap;
 import org.neo4j.gds.api.compress.AdjacencyCompressor;
-import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.utils.StringJoining;
 
@@ -44,12 +43,12 @@ public class RelationshipsBuilder {
 
     RelationshipsBuilder(
         SingleTypeRelationshipsBuilder singleTypeRelationshipsBuilder,
-        boolean skipDanglingRelationships,
-        Concurrency concurrency
+        LocalRelationshipsBuilderProvider localBuilderProvider,
+        boolean skipDanglingRelationships
     ) {
         this.singleTypeRelationshipsBuilder = singleTypeRelationshipsBuilder;
         this.idMap = singleTypeRelationshipsBuilder.partialIdMap();
-        this.localBuilderProvider = LocalRelationshipsBuilderProvider.threadLocal(singleTypeRelationshipsBuilder::threadLocalRelationshipsBuilder);
+        this.localBuilderProvider = localBuilderProvider;
         this.skipDanglingRelationships = skipDanglingRelationships;
     }
 
