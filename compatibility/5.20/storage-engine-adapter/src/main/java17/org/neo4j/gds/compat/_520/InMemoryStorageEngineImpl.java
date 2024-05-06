@@ -177,6 +177,21 @@ public final class InMemoryStorageEngineImpl implements StorageEngine {
             public long allRelationshipsCountStore(CursorContext cursorContext) {
                 return graphStore.relationshipCount();
             }
+
+            @Override
+            public long estimateNodes() {
+                return graphStore.nodeCount();
+            }
+
+            @Override
+            public long estimateRelationships() {
+                return graphStore.relationshipCount();
+            }
+
+            @Override
+            public long estimateLabels() {
+                return graphStore.nodeLabels().size();
+            }
         };
     }
 
