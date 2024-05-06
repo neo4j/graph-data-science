@@ -75,8 +75,8 @@ abstract class SingleTypeRelationshipsBuilder {
         ExecutorService executorService,
         Concurrency concurrency
     ) {
-        return inverseImporter.isPresent() ?
-            new Indexed(
+        return inverseImporter.isPresent()
+            ? new Indexed(
                 idMap,
                 importer,
                 inverseImporter.get(),
@@ -88,8 +88,8 @@ abstract class SingleTypeRelationshipsBuilder {
                 direction,
                 executorService,
                 concurrency
-            ) :
-            new NonIndexed(
+            )
+            : new NonIndexed(
                 idMap,
                 importer,
                 bufferSize,

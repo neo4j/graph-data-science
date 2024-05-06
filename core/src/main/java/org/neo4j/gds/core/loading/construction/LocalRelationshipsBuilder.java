@@ -94,7 +94,8 @@ abstract class LocalRelationshipsBuilder implements AutoCloseable {
             int nextRelationshipId = localRelationshipId++;
             importer.buffer().add(source, target, nextRelationshipId, RelationshipsBuilder.NO_PROPERTY_REF);
             for (int propertyKeyId = 0; propertyKeyId < this.propertyCount; propertyKeyId++) {
-                bufferedPropertyReader.add(nextRelationshipId, propertyKeyId, relationshipPropertyValues[propertyKeyId]);
+                bufferedPropertyReader
+                    .add(nextRelationshipId, propertyKeyId, relationshipPropertyValues[propertyKeyId]);
             }
             if (importer.buffer().isFull()) {
                 flushBuffer();

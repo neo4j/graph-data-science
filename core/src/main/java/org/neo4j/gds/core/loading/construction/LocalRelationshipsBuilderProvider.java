@@ -34,7 +34,10 @@ abstract class LocalRelationshipsBuilderProvider implements AutoCloseable {
         return new ThreadLocalProvider(builderSupplier);
     }
 
-    static LocalRelationshipsBuilderProvider pooled(Supplier<LocalRelationshipsBuilder> builderSupplier, Concurrency concurrency) {
+    static LocalRelationshipsBuilderProvider pooled(
+        Supplier<LocalRelationshipsBuilder> builderSupplier,
+        Concurrency concurrency
+    ) {
         return PooledProvider.create(builderSupplier, concurrency);
     }
 
@@ -85,7 +88,10 @@ abstract class LocalRelationshipsBuilderProvider implements AutoCloseable {
         private final Pool<Slot> pool;
         private final Timeout timeout = new Timeout(1, TimeUnit.HOURS);
 
-        static LocalRelationshipsBuilderProvider create(Supplier<LocalRelationshipsBuilder> builderSupplier, Concurrency concurrency) {
+        static LocalRelationshipsBuilderProvider create(
+            Supplier<LocalRelationshipsBuilder> builderSupplier,
+            Concurrency concurrency
+        ) {
             var pool = Pool
                 .fromInline(new Allocator(builderSupplier))
                 .setSize(concurrency.value())
@@ -127,7 +133,9 @@ abstract class LocalRelationshipsBuilderProvider implements AutoCloseable {
         private static final class Allocator implements stormpot.Allocator<Slot> {
             private final Supplier<LocalRelationshipsBuilder> builderSupplier;
 
-            Allocator(Supplier<LocalRelationshipsBuilder> builderSupplier) {this.builderSupplier = builderSupplier;}
+            Allocator(Supplier<LocalRelationshipsBuilder> builderSupplier) {
+                this.builderSupplier = builderSupplier;
+            }
 
             @Override
             public Slot allocate(stormpot.Slot slot) {

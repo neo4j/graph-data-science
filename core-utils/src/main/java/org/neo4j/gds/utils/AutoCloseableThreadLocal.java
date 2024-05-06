@@ -57,7 +57,7 @@ public final class AutoCloseableThreadLocal<T extends AutoCloseable> implements 
     public T get() {
         return closeableThreadLocal.get();
     }
-    
+
     public void forEach(Consumer<T> consumer) {
         copies.forEach(consumer);
     }
