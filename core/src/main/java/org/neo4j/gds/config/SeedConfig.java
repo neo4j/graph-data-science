@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.config;
 
-import org.immutables.value.Value;
 import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
@@ -34,7 +33,6 @@ import static org.neo4j.gds.core.StringIdentifierValidations.validateNoWhiteChar
 public interface SeedConfig {
     String SEED_PROPERTY_KEY = "seedProperty";
 
-    @Value.Default
     @Configuration.ConvertWith(method = "validatePropertyName")
     @Configuration.Key(SEED_PROPERTY_KEY)
     default @Nullable String seedProperty() {

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.config;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
@@ -35,7 +34,6 @@ import static org.neo4j.gds.utils.StringFormatting.formatWithLocale;
 
 public interface FeaturePropertiesConfig {
 
-    @Value.Default
     default List<String> featureProperties() {
         return List.of();
     }

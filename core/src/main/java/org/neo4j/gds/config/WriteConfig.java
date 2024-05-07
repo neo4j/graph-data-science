@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.config;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
@@ -35,7 +34,6 @@ public interface WriteConfig extends ConcurrencyConfig {
 
     String WRITE_CONCURRENCY_KEY = "writeConcurrency";
 
-    @Value.Default
     @Configuration.Key(WRITE_CONCURRENCY_KEY)
     @Configuration.ConvertWith(method = "org.neo4j.gds.config.ConcurrencyConfig#parse")
     @Configuration.ToMapValue("org.neo4j.gds.config.ConcurrencyConfig#render")
@@ -62,15 +60,11 @@ public interface WriteConfig extends ConcurrencyConfig {
     @Configuration.ToMapValue(value = "org.neo4j.gds.config.ArrowConnectionInfo#toMap")
     Optional<ArrowConnectionInfo> arrowConnectionInfo();
 
-    @Value.Default
-    @Value.Auxiliary
     default boolean writeToResultStore() {
         return false;
     }
 
     @Configuration.Ignore
-    @Value.Auxiliary
-    @Value.Default
     default Optional<ResultStore> resolveResultStore(ResultStore resultStore) {
         return writeToResultStore()
             ? Optional.of(resultStore)
@@ -78,7 +72,6 @@ public interface WriteConfig extends ConcurrencyConfig {
     }
 
     @Configuration.GraphStoreValidationCheck
-    @Value.Default
     default void validateGraphIsSuitableForWrite(
         GraphStore graphStore,
         @SuppressWarnings("unused") Collection<NodeLabel> selectedLabels,

@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.config;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
 import org.neo4j.gds.annotation.Configuration;
@@ -36,14 +35,12 @@ public interface TargetNodesConfig {
 
     String TARGET_NODES_KEY = "targetNodes";
 
-    @Value.Default
     @Configuration.ConvertWith(method = "org.neo4j.gds.config.TargetNodesConfig#parseTargetNodes")
     default List<Long> targetNodes() {
         return Collections.emptyList();
     }
 
     @Configuration.Ignore
-    @Value.Derived
     default boolean hasTargetNodes() {
         return !targetNodes().isEmpty();
     }

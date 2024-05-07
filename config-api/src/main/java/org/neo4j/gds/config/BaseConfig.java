@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.config;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 
 import java.util.Collection;
@@ -28,42 +27,31 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@SuppressWarnings("immutables:subtype")
 public interface BaseConfig extends ToMapConvertible {
 
     String SUDO_KEY = "sudo";
     String LOG_PROGRESS_KEY = "logProgress";
 
-    @Value.Parameter(false)
     @Configuration.Key("username")
     @Configuration.ConvertWith(method = "trim")
     Optional<String> usernameOverride();
 
-    @Value.Default
-    @Value.Parameter(false)
     @Configuration.Key(SUDO_KEY)
     default boolean sudo() {
         return false;
     }
 
-    @Value.Default
-    @Value.Parameter(false)
     @Configuration.Key(LOG_PROGRESS_KEY)
     default boolean logProgress() {
         return true;
     }
 
     @Configuration.CollectKeys
-    @Value.Auxiliary
-    @Value.Default
-    @Value.Parameter(false)
     default Collection<String> configKeys() {
         return Collections.emptyList();
     }
 
     @Configuration.ToMap
-    @Value.Auxiliary
-    @Value.Derived
     default Map<String, Object> toMap() {
         return new HashMap<>();
     }

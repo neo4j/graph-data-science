@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.config;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.annotation.Configuration;
 import org.neo4j.gds.concurrency.ConcurrencyValidatorService;
 import org.neo4j.gds.core.concurrency.Concurrency;
@@ -33,7 +32,6 @@ public interface ConcurrencyConfig {
     Concurrency TYPED_DEFAULT_CONCURRENCY = new Concurrency(DEFAULT_CONCURRENCY);
     int CONCURRENCY_LIMITATION = 4;
 
-    @Value.Default
     @Configuration.Key(CONCURRENCY_KEY)
     @Configuration.ConvertWith(method = "org.neo4j.gds.config.ConcurrencyConfig#parse")
     @Configuration.ToMapValue("org.neo4j.gds.config.ConcurrencyConfig#render")

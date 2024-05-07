@@ -25,7 +25,6 @@ import org.neo4j.gds.core.CypherMapWrapper;
 
 
 @Configuration
-@SuppressWarnings("immutables:subtype")
 public interface SplitRelationshipsMutateConfig extends SplitRelationshipsBaseConfig, MutateConfig {
 
     static SplitRelationshipsMutateConfig of(CypherMapWrapper userInput) {

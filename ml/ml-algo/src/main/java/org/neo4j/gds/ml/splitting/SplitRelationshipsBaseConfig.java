@@ -19,7 +19,6 @@
  */
 package org.neo4j.gds.ml.splitting;
 
-import org.immutables.value.Value;
 import org.neo4j.gds.ElementProjection;
 import org.neo4j.gds.NodeLabel;
 import org.neo4j.gds.RelationshipType;
@@ -68,13 +67,11 @@ public interface SplitRelationshipsBaseConfig extends AlgoBaseConfig, RandomSeed
     @Configuration.ToMapValue("org.neo4j.gds.RelationshipType#toString")
     RelationshipType remainingRelationshipType();
 
-    @Value.Default
     default List<String> nonNegativeRelationshipTypes() {
         return List.of();
     }
 
     @Configuration.Ignore
-    @Value.Derived
     default List<String> superRelationshipTypes() {
         return Stream.of(relationshipTypes(), nonNegativeRelationshipTypes())
             .flatMap(List::stream)
@@ -82,7 +79,6 @@ public interface SplitRelationshipsBaseConfig extends AlgoBaseConfig, RandomSeed
     }
 
     @Configuration.GraphStoreValidationCheck
-    @Value.Default
     default void validateRemainingRelType(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
@@ -92,7 +88,6 @@ public interface SplitRelationshipsBaseConfig extends AlgoBaseConfig, RandomSeed
     }
 
     @Configuration.GraphStoreValidationCheck
-    @Value.Default
     default void validateHoldOutRelType(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
@@ -102,7 +97,6 @@ public interface SplitRelationshipsBaseConfig extends AlgoBaseConfig, RandomSeed
     }
 
     @Configuration.GraphStoreValidationCheck
-    @Value.Default
     default void validateNonNegativeRelTypesExist(
         GraphStore graphStore,
         Collection<NodeLabel> selectedLabels,
