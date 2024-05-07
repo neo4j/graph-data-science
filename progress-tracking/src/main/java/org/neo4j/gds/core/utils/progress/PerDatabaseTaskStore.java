@@ -21,16 +21,25 @@ package org.neo4j.gds.core.utils.progress;
 
 import org.neo4j.gds.core.utils.progress.tasks.Task;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 public class PerDatabaseTaskStore implements TaskStore {
-    private final Map<String, Map<JobId, Task>> registeredTasks = new ConcurrentHashMap<>();
+    private final Map<String, Map<JobId, Task>> registeredTasks;
+    private final List<TaskStoreListener> listeners;
+
+    public PerDatabaseTaskStore() {
+        this.registeredTasks = new ConcurrentHashMap<>();
+        this.listeners = new ArrayList<>();
+    }
 
     @Override
     public void store(String username, JobId jobId, Task task) {
+        listeners.forEach(TaskStoreListener::onTaskStoreUpdate);
         this.registeredTasks
             .computeIfAbsent(username, __ -> new ConcurrentHashMap<>())
             .put(jobId, task);
@@ -38,6 +47,7 @@ public class PerDatabaseTaskStore implements TaskStore {
 
     @Override
     public void remove(String username, JobId jobId) {
+        listeners.forEach(TaskStoreListener::onTaskStoreUpdate);
         if (this.registeredTasks.containsKey(username)) {
             this.registeredTasks.get(username).remove(jobId);
         }
@@ -90,5 +100,10 @@ public class PerDatabaseTaskStore implements TaskStore {
     @Override
     public long taskCount() {
         return registeredTasks.values().stream().mapToLong(Map::size).sum();
+    }
+
+    @Override
+    public synchronized void addListener(TaskStoreListener listener) {
+        this.listeners.add(listener);
     }
 }

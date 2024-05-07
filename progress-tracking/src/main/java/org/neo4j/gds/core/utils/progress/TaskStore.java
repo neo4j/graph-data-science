@@ -43,6 +43,8 @@ public interface TaskStore {
 
     long taskCount();
 
+    void addListener(TaskStoreListener listener);
+
     @ValueClass
     interface UserTask {
         String username();
@@ -50,5 +52,9 @@ public interface TaskStore {
         JobId jobId();
 
         Task task();
+    }
+
+    interface TaskStoreListener {
+        void onTaskStoreUpdate();
     }
 }
