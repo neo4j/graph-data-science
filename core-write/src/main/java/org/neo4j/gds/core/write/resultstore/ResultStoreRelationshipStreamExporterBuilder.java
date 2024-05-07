@@ -25,6 +25,6 @@ import org.neo4j.gds.core.write.RelationshipStreamExporterBuilder;
 public class ResultStoreRelationshipStreamExporterBuilder extends RelationshipStreamExporterBuilder {
     @Override
     public RelationshipStreamExporter build() {
-        return new ResultStoreRelationshipStreamExporter(resultStore.orElseThrow(), relationships, toOriginalId);
+        return new ResultStoreRelationshipStreamExporter(jobId, resultStore.orElseThrow(), relationships, toOriginalId);
     }
 }

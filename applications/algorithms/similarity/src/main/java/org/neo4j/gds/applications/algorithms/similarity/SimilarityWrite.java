@@ -30,6 +30,7 @@ import org.neo4j.gds.config.ConcurrencyConfig;
 import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.similarity.SimilarityGraphResult;
 import org.neo4j.gds.similarity.SimilarityResult;
 
@@ -56,7 +57,8 @@ class SimilarityWrite {
         boolean shouldComputeSimilarityDistribution,
         Optional<ResultStore> resultStore,
         Stream<SimilarityResult> similarityResultStream,
-        String taskName
+        String taskName,
+        JobId jobId
     ) {
         var similarityGraphResult = similarityResultStreamDelegate.computeSimilarityGraph(
             graph,
@@ -72,7 +74,8 @@ class SimilarityWrite {
             shouldComputeSimilarityDistribution,
             resultStore,
             taskName,
-            similarityGraphResult
+            similarityGraphResult,
+            jobId
         );
     }
 
@@ -84,7 +87,8 @@ class SimilarityWrite {
         boolean shouldComputeSimilarityDistribution,
         Optional<ResultStore> resultStore,
         String taskName,
-        SimilarityGraphResult similarityGraphResult
+        SimilarityGraphResult similarityGraphResult,
+        JobId jobId
     ) {
         var similarityGraph = similarityGraphResult.similarityGraph();
 
@@ -104,7 +108,8 @@ class SimilarityWrite {
             writeConfiguration.writeConcurrency(),
             writeConfiguration.arrowConnectionInfo(),
             resultStore,
-            similarityDistributionBuilder.similarityConsumer()
+            similarityDistributionBuilder.similarityConsumer(),
+            jobId
         );
 
         var similaritySummary = similarityDistributionBuilder.similaritySummary();

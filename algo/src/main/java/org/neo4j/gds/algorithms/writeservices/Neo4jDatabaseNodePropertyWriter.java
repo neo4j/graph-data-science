@@ -32,6 +32,7 @@ import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.concurrency.DefaultPool;
 import org.neo4j.gds.core.loading.Capabilities;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -71,6 +72,7 @@ final class Neo4jDatabaseNodePropertyWriter {
         String procedureName,
         Optional<ArrowConnectionInfo> arrowConnectionInfo,
         Optional<ResultStore> resultStore,
+        JobId jobId,
         TerminationFlag terminationFlag,
         Log log
     ) {
@@ -107,6 +109,7 @@ final class Neo4jDatabaseNodePropertyWriter {
                     graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
                 )
                 .withResultStore(resultStore)
+                .withJobId(jobId)
                 .parallel(DefaultPool.INSTANCE, writeConcurrency)
                 .build();
 

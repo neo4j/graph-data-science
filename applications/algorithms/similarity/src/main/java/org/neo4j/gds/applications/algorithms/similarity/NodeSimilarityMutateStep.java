@@ -26,6 +26,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityMutateConfig;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
@@ -63,7 +64,8 @@ final class NodeSimilarityMutateStep implements MutateOrWriteStep<NodeSimilarity
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        NodeSimilarityResult result
+        NodeSimilarityResult result,
+        JobId jobId
     ) {
         return similarityMutation.execute(
             graph,

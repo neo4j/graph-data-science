@@ -28,8 +28,9 @@ import org.neo4j.gds.config.RelationshipWeightConfig;
 import org.neo4j.gds.core.loading.GraphResources;
 import org.neo4j.gds.core.loading.GraphStoreCatalogService;
 import org.neo4j.gds.core.utils.ProgressTimer;
-import org.neo4j.gds.mem.MemoryEstimation;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.logging.Log;
+import org.neo4j.gds.mem.MemoryEstimation;
 import org.neo4j.gds.metrics.algorithms.AlgorithmMetricsService;
 
 import java.util.Optional;
@@ -108,7 +109,8 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
             graph,
             graphStore,
             resultStore,
-            result
+            result,
+            configuration.jobId()
         );
 
         // inject dependencies to render results
@@ -206,12 +208,13 @@ public class DefaultAlgorithmProcessingTemplate implements AlgorithmProcessingTe
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        RESULT_FROM_ALGORITHM result
+        RESULT_FROM_ALGORITHM result,
+        JobId jobId
     ) {
         if (mutateOrWriteStep.isEmpty()) return null;
 
         try (ProgressTimer ignored = ProgressTimer.start(timingsBuilder::withMutateOrWriteMillis)) {
-            return mutateOrWriteStep.get().execute(graph, graphStore, resultStore, result);
+            return mutateOrWriteStep.get().execute(graph, graphStore, resultStore, result, jobId);
         }
     }
 }

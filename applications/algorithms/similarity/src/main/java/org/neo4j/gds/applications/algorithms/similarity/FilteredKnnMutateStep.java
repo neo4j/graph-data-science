@@ -26,6 +26,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.logging.Log;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnMutateConfig;
 import org.neo4j.gds.similarity.filteredknn.FilteredKnnResult;
@@ -63,7 +64,8 @@ final class FilteredKnnMutateStep implements MutateOrWriteStep<FilteredKnnResult
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        FilteredKnnResult result
+        FilteredKnnResult result,
+        JobId jobId
     ) {
         return similarityMutation.execute(
             graph,

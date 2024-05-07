@@ -35,6 +35,7 @@ import org.neo4j.gds.betweenness.BetweennessCentralityWriteConfig;
 import org.neo4j.gds.collections.ha.HugeDoubleArray;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.pagerank.PageRankResult;
 import org.neo4j.gds.pagerank.PageRankWriteConfig;
 import org.neo4j.gds.scaling.ScalerFactory;
@@ -96,8 +97,9 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
 
     @Test
     void writeWithoutStatistics() {
-
+        var jobId = new JobId("test");
         var configurationMock = mock(BetweennessCentralityWriteConfig.class);
+        when(configurationMock.jobId()).thenReturn(jobId);
         var graph = mock(Graph.class);
         var graphStore = mock(GraphStore.class);
 
@@ -124,7 +126,8 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
             eq("foo"),
             eq("FooWrite"),
             eq(Optional.empty()),
-            eq(Optional.empty())
+            eq(Optional.empty()),
+            eq(jobId)
         )).thenReturn(new WriteNodePropertyResult(4, 100));
 
         var businessFacade = new CentralityAlgorithmsWriteBusinessFacade(null, nodePropertyServiceMock);
@@ -165,8 +168,9 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
 
     @Test
     void writeWithStatistics() {
-
+        var jobId = new JobId("test");
         var configurationMock = mock(BetweennessCentralityWriteConfig.class);
+        when(configurationMock.jobId()).thenReturn(jobId);
         when(configurationMock.concurrency()).thenReturn(new Concurrency(4));
         var graph = mock(Graph.class);
         var graphStore = mock(GraphStore.class);
@@ -194,7 +198,8 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
             eq("foo"),
             eq("FooWrite"),
             eq(Optional.empty()),
-            eq(Optional.empty())
+            eq(Optional.empty()),
+            eq(jobId)
         )).thenReturn(new WriteNodePropertyResult(4, 100));
 
         var businessFacade = new CentralityAlgorithmsWriteBusinessFacade(null, nodePropertyServiceMock);
@@ -320,7 +325,8 @@ class CentralityAlgorithmsWriteBusinessFacadeTest {
             String writeProperty,
             String procedureName,
             Optional<ArrowConnectionInfo> arrowConnectionInfo,
-            Optional<ResultStore> resultStore
+            Optional<ResultStore> resultStore,
+            JobId jobId
         ) {
             return new WriteNodePropertyResult(nodePropertiesWritten, writeMilliseconds);
         }

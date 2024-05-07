@@ -21,7 +21,9 @@ package org.neo4j.gds.core.write.resultstore;
 
 import org.neo4j.gds.api.ExportedRelationship;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.api.ResultStoreEntry;
 import org.neo4j.gds.api.nodeproperties.ValueType;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 
 import java.util.List;
@@ -30,15 +32,18 @@ import java.util.stream.Stream;
 
 public class ResultStoreRelationshipStreamExporter implements RelationshipStreamExporter {
 
+    private final JobId jobId;
     private final ResultStore resultStore;
     private final Stream<ExportedRelationship> relationshipStream;
     private final LongUnaryOperator toOriginalId;
 
     ResultStoreRelationshipStreamExporter(
+        JobId jobId,
         ResultStore resultStore,
         Stream<ExportedRelationship> relationshipStream,
         LongUnaryOperator toOriginalId
     ) {
+        this.jobId = jobId;
         this.resultStore = resultStore;
         this.relationshipStream = relationshipStream;
         this.toOriginalId = toOriginalId;
@@ -47,6 +52,7 @@ public class ResultStoreRelationshipStreamExporter implements RelationshipStream
     @Override
     public long write(String relationshipType, List<String> propertyKeys, List<ValueType> propertyTypes) {
         resultStore.addRelationshipStream(relationshipType, propertyKeys, propertyTypes, relationshipStream, toOriginalId);
+        resultStore.add(jobId, new ResultStoreEntry.RelationshipStream(relationshipType, propertyKeys, propertyTypes, relationshipStream, toOriginalId));
         // TODO: return the number of relationships written
         return 0;
     }

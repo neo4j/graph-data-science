@@ -21,10 +21,13 @@ package org.neo4j.gds.core.write.resultstore;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.EphemeralResultStore;
+import org.neo4j.gds.api.ResultStoreEntry;
 import org.neo4j.gds.api.properties.nodes.NodePropertyValues;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.write.ImmutableNodeProperty;
 
 import java.util.List;
+import java.util.function.LongUnaryOperator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -35,35 +38,41 @@ class ResultStoreNodePropertyExporterTest {
 
     @Test
     void shouldWriteSingleNodePropertyToResultStore() {
+        var jobId = new JobId("test");
         var resultStore = new EphemeralResultStore();
         var nodePropertyValues = mock(NodePropertyValues.class);
+        var toOriginalId = mock(LongUnaryOperator.class);
         when(nodePropertyValues.nodeCount()).thenReturn(42L);
 
-        var nodePropertyExporter = new ResultStoreNodePropertyExporter(resultStore, List.of("A"));
+        var nodePropertyExporter = new ResultStoreNodePropertyExporter(jobId, resultStore, List.of("A"), toOriginalId);
         nodePropertyExporter.write("prop", nodePropertyValues);
 
         assertThat(nodePropertyExporter.propertiesWritten()).isEqualTo(42L);
         assertThat(resultStore.getNodePropertyValues(List.of("A"), "prop")).isEqualTo(nodePropertyValues);
 
-        var newNodePropertyValues = mock(NodePropertyValues.class);
-        when(newNodePropertyValues.nodeCount()).thenReturn(43L);
+        var entry = resultStore.get(jobId);
+        assertThat(entry).isInstanceOf(ResultStoreEntry.NodeProperties.class);
 
-        var newNodePropertyExporter1 = new ResultStoreNodePropertyExporter(resultStore, List.of("A", "B"));
-        newNodePropertyExporter1.write( ImmutableNodeProperty.of("newProp", newNodePropertyValues));
+        var nodePropertiesEntry = (ResultStoreEntry.NodeProperties) entry;
 
-        assertThat(newNodePropertyExporter1.propertiesWritten()).isEqualTo(43L);
-        assertThat(resultStore.getNodePropertyValues(List.of("A", "B"), "newProp")).isEqualTo(newNodePropertyValues);
+        assertThat(nodePropertiesEntry.nodeLabels()).isEqualTo(List.of("A"));
+        assertThat(nodePropertiesEntry.propertyKeys()).isEqualTo(List.of("prop"));
+        assertThat(nodePropertiesEntry.propertyValues()).isEqualTo(List.of(nodePropertyValues));
+        assertThat(nodePropertiesEntry.toOriginalId()).isEqualTo(toOriginalId);
     }
 
     @Test
     void shouldWriteMultipleNodePropertiesToResultStore() {
+        var jobId = new JobId("test");
         var resultStore = new EphemeralResultStore();
         var nodePropertyValues1 = mock(NodePropertyValues.class);
         when(nodePropertyValues1.nodeCount()).thenReturn(42L);
         var nodePropertyValues2 = mock(NodePropertyValues.class);
         when(nodePropertyValues2.nodeCount()).thenReturn(43L);
 
-        var nodePropertyExporter = new ResultStoreNodePropertyExporter(resultStore, List.of(PROJECT_ALL));
+        var toOriginalId = mock(LongUnaryOperator.class);
+
+        var nodePropertyExporter = new ResultStoreNodePropertyExporter(jobId, resultStore, List.of(PROJECT_ALL), toOriginalId);
         nodePropertyExporter.write(List.of(
                 ImmutableNodeProperty.of("prop1", nodePropertyValues1),
                 ImmutableNodeProperty.of("prop2", nodePropertyValues2)
@@ -73,5 +82,15 @@ class ResultStoreNodePropertyExporterTest {
         assertThat(nodePropertyExporter.propertiesWritten()).isEqualTo(85L);
         assertThat(resultStore.getNodePropertyValues(List.of(PROJECT_ALL), "prop1")).isEqualTo(nodePropertyValues1);
         assertThat(resultStore.getNodePropertyValues(List.of(PROJECT_ALL), "prop2")).isEqualTo(nodePropertyValues2);
+
+        var entry = resultStore.get(jobId);
+        assertThat(entry).isInstanceOf(ResultStoreEntry.NodeProperties.class);
+
+        var nodePropertiesEntry = (ResultStoreEntry.NodeProperties) entry;
+
+        assertThat(nodePropertiesEntry.nodeLabels()).isEqualTo(List.of(PROJECT_ALL));
+        assertThat(nodePropertiesEntry.propertyKeys()).isEqualTo(List.of("prop1", "prop2"));
+        assertThat(nodePropertiesEntry.propertyValues()).isEqualTo(List.of(nodePropertyValues1, nodePropertyValues2));
+        assertThat(nodePropertiesEntry.toOriginalId()).isEqualTo(toOriginalId);
     }
 }

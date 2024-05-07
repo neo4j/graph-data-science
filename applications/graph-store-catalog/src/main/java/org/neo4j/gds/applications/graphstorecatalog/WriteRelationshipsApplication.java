@@ -28,6 +28,7 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.config.ArrowConnectionInfo;
 import org.neo4j.gds.core.concurrency.Concurrency;
 import org.neo4j.gds.core.utils.ProgressTimer;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.TaskRegistryFactory;
 import org.neo4j.gds.core.utils.progress.tasks.ProgressTracker;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
@@ -87,7 +88,8 @@ public class WriteRelationshipsApplication {
                     configuration.resolveResultStore(resultStore),
                     graphStore,
                     relationshipType,
-                    configuration.relationshipProperty()
+                    configuration.relationshipProperty(),
+                    configuration.jobId()
                 );
 
                 builder.withRelationshipsWritten(relationshipsWritten);
@@ -110,7 +112,8 @@ public class WriteRelationshipsApplication {
         Optional<ResultStore> resultStore,
         GraphStore graphStore,
         RelationshipType relationshipType,
-        Optional<String> relationshipProperty
+        Optional<String> relationshipProperty,
+        JobId jobId
     ) {
         var graph = graphStore.getGraph(relationshipType, relationshipProperty);
 
@@ -121,6 +124,7 @@ public class WriteRelationshipsApplication {
             .withConcurrency(concurrency)
             .withArrowConnectionInfo(arrowConnectionInfo, graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName))
             .withResultStore(resultStore)
+            .withJobId(jobId)
             .withProgressTracker(progressTracker);
 
         if (relationshipProperty.isPresent()) {

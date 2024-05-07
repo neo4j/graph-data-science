@@ -29,6 +29,7 @@ import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.config.MutateRelationshipConfig;
 import org.neo4j.gds.core.loading.SingleTypeRelationships;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.paths.dijkstra.PathFindingResult;
 
 import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfig.TOTAL_COST_KEY;
@@ -44,7 +45,8 @@ class ShortestPathMutateStep implements MutateOrWriteStep<PathFindingResult, Rel
     public RelationshipsWritten execute(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore, PathFindingResult result
+        ResultStore resultStore, PathFindingResult result,
+        JobId jobId
     ) {
         var mutateRelationshipType = RelationshipType.of(configuration.mutateRelationshipType());
 

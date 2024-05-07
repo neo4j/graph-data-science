@@ -64,6 +64,7 @@ public class WriteRelationshipPropertiesApplication {
             )
             .withResultStore(configuration.resolveResultStore(resultStore))
             .withRelationshipCount(relationshipCount)
+            .withJobId(configuration.jobId())
             .build();
 
         var resultBuilder = new WriteRelationshipPropertiesResult.Builder(

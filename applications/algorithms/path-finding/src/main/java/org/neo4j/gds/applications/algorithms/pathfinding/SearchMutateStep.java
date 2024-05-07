@@ -28,6 +28,7 @@ import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
 import org.neo4j.gds.collections.ha.HugeLongArray;
 import org.neo4j.gds.core.loading.construction.GraphFactory;
+import org.neo4j.gds.core.utils.progress.JobId;
 
 class SearchMutateStep implements MutateOrWriteStep<HugeLongArray, RelationshipsWritten> {
     private final RelationshipType mutateRelationshipType;
@@ -38,7 +39,8 @@ class SearchMutateStep implements MutateOrWriteStep<HugeLongArray, Relationships
     public RelationshipsWritten execute(
         Graph graph,
         GraphStore graphStore,
-        ResultStore resultStore, HugeLongArray result
+        ResultStore resultStore, HugeLongArray result,
+        JobId jobId
     ) {
 
         var relationshipsBuilder = GraphFactory

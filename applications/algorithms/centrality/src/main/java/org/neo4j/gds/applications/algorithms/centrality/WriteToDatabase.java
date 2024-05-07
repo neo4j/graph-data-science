@@ -27,6 +27,7 @@ import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.config.WriteConfig;
 import org.neo4j.gds.config.WritePropertyConfig;
+import org.neo4j.gds.core.utils.progress.JobId;
 
 class WriteToDatabase {
     private final WriteNodePropertyService writeNodePropertyService;
@@ -42,7 +43,8 @@ class WriteToDatabase {
         WriteConfig writeConfiguration,
         WritePropertyConfig writePropertyConfiguration,
         String label,
-        CentralityAlgorithmResult result
+        CentralityAlgorithmResult result,
+        JobId jobId
     ) {
         var writeNodePropertyResult = writeNodePropertyService.write(
             graph,
@@ -52,7 +54,8 @@ class WriteToDatabase {
             writePropertyConfiguration.writeProperty(),
             label,
             writeConfiguration.arrowConnectionInfo(),
-            writeConfiguration.resolveResultStore(resultStore)
+            writeConfiguration.resolveResultStore(resultStore),
+            jobId
         );
 
         return new NodePropertiesWritten(writeNodePropertyResult.nodePropertiesWritten());

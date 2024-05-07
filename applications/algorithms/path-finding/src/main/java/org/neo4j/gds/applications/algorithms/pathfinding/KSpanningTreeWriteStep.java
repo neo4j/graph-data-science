@@ -25,6 +25,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.NodePropertyExporter;
 import org.neo4j.gds.kspanningtree.KSpanningTreeWriteConfig;
@@ -53,7 +54,8 @@ class KSpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree, Void> {
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        SpanningTree spanningTree
+        SpanningTree spanningTree,
+        JobId jobId
     ) {
         var properties = new SpanningTreeBackedNodePropertyValues(spanningTree, graph.nodeCount());
 
@@ -73,6 +75,7 @@ class KSpanningTreeWriteStep implements MutateOrWriteStep<SpanningTree, Void> {
                 graphStore.databaseInfo().remoteDatabaseId().map(DatabaseId::databaseName)
             )
             .withResultStore(configuration.resolveResultStore(resultStore))
+            .withJobId(configuration.jobId())
             .build();
 
         // effect

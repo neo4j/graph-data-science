@@ -21,6 +21,8 @@ package org.neo4j.gds.core.write.resultstore;
 
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.EphemeralResultStore;
+import org.neo4j.gds.api.ResultStoreEntry;
+import org.neo4j.gds.core.utils.progress.JobId;
 
 import java.util.function.LongUnaryOperator;
 
@@ -30,9 +32,10 @@ class ResultStoreNodeLabelExporterTest {
 
     @Test
     void shouldWriteToResultStore() {
+        var jobId = new JobId("test");
         var resultStore = new EphemeralResultStore();
         LongUnaryOperator toOriginalId = l -> l + 42;
-        var nodeLabelExporter = new ResultStoreNodeLabelExporter(resultStore, 5, toOriginalId);
+        var nodeLabelExporter = new ResultStoreNodeLabelExporter(jobId, resultStore, 5, toOriginalId);
         nodeLabelExporter.write("label");
 
         assertThat(nodeLabelExporter.nodeLabelsWritten()).isEqualTo(5);
@@ -43,6 +46,13 @@ class ResultStoreNodeLabelExporterTest {
         for (int i = 0; i < 5; i++) {
             assertThat(nodeLabelEntry.toOriginalId().applyAsLong(i)).isEqualTo(i + 42);
         }
+
+        var entry = resultStore.get(jobId);
+        assertThat(entry).isInstanceOf(ResultStoreEntry.NodeLabel.class);
+
+        var jobIdNodeLabelEntry = (ResultStoreEntry.NodeLabel) entry;
+        assertThat(jobIdNodeLabelEntry.nodeLabel()).isEqualTo("label");
+        assertThat(jobIdNodeLabelEntry.nodeCount()).isEqualTo(5);
     }
 
 }

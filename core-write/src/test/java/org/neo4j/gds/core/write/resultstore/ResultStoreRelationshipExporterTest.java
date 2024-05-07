@@ -22,6 +22,8 @@ package org.neo4j.gds.core.write.resultstore;
 import org.junit.jupiter.api.Test;
 import org.neo4j.gds.api.EphemeralResultStore;
 import org.neo4j.gds.api.Graph;
+import org.neo4j.gds.api.ResultStoreEntry;
+import org.neo4j.gds.core.utils.progress.JobId;
 
 import java.util.function.LongUnaryOperator;
 
@@ -32,29 +34,49 @@ class ResultStoreRelationshipExporterTest {
 
     @Test
     void shouldWriteRelationshipWithoutPropertyToResultStore() {
+        var jobId = new JobId("test");
         var resultStore = new EphemeralResultStore();
         var graph = mock(Graph.class);
         var toOriginalId = mock(LongUnaryOperator.class);
-        new ResultStoreRelationshipExporter(resultStore, graph, toOriginalId).write("REL");
+        new ResultStoreRelationshipExporter(jobId, resultStore, graph, toOriginalId).write("REL");
 
         var relationshipEntry = resultStore.getRelationship("REL");
         assertThat(relationshipEntry.graph()).isEqualTo(graph);
         assertThat(relationshipEntry.toOriginalId()).isEqualTo(toOriginalId);
 
         assertThat(resultStore.getRelationship("REL", "foo")).isNull();
+
+        var entry = resultStore.get(jobId);
+        assertThat(entry).isInstanceOf(ResultStoreEntry.RelationshipTopology.class);
+
+        var jobIdRelationshipEntry = (ResultStoreEntry.RelationshipTopology) entry;
+        assertThat(jobIdRelationshipEntry.relationshipType()).isEqualTo("REL");
+        assertThat(jobIdRelationshipEntry.graph()).isEqualTo(graph);
+        assertThat(jobIdRelationshipEntry.toOriginalId()).isEqualTo(toOriginalId);
     }
 
     @Test
     void shouldWriteRelationshipWithPropertyToResultStore() {
+        var jobId = new JobId("test");
         var resultStore = new EphemeralResultStore();
         var graph = mock(Graph.class);
         var toOriginalId = mock(LongUnaryOperator.class);
-        new ResultStoreRelationshipExporter(resultStore, graph, toOriginalId).write("REL", "prop");
+        new ResultStoreRelationshipExporter(jobId, resultStore, graph, toOriginalId).write("REL", "prop");
 
         var relationshipEntry = resultStore.getRelationship("REL", "prop");
         assertThat(relationshipEntry.graph()).isEqualTo(graph);
         assertThat(relationshipEntry.toOriginalId()).isEqualTo(toOriginalId);
 
         assertThat(resultStore.getRelationship("REL")).isNull();
+
+        var entry = resultStore.get(jobId);
+        assertThat(entry).isInstanceOf(ResultStoreEntry.RelationshipsFromGraph.class);
+
+        var jobIdRelationshipEntry = (ResultStoreEntry.RelationshipsFromGraph) entry;
+
+        assertThat(jobIdRelationshipEntry.relationshipType()).isEqualTo("REL");
+        assertThat(jobIdRelationshipEntry.propertyKey()).isEqualTo("prop");
+        assertThat(jobIdRelationshipEntry.graph()).isEqualTo(graph);
+        assertThat(jobIdRelationshipEntry.toOriginalId()).isEqualTo(toOriginalId);
     }
 }

@@ -29,8 +29,10 @@ import org.neo4j.gds.api.nodeproperties.ValueType;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.machinery.RequestScopedDependencies;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
+import org.neo4j.gds.config.JobIdConfig;
 import org.neo4j.gds.config.WriteRelationshipConfig;
 import org.neo4j.gds.core.concurrency.Concurrency;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.utils.progress.tasks.TaskProgressTracker;
 import org.neo4j.gds.core.write.RelationshipStreamExporter;
 import org.neo4j.gds.logging.Log;
@@ -49,7 +51,7 @@ import static org.neo4j.gds.paths.dijkstra.config.ShortestPathDijkstraWriteConfi
 /**
  * This is relationship writes as needed by path finding algorithms (for now).
  */
-class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & WritePathOptionsConfig> implements
+class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & WritePathOptionsConfig & JobIdConfig> implements
     MutateOrWriteStep<PathFindingResult, RelationshipsWritten> {
     private final Log log;
     private final RequestScopedDependencies requestScopedDependencies;
@@ -74,7 +76,8 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        PathFindingResult result
+        PathFindingResult result,
+        JobId jobId
     ) {
         var writeNodeIds = configuration.writeNodeIds();
         var writeCosts = configuration.writeCosts();
@@ -124,6 +127,7 @@ class ShortestPathWriteStep<CONFIGURATION extends WriteRelationshipConfig & Writ
                 .withProgressTracker(progressTracker)
                 .withRelationships(maybeCollectedStream)
                 .withTerminationFlag(requestScopedDependencies.getTerminationFlag())
+                .withJobId(configuration.jobId())
                 .build();
 
             var writeRelationshipType = configuration.writeRelationshipType();

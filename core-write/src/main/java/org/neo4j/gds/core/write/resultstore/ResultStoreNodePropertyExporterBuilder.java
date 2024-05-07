@@ -28,8 +28,10 @@ public class ResultStoreNodePropertyExporterBuilder extends NodePropertyExporter
     @Override
     public NodePropertyExporter build() {
         return new ResultStoreNodePropertyExporter(
+            jobId,
             resultStore.orElseThrow(),
-            nodeLabels.stream().map(NodeLabel::name).toList()
+            nodeLabels.stream().map(NodeLabel::name).toList(),
+            toOriginalId
         );
     }
 }

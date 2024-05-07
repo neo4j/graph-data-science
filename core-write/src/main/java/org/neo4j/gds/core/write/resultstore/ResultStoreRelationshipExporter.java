@@ -23,21 +23,26 @@ import org.jetbrains.annotations.Nullable;
 import org.neo4j.gds.api.Graph;
 import org.neo4j.gds.api.RelationshipWithPropertyConsumer;
 import org.neo4j.gds.api.ResultStore;
+import org.neo4j.gds.api.ResultStoreEntry;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.core.write.RelationshipExporter;
 
 import java.util.function.LongUnaryOperator;
 
 public class ResultStoreRelationshipExporter implements RelationshipExporter {
 
+    private final JobId jobId;
     private final ResultStore resultStore;
     private final Graph graph;
     private final LongUnaryOperator toOriginalId;
 
     ResultStoreRelationshipExporter(
+        JobId jobId,
         ResultStore resultStore,
         Graph graph,
         LongUnaryOperator toOriginalId
     ) {
+        this.jobId = jobId;
         this.resultStore = resultStore;
         this.graph = graph;
         this.toOriginalId = toOriginalId;
@@ -46,6 +51,7 @@ public class ResultStoreRelationshipExporter implements RelationshipExporter {
     @Override
     public void write(String relationshipType) {
         resultStore.addRelationship(relationshipType, graph, toOriginalId);
+        resultStore.add(jobId, new ResultStoreEntry.RelationshipTopology(relationshipType, graph, toOriginalId));
     }
 
     @Override
@@ -60,5 +66,6 @@ public class ResultStoreRelationshipExporter implements RelationshipExporter {
         @Nullable RelationshipWithPropertyConsumer afterWriteConsumer
     ) {
         resultStore.addRelationship(relationshipType, propertyKey, graph, toOriginalId);
+        resultStore.add(jobId, new ResultStoreEntry.RelationshipsFromGraph(relationshipType, propertyKey, graph, toOriginalId));
     }
 }

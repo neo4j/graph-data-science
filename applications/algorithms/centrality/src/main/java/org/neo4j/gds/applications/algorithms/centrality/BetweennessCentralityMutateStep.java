@@ -26,6 +26,7 @@ import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.NodePropertiesWritten;
 import org.neo4j.gds.betweenness.BetweennessCentralityMutateConfig;
 import org.neo4j.gds.betweenness.BetwennessCentralityResult;
+import org.neo4j.gds.core.utils.progress.JobId;
 
 class BetweennessCentralityMutateStep implements MutateOrWriteStep<BetwennessCentralityResult, NodePropertiesWritten> {
     private final MutateNodeProperty mutateNodeProperty;
@@ -44,7 +45,8 @@ class BetweennessCentralityMutateStep implements MutateOrWriteStep<BetwennessCen
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        BetwennessCentralityResult result
+        BetwennessCentralityResult result,
+        JobId jobId
     ) {
         return mutateNodeProperty.mutateNodeProperties(
             graph,

@@ -31,6 +31,7 @@ package org.neo4j.gds.algorithms.community;
     import org.neo4j.gds.collections.ha.HugeLongArray;
     import org.neo4j.gds.config.AlgoBaseConfig;
     import org.neo4j.gds.core.concurrency.Concurrency;
+    import org.neo4j.gds.core.utils.progress.JobId;
     import org.neo4j.gds.result.StatisticsComputationInstructions;
     import org.neo4j.gds.wcc.WccWriteConfig;
 
@@ -88,8 +89,9 @@ package org.neo4j.gds.algorithms.community;
 
         @Test
         void writeWithoutCommunityStatistics() {
-
+            var jobId = new JobId("test");
             var configurationMock = mock(WccWriteConfig.class);
+            when(configurationMock.jobId()).thenReturn(jobId);
             var graph = mock(Graph.class);
             var graphStore = mock(GraphStore.class);
 
@@ -118,7 +120,8 @@ package org.neo4j.gds.algorithms.community;
                 eq("foo"),
                 eq("FooWrite"),
                 eq(Optional.empty()),
-                eq(Optional.empty())
+                eq(Optional.empty()),
+                eq(jobId)
             )).thenReturn(new WriteNodePropertyResult(4, 100));
 
             var businessFacade = new CommunityAlgorithmsWriteBusinessFacade(nodePropertyServiceMock, null);
@@ -157,9 +160,10 @@ package org.neo4j.gds.algorithms.community;
 
         @Test
         void writeWithCommunityStatistics() {
-
+            var jobId = new JobId("test");
             var configurationMock = mock(WccWriteConfig.class);
             when(configurationMock.concurrency()).thenReturn(new Concurrency(4));
+            when(configurationMock.jobId()).thenReturn(jobId);
             var graph = mock(Graph.class);
             var graphStore = mock(GraphStore.class);
 
@@ -191,7 +195,8 @@ package org.neo4j.gds.algorithms.community;
                 eq("foo"),
                 eq("FooWrite"),
                 eq(Optional.empty()),
-                eq(Optional.empty())
+                eq(Optional.empty()),
+                eq(jobId)
             )).thenReturn(new WriteNodePropertyResult(4, 100));
 
             var businessFacade = new CommunityAlgorithmsWriteBusinessFacade(nodePropertyServiceMock, null);

@@ -26,6 +26,7 @@ import org.neo4j.gds.api.GraphStore;
 import org.neo4j.gds.api.ResultStore;
 import org.neo4j.gds.applications.algorithms.machinery.MutateOrWriteStep;
 import org.neo4j.gds.applications.algorithms.metadata.RelationshipsWritten;
+import org.neo4j.gds.core.utils.progress.JobId;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityResult;
 import org.neo4j.gds.similarity.nodesim.NodeSimilarityWriteConfig;
 
@@ -67,7 +68,8 @@ final class NodeSimilarityWriteStep implements MutateOrWriteStep<NodeSimilarityR
         Graph graph,
         GraphStore graphStore,
         ResultStore resultStore,
-        NodeSimilarityResult result
+        NodeSimilarityResult result,
+        JobId jobId
     ) {
         return similarityWrite.execute(
             graphStore,
@@ -77,7 +79,8 @@ final class NodeSimilarityWriteStep implements MutateOrWriteStep<NodeSimilarityR
             shouldComputeSimilarityDistribution,
             configuration.resolveResultStore(resultStore),
             NODE_SIMILARITY,
-            result.graphResult()
+            result.graphResult(),
+            jobId
         );
     }
 }

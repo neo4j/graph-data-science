@@ -26,6 +26,6 @@ public class ResultStoreNodeLabelExporterBuilder extends NodeLabelExporterBuilde
 
     @Override
     public NodeLabelExporter build() {
-        return new ResultStoreNodeLabelExporter(resultStore.orElseThrow(), nodeCount, toOriginalId);
+        return new ResultStoreNodeLabelExporter(jobId, resultStore.orElseThrow(), nodeCount, toOriginalId);
     }
 }
