@@ -86,6 +86,11 @@ public class InMemoryTransactionIdStoreImpl extends AbstractTransactionIdStore {
     }
 
     @Override
+    public long getLastCommittedTransactionId() {
+        return this.committedTransactionId.get().transactionId();
+    }
+
+    @Override
     public void setLastCommittedAndClosedTransactionId(
         long transactionId,
         int checksum,
