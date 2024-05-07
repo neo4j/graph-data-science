@@ -37,9 +37,10 @@ public enum Neo4jVersion {
     V_5_17,
     V_5_18,
     V_5_19,
+    V_5_20,
     V_RC;
 
-    private static final int MINOR_DEV_VERSION = 19;
+    private static final int MINOR_DEV_VERSION = 20;
 
     static Neo4jVersion parse(String version) {
         var versionSegments = Pattern.compile("[.-]")
@@ -82,6 +83,8 @@ public enum Neo4jVersion {
                     return Neo4jVersion.V_5_18;
                 case 19:
                     return Neo4jVersion.V_5_19;
+                case 20:
+                    return Neo4jVersion.V_5_20;
                 default:
                     if (minorVersion >= MINOR_DEV_VERSION) {
                         return Neo4jVersion.V_RC;
@@ -158,6 +161,8 @@ public enum Neo4jVersion {
                 return "5.18";
             case V_5_19:
                 return "5.19";
+            case V_5_20:
+                return "5.20";
             case V_RC:
                 return "dev";
             default:

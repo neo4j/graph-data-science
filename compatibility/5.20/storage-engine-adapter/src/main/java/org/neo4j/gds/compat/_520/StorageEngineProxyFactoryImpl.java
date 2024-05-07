@@ -34,11 +34,11 @@ public class StorageEngineProxyFactoryImpl implements StorageEngineProxyFactory 
 
     @Override
     public StorageEngineProxyApi load() {
-        throw new UnsupportedOperationException("RC storage engine requires JDK17 or later");
+        throw new UnsupportedOperationException("5.20 storage engine requires JDK17 or later");
     }
 
     @Override
     public String description() {
-        return "Storage Engine RC";
+        return "Storage Engine 5.20";
     }
 }

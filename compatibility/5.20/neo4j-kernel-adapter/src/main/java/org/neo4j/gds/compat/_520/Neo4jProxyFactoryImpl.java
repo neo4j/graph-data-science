@@ -34,11 +34,11 @@ public final class Neo4jProxyFactoryImpl implements Neo4jProxyFactory {
 
     @Override
     public Neo4jProxyApi load() {
-        throw new UnsupportedOperationException("RC compatibility requires JDK17 or later");
+        throw new UnsupportedOperationException("5.20 compatibility requires JDK17 or later");
     }
 
     @Override
     public String description() {
-        return "Neo4j RC (placeholder)";
+        return "Neo4j 5.20 (placeholder)";
     }
 }
