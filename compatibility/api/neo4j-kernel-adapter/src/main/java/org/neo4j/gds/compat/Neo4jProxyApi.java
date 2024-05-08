@@ -64,12 +64,6 @@ public interface Neo4jProxyApi {
     @CompatSince(Neo4jVersion.V_5_17)
     long estimateRelationshipCount(Read read, int sourceLabel, int targetLabel, int type);
 
-    @CompatSince(Neo4jVersion.V_5_11)
-    void registerCloseableResource(
-        org.neo4j.kernel.api.KernelTransaction transaction,
-        AutoCloseable autoCloseable
-    );
-
     @CompatSince(Neo4jVersion.V_5_18)
     default BatchImporter instantiateBlockBatchImporter(
         DatabaseLayout directoryStructure,

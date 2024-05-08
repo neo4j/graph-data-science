@@ -29,7 +29,6 @@ import org.neo4j.gds.projection.CypherAggregation;
 
 import java.util.List;
 
-@DisableForNeo4jVersion(Neo4jVersion.V_5_11)
 @DisableForNeo4jVersion(Neo4jVersion.V_5_12)
 class GraphProjectCypherAggregationDocTest extends SingleFileDocTestBase {
     @Override

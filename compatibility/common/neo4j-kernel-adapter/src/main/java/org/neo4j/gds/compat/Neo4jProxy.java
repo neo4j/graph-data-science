@@ -770,7 +770,7 @@ public final class Neo4jProxy {
         org.neo4j.kernel.api.KernelTransaction transaction,
         AutoCloseable autoCloseable
     ) {
-        IMPL.registerCloseableResource(transaction, autoCloseable);
+        transaction.resourceMonitor().registerCloseableResource(autoCloseable);
     }
 
     private Neo4jProxy() {
