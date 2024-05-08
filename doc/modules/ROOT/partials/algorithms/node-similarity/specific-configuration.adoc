@@ -1,4 +1,4 @@
-// DO NOT EDIT: File generated automatically by process_conf.py script
+// DO NOT EDIT: File generated automatically by the process_conf.py script
 | similarityCutoff | Float | 1e-42 | yes | Lower limit for the similarity score to be present in the result.
 Values must be between 0 and 1.
 | degreeCutoff | Integer | 1 | yes | Inclusive lower bound on the node degree for a node to be considered in the comparisons.

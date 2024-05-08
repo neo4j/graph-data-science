@@ -81,7 +81,7 @@ with open(conf_filename) as conf_file:
         adoc_filename = adoc_root / algo["page_path"] / "specific-configuration.adoc"
 
         with open(adoc_filename, "w") as adoc_file:
-            adoc_file.write(f"// DO NOT EDIT: File generated automatically by {Path(__file__).name} script\n")
+            adoc_file.write(f"// DO NOT EDIT: File generated automatically by the {Path(__file__).name} script\n")
             
             for conf in algo["config"]:
                 name, type_, default, optional, description = conf["name"], conf["type"], conf["default"], conf["optional"], conf["description"]

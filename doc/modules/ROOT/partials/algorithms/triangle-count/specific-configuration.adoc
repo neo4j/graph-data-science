@@ -1,2 +1,2 @@
-// DO NOT EDIT: File generated automatically by process_conf.py script
+// DO NOT EDIT: File generated automatically by the process_conf.py script
 | maxDegree | Integer | 2^63^ - 1 | yes | If a node has a degree higher than this it will not be considered by the algorithm. The triangle count for these nodes will be `-1`.

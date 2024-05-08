@@ -1,4 +1,4 @@
-// DO NOT EDIT: File generated automatically by process_conf.py script
+// DO NOT EDIT: File generated automatically by the process_conf.py script
 | dampingFactor | Float | 0.85 | yes | The damping factor of the Page Rank calculation. Must be in [0, 1).
 | xref:common-usage/running-algos.adoc#common-configuration-max-iterations[maxIterations] | Integer | 20 | yes | The maximum number of iterations of Article Rank to run.
 | xref:common-usage/running-algos.adoc#common-configuration-tolerance[tolerance] | Float | 0.0000001 | yes | Minimum change in scores between iterations. If all scores change less than the tolerance value the result is considered stable, and the algorithm returns.
